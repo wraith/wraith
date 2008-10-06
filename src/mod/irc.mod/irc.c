@@ -175,7 +175,7 @@ void detected_drone_flood(struct chanset_t* chan, memberlist* m) {
     howlong.usec = 0;
     timer_create_complex(&howlong, "unlock", (Function) unlock_chan, (void *) chan, 0);
 
-    putlog(LOG_MISC, "*", "Flood detected in %s! Locking for %li seconds.", chan->dname, chan->flood_lock_time);
+    putlog(LOG_MISC, "*", "Flood detected in %s! Locking for %d seconds.", chan->dname, chan->flood_lock_time);
   }
 }
 
@@ -774,7 +774,7 @@ request_op(struct chanset_t *chan)
     i++;
   }
   if ((5 - my_exp) >= op_requests.count) {
-    putlog(LOG_GETIN, "*", "Delaying opreq for %s - Maximum of %d:%li reached", chan->dname, op_requests.count,
+    putlog(LOG_GETIN, "*", "Delaying opreq for %s - Maximum of %d:%d reached", chan->dname, op_requests.count,
            op_requests.time);
     chan->channel.no_op = now + op_requests.time + 1;
     return;
@@ -805,7 +805,7 @@ request_op(struct chanset_t *chan)
   if (!i) {
     if (channel_active(chan) && !channel_pending(chan)) {
       chan->channel.no_op = now + op_requests.time;
-      putlog(LOG_GETIN, "*", "No one to ask for ops on %s - Delaying requests for %lu seconds.", chan->dname, op_requests.time);
+      putlog(LOG_GETIN, "*", "No one to ask for ops on %s - Delaying requests for %d seconds.", chan->dname, op_requests.time);
     }
     return;
   }

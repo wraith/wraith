@@ -72,14 +72,13 @@ static bool keepnick = 1;		/* keep trying to regain my intended
 static bool nick_juped = 0;	/* True if origbotname is juped(RPL437) (dw) */
 static bool jnick_juped = 0;    /* True if jupenick is juped */
 bool tried_jupenick = 0;
-static time_t waiting_for_awake;	/* set when i unidle myself, cleared when
-				   i get the response */
+static bool waiting_for_awake;	/* set when i unidle myself, cleared when I get the response */
 time_t server_online;	/* server connection time */
 char botrealname[121] = "A deranged product of evil coders.";	/* realname of bot */
-static time_t server_timeout = 15;	/* server timeout for connecting */
+static interval_t server_timeout = 15;	/* server timeout for connecting */
 struct server_list *serverlist = NULL;	/* old-style queue, still used by
 					   server list */
-time_t cycle_time;			/* cycle time till next server connect */
+interval_t cycle_time;			/* cycle time till next server connect */
 port_t default_port = 6667;		/* default IRC port */
 bool trigger_on_ignore;	/* trigger bindings if user is ignored ? */
 int answer_ctcp = 1;		/* answer how many stacked ctcp's ? */
@@ -1027,7 +1026,7 @@ void server_report(int idx, int details)
     dprintf(idx, "    Help queue is at %d%%, %d msgs\n",
            (int) ((float) (hq.tot * 100.0) / (float) maxqmsg), (int) hq.tot);
   if (details) {
-    dprintf(idx, "    Flood is: %d msg/%lus, %d ctcp/%lus\n",
+    dprintf(idx, "    Flood is: %d msg/%ds, %d ctcp/%ds\n",
 	    flood_msg.count, flood_msg.time, flood_ctcp.count, flood_ctcp.time);
   }
 }

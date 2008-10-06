@@ -176,7 +176,7 @@ void link_pref_val(struct userrec *u, char *lval);
 void check_stale_dcc_users();
 
 extern char			userfile[];
-extern time_t			ignore_time;
+extern interval_t			ignore_time;
 extern bool			dont_restructure;
 
 #endif				/* _EGG_USERS_H */

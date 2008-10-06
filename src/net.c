@@ -72,7 +72,6 @@ union sockaddr_union cached_myip6_so;
 bool	cached_ip = 0;		/* Set to 1 after cache_my_ip is called */
 bool    identd_hack = 0;	/* identd_open() won't work on most servers, dont even bother warning. */
 char	botuser[21] = ""; 	/* Username of the user running the bot    */
-int     resolve_timeout = 10;   /* hostname/address lookup timeout */
 int	socks_total = 0;	/* total number of sockets */
 sock_list *socklist = NULL;	/* Enough to be safe			    */
 int	MAXSOCKS = 0;

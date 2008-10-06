@@ -75,7 +75,7 @@ static void flush_mode(struct chanset_t *, int);
 
 static void detect_offense(memberlist*, struct chanset_t *, char *);
 /* static int target_priority(struct chanset_t *, memberlist *, int); */
-static bool do_op(char *, struct chanset_t *, time_t, bool);
+static bool do_op(char *, struct chanset_t *, bool, bool);
 static void request_op(struct chanset_t *);
 static void request_in(struct chanset_t *);
 static void my_setkey(struct chanset_t *, char *);

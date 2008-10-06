@@ -39,6 +39,9 @@ typedef u_32bit_t 		dword;
 /* port */
 typedef in_port_t		port_t;
 
+// Signed so that it can play nice with time_t
+typedef int			interval_t;
+
 typedef struct {
   int family;
   union {

@@ -127,8 +127,8 @@ static void dns_on_eof(int idx);
 static const char *dns_next_server();
 static int parse_reply(char *response, size_t nbytes);
 
-time_t async_lookup_timeout = 30;
-time_t async_server_timeout = 40;
+interval_t async_lookup_timeout = 30;
+interval_t async_server_timeout = 40;
 //int resend_on_read = 0;
 
 static void 
@@ -321,7 +321,7 @@ void egg_dns_send(char *query, int len)
 	}
         if (!dns_handler.timeout_val) {
           dns_handler.timeout_val = &async_server_timeout;
-          sdprintf("SETTING TIMEOUT to %li", async_server_timeout);
+          sdprintf("SETTING TIMEOUT to %d", async_server_timeout);
           dcc[dns_idx].timeval = now;
         }
         write(dcc[dns_idx].sock, query, len);
@@ -404,7 +404,7 @@ void dns_create_timeout_timer(dns_query_t **qm, const char *query, int timeout)
 /* Perform an async dns lookup. This is host -> ip. For ip -> host, use
  * egg_dns_reverse(). We return a dns id that you can use to cancel the
  * lookup. */
-int egg_dns_lookup(const char *host, int timeout, dns_callback_t callback, void *client_data)
+int egg_dns_lookup(const char *host, interval_t timeout, dns_callback_t callback, void *client_data)
 {
 	dns_query_t *q = NULL;
 	int i, cache_id;
@@ -462,7 +462,7 @@ int egg_dns_lookup(const char *host, int timeout, dns_callback_t callback, void 
 /* Perform an async dns reverse lookup. This does ip -> host. For host -> ip
  * use egg_dns_lookup(). We return a dns id that you can use to cancel the
  * lookup. */
-int egg_dns_reverse(const char *ip, int timeout, dns_callback_t callback, void *client_data)
+int egg_dns_reverse(const char *ip, interval_t timeout, dns_callback_t callback, void *client_data)
 {
 	dns_query_t *q;
 	int i, cache_id;

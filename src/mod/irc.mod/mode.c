@@ -91,7 +91,7 @@ static size_t egg_strcatn(char *dst, const char *src, size_t max)
 }
 
 static bool
-do_op(char *nick, struct chanset_t *chan, time_t delay, bool force)
+do_op(char *nick, struct chanset_t *chan, bool delay, bool force)
 {
   memberlist *m = ismember(chan, nick);
 

@@ -54,9 +54,9 @@
 static bool 			use_info = 1;
 static char 			glob_chanmode[64] = "nt";		/* Default chanmode (drummer,990731) */
 //static int 			global_revenge_mode = 3;
-static time_t 			global_ban_time;
-static time_t			global_exempt_time;
-static time_t 			global_invite_time;
+static interval_t 			global_ban_time;
+static interval_t			global_exempt_time;
+static interval_t 			global_invite_time;
 
 
 /* Global channel settings (drummer/dw) */
@@ -65,17 +65,17 @@ static char *lastdeletedmask = NULL;
 
 /* Global flood settings */
 static int 			gfld_chan_thr;
-static time_t 			gfld_chan_time;
+static interval_t 		gfld_chan_time;
 static int 			gfld_deop_thr = 8;
-static time_t 			gfld_deop_time = 10;
+static interval_t 		gfld_deop_time = 10;
 static int 			gfld_kick_thr;
-static time_t 			gfld_kick_time;
+static interval_t 		gfld_kick_time;
 static int 			gfld_join_thr;
-static time_t 			gfld_join_time;
+static interval_t 		gfld_join_time;
 static int 			gfld_ctcp_thr = 5;
-static time_t 			gfld_ctcp_time = 30;
+static interval_t 		gfld_ctcp_time = 30;
 static int			gfld_nick_thr;
-static time_t 			gfld_nick_time;
+static interval_t		gfld_nick_time;
 
 static int 			killed_bots = 0;
 
@@ -285,7 +285,7 @@ static void got_cycle(char *botnick, char *code, char *par)
   if (!(chan = findchan_by_dname(chname)))
    return;
 
-  time_t delay = 10;
+  interval_t delay = 10;
 
   if (par[0])
     delay = atoi(newsplit(&par));
@@ -907,9 +907,9 @@ void channels_report(int idx, int details)
           dprintf(idx, "      revenge-mode %d\n",
                   chan->revenge_mode);
 */
-       dprintf(idx, "    Bans last %lu mins.\n", chan->ban_time);
-       dprintf(idx, "    Exemptions last %lu mins.\n", chan->exempt_time);
-       dprintf(idx, "    Invitations last %lu mins.\n", chan->invite_time);
+       dprintf(idx, "    Bans last %d mins.\n", chan->ban_time);
+       dprintf(idx, "    Exemptions last %d mins.\n", chan->exempt_time);
+       dprintf(idx, "    Invitations last %d mins.\n", chan->invite_time);
       }
     }
   }

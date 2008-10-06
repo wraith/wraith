@@ -668,7 +668,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
     else if (!cmd && !strncmp(item[i], "need-", 5))   ;
     else if (!strncmp(item[i], "flood-", 6)) {
       int *pthr = NULL;
-      time_t *ptime = NULL;
+      interval_t *ptime = NULL;
       char *p = NULL;
 
       if (!strcmp(item[i] + 6, "*")) {
@@ -681,7 +681,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
         p = strchr(item[i], ':');
 
         int thr = 0;
-        time_t time = 0;
+        interval_t time = 0;
 
         if (p) {
           *p++ = 0;

@@ -62,6 +62,6 @@ void set_cmd_pass(char *, int);
 void cmdpass_free(struct cmd_pass *);
 
 extern int		max_dcc;
-extern time_t		connect_timeout;
+extern interval_t		connect_timeout;
 
 #endif /* !_DCCUTIL_H */

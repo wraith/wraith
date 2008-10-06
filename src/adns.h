@@ -24,8 +24,8 @@ int egg_dns_init(void);
 //int egg_dns_shutdown(void);
 
 void egg_dns_send(char *query, int len);
-int egg_dns_lookup(const char *host, int timeout, dns_callback_t callback, void *client_data);
-int egg_dns_reverse(const char *ip, int timeout, dns_callback_t callback, void *client_data);
+int egg_dns_lookup(const char *host, interval_t timeout, dns_callback_t callback, void *client_data);
+int egg_dns_reverse(const char *ip, interval_t timeout, dns_callback_t callback, void *client_data);
 int egg_dns_cancel(int id, int issue_callback);
 void tell_dnsdebug(int);
 void dns_cache_flush();

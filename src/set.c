@@ -213,7 +213,7 @@ char *var_sanitize(variable_t *var, const char *data)
 
     /* No limit enforcing yet */
     dataout = (char*) my_calloc(1, 21);
-    egg_snprintf(dataout, 21, "%u:%li", rate.count, rate.time);
+    simple_snprintf(dataout, 21, "%d:%d", rate.count, rate.time);
   } else if ((var->flags & VAR_SERVERS)) {
     dataout = data ? strdup(data) : NULL;
   }
@@ -387,7 +387,7 @@ const char *var_string(variable_t *var)
     /* only bother setting if we don't have 0:0 */
     if ((*(rate_t *) (var->mem)).count && (*(rate_t *) (var->mem)).time) {
       data = (char *) my_calloc(1, 21);
-      egg_snprintf(data, 21, "%d:%li", (*(rate_t *) (var->mem)).count, (*(rate_t *) (var->mem)).time);
+      simple_snprintf(data, 21, "%d:%d", (*(rate_t *) (var->mem)).count, (*(rate_t *) (var->mem)).time);
     }
   } else if (var->flags & VAR_SERVERS) {
     /* only bother setting/checking if we have 'serverlist' alloc'd */

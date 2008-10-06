@@ -53,7 +53,7 @@
 
 extern int		bupdating;
 
-static time_t wait_dcc_xfer = 40;	/* Timeout time on DCC xfers */
+static interval_t wait_dcc_xfer = 40;	/* Timeout time on DCC xfers */
 static int dcc_limit = 4;	/* Maximum number of simultaneous file
 				   downloads allowed */
 static unsigned int dcc_block = 0;	/* Size of one dcc block */

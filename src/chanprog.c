@@ -369,7 +369,7 @@ void tell_settings(int idx)
   dprintf(idx, "New users get flags [%s]\n", s);
   if (conf.bot->hub && owner[0])
     dprintf(idx, "Permanent owner(s): %s\n", owner);
-  dprintf(idx, "Ignores last %li mins\n", ignore_time);
+  dprintf(idx, "Ignores last %d mins\n", ignore_time);
 }
 
 void reaffirm_owners()

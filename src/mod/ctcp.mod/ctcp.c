@@ -48,7 +48,7 @@
 #define AVGHERETIME             5
 time_t cloak_awaytime = 0;
 time_t cloak_heretime = 0;
-time_t listen_time = 0;
+interval_t listen_time = 0;
 char cloak_bxver[10] = "";
 char cloak_os[20] = "";
 char cloak_osver[100] = "";

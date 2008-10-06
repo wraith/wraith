@@ -748,11 +748,11 @@ bool write_chans(FILE *f, int idx)
     if (lfprintf(f, "\
 + channel add %s { chanmode { %s } addedby %s addedts %lu \
 bad-cookie %d manop %d mdop %d mop %d limit %d \
-flood-chan %d:%lu flood-ctcp %d:%lu flood-join %d:%lu \
-flood-kick %d:%lu flood-deop %d:%lu flood-nick %d:%lu flood-mjoin %d:%lu \
-closed-ban %d closed-invite %d closed-private %d ban-time %lu \
-exempt-time %lu invite-time %lu voice-non-ident %d auto-delay %d \
-flood-exempt %d flood-lock-time %lu \
+flood-chan %d:%d flood-ctcp %d:%d flood-join %d:%d \
+flood-kick %d:%d flood-deop %d:%d flood-nick %d:%d flood-mjoin %d:%d \
+closed-ban %d closed-invite %d closed-private %d ban-time %d \
+exempt-time %d invite-time %d voice-non-ident %d auto-delay %d \
+flood-exempt %d flood-lock-time %d \
 %cmeankicks %cenforcebans %cdynamicbans %cuserbans %cbitch \
 %cprivate %ccycle %cinactive %cdynamicexempts %cuserexempts \
 %cdynamicinvites %cuserinvites %cnodesynch %cclosed %cvoice \
@@ -852,10 +852,10 @@ bool write_chans_compat(FILE *f, int idx)
     if (lfprintf(f, "\
 + channel add %s { chanmode { %s } addedby %s addedts %lu \
 bad-cookie %d manop %d mdop %d mop %d limit %d \
-flood-chan %d:%lu flood-ctcp %d:%lu flood-join %d:%lu \
-flood-kick %d:%lu flood-deop %d:%lu flood-nick %d:%lu \
-closed-ban %d closed-invite %d closed-private %d ban-time %lu \
-exempt-time %lu invite-time %lu voice-non-ident %d auto-delay %d \
+flood-chan %d:%d flood-ctcp %d:%d flood-join %d:%d \
+flood-kick %d:%d flood-deop %d:%d flood-nick %d:%d \
+closed-ban %d closed-invite %d closed-private %d ban-time %d \
+exempt-time %d invite-time %d voice-non-ident %d auto-delay %d \
 %cenforcebans %cdynamicbans %cuserbans %cbitch \
 %cprivate %ccycle %cinactive %cdynamicexempts %cuserexempts \
 %cdynamicinvites %cuserinvites %cnodesynch %cclosed %cvoice \

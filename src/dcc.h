@@ -17,7 +17,7 @@ struct dcc_table {
   int flags;
   void (*eof) (int);
   void (*activity) (int, char *, int);
-  time_t *timeout_val;
+  interval_t *timeout_val;
   void (*timeout) (int);
   void (*display) (int, char *);
   void (*kill) (int, void *);

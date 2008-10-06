@@ -62,7 +62,7 @@ typedef struct variable_b {
 
 typedef struct rate_b {
  int count;
- time_t time;
+ interval_t time;
 } rate_t;
 
 extern char		auth_key[], auth_prefix[2], motd[], *def_chanset, alias[],

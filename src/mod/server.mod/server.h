@@ -49,7 +49,8 @@ extern bool		trigger_on_ignore, floodless, tried_jupenick;
 extern int 		servidx, ctcp_mode, answer_ctcp, serv, curserv, default_alines;
 extern unsigned int     rolls;
 extern port_t		default_port, newserverport, curservport;
-extern time_t		server_online, cycle_time;
+extern time_t		server_online;
+extern interval_t	cycle_time;
 extern char		cursrvname[], botrealname[121], botuserhost[], ctcp_reply[1024],
 			newserver[], newserverpass[], curnetwork[], botuserip[], altnick_char;
 extern struct server_list *serverlist;

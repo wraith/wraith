@@ -30,6 +30,10 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
+#ifdef no
+static interval_t     resolve_timeout = 10;   /* hostname/address lookup timeout */
+#endif
+
 int is_dotted_ip(const char *ip)
 {
         char buf[512];
@@ -73,7 +77,7 @@ static int egg_connect_timeout(void *client_data)
         return(0);
 }
 
-static connect_info_t *attach(int idx, const char *host, int port, int timeout)
+static connect_info_t *attach(int idx, const char *host, int port, interval_t timeout)
 {
         connect_info_t *connect_info = (connect_info_t *) my_calloc(1, sizeof(*connect_info));
 

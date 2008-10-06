@@ -456,7 +456,7 @@ static void dtx_arg(int& argc, char *argv[])
 }
 
 /* Timer info */
-static time_t		lastmin = 99;
+static int		lastmin = 99;
 static struct tm	nowtm;
 
 void core_10secondly()
@@ -543,19 +543,19 @@ static void core_secondly()
 
   egg_memcpy(&nowtm, gmtime(&now), sizeof(struct tm));
   if (nowtm.tm_min != lastmin) {
-    time_t i = 0;
+    int i = 0;
 
     /* Once a minute */
     lastmin = (lastmin + 1) % 60;
     /* In case for some reason more than 1 min has passed: */
     while (nowtm.tm_min != lastmin) {
       /* Timer drift, dammit */
-      debug2("timer: drift (lastmin=%lu, now=%d)", lastmin, nowtm.tm_min);
+      debug2("timer: drift (lastmin=%d, now=%d)", lastmin, nowtm.tm_min);
       ++i;
       lastmin = (lastmin + 1) % 60;
     }
     if (i > 1)
-      putlog(LOG_MISC, "*", "(!) timer drift -- spun %lu minutes", i);
+      putlog(LOG_MISC, "*", "(!) timer drift -- spun %d minutes", i);
     miltime = (nowtm.tm_hour * 100) + (nowtm.tm_min);
     if (conf.bot->hub && ((int) (nowtm.tm_min / 5) * 5) == (nowtm.tm_min)) {	/* 5 min */
 /* 	flushlogs(); */

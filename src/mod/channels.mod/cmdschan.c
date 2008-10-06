@@ -1271,7 +1271,7 @@ static void cmd_chaninfo(int idx, char *par)
 	    chan->flood_join_thr, chan->flood_kick_thr,
 	    chan->flood_deop_thr, chan->flood_nick_thr,
             chan->flood_mjoin_thr);
-    dprintf(idx, "  time  :          %3lu  %3lu  %3lu  %3lu  %3lu  %3lu  %3lu\n",
+    dprintf(idx, "  time  :          %3u  %3u  %3u  %3u  %3u  %3u  %3u\n",
 	    chan->flood_pub_time, chan->flood_ctcp_time,
 	    chan->flood_join_time, chan->flood_kick_time,
 	    chan->flood_deop_time, chan->flood_nick_time,

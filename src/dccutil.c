@@ -54,7 +54,7 @@
 
 static struct portmap *root = NULL;
 
-time_t connect_timeout = 40;    /* How long to wait before a telnet connection times out */
+interval_t connect_timeout = 40;    /* How long to wait before a telnet connection times out */
 int max_dcc = 200;
 
 static int dcc_flood_thr = 3;

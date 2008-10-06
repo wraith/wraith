@@ -68,16 +68,16 @@ int dcc_total = 0;              /* size of dcc table                            
 int dccn = 0;			/* actual number of dcc entries */
 int uplink_idx = -1;
 
-static time_t password_timeout = 40;       /* Time to wait for a password from a user */
-static time_t auth_timeout = 80;
-static time_t bot_timeout = 15;    /* Bot timeout value                       */
-static time_t identtimeout = 15;   /* Timeout value for ident lookups         */
-static time_t dupwait_timeout = 5; /* Timeout for rejecting duplicate entries */
+static interval_t password_timeout = 40;       /* Time to wait for a password from a user */
+static interval_t auth_timeout = 80;
+static interval_t bot_timeout = 15;    /* Bot timeout value                       */
+static interval_t identtimeout = 15;   /* Timeout value for ident lookups         */
+static interval_t dupwait_timeout = 5; /* Timeout for rejecting duplicate entries */
 
 bool protect_telnet = 0;  /* Even bother with ident lookups :)       */
 static int flood_telnet_thr = 10;       /* Number of telnet connections to be
                                          * considered a flood                      */
-static time_t flood_telnet_time = 5;       /* In how many seconds?                    */
+static interval_t flood_telnet_time = 5;       /* In how many seconds?                    */
 
 static void dcc_telnet_got_ident(int, char *);
 static void dcc_telnet_pass(int, int);

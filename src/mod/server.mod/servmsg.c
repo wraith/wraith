@@ -350,7 +350,7 @@ static time_t lastmsgtime[FLOOD_GLOBAL_MAX];
 static int dronemsgs;
 static time_t dronemsgtime;
 static bool set_pls_g;
-static time_t flood_g_time = 60;
+static interval_t flood_g_time = 60;
 
 rate_t flood_g = { 6, 2 };
 
@@ -416,7 +416,7 @@ static bool detect_flood(char *floodnick, char *floodhost, char *from, int which
     howlong.sec = flood_g_time;
     howlong.usec = 0;
     timer_create(&howlong, "Unset umode +g", (Function) unset_g);
-    putlog(LOG_MISC, "*", "Drone flood detected! Setting +g for %li seconds.", flood_g_time);
+    putlog(LOG_MISC, "*", "Drone flood detected! Setting +g for %d seconds.", flood_g_time);
     return 1;	//ignore the current msg
   }
 
