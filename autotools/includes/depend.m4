@@ -8,7 +8,7 @@ AC_DEFUN([EGG_CHECK_DEPMODE],
 [
 CCDEPMODE=gcc
 num=`$CXX -dumpversion | sed "s/^\\\(.\\\).*/\\\1/"`
-if test $num = "3"; then
+if test $num -ge "3"; then
   CCDEPMODE=gcc3
 #  GCC3="-Wpadded -Wpacked -Wno-unused-parameter -Wmissing-format-attribute -Wdisabled-optimization"
   GCC3="-W -Wno-unused-parameter -Wdisabled-optimization -Wmissing-format-attribute -Wno-write-strings"
