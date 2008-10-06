@@ -172,7 +172,7 @@ void botnet_send_act(int idx, char *botnick, char *user, int chan, char *data)
   }
 }
 
-void botnet_send_chat(int idx, char *botnick, char *data)
+void botnet_send_chat(int idx, const char *botnick, const char *data)
 {
   if (tands > 0) {
     const size_t len = simple_snprintf(OBUF, sizeof(OBUF), "ct %s %s\n", botnick, data);

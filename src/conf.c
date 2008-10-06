@@ -205,7 +205,7 @@ void
 confedit()
 {
   Tempfile tmpconf = Tempfile("conf");
-  char *editor = NULL;
+  const char *editor = NULL;
   mode_t um;
   int waiter;
   pid_t pid, xpid;

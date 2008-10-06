@@ -11,7 +11,7 @@ num=`$CXX -dumpversion | sed "s/^\\\(.\\\).*/\\\1/"`
 if test $num = "3"; then
   CCDEPMODE=gcc3
 #  GCC3="-Wpadded -Wpacked -Wno-unused-parameter -Wmissing-format-attribute -Wdisabled-optimization"
-  GCC3="-W -Wno-unused-parameter -Wdisabled-optimization -Wmissing-format-attribute"
+  GCC3="-W -Wno-unused-parameter -Wdisabled-optimization -Wmissing-format-attribute -Wno-write-strings"
 fi
 AC_SUBST(CCDEPMODE)dnl
 AC_SUBST(GCC3)dnl

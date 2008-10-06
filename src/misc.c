@@ -347,7 +347,7 @@ void daysdur(time_t mynow, time_t then, char *out)
 }
 
 /* show l33t banner */
-static char *wbanner(void) {
+static const char *wbanner(void) {
 /*
                        .__  __  .__
 __  _  ______________  |__|/  |_|  |__

@@ -605,7 +605,7 @@ void suicide(const char *msg)
   fatal(msg, 0);
 }
 
-void detected(int code, char *msg)
+void detected(int code, const char *msg)
 {
   char tmp[512] = "";
   struct flag_record fr = { FR_GLOBAL, 0, 0, 0 };
@@ -662,7 +662,7 @@ void detected(int code, char *msg)
     fatal(msg, 0);
 }
 
-char *werr_tostr(int errnum)
+const char *werr_tostr(int errnum)
 {
   switch (errnum) {
   case ERR_BINSTAT:

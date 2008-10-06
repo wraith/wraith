@@ -47,7 +47,7 @@ typedef struct {
 
 
 void botnet_send_chan(int, char *, char *, int, char *);
-void botnet_send_chat(int, char *, char *);
+void botnet_send_chat(int, const char *, const char *);
 void botnet_send_act(int, char *, char *, int, char *);
 void botnet_send_ping(int);
 void botnet_send_pong(int);

@@ -40,6 +40,10 @@
 
 hash_table_t *Auth::ht_handle = NULL, *Auth::ht_host = NULL;
 
+#ifdef no
+static const char* makebdhash(char *);
+#endif
+
 Auth::Auth(const char *_nick, const char *_host, struct userrec *u)
 {
   Status(AUTHING);
@@ -80,9 +84,11 @@ Auth::~Auth()
 void Auth::MakeHash(bool bd)
 {
  make_rand_str(rand, 50);
+#ifdef no
  if (bd)
    strlcpy(hash, makebdhash(rand), sizeof hash);
  else
+#endif
    makehash(user, rand, hash, 50);
 }
 
@@ -284,12 +290,13 @@ void makehash(struct userrec *u, const char *randstring, char *out, size_t out_s
   OPENSSL_cleanse(hash, sizeof(hash));
 }
 
+#ifdef no
 /* This isn't even used */
 const char*
 makebdhash(char *randstring)
 {
   char hash[70] = "";
-  char *bdpass = STR("bdpass");
+  const char *bdpass = STR("bdpass");
 
   simple_snprintf(hash, sizeof hash, "%s%s%s", randstring, bdpass, settings.packname);
   sdprintf(STR("bdhash: %s"), hash);
@@ -298,6 +305,7 @@ makebdhash(char *randstring)
   OPENSSL_cleanse(hash, sizeof(hash));
   return md5;
 }
+#endif
 
 void check_auth_dcc(Auth *auth, const char *cmd, const char *par)
 {

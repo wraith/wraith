@@ -3,6 +3,6 @@
 
 #define STR(x) x
 
-char *degarble(int, const char *);
+const char *degarble(int, const char *);
 
 #endif /* !_GARBLE_H */

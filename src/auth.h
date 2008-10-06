@@ -49,7 +49,6 @@ class Auth {
   static hash_table_t *ht_handle;
 };
 
-const char* makebdhash(char *);
 void makehash(struct userrec *u, const char *randstring, char *out, size_t out_size);
 
 void check_auth_dcc(Auth *, const char *, const char *);

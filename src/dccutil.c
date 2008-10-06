@@ -199,14 +199,14 @@ colorbuf(char *buf, size_t len, int idx)
 
 /* Dump a potentially super-long string of text.
  */
-void dumplots(int idx, const char *prefix, char *data)
+void dumplots(int idx, const char *prefix, const char *data)
 {
   if (!*data) {
     dprintf(idx, "%s\n", prefix);
     return;
   }
 
-  char *p = data, *q = NULL, *n = NULL, c = 0;
+  char *p = (char*)data, *q = NULL, *n = NULL, c = 0;
   const size_t max_data_len = 120 - strlen(prefix);
 
   while ((strlen(p) - ansi_len(p)) > max_data_len) {
