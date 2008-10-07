@@ -20,7 +20,7 @@ do
   ./build.sh -n -P -q $cfg -s $scp_target:${dir}/ all
  fi
 done
-chmod 0700 misc/id_dsa
-ssh -i misc/id_dsa $scp_target chmod 0644 ${dir}/*.tar.gz
+chmod 0700 private/id_dsa
+ssh -i private/id_dsa $scp_target chmod 0644 ${dir}/*.tar.gz
 rm *.tar.gz
 

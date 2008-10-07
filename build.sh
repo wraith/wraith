@@ -25,8 +25,8 @@ else
 fi
 rm -f ts ts.exe
 gcc -o ts src/timestamp.c > /dev/null 2>&1
-if [ -f misc/getdate.sh ]; then
-  BUILDTS=`./ts \`misc/getdate.sh\``
+if [ -f private/getdate.sh ]; then
+  BUILDTS=`./ts \`private/getdate.sh\``
 else
   BUILDTS=`grep -m 1 "BUILDTS = " Makefile.in | ${AWK} '{print $3}'` 
 fi
@@ -131,8 +131,8 @@ then
 fi
 
 if [ $nightly = "1" ]; then
-  chmod 0700 misc/id_dsa
-  remotedate="`ssh -q -i misc/id_dsa bdrewery@endurance.quadspeedi.net ls -al public_html/nightly/${os}-stable.tar.gz | \
+  chmod 0700 private/id_dsa
+  remotedate="`ssh -q -i private/id_dsa bdrewery@endurance.quadspeedi.net ls -al public_html/nightly/${os}-stable.tar.gz | \
              sed -e 's/.*\-> \([0-1][0-2]\.[0-3][0-9]\.[0-9][0-9][0-9][0-9]\)\-.*/\1/'`"
   if [ "${remotedate}" = "${builddate}" ]; then
     exit 0
@@ -215,16 +215,16 @@ if [ $nopkg = "0" -o $pkg = "1" ]; then
   echo "Binaries are now in '${PACKNAME}.$os-$ver${d}.tar.${ext}'."
  
   if ! [ $scp = 0 ]; then
-    chmod 0700 misc/id_dsa
-    scp -i misc/id_dsa -B -p -C ${PACKNAME}.$os-$ver${d}.tar.${ext} $scp
+    chmod 0700 private/id_dsa
+    scp -i private/id_dsa -B -p -C ${PACKNAME}.$os-$ver${d}.tar.${ext} $scp
 
     scp_target=`echo $scp | cut -d : -f 1`
     dir=`echo $scp | cut -d : -f 2`
     if [ "$devel" = "1" ]; then
-      ssh -i misc/id_dsa $scp_target ln -fs ${PACKNAME}.$os-$ver${d}.tar.${ext} ${dir}/${PACKNAME}.${os}-devel.tar.gz
+      ssh -i private/id_dsa $scp_target ln -fs ${PACKNAME}.$os-$ver${d}.tar.${ext} ${dir}/${PACKNAME}.${os}-devel.tar.gz
     else
-      ssh -i misc/id_dsa $scp_target ln -fs ${PACKNAME}.$os-$ver${d}.tar.${ext} ${dir}/${PACKNAME}.${os}-stable.tar.gz
-      ssh -i misc/id_dsa $scp_target ln -fs ${PACKNAME}.$os-$ver${d}.tar.${ext} ${dir}/${PACKNAME}.${os}-base.tar.gz
+      ssh -i private/id_dsa $scp_target ln -fs ${PACKNAME}.$os-$ver${d}.tar.${ext} ${dir}/${PACKNAME}.${os}-stable.tar.gz
+      ssh -i private/id_dsa $scp_target ln -fs ${PACKNAME}.$os-$ver${d}.tar.${ext} ${dir}/${PACKNAME}.${os}-base.tar.gz
     fi
 
   fi
@@ -247,14 +247,14 @@ elif ! [ $scp = "0" ]; then
   if test -n "$tmp"; then
     declare -x MALLOC_CHECK_=$tmp
   fi
-  chmod 0700 misc/id_dsa
-  scp -i misc/id_dsa -B -p -C ${builddate}-$os-$ver${d}.tar.${ext} $scp
+  chmod 0700 private/id_dsa
+  scp -i private/id_dsa -B -p -C ${builddate}-$os-$ver${d}.tar.${ext} $scp
   rm -rf ${builddate}-$os-$ver${d}.tar.${ext} wraith.$os-$ver${d}${exe} ChangeLog-${builddate}.gz ${extras_local}
   if [ "$devel" = "1" ]; then
-    ssh -i misc/id_dsa shatow@wraith.shatow.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}-devel.tar.gz
+    ssh -i private/id_dsa shatow@wraith.shatow.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}-devel.tar.gz
   else
-    ssh -i misc/id_dsa shatow@wraith.shatow.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}-stable.tar.gz
-    ssh -i misc/id_dsa shatow@wraith.shatow.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}.tar.gz
+    ssh -i private/id_dsa shatow@wraith.shatow.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}-stable.tar.gz
+    ssh -i private/id_dsa shatow@wraith.shatow.net ln -fs ${builddate}-$os-$ver${d}.tar.${ext} public_html/nightly/${os}.tar.gz
   fi
 fi
 

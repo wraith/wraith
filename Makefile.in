@@ -20,8 +20,8 @@ CONFIGFILES = config.cache config.log config.status config.h src/buildinfo.h
 DISTROFILES = README LICENSE config.h.in autotools/ doc/ scripts/ lib/ Makefile.in build.sh configure pack/ src/
 EXCLUDES = pack/pack.cfg $(CONFIGFILES) $(STATICMAKEFILES)
 
-REVISION 	:= $(shell misc/getrev.sh)
-BUILDTS 	:= $(shell misc/getts.sh)
+REVISION 	:= $(shell private/getrev.sh)
+BUILDTS 	:= $(shell private/getts.sh)
 
 HELPFILE = doc/help.txt
 SETTINGSFILE = doc/settings.txt
@@ -118,7 +118,7 @@ indent:
 	@ifiles="`find src -name '*.h' -or -name '*.c'`"; \
 	for s in $$ifiles; \
 	do \
-	 INDENT_PROFILE=misc/indent.pro indent $$s; \
+	 INDENT_PROFILE=private/indent.pro indent $$s; \
 	done
 
 sort: sorthelp
