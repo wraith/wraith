@@ -1,3 +1,2 @@
 #!/bin/sh
-grep=`which grep`
-grep "$@" | grep -v "^configure" |grep -v src/bdlib| grep -v "^ChangeLog" | grep -v "^Binary" | grep -v "^src/_" | grep -v "^tmp/" | grep -v "help\..*:" | grep -v "\.svn" | grep -v ".deps.*\.Po" | grep -v "\.c~:" | grep -v "tags:" | grep -v "\.orig:"
+grep "$@" | egrep -v "(configure|bdlib|Binary|src/_|tmp|help\..*:|\.svn|\.deps.*\.Po|\.c~:|tags:|\.orig:)"

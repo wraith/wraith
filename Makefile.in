@@ -118,7 +118,7 @@ indent:
 	@ifiles="`find src -name '*.h' -or -name '*.c'`"; \
 	for s in $$ifiles; \
 	do \
-	 indent $$s; \
+	 INDENT_PROFILE=misc/indent.pro indent $$s; \
 	done
 
 sort: sorthelp
