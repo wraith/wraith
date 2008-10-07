@@ -409,15 +409,15 @@ static void ctcp_minutely()
 
 static int ctcp_FINGER(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
-  time_t idletime = 0;
+  int idletime = 0;
 
   if (cloak_awaytime)
     idletime = now - cloak_awaytime;
   else if (cloak_heretime)
     idletime = now - cloak_heretime;
-  dprintf(DP_HELP, "NOTICE %s :\001%s %s (%s@%s) Idle %li second%s\001\n", nick, keyword, "",
+  dprintf(DP_HELP, "NOTICE %s :\001%s %s (%s@%s) Idle %d second%s\001\n", nick, keyword, "",
                    conf.username ? conf.username : conf.bot->nick, 
-                   (strchr(botuserhost, '@') + 1), idletime, idletime == 1 ? "" : "s");
+                   (strchr(botuserhost, '@') + 1), (int) idletime, idletime == 1 ? "" : "s");
   return BIND_RET_BREAK;
 }
 

@@ -376,7 +376,7 @@ static void check_updates()
       }
     }
     /* send out notice to update remote bots ... */
-    egg_snprintf(buf, sizeof buf, "nu? %lu %d", buildts, revision);
+    simple_snprintf(buf, sizeof buf, "nu? . %d", revision);
     putallbots(buf);
   }
 }

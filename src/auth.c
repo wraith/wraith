@@ -269,7 +269,7 @@ static int auth_tell_walk(const void *key, void *data, void *param)
 
 //  dprintf(idx, "%s(%s!%s) [%s] authtime: %li, atime: %li, Status: %d\n", auth->bd ? "x " : "", auth->nick, 
   dprintf(idx, "(%s!%s) [%s] authtime: %li, atime: %li, Status: %d\n", auth->nick, 
-        auth->host, auth->handle, auth->authtime, auth->atime, auth->Status());
+        auth->host, auth->handle, (long)auth->authtime, (long)auth->atime, auth->Status());
   
   return 0;
 }

@@ -1571,11 +1571,11 @@ static void cmd_channel(int idx, char *par)
       } else {
 	/* Determine idle time */
 	if (now - (m->last) > 86400)
-	  egg_snprintf(s1, sizeof s1, "%2lid", ((now - (m->last)) / 86400));
+	  egg_snprintf(s1, sizeof s1, "%2dd", (int) ((now - (m->last)) / 86400));
 	else if (now - (m->last) > 3600)
-	  egg_snprintf(s1, sizeof s1, "%2lih", ((now - (m->last)) / 3600));
+	  egg_snprintf(s1, sizeof s1, "%2dh", (int) ((now - (m->last)) / 3600));
 	else if (now - (m->last) > 180)
-	  egg_snprintf(s1, sizeof s1, "%2lim", ((now - (m->last)) / 60));
+	  egg_snprintf(s1, sizeof s1, "%2dm", (int) ((now - (m->last)) / 60));
 	else
 	  strlcpy(s1, "   ", sizeof s1);
 	egg_snprintf(format, sizeof format, "%%c%%c%%-%us %%-%us %%s %%c   %%d %%s  %%s %%s\n", 
@@ -1751,7 +1751,7 @@ static void cmd_adduser(int idx, char *par)
   if (!u) {
     userlist = adduser(userlist, hand, p1, "-", USER_DEFAULT, 0);
     u = get_user_by_handle(userlist, hand);
-    sprintf(tmp, "%li %s", now, dcc[idx].nick);
+    egg_snprintf(tmp, sizeof(tmp), "%li %s", (long) now, dcc[idx].nick);
     set_user(&USERENTRY_ADDED, u, tmp);
     make_rand_str(s2, MAXPASSLEN);
     set_user(&USERENTRY_PASS, u, s2);

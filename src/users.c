@@ -156,7 +156,7 @@ void addignore(char *ign, char *from, const char *mnote, time_t expire_time)
     char *mask = str_escape(ign, ':', '\\');
 
     if (mask) {
-      shareout("+i %s %li %c %s %s\n", mask, expire_time - now, (p->flags & IGREC_PERM) ? 'p' : '-', from, mnote);
+      shareout("+i %s %d %c %s %s\n", mask, (int) (expire_time - now), (p->flags & IGREC_PERM) ? 'p' : '-', from, mnote);
       free(mask);
     }
   }

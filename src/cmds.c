@@ -330,7 +330,7 @@ static void cmd_lagged(int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# lagged %s", dcc[idx].nick, par);
   for (int i = 0; i < dcc_total; i++) {
     if (dcc[i].type && dcc[i].type == &DCC_BOT) {
-      dprintf(idx, "%9s - %li seconds\n", dcc[i].nick, (dcc[i].pingtime > 120) ? (now - dcc[i].pingtime) : dcc[i].pingtime);
+      dprintf(idx, "%9s - %d seconds\n", dcc[i].nick, (dcc[i].pingtime > 120) ? (int) (now - dcc[i].pingtime) : (int) dcc[i].pingtime);
     }
   }
 }
@@ -370,7 +370,7 @@ static void cmd_motd(int idx, char *par)
     size = strlen(par) + 1 + strlen(dcc[idx].nick) + 10 + 1 + 1;
     s = (char *) my_calloc(1, size); /* +2: ' 'x2 */
 
-    egg_snprintf(s, size, "%s %li %s", dcc[idx].nick, now, par);
+    egg_snprintf(s, size, "%s %li %s", dcc[idx].nick, (long)now, par);
     var_set_by_name(NULL, "motd", s);
     free(s);
     dprintf(idx, "Motd set\n");
@@ -390,7 +390,7 @@ static void cmd_about(int idx, char *par)
   dprintf(idx, STR("http://wraith.botpack.net\n"));
   egg_strftime(c, sizeof c, "%c %Z", gmtime(&buildts));
   dprintf(idx, "Version: %s\n", egg_version);
-  dprintf(idx, "Build: %s (%li)\n", c, buildts);
+  dprintf(idx, "Build: %s (%li)\n", c, (long)buildts);
   dprintf(idx, "Revision: %d\n", revision);
   dprintf(idx, STR("(written from a base of Eggdrop 1.6.12)\n"));
   dprintf(idx, "..with credits and thanks to the following:\n");
@@ -1924,9 +1924,9 @@ static void cmd_debug(int idx, char *par)
   if (par[0])
     cmd = newsplit(&par);
   if (!cmd || (cmd && !strcmp(cmd, "timesync")))
-    dprintf(idx, "Timesync: %li (%li)\n", now + timesync, timesync);
+    dprintf(idx, "Timesync: %li (%li)\n", (long) (now + timesync), (long)timesync);
   if (!cmd || (cmd && !strcmp(cmd, "now")))
-    dprintf(idx, "Now: %li\n", now);
+    dprintf(idx, "Now: %li\n", (long)now);
   if (!cmd || (cmd && !strcmp(cmd, "role")))
     dprintf(idx, "Role: %d\n", role);
   if (!cmd || (cmd && !strcmp(cmd, "net")))
@@ -2122,13 +2122,11 @@ static void cmd_trace(int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# trace %s", dcc[idx].nick, par);
   simple_snprintf(x, sizeof(x), "%d:%s@%s", dcc[idx].sock, dcc[idx].nick, conf.bot->nick);
 
-  time_t tm;
   egg_timeval_t tv;
 
   timer_get_now(&tv);
-  tm = (tv.sec % 10000) * 100 + (tv.usec * 100) / (1000000);
 
-  sprintf(y, ":%li", tm);
+  egg_snprintf(y, sizeof(y), ":%li", (long) ((tv.sec % 10000) * 100 + (tv.usec * 100) / (1000000)));
   botnet_send_trace(i, x, par, y);
 }
 
@@ -3149,7 +3147,7 @@ static void cmd_newleaf(int idx, char *par)
     bi->hublevel = 999;
     set_user(&USERENTRY_BOTADDR, u1, bi);
     /* set_user(&USERENTRY_PASS, u1, settings.salt2); */
-    sprintf(tmp, "%li %s", now, dcc[idx].nick);
+    egg_snprintf(tmp, sizeof(tmp), "%li %s", (long) now, dcc[idx].nick);
     set_user(&USERENTRY_ADDED, u1, tmp);
     dprintf(idx, "Added new leaf: %s\n", handle);
     while (par[0]) {
@@ -3352,7 +3350,7 @@ static void cmd_pls_user(int idx, char *par)
 
     userlist = adduser(userlist, handle, phost, "-", USER_DEFAULT, 0);
     u2 = get_user_by_handle(userlist, handle);
-    sprintf(tmp, "%li %s", now, dcc[idx].nick);
+    egg_snprintf(tmp, sizeof(tmp), "%li %s", (long)now, dcc[idx].nick);
     set_user(&USERENTRY_ADDED, u2, tmp);
     dprintf(idx, "Added %s (%s) with no flags.\n", handle, phost);
     while (par[0]) {
@@ -3767,16 +3765,15 @@ static void cmd_timesync(int idx, char *par) {
   char tmp[30] = "";
 
   putlog(LOG_CMDS, "*", "#%s# timesync", dcc[idx].nick);
-  sprintf(tmp, "timesync %li", timesync + now);
+  egg_snprintf(tmp, sizeof(tmp), "timesync %li", (long)(timesync + now));
   botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, tmp);
 }
 
 static void rcmd_timesync(char *frombot, char *fromhand, char *fromidx, char *par) {
   char tmp[1024] = "";
-  time_t net;
+  long net = atol(par);
 
-  net = atol(par);
-  sprintf(tmp, "NET: %li    ME: %li   DIFF: %li", net, timesync + now, (timesync+now) - net);
+  sprintf(tmp, "NET: %li    ME: %li   DIFF: %d", net, (long)timesync + now, (int) ((timesync+now) - net));
   botnet_send_cmdreply(conf.bot->nick, frombot, fromhand, fromidx, tmp);
 }
 
@@ -3914,15 +3911,13 @@ static void rcmd_msg(char * tobot, char * frombot, char * fromhand, char * fromi
 
 /* netlag */
 static void cmd_netlag(int idx, char * par) {
-  time_t tm;
   egg_timeval_t tv;
   char tmp[64] = "";
 
   putlog(LOG_CMDS, "*", "#%s# netlag", dcc[idx].nick);
   
   timer_get_now(&tv);
-  tm = (tv.sec % 10000) * 100 + (tv.usec * 100) / (1000000);
-  sprintf(tmp, "ping %li", tm);
+  egg_snprintf(tmp, sizeof(tmp), "ping %li", (long) ((tv.sec % 10000) * 100 + (tv.usec * 100) / (1000000)));
   dprintf(idx, "Sent ping to all linked bots\n");
   botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, tmp);
 }
@@ -3938,12 +3933,11 @@ static void rcmd_pong(char *frombot, char *fromhand, char *fromidx, char *par) {
   int i = atoi(fromidx);
 
   if ((i >= 0) && (i < dcc_total) && (dcc[i].type == &DCC_CHAT) && (!strcmp(dcc[i].nick, fromhand))) {
-    time_t tm;
     egg_timeval_t tv;
 
     timer_get_now(&tv);
-    tm = ((tv.sec % 10000) * 100 + (tv.usec * 100) / (1000000)) - atoi(par);
-    dprintf(i, "Pong from %s: %li.%li seconds\n", frombot, (tm / 100), (tm % 100));
+    long tm = ((tv.sec % 10000) * 100 + (tv.usec * 100) / (1000000)) - atol(par);
+    dprintf(i, "Pong from %s: %d.%d seconds\n", frombot, (int)(tm / 100), (int)(tm % 100));
   }
 }
 

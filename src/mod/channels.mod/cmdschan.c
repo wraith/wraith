@@ -528,7 +528,7 @@ static void cmd_slowjoin(int idx, char *par)
     return;
   }
 
-  egg_snprintf(buf, sizeof(buf), "+inactive addedby %s addedts %li", dcc[idx].nick, now);
+  egg_snprintf(buf, sizeof(buf), "+inactive addedby %s addedts %li", dcc[idx].nick, (long)now);
 
   if (par[0])
     strlcat(buf, par, sizeof(buf));
@@ -963,7 +963,7 @@ static void pls_chan(int idx, char *par, char *bot)
       if (!bot) {
         char tmp[51] = "";
 
-        sprintf(tmp, "addedby %s addedts %li", dcc[idx].nick, now);
+        egg_snprintf(tmp, sizeof(tmp), "addedby %s addedts %li", dcc[idx].nick, (long) now);
         if (buf[0]) {
           strcat(buf, " ");
           strcat(buf, tmp);

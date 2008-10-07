@@ -134,7 +134,7 @@ interval_t async_server_timeout = 40;
 static void 
 dns_display(int idx, char *buf)
 {
-  sprintf(buf, "named   waited %lis", now - dcc[idx].timeval);
+  simple_sprintf(buf, "named   waited %ds", (int) (now - dcc[idx].timeval));
 }
 
 static void
@@ -192,7 +192,7 @@ static void eof_dcc_dnswait(int idx)
 
 static void display_dcc_dnswait(int idx, char *buf)
 {
-  sprintf(buf, "dns   waited %lis", now - dcc[idx].timeval);
+  simple_sprintf(buf, "dns   waited %ds", (int) (now - dcc[idx].timeval));
 }
 
 static void kill_dcc_dnswait(int idx, void *x)
@@ -966,13 +966,13 @@ void tell_dnsdebug(int idx)
 
 
 	for (q = query_head; q; q = q->next)
-		dprintf(idx, "DNS (%d) (%lis): %s\n", q->id, q->expiretime - now, q->query);
+		dprintf(idx, "DNS (%d) (%ds): %s\n", q->id, (int) (q->expiretime - now), q->query);
 
 //	for (i = 0; i < nhosts; i++)
 //           dprintf(idx, "HOST #%d: %s/%s\n", i, hosts[i].host, hosts[i].ip);
 
 	for (i = 0; i < ncache; i++) {
-		dprintf(idx, "cache(%d) %s expires in %lis\n", i, cache[i].query, cache[i].expiretime - now);
+		dprintf(idx, "cache(%d) %s expires in %ds\n", i, cache[i].query, (int) (cache[i].expiretime - now));
     		for (n = 0; n < cache[i].answer.len; n++)
 			dprintf(idx, "%d: %s\n", n, cache[i].answer.list[n]);
 	}

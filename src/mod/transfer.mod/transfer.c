@@ -602,7 +602,7 @@ void display_dcc_get(int idx, char *buf)
 
 void display_dcc_get_p(int idx, char *buf)
 {
-  sprintf(buf,"send  waited %lus\n    Filename: %s\n", now - dcc[idx].timeval, dcc[idx].u.xfer->origname);
+  simple_sprintf(buf,"send  waited %ds\n    Filename: %s\n", (int) (now - dcc[idx].timeval), dcc[idx].u.xfer->origname);
 }
 
 void display_dcc_send(int idx, char *buf)

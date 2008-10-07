@@ -372,7 +372,7 @@ bool write_user(struct userrec *u, FILE * f, int idx)
       fr.match = FR_CHAN;
       fr.chan = ch->flags;
       build_flags(s, &fr, NULL);
-      if (lfprintf(f, "! %-20s %lu %-10s %s\n", ch->channel, ch->laston, s, ch->info ? ch->info : "") == EOF)
+      if (lfprintf(f, "! %-20s %li %-10s %s\n", ch->channel, (long) ch->laston, s, ch->info ? ch->info : "") == EOF)
         return 0;
     }
   }

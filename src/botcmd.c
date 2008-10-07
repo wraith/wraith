@@ -780,8 +780,8 @@ static void bot_traced(int idx, char *par)
           timer_get_now(&tv);
           tm = ((tv.sec % 10000) * 100 + (tv.usec * 100) / (1000000)) - t;
 
-          dprintf(i, "%s -> %s (%li.%li secs, %d hop%s)\n", "Trace result", p2,
-            (tm / 100), (tm % 100), j, (j != 1) ? "s" : "");
+          dprintf(i, "%s -> %s (%d.%d secs, %d hop%s)\n", "Trace result", p2,
+            (int)(tm / 100), (int)(tm % 100), j, (j != 1) ? "s" : "");
 	} else
 	  dprintf(i, "%s -> %s\n", "Trace result", p);
       }
