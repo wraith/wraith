@@ -143,11 +143,12 @@ void check_maxfiles()
     sdprintf("SOCK: %d BOGUS: %d SOCKS_TOTAL: %d", sock, bogus, socks_total);
 
     for (int i = 10; i < sock; i++)	/* dont close lower sockets, they're probably legit */
-      if (!findanysnum(i))
+      if (!findanysnum(i)) {
         if ((close(i)) == -1)			/* try to close the BOGUS fd (likely a KQUEUE) */
           failed_close++;
         else
           bogus--;
+      }
     if (bogus >= 150 || failed_close >= 50) {
       if (tands > 0) {
         botnet_send_chat(-1, conf.bot->nick, "Max FD reached, restarting...");

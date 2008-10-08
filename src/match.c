@@ -97,7 +97,8 @@ int _wild_match_per(register unsigned char *m, register unsigned char *n)
           return PERMATCH;      /* nonquoted * = match */
         break;
       case WILDP:
-        while (*(++m) == WILDP);        /* Zap redundant %s */
+        while (*(++m) == WILDP)
+          ;        /* Zap redundant %s */
         if (*m != WILDS) {      /* Don't both if next=* */
           if (*n != ' ') {      /* WILDS can't match ' ' */
             lpm = m;
@@ -170,9 +171,11 @@ int _wild_match(register unsigned char *m, register unsigned char *n)
   register int sofar = 0;
 
   /* find the end of each string */
-  while (*(++m));
+  while (*(++m))
+    ;
   m--;
-  while (*(++n));
+  while (*(++n))
+    ;
   n--;
 
   while (n >= na) {

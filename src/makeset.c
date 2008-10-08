@@ -3,6 +3,7 @@
 #include <string>
 #include <cctype>
 #include <algorithm>
+#include <cstring>
 using namespace std;
 
 int main(int argc, char *argv[]) {

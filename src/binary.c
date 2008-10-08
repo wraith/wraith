@@ -531,7 +531,7 @@ static bool check_bin_initialized(const char *fname)
   return 0;
 }
 
-void write_settings(const char *fname, int die, bool conf)
+void write_settings(const char *fname, int die, bool doconf)
 {
   char *hash = NULL;
   int bits = WRITE_CHECKSUM;
@@ -543,10 +543,10 @@ void write_settings(const char *fname, int die, bool conf)
    */
   if (!initialized)
     bits |= WRITE_PACK;
-  if (conf)
+  if (doconf)
     bits |= WRITE_CONF;
 
-  /* only bother writing anything if we have pack or conf, checksum is worthless to write out */
+  /* only bother writing anything if we have pack or doconf, checksum is worthless to write out */
   if (bits & (WRITE_PACK|WRITE_CONF)) {
     if ((hash = bin_checksum(fname, bits))) {
       printf(STR("* Wrote %ssettings to: %s.\n"), ((bits & WRITE_PACK) && !(bits & WRITE_CONF)) ? "pack " :

@@ -447,7 +447,7 @@ static void dtx_arg(int& argc, char *argv[])
     strlcpy(origbotname, argv[optind], HANDLEN + 1);
     strlcpy(origbotnick, argv[optind], HANDLEN + 1);
     /* Trim off .conf */
-    char *p = strchr(origbotname, '.');
+    p = strchr(origbotname, '.');
     if (p) {
       origbotname[(p - origbotname)] = 0;
       origbotnick[(p - origbotname)] = 0;

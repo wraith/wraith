@@ -73,11 +73,13 @@ void rmspace(char *s)
   register char *p = NULL, *q = NULL;
 
   /* Remove trailing whitespaces. */
-  for (q = s + strlen(s) - 1; q >= s && egg_isspace(*q); q--);
+  for (q = s + strlen(s) - 1; q >= s && egg_isspace(*q); q--)
+    ;
   *(q + 1) = 0;
 
   /* Remove leading whitespaces. */
-  for (p = s; egg_isspace(*p); p++);
+  for (p = s; egg_isspace(*p); p++)
+    ;
 
   if (p != s)
     memmove(s, p, q - p + 2);

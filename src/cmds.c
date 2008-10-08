@@ -1248,7 +1248,7 @@ static void cmd_chpass(int idx, char *par)
       }
     }
     if (strlen(pass) > MAXPASSLEN)
-      pass[MAXPASSLEN] = 0;
+      pass[MAXPASSLEN - 1] = 0;
 
     if (good) {
       set_user(&USERENTRY_PASS, u, pass);

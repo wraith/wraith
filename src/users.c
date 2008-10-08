@@ -89,7 +89,8 @@ char *delignore(char *ign)
   static char temp[256] = "";
 
   if (!strchr(ign, '!') && (j = atoi(ign))) {
-    for (u = &global_ign, j--; *u && j; u = &((*u)->next), j--);
+    for (u = &global_ign, j--; *u && j; u = &((*u)->next), j--)
+      ;
     if (*u) {
       strlcpy(temp, (*u)->igmask, sizeof temp);
       i = 1;

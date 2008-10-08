@@ -38,7 +38,7 @@ DIFF = @DIFF@
 #LIBS = @LIBS@ @ZLIB@ @SSL@ 
 LIBS = @LIBS@ @ZLIB@ 
 
-DEBCXXFLAGS = -DDEBUG -fno-inline -g3 -ggdb3 -O0
+DEBCXXFLAGS = -DDEBUG -fno-inline -g3 -ggdb3 -O0 -Wshadow -Wpointer-arith -Wcast-align @GCC3DEB@
 CFLGS = @GCC3@
 _CFLGS = -fno-strict-aliasing -W -Wformat \
 #-Wshadow -Wnested-externs -Wno-format-y2k \
@@ -61,16 +61,16 @@ MAKE_BIN = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CXX)' 'LD=$(LD)' \
 
 MAKE_DEBUG = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CCDEBUG)' 'LD=$(LDDEBUG) -g' \
 'CCDEPMODE=$(CCDEPMODE)' 'REVISION=$(REVISION)' 'BUILDTS=$(BUILDTS)' \
-'STRIP=touch' 'CFLGS=$(DEBCXXFLAGS) $(CFLGS)' \
+'STRIP=touch' 'CFLGS=$(CFLGS) $(DEBCXXFLAGS)' \
 'LIBS=$(LIBS)' 'EGGEXEC=$(BINEXEC)' 'EGGBUILD=(debug)' 
 
 MAKE_UTILS = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CCDEBUG)' 'STRIP=touch' \
 'CCDEPMODE=$(CCDEPMODE)' \
-'CFLGS=$(DEBCXXFLAGS) $(CFLGS)' 'LIBS=$(LIBS)' 'LD=$(LDDEBUG) -g'
+'CFLGS=$(CFLGS) $(DEBCXXFLAGS)' 'LIBS=$(LIBS)' 'LD=$(LDDEBUG) -g'
 
 MAKE_UTILS_NR = $(MAKE) 'CXX=$(CXX)' 'STRIP=touch' \
 'CCDEPMODE=$(CCDEPMODE)' \
-'CFLGS=$(DEBCXXFLAGS) $(CFLGS)' 'LIBS=$(LIBS)' 'LD=$(LD) -g'
+'CFLGS=$(CFLGS) $(DEBCXXFLAGS)' 'LIBS=$(LIBS)' 'LD=$(LD) -g'
 
 MAKE_CONFIG = $(MAKE) 'MAKE=$(MAKE)'
 

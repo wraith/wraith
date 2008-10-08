@@ -648,7 +648,8 @@ void add_server(char *ss)
 #endif /* USE_IPV6 */
   char *p = NULL, *q = NULL;
 
-  for (z = serverlist; z && z->next; z = z->next);
+  for (z = serverlist; z && z->next; z = z->next)
+    ;
   while (ss) {
     p = strchr(ss, ',');
     if (p)

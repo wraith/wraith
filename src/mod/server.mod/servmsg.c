@@ -1091,10 +1091,10 @@ static void disconnect_server(int idx, int dolost)
   }
 
   /* Invalidate the cmd_swhois cache callback data */
-  for (int idx = 0; idx < dcc_total; idx++) {
-    if (dcc[idx].type && dcc[idx].whois[0]) {
-      dcc[idx].whois[0] = 0;
-      dcc[idx].whowas = 0;
+  for (int i = 0; i < dcc_total; i++) {
+    if (dcc[i].type && dcc[i].whois[0]) {
+      dcc[i].whois[0] = 0;
+      dcc[i].whowas = 0;
     }
   }
 }

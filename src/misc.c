@@ -261,7 +261,8 @@ void maskhost(const char *s, char *nw)
       nw += (f - q);
       strcpy(nw, mask_str);
     } else {
-      for (f = e; *f; f++);
+      for (f = e; *f; f++)
+        ;
       f--;
       if (*f >= '0' && *f <= '9') {	/* Numeric IP address */
 	while (*f != '.')

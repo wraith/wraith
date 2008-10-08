@@ -669,6 +669,7 @@ GREP
 EGREP
 CCDEPMODE
 GCC3
+GCC3DEB
 SET_MAKE
 HEAD_1
 AWK
@@ -3473,7 +3474,8 @@ num=`$CXX -dumpversion | sed "s/^\\\(.\\\).*/\\\1/"`
 if test $num -ge "3"; then
   CCDEPMODE=gcc3
 #  GCC3="-Wpadded -Wpacked -Wno-unused-parameter -Wmissing-format-attribute -Wdisabled-optimization"
-  GCC3="-W -Wno-unused-parameter -Wdisabled-optimization -Wmissing-format-attribute -Wno-write-strings"
+  GCC3="-W -Wno-unused-parameter -Wdisabled-optimization -Wno-write-strings"
+  GCC3DEB="-Wno-disabled-optimization -Wmissing-format-attribute"
 fi
 
 
@@ -9651,6 +9653,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 # endif
 #endif
 
+#include <limits.h>
 #include <stdlib.h>
 
 #ifdef HAVE_UNISTD_H
@@ -9799,12 +9802,15 @@ main ()
      isn't worth using anyway.  */
   alarm (60);
 
-  for (time_t_max = 1; 0 < time_t_max; time_t_max *= 2)
-    continue;
-  time_t_max--;
-  if ((time_t) -1 < 0)
-    for (time_t_min = -1; (time_t) (time_t_min * 2) < 0; time_t_min *= 2)
-      continue;
+  for (;;)
+    {
+      t = (time_t_max << 1) + 1;
+      if (t <= time_t_max)
+	break;
+      time_t_max = t;
+    }
+  time_t_min = - ((time_t) ~ (time_t) 0 == (time_t) -1) - time_t_max;
+
   delta = time_t_max / 997; /* a suitable prime number */
   for (i = 0; i < N_STRINGS; i++)
     {
@@ -9819,10 +9825,12 @@ main ()
 	     && mktime_test ((time_t) (60 * 60 * 24))))
 	return 1;
 
-      for (j = 1; 0 < j; j *= 2)
+      for (j = 1; ; j <<= 1)
 	if (! bigtime_test (j))
 	  return 1;
-      if (! bigtime_test (j - 1))
+	else if (INT_MAX / 2 < j)
+	  break;
+      if (! bigtime_test (INT_MAX))
 	return 1;
     }
   return ! (irix_6_4_bug () && spring_forward_gap () && year_2050_test ());
@@ -12593,6 +12601,7 @@ GREP!$GREP$ac_delim
 EGREP!$EGREP$ac_delim
 CCDEPMODE!$CCDEPMODE$ac_delim
 GCC3!$GCC3$ac_delim
+GCC3DEB!$GCC3DEB$ac_delim
 SET_MAKE!$SET_MAKE$ac_delim
 HEAD_1!$HEAD_1$ac_delim
 AWK!$AWK$ac_delim
@@ -12614,7 +12623,7 @@ MOD_UPDIR!$MOD_UPDIR$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 69; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 70; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

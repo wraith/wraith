@@ -174,15 +174,15 @@ int fixmod(const char *s)
   return chmod(s, S_IRUSR | S_IWUSR | S_IXUSR);
 }
 
-Tempfile::Tempfile(const char *prefix, bool useFopen)
+Tempfile::Tempfile(const char *_prefix, bool _useFopen)
 {
-  this->useFopen = useFopen;
+  this->useFopen = _useFopen;
   this->f = NULL;
   this->fd = -1;
-  if (prefix) {
-    plen = strlen(prefix) + 1;
+  if (_prefix) {
+    plen = strlen(_prefix) + 1;
     this->prefix = new char[plen];
-    strlcpy(this->prefix, prefix, plen);
+    strlcpy(this->prefix, _prefix, plen);
   } else {
     this->prefix = NULL;
     plen = -1; /* to swallow the '-' */
