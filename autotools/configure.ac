@@ -87,7 +87,7 @@ AC_CACHE_SAVE
 #EGG_CHECK_SSL
 
 
-AC_SUBST(ZLIB)dnl
+#AC_SUBST(ZLIB)dnl
 #AC_SUBST(SSL)dnl
 
 # Checks for typedefs, structures, and compiler characteristics
@@ -107,17 +107,17 @@ AC_C_CHAR_UNSIGNED
 #checkpoint
 AC_CACHE_SAVE 
 
-AC_CHECK_SIZEOF(int, 0)
 AC_CHECK_SIZEOF(short, 0)
+AC_CHECK_SIZEOF(int, 0)
 AC_CHECK_SIZEOF(long, 0)
 AC_CHECK_SIZEOF(long long,0)
+AC_CHECK_SIZEOF(size_t, 0)
+AC_CHECK_SIZEOF(ptrdiff_t, 0)
+AC_CHECK_SIZEOF(time_t, 0)
 
 
 AC_STRUCT_TIMEZONE
 AC_STRUCT_TM
-
-#checkpoint
-AC_CACHE_SAVE 
 
 # Checks for library functions
 AC_FUNC_FORK
