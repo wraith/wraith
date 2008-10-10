@@ -528,7 +528,7 @@ static void cmd_slowjoin(int idx, char *par)
     return;
   }
 
-  egg_snprintf(buf, sizeof(buf), "+inactive addedby %s addedts %li", dcc[idx].nick, (long)now);
+  simple_snprintf(buf, sizeof(buf), "+inactive addedby %s addedts %li", dcc[idx].nick, (long)now);
 
   if (par[0])
     strlcat(buf, par, sizeof(buf));
@@ -934,9 +934,9 @@ static void pls_chan(int idx, char *par, char *bot)
   chname = newsplit(&par);
   simple_snprintf(buf, sizeof(buf), "cjoin %s %s", chname, bot ? bot : "*");		/* +chan makes all bots join */
   if (par[0]) {
-    strcat(buf, " ");
-    strcat(buf, par);
-    strcat(buf, " ");
+    strlcat(buf, " ", sizeof(buf));
+    strlcat(buf, par, sizeof(buf));
+    strlcat(buf, " ", sizeof(buf));
   }
     
   if (!bot && findchan_by_dname(chname)) {
@@ -963,10 +963,10 @@ static void pls_chan(int idx, char *par, char *bot)
       if (!bot) {
         char tmp[51] = "";
 
-        egg_snprintf(tmp, sizeof(tmp), "addedby %s addedts %li", dcc[idx].nick, (long) now);
+        simple_snprintf(tmp, sizeof(tmp), "addedby %s addedts %li", dcc[idx].nick, (long) now);
         if (buf[0]) {
-          strcat(buf, " ");
-          strcat(buf, tmp);
+          strlcat(buf, " ", sizeof(buf));
+          strlcat(buf, tmp, sizeof(buf));
         }
         do_chanset(NULL, chan, buf[0] ? buf : tmp, DO_LOCAL);
         dprintf(idx, "Channel %s added to the botnet.\n", chname);
@@ -1040,7 +1040,7 @@ static void mns_chan(int idx, char *par, char *bot)
       if (dcc[i].type && (dcc[i].type->flags & DCT_CHAT) && 
           !rfc_casecmp(dcc[i].u.chat->con_chan, chan->dname)) {
         dprintf(i, "%s is no longer a valid channel, changing your console to '*'\n", chname);
-        strcpy(dcc[i].u.chat->con_chan, "*");
+        strlcpy(dcc[i].u.chat->con_chan, "*", 2);
         console_dostore(i, 0);
       }
     }
@@ -1081,7 +1081,7 @@ static void cmd_botpart(int idx, char *par)
 
 /* thanks Excelsior */
 #define FLAG_COLS 4
-void show_flag(int idx, char *work, int *cnt, const char *name, unsigned int state)
+static void show_flag(int idx, char *work, int *cnt, const char *name, unsigned int state, size_t worksiz)
 {
   char tmp[101] = "", chr_state[15] = "";
   /* empty buffer if no (char *) name */
@@ -1092,26 +1092,26 @@ void show_flag(int idx, char *work, int *cnt, const char *name, unsigned int sta
     work[0] = 0;
   }
   if (!work[0])
-    simple_sprintf(work, "  ");
+    strlcpy(work, "  ", 3);
   if (name && name[0]) {
     chr_state[0] = 0;
     if (state) {
-      strcat(chr_state, GREEN(idx));
-      strcat(chr_state, "+");
+      strlcat(chr_state, GREEN(idx), sizeof(chr_state));
+      strlcat(chr_state, "+", sizeof(chr_state));
     } else {
-      strcat(chr_state, RED(idx));
-      strcat(chr_state, "-");
+      strlcat(chr_state, RED(idx), sizeof(chr_state));
+      strlcat(chr_state, "-", sizeof(chr_state));
     }
-    strcat(chr_state, COLOR_END(idx));
+    strlcat(chr_state, COLOR_END(idx), sizeof(chr_state));
     egg_snprintf(tmp, sizeof tmp, "%s%-17s", chr_state, name);
-    strcat(work, tmp);
+    strlcat(work, tmp, sizeof(work));
   }
   if (*cnt >= FLAG_COLS)
     dprintf(idx, "%s\n", work);
 }
 
 #define INT_COLS 1
-void show_int(int idx, char *work, int *cnt, const char *desc, int state, const char *yes, const char *no)
+static void show_int(int idx, char *work, int *cnt, const char *desc, int state, const char *yes, const char *no, size_t worksiz)
 {
   char tmp[101] = "", chr_state[101] = "";
 
@@ -1124,35 +1124,35 @@ void show_int(int idx, char *work, int *cnt, const char *desc, int state, const 
     work[0] = 0;
   }
   if (!work[0])
-    simple_sprintf(work, "  ");
+    strlcpy(work, "  ", 3);
   /* need to make next line all one char, and then put it into %-30s */
   if (desc && desc[0]) {
     char tmp2[50] = "", tmp3[50] = "";
 
-    strcat(tmp2, BOLD(idx));
+    strlcat(tmp2, BOLD(idx), sizeof(tmp2));
     if (state && yes) {
-      strcat(tmp2, yes);
-      strcat(tmp3, " (");
-      strcat(tmp3, chr_state);
-      strcat(tmp3, ")");
+      strlcat(tmp2, yes, sizeof(tmp2));
+      strlcat(tmp3, " (", sizeof(tmp3));
+      strlcat(tmp3, chr_state, sizeof(tmp3));
+      strlcat(tmp3, ")", sizeof(tmp3));
     } else if (!state && no) {
-      strcat(tmp2, no);
-      strcat(tmp3, " (");
-      strcat(tmp3, chr_state);
-      strcat(tmp3, ")");
+      strlcat(tmp2, no, sizeof(tmp2));
+      strlcat(tmp3, " (", sizeof(tmp3));
+      strlcat(tmp3, chr_state, sizeof(tmp3));
+      strlcat(tmp3, ")", sizeof(tmp3));
     } else if ((state && !yes) || (!state && !no)) {
-      strcat(tmp2, chr_state);
+      strlcat(tmp2, chr_state, sizeof(tmp2));
     }
-    strcat(tmp2, BOLD_END(idx));
+    strlcat(tmp2, BOLD_END(idx), sizeof(tmp2));
     egg_snprintf(tmp, sizeof tmp, "%-30s %-20s %s", desc, tmp2, tmp3[0] ? tmp3 : "");
-    strcat(work, tmp);
+    strlcat(work, tmp, worksiz);
   }
   if (*cnt >= INT_COLS)
     dprintf(idx, "%s\n", work);
 }
 
-#define SHOW_FLAG(name, state) show_flag(idx, work, &cnt, name, state)
-#define SHOW_INT(desc, state, yes, no) show_int(idx, work, &cnt, desc, state, yes, no)
+#define SHOW_FLAG(name, state) show_flag(idx, work, &cnt, name, state, sizeof(work))
+#define SHOW_INT(desc, state, yes, no) show_int(idx, work, &cnt, desc, state, yes, no, sizeof(work))
 #define P_STR deflag == P_KICK ? "Kick" : (deflag == P_DEOP ? "Deop" : (deflag == P_DELETE ? "Remove" : NULL))
 #define F_STR chan->flood_exempt_mode == FLOOD_EXEMPT_OP ? "Op" : (chan->flood_exempt_mode == FLOOD_EXEMPT_VOICE ? "Voice" : NULL)
 static void cmd_chaninfo(int idx, char *par)

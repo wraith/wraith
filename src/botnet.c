@@ -254,10 +254,10 @@ int partynick(char *bot, int sock, char *nick)
 
   for (int i = 0; i < parties; i++) {
     if (!egg_strcasecmp(party[i].bot, bot) && (party[i].sock == sock)) {
-      strcpy(work, party[i].nick);
+      strlcpy(work, party[i].nick, sizeof(work));
       strncpy(party[i].nick, nick, HANDLEN);
       party[i].nick[HANDLEN] = 0;
-      strcpy(nick, work);
+      strlcpy(nick, work, HANDLEN + 1);
       return i;
     }
   }
@@ -324,8 +324,8 @@ void remparty(char *bot, int sock)
       if (party[i].away)
 	free(party[i].away);
       if (i < parties) {
-	strcpy(party[i].bot, party[parties].bot);
-	strcpy(party[i].nick, party[parties].nick);
+	strlcpy(party[i].bot, party[parties].bot, sizeof(party[i].bot));
+	strlcpy(party[i].nick, party[parties].nick, sizeof(party[i].nick));
 	party[i].chan = party[parties].chan;
 	party[i].sock = party[parties].sock;
 	party[i].flag = party[parties].flag;
@@ -370,20 +370,21 @@ void unvia(int idx, tand_t *who)
   }
 }
 
+#ifdef NOTUSED
 void besthub(char *hub)
 {
   tand_t *ptr = tandbot;
   struct userrec *u = NULL, *besthubu = NULL;
-  char bestlval[20] = "", lval[20] = "";
+  char bestlval[HANDLEN + 4] = "", lval[HANDLEN + 4] = "";
 
   hub[0] = 0;
-  strcpy(bestlval, "z");
+  strlcpy(bestlval, "z", sizeof(bestlval));
   while (ptr) {
     u = get_user_by_handle(userlist, ptr->bot);
     if (u) {
       link_pref_val(u, lval);
       if (strcmp(lval, bestlval) < 0) {
-        strcpy(bestlval, lval);
+        strlcpy(bestlval, lval, sizeof(bestlval));
         besthubu = u;
       }
     }
@@ -393,6 +394,7 @@ void besthub(char *hub)
     strcpy(hub, besthubu->handle);
   return;
 }
+#endif
 
 /* Return index into dcc list of the bot that connects us to bot <x>
  */
@@ -457,15 +459,15 @@ void answer_local_whom(int idx, int chan)
   if(botnicklen < 9) botnicklen = 9;
 
   if (conf.bot->hub) {
-    egg_snprintf(format, sizeof format, "%%-%us   %%-%us  %%s\n", nicklen, botnicklen);
+    simple_snprintf(format, sizeof format, "%%-%us   %%-%us  %%s\n", nicklen, botnicklen);
     dprintf(idx, format, " Nick", 	" Bot",      " Host");
     dprintf(idx, format, "----------",	"---------", "--------------------");
-    egg_snprintf(format, sizeof format, "%%c%%-%us %%c %%-%us  %%s%%s\n", nicklen, botnicklen);
+    simple_snprintf(format, sizeof format, "%%c%%-%us %%c %%-%us  %%s%%s\n", nicklen, botnicklen);
   } else {
-    egg_snprintf(format, sizeof format, "%%-%us\n", nicklen);
+    simple_snprintf(format, sizeof format, "%%-%us\n", nicklen);
     dprintf(idx, format, " Nick");
     dprintf(idx, format, "----------");
-    egg_snprintf(format, sizeof format, "%%c%%-%us %%c %%s\n", nicklen);
+    simple_snprintf(format, sizeof format, "%%c%%-%us %%c %%s\n", nicklen);
   }
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type && dcc[i].simul == -1 && dcc[i].type == &DCC_CHAT) {
@@ -480,11 +482,11 @@ void answer_local_whom(int idx, int chan)
 	  hrs = ((now - dcc[i].timeval) - (mydays * 86400)) / 3600;
 	  mins = ((now - dcc[i].timeval) - (hrs * 3600)) / 60;
 	  if (mydays > 0)
-	    sprintf(idle, " [idle %lud%luh]", mydays, hrs);
+	    simple_snprintf(idle, sizeof(idle), " [idle %lud%luh]", mydays, hrs);
 	  else if (hrs > 0)
-	    sprintf(idle, " [idle %luh%lum]", hrs, mins);
+	    simple_snprintf(idle, sizeof(idle), " [idle %luh%lum]", hrs, mins);
 	  else
-	    sprintf(idle, " [idle %lum]", mins);
+	    simple_snprintf(idle, sizeof(idle), " [idle %lum]", mins);
 	} else
 	  idle[0] = 0;
 
@@ -513,7 +515,7 @@ void answer_local_whom(int idx, int chan)
       if (c == '-')
 	c = ' ';
       if (party[i].timer == 0L)
-	strcpy(idle, " [idle?]");
+	strlcpy(idle, " [idle?]", sizeof(idle));
       else if (now - party[i].timer > 300) {
 	unsigned long mydays, hrs, mins;
 
@@ -521,11 +523,11 @@ void answer_local_whom(int idx, int chan)
 	hrs = ((now - party[i].timer) - (mydays * 86400)) / 3600;
 	mins = ((now - party[i].timer) - (hrs * 3600)) / 60;
 	if (mydays > 0)
-	  sprintf(idle, " [idle %lud%luh]", mydays, hrs);
+	  simple_snprintf(idle, sizeof(idle), " [idle %lud%luh]", mydays, hrs);
 	else if (hrs > 0)
-	  sprintf(idle, " [idle %luh%lum]", hrs, mins);
+	  simple_snprintf(idle, sizeof(idle), " [idle %luh%lum]", hrs, mins);
 	else
-	  sprintf(idle, " [idle %lum]", mins);
+	  simple_snprintf(idle, sizeof(idle), " [idle %lum]", mins);
       } else
 	idle[0] = 0;
       total++;
@@ -556,8 +558,8 @@ tell_bots(int idx, int up, const char *nodename)
     if (nodename)
       node = (char *) get_user(&USERENTRY_NODENAME, conf.bot->u);    
     if (!nodename || wild_match(nodename, node)) {
-      strcat(work, conf.bot->nick);
-      strcat(work, " ");
+      strlcat(work, conf.bot->nick, sizeof(work));
+      strlcat(work, " ", sizeof(work));
       cnt++;
       tot++;
       if (nodename)
@@ -578,8 +580,8 @@ tell_bots(int idx, int up, const char *nodename)
             node = (char *) get_user(&USERENTRY_NODENAME, u);
           if (!nodename || wild_match(nodename, node)) {
             if (nodename && !found)
-              strcat(work, "*");
-            strcat(work, u->handle);
+              strlcat(work, "*", sizeof(work));
+            strlcat(work, u->handle, sizeof(work));
             cnt++;
             if (nodename)
               mtot++;
@@ -590,7 +592,7 @@ tell_bots(int idx, int up, const char *nodename)
               work[0] = 0;
               cnt = 0;
             } else {
-              strcat(work, " ");
+              strlcat(work, " ", sizeof(work));
             }
           }
         }
@@ -626,7 +628,7 @@ void tell_bottree(int idx)
 	s[i++] = ',';
 	s[i++] = ' ';
       }
-      strcpy(s + i, bot->bot);
+      strlcpy(s + i, bot->bot, sizeof(s) - i);
       i += strlen(bot->bot);
     }
 
@@ -660,15 +662,15 @@ void tell_bottree(int idx)
       imark = 0;
       for (i = 0; i < lev; i++) {
 	if (mark[i])
-	  strcpy(work + imark, "  |  ");
+	  strlcpy(work + imark, "  |  ", sizeof(work) - imark);
 	else
-	  strcpy(work + imark, "     ");
+	  strlcpy(work + imark, "     ", sizeof(work) - imark);
 	imark += 5;
       }
       if (cnt > 1)
-	strcpy(work + imark, "  |-");
+	strlcpy(work + imark, "  |-", sizeof(work) - imark);
       else
-	strcpy(work + imark, "  `-");
+	strlcpy(work + imark, "  `-", sizeof(work) - imark);
       s[0] = 0;
       bot = tandbot;
       while (!s[0]) {
@@ -686,7 +688,7 @@ void tell_bottree(int idx)
             i = simple_snprintf(s, sizeof(s), "%c", bot->share);
           else
             i = simple_snprintf(s, sizeof(s), "-");
-          i = sprintf(s + 1, "%s%s%s (%s %d)", color_str ? color_str : "",
+          i = simple_snprintf(s + 1, sizeof(s) - 1, "%s%s%s (%s %d)", color_str ? color_str : "",
                                                 bot->bot,
                                                 color_str ? COLOR_END(idx) : "",
                                                 bot->version, bot->revision);
@@ -732,7 +734,7 @@ void tell_bottree(int idx)
                   i = simple_snprintf(s, sizeof(s), "%c", bot->share);
                 else
                   i = simple_snprintf(s, sizeof(s), "-");
-                i = sprintf(s + 1, "%s%s%s (%s %d)", color_str ? color_str : "",
+                i = simple_snprintf(s + 1, sizeof(s) - 1, "%s%s%s (%s %d)", color_str ? color_str : "",
                                                       bot->bot,
                                                       color_str ? COLOR_END(idx) : "",
                                                       bot->version, bot->revision);
@@ -744,9 +746,9 @@ void tell_bottree(int idx)
 	  imark = 0;
 	  for (i = 1; i < lev; i++) {
 	    if (mark[i - 1])
-	      strcpy(work + imark, "  |  ");
+	      strlcpy(work + imark, "  |  ", sizeof(work) - imark);
 	    else
-	      strcpy(work + imark, "     ");
+	      strlcpy(work + imark, "     ", sizeof(work) - imark);
 	    imark += 5;
 	  }
 	  more = 1;
@@ -1020,8 +1022,8 @@ int botlink(char *linker, int idx, char *nick)
       dcc[i].timeval = now;
       dcc[i].port = bi->telnet_port;
       dcc[i].user = u;
-      strcpy(dcc[i].nick, nick);
-      strcpy(dcc[i].host, bi->address);
+      strlcpy(dcc[i].nick, nick, NICKLEN);
+      strlcpy(dcc[i].host, bi->address, UHOSTLEN);
       dcc[i].u.dns->cptr = strdup(linker);
       dcc[i].u.dns->ibuf = idx;
       dcc[i].bot = 1;
@@ -1068,9 +1070,10 @@ static void botlink_dns_callback(int id, void *client_data, const char *host, ch
 
   changeover_dcc(i, &DCC_FORK_BOT, sizeof(struct bot_info));
   dcc[i].timeval = now;
-  strcpy(dcc[i].u.bot->version, "(primitive bot)");
-  strcpy(dcc[i].u.bot->sysname, "*");
-  strcpy(dcc[i].u.bot->linker, linker);
+  struct bot_info dummy;
+  strlcpy(dcc[i].u.bot->version, "(primitive bot)", sizeof(dummy.version));
+  strlcpy(dcc[i].u.bot->sysname, "*", 2);
+  strlcpy(dcc[i].u.bot->linker, linker, sizeof(dummy.linker));
   dcc[i].u.bot->numver = idx;
   free(linker);
 
@@ -1173,9 +1176,9 @@ void tandem_relay(int idx, char *nick, register int i)
 
   dcc[i].port = bi->relay_port;
   dcc[i].addr = 0L;
-  strcpy(dcc[i].nick, nick);
+  strlcpy(dcc[i].nick, nick, NICKLEN);
   dcc[i].user = u;
-  strcpy(dcc[i].host, bi->address);
+  strlcpy(dcc[i].host, bi->address, UHOSTLEN);
   if (conf.bot->hub) 
     dprintf(idx, "%s %s @ %s:%d ...\n", "Connecting to", nick, bi->address, bi->relay_port);
   dprintf(idx, "(Type *BYE* on a line by itself to abort.)\n");
@@ -1527,24 +1530,24 @@ static void dcc_relaying(int idx, char *buf, int j)
   lostdcc(j);
 }
 
-static void display_relay(int i, char *other)
+static void display_relay(int i, char *other, size_t bufsiz)
 {
-  simple_sprintf(other, "rela  -> sock %d", dcc[i].u.relay->sock);
+  simple_snprintf(other, bufsiz, "rela  -> sock %d", dcc[i].u.relay->sock);
 }
 
-static void display_relaying(int i, char *other)
+static void display_relaying(int i, char *other, size_t bufsiz)
 {
-  simple_sprintf(other, ">rly  -> sock %d", dcc[i].u.relay->sock);
+  simple_snprintf(other, bufsiz, ">rly  -> sock %d", dcc[i].u.relay->sock);
 }
 
-static void display_tandem_relay(int i, char *other)
+static void display_tandem_relay(int i, char *other, size_t bufsiz)
 {
-  strcpy(other, "other  rela");
+  strlcpy(other, "other  rela", bufsiz);
 }
 
-static void display_pre_relay(int i, char *other)
+static void display_pre_relay(int i, char *other, size_t bufsiz)
 {
-  strcpy(other, "other  >rly");
+  strlcpy(other, "other  >rly", bufsiz);
 }
 
 static void kill_relay(int idx, void *x)

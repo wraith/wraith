@@ -125,13 +125,13 @@ char *maskname(int x)
 	for (mapping = logmode_mappings; mapping->type; mapping++) {
 		if (x & mapping->flag) {
 			if ((mapping->flag & NEEDS_DEBUG_OUTPUT) && !debug_output) continue;
-			strcat(s, mapping->type);
-			strcat(s, ", ");
+			strlcat(s, mapping->type, sizeof(s));
+			strlcat(s, ", ", sizeof(s));
 		}
 	}
 	len = strlen(s);
 	if (len) s[len-2] = 0;
-	else strcpy(s, "none");
+	else strlcpy(s, "none", sizeof(s));
 	return(s);
 }
 

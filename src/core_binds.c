@@ -122,12 +122,12 @@ bool check_aliases(int idx, const char *cmd, const char *args)
         pass = newsplit(&argsdup);
         simple_snprintf(myargs, size, "%s", pass);
         if (a && a[0]) {
-          strcat(myargs, " ");
-          strcat(myargs, a);
+          strlcat(myargs, " ", size);
+          strlcat(myargs, a, size);
         }
         if (argsdup[0]) { /* was split */
-          strcat(myargs, " ");
-          strcat(myargs, argsdup);
+          strlcat(myargs, " ", size);
+          strlcat(myargs, argsdup, size);
         }
       } else {
         /* Otherwise, just construct it based on cmd and params if provided */
@@ -167,6 +167,7 @@ void real_check_bind_dcc(const char *cmd, int idx, const char *text, Auth *auth)
   bind_entry_t *entry = NULL;
   bind_table_t *table = NULL;
   char *args = strdup(text);
+  size_t args_siz = strlen(args) + 1;
 
   get_user_flagrec(dcc[idx].user, &fr, dcc[idx].u.chat->con_chan);
 
@@ -197,7 +198,7 @@ void real_check_bind_dcc(const char *cmd, int idx, const char *text, Auth *auth)
               strlcpy(work, args, sizeof(work));
               p = work;
               newsplit(&p);
-              strcpy(args, p);
+              strlcpy(args, p, args_siz);
             } else {
               dprintf(idx, "Invalid command password.\n");
               dprintf(idx, "Use: $b%scommand <password> [arguments]$b\n", (dcc[idx].u.chat->channel >= 0) ? settings.dcc_prefix : "");

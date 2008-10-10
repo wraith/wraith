@@ -19,7 +19,7 @@ struct dcc_table {
   void (*activity) (int, char *, int);
   interval_t *timeout_val;
   void (*timeout) (int);
-  void (*display) (int, char *);
+  void (*display) (int, char *, size_t);
   void (*kill) (int, void *);
   void (*output) (int, char *, void *);
   void (*outdone) (int);

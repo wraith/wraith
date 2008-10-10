@@ -1293,7 +1293,7 @@ static void cmd_find(int idx, char *par)
       for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
         char s[UHOSTLEN] = "";
 
-        sprintf(s, "%s!%s", m->nick, m->userhost);
+        simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
         if (!m->user && !m->tried_getuser) {
           m->user = get_user_by_host(s);
           if (!m->user && doresolv(chan) && m->userip[0]) {
@@ -1558,13 +1558,13 @@ static void cmd_channel(int idx, char *par)
         chanflag[0] = ' ';
 
       if (chan_issplit(m)) {
-        egg_snprintf(format, sizeof format, 
+        simple_snprintf(format, sizeof format, 
 			"%%c%%c%%-%us %%-%us %%s %%c     <- netsplit, %%lus\n", 
 			maxnicklen, maxhandlen);
 	dprintf(idx, format, chanflag[0],chanflag[1], m->nick, handle, s, atrflag,
 		now - (m->split));
       } else if (!rfc_casecmp(m->nick, botname)) {
-        egg_snprintf(format, sizeof format, 
+        simple_snprintf(format, sizeof format, 
 			"%%c%%c%%-%us %%-%us %%s %%c     <- it's me!\n", 
 			maxnicklen, maxhandlen);
 	dprintf(idx, format, chanflag[0], chanflag[1], m->nick, handle, s, atrflag);
@@ -1578,7 +1578,7 @@ static void cmd_channel(int idx, char *par)
 	  egg_snprintf(s1, sizeof s1, "%2dm", (int) ((now - (m->last)) / 60));
 	else
 	  strlcpy(s1, "   ", sizeof s1);
-	egg_snprintf(format, sizeof format, "%%c%%c%%-%us %%-%us %%s %%c   %%d %%s  %%s %%s\n", 
+	simple_snprintf(format, sizeof format, "%%c%%c%%-%us %%-%us %%s %%c   %%d %%s  %%s %%s\n", 
 			maxnicklen, maxhandlen);
 	dprintf(idx, format, chanflag[0], chanflag[1], m->nick,	handle, s, atrflag, m->hops,
                      s1, m->userhost, m->userip);

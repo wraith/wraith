@@ -132,13 +132,13 @@ static void update_ufsend(int idx, char *par)
       i = new_dcc(&DCC_FORK_SEND, sizeof(struct xfer_info));
       dcc[i].addr = my_atoul(ip);
       dcc[i].port = atoi(port);
-      strcpy(dcc[i].nick, "*binary");
+      strlcpy(dcc[i].nick, "*binary", NICKLEN);
       dcc[i].u.xfer->filename = strdup(s);
       dcc[i].u.xfer->origname = dcc[i].u.xfer->filename;
       dcc[i].u.xfer->length = atol(par);
       dcc[i].u.xfer->f = f;
       dcc[i].sock = sock;
-      strcpy(dcc[i].host, dcc[idx].nick);
+      strlcpy(dcc[i].host, dcc[idx].nick, UHOSTLEN);
 
       dcc[idx].status |= STAT_GETTINGU;
     }
@@ -342,7 +342,7 @@ static void start_sending_binary(int idx)
     bupdating = 0;
   } else {
     dcc[idx].status |= STAT_SENDINGU;
-    strcpy(dcc[j].host, dcc[idx].nick);		/* Store bot's nick */
+    strlcpy(dcc[j].host, dcc[idx].nick, UHOSTLEN);		/* Store bot's nick */
     dprintf(idx, "sb us %lu %hd %lu\n", iptolong(getmyip()), dcc[j].port, dcc[j].u.xfer->length);
   }
 }

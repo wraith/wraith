@@ -153,8 +153,8 @@ static char *getfullbinname(const char *argv_zero)
       if (p)
         *p = 0;
     } else if (strcmp(p, ".")) {
-      strcat(cwd, "/");
-      strcat(cwd, p);
+      strlcat(cwd, "/", sizeof(cwd));
+      strlcat(cwd, p, sizeof(cwd));
     }
     p = p2;
     if (p)
@@ -289,9 +289,7 @@ static void show_help() __attribute__((noreturn));
 
 static void show_help()
 {
-  char format[81] = "";
-
-  egg_snprintf(format, sizeof format, "%%-30s %%-30s\n");
+  const char format[] = "%-30s %-30s\n";
 
   printf(STR("%s\n\n"), version);
   printf(STR("%s [options] [botnick[.conf]]\n"));
@@ -790,7 +788,7 @@ printf("out: %s\n", out);
 
   /* Version info! */
   simple_snprintf(ver, sizeof ver, STR("[%s] Wraith %s"), settings.packname, egg_version);
-  egg_snprintf(version, sizeof version, STR("[%s] Wraith %s (%lu:%d)"), settings.packname, egg_version, buildts, revision);
+  simple_snprintf(version, sizeof version, STR("[%s] Wraith %s (%lu:%d)"), settings.packname, egg_version, buildts, revision);
 
   egg_memcpy(&nowtm, gmtime(&now), sizeof(struct tm));
   lastmin = nowtm.tm_min;
@@ -834,7 +832,7 @@ printf("out: %s\n", out);
   console_init();
   chanprog();
 
-  strcpy(botuser, conf.username ? conf.username : origbotname);
+  strlcpy(botuser, conf.username ? conf.username : origbotname, sizeof(botuser));
 
   if (!conf.bot->hub && conf.bot->localhub)
     sdprintf(STR("I am localhub (%s)"), conf.bot->nick);
@@ -909,8 +907,8 @@ printf("out: %s\n", out);
     dcc[n].u.chat->con_flags = conmask | LOG_ALL;
     dcc[n].u.chat->strip_flags = STRIP_ALL;
     dcc[n].status = STAT_ECHO;
-    strcpy(dcc[n].nick, STR("HQ"));
-    strcpy(dcc[n].host, STR("llama@console"));
+    strlcpy(dcc[n].nick, STR("HQ"), NICKLEN);
+    strlcpy(dcc[n].host, STR("llama@console"), UHOSTLEN);
     dcc[n].user = get_user_by_handle(userlist, dcc[n].nick);
     /* Make sure there's an innocuous HQ user if needed */
     if (!dcc[n].user) {
@@ -995,7 +993,7 @@ printf("out: %s\n", out);
 	      else
 		traffic.in_today.unknown += strlen(buf) + 1;
 	    }
-	    dcc[idx].type->activity(idx, buf, i);
+	    dcc[idx].type->activity(idx, buf, (size_t) i);
 	  } else
 	    putlog(LOG_MISC, "*",
 		   STR("!!! untrapped dcc activity: type %s, sock %d"),

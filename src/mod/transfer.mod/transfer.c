@@ -590,30 +590,29 @@ void tout_dcc_send(int idx)
   lostdcc(idx);
 }
 
-void display_dcc_get(int idx, char *buf)
+void display_dcc_get(int idx, char *buf, size_t bufsiz)
 {
   if (dcc[idx].status == dcc[idx].u.xfer->length)
-    sprintf(buf, "send  (%lu)/%lu\n    Filename: %s\n", dcc[idx].u.xfer->acked,
+    simple_snprintf(buf, bufsiz, "send  (%lu)/%lu\n    Filename: %s\n", dcc[idx].u.xfer->acked,
 	    dcc[idx].u.xfer->length, dcc[idx].u.xfer->origname);
   else
-    sprintf(buf,"send  (%lu)/%lu\n    Filename: %s\n", dcc[idx].status,
+    simple_snprintf(buf, bufsiz, "send  (%lu)/%lu\n    Filename: %s\n", dcc[idx].status,
 	    dcc[idx].u.xfer->length, dcc[idx].u.xfer->origname);
 }
 
-void display_dcc_get_p(int idx, char *buf)
+void display_dcc_get_p(int idx, char *buf, size_t bufsiz)
 {
-  simple_sprintf(buf,"send  waited %ds\n    Filename: %s\n", (int) (now - dcc[idx].timeval), dcc[idx].u.xfer->origname);
+  simple_snprintf(buf, bufsiz, "send  waited %ds\n    Filename: %s\n", (int) (now - dcc[idx].timeval), dcc[idx].u.xfer->origname);
 }
 
-void display_dcc_send(int idx, char *buf)
+void display_dcc_send(int idx, char *buf, size_t bufsiz)
 {
-  sprintf(buf,"send  (%lu)/%lu\n    Filename: %s\n", dcc[idx].status,
-	  dcc[idx].u.xfer->length, dcc[idx].u.xfer->origname);
+  simple_snprintf(buf, bufsiz, "send  (%lu)/%lu\n    Filename: %s\n", dcc[idx].status, dcc[idx].u.xfer->length, dcc[idx].u.xfer->origname);
 }
 
-void display_dcc_fork_send(int idx, char *buf)
+void display_dcc_fork_send(int idx, char *buf, size_t bufsiz)
 {
-  simple_sprintf(buf, "conn  send");
+  simple_snprintf(buf, bufsiz, "conn  send");
 }
 
 void kill_dcc_xfer(int idx, void *x)
@@ -838,13 +837,10 @@ static int raw_dcc_resend_send(char *filename, char *nick, char *from, int resen
   dcc[i].sock = zz;
   dcc[i].addr = (in_addr_t) (-559026163);
   dcc[i].port = port;
-  strcpy(dcc[i].nick, nick);
-  strcpy(dcc[i].host, "irc");
-  dcc[i].u.xfer->filename = (char *) my_calloc(1, strlen(filename) + 1);
-  strcpy(dcc[i].u.xfer->filename, filename);
-
-  dcc[i].u.xfer->origname = (char *) my_calloc(1, strlen(filename) + 1);
-  strcpy(dcc[i].u.xfer->origname, filename);
+  strlcpy(dcc[i].nick, nick, NICKLEN);
+  strlcpy(dcc[i].host, "irc", 4);
+  dcc[i].u.xfer->filename = strdup(filename);
+  dcc[i].u.xfer->origname = strdup(filename);
   strlcpy(dcc[i].u.xfer->from, from, NICKLEN);
   dcc[i].u.xfer->length = dccfilesize;
   dcc[i].timeval = now;

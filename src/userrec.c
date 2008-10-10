@@ -144,7 +144,7 @@ void correct_handle(char *handle)
 
   if (u == NULL || handle == u->handle)
     return;
-  strcpy(handle, u->handle);
+  strlcpy(handle, u->handle, HANDLEN + 1);
 }
 
 /* This will be usefull in a lot of places, much more code re-use so we
@@ -476,14 +476,14 @@ int write_userfile(int idx)
   simple_snprintf(new_userfile, siz, "%s~new", userfile);
 
   f = fopen(new_userfile, "w");
-  fixmod(new_userfile);
   if (f == NULL) {
     putlog(LOG_MISC, "*", "ERROR writing user file.");
     free(new_userfile);
     return 2;
   }
+  fchmod(fileno(f), S_IRUSR | S_IWUSR);
 
-  char s1[81] = "", backup[DIRMAX] = "";
+  char backup[DIRMAX] = "";
   bool ok = 1;
 
   if (idx >= 0)
@@ -493,8 +493,7 @@ int write_userfile(int idx)
 
   time_t tt = now;
 
-  strcpy(s1, ctime(&tt));
-  lfprintf(f, "#4v: %s -- %s -- written %s", ver, conf.bot->nick, s1);
+  lfprintf(f, "#4v: %s -- %s -- written %s", ver, conf.bot->nick, ctime(&tt));
   fclose(f);
 
 

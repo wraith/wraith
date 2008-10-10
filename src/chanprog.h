@@ -31,7 +31,7 @@ bool is_hub(const char*);
 void load_internal_users();
 
 extern struct chanset_t		*chanset;
-extern char			admin[], origbotnick[NICKLEN + 1], origbotname[NICKLEN + 1], jupenick[NICKLEN], botname[];
+extern char			admin[], origbotnick[NICKLEN + 1], origbotname[NICKLEN + 1], jupenick[NICKLEN], botname[NICKLEN + 1];
 extern port_t			my_port;
 extern bool			reset_chans;
 

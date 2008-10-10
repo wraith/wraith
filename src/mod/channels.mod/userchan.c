@@ -309,7 +309,7 @@ int u_delmask(char type, struct chanset_t *c, char *who, int doit)
  */
 bool u_addmask(char type, struct chanset_t *chan, char *who, char *from, char *note, time_t expire_time, int flags)
 {
-  char host[1024] = "", s[1024] = "";
+  char host[UHOSTLEN] = "", s[UHOSTLEN] = "";
   maskrec *p = NULL, *l = NULL, **u = NULL;
 
   if (type == 'b')
@@ -319,19 +319,19 @@ bool u_addmask(char type, struct chanset_t *chan, char *who, char *from, char *n
   else if (type == 'I')
     u = chan ? &chan->invites : &global_invites;
 
-  strcpy(host, who);
+  strlcpy(host, who, sizeof(host));
   /* Choke check: fix broken bans (must have '!' and '@') */
   if ((strchr(host, '!') == NULL) && (strchr(host, '@') == NULL))
-    strcat(host, "!*@*");
+    strlcat(host, "!*@*", sizeof(host));
   else if (strchr(host, '@') == NULL)
-    strcat(host, "@*");
+    strlcat(host, "@*", sizeof(host));
   else if (strchr(host, '!') == NULL) {
     char *i = strchr(host, '@');
 
-    strcpy(s, i);
+    strlcpy(s, i, sizeof(s));
     *i = 0;
-    strcat(host, "!*");
-    strcat(host, s);
+    strlcat(host, "!*", sizeof(host));
+    strlcat(host, s, sizeof(host));
   }
     if (conf.bot->hub)
       simple_snprintf(s, sizeof(s), "%s!%s@%s", origbotname, botuser, conf.bot->net.host);
@@ -406,27 +406,27 @@ static void display_mask(const char type, int idx, int number, maskrec *mask, st
   const char *str_type = (type == 'b' ? "BAN" : type == 'e' ? "EXEMPT" : "INVITE");
 
   if (mask->added) {
-    daysago(now, mask->added, s);
+    daysago(now, mask->added, s, sizeof(s));
     simple_snprintf(dates, sizeof(dates), "Created %s", s);
     if (mask->added < mask->lastactive) {
-      strcat(dates, ", ");
-      strcat(dates, "last used");
-      strcat(dates, " ");
-      daysago(now, mask->lastactive, s);
-      strcat(dates, s);
+      strlcat(dates, ", ", sizeof(dates));
+      strlcat(dates, "last used", sizeof(dates));
+      strlcat(dates, " ", sizeof(dates));
+      daysago(now, mask->lastactive, s, sizeof(s));
+      strlcat(dates, s, sizeof(dates));
     }
   } else
     dates[0] = 0;
   if (mask->flags & MASKREC_PERM)
-    strcpy(s, "(perm)");
+    strlcpy(s, "(perm)", sizeof(s));
   else {
     char s1[41] = "";
 
-    days(mask->expire, now, s1);
+    days(mask->expire, now, s1, sizeof(s1));
     simple_snprintf(s, sizeof(s), "(expires %s)", s1);
   }
   if (mask->flags & MASKREC_STICKY)
-    strcat(s, " (sticky)");
+    strlcat(s, " (sticky)", sizeof(s));
 
   /* always show mask on hubs */
   if (!chan || ischanmask(type, chan, mask->mask) || conf.bot->hub) {
@@ -533,7 +533,7 @@ static void tell_masks(const char type, int idx, bool show_inact, char *match, b
       for (ml = channel_list; ml && ml->mask[0]; ml = ml->next) {    
 	if ((!u_equals_mask(global_masks, ml->mask)) &&
 	    (!u_equals_mask(chan_masks, ml->mask))) {
-	  strcpy(s, ml->who);
+	  strlcpy(s, ml->who, sizeof(s));
 	  s2 = s;
 	  s1 = splitnick(&s2);
 	  if (s1[0])
@@ -543,8 +543,8 @@ static void tell_masks(const char type, int idx, bool show_inact, char *match, b
 	  if (ml->timer != 0) {
 	    min = (now - ml->timer) / 60;
 	    sec = (now - ml->timer) - (min * 60);
-	    sprintf(s, " (active %02d:%02d)", min, sec);
-	    strcat(fill, s);
+	    egg_snprintf(s, sizeof(s), " (active %02d:%02d)", min, sec);
+	    strlcat(fill, s, sizeof(fill));
 	  }
 	  if ((!match[0]) || (wild_match(match, ml->mask)))
 	    dprintf(idx, "* [%3d] %s\n", k, fill);
@@ -931,7 +931,7 @@ void channels_writeuserfile(bool old)
   int  ret = 0;
 
   putlog(LOG_DEBUG, "@", "Writing channel/ban/exempt/invite entries.");
-  simple_sprintf(s, "%s~new", userfile);
+  simple_snprintf(s, sizeof(s), "%s~new", userfile);
   f = fopen(s, "a");
   if (f) {
     if (!old)
@@ -964,7 +964,7 @@ bool expired_mask(struct chanset_t *chan, char *who)
   char buf[UHOSTLEN] = "", *snick = NULL, *sfrom = NULL;
   struct userrec *u = NULL;
 
-  strcpy(buf, who);
+  strlcpy(buf, who, sizeof(buf));
   sfrom = buf;
   snick = splitnick(&sfrom);
 

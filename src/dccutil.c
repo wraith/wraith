@@ -194,7 +194,7 @@ colorbuf(char *buf, size_t len, int idx)
     simple_snprintf(buf3, sizeof(buf3), "%s%s", buf3[0] ? buf3 : "", buf2[0] ? buf2 : "");
   }
   buf3[strlen(buf3)] = 0;
-  strcpy(buf, buf3);
+  strlcpy(buf, buf3, 1024);
 }
 
 /* Dump a potentially super-long string of text.
@@ -317,7 +317,7 @@ dprintf(int idx, const char *format, ...)
 
     if (len > 1000) {           /* Truncate to fit */
       buf[1000] = 0;
-      strcat(buf, "\n");
+      strlcat(buf, "\n", sizeof(buf));
       len = 1001;
     }
     if (dcc[idx].simul >= 0 && !dcc[idx].irc) {
@@ -396,7 +396,8 @@ dcc_chatter(int idx)
     dprintf(idx, "You don't have partyline chat access; commands only.\n\n");
   } 
 
-  strcpy(dcc[idx].u.chat->con_chan, "***");
+  struct chat_info dummy;
+  strlcpy(dcc[idx].u.chat->con_chan, "***", sizeof(dummy.con_chan));
   check_bind_chon(dcc[idx].nick, idx);
 
   dprintf(idx, "Connected to %s, running %s\n", conf.bot->nick, version);
@@ -424,7 +425,7 @@ dcc_chatter(int idx)
 
   if (dcc[idx].type == &DCC_CHAT) {
     if (!strcmp(dcc[idx].u.chat->con_chan, "***"))
-      strcpy(dcc[idx].u.chat->con_chan, "*");
+      strlcpy(dcc[idx].u.chat->con_chan, "*", sizeof(dummy.con_chan));
 
     if (dcc[idx].u.chat->channel == -2)
       dcc[idx].u.chat->channel = 0;
@@ -585,12 +586,12 @@ tell_dcc(int idx)
   if (nicklen < 9)
     nicklen = 9;
 
-  egg_snprintf(format, sizeof format, "%%-4s %%-4s %%-8s %%-5s %%-%us %%-40s %%s\n", nicklen);
+  simple_snprintf(format, sizeof format, "%%-4s %%-4s %%-8s %%-5s %%-%us %%-40s %%s\n", nicklen);
   dprintf(idx, format, "SOCK", "IDX", "ADDR", "PORT", "NICK", "HOST", "TYPE");
   dprintf(idx, format, "----", "---", "--------", "-----", "---------",
           "----------------------------------------", "----");
 
-  egg_snprintf(format, sizeof format, "%%-4d %%-4d %%08X %%5u %%-%us %%-40s %%s\n", nicklen);
+  simple_snprintf(format, sizeof format, "%%-4d %%-4d %%08X %%5u %%-%us %%-40s %%s\n", nicklen);
 
   dprintf(idx, "dccn: %d, dcc_total: %d\n", dccn, dcc_total);
   dprintf(idx, "dns_idx: %d, servidx: %d\n", dns_idx, servidx);
@@ -602,9 +603,9 @@ tell_dcc(int idx)
       else
         j = 0;
       if (dcc[i].type && dcc[i].type->display)
-        dcc[i].type->display(i, other);
+        dcc[i].type->display(i, other, sizeof(other));
       else {
-        sprintf(other, "?:%lX  !! ERROR !!", (long) dcc[i].type);
+        simple_snprintf(other, sizeof(other), "?:%lX  !! ERROR !!", (long) dcc[i].type);
         break;
       }
       dprintf(idx, format, dcc[i].sock, i, dcc[i].addr, dcc[i].port, dcc[i].nick, dcc[i].host + j, other);
@@ -806,7 +807,7 @@ do_boot(int idx, const char *by, const char *reason)
 
   if (dcc[idx].u.chat->su_nick) {
     dcc[idx].user = get_user_by_handle(userlist, dcc[idx].u.chat->su_nick);
-    strcpy(dcc[idx].nick, dcc[idx].u.chat->su_nick);
+    strlcpy(dcc[idx].nick, dcc[idx].u.chat->su_nick, NICKLEN);
     dcc[idx].type = &DCC_CHAT;
     dprintf(idx, "Returning to real nick %s!\n", dcc[idx].u.chat->su_nick);
     free(dcc[idx].u.chat->su_nick);
@@ -888,12 +889,12 @@ listen_all(port_t lport, bool off)
         /* now setup ipv4/ipv6 listening port */
         idx = new_dcc(&DCC_TELNET, 0);
         dcc[idx].addr = 0L;
-        strcpy(dcc[idx].host6, myipstr(AF_INET6));
+        strlcpy(dcc[idx].host6, myipstr(AF_INET6), sizeof(dcc[idx].host6));
         dcc[idx].port = port;
         dcc[idx].sock = i6;
         dcc[idx].timeval = now;
-        strcpy(dcc[idx].nick, "(telnet6)");
-        strcpy(dcc[idx].host, "*");
+        strlcpy(dcc[idx].nick, "(telnet6)", NICKLEN);
+        strlcpy(dcc[idx].host, "*", UHOSTLEN);
         putlog(LOG_DEBUG, "*", "Listening on IPv6 at telnet port %d", port);
       }
       i = open_listen_by_af(&port, AF_INET);
@@ -913,8 +914,8 @@ listen_all(port_t lport, bool off)
         dcc[idx].port = port;
         dcc[idx].sock = i;
         dcc[idx].timeval = now;
-        strcpy(dcc[idx].nick, "(telnet)");
-        strcpy(dcc[idx].host, "*");
+        strlcpy(dcc[idx].nick, "(telnet)", NICKLEN);
+        strlcpy(dcc[idx].host, "*", UHOSTLEN);
         putlog(LOG_DEBUG, "*", "Listening on IPv4 at telnet port %d", port);
       }
 #ifdef USE_IPV6
@@ -970,8 +971,8 @@ identd_open(const char *sourceIp, const char *destIp)
       dcc[idx].port = port;
       dcc[idx].sock = i;
       dcc[idx].timeval = now;
-      strcpy(dcc[idx].nick, "(identd)");
-      strcpy(dcc[idx].host, "*");
+      strlcpy(dcc[idx].nick, "(identd)", NICKLEN);
+      strlcpy(dcc[idx].host, "*", UHOSTLEN);
       putlog(LOG_DEBUG, "*", "Identd daemon started.");
       howlong.sec = 15;
       howlong.usec = 0;
@@ -1096,7 +1097,7 @@ void set_cmd_pass(char *ln, int shareit)
   if (cp)
     if (ln[0]) {
       /* change */
-      strcpy(cp->pass, ln);
+      strlcpy(cp->pass, ln, sizeof(cp->pass));
       if (shareit)
         botnet_send_cmdpass(-1, cp->name, cp->pass);
     } else {
@@ -1120,7 +1121,7 @@ void set_cmd_pass(char *ln, int shareit)
     cp->next = cmdpass;
     cmdpass = cp;
     cp->name = strdup(cmd);
-    strcpy(cp->pass, ln);
+    strlcpy(cp->pass, ln, sizeof(cp->pass));
     if (shareit)
       botnet_send_cmdpass(-1, cp->name, cp->pass);
   }

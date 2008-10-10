@@ -484,7 +484,7 @@ void stats_add(struct userrec *u, int islogin, int op)
   if (s) {
     strlcpy(s2, s, sizeof(s2));
   } else
-    strcpy(s2, "0 0");
+    strlcpy(s2, "0 0", sizeof(s2));
   s = strchr(s2, ' ');
   if (s) {
     s++;
@@ -771,7 +771,7 @@ static bool botaddr_unpack(struct userrec *u, struct user_entry *e)
   /* address:port/port:hublevel:uplink */
   Context;
 
-  strcpy(p, e->u.list->extra);
+  strlcpy(p, e->u.list->extra, sizeof(p));
   q1 = strchr(p, ':');
   if (q1)
     *q1++ = 0;
@@ -938,10 +938,10 @@ static void hosts_display(int idx, struct user_entry *e, struct userrec *u)
     char s[1024] = "";
     struct list_type *q = NULL;
 
-    strcpy(s, "  HOSTS: ");
+    strlcpy(s, "  HOSTS: ", sizeof(s));
     for (q = e->u.list; q; q = q->next) {
       if (s[0] && !s[9])
-        strcat(s, q->extra);
+        strlcat(s, q->extra, sizeof(s));
       else if (!s[0])
         simple_snprintf(s, sizeof(s), "         %s", q->extra);
       else {
@@ -949,8 +949,8 @@ static void hosts_display(int idx, struct user_entry *e, struct userrec *u)
   	  dprintf(idx, "%s\n", s);
   	  simple_snprintf(s, sizeof(s), "         %s", q->extra);
         } else {
-  	  strcat(s, ", ");
-  	  strcat(s, q->extra);
+  	  strlcat(s, ", ", sizeof(s));
+  	  strlcat(s, q->extra, sizeof(s));
         }
       }
     }

@@ -132,9 +132,9 @@ interval_t async_server_timeout = 40;
 //int resend_on_read = 0;
 
 static void 
-dns_display(int idx, char *buf)
+dns_display(int idx, char *buf, size_t bufsiz)
 {
-  simple_sprintf(buf, "named   waited %ds", (int) (now - dcc[idx].timeval));
+  simple_snprintf(buf, bufsiz, "named   waited %ds", (int) (now - dcc[idx].timeval));
 }
 
 static void
@@ -190,9 +190,9 @@ static void eof_dcc_dnswait(int idx)
   lostdcc(idx);
 }
 
-static void display_dcc_dnswait(int idx, char *buf)
+static void display_dcc_dnswait(int idx, char *buf, size_t bufsiz)
 {
-  simple_sprintf(buf, "dns   waited %ds", (int) (now - dcc[idx].timeval));
+  simple_snprintf(buf, bufsiz, "dns   waited %ds", (int) (now - dcc[idx].timeval));
 }
 
 static void kill_dcc_dnswait(int idx, void *x)
@@ -297,8 +297,8 @@ static int get_dns_idx()
           dcc[dns_idx].sock = sock;
           dns_sock = sock;
           sdprintf("dns_sock: %d", dcc[dns_idx].sock);
-          strcpy(dcc[dns_idx].host, dns_ip);
-          strcpy(dcc[dns_idx].nick, "(adns)");
+          strlcpy(dcc[dns_idx].host, dns_ip, UHOSTLEN);
+          strlcpy(dcc[dns_idx].nick, "(adns)", NICKLEN);
           sdprintf("dns_ip: %s", dns_ip);
           dcc[dns_idx].timeval = now;
           dns_handler.timeout_val = 0;
@@ -508,16 +508,18 @@ int egg_dns_reverse(const char *ip, interval_t timeout, dns_callback_t callback,
 
 		socket_ipv6_to_dots(ip, temp);
 sdprintf("dots: %s", temp);
-		q->ip = (char *) my_calloc(1, strlen(temp) + 9 + 1);
+		size_t iplen = strlen(temp) + 9 + 1;
+		q->ip = (char *) my_calloc(1, iplen);
 //		reverse_ip(temp, q->ip);
-		strcat(q->ip, temp);
-		strcat(q->ip, "ip6.arpa");
+		strlcat(q->ip, temp, iplen);
+		strlcat(q->ip, "ip6.arpa", iplen);
 sdprintf("reversed ipv6 ip: %s", q->ip);
 	}
 	else {
-		q->ip = (char *) my_calloc(1, strlen(ip) + 13 + 1);
+		size_t iplen = strlen(ip) + 13 + 1;
+		q->ip = (char *) my_calloc(1, iplen);
 		reverse_ip(ip, q->ip);
-		strcat(q->ip, ".in-addr.arpa");
+		strlcat(q->ip, ".in-addr.arpa", iplen);
 	}
 
         dns_send_query(q);
@@ -895,12 +897,12 @@ static int parse_reply(char *response, size_t nbytes)
 
 		switch (reply.type) {
 		case DNS_A:
-			inet_ntop(AF_INET, ptr, result, 512);
+			egg_inet_ntop(AF_INET, ptr, result, 512);
 			answer_add(&q->answer, result);
 			break;
 		case DNS_AAAA:
 #ifdef USE_IPV6
-			inet_ntop(AF_INET6, ptr, result, 512);
+			egg_inet_ntop(AF_INET6, ptr, result, 512);
 			answer_add(&q->answer, result);
 #endif /* USE_IPV6 */
 			break;

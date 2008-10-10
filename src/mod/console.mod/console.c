@@ -179,11 +179,12 @@ console_gotshare(struct userrec *u, struct user_entry *e, char *par, int idx)
   ci->whom = atoi(arg);
 
   e->u.extra = ci;
+  struct chat_info dummy;
   /* now let's propogate to the dcc list */
   for (int i = 0; i < dcc_total; i++) {
     if (dcc[i].type && (dcc[i].type == &DCC_CHAT) && !strcmp(dcc[i].user->handle, u->handle)) {
       if (ci->channel && ci->channel[0])
-        strcpy(dcc[i].u.chat->con_chan, ci->channel);
+        strlcpy(dcc[i].u.chat->con_chan, ci->channel, sizeof(dummy.con_chan));
       dcc[i].u.chat->con_flags = ci->conflags;
       dcc[i].u.chat->strip_flags = ci->stripflags;
       if (ci->echoflags)
@@ -260,8 +261,10 @@ console_chon(char *handle, int idx)
     struct console_info *i = (struct console_info *) get_user(&USERENTRY_CONSOLE, dcc[idx].user);
 
     if (i) {
-      if (i->channel && i->channel[0])
-        strcpy(dcc[idx].u.chat->con_chan, i->channel);
+      if (i->channel && i->channel[0]) {
+        struct chat_info dummy;
+        strlcpy(dcc[idx].u.chat->con_chan, i->channel, sizeof(dummy.con_chan));
+      }
       dcc[idx].u.chat->con_flags = i->conflags;
       dcc[idx].u.chat->strip_flags = i->stripflags;
       if (i->echoflags)

@@ -105,20 +105,19 @@ static void tell_who(int idx, int chan)
     if (dcc[i].type && dcc[i].type == &DCC_CHAT)
       if (dcc[i].u.chat->channel == chan) {
 	if (atr & USER_OWNER) {
-	  egg_snprintf(format, sizeof format, "  [%%.2li]  %%c%%-%us %%s", nicklen);
-	  sprintf(s, format,
+	  simple_snprintf(format, sizeof format, "  [%%.2li]  %%c%%-%us %%s", nicklen);
+	  egg_snprintf(s, sizeof(s), format,
 		  dcc[i].sock, (geticon(i) == '-' ? ' ' : geticon(i)),
 		  dcc[i].nick, dcc[i].host);
 	} else {
-	  egg_snprintf(format, sizeof format, "  %%c%%-%us %%s", nicklen);
-	  sprintf(s, format,
+	  simple_snprintf(format, sizeof format, "  %%c%%-%us %%s", nicklen);
+	  egg_snprintf(s, sizeof(s), format,
 		  (geticon(i) == '-' ? ' ' : geticon(i)),
 		  dcc[i].nick, dcc[i].host);
 	}
 	if (atr & USER_MASTER) {
 	  if (dcc[i].u.chat->con_flags)
-	    sprintf(&s[strlen(s)], " (con:%s)",
-		    masktype(dcc[i].u.chat->con_flags));
+	    simple_sprintf(&s[strlen(s)], " (con:%s)", masktype(dcc[i].u.chat->con_flags));
 	}
 	if (now - dcc[i].timeval > 300) {
 	  unsigned long mydays, hrs, mins;
@@ -127,11 +126,11 @@ static void tell_who(int idx, int chan)
 	  hrs = ((now - dcc[i].timeval) - (mydays * 86400)) / 3600;
 	  mins = ((now - dcc[i].timeval) - (hrs * 3600)) / 60;
 	  if (mydays > 0)
-	    sprintf(&s[strlen(s)], " (idle %lud%luh)", mydays, hrs);
+	    simple_sprintf(&s[strlen(s)], " (idle %lud%luh)", mydays, hrs);
 	  else if (hrs > 0)
-	    sprintf(&s[strlen(s)], " (idle %luh%lum)", hrs, mins);
+	    simple_sprintf(&s[strlen(s)], " (idle %luh%lum)", hrs, mins);
 	  else
-	    sprintf(&s[strlen(s)], " (idle %lum)", mins);
+	    simple_sprintf(&s[strlen(s)], " (idle %lum)", mins);
 	}
 	dprintf(idx, "%s\n", s);
 	if (dcc[i].u.chat->away != NULL)
@@ -146,14 +145,14 @@ static void tell_who(int idx, int chan)
       egg_strftime(s, 20, "%d %b %H:%M %Z", gmtime(&dcc[i].timeval));
       s[20] = 0;
       if (atr & USER_OWNER) {
-        egg_snprintf(format, sizeof format, "  [%%.2lu]  %%s%%c%%-%us (%%s) %%s\n", 
+        simple_snprintf(format, sizeof format, "  [%%.2lu]  %%s%%c%%-%us (%%s) %%s\n", 
 			    nicklen);
 	dprintf(idx, format,
 		dcc[i].sock, dcc[i].status & STAT_CALLED ? "<-" : "->",
 		dcc[i].status & STAT_SHARE ? '+' : ' ',
 		dcc[i].nick, s, dcc[i].u.bot->version);
       } else {
-        egg_snprintf(format, sizeof format, "  %%s%%c%%-%us (%%s) %%s\n", nicklen);
+        simple_snprintf(format, sizeof format, "  %%s%%c%%-%us (%%s) %%s\n", nicklen);
 	dprintf(idx, format,
 		dcc[i].status & STAT_CALLED ? "<-" : "->",
 		dcc[i].status & STAT_SHARE ? '+' : ' ',
@@ -169,34 +168,33 @@ static void tell_who(int idx, int chan)
 	dprintf(idx, "Other people on the bot:\n");
       }
       if (atr & USER_OWNER) {
-	egg_snprintf(format, sizeof format, "  [%%.2lu]  %%c%%-%us ", nicklen);
-	sprintf(s, format, dcc[i].sock,
+	simple_snprintf(format, sizeof format, "  [%%.2lu]  %%c%%-%us ", nicklen);
+	egg_snprintf(s, sizeof(s), format, dcc[i].sock,
 		(geticon(i) == '-' ? ' ' : geticon(i)), dcc[i].nick);
       } else {
-	egg_snprintf(format, sizeof format, "  %%c%%-%us ", nicklen);
-	sprintf(s, format,
+	simple_snprintf(format, sizeof format, "  %%c%%-%us ", nicklen);
+	egg_snprintf(s, sizeof(s), format,
 		(geticon(i) == '-' ? ' ' : geticon(i)), dcc[i].nick);
       }
       if (atr & USER_MASTER) {
 	if (dcc[i].u.chat->channel < 0)
-	  strcat(s, "(-OFF-) ");
+	  strlcat(s, "(-OFF-) ", sizeof(s));
 	else if (!dcc[i].u.chat->channel)
-	  strcat(s, "(party) ");
+	  strlcat(s, "(party) ", sizeof(s));
 	else
 	  sprintf(&s[strlen(s)], "(%5d) ", dcc[i].u.chat->channel);
       }
-      strcat(s, dcc[i].host);
+      strlcat(s, dcc[i].host, sizeof(s));
       if (atr & USER_MASTER) {
 	if (dcc[i].u.chat->con_flags)
-	  sprintf(&s[strlen(s)], " (con:%s)",
-		  masktype(dcc[i].u.chat->con_flags));
+	  simple_sprintf(&s[strlen(s)], " (con:%s)", masktype(dcc[i].u.chat->con_flags));
       }
       if (now - dcc[i].timeval > 300) {
 	k = (now - dcc[i].timeval) / 60;
 	if (k < 60)
-	  sprintf(&s[strlen(s)], " (idle %dm)", k);
+	  simple_sprintf(&s[strlen(s)], " (idle %dm)", k);
 	else
-	  sprintf(&s[strlen(s)], " (idle %dh%dm)", k / 60, k % 60);
+	  simple_sprintf(&s[strlen(s)], " (idle %dh%dm)", k / 60, k % 60);
       }
       dprintf(idx, "%s\n", s);
       if (dcc[i].u.chat->away != NULL)
@@ -370,7 +368,7 @@ static void cmd_motd(int idx, char *par)
     size = strlen(par) + 1 + strlen(dcc[idx].nick) + 10 + 1 + 1;
     s = (char *) my_calloc(1, size); /* +2: ' 'x2 */
 
-    egg_snprintf(s, size, "%s %li %s", dcc[idx].nick, (long)now, par);
+    simple_snprintf(s, size, "%s %li %s", dcc[idx].nick, (long)now, par);
     var_set_by_name(NULL, "motd", s);
     free(s);
     dprintf(idx, "Motd set\n");
@@ -445,18 +443,18 @@ static void cmd_addline(int idx, char *par)
   }
 
   struct list_type *q = (struct list_type *) get_user(&USERENTRY_HOSTS, u);
-  char *hostbuf = NULL, *outbuf = NULL;
-  size_t siz = 0;
+  char *hostbuf = (char *) my_calloc(1, 1);
+  size_t siz = 1;
   
-  hostbuf = (char *) my_calloc(1, 1);
   for (; q; q = q->next) {
-    hostbuf = (char *) my_realloc(hostbuf, strlen(hostbuf) + strlen(q->extra) + 2);
-    strcat(hostbuf, q->extra);
-    strcat(hostbuf, " ");
+    siz = strlen(hostbuf) + strlen(q->extra) + 2;
+    hostbuf = (char *) my_realloc(hostbuf, siz);
+    strlcat(hostbuf, q->extra, siz);
+    strlcat(hostbuf, " ", siz);
   }
   siz = strlen(hostbuf) + strlen(u->handle) + 19 + 1;
 
-  outbuf = (char *) my_calloc(1, siz);
+  char *outbuf = (char *) my_calloc(1, siz);
   simple_snprintf(outbuf, siz, "Addline: +user %s %s", u->handle, hostbuf);
   dumplots(idx, "", outbuf);
   free(hostbuf);
@@ -576,14 +574,16 @@ static int my_cmp(const mycmds *c1, const mycmds *c2)
 static void cmd_nohelp(int idx, char *par)
 {
   char *buf = (char *) my_calloc(1, 1);
+  size_t siz = 1;
   bind_entry_t *entry = NULL;
   bind_table_t *table = bind_table_lookup("dcc");
 
   for (entry = table->entries; entry; entry = entry->next) {
     if (findhelp(entry->mask) == NULL) {
-      buf = (char *) my_realloc(buf, strlen(buf) + 2 + strlen(entry->mask) + 1);
-      strcat(buf, entry->mask);
-      strcat(buf, ", ");
+      siz = strlen(buf) + 2 + strlen(entry->mask) + 1;
+      buf = (char *) my_realloc(buf, siz);
+      strlcat(buf, entry->mask, siz);
+      strlcat(buf, ", ", siz);
     }
   }
   buf[strlen(buf) - 1] = 0;
@@ -688,6 +688,7 @@ static void cmd_help(int idx, char *par)
             /* we dumped the buf to dprintf, now start a new one... */
             simple_snprintf(buf, sizeof(buf), "  ");
           }
+          //This overlaps, behavior undefined with snprintf.
           sprintf(buf, "%s%-14.14s", buf[0] ? buf : "", cmdlist[n].name);
           first = 0;
           end = 0;
@@ -821,7 +822,7 @@ static void cmd_uptime(int idx, char *par)
   tell_verbose_uptime(idx);
 }
 
-static void print_users(char *work, int idx, int *cnt, int *tt, int bot, int flags, int notflags, const char *str)
+static void print_users(char *work, int idx, int *cnt, int *tt, int bot, int flags, int notflags, const char *str, size_t worksiz)
 {
   struct userrec *u = NULL;
 
@@ -832,11 +833,11 @@ static void print_users(char *work, int idx, int *cnt, int *tt, int bot, int fla
          ((!notflags) || !(u->flags & notflags)) &&
           (!bot || (bot == 2 && bot_hublevel(u) < 999) || (bot == 1 && bot_hublevel(u) == 999))) {
       if (!*cnt)
-        sprintf(work, "%-11s: ", str); 
+        egg_snprintf(work, worksiz, "%-11s: ", str);
       else
-        simple_sprintf(work, "%s, ", work[0] ? work : "");
+        simple_snprintf(work, worksiz, "%s, ", work[0] ? work : "");
 
-      strcat(work, u->handle);
+      strlcat(work, u->handle, worksiz);
       (*cnt)++;
       (*tt)++;
       if (*cnt == 11) {
@@ -853,7 +854,7 @@ static void print_users(char *work, int idx, int *cnt, int *tt, int bot, int fla
   *cnt = 0;
 }
 
-#define PRINT_USERS(bot, flags, notflags, str)	print_users(work, idx, &cnt, &tt, bot, flags, notflags, str)
+#define PRINT_USERS(bot, flags, notflags, str)	print_users(work, idx, &cnt, &tt, bot, flags, notflags, str, sizeof(work))
 
 static void cmd_userlist(int idx, char *par)
 {
@@ -1000,7 +1001,7 @@ static void cmd_console(int idx, char *par)
   struct chanset_t *chan = NULL;
 
   get_user_flagrec(dcc[idx].user, &fr, dcc[idx].u.chat->con_chan);
-  strcpy(s1, par);
+  strlcpy(s1, par, sizeof(s1));
   nick = newsplit(&par);
   /* Don't remove '+' as someone couldn't have '+' in CHANMETA cause
    * he doesn't use IRCnet ++rtc.
@@ -1956,8 +1957,8 @@ static void cmd_timers(int idx, char *par)
 
       timer_info(ids[i], &name, &howlong, &trigger_time, &called);
       timer_diff(&mynow, &trigger_time, &diff);
-      egg_snprintf(interval, sizeof interval, "(%li.%li secs)", howlong.sec, howlong.usec);
-      egg_snprintf(next, sizeof next, "%li.%li secs", diff.sec, diff.usec);
+      simple_snprintf(interval, sizeof interval, "(%li.%li secs)", howlong.sec, howlong.usec);
+      simple_snprintf(next, sizeof next, "%li.%li secs", diff.sec, diff.usec);
       dprintf(idx, "%-2d: %-25s %-15s Next: %-25s Called: %d\n", i, name, interval, next, called);
     }
     free(ids);
@@ -2073,21 +2074,20 @@ static void cmd_relay(int idx, char *par)
 static void cmd_save(int idx, char *par)
 {
   char buf[100] = "";
-  int i = 0;
 
   putlog(LOG_CMDS, "*", "#%s# save", dcc[idx].nick);
   simple_snprintf(buf, sizeof(buf), "Saving user file...");
-  i = write_userfile(-1);
+  int i = write_userfile(-1);
   if (i == 0)
-    strcat(buf, "success.");
+    strlcat(buf, "success.", sizeof(buf));
   else if (i == 1)
-    strcat(buf, "failed: No userlist.");
+    strlcat(buf, "failed: No userlist.", sizeof(buf));
   else if (i == 2)
-    strcat(buf, "failed: Cannot open userfile for writing.");
+    strlcat(buf, "failed: Cannot open userfile for writing.", sizeof(buf));
   else if (i == 3)
-    strcat(buf, "failed: Problem writing users/chans (see debug).");
+    strlcat(buf, "failed: Problem writing users/chans (see debug).", sizeof(buf));
   else		/* This can't happen. */
-    strcat(buf, "failed: Unforseen error");
+    strlcat(buf, "failed: Unforseen error", sizeof(buf));
 
   dprintf(idx, "%s\n", buf);
 }
@@ -2127,7 +2127,7 @@ static void cmd_trace(int idx, char *par)
 
   timer_get_now(&tv);
 
-  egg_snprintf(y, sizeof(y), ":%li", (long) ((tv.sec % 10000) * 100 + (tv.usec * 100) / (1000000)));
+  simple_snprintf(y, sizeof(y), ":%li", (long) ((tv.sec % 10000) * 100 + (tv.usec * 100) / (1000000)));
   botnet_send_trace(i, x, par, y);
 }
 
@@ -2253,6 +2253,7 @@ int check_dcc_chanattrs(struct userrec *u, char *chname, flag_t chflags, flag_t 
 
   int found = 0, atr = u ? u->flags : 0;
   struct chanset_t *chan = NULL;
+  struct chat_info dummy;
 
   for (int i = 0; i < dcc_total; i++) {
     if (dcc[i].type && dcc[i].simul == -1 && (dcc[i].type->flags & DCT_MASTER) && !egg_strcasecmp(u->handle, dcc[i].nick)) {
@@ -2296,9 +2297,9 @@ int check_dcc_chanattrs(struct userrec *u, char *chname, flag_t chflags, flag_t 
 	if (!chan)
 	  chan = chanset;
 	if (chan)
-	  strcpy(dcc[i].u.chat->con_chan, chan->dname);
+	  strlcpy(dcc[i].u.chat->con_chan, chan->dname, sizeof(dummy.con_chan));
 	else
-	  strcpy(dcc[i].u.chat->con_chan, "*");
+	  strlcpy(dcc[i].u.chat->con_chan, "*", 2);
       }
     }
   }
@@ -2370,9 +2371,10 @@ static void cmd_chattr(int idx, char *par)
 	return;
       }
     } else if (arg && !strpbrk(chg, "&|")) {
-      tmpchg = (char *) my_calloc(1, strlen(chg) + 2);
-      strcpy(tmpchg, "|");
-      strcat(tmpchg, chg);
+      size_t tmpsiz = strlen(chg) + 2;
+      tmpchg = (char *) my_calloc(1, tmpsiz);
+      strlcpy(tmpchg, "|", 2);
+      strlcat(tmpchg, chg, tmpsiz);
       chg = tmpchg;
     }
   }
@@ -2900,7 +2902,7 @@ static char *stripmaskname(int x)
   if (x & STRIP_BELLS)
     i += my_strcpy(s + i, "bells, ");
   if (!i)
-    strcpy(s, "none");
+    strlcpy(s, "none", sizeof(s));
   else
     s[i - 2] = 0;
   return s;
@@ -3037,7 +3039,7 @@ static void cmd_su(int idx, char *par)
         dcc[idx].u.chat->su_channel = dcc[idx].u.chat->channel;
 
 	dcc[idx].user = u;
-	strcpy(dcc[idx].nick, par);
+	strlcpy(dcc[idx].nick, par, NICKLEN);
 	/* Display password prompt and turn off echo (send IAC WILL ECHO). */
 	dprintf(idx, "Enter password for %s%s\n", par,
 		(dcc[idx].status & STAT_TELNET) ? TLN_IAC_C TLN_WILL_C
@@ -3054,7 +3056,7 @@ static void cmd_su(int idx, char *par)
         dcc[idx].u.chat->su_nick = strdup(dcc[idx].nick);
         dcc[idx].u.chat->su_channel = dcc[idx].u.chat->channel;
 	dcc[idx].user = u;
-	strcpy(dcc[idx].nick, par);
+	strlcpy(dcc[idx].nick, par, NICKLEN);
 	dcc_chatter(idx);
       }
     }
@@ -3140,7 +3142,7 @@ static void cmd_newleaf(int idx, char *par)
 
     bi->uplink = (char *) my_calloc(1, strlen(conf.bot->nick) + 1); 
 /*      strcpy(bi->uplink, conf.bot->nick); */
-    strcpy(bi->uplink, "");
+    bi->uplink[0] = 0;
 
     bi->address = (char *) my_calloc(1, 1);
     bi->telnet_port = 3333;
@@ -3148,7 +3150,7 @@ static void cmd_newleaf(int idx, char *par)
     bi->hublevel = 999;
     set_user(&USERENTRY_BOTADDR, u1, bi);
     /* set_user(&USERENTRY_PASS, u1, settings.salt2); */
-    egg_snprintf(tmp, sizeof(tmp), "%li %s", (long) now, dcc[idx].nick);
+    simple_snprintf(tmp, sizeof(tmp), "%li %s", (long) now, dcc[idx].nick);
     set_user(&USERENTRY_ADDED, u1, tmp);
     dprintf(idx, "Added new leaf: %s\n", handle);
     while (par[0]) {
@@ -3182,6 +3184,7 @@ static void cmd_nopass(int idx, char *par)
   int cnt = 0;
   struct userrec *cu = NULL;
   char *users = (char *) my_calloc(1, 1), pass[MAXPASSLEN] = "";
+  size_t userssiz = 1;
   bool dopass = 0;
 
   putlog(LOG_CMDS, "*", "#%s# nopass %s", dcc[idx].nick, (par && par[0]) ? par : "");
@@ -3198,9 +3201,10 @@ static void cmd_nopass(int idx, char *par)
           make_rand_str(pass, MAXPASSLEN);
           set_user(&USERENTRY_PASS, cu, pass);
         } else {
-          users = (char *) my_realloc(users, strlen(users) + strlen(cu->handle) + 1 + 1);
-          strcat(users, cu->handle);
-          strcat(users, " ");
+          userssiz = strlen(users) + strlen(cu->handle) + 1 + 1;
+          users = (char *) my_realloc(users, userssiz);
+          strlcat(users, cu->handle, userssiz);
+          strlcat(users, " ", userssiz);
         }
       }
     }
@@ -3276,7 +3280,7 @@ static void cmd_pls_ignore(int idx, char *par)
   } else if (!strchr(who, '@'))
     simple_snprintf(s, sizeof(s), "%s@*", who);
   else
-    strcpy(s, who);
+    strlcpy(s, who, sizeof(s));
 
   if (match_ignore(s))
     dprintf(idx, "That already matches an existing ignore.\n");
@@ -3351,7 +3355,7 @@ static void cmd_pls_user(int idx, char *par)
 
     userlist = adduser(userlist, handle, phost, "-", USER_DEFAULT, 0);
     u2 = get_user_by_handle(userlist, handle);
-    egg_snprintf(tmp, sizeof(tmp), "%li %s", (long)now, dcc[idx].nick);
+    simple_snprintf(tmp, sizeof(tmp), "%li %s", (long)now, dcc[idx].nick);
     set_user(&USERENTRY_ADDED, u2, tmp);
     dprintf(idx, "Added %s (%s) with no flags.\n", handle, phost);
     while (par[0]) {
@@ -3748,13 +3752,13 @@ static void cmd_botserver(int idx, char * par) {
 
 static void rcmd_cursrv(char * fbot, char * fhand, char * fidx) {
   if (!conf.bot->hub) {
-    char tmp[512] = "";
+    char tmp[120] = "";
 
     if (server_online) {
       if (floodless)
-        sprintf(tmp, "Currently: %-40s Lag: %ds [floodless ;)]", cursrvname, server_lag);
+        egg_snprintf(tmp, sizeof(tmp), "Currently: %-40s Lag: %ds [floodless ;)]", cursrvname, server_lag);
       else
-        sprintf(tmp, "Currently: %-40s Lag: %ds", cursrvname, server_lag);
+        egg_snprintf(tmp, sizeof(tmp), "Currently: %-40s Lag: %ds", cursrvname, server_lag);
     } else
       simple_snprintf(tmp, sizeof(tmp), "Currently: none");
 
@@ -3766,15 +3770,15 @@ static void cmd_timesync(int idx, char *par) {
   char tmp[30] = "";
 
   putlog(LOG_CMDS, "*", "#%s# timesync", dcc[idx].nick);
-  egg_snprintf(tmp, sizeof(tmp), "timesync %li", (long)(timesync + now));
+  simple_snprintf(tmp, sizeof(tmp), "timesync %li", (long)(timesync + now));
   botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, tmp);
 }
 
 static void rcmd_timesync(char *frombot, char *fromhand, char *fromidx, char *par) {
-  char tmp[1024] = "";
+  char tmp[100] = "";
   long net = atol(par);
 
-  sprintf(tmp, "NET: %li    ME: %li   DIFF: %d", net, (long)timesync + now, (int) ((timesync+now) - net));
+  simple_snprintf(tmp, sizeof(tmp), "NET: %li    ME: %li   DIFF: %d", net, (long)timesync + now, (int) ((timesync+now) - net));
   botnet_send_cmdreply(conf.bot->nick, frombot, fromhand, fromidx, tmp);
 }
 
@@ -3803,7 +3807,7 @@ static void rcmd_ver(char * fbot, char * fhand, char * fidx) {
 
   simple_snprintf(tmp, sizeof(tmp), "%s ", version);
   if (uname(&un) < 0) {
-    strcat(tmp, "(unknown OS)");
+    strlcat(tmp, "(unknown OS)", sizeof(tmp));
   } else {
     if (updated) {
       simple_snprintf(tmp, sizeof(tmp), "%s %s %s (%s) - UPDATED", tmp, un.sysname, un.release, un.machine);
@@ -3842,7 +3846,7 @@ static void rcmd_curnick(char * fbot, char * fhand, char * fidx) {
     char tmp[301] = "";
 
     if (server_online)
-      sprintf(tmp, "Currently: %-20s ", botname);
+      egg_snprintf(tmp, sizeof(tmp), "Currently: %-20s ", botname);
     if (jupenick[0] && strncmp(botname, jupenick, strlen(botname)))
       simple_snprintf(tmp, sizeof(tmp), "%sJupe: %s", tmp, jupenick);
     else if (jupenick[0] && strcmp(botname, origbotname))
@@ -3918,7 +3922,7 @@ static void cmd_netlag(int idx, char * par) {
   putlog(LOG_CMDS, "*", "#%s# netlag", dcc[idx].nick);
   
   timer_get_now(&tv);
-  egg_snprintf(tmp, sizeof(tmp), "ping %li", (long) ((tv.sec % 10000) * 100 + (tv.usec * 100) / (1000000)));
+  simple_snprintf(tmp, sizeof(tmp), "ping %li", (long) ((tv.sec % 10000) * 100 + (tv.usec * 100) / (1000000)));
   dprintf(idx, "Sent ping to all linked bots\n");
   botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, tmp);
 }
@@ -3944,11 +3948,11 @@ static void rcmd_pong(char *frombot, char *fromhand, char *fromidx, char *par) {
 
 /* exec commands */
 static void cmd_netw(int idx, char * par) {
-  char tmp[128] = "";
 
   putlog(LOG_CMDS, "*", "#%s# netw", dcc[idx].nick);
 
-  strcpy(tmp, "exec w");
+  char tmp[7] = "";
+  strlcpy(tmp, "exec w", sizeof(tmp));
   botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, tmp);
 }
 
@@ -4100,7 +4104,7 @@ static void rcmd_exec(char * frombot, char * fromhand, char * fromidx, char * pa
 
   cmd = newsplit(&par);
   if (!strcmp(cmd, "w")) {
-    strcpy(scmd, "w");
+    strlcpy(scmd, "w", 2);
   } else if (!strcmp(cmd, "last")) {
     char user[20] = "";
 
@@ -4121,7 +4125,7 @@ static void rcmd_exec(char * frombot, char * fromhand, char * fromidx, char * pa
     char *code = newsplit(&par);
 
     if (!strcmp(code, "show")) {
-      strcpy(scmd, "crontab -l | grep -v \"^#\"");
+      strlcpy(scmd, "crontab -l | grep -v \"^#\"", sizeof(scmd));
     } else if (!strcmp(code, "delete")) {
       crontab_del();
     } else if (!strcmp(code, "new")) {
@@ -4367,9 +4371,9 @@ static char *btos(unsigned long  bytes)
     xbytes = xbytes / 1024.0;
   }
   if (bytes > 1024)
-    sprintf(traffictxt, "%.2f %s", xbytes, unit);
+    egg_snprintf(traffictxt, sizeof(traffictxt), "%.2f %s", xbytes, unit);
   else
-    sprintf(traffictxt, "%lu Bytes", bytes);
+    simple_snprintf(traffictxt, sizeof(traffictxt), "%lu Bytes", bytes);
   return traffictxt;
 }
 
@@ -4401,7 +4405,7 @@ static void cmd_quit(int idx, char *text)
 
 	if (dcc[idx].u.chat->su_nick) {
 		dcc[idx].user = get_user_by_handle(userlist, dcc[idx].u.chat->su_nick);
-		strcpy(dcc[idx].nick, dcc[idx].u.chat->su_nick);
+		strlcpy(dcc[idx].nick, dcc[idx].u.chat->su_nick, NICKLEN);
                 dcc[idx].u.chat->channel = dcc[idx].u.chat->su_channel;
 		dcc[idx].type = &DCC_CHAT;
 		dprintf(idx, "Returning to real nick %s!\n", dcc[idx].u.chat->su_nick);

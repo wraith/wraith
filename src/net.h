@@ -159,7 +159,7 @@ extern union sockaddr_union 		cached_myip6_so;
 extern unsigned long			notalloc;
 #endif /* USE_IPV6 */
 
-extern char				firewall[], botuser[];
+extern char				firewall[], botuser[21];
 extern int				MAXSOCKS, socks_total;
 extern bool				identd_hack, cached_ip;
 extern port_t				firewallport;

@@ -326,7 +326,7 @@ static void remote_tell_who(int idx, char *nick, int chan)
   else
     realnick = nick;
   putlog(LOG_BOTS, "*", "#%s# who", realnick);
-  strcpy(s, "Channels: ");
+  strlcpy(s, "Channels: ", sizeof(s));
   for (c = chanset; c; c = c->next)
     if (!channel_secret(c) && shouldjoin(c)) {
       l = strlen(c->dname);
@@ -334,7 +334,7 @@ static void remote_tell_who(int idx, char *nick, int chan)
 	if (i > 10) {
           simple_snprintf(s, sizeof(s), "%s, %s", s, c->dname);
 	} else {
-          strcpy(s, c->dname);
+          strlcpy(s, c->dname, sizeof(s));
 	  i += (l + 2);
         }
       }
@@ -358,7 +358,7 @@ static void remote_tell_who(int idx, char *nick, int chan)
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type && dcc[i].type->flags & DCT_REMOTEWHO) {
       if (dcc[i].u.chat->channel == chan) {
-	k = sprintf(s, "  %c%-15s %s", (geticon(i) == '-' ? ' ' : geticon(i)),
+	k = egg_snprintf(s, sizeof(s), "  %c%-15s %s", (geticon(i) == '-' ? ' ' : geticon(i)),
 		    dcc[i].nick, dcc[i].host);
 	if (now - dcc[i].timeval > 300) {
 	  unsigned long mydays, hrs, mins;
@@ -367,11 +367,11 @@ static void remote_tell_who(int idx, char *nick, int chan)
 	  hrs = ((now - dcc[i].timeval) - (mydays * 86400)) / 3600;
 	  mins = ((now - dcc[i].timeval) - (hrs * 3600)) / 60;
 	  if (mydays > 0)
-	    sprintf(s + k, " (idle %lud%luh)", mydays, hrs);
+	    simple_snprintf(s + k, sizeof(s) - k, " (idle %lud%luh)", mydays, hrs);
 	  else if (hrs > 0)
-	    sprintf(s + k, " (idle %luh%lum)", hrs, mins);
+	    simple_snprintf(s + k, sizeof(s) - k, " (idle %luh%lum)", hrs, mins);
 	  else
-	    sprintf(s + k, " (idle %lum)", mins);
+	    simple_snprintf(s + k, sizeof(s) - k, " (idle %lum)", mins);
 	}
 	botnet_send_priv(idx, conf.bot->nick, nick, NULL, "%s", s);
 	if (dcc[i].u.chat->away != NULL)
@@ -385,7 +385,7 @@ static void remote_tell_who(int idx, char *nick, int chan)
 	ok = 1;
 	botnet_send_priv(idx, conf.bot->nick, nick, NULL, "%s:", "Bots connected");
       }
-      sprintf(s, "  %s%c%-15s %s",
+      egg_snprintf(s, sizeof(s), "  %s%c%-15s %s",
 	      dcc[i].status & STAT_CALLED ? "<-" : "->",
 	      dcc[i].status & STAT_SHARE ? '+' : ' ',
 	      dcc[i].nick, dcc[i].u.bot->version);
@@ -400,7 +400,7 @@ static void remote_tell_who(int idx, char *nick, int chan)
 	  ok = 1;
 	  botnet_send_priv(idx, conf.bot->nick, nick, NULL, "%s:", "Other people on the bot");
 	}
-	l = sprintf(s, "  %c%-15s %s", (geticon(i) == '-' ? ' ' : geticon(i)), dcc[i].nick, dcc[i].host);
+	l = egg_snprintf(s, sizeof(s), "  %c%-15s %s", (geticon(i) == '-' ? ' ' : geticon(i)), dcc[i].nick, dcc[i].host);
 	if (now - dcc[i].timeval > 300) {
 	  k = (now - dcc[i].timeval) / 60;
 	  if (k < 60)
@@ -429,7 +429,8 @@ static void bot_shellinfo(int idx, char *par)
   set_user(&USERENTRY_USERNAME, dcc[idx].user, username);
   set_user(&USERENTRY_OS, dcc[idx].user, sysname);
   dcc[idx].u.bot->sysname[0] = 0;
-  strcpy(dcc[idx].u.bot->sysname, sysname); 
+  struct bot_info dummy;
+  strlcpy(dcc[idx].u.bot->sysname, sysname, sizeof(dummy.sysname)); 
   set_user(&USERENTRY_NODENAME, dcc[idx].user, nodename);
   set_user(&USERENTRY_ARCH, dcc[idx].user, arch);
   set_user(&USERENTRY_OSVER, dcc[idx].user, botversion);
@@ -639,7 +640,7 @@ static void bot_nlinked(int idx, char *par)
   } else if ((in_chain(newbot)) || (!egg_strcasecmp(newbot, conf.bot->nick))) {
     /* Loop! */
     putlog(LOG_BOTS, "*", "Loop detected %s (mutual: %s)", dcc[idx].nick, newbot);
-    simple_sprintf(s, "Detected loop: two bots exist named %s: disconnecting %s", newbot, dcc[idx].nick);
+    simple_snprintf(s, sizeof(s), "Detected loop: two bots exist named %s: disconnecting %s", newbot, dcc[idx].nick);
     dprintf(idx, "error Loop (%s)\n", newbot);
   }
   if (!s[0]) {
@@ -872,7 +873,7 @@ static void bot_thisbot(int idx, char *par)
   noshare = 1;
   change_handle(dcc[idx].user, par);
   noshare = 0;
-  strcpy(dcc[idx].nick, par);
+  strlcpy(dcc[idx].nick, par, NICKLEN);
 }
 
 /* Used to send a direct msg from Tcl on one bot to Tcl on another
@@ -1228,7 +1229,7 @@ void send_remote_simul(int idx, char *bot, char *cmd, char *par)
 {
   char msg[SGRAB - 110] = "";
 
-  egg_snprintf(msg, sizeof msg, "r-s %d %s %d %s %lu %s %s", idx, dcc[idx].nick, dcc[idx].u.chat->con_flags, 
+  simple_snprintf(msg, sizeof msg, "r-s %d %s %d %s %lu %s %s", idx, dcc[idx].nick, dcc[idx].u.chat->con_flags, 
                dcc[idx].u.chat->con_chan, dcc[idx].status, cmd, par);
   putbot(bot, msg);
 }
@@ -1277,13 +1278,14 @@ static void bot_rsim(char *botnick, char *code, char *msg)
     dcc[idx].simultime = now;
     dcc[idx].simul = ridx;
     dcc[idx].status = status;
-    strcpy(dcc[idx].simulbot, botnick);
+    strlcpy(dcc[idx].simulbot, botnick, NICKLEN);
     dcc[idx].u.chat->con_flags = rconmask;
-    strcpy(dcc[idx].u.chat->con_chan, rconchan);
+    struct chat_info dummy;
+    strlcpy(dcc[idx].u.chat->con_chan, rconchan, sizeof(dummy.con_chan));
     dcc[idx].u.chat->strip_flags = STRIP_ALL;
-    strcpy(dcc[idx].nick, nick);
+    strlcpy(dcc[idx].nick, nick, NICKLEN);
     simple_snprintf(buf, sizeof buf, "%s@%s", nick, botnick);
-    strcpy(dcc[idx].host, buf);
+    strlcpy(dcc[idx].host, buf, UHOSTLEN);
     dcc[idx].addr = 0L;
     dcc[idx].user = get_user_by_handle(userlist, nick);
   }

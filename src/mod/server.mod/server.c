@@ -681,7 +681,7 @@ void add_server(char *ss)
 #endif /* USE_IPV6 */
       *q++ = 0;
       x->name = (char *) my_calloc(1, q - ss);
-      strcpy(x->name, ss);
+      strlcpy(x->name, ss, q - ss);
       ss = q;
       q = strchr(ss, ':');
       if (!q) {
@@ -888,8 +888,8 @@ static int ctcp_DCC_CHAT(char *nick, char *from, struct userrec *u, char *object
     dcc[i].addr = my_atoul(ip);
     dcc[i].port = atoi(prt);
     dcc[i].sock = -1;
-    strcpy(dcc[i].nick, u->handle);
-    strcpy(dcc[i].host, from);
+    strlcpy(dcc[i].nick, u->handle, NICKLEN);
+    strlcpy(dcc[i].host, from, UHOSTLEN);
     dcc[i].timeval = now;
     dcc[i].user = u;
 
@@ -909,14 +909,14 @@ static void dcc_chat_hostresolved(int i)
 
   simple_snprintf(buf, sizeof buf, "%d", dcc[i].port);
 
-  egg_snprintf(ip, sizeof ip, "%lu", iptolong(htonl(dcc[i].addr)));
+  simple_snprintf(ip, sizeof ip, "%lu", iptolong(htonl(dcc[i].addr)));
 #ifdef USE_IPV6
   dcc[i].sock = getsock(0, AF_INET);
 #else
   dcc[i].sock = getsock(0);
 #endif /* USE_IPV6 */
   if (dcc[i].sock < 0 || open_telnet_dcc(dcc[i].sock, ip, buf) < 0) {
-    strcpy(buf, strerror(errno));
+    strlcpy(buf, strerror(errno), sizeof(buf));
     putlog(LOG_MISC, "*", "%s: CHAT (%s!%s)", "DCC connection failed", dcc[i].nick, dcc[i].host);
     putlog(LOG_MISC, "*", "    (%s)", buf);
     killsock(dcc[i].sock);
@@ -933,7 +933,8 @@ static void dcc_chat_hostresolved(int i)
      ok = 0;
     if (ok)
       dcc[i].status |= STAT_PARTY;
-    strcpy(dcc[i].u.chat->con_chan, (chanset) ? chanset->dname : "*");
+    struct chat_info dummy;
+    strlcpy(dcc[i].u.chat->con_chan, (chanset) ? chanset->dname : "*", sizeof(dummy.con_chan));
     dcc[i].timeval = now;
     /* Ok, we're satisfied with them now: attempt the connect */
     putlog(LOG_MISC, "*", "DCC connection: CHAT (%s!%s)", dcc[i].nick, dcc[i].host);
@@ -1001,14 +1002,14 @@ void server_report(int idx, int details)
     if (jnick_juped)
       dprintf(idx, "    JUPENICK IS JUPED: %s %s\n", jupenick, keepnick ? "(trying)" : "");
     nick_juped = jnick_juped = 0;
-    daysdur(now, server_online, s1);
+    daysdur(now, server_online, s1, sizeof(s1));
     simple_snprintf(s, sizeof s, "(connected %s)", s1);
     if (server_lag && !waiting_for_awake) {
       if (server_lag == (-1))
 	simple_snprintf(s1, sizeof s1, " (bad pong replies)");
       else
 	simple_snprintf(s1, sizeof s1, " (lag: %ds)", server_lag);
-      strcat(s, s1);
+      strlcat(s, s1, sizeof(s));
     }
   }
   if ((trying_server || server_online) && (servidx != (-1))) {
@@ -1053,8 +1054,8 @@ static cmd_t my_ctcps[] =
 
 void server_init()
 {
-  strcpy(botrealname, "A deranged product of evil coders");
-  strcpy(stackable2cmds, "USERHOST ISON");
+  strlcpy(botrealname, "A deranged product of evil coders", sizeof(botrealname));
+  strlcpy(stackable2cmds, "USERHOST ISON", sizeof(stackable2cmds));
 
   mq.head = hq.head = modeq.head = NULL;
   mq.last = hq.last = modeq.last = NULL;

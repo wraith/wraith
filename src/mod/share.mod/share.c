@@ -99,7 +99,7 @@ static void new_tbuf(char *bot)
   tandbuf **old = &tbuf, *newbuf = NULL;
 
   newbuf = (tandbuf *) my_calloc(1, sizeof(tandbuf));
-  strcpy(newbuf->bot, bot);
+  strlcpy(newbuf->bot, bot, sizeof(newbuf->bot));
   newbuf->q = NULL;
   newbuf->timer = now;
   newbuf->next = *old;
@@ -149,13 +149,15 @@ static struct share_msgq *q_addmsg(struct share_msgq *qq, char *s)
 {
   struct share_msgq *q = NULL;
   int cnt;
+  size_t siz = 0;
 
   if (!qq) {
     q = (share_msgq *) my_calloc(1, sizeof *q);
 
     q->next = NULL;
-    q->msg = (char *) my_calloc(1, strlen(s) + 1);
-    strcpy(q->msg, s);
+    siz = strlen(s) + 1;
+    q->msg = (char *) my_calloc(1, siz);
+    strlcpy(q->msg, s, siz);
     return q;
   }
   cnt = 0;
@@ -167,8 +169,9 @@ static struct share_msgq *q_addmsg(struct share_msgq *qq, char *s)
 
   q = q->next;
   q->next = NULL;
-  q->msg = (char *) my_calloc(1, strlen(s) + 1);
-  strcpy(q->msg, s);
+  siz = strlen(s) + 1;
+  q->msg = (char *) my_calloc(1, siz);
+  strlcpy(q->msg, s, siz);
   return qq;
 }
 
@@ -927,7 +930,7 @@ share_ufsend(int idx, char *par)
   FILE *f = NULL;
 
   char rand[7] = "";
-  make_rand_str(rand, sizeof(rand) - 1);
+  make_rand_str(rand, sizeof(rand) - 1, 0);
   simple_snprintf(s, sizeof(s), "%s.share.%s", tempdir, rand);
   //mktemp(s); //Although safe here, g++ complains too much.
 
@@ -962,13 +965,13 @@ share_ufsend(int idx, char *par)
       i = new_dcc(&DCC_FORK_SEND, sizeof(struct xfer_info));
       dcc[i].addr = my_atoul(ip);
       dcc[i].port = atoi(port);
-      strcpy(dcc[i].nick, "*users");
+      strlcpy(dcc[i].nick, "*users", NICKLEN);
       dcc[i].u.xfer->filename = strdup(s);
       dcc[i].u.xfer->origname = dcc[i].u.xfer->filename;
       dcc[i].u.xfer->length = atoi(par);
       dcc[i].u.xfer->f = f;
       dcc[i].sock = sock;
-      strcpy(dcc[i].host, dcc[idx].nick);
+      strlcpy(dcc[i].host, dcc[idx].nick, UHOSTLEN);
       dcc[idx].status |= STAT_GETTING;
     }
   }
@@ -1076,7 +1079,7 @@ shareout(const char *format, ...)
 
   va_start(va, format);
 
-  strcpy(s, "s ");
+  strlcpy(s, "s ", 3);
   if ((l = egg_vsnprintf(s + 2, 509, format, va)) < 0)
     s[2 + (l = 509)] = 0;
   va_end(va);
@@ -1099,7 +1102,7 @@ shareout_prot(struct userrec *u, const char *format, ...)
 
   va_start(va, format);
 
-  strcpy(s, "s ");
+  strlcpy(s, "s ", 3);
   if ((l = egg_vsnprintf(s + 2, 509, format, va)) < 0)
     s[2 + (l = 509)] = 0;
   va_end(va);
@@ -1124,7 +1127,7 @@ shareout_but(int x, const char *format, ...)
 
   va_start(va, format);
 
-  strcpy(s, "s ");
+  strlcpy(s, "s ", 3);
   if ((l = egg_vsnprintf(s + 2, 509, format, va)) < 0)
     s[2 + (l = 509)] = 0;
   va_end(va);
@@ -1181,6 +1184,7 @@ write_tmp_userfile(char *fn, const struct userrec *bu, int idx)
   int ok = 0;
 
   if ((f = fopen(fn, "wb"))) {
+    fchmod(fileno(f), S_IRUSR | S_IWUSR);
 /* FIXME: REMOVE AFTER 1.2.14 */
     bool old = 0;
 
@@ -1189,11 +1193,8 @@ write_tmp_userfile(char *fn, const struct userrec *bu, int idx)
       old = 1;
 
     time_t tt = now;
-    char s1[81] = "";
 
-    fixmod(fn);
-    strcpy(s1, ctime(&tt));
-    lfprintf(f, "#4v: %s -- %s -- written %s", ver, conf.bot->nick, s1);
+    lfprintf(f, "#4v: %s -- %s -- written %s", ver, conf.bot->nick, ctime(&tt));
 
     if (!old)
       ok += write_chans(f, idx);
@@ -1413,7 +1414,7 @@ start_sending_users(int idx)
   int i = 1, j = -1;
 
   char rand[7] = "";
-  make_rand_str(rand, sizeof(rand) - 1);
+  make_rand_str(rand, sizeof(rand) - 1, 0);
   simple_snprintf(share_file, sizeof(share_file), "%s.share.%s", tempdir, rand);
   //mktemp(share_file); //Although safe here, g++ complains too much.
 
@@ -1441,7 +1442,7 @@ start_sending_users(int idx)
   } else {
     updatebot(-1, dcc[idx].nick, '+', 0, 0, 0, NULL);
     dcc[idx].status |= STAT_SENDING;
-    strcpy(dcc[j].host, dcc[idx].nick); /* Store bot's nick */
+    strlcpy(dcc[j].host, dcc[idx].nick, UHOSTLEN); /* Store bot's nick */
     dprintf(idx, "s us %lu %d %lu\n", iptolong(getmyip()), dcc[j].port, dcc[j].u.xfer->length);
     /* Start up a tbuf to queue outgoing changes for this bot until the
      * userlist is done transferring.

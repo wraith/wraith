@@ -73,29 +73,27 @@ void scriptchanged()
   switch (cloak_script) {
   case CLOAK_PLAIN:
     simple_snprintf(ctcpversion, sizeof(ctcpversion), "\002BitchX-%s\002 by panasync - %s %s : \002Keep it to yourself!\002", cloak_bxver, cloak_os, cloak_osver);
-    strcpy(ctcpuserinfo, "");
-    strcpy(autoaway, "Auto-Away after 10 mins");
-    strcpy(kickprefix, "");
-    strcpy(bankickprefix, "");
+    ctcpuserinfo[0] = kickprefix[0] = bankickprefix[0] = 0;
+    strlcpy(autoaway, "Auto-Away after 10 mins", sizeof(autoaway));
     break;
   case CLOAK_CRACKROCK:
     simple_snprintf(ctcpversion, sizeof(ctcpversion), "BitchX-%s\002/\002%s %s:(\002c\002)\037rackrock\037/\002b\002X \037[\0373.0.1á9\037]\037 :\002 Keep it to yourself!\002", cloak_bxver, cloak_os, cloak_osver);
-    strcpy(ctcpuserinfo, "crack addict, help me.");
-    strcpy(autoaway, "automatically dead");
-    strcpy(kickprefix, "\002c\002/\037k\037: ");
-    strcpy(bankickprefix, "\002c\002/\037kb\037: ");
+    strlcpy(ctcpuserinfo, "crack addict, help me.", sizeof(ctcpuserinfo));
+    strlcpy(autoaway, "automatically dead", sizeof(autoaway));
+    strlcpy(kickprefix, "\002c\002/\037k\037: ", sizeof(kickprefix));
+    strlcpy(bankickprefix, "\002c\002/\037kb\037: ", sizeof(bankickprefix));
     break;
   case CLOAK_NEONAPPLE:
     simple_snprintf(tmp, sizeof(tmp), "%s %s", cloak_os, cloak_osver);
     strtolower(tmp);
     simple_snprintf(ctcpversion, sizeof(ctcpversion), "bitchx-%s\037(\037%s\037):\037 \002n\002eon\037a\037ppl\002e\002\037/\037\002v\0020\037.\03714i : \002d\002ont you wish you had it\037?\037", cloak_bxver, tmp);
-    strcpy(ctcpuserinfo, "neon apple");
-    strcpy(autoaway, "automatically away after 10 mins \037(\037\002n\002/\037a)\037");
-    strcpy(kickprefix, "\037[na\002(\037k\037)\002]\037 ");
-    strcpy(bankickprefix, "");
+    strlcpy(ctcpuserinfo, "neon apple", sizeof(ctcpuserinfo));
+    strlcpy(autoaway, "automatically away after 10 mins \037(\037\002n\002/\037a)\037", sizeof(autoaway));
+    strlcpy(kickprefix, "\037[na\002(\037k\037)\002]\037 ", sizeof(kickprefix));
+    bankickprefix[0] = 0;
     break;
   case CLOAK_TUNNELVISION:
-    strcpy(tmp, cloak_bxver);
+    strlcpy(tmp, cloak_bxver, sizeof(tmp));
     p = tmp;
     p += strlen(tmp) - 1;
     p[1] = p[0];
@@ -103,53 +101,49 @@ void scriptchanged()
     p[2] = '\037';
     p[3] = 0;
     simple_snprintf(ctcpversion, sizeof(ctcpversion), "\002b\002itchx-%s :tunnel\002vision\002/\0371.2\037", tmp);
-    strcpy(ctcpuserinfo, "");
-    strcpy(autoaway, "auto-gone");
-    strcpy(kickprefix, "");
-    strcpy(bankickprefix, "");
+    ctcpuserinfo[0] = kickprefix[0] = bankickprefix[0] = 0;
+    strlcpy(autoaway, "auto-gone", sizeof(autoaway));
     break;
   case CLOAK_ARGON:
     simple_snprintf(ctcpversion, sizeof(ctcpversion), ".\037.(\037argon\002/\0021g\037)\037 \002:\002bitchx-%s", cloak_bxver);
-    strcpy(ctcpuserinfo, "");
-    strcpy(autoaway, "\037(\037ar\037)\037 auto-away \037(\03710m\037)\037");
-    strcpy(kickprefix, "\037(\037ar\037)\037 ");
-    strcpy(bankickprefix, "\037(\037ar\037)\037 ");
+    ctcpuserinfo[0] = 0;
+    strlcpy(autoaway, "\037(\037ar\037)\037 auto-away \037(\03710m\037)\037", sizeof(autoaway));
+    strlcpy(kickprefix, "\037(\037ar\037)\037 ", sizeof(kickprefix));
+    strlcpy(bankickprefix, "\037(\037ar\037)\037 ", sizeof(bankickprefix));
     break;
   case CLOAK_EVOLVER:
     simple_snprintf(ctcpversion, sizeof(ctcpversion), "\037evolver\037(\00202x9\002)\037: bitchx\037(\002%s\002) \037í\037 %s\002/\002%s : eye yam pheerable now!", cloak_bxver, cloak_os, cloak_osver);
-    strcpy(ctcpuserinfo, "");
-    strcpy(autoaway, "[\037\002i\002dle for \037[\03710 minutes\037]]");
-    strcpy(kickprefix, "\037ev\002!\002k\037 ");
-    strcpy(bankickprefix, "\037ev\002!\002bk\037 ");
+    ctcpuserinfo[0] = 0;
+    strlcpy(autoaway, "[\037\002i\002dle for \037[\03710 minutes\037]]", sizeof(autoaway));
+    strlcpy(kickprefix, "\037ev\002!\002k\037 ", sizeof(kickprefix));
+    strlcpy(bankickprefix, "\037ev\002!\002bk\037 ", sizeof(bankickprefix));
     break;
   case CLOAK_PREVAIL:
     simple_snprintf(ctcpversion, sizeof(ctcpversion), "%s\037!\037%s bitchx-%s \002-\002 prevail\037[\0370123\037]\037 :down with people", cloak_os, cloak_osver, cloak_bxver);
-    strcpy(ctcpuserinfo, botrealname);
-    strcpy(autoaway, "idle 10 minutes \037-\037 gone\037!\037");
-    strcpy(kickprefix, "\037[\037pv\037!\037k\037]\037 ");
-    strcpy(bankickprefix, "\037[\037pv\037!\037bk\037]\037 ");
+    strlcpy(ctcpuserinfo, botrealname, sizeof(ctcpuserinfo));
+    strlcpy(autoaway, "idle 10 minutes \037-\037 gone\037!\037", sizeof(autoaway));
+    strlcpy(kickprefix, "\037[\037pv\037!\037k\037]\037 ", sizeof(kickprefix));
+    strlcpy(bankickprefix, "\037[\037pv\037!\037bk\037]\037 ", sizeof(bankickprefix));
     break;
   case CLOAK_MIRC:
   {
     char mircver[5] = "";
    
-    strcpy(mircver, response(RES_MIRCVER));
+    strlcpy(mircver, response(RES_MIRCVER), sizeof(mircver));
     simple_snprintf(ctcpversion, sizeof(ctcpversion), "mIRC v%s Khaled Mardam-Bey", mircver);
     if (randint(2) % 2)
       strlcpy(ctcpversion2, response(RES_MIRCSCRIPT), sizeof(ctcpversion2));
-    strcpy(ctcpuserinfo, botrealname);
-    strcpy(autoaway, "auto-away after 10 minutes");
-    strcpy(kickprefix, "");
-    strcpy(bankickprefix, "");
+    strlcpy(ctcpuserinfo, botrealname, sizeof(ctcpuserinfo));
+    strlcpy(autoaway, "auto-away after 10 minutes", sizeof(autoaway));
+    kickprefix[0] = bankickprefix[0] = 0;
     break;
   }
   case CLOAK_OTHER:
   {
-    strcpy(ctcpversion, response(RES_OTHERSCRIPT));
-    strcpy(ctcpuserinfo, botrealname);
-    strcpy(autoaway, "auto-away after 10 minutes");
-    strcpy(kickprefix, "");
-    strcpy(bankickprefix, "");
+    strlcpy(ctcpversion, response(RES_OTHERSCRIPT), sizeof(ctcpversion));
+    strlcpy(ctcpuserinfo, botrealname, sizeof(ctcpuserinfo));
+    strlcpy(autoaway, "auto-away after 10 minutes", sizeof(autoaway));
+    kickprefix[0] = bankickprefix[0];
     break;
   }
   case CLOAK_CYPRESS:
@@ -158,67 +152,67 @@ void scriptchanged()
 
     switch (randint(25)) { /* 0-19 = script, 20-24 = plain */
     case 0:
-      strcpy(theme, " \037.\037.\002BX\002");
+      strlcpy(theme, " \037.\037.\002BX\002", sizeof(theme));
       break;
     case 1:
-      strcpy(theme, " \037.\037.chl\037o\037rine");
+      strlcpy(theme, " \037.\037.chl\037o\037rine", sizeof(theme));
       break;
     case 2:
-      strcpy(theme, " \037.\037.\037<\037c\002x\002\037>\037");
+      strlcpy(theme, " \037.\037.\037<\037c\002x\002\037>\037", sizeof(theme));
       break;
     case 3:
-      strcpy(theme, " \037.\037.supercyan");
+      strlcpy(theme, " \037.\037.supercyan", sizeof(theme));
       break;
     case 4:
-      strcpy(theme, " \037.\037.\037c\037yan\002i\002\002\037z\037\002\037e\037d");
+      strlcpy(theme, " \037.\037.\037c\037yan\002i\002\002\037z\037\002\037e\037d", sizeof(theme));
       break;
     case 5:
-      strcpy(theme, " \037.\037.delusion");
+      strlcpy(theme, " \037.\037.delusion", sizeof(theme));
       break;
     case 6:
-      strcpy(theme, " \037.\037.\002e\002mbryonic");
+      strlcpy(theme, " \037.\037.\002e\002mbryonic", sizeof(theme));
       break;
     case 7:
-      strcpy(theme, " \037.\037.e\002x\002tra\037.\037terrestr\037i\037al");
+      strlcpy(theme, " \037.\037.e\002x\002tra\037.\037terrestr\037i\037al", sizeof(theme));
       break;
     case 8:
-      strcpy(theme, " \037.\037.\002f\002ad\037e\037d");
+      strlcpy(theme, " \037.\037.\002f\002ad\037e\037d", sizeof(theme));
       break;
     case 9:
-      strcpy(theme, " \037.\037.fo\037c\037us");
+      strlcpy(theme, " \037.\037.fo\037c\037us", sizeof(theme));
       break;
     case 10:
-      strcpy(theme, " \037.\037.\002h\002ade\037s\037");
+      strlcpy(theme, " \037.\037.\002h\002ade\037s\037", sizeof(theme));
       break;
     case 11:
-      strcpy(theme, " \037.\037.hellbent\037.\037");
+      strlcpy(theme, " \037.\037.hellbent\037.\037", sizeof(theme));
       break;
     case 12:
-      strcpy(theme, " \037.\037.illusi\037o\037n");
+      strlcpy(theme, " \037.\037.illusi\037o\037n", sizeof(theme));
       break;
     case 13:
-      strcpy(theme, " \037.\037.\037j\037ungl\037e\037");
+      strlcpy(theme, " \037.\037.\037j\037ungl\037e\037", sizeof(theme));
       break;
     case 14:
-      strcpy(theme, " \037.\037.\002l\002abry\037i\037nth");
+      strlcpy(theme, " \037.\037.\002l\002abry\037i\037nth", sizeof(theme));
       break;
     case 15:
-      strcpy(theme, " \037.\037.nightblue");
+      strlcpy(theme, " \037.\037.nightblue", sizeof(theme));
       break;
     case 16:
-      strcpy(theme, " \037.\037.\037o\037bli\037v\037io\037n\037");
+      strlcpy(theme, " \037.\037.\037o\037bli\037v\037io\037n\037", sizeof(theme));
       break;
     case 17:
-      strcpy(theme, " \037.\037.ph\002a\002ze");
+      strlcpy(theme, " \037.\037.ph\002a\002ze", sizeof(theme));
       break;
     case 18:
-      strcpy(theme, " \037.\037.sphere");
+      strlcpy(theme, " \037.\037.sphere", sizeof(theme));
       break;
     case 19:
-      strcpy(theme, " \037.\037.zip");
+      strlcpy(theme, " \037.\037.zip", sizeof(theme));
       break;
     default:
-      strcpy(theme, "");
+      theme[0] = 0;
       break;
     }
     switch (randint(16)) {
@@ -287,10 +281,10 @@ void scriptchanged()
       simple_snprintf(ctcpversion, sizeof(ctcpversion), "cypress\037.\03701i\037/\037bx%s \037(\037%s\037)\037", cloak_bxver, theme);
       break;
     }
-    strcpy(ctcpuserinfo, "");
-    strcpy(autoaway, "autoaway after 40 min");
-    strcpy(kickprefix, "\002.\002.\037(\037\002c\002yp\002/\002k\037)\037 ");
-    strcpy(bankickprefix, "\002.\002.\037(\037\002c\002yp\002/\002bk\037)\037 ");
+    ctcpuserinfo[0] = 0;
+    strlcpy(autoaway, "autoaway after 40 min", sizeof(autoaway));
+    strlcpy(kickprefix, "\002.\002.\037(\037\002c\002yp\002/\002k\037)\037 ", sizeof(kickprefix));
+    strlcpy(bankickprefix, "\002.\002.\037(\037\002c\002yp\002/\002bk\037)\037 ", sizeof(bankickprefix));
     break;
   }
   }
@@ -445,28 +439,28 @@ static int ctcp_VERSION(char *nick, char *uhost, struct userrec *u, char *object
   if (cloak_script == CLOAK_CYPRESS) {
     switch (randint(8)) {
     case 0:
-      strcpy(s, " :should of put the glock down.");
+      strlcpy(s, " :should of put the glock down.", sizeof(s));
       break;
     case 1:
-      strcpy(s, " :hot damn, I didn't want to kill a man.");
+      strlcpy(s, " :hot damn, I didn't want to kill a man.", sizeof(s));
       break;
     case 2:
-      strcpy(s, " :check me and I'll check ya back.");
+      strlcpy(s, " :check me and I'll check ya back.", sizeof(s));
       break;
     case 3:
-      strcpy(s, " :put the blunt down just for a minute.");
+      strlcpy(s, " :put the blunt down just for a minute.", sizeof(s));
       break;
     case 4:
-      strcpy(s, " :tried to jack me, my homie got shot.");
+      strlcpy(s, " :tried to jack me, my homie got shot.", sizeof(s));
       break;
     case 5:
-      strcpy(s, " :insane in the membrane");
+      strlcpy(s, " :insane in the membrane", sizeof(s));
       break;
     case 6:
-      strcpy(s, " :slow hits from the bong");
+      strlcpy(s, " :slow hits from the bong", sizeof(s));
       break;
     case 7:
-      strcpy(s, " :k\002-\002leet");
+      strlcpy(s, " :k\002-\002leet", sizeof(s));
       break;
     }
   }
@@ -533,10 +527,10 @@ static int ctcp_INVITE_UNBAN(char *nick, char *uhost, struct userrec *u, char *o
 static int ctcp_USERINFO(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
   if (cloak_script == CLOAK_TUNNELVISION)
-    strcpy(ctcpuserinfo, botname);
+    strlcpy(ctcpuserinfo, botname, sizeof(ctcpuserinfo));
   else if (cloak_script == CLOAK_PREVAIL) {
-    strcpy(ctcpuserinfo, botname);
-    strcat(ctcpuserinfo, " ?");
+    strlcpy(ctcpuserinfo, botname, sizeof(ctcpuserinfo));
+    strlcat(ctcpuserinfo, " ?", sizeof(ctcpuserinfo));
   }
   dprintf(DP_HELP, "NOTICE %s :\001%s %s\001\n", nick, keyword, ctcpuserinfo);
   return BIND_RET_BREAK;
@@ -550,53 +544,53 @@ static int ctcp_CLIENTINFO(char *nick, char *uhost, struct userrec *u, char *obj
   char buf[256] = "";
 
   if (!text[0]) {
-    strcpy(buf, "SED UTC ACTION DCC CDCC BDCC XDCC VERSION CLIENTINFO USERINFO ERRMSG FINGER TIME PING ECHO INVITE WHOAMI OP OPS UNBAN IDENT XLINK UPTIME :Use CLIENTINFO <COMMAND> to get more specific information");
+    strlcpy(buf, "SED UTC ACTION DCC CDCC BDCC XDCC VERSION CLIENTINFO USERINFO ERRMSG FINGER TIME PING ECHO INVITE WHOAMI OP OPS UNBAN IDENT XLINK UPTIME :Use CLIENTINFO <COMMAND> to get more specific information", sizeof(buf));
   } else if (!egg_strcasecmp(text, "UNBAN"))
-    strcpy(buf, "UNBAN unbans the person from channel");
+    strlcpy(buf, "UNBAN unbans the person from channel", sizeof(buf));
   else if (!egg_strcasecmp(text, "OPS"))
-    strcpy(buf, "OPS ops the person if on userlist");
+    strlcpy(buf, "OPS ops the person if on userlist", sizeof(buf));
   else if (!egg_strcasecmp(text, "ECHO"))
-    strcpy(buf, "ECHO returns the arguments it receives");
+    strlcpy(buf, "ECHO returns the arguments it receives", sizeof(buf));
   else if (!egg_strcasecmp(text, "WHOAMI"))
-    strcpy(buf, "WHOAMI user list information");
+    strlcpy(buf, "WHOAMI user list information", sizeof(buf));
   else if (!egg_strcasecmp(text, "INVITE"))
-    strcpy(buf, "INVITE invite to channel specified");
+    strlcpy(buf, "INVITE invite to channel specified", sizeof(buf));
   else if (!egg_strcasecmp(text, "PING"))
-    strcpy(buf, "PING returns the arguments it receives");
+    strlcpy(buf, "PING returns the arguments it receives", sizeof(buf));
   else if (!egg_strcasecmp(text, "UTC"))
-    strcpy(buf, "UTC substitutes the local timezone");
+    strlcpy(buf, "UTC substitutes the local timezone", sizeof(buf));
   else if (!egg_strcasecmp(text, "XDCC"))
-    strcpy(buf, "XDCC checks cdcc info for you");
+    strlcpy(buf, "XDCC checks cdcc info for you", sizeof(buf));
   else if (!egg_strcasecmp(text, "BDCC"))
-    strcpy(buf, "BDCC checks cdcc info for you");
+    strlcpy(buf, "BDCC checks cdcc info for you", sizeof(buf));
   else if (!egg_strcasecmp(text, "CDCC"))
-    strcpy(buf, "CDCC checks cdcc info for you");
+    strlcpy(buf, "CDCC checks cdcc info for you", sizeof(buf));
   else if (!egg_strcasecmp(text, "DCC"))
-    strcpy(buf, "DCC requests a direct_client_connection");
+    strlcpy(buf, "DCC requests a direct_client_connection", sizeof(buf));
   else if (!egg_strcasecmp(text, "ACTION"))
-    strcpy(buf, "ACTION contains action descriptions for atmosphere");
+    strlcpy(buf, "ACTION contains action descriptions for atmosphere", sizeof(buf));
   else if (!egg_strcasecmp(text, "FINGER"))
-    strcpy(buf, "FINGER shows real name, login name and idle time of user");
+    strlcpy(buf, "FINGER shows real name, login name and idle time of user", sizeof(buf));
   else if (!egg_strcasecmp(text, "ERRMSG"))
-    strcpy(buf, "ERRMSG returns error messages");
+    strlcpy(buf, "ERRMSG returns error messages", sizeof(buf));
   else if (!egg_strcasecmp(text, "USERINFO"))
-    strcpy(buf, "USERINFO returns user settable information");
+    strlcpy(buf, "USERINFO returns user settable information", sizeof(buf));
   else if (!egg_strcasecmp(text, "CLIENTINFO"))
-    strcpy(buf, "CLIENTINFO gives information about available CTCP commands");
+    strlcpy(buf, "CLIENTINFO gives information about available CTCP commands", sizeof(buf));
   else if (!egg_strcasecmp(text, "SED"))
-    strcpy(buf, "SED contains simple_encrypted_data");
+    strlcpy(buf, "SED contains simple_encrypted_data", sizeof(buf));
   else if (!egg_strcasecmp(text, "OP"))
-    strcpy(buf, "OP ops the person if on userlist");
+    strlcpy(buf, "OP ops the person if on userlist", sizeof(buf));
   else if (!egg_strcasecmp(text, "VERSION"))
-    strcpy(buf, "VERSION shows client type, version and environment");
+    strlcpy(buf, "VERSION shows client type, version and environment", sizeof(buf));
   else if (!egg_strcasecmp(text, "XLINK"))
-    strcpy(buf, "XLINK x-filez rule");
+    strlcpy(buf, "XLINK x-filez rule", sizeof(buf));
   else if (!egg_strcasecmp(text, "IDENT"))
-    strcpy(buf, "IDENT change userhost of userlist");
+    strlcpy(buf, "IDENT change userhost of userlist", sizeof(buf));
   else if (!egg_strcasecmp(text, "TIME"))
-    strcpy(buf, "TIME tells you the time on the user's host");
+    strlcpy(buf, "TIME tells you the time on the user's host", sizeof(buf));
   else if (!egg_strcasecmp(text, "UPTIME"))
-    strcpy(buf, "UPTIME my uptime");
+    strlcpy(buf, "UPTIME my uptime", sizeof(buf));
   else {
     dprintf(DP_HELP, "NOTICE %s :\001ERRMSG %s is not a valid function\001\n", nick, text);
     return BIND_RET_LOG;
@@ -680,15 +674,15 @@ void ctcp_init()
     /* shit, we have to come up with something ourselves.. */
     switch (randint(2)) {
     case 0:
-      strcpy(cloak_os, "Linux");
-      strcpy(cloak_osver, "2.6.18");
+      strlcpy(cloak_os, "Linux", sizeof(cloak_os));
+      strlcpy(cloak_osver, "2.6.25.5", sizeof(cloak_osver));
       break;
     case 1:
-      strcpy(cloak_os, "FreeBSD");
-      strcpy(cloak_osver, "6.2-p7");
+      strlcpy(cloak_os, "FreeBSD", sizeof(cloak_os));
+      strlcpy(cloak_osver, "7.0-p4", sizeof(cloak_osver));
       break;
     }
-    strcpy(cloak_host, "login");
+    strlcpy(cloak_host, "login", sizeof(cloak_host));
 #ifndef CYGWIN_HACKS
   }
 #endif /* !CYGWIN_HACKS */
@@ -697,16 +691,16 @@ void ctcp_init()
 
   switch (randint(4)) {
   case 0:
-    strcpy(cloak_bxver, "1.0c17");
+    strlcpy(cloak_bxver, "1.1-final", sizeof(cloak_bxver));
     break;
   case 1:
-    strcpy(cloak_bxver, "1.0c18");
+    strlcpy(cloak_bxver, "1.0c18", sizeof(cloak_bxver));
     break;
   case 2:
-    strcpy(cloak_bxver, "1.0c19");
+    strlcpy(cloak_bxver, "1.0c19", sizeof(cloak_bxver));
     break;
   case 3:
-    strcpy(cloak_bxver, "1.0c20cvs+");
+    strlcpy(cloak_bxver, "1.0c20cvs+", sizeof(cloak_bxver));
     break;
   }
   scriptchanged();

@@ -125,6 +125,7 @@ void sdprintf (const char *format, ...)
   }
 }
 
+#ifdef NOTUSED
 char* hexize(const unsigned char* data, size_t len) {
   static char buffers[5][513] = { "", "", "", "", "" };
   static int n = 0;
@@ -144,7 +145,7 @@ char* hexize(const unsigned char* data, size_t len) {
   if (n == 5) n = 0;
   return buf;
 }
-
+#endif
 
 void printstr(unsigned char *str, int len)
 {

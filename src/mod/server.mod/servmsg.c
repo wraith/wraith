@@ -75,7 +75,7 @@ static void rotate_nick(char *nick, char *orignick)
         use_chr = 0;
 
         if (rolls == 0) {
-          strcpy(nick, orignick);
+          strlcpy(nick, orignick, sizeof(botname));
           len = strlen(nick);
         }
 #ifdef ROLL_RIGHT
@@ -380,12 +380,12 @@ static bool detect_flood(char *floodnick, char *floodhost, char *from, int which
   case FLOOD_NOTICE:
     thr = flood_msg.count;
     lapse = flood_msg.time;
-    strcpy(ftype, "msg");
+    strlcpy(ftype, "msg", 4);
     break;
   case FLOOD_CTCP:
     thr = flood_ctcp.count;
     lapse = flood_ctcp.time;
-    strcpy(ftype, "ctcp");
+    strlcpy(ftype, "ctcp", 5);
     break;
   }
   if ((thr == 0) || (lapse == 0))
@@ -424,7 +424,7 @@ static bool detect_flood(char *floodnick, char *floodhost, char *from, int which
   if (p) {
     p++;
     if (egg_strcasecmp(lastmsghost[which], p)) {	/* New */
-      strcpy(lastmsghost[which], p);
+      strlcpy(lastmsghost[which], p, 128);
       lastmsgtime[which] = now;
       lastmsgs[which] = 0;
       return 0;
@@ -488,7 +488,7 @@ static int gotmsg(char *from, char *msg)
 
   fixcolon(msg);
   /* Only check if flood-ctcp is active */
-  strcpy(uhost, from);
+  strlcpy(uhost, from, UHOSTLEN);
   nick = splitnick(&uhost);
   if (flood_ctcp.count && detect_avalanche(msg)) {
     if (!ignoring) {
@@ -514,7 +514,8 @@ static int gotmsg(char *from, char *msg)
       p++;
     if (*p == 1) {
       *p = 0;
-      ctcp = strcpy(ctcpbuf, p1);
+      strlcpy(ctcpbuf, p1, sizeof(ctcpbuf));
+      ctcp = ctcpbuf;
       strcpy(p1 - 1, p + 1);
       if (!ignoring)
         detect_flood(nick, uhost, from, strncmp(ctcp, "ACTION ", 7) ? FLOOD_CTCP : FLOOD_PRIVMSG);
@@ -655,7 +656,7 @@ static int gotnotice(char *from, char *msg)
 
   to = newsplit(&msg);
   fixcolon(msg);
-  strcpy(uhost, from);
+  strlcpy(uhost, from, UHOSTLEN);
   nick = splitnick(&uhost);
   if (flood_ctcp.count && detect_avalanche(msg)) {
     /* Discard -- kick user if it was to the channel */
@@ -673,7 +674,8 @@ static int gotnotice(char *from, char *msg)
       p++;
     if (*p == 1) {
       *p = 0;
-      ctcp = strcpy(ctcpbuf, p1);
+      strlcpy(ctcpbuf, p1, sizeof(ctcpbuf));
+      ctcp = ctcpbuf;
       strcpy(p1 - 1, p + 1);
       if (!ignoring)
 	detect_flood(nick, uhost, from, FLOOD_CTCP);
@@ -1105,9 +1107,9 @@ static void eof_server(int idx)
   disconnect_server(idx, DO_LOST);
 }
 
-static void display_server(int idx, char *buf)
+static void display_server(int idx, char *buf, size_t bufsiz)
 {
-  simple_sprintf(buf, "%s  (lag: %d)", trying_server ? "conn" : "serv", server_lag);
+  simple_snprintf(buf, bufsiz, "%s  (lag: %d)", trying_server ? "conn" : "serv", server_lag);
 }
 
 static void connect_server(void);
@@ -1150,7 +1152,7 @@ static void server_activity(int idx, char *msg, int len)
   char *from = NULL, *code = NULL;
 
   if (trying_server) {
-    strcpy(dcc[idx].nick, "(server)");
+    strlcpy(dcc[idx].nick, "(server)", NICKLEN);
     putlog(LOG_SERV, "*", "Connected to %s", dcc[idx].host);
 
     trying_server = 0;
@@ -1593,9 +1595,9 @@ static void connect_server(void)
 
   if (newserverport) {		/* cmd_jump was used; connect specified server */
     curserv = -1;		/* Reset server list */
-    strcpy(botserver, newserver);
+    strlcpy(botserver, newserver, sizeof(botserver));
     botserverport = newserverport;
-    strcpy(pass, newserverpass);
+    strlcpy(pass, newserverpass, sizeof(pass));
     newserver[0] = newserverport = newserverpass[0] = 0;
   } 
 
@@ -1619,7 +1621,7 @@ static void connect_server(void)
     putlog(LOG_SERV, "*", "Trying server %s:%d", botserver, botserverport);
 
     dcc[newidx].port = botserverport;
-    strcpy(dcc[newidx].nick, "(server)");
+    strlcpy(dcc[newidx].nick, "(server)", NICKLEN);
     strlcpy(dcc[newidx].host, botserver, UHOSTLEN);
 
     botuserhost[0] = 0;
@@ -1695,7 +1697,7 @@ static void server_dns_callback(int id, void *client_data, const char *host, cha
   if (addr.family == AF_INET)
     dcc[idx].addr = htonl(addr.u.addr.s_addr);
 
-  strcpy(serverpass, (char *) dcc[idx].u.dns->cbuf);
+  strlcpy(serverpass, (char *) dcc[idx].u.dns->cbuf, sizeof(serverpass));
   changeover_dcc(idx, &SERVER_SOCKET, 0);
 
 //  identd_open(idx);
@@ -1720,9 +1722,9 @@ static void server_dns_callback(int id, void *client_data, const char *host, cha
     SERVER_SOCKET.timeout_val = &server_timeout;
     /* Another server may have truncated it, so use the original */
     if (jupenick[0])
-      strcpy(botname, jupenick);
+      strlcpy(botname, jupenick, sizeof(botname));
     else
-      strcpy(botname, origbotname);
+      strlcpy(botname, origbotname, sizeof(botname));
     /* Start alternate nicks from the beginning */
     altnick_char = 0;
     /* reset counter so first ctcp is dumped for tcms */

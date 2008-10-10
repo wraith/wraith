@@ -630,7 +630,7 @@ fmtfp(char *buffer, size_t *currlen, size_t maxlen, long double fvalue,
 	}
 }
 
-static void 
+inline static void 
 dopr_outch(char *buffer, size_t *currlen, size_t maxlen, char c)
 {
 	if (*currlen < maxlen)

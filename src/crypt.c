@@ -109,7 +109,7 @@ char *decrypt_string(const char *keydata, char *in)
     return res;
   } else {
     res = (char *) my_calloc(1, len + 1);
-    strcpy(res, in);
+    strlcpy(res, in, len + 1);
     return res;
   }
 }
@@ -121,7 +121,7 @@ void encrypt_cmd_pass(char *in, char *out)
   if (strlen(in) > MAXPASSLEN)
     in[MAXPASSLEN] = 0;
   tmp = encrypt_string(in, in);
-  strcpy(out, "+");
+  strlcpy(out, "+", 2);
   strlcat(out, tmp, MAXPASSLEN + 1);
   out[MAXPASSLEN] = 0;
   free(tmp);

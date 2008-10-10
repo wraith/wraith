@@ -311,22 +311,22 @@ readcfg(const char *cfgfile)
           strlcpy(settings.dcc_prefix, trim(p), sizeof settings.dcc_prefix);
           printf(".");
         } else if (!egg_strcasecmp(buffer, STR("owner"))) {
-          strcat(settings.owners, trim(p));
-          strcat(settings.owners, ",");
+          strlcat(settings.owners, trim(p), sizeof(settings.owners));
+          strlcat(settings.owners, ",", sizeof(settings.owners));
           printf(".");
         } else if (!egg_strcasecmp(buffer, STR("owneremail"))) {
-          strcat(settings.owneremail, trim(p));
-          strcat(settings.owneremail, ",");
+          strlcat(settings.owneremail, trim(p), sizeof(settings.owneremail));
+          strlcat(settings.owneremail, ",", sizeof(settings.owneremail));
           printf(".");
         } else if (!egg_strcasecmp(buffer, STR("hub"))) {
-          strcat(settings.hubs, trim(p));
-          strcat(settings.hubs, ",");
+          strlcat(settings.hubs, trim(p), sizeof(settings.hubs));
+          strlcat(settings.hubs, ",", sizeof(settings.hubs));
           printf(".");
         } else if (!egg_strcasecmp(buffer, STR("salt1"))) {
-          strcat(settings.salt1, trim(p));
+          strlcat(settings.salt1, trim(p), sizeof(settings.salt1));
           printf(".");
         } else if (!egg_strcasecmp(buffer, STR("salt2"))) {
-          strcat(settings.salt2, trim(p));
+          strlcat(settings.salt2, trim(p), sizeof(settings.salt2));
           printf(".");
         } else {
           printf("%s %s\n", buffer, p);

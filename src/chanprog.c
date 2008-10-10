@@ -242,28 +242,6 @@ void checkchans(int which)
 
 }
 
-/* Dump uptime info out to dcc (guppy 9Jan99)
- */
-static void tell_time(time_t time, char *s)
-{
-  time_t now2, hr, min;
-
-  s[0] = 0;
-  now2 = now - time;
-  if (now2 > 86400) {
-    /* days */
-    simple_sprintf(s, "%d day", (int) (now2 / 86400));
-    if ((int) (now2 / 86400) >= 2)
-      strcat(s, "s");
-    strcat(s, ", ");
-    now2 -= (((int) (now2 / 86400)) * 86400);
-  }
-  hr = (time_t) ((int) now2 / 3600);
-  now2 -= (hr * 3600);
-  min = (time_t) ((int) now2 / 60);
-  sprintf(&s[strlen(s)], "%02d:%02d", (int) hr, (int) min);
-}
-
 void tell_verbose_uptime(int idx)
 {
   char s[256] = "", s1[121] = "", s2[81] = "", outbuf[501] = "";
@@ -276,18 +254,19 @@ void tell_verbose_uptime(int idx)
 # endif
 #endif /* HAVE_GETRUSAGE */
 
-  tell_time(online_since, s);
+  daysdur(now, online_since, s, sizeof(s));
+
   if (backgrd)
-    strcpy(s1, "background");
+    strlcpy(s1, "background", sizeof(s1));
   else {
     if (term_z)
-      strcpy(s1, "terminal mode");
+      strlcpy(s1, "terminal mode", sizeof(s1));
     else
-      strcpy(s1, "log dump mode");
+      strlcpy(s1, "log dump mode", sizeof(s1));
   }
   simple_snprintf(outbuf, sizeof(outbuf), "Online for %s", s);
   if (restart_time) {
-    tell_time(restart_time, s);
+    daysdur(now, restart_time, s, sizeof(s));
     simple_snprintf(outbuf, sizeof(outbuf), "%s (%s %s)", outbuf, restart_was_update ? "updated" : "restarted", s);
   }
 
@@ -296,15 +275,13 @@ void tell_verbose_uptime(int idx)
   total = ru.ru_utime.tv_sec + ru.ru_stime.tv_sec;
   hr = (int) (total / 60);
   min = (int) (total - (hr * 60));
-  sprintf(s2, "CPU %02d:%02d (load avg %3.1f%%)", (int) hr, (int) min, 
-  100.0 * ((float) total / (float) (now - online_since)));
+  snprintf(s2, sizeof(s2), "CPU %02d:%02d (load avg %3.1f%%)", (int) hr, (int) min, 100.0 * ((float) total / (float) (now - online_since)));
 #else
 # if HAVE_CLOCK
   cl = (clock() / CLOCKS_PER_SEC);
   hr = (int) (cl / 60);
   min = (int) (cl - (hr * 60));
-  sprintf(s2, "CPU %02d:%02d (load avg %3.1f%%)", (int) hr, (int) min,
-  100.0 * ((float) cl / (float) (now - online_since)));
+  snprintf(s2, sizeof(s2), "CPU %02d:%02d (load avg %3.1f%%)", (int) hr, (int) min,  100.0 * ((float) cl / (float) (now - online_since)));
 # else
   simple_snprintf(s2, sizeof(s2), "CPU ???");
 # endif
@@ -390,7 +367,7 @@ void reaffirm_owners()
       q = p + 1;
       p = strchr(q, ',');
     }
-    strcpy(s, q);
+    strlcpy(s, q, sizeof(s));
     rmspace(s);
     u = get_user_by_handle(userlist, s);
     if (u)
@@ -801,21 +778,22 @@ int do_chanset(char *result, struct chanset_t *chan, const char *options, int lo
   int ret = OK;
 
   if (local & DO_NET) {
-    char *buf = NULL;
+    size_t bufsiz = 0;
          /* malloc(options,chan,'cset ',' ',+ 1) */
     if (chan)
-      buf = (char *) my_calloc(1, strlen(options) + strlen(chan->dname) + 5 + 1 + 1);
+      bufsiz = strlen(options) + strlen(chan->dname) + 5 + 1 + 1;
     else
-      buf = (char *) my_calloc(1, strlen(options) + 1 + 5 + 1 + 1);
+      bufsiz = strlen(options) + 1 + 5 + 1 + 1;
+    
+    char *buf = (char*) my_calloc(1, bufsiz);
 
-    strcat(buf, "cset ");
+    strlcat(buf, "cset ", bufsiz);
     if (chan)
-      strcat(buf, chan->dname);
+      strlcat(buf, chan->dname, bufsiz);
     else
-      strcat(buf, "*");
-    strcat(buf, " ");
-    strcat(buf, options);
-    buf[strlen(buf)] = 0;
+      strlcat(buf, "*", bufsiz);
+    strlcat(buf, " ", bufsiz);
+    strlcat(buf, options, bufsiz);
     putlog(LOG_DEBUG, "*", "sending out cset: %s", buf);
     putallbots(buf); 
     free(buf);
@@ -865,8 +843,8 @@ samechans(const char *nick, const char *delim)
   ret[0] = 0;		/* may be filled from last time */
   for (chan = chanset; chan; chan = chan->next) {
     if (ismember(chan, nick)) {
-      strcat(ret, chan->dname);
-      strcat(ret, delim);
+      strlcat(ret, chan->dname, sizeof(ret));
+      strlcat(ret, delim, sizeof(ret));
     }
   }
   ret[strlen(ret) - 1] = 0;

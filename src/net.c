@@ -1248,9 +1248,10 @@ int sockgets(char *s, int *len)
 	  *p = 0;
 	  if (strlen(socklist[i].inbuf) > SGRAB)
 	    socklist[i].inbuf[SGRAB] = 0;
-	  strcpy(s, socklist[i].inbuf);
-	  px = (char *) my_calloc(1, strlen(p + 1) + 1);
-	  strcpy(px, p + 1);
+	  strlcpy(s, socklist[i].inbuf, SGRAB + 10); //buf@main.c
+          size_t psiz = strlen(p + 1) + 1;
+	  px = (char *) my_calloc(1, psiz);
+	  strlcpy(px, p + 1, psiz);
 	  free(socklist[i].inbuf);
 	  if (px[0])
 	    socklist[i].inbuf = px;
@@ -1338,12 +1339,13 @@ int sockgets(char *s, int *len)
   /* Might be necessary to prepend stored-up data! */
   if (socklist[ret].inbuf != NULL) {
     p = socklist[ret].inbuf;
-    socklist[ret].inbuf = (char *) my_calloc(1, strlen(p) + strlen(xx) + 1);
-    strcpy(socklist[ret].inbuf, p);
-    strcat(socklist[ret].inbuf, xx);
+    size_t bufsiz = strlen(p) + strlen(xx) + 1;
+    socklist[ret].inbuf = (char *) my_calloc(1, bufsiz);
+    strlcpy(socklist[ret].inbuf, p, bufsiz);
+    strlcat(socklist[ret].inbuf, xx, bufsiz);
     free(p);
     if (strlen(socklist[ret].inbuf) < (SGRAB + 2)) {
-      strcpy(xx, socklist[ret].inbuf);
+      strlcpy(xx, socklist[ret].inbuf, sizeof(xx));
       free(socklist[ret].inbuf);
       socklist[ret].inbuf = NULL;
       socklist[ret].inbuflen = 0;
@@ -1351,9 +1353,9 @@ int sockgets(char *s, int *len)
       p = socklist[ret].inbuf;
       socklist[ret].inbuflen = strlen(p) - SGRAB;
       socklist[ret].inbuf = (char *) my_calloc(1, socklist[ret].inbuflen + 1); 
-      strcpy(socklist[ret].inbuf, p + SGRAB);
+      strlcpy(socklist[ret].inbuf, p + SGRAB, socklist[ret].inbuflen + 1);
       *(p + SGRAB) = 0;
-      strcpy(xx, p);
+      strlcpy(xx, p, sizeof(xx));
       free(p);
       /* (leave the rest to be post-pended later) */
     }
@@ -1369,8 +1371,8 @@ int sockgets(char *s, int *len)
     *p = 0;
 /* FIXME: overlapping here */
 
-    strcpy(s, xx);
-    strcpy(xx, p + 1);
+   strlcpy(s, xx, SGRAB + 10); //buf@main.c
+   strlcpy(xx, p + 1, sizeof(xx));
 
 /*    if (s[0] && strlen(s) && (s[strlen(s) - 1] == '\r')) */
     if (s[strlen(s) - 1] == '\r')
@@ -1382,7 +1384,7 @@ int sockgets(char *s, int *len)
     s[0] = 0;
     if (strlen(xx) >= SGRAB) {
       /* String is too long, so just insert fake \n */
-      strcpy(s, xx);
+      strlcpy(s, xx, SGRAB + 10); //buf@main.c
       xx[0] = 0;
       data = 1;
     }
@@ -1404,13 +1406,13 @@ int sockgets(char *s, int *len)
     p = socklist[ret].inbuf;
     socklist[ret].inbuflen = strlen(p) + strlen(xx);
     socklist[ret].inbuf = (char *) my_calloc(1, socklist[ret].inbuflen + 1);
-    strcpy(socklist[ret].inbuf, xx);
-    strcat(socklist[ret].inbuf, p);
+    strlcpy(socklist[ret].inbuf, xx, socklist[ret].inbuflen + 1);
+    strlcat(socklist[ret].inbuf, p, socklist[ret].inbuflen + 1);
     free(p);
   } else {
     socklist[ret].inbuflen = strlen(xx);
     socklist[ret].inbuf = (char *) my_calloc(1, socklist[ret].inbuflen + 1);
-    strcpy(socklist[ret].inbuf, xx);
+    strlcpy(socklist[ret].inbuf, xx, socklist[ret].inbuflen + 1);
   }
   if (data) {
     return socklist[ret].sock;
@@ -1670,24 +1672,24 @@ void tell_netdebug(int idx)
     if (!(socklist[i].flags & SOCK_UNUSED)) {
       simple_snprintf(s, sizeof(s), " %d", socklist[i].sock);
       if (socklist[i].flags & SOCK_BINARY)
-	strcat(s, " (binary)");
+	strlcat(s, " (binary)", sizeof(s));
       if (socklist[i].flags & SOCK_LISTEN)
-	strcat(s, " (listen)");
+	strlcat(s, " (listen)", sizeof(s));
       if (socklist[i].flags & SOCK_PASS)
-	strcat(s, " (passed on)");
+	strlcat(s, " (passed on)", sizeof(s));
       if (socklist[i].flags & SOCK_CONNECT)
-	strcat(s, " (connecting)");
+	strlcat(s, " (connecting)", sizeof(s));
       if (socklist[i].flags & SOCK_STRONGCONN)
-	strcat(s, " (strong)");
+	strlcat(s, " (strong)", sizeof(s));
       if (socklist[i].flags & SOCK_NONSOCK)
-	strcat(s, " (file)");
+	strlcat(s, " (file)", sizeof(s));
       if (socklist[i].inbuf != NULL)
 	sprintf(&s[strlen(s)], " (inbuf: %04X)", strlen(socklist[i].inbuf));
       if (socklist[i].outbuf != NULL)
 	sprintf(&s[strlen(s)], " (outbuf: %06lX)", (unsigned long) socklist[i].outbuflen);
       if (socklist[i].host)
-        sprintf(&s[strlen(s)], " (%s:%d)", socklist[i].host, socklist[i].port);
-      strcat(s, ",");
+        simple_sprintf(&s[strlen(s)], " (%s:%d)", socklist[i].host, socklist[i].port);
+      strlcat(s, ",", sizeof(s));
       dprintf(idx, "%s", s);
     }
   }

@@ -106,7 +106,7 @@ static int FindElement(char *resultBuf, const char *list, size_t listLength,
                                 && (p2 < p+20)) {
                             p2++;
                         }
-                        sprintf(resultBuf, "list element in braces followed by \"%.*s\" instead of space", (int) (p2-p), p);
+//                        snprintf(resultBuf, RESULT_LEN, "list element in braces followed by \"%.*s\" instead of space", (int) (p2-p), p);
                     }
                     return ERROR;
                 }
@@ -163,7 +163,7 @@ static int FindElement(char *resultBuf, const char *list, size_t listLength,
                                  && (p2 < p+20)) {
                             p2++;
                         }
-                        sprintf(resultBuf, "list element in quotes followed by \"%.*s\" %s", (int) (p2-p), p, "instead of space");
+//                        sprintf(resultBuf, "list element in quotes followed by \"%.*s\" %s", (int) (p2-p), p, "instead of space");
                     }
                     return ERROR;
                 }
@@ -787,7 +787,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
     }
   }
   if (result && result[0] && result_extra[0])
-    strcat(result, result_extra);
+    strlcat(result, result_extra, RESULT_LEN);
 
   if (error)
     return ERROR;
@@ -886,11 +886,11 @@ int channel_add(char *result, char *newname, char *options)
   char buf[3001] = "";
 
   simple_snprintf(buf, sizeof(buf), "chanmode { %s } ", glob_chanmode);
-  strcat(buf, def_chanset);
-  strcat(buf, " ");
-  strcat(buf, glob_chanset);
-  strcat(buf, " ");
-  strcat(buf, options);
+  strlcat(buf, def_chanset, sizeof(buf));
+  strlcat(buf, " ", sizeof(buf));
+  strlcat(buf, glob_chanset, sizeof(buf));
+  strlcat(buf, " ", sizeof(buf));
+  strlcat(buf, options, sizeof(buf));
   buf[strlen(buf)] = 0;
 
   if (SplitList(result, buf, &items, &item) != OK)

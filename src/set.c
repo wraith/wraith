@@ -225,7 +225,9 @@ char *var_sanitize(variable_t *var, const char *data)
 static bool var_set_mem(variable_t *var, const char *datain)
 {
   char *data = (datain && datain[0]) ? strdup(datain) : NULL, *datap = data;
+#ifdef DEBUG
 sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
+#endif
 
   if (data && var->flags & VAR_SHUFFLE) {
 //    char *datadup = strdup(data);
@@ -233,7 +235,7 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
 //    shuffle(datadup, ",");
 //    data = datadup;
 //    freedata++;
-    shuffle(data, ",");
+    shuffle(data, ",", strlen(data) + 1);
   }
 
   /* figure out it's type and set it's variable to the data */
@@ -418,7 +420,7 @@ const char *var_string(variable_t *var)
 
   if (data) {
     if (var->flags & VAR_SHUFFLE)
-      shuffle(data, ",");
+      shuffle(data, ",", strlen(data) + 1);
 
     if ((var->flags & VAR_NODEF) && !var->gdata) {
        free(data);

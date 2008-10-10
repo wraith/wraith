@@ -166,7 +166,7 @@ egg_inet_ntop6(const u_char *src, char *dst, socklen_t size)
 			tp += strlen(tp);
 			break;
 		}
-		tp += SPRINTF((tp, "%x", words[i]));
+		tp += simple_snprintf(tp, sizeof(tmp), "%x", words[i]);
 	}
 	/* Was it a trailing run of 0x00's? */
 	if (best.base != -1 && (best.base + best.len) ==

@@ -568,7 +568,7 @@ static void set_mode_protect(struct chanset_t *chan, char *set)
       if (pos) {
 	s1 = newsplit(&set);
 	if (s1[0])
-	  strcpy(chan->key_prot, s1);
+	  strlcpy(chan->key_prot, s1, sizeof(chan->key_prot));
       }
       break;
     }
@@ -652,8 +652,8 @@ static void get_mode_protect(struct chanset_t *chan, char *s)
   *p = 0;
   if (s1[0]) {
     s1[strlen(s1) - 1] = 0;
-    strcat(s, " ");
-    strcat(s, s1);
+    strlcat(s, " ", sizeof(s));
+    strlcat(s, s1, sizeof(s));
   }
 }
 
@@ -772,10 +772,12 @@ static int channels_chon(char *handle, int idx)
       }
       if (!chan)
 	chan = chanset;
+
+      struct chat_info dummy;
       if (chan)
-	strcpy(dcc[idx].u.chat->con_chan, chan->dname);
+	strlcpy(dcc[idx].u.chat->con_chan, chan->dname, sizeof(dummy.con_chan));
       else
-	strcpy(dcc[idx].u.chat->con_chan, "*");
+	strlcpy(dcc[idx].u.chat->con_chan, "*", 2);
     }
   }
   return 0;
@@ -801,17 +803,17 @@ void channels_report(int idx, int details)
       s[0] = 0;
 
       if (chan_bitch(chan))
-	strcat(s, "bitch, ");
+	strlcat(s, "bitch, ", sizeof(s));
       if (s[0])
 	s[strlen(s) - 2] = 0;
       if (!s[0])
-	strcpy(s, "lurking");
+	strlcpy(s, "lurking", sizeof(s));
       get_mode_protect(chan, s2);
       if (channel_closed(chan)) {
         if (chan->closed_invite)
-          strcat(s2, "i");
+          strlcat(s2, "i", sizeof(s2));
         if (chan->closed_private)
-          strcat(s2, "p");
+          strlcat(s2, "p", sizeof(s2));
       }
 
       if (shouldjoin(chan)) {

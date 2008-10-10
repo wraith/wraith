@@ -169,16 +169,16 @@ void display_ignore(int idx, int number, struct igrec *ignore)
   char dates[81] = "", s[41] = "";
 
   if (ignore->added) {
-    daysago(now, ignore->added, s);
+    daysago(now, ignore->added, s, sizeof(s));
     simple_snprintf(dates, sizeof(dates), "Started %s", s);
   } 
 
   if (ignore->flags & IGREC_PERM)
-    strcpy(s, "(perm)");
+    strlcpy(s, "(perm)", sizeof(s));
   else {
     char s1[41] = "";
 
-    days(ignore->expire, now, s1);
+    days(ignore->expire, now, s1, sizeof(s1));
     simple_snprintf(s, sizeof(s), "(expires %s)", s1);
   }
   if (number >= 0)
@@ -386,7 +386,7 @@ tell_user(int idx, struct userrec *u)
   build_flags(s, &fr, NULL);
 
   if (!li || !li->laston)
-    strcpy(s1, "never");
+    strlcpy(s1, "never", sizeof(s1));
   else {
     now2 = now - li->laston;
     if (now2 > 86400)
@@ -409,7 +409,7 @@ tell_user(int idx, struct userrec *u)
     if (!channel_privchan(chan) || (channel_privchan(chan) && (chan_op(fr) || glob_owner(fr)))) {
       if (glob_op(fr) || chan_op(fr)) {
         if (ch->laston == 0L)
-  	  strcpy(s1, "never");
+  	  strlcpy(s1, "never", sizeof(s1));
         else {
   	  now2 = now - (ch->laston);
 	  if (now2 > 86400)
@@ -744,14 +744,14 @@ int readuserfile(const char *file, struct userrec **ret)
            free(my_ptr);
          }
 	} else if (!strncmp(code, "::", 2)) {	/* channel-specific bans */
-	  strcpy(lasthand, &code[2]);
+	  strlcpy(lasthand, &code[2], sizeof(lasthand));
 	  u = NULL;
 	  if (!findchan_by_dname(lasthand)) {
-	    strcpy(s1, lasthand);
-	    strcat(s1, " ");
+	    strlcpy(s1, lasthand, sizeof(s1));
+	    strlcat(s1, " ", sizeof(s1));
 	    if (strstr(ignored, s1) == NULL) {
-	      strcat(ignored, lasthand);
-	      strcat(ignored, " ");
+	      strlcat(ignored, lasthand, sizeof(ignored));
+	      strlcat(ignored, " ", sizeof(ignored));
 	    }
 	    lasthand[0] = 0;
 	  } else {
@@ -763,14 +763,14 @@ int readuserfile(const char *file, struct userrec **ret)
 	    cst->bans = NULL;
 	  }
 	} else if (!strncmp(code, "&&", 2)) {	/* channel-specific exempts */
-	  strcpy(lasthand, &code[2]);
+	  strlcpy(lasthand, &code[2], sizeof(lasthand));
 	  u = NULL;
 	  if (!findchan_by_dname(lasthand)) {
-	    strcpy(s1, lasthand);
-	    strcat(s1, " ");
+	    strlcpy(s1, lasthand, sizeof(s1));
+	    strlcat(s1, " ", sizeof(s1));
 	    if (strstr(ignored, s1) == NULL) {
-	      strcat(ignored, lasthand);
-	      strcat(ignored, " ");
+	      strlcat(ignored, lasthand, sizeof(ignored));
+	      strlcat(ignored, " ", sizeof(ignored));
 	    }
 	    lasthand[0] = 0;
 	  } else {
@@ -782,14 +782,14 @@ int readuserfile(const char *file, struct userrec **ret)
 	    cst->exempts = NULL;
 	  }
 	} else if (!strncmp(code, "$$", 2)) {	/* channel-specific invites */
-	  strcpy(lasthand, &code[2]);
+	  strlcpy(lasthand, &code[2], sizeof(lasthand));
 	  u = NULL;
 	  if (!findchan_by_dname(lasthand)) {
-	    strcpy(s1, lasthand);
-	    strcat(s1, " ");
+	    strlcpy(s1, lasthand, sizeof(s1));
+	    strlcat(s1, " ", sizeof(s1));
 	    if (strstr(ignored, s1) == NULL) {
-	      strcat(ignored, lasthand);
-	      strcat(ignored, " ");
+	      strlcat(ignored, lasthand, sizeof(ignored));
+	      strlcat(ignored, " ", sizeof(ignored));
 	    }
 	    lasthand[0] = 0;
 	  } else {
@@ -833,22 +833,22 @@ int readuserfile(const char *file, struct userrec **ret)
 	    }
 	  }
 	} else if (!rfc_casecmp(code, BAN_NAME)) {
-	  strcpy(lasthand, code);
+	  strlcpy(lasthand, code, sizeof(lasthand));
 	  u = NULL;
 	} else if (!rfc_casecmp(code, IGNORE_NAME)) {
-	  strcpy(lasthand, code);
+	  strlcpy(lasthand, code, sizeof(lasthand));
 	  u = NULL;
 	} else if (!rfc_casecmp(code, EXEMPT_NAME)) {
-	  strcpy(lasthand, code);
+	  strlcpy(lasthand, code, sizeof(lasthand));
 	  u = NULL;
 	} else if (!rfc_casecmp(code, INVITE_NAME)) {
-	  strcpy(lasthand, code);
+	  strlcpy(lasthand, code, sizeof(lasthand));
 	  u = NULL;
         } else if (!rfc_casecmp(code, CHANS_NAME)) {
-          strcpy(lasthand, code);
+          strlcpy(lasthand, code, sizeof(lasthand));
           u = NULL;
         } else if (!rfc_casecmp(code, SET_NAME)) {
-          strcpy(lasthand, code);
+          strlcpy(lasthand, code, sizeof(lasthand));
           u = NULL;  
 	} else if (code[0] == '*') {
 	  lasthand[0] = 0;
@@ -881,14 +881,15 @@ int readuserfile(const char *file, struct userrec **ret)
               if (isbot)
                 fr.match |= FR_BOT;
 	      break_down_flags(attr, &fr, 0);
-	      strcpy(lasthand, code);
+	      strlcpy(lasthand, code, sizeof(lasthand));
 	      cst = NULL;
               
 	      if (strlen(code) > HANDLEN)
 		code[HANDLEN] = 0;
 	      if (strlen(pass) > 20) {	/* old style passwords */
 		putlog(LOG_MISC, "*", "* Corrupted password reset for '%s'", code);
-		strcpy(pass, "-");
+                pass[0] = '-';
+                pass[1] = 0;
 	      }
 	      bu = adduser(bu, code, 0, pass, sanity_check(fr.global, isbot), isbot);
 
@@ -962,7 +963,7 @@ void link_pref_val(struct userrec *u, char *val)
   if (!ba->hublevel || ba->hublevel == 999) {
     return;
   }
-  sprintf(val, "%02d%s", ba->hublevel, u->handle);
+  egg_snprintf(val, HANDLEN + 4, "%02d%s", ba->hublevel, u->handle);
 }
 
 /*
@@ -973,7 +974,7 @@ void link_pref_val(struct userrec *u, char *val)
 */
 struct userrec *next_hub(struct userrec *current, char *lowval, char *highval)
 {
-  char thisval[NICKLEN + 4] = "", bestmatchval[NICKLEN + 4] = "z", bestallval[NICKLEN + 4] = "z";
+  char thisval[HANDLEN + 4] = "", bestmatchval[HANDLEN + 4] = "z", bestallval[HANDLEN + 4] = "z";
   struct userrec *cur = NULL, *bestmatch = NULL, *bestall = NULL;
 
   if (current)
@@ -988,12 +989,11 @@ struct userrec *next_hub(struct userrec *current, char *lowval, char *highval)
     if (cur->bot && (egg_strcasecmp(cur->handle, conf.bot->nick))) {
       link_pref_val(cur, thisval);
       if ((strcmp(thisval, lowval) < 0) && (strcmp(thisval, highval) > 0) &&(strcmp(thisval, bestmatchval) < 0)) {
-        strcpy(bestmatchval, thisval);
+        strlcpy(bestmatchval, thisval, sizeof(bestmatchval));
         bestmatch = cur;
       }
-      if ((strcmp(thisval, lowval) < 0)
-          && (strcmp(thisval, bestallval) < 0)) {
-        strcpy(bestallval, thisval);
+      if ((strcmp(thisval, lowval) < 0) && (strcmp(thisval, bestallval) < 0)) {
+        strlcpy(bestallval, thisval, sizeof(bestallval));
         bestall = cur;
       }
     }
@@ -1012,7 +1012,7 @@ void autolink_cycle_hub(char *start)
   tand_t *bot = NULL;
 
   link_pref_val(conf.bot->u, myval);
-  strcpy(bestval, myval);
+  strlcpy(bestval, myval, sizeof(bestval));
   for (int i = 0; i < dcc_total; i++) {
    if (dcc[i].type) {
     if (dcc[i].type == &DCC_BOT_NEW)
@@ -1046,7 +1046,7 @@ void autolink_cycle_hub(char *start)
 	    return;
 	  }
 	  if (strcmp(curval, bestval) < 0)
-	    strcpy(bestval, curval);
+	    strlcpy(bestval, curval, sizeof(bestval));
 	}
       }
     }
@@ -1071,7 +1071,7 @@ void autolink_cycle_hub(char *start)
       return;
     }
   } else
-    strcpy(curval, "0");
+    strlcpy(curval, "0", sizeof(curval));
 
   /* link to the (highlest level)/best hub */
   u = next_hub(u, bestval, curval);
@@ -1146,7 +1146,7 @@ void autolink_cycle_leaf(char *start)
     if ((dcc[i].type == &DCC_BOT_NEW) || (dcc[i].type == &DCC_FORK_BOT))
       return;
     if (dcc[i].type == &DCC_BOT) {
-      strcpy(curhub, dcc[i].nick);
+      strlcpy(curhub, dcc[i].nick, sizeof(curhub));
       break;
     }
    }
@@ -1190,7 +1190,7 @@ void autolink_cycle_leaf(char *start)
 	/* tried 3+ random hubs without success, wait for next regular interval call */
 	return;
       /* We need a random bot but *not* the last we tried */
-      strcpy(avoidbot, start);
+      strlcpy(avoidbot, start, sizeof(avoidbot));
     }
   }
 

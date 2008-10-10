@@ -466,11 +466,11 @@ int add_note(char *to, char *from, char *msg, int idx, int echo)
       if (strlen(from) > 40)
 	from[40] = 0;
       if (strchr(from, '@')) {
-	strcpy(botf, from);
+	strlcpy(botf, from, sizeof(botf));
       } else
 	simple_snprintf(botf, sizeof(botf), "%s@%s", from, conf.bot->nick);
     } else
-      strcpy(botf, conf.bot->nick);
+      strlcpy(botf, conf.bot->nick, sizeof(botf));
     i = nextbot(p);
     if (i < 0) {
       if (idx >= 0)

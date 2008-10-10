@@ -299,12 +299,12 @@ void maskhost(const char *s, char *nw)
 /* Convert an interval (in seconds) to one of:
  * "19 days ago", "1 day ago", "18:12"
  */
-void daysago(time_t mynow, time_t then, char *out)
+void daysago(time_t mynow, time_t then, char *out, size_t outsiz)
 {
   if (mynow - then > 86400) {
     int mydays = (mynow - then) / 86400;
 
-    simple_sprintf(out, "%d day%s ago", mydays, (mydays == 1) ? "" : "s");
+    simple_snprintf(out, outsiz, "%d day%s ago", mydays, (mydays == 1) ? "" : "s");
     return;
   }
   egg_strftime(out, 6, "%H:%M", gmtime(&then));
@@ -313,12 +313,12 @@ void daysago(time_t mynow, time_t then, char *out)
 /* Convert an interval (in seconds) to one of:
  * "in 19 days", "in 1 day", "at 18:12"
  */
-void days(time_t mynow, time_t then, char *out)
+void days(time_t mynow, time_t then, char *out, size_t outsiz)
 {
   if (mynow - then > 86400) {
     int mydays = (mynow - then) / 86400;
 
-    simple_sprintf(out, "in %d day%s", mydays, (mydays == 1) ? "" : "s");
+    simple_snprintf(out, outsiz, "in %d day%s", mydays, (mydays == 1) ? "" : "s");
     return;
   }
   egg_strftime(out, 9, "at %H:%M", gmtime(&now));
@@ -327,24 +327,23 @@ void days(time_t mynow, time_t then, char *out)
 /* Convert an interval (in seconds) to one of:
  * "for 19 days", "for 1 day", "for 09:10"
  */
-void daysdur(time_t mynow, time_t then, char *out)
+void daysdur(time_t mynow, time_t then, char *out, size_t outsiz)
 {
   if (mynow - then > 86400) {
     int mydays = (mynow - then) / 86400;
 
-    simple_sprintf(out, "for %d day%s", mydays, (mydays == 1) ? "" : "s");
+    simple_snprintf(out, outsiz, "for %d day%s", mydays, (mydays == 1) ? "" : "s");
     return;
   }
 
   char s[81] = "";
-  int hrs, mins;
 
-  strcpy(out, "for ");
+  strlcpy(out, "for ", outsiz);
   mynow -= then;
-  hrs = (int) (mynow / 3600);
-  mins = (int) ((mynow - (hrs * 3600)) / 60);
-  sprintf(s, "%02d:%02d", hrs, mins);
-  strcat(out, s);
+  int hrs = (int) (mynow / 3600);
+  int mins = (int) ((mynow - (hrs * 3600)) / 60);
+  egg_snprintf(s, sizeof(s), "%02d:%02d", hrs, mins);
+  strlcat(out, s, outsiz);
 }
 
 /* show l33t banner */
@@ -453,13 +452,13 @@ void show_channels(int idx, char *handle)
 
 /* Create a string with random letters and digits
  */
-void make_rand_str(char *s, size_t len)
+void make_rand_str(char *s, size_t len, bool special)
 {
   int r = 0;
   size_t j = 0;
 
   for (j = 0; j < len; j++) {
-    r = randint(4);
+    r = randint(special ? 4 : 3);
     if (r == 0)
       s[j] = '0' + randint(10);
     else if (r == 1)
@@ -507,7 +506,7 @@ char *str_escape(const char *str, const char divc, const char mask)
     }
 
     if (*s == divc || *s == mask) {
-      sprintf(b, "%c%02x", mask, *s);
+      egg_snprintf(b, buflen, "%c%02x", mask, *s);
       b += 3;
       blen += 3;
     } else {
@@ -776,7 +775,7 @@ restart(int idx)
   if (!backgrd || term_z || sdebug) {
     char shit[7] = "";
 
-    simple_sprintf(shit, STR("-%s%s%s"), !backgrd ? "n" : "", term_z ? "t" : "", sdebug ? "D" : "");
+    simple_snprintf(shit, sizeof(shit), STR("-%s%s%s"), !backgrd ? "n" : "", term_z ? "t" : "", sdebug ? "D" : "");
     argv[1] = strdup(shit);
     argv[2] = strdup(shell_escape(conf.bot->nick));
   } else {
@@ -824,13 +823,14 @@ int updatebin(int idx, char *par, int secs)
     return 1;
   }
 
-  char *path = (char *) my_calloc(1, strlen(binname) + strlen(par) + 2);
+  size_t path_siz = strlen(binname) + strlen(par) + 2;
+  char *path = (char *) my_calloc(1, path_siz);
   char *newbin = NULL, buf[DIRMAX] = "";
 #ifndef CYGWIN_HACKS
   int i;
 #endif /* !CYGWIN_HACKS */
 
-  strcpy(path, binname);
+  strlcpy(path, binname, path_siz);
   newbin = strrchr(path, '/');
   if (!newbin) {
     free(path);
@@ -973,7 +973,7 @@ int updatebin(int idx, char *par, int secs)
 
 int bot_aggressive_to(struct userrec *u)
 {
-  char mypval[20] = "", botpval[20] = "";
+  char mypval[HANDLEN + 4] = "", botpval[HANDLEN + 4] = "";
 
   link_pref_val(u, botpval);
   link_pref_val(conf.bot->u, mypval);
@@ -1083,7 +1083,8 @@ char* replace_vars(char *buf) {
 void showhelp(int idx, struct flag_record *flags, const char *string)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
-  char *helpstr = (char *) my_calloc(1, strlen(string) + 1000 + 1);
+  size_t help_siz = strlen(string) + 1000 + 1;
+  char *helpstr = (char *) my_calloc(1, help_siz);
   char tmp[2] = "", flagstr[10] = "";
   bool ok = 1;
 
@@ -1096,7 +1097,7 @@ void showhelp(int idx, struct flag_record *flags, const char *string)
         flagstr[0] = 0;
         while (*string && *string != '}') {
           simple_snprintf(tmp, sizeof(tmp), "%c", *string);
-          strcat(flagstr, tmp);
+          strlcat(flagstr, tmp, sizeof(flagstr));
           string++;
         }
         string++;
@@ -1105,7 +1106,7 @@ void showhelp(int idx, struct flag_record *flags, const char *string)
           ok = 1;
           while (*string && *string != '%') {
             simple_snprintf(tmp, sizeof(tmp), "%c", *string);
-            strcat(helpstr, tmp);
+            strlcat(helpstr, tmp, help_siz);
             string++;
           }
           if (!strncmp(string + 1, "{-", 2)) {
@@ -1131,21 +1132,21 @@ void showhelp(int idx, struct flag_record *flags, const char *string)
       } else if (*(string + 1) == 'd') {
         string += 2;
         if (dcc[idx].u.chat->channel >= 0)
-          strcat(helpstr, settings.dcc_prefix);        
+          strlcat(helpstr, settings.dcc_prefix, help_siz);
       } else if (*(string + 1) == '%') {
         string += 2;
-        strcat(helpstr, "%");        
+        strlcat(helpstr, "%", help_siz);
       } else {
         if (ok) {
           simple_snprintf(tmp, sizeof(tmp), "%c", *string);
-          strcat(helpstr, tmp);
+          strlcat(helpstr, tmp, help_siz);
         }
         string++;
       }
     } else {
       if (ok) {
         simple_snprintf(tmp, sizeof(tmp), "%c", *string);
-        strcat(helpstr, tmp);
+        strlcat(helpstr, tmp, help_siz);
       }
       string++;
     }
@@ -1166,7 +1167,7 @@ void shuffleArray(char* array[], size_t n)
   }
 }
 
-void shuffle(char *string, char *delim)
+void shuffle(char *string, char *delim, size_t str_len)
 {
   char *array[501], *str = NULL, *work = NULL;
   size_t len = 0;
@@ -1184,9 +1185,9 @@ void shuffle(char *string, char *delim)
   shuffleArray(array, len);
   string[0] = 0;
   for (size_t i = 0; i < len; i++) {
-    strcat(string, array[i]);
+    strlcat(string, array[i], str_len);
     if (i != len - 1)
-      strcat(string, delim);
+      strlcat(string, delim, str_len);
   }
   free(work);
   string[strlen(string)] = 0;
@@ -1306,16 +1307,19 @@ char *step_thru_file(FILE *fd)
   }
 
   char tempBuf[1024] = "", *retStr = NULL;
+  size_t ret_siz = 0;
 
   while (!feof(fd)) {
     fgets(tempBuf, sizeof(tempBuf), fd);
     if (!feof(fd)) {
       if (retStr == NULL) {
-        retStr = (char *) my_calloc(1, strlen(tempBuf) + 2);
-        strcpy(retStr, tempBuf);
+        ret_siz = strlen(tempBuf) + 2;
+        retStr = (char *) my_calloc(1, ret_siz);
+        strlcpy(retStr, tempBuf, ret_siz);
       } else {
-        retStr = (char *) my_realloc(retStr, strlen(retStr) + strlen(tempBuf));
-        strcat(retStr, tempBuf);
+        ret_siz = strlen(retStr) + strlen(tempBuf);
+        retStr = (char *) my_realloc(retStr, ret_siz);
+        strlcat(retStr, tempBuf, ret_siz);
       }
       if (retStr[strlen(retStr)-1] == '\n') {
         retStr[strlen(retStr)-1] = 0;

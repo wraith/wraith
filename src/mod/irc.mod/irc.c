@@ -197,7 +197,7 @@ static cache_t *cache_new(char *nick)
   cache_t *cache = (cache_t *) my_calloc(1, sizeof(cache_t));
 
   cache->next = NULL;
-  strcpy(cache->nick, nick);
+  strlcpy(cache->nick, nick, sizeof(cache->nick));
   cache->uhost[0] = 0;
   cache->handle[0] = 0;
 //  cache->user = NULL;
@@ -213,7 +213,7 @@ static cache_chan_t *cache_chan_add(cache_t *cache, char *chname)
   cache_chan_t *cchan = (cache_chan_t *) my_calloc(1, sizeof(cache_chan_t));
   
   cchan->next = NULL;
-  strcpy(cchan->dname, chname);
+  strlcpy(cchan->dname, chname, sizeof(cchan->dname));
   cchan->ban = 0;
   cchan->invite = 0;
   cchan->invited = 0;
@@ -301,14 +301,14 @@ static void cache_invite(struct chanset_t *chan, char *nick, char *host, char *h
     cache->uhost[0] = 0;
 
   if (host && !cache->uhost[0])
-    strcpy(cache->uhost, host);
+    strlcpy(cache->uhost, host, sizeof(cache->uhost));
 
   /* if we find they have a handle but it doesnt match the new handle, wipe it */
   if (handle && cache->handle[0] && egg_strcasecmp(cache->handle, handle))
     cache->handle[0] = 0;
 
   if (handle && !cache->handle[0])
-    strcpy(cache->handle, handle);
+    strlcpy(cache->handle, handle, sizeof(cache->handle));
 
   cache_chan_t *cchan = cache_chan_add(cache, chan->dname);
 
@@ -1015,9 +1015,9 @@ punish_badguy(struct chanset_t *chan, char *whobad,
     }
     /* ... or creating new user and setting that to deop */
     else {
-      strcpy(s1, whobad);
+      strlcpy(s1, whobad, sizeof(s1));
       maskhost(s1, s);
-      strcpy(s1, badnick);
+      strlcpy(s1, badnick, sizeof(s1));
       /* If that handle exists use "badX" (where X is an increasing number)
        * instead.
        */
@@ -1028,7 +1028,7 @@ punish_badguy(struct chanset_t *chan, char *whobad,
           i = atoi(s1 + 3);
           simple_snprintf(s1 + 3, sizeof(s1) - 3, "%d", i + 1);
         } else
-          strcpy(s1, "bad1");   /* Start with '1' */
+          strlcpy(s1, "bad1", sizeof(s1));   /* Start with '1' */
       }
       userlist = adduser(userlist, s1, s, "-", 0, 0);
       fr.match = FR_CHAN;
@@ -1592,7 +1592,7 @@ irc_report(int idx, int details)
   int k = 10;
   size_t len;
 
-  strcpy(q, "Channels: ");
+  strlcpy(q, "Channels: ", sizeof(q));
   for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
     if (idx != DP_STDOUT)
       get_user_flagrec(dcc[idx].user, &fr, chan->dname, chan);
@@ -1614,7 +1614,7 @@ irc_report(int idx, int details)
       len = simple_snprintf(ch, sizeof(ch), "%s%s%s%s, ", chan->dname, p ? "(" : "", p ? p : "", p ? ")" : "");
       if ((k + len) > 70) {
         dprintf(idx, "    %s\n", q);
-        strcpy(q, "           ");
+        strlcpy(q, "           ", sizeof(q));
         k = 10;
       }
       k += my_strcpy(q + k, ch);

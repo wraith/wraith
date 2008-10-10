@@ -36,7 +36,7 @@ STRIP = @STRIP@
 DIFF = @DIFF@
 
 #LIBS = @LIBS@ @ZLIB@ @SSL@ 
-LIBS = @LIBS@ @ZLIB@ 
+LIBS = @LIBS@
 
 DEBCXXFLAGS = -DDEBUG -fno-inline -g3 -ggdb3 -O0 -Wshadow -Wpointer-arith -Wcast-align @GCC3DEB@
 CFLGS = @GCC3@

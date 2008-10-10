@@ -93,6 +93,7 @@ void clear_tmp()
 
   struct dirent *dir_ent = NULL;
   char *file = NULL;
+  size_t flen = 0;
 
   while ((dir_ent = readdir(tmp))) {
     if (strncmp(dir_ent->d_name, ".pid.", 4) && 
@@ -103,10 +104,11 @@ void clear_tmp()
         strcmp(dir_ent->d_name, ".un") && 
         strcmp(dir_ent->d_name, "..")) {
 
-      file = (char *) my_calloc(1, strlen(dir_ent->d_name) + strlen(tempdir) + 1);
+      flen = strlen(dir_ent->d_name) + strlen(tempdir) + 1;
+      file = (char *) my_calloc(1, flen);
 
-      strcat(file, tempdir);
-      strcat(file, dir_ent->d_name);
+      strlcat(file, tempdir, flen);
+      strlcat(file, dir_ent->d_name, flen);
       file[strlen(file)] = 0;
       sdprintf("clear_tmp: %s", file);
       unlink(file);
@@ -1027,9 +1029,10 @@ void check_crontab()
 void crontab_del() {
   char *tmpFile = NULL, *p = NULL, buf[2048] = "";
 
-  tmpFile = (char *) my_calloc(1, strlen(binname) + 100);
+  size_t tmplen = strlen(binname) + 100;
+  tmpFile = (char *) my_calloc(1, tmplen);
 
-  strcpy(tmpFile, shell_escape(binname));
+  strlcpy(tmpFile, shell_escape(binname), tmplen);
   if (!(p = strrchr(tmpFile, '/')))
     return;
   p++;
@@ -1077,7 +1080,7 @@ void crontab_create(int interval) {
   if (shell_exec(buf, NULL, NULL, NULL) && (f = fdopen(fd, "a")) != NULL) {
     buf[0] = 0;
     if (interval == 1)
-      strcpy(buf, "*");
+      strlcpy(buf, "*", 2);
     else {
       int i = 1;
       int si = randint(interval);
