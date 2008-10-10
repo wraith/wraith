@@ -1,5 +1,6 @@
-Wraith botpack by bryan, with credits and thanks to the following:
+Wraith botpack by Bryan (http://wraith.botpack.net)
 (written from a base of Eggdrop 1.6.12)
+Credits and thanks to the following:
 
 * Eggdev for eggdrop obviously.
 * ryguy for beta testing, providing code, finding bugs, and providing input.
@@ -12,8 +13,12 @@ Wraith botpack by bryan, with credits and thanks to the following:
 * Excelsior for celdrop which inspired many features.
 * syt for giving me inspiration to code a more secure bot.
 * Blackjac for helping with the bx auth script with his Sentinel script.
-* Mystikal for various bugs
-* Many others
+* Mystikal for various bugs.
+* Many others.
+
+Credit for suggestions/bugs can be found at: http://wraith.botpack.net/report/9
+Bugs can be reported at: http://wraith.botpack.net/newticket
+Bugs can be looked up by #, ie, '#24' in url: http://wraith.botpack.net/ticket/24/
 
 The botpack ghost inspired the early versions of wraith and a few cmds.
 * einride

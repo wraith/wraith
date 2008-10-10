@@ -406,9 +406,10 @@ static void cmd_about(int idx, char *par)
   dprintf(idx, STR(" * $bExcelsior$b for celdrop which inspired many features.\n"));
   dprintf(idx, STR(" * $bsyt$b for giving me inspiration to code a more secure bot.\n"));
   dprintf(idx, STR(" * $bBlackjac$b for helping with the bx auth script with his Sentinel script.\n"));
-  dprintf(idx, STR(" * $bMystikal$b for various bugs\n"));
+  dprintf(idx, STR(" * $bMystikal$b for various bugs.\n"));
+  dprintf(idx, STR(" * $bMany$b others.\n"));
   dprintf(idx, " \n");
-  dprintf(idx, STR("Credit for suggestions/bugs can be found at: https://wraith.botpack.net/trac/report/9\n"));
+  dprintf(idx, STR("Credit for suggestions/bugs can be found at: http://wraith.botpack.net/report/9\n"));
   dprintf(idx, STR("Bugs can be reported at: http://wraith.botpack.net/newticket\n"));
   dprintf(idx, STR("Bugs can be looked up by #, ie, '#24' in url: http://wraith.botpack.net/ticket/24/\n"));
   dprintf(idx, " \n");
