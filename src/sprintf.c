@@ -28,53 +28,50 @@
 #include "base64.h"
 #include <stdarg.h>
 
-static char *int_to_base10(int val)
+static char buf_convert[20] = "";
+static char *int_to_string(const long val, const unsigned int base)
 {
-  static char buf_base10[17] = "";
-
-  buf_base10[16] = 0;
+  buf_convert[sizeof(buf_convert) - 1] = 0;
   if (!val) {
-    buf_base10[15] = '0';
-    return buf_base10 + 15;
+    buf_convert[sizeof(buf_convert) - 2] = '0';
+    return buf_convert + sizeof(buf_convert) - 2;
   }
 
-  int p = 0;
-  int i = 16;
+  bool negative = 0;
+  long uval = val;
 
   if (val < 0) {
-    p = 1;
-    val *= -1;
+    negative = 1;
+    uval = -val;
   }
-  while (val) {
-    i--;
-    buf_base10[i] = '0' + (val % 10);
-    val /= 10;
+
+  int place = sizeof(buf_convert) - 1;
+  while (uval && place >= 0) {
+    buf_convert[--place] = '0' + uval % base;
+    uval /= base;
   }
-  if (p) {
-    i--;
-    buf_base10[i] = '-';
-  }
-  return buf_base10 + i;
+
+  if (negative)
+    buf_convert[--place] = '-';
+ 
+  return buf_convert + place;
 }
 
-static char *unsigned_int_to_base10(unsigned int val)
+static char *unsigned_int_to_string(unsigned long val, const unsigned int base, bool caps = false)
 {
-  static char buf_base10[16] = "";
-
-  buf_base10[15] = 0;
+  buf_convert[sizeof(buf_convert) - 1] = 0;
   if (!val) {
-    buf_base10[14] = '0';
-    return buf_base10 + 14;
+    buf_convert[sizeof(buf_convert) - 2] = '0';
+    return buf_convert + sizeof(buf_convert) - 2;
   }
 
-  int i = 15;
+  int place = sizeof(buf_convert) - 1;
 
-  while (val) {
-    i--;
-    buf_base10[i] = '0' + (val % 10);
-    val /= 10;
+  while (val && place >= 0) {
+    buf_convert[--place] = (caps ? "0123456789ABCDEF" : "0123456789abcdef")[val % base];
+    val /= base;
   }
-  return buf_base10 + i;
+  return buf_convert + place;
 }
 
 size_t simple_vsnprintf(char *buf, size_t size, const char *format, va_list va)
@@ -82,32 +79,56 @@ size_t simple_vsnprintf(char *buf, size_t size, const char *format, va_list va)
   char *s = NULL;
   char *fp = (char *) format;
   size_t c = 0;
-  unsigned int i = 0;
+  unsigned long i = 0;
+  bool islong = 0, caps = false;
 
   while (*fp && c < size - 1) {
     if (*fp == '%') {
-      fp++;
+re_eval_with_modifier:
+      ++fp;
       switch (*fp) {
-      case 's':
+      case 'l':
+        islong = 1;
+        goto re_eval_with_modifier;
+      case 's': //string
         s = va_arg(va, char *);
         break;
-      case 'd':
+      case 'd': //int
       case 'i':
-        i = va_arg(va, int);
-        s = int_to_base10(i);
+        if (islong) {
+          i = va_arg(va, long);
+          islong = 0;
+        } else
+          i = va_arg(va, int);
+        s = int_to_string(i, 10);
         break;
-      case 'D':
+      case 'D': //stupid eggdrop base64
         i = va_arg(va, int);
         s = int_to_base64((unsigned int) i);
         break;
-      case 'u':
-        i = va_arg(va, unsigned int);
-        s = unsigned_int_to_base10(i);
+      case 'u': //unsigned
+        if (islong) {
+          i = va_arg(va, unsigned long);
+          islong = 0;
+        } else
+          i = va_arg(va, unsigned int);
+        s = unsigned_int_to_string(i, 10);
         break;
-      case '%':
+      case 'X': //HEX
+        caps = true;
+      case 'x': //hex
+        if (islong) {
+          i = va_arg(va, unsigned long);
+          islong = 0;
+        } else
+          i = va_arg(va, unsigned int);
+        s = unsigned_int_to_string(i, 16, caps);
+        caps = false;
+        break;
+      case '%': //%
         buf[c++] = *fp++;
         continue;
-      case 'c':
+      case 'c': //char
         buf[c++] = (char) va_arg(va, int);
         fp++;
         continue;
