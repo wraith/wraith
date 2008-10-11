@@ -87,6 +87,7 @@ size_t simple_vsnprintf(char *buf, size_t size, const char *format, va_list va)
 re_eval_with_modifier:
       ++fp;
       switch (*fp) {
+      case 'z':
       case 'l':
         islong = 1;
         goto re_eval_with_modifier;
