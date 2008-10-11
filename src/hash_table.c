@@ -231,7 +231,7 @@ int hash_table_walk(hash_table_t *ht, hash_table_node_func callback, void *param
 
 static int my_int_cmp(const void *left, const void *right)
 {
-	return((int) left - (int) right);
+	return((long) left - (long) right);
 }
 
 static unsigned int my_string_hash(const void *key)
@@ -273,7 +273,7 @@ static unsigned int my_string_hash(const void *key)
 
 static unsigned int my_int_hash(const void *key)
 {
-	return((unsigned int)key);
+	return((unsigned long)key);
 }
 
 static unsigned int my_mixed_hash (const void *key)

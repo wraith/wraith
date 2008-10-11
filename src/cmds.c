@@ -105,12 +105,12 @@ static void tell_who(int idx, int chan)
     if (dcc[i].type && dcc[i].type == &DCC_CHAT)
       if (dcc[i].u.chat->channel == chan) {
 	if (atr & USER_OWNER) {
-	  simple_snprintf(format, sizeof format, "  [%%.2li]  %%c%%-%us %%s", nicklen);
+	  simple_snprintf(format, sizeof format, "  [%%.2li]  %%c%%-%zus %%s", nicklen);
 	  egg_snprintf(s, sizeof(s), format,
 		  dcc[i].sock, (geticon(i) == '-' ? ' ' : geticon(i)),
 		  dcc[i].nick, dcc[i].host);
 	} else {
-	  simple_snprintf(format, sizeof format, "  %%c%%-%us %%s", nicklen);
+	  simple_snprintf(format, sizeof format, "  %%c%%-%zus %%s", nicklen);
 	  egg_snprintf(s, sizeof(s), format,
 		  (geticon(i) == '-' ? ' ' : geticon(i)),
 		  dcc[i].nick, dcc[i].host);
@@ -145,14 +145,13 @@ static void tell_who(int idx, int chan)
       egg_strftime(s, 20, "%d %b %H:%M %Z", gmtime(&dcc[i].timeval));
       s[20] = 0;
       if (atr & USER_OWNER) {
-        simple_snprintf(format, sizeof format, "  [%%.2lu]  %%s%%c%%-%us (%%s) %%s\n", 
-			    nicklen);
+        simple_snprintf(format, sizeof format, "  [%%.2lu]  %%s%%c%%-%zus (%%s) %%s\n", nicklen);
 	dprintf(idx, format,
 		dcc[i].sock, dcc[i].status & STAT_CALLED ? "<-" : "->",
 		dcc[i].status & STAT_SHARE ? '+' : ' ',
 		dcc[i].nick, s, dcc[i].u.bot->version);
       } else {
-        simple_snprintf(format, sizeof format, "  %%s%%c%%-%us (%%s) %%s\n", nicklen);
+        simple_snprintf(format, sizeof format, "  %%s%%c%%-%zus (%%s) %%s\n", nicklen);
 	dprintf(idx, format,
 		dcc[i].status & STAT_CALLED ? "<-" : "->",
 		dcc[i].status & STAT_SHARE ? '+' : ' ',
@@ -168,13 +167,12 @@ static void tell_who(int idx, int chan)
 	dprintf(idx, "Other people on the bot:\n");
       }
       if (atr & USER_OWNER) {
-	simple_snprintf(format, sizeof format, "  [%%.2lu]  %%c%%-%us ", nicklen);
+	simple_snprintf(format, sizeof format, "  [%%.2lu]  %%c%%-%zus ", nicklen);
 	egg_snprintf(s, sizeof(s), format, dcc[i].sock,
 		(geticon(i) == '-' ? ' ' : geticon(i)), dcc[i].nick);
       } else {
-	simple_snprintf(format, sizeof format, "  %%c%%-%us ", nicklen);
-	egg_snprintf(s, sizeof(s), format,
-		(geticon(i) == '-' ? ' ' : geticon(i)), dcc[i].nick);
+	simple_snprintf(format, sizeof format, "  %%c%%-%zus ", nicklen);
+	egg_snprintf(s, sizeof(s), format, (geticon(i) == '-' ? ' ' : geticon(i)), dcc[i].nick);
       }
       if (atr & USER_MASTER) {
 	if (dcc[i].u.chat->channel < 0)
@@ -4044,7 +4042,9 @@ static void cmd_crontab(int idx, char *par) {
 
 static void my_dns_callback(int id, void *client_data, const char *host, char **ips)
 {
-  int idx = (int) client_data;
+  //64bit hacks
+  long data = (long) client_data;
+  int idx = (int) data;
 
   if (!valid_idx(idx))
     return;
@@ -4074,11 +4074,11 @@ static void cmd_dns(int idx, char *par)
   }
   if (is_dotted_ip(par)) {
     dprintf(idx, "Reversing %s ...\n", par);
-    egg_dns_reverse(par, 20, my_dns_callback, (void *) idx);
+    egg_dns_reverse(par, 20, my_dns_callback, (void *) (long) idx);
 
   } else {
     dprintf(idx, "Looking up %s ...\n", par);
-    egg_dns_lookup(par, 20, my_dns_callback, (void *) idx);
+    egg_dns_lookup(par, 20, my_dns_callback, (void *) (long) idx);
   }
 }
 

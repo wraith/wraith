@@ -395,10 +395,10 @@ tell_user(int idx, struct userrec *u)
       egg_strftime(s1, 6, "%H:%M", gmtime(&li->laston));
   }
   if (!u->bot) {
-    egg_snprintf(format, sizeof format, "%%-%us %%-5s %%-15s %%s (%%-10.10s)\n", HANDLEN);
+    simple_snprintf(format, sizeof format, "%%-%us %%-5s %%-15s %%s (%%-10.10s)\n", HANDLEN);
     dprintf(idx, format, u->handle, get_user(&USERENTRY_PASS, u) ? "yes" : "no", s, s1, (li && li->lastonplace) ? li->lastonplace : "nowhere");
   } else {	/* BOT */
-    egg_snprintf(format, sizeof format, "%%-%us %%-8s %%s (%%-10.10s)\n", HANDLEN);
+    simple_snprintf(format, sizeof format, "%%-%us %%-8s %%s (%%-10.10s)\n", HANDLEN);
     dprintf(idx, format, u->handle, s, s1, (li && li->lastonplace) ? li->lastonplace : "nowhere");
   }  
   /* channel flags? */
@@ -420,7 +420,7 @@ tell_user(int idx, struct userrec *u)
         fr.match = FR_CHAN;
         fr.chan = ch->flags;
         build_flags(s, &fr, NULL);
-        egg_snprintf(format, sizeof format, "%%%us  %%-18s %%-15s %%s\n", HANDLEN-9);
+        simple_snprintf(format, sizeof format, "%%%us  %%-18s %%-15s %%s\n", HANDLEN-9);
         dprintf(idx, format, " ", ch->channel, s, s1);
         if (ch->info != NULL)
   	  dprintf(idx, "    INFO: %s\n", ch->info);
@@ -452,10 +452,10 @@ void tell_user_ident(int idx, char *id)
   char format[81] = "";
 
   if (u->bot) {
-    egg_snprintf(format, sizeof format, "%%-%us FLAGS    LAST\n", HANDLEN);
+    simple_snprintf(format, sizeof format, "%%-%us FLAGS    LAST\n", HANDLEN);
     dprintf(idx, format, "BOTNICK");
   } else {
-    egg_snprintf(format, sizeof format, "%%-%us PASS FLAGS           LAST\n", HANDLEN);
+    simple_snprintf(format, sizeof format, "%%-%us PASS FLAGS           LAST\n", HANDLEN);
     dprintf(idx, format, "HANDLE");
   }
   tell_user(idx, u);
@@ -474,10 +474,10 @@ void tell_users_match(int idx, char *mtch, int start, int limit, char *chname, i
 
   dprintf(idx, "*** Matching '%s':\n", mtch);
   if (isbot) {
-    egg_snprintf(format, sizeof format, "%%-%us FLAGS    LAST\n", HANDLEN);
+    simple_snprintf(format, sizeof format, "%%-%us FLAGS    LAST\n", HANDLEN);
     dprintf(idx, format, "BOTNICK");
   } else {
-    egg_snprintf(format, sizeof format, "%%-%us PASS FLAGS           LAST\n", HANDLEN);
+    simple_snprintf(format, sizeof format, "%%-%us PASS FLAGS           LAST\n", HANDLEN);
     dprintf(idx, format, "HANDLE");
   }
   if (start > 1)

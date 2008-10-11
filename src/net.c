@@ -1684,9 +1684,9 @@ void tell_netdebug(int idx)
       if (socklist[i].flags & SOCK_NONSOCK)
 	strlcat(s, " (file)", sizeof(s));
       if (socklist[i].inbuf != NULL)
-	sprintf(&s[strlen(s)], " (inbuf: %04X)", strlen(socklist[i].inbuf));
+	simple_sprintf(&s[strlen(s)], " (inbuf: %zu)", strlen(socklist[i].inbuf));
       if (socklist[i].outbuf != NULL)
-	sprintf(&s[strlen(s)], " (outbuf: %06lX)", (unsigned long) socklist[i].outbuflen);
+	simple_sprintf(&s[strlen(s)], " (outbuf: %zu)", socklist[i].outbuflen);
       if (socklist[i].host)
         simple_sprintf(&s[strlen(s)], " (%s:%d)", socklist[i].host, socklist[i].port);
       strlcat(s, ",", sizeof(s));

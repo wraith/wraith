@@ -265,7 +265,8 @@ sdprintf(STR("GETIDX: auth: %s, idx: %d"), nick, idx);
 static int auth_tell_walk(const void *key, void *data, void *param)
 {
   Auth *auth = *(Auth **)data;
-  int idx = (int) param;
+  long lparam = (long) param;
+  int idx = (int) lparam;
 
 //  dprintf(idx, "%s(%s!%s) [%s] authtime: %li, atime: %li, Status: %d\n", auth->bd ? "x " : "", auth->nick, 
   dprintf(idx, "(%s!%s) [%s] authtime: %li, atime: %li, Status: %d\n", auth->nick, 
@@ -276,7 +277,7 @@ static int auth_tell_walk(const void *key, void *data, void *param)
 
 void Auth::TellAuthed(int idx)
 {
-  hash_table_walk(ht_host, auth_tell_walk, (void *) idx);
+  hash_table_walk(ht_host, auth_tell_walk, (void *) (long) idx);
 }
 
 void makehash(struct userrec *u, const char *randstring, char *out, size_t out_size)

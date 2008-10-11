@@ -430,7 +430,7 @@ void show_channels(int idx, char *handle)
       total++;
   }
 
-  egg_snprintf(format, sizeof format, "  %%c%%-%us %%-s%%-s%%-s%%-s%%-s%%-s\n", (l+2));
+  simple_snprintf(format, sizeof(format), "  %%c%%-%zus %%-s%%-s%%-s%%-s%%-s%%-s\n", (l+2));
 
   for (chan = chanset;chan;chan = chan->next) {
     get_user_flagrec(u, &fr, chan->dname);
@@ -959,7 +959,7 @@ int updatebin(int idx, char *par, int secs)
       egg_timeval_t howlong;
       howlong.sec = secs;
       howlong.usec = 0;
-      timer_create_complex(&howlong, STR("restarting for update"), (Function) restart, (void *) idx, 0);
+      timer_create_complex(&howlong, STR("restarting for update"), (Function) restart, (void *) (long) idx, 0);
     } else
       restart(idx);
 

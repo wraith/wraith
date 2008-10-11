@@ -67,7 +67,7 @@ static void ghost_link_case(int idx, direction_t direction)
     strlcpy(keyp, SHA1(tmp), ENC_KEY_LEN + 1);
 #ifdef DEBUG
     putlog(LOG_DEBUG, "@", "Link hash for %s: %s", dcc[idx].nick, tmp);
-    putlog(LOG_DEBUG, "@", "outkey (%d): %s", strlen(keyp), keyp);
+    putlog(LOG_DEBUG, "@", "outkey (%zu): %s", strlen(keyp), keyp);
 #endif
     OPENSSL_cleanse(tmp, sizeof(tmp));
 

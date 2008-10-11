@@ -1028,7 +1028,7 @@ int botlink(char *linker, int idx, char *nick)
       dcc[i].u.dns->ibuf = idx;
       dcc[i].bot = 1;
 
-      int dns_id = egg_dns_lookup(bi->address, 20, botlink_dns_callback, (void *) i);
+      int dns_id = egg_dns_lookup(bi->address, 20, botlink_dns_callback, (void *) (long)i);
        /* dns_id 
         * -1 means it was cached and the callback already called
         * -2 means it's already being looked up.. try again later .. */
@@ -1048,7 +1048,8 @@ int botlink(char *linker, int idx, char *nick)
 
 static void botlink_dns_callback(int id, void *client_data, const char *host, char **ips)
 {
-  int i = (int) client_data;
+  long data = (long) client_data;
+  int i = (int) data;
 
   if (!valid_dns_id(i, id))
     return;
@@ -1195,7 +1196,7 @@ void tandem_relay(int idx, char *nick, register int i)
   dcc[i].timeval = now;
   dcc[i].u.dns->ibuf = idx;
   
-  int dns_id = egg_dns_lookup(bi->address, 20, tandem_relay_dns_callback, (void *) i);
+  int dns_id = egg_dns_lookup(bi->address, 20, tandem_relay_dns_callback, (void *) (long) i);
   if (dns_id >= 0)
     dcc[i].dns_id = dns_id;
 
@@ -1205,7 +1206,9 @@ void tandem_relay(int idx, char *nick, register int i)
 
 static void tandem_relay_dns_callback(int id, void *client_data, const char *host, char **ips)
 {
-  int i = (int) client_data, idx = -1;
+  //64bit hacks
+  long data = (long) client_data;
+  int i = (int) data, idx = -1;
 
   if (!valid_dns_id(i, id))
     return;

@@ -83,9 +83,9 @@ void garble(char **inptr, char **outptr)
     }
 
     if (help)
-      sprintf(*outptr, "%d, \"%s\"", chars, obuf);
+      sprintf(*outptr, "%zu, \"%s\"", chars, obuf);
     else
-      sprintf(*outptr, "degarble(%d, \"%s\")", chars, obuf);
+      sprintf(*outptr, "degarble(%zu, \"%s\")", chars, obuf);
     *outptr += strlen(*outptr);
     in = p + 2;
   } else {

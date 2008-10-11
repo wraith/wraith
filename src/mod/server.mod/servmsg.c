@@ -1644,7 +1644,7 @@ static void connect_server(void)
     /* I'm resolving... don't start another server connect request */
     resolvserv = 1;
     /* Resolve the hostname. */
-    int dns_id = egg_dns_lookup(botserver, 20, server_dns_callback, (void *) newidx);
+    int dns_id = egg_dns_lookup(botserver, 20, server_dns_callback, (void *) (long) newidx);
     if (dns_id >= 0)
       dcc[newidx].dns_id = dns_id;
     /* wait for async reply */
@@ -1653,7 +1653,9 @@ static void connect_server(void)
 
 static void server_dns_callback(int id, void *client_data, const char *host, char **ips)
 {
-  int idx = (int) client_data;
+  //64bit hacks
+  long data = (long) client_data;
+  int idx = (int) data;
 
   resolvserv = 0;
 

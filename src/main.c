@@ -340,7 +340,7 @@ static void dtx_arg(int& argc, char *argv[])
       case '2':		/* used for testing new binary through update */
         exit(2);
       case '3':		/* return the size of our settings struct */
-        printf("%d %d\n", SETTINGS_VER, sizeof(settings_t));
+        printf("%d %zu\n", SETTINGS_VER, sizeof(settings_t));
         exit(0);
       case '4':
         readconf(optarg, CONF_ENC);

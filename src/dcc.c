@@ -260,8 +260,8 @@ bot_version(int idx, char *par)
   size_t l = atol(newsplit(&par));
 
   if (l != HANDLEN) {
-    putlog(LOG_BOTS, "*", "Non-matching handle lengths with %s, they use %d characters.", dcc[idx].nick, l);
-    dprintf(idx, "error Non-matching handle length: mine %d, yours %d\n", HANDLEN, l);
+    putlog(LOG_BOTS, "*", "Non-matching handle lengths with %s, they use %zu characters.", dcc[idx].nick, l);
+    dprintf(idx, "error Non-matching handle length: mine %d, yours %zu\n", HANDLEN, l);
     dprintf(idx, "bye %s\n", "bad handlen");
     killsock(dcc[idx].sock);
     lostdcc(idx);
@@ -1387,14 +1387,16 @@ dcc_telnet(int idx, char *buf, int ii)
 
   dcc[i].u.dns->ibuf = idx;
 
-  int dns_id = egg_dns_reverse(s, 20, dcc_telnet_dns_callback, (void *) i);
+  int dns_id = egg_dns_reverse(s, 20, dcc_telnet_dns_callback, (void *) (long) i);
   if (dns_id >= 0)
     dcc[i].dns_id = dns_id;
 }
 
 static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, char **hosts)
 {
-  int i = (int) client_data;
+  // 64bit hacks
+  long data = (long) client_data;
+  int i = (int) data;
 
   if (!valid_dns_id(i, id))
     return;
