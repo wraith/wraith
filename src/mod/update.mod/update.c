@@ -172,7 +172,6 @@ static void got_nu(char *botnick, char *code, char *par)
 
 /* needupdate? curver */
    time_t newts = atol(newsplit(&par));
-   newsplit(&par); //ts
    int newrevision = atol(newsplit(&par));
 
    if (newrevision > revision) {
@@ -356,7 +355,7 @@ static void check_updates()
 
         dcc[i].status &= ~(STAT_GETTINGU | STAT_SENDINGU | STAT_OFFEREDU);
 
-        if (bot && (bot->revision < revision) && (isupdatehub())) {
+        if (bot && (bot->revision < revision)) {
           putlog(LOG_DEBUG, "@", "Bot: %s has build %d, offering them %d", dcc[i].nick, bot->revision, revision);
           dprintf(i, "sb u?\n");
           dcc[i].status |= STAT_OFFEREDU;
