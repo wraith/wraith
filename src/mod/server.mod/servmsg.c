@@ -869,13 +869,13 @@ static int got432(char *from, char *msg)
 static char rnick[NICKLEN] = "";
 static int got433(char *from, char *msg)
 {
-  newsplit(&msg);
   char *tmp = newsplit(&msg);
 
   /* We are online and have a nickname, we'll keep it */
   //Also make sure we're not juping the jupenick if we shouldn't be.
   //Prefer to be on the 'nick'(origbotname) at all times
   if (server_online) {
+    tmp = newsplit(&msg);
 
     if (tried_jupenick)
       jnick_juped = 0;
@@ -904,8 +904,14 @@ static int got433(char *from, char *msg)
       } else
         putlog(LOG_MISC, "*", "NICK IN USE: '%s' (keeping '%s')", tmp, botname);
     }
-  } else
+  } else {
+    //Hack for different responses:
+    //[@] efnet.demon.co.uk 433 * lolwut :Nickname is already in use.
+    //[@] irc.efnet.no 433  lolwut :Nickname is already in use.
+    if (tmp[0] == '*')
+      tmp = newsplit(&msg);
     gotfake433(tmp);
+  }
   return 0;
 }
 
