@@ -1585,7 +1585,11 @@ See also: reload, backup
  
 [B]  $bident-botnick$b   Send botnick instead of shell username on connect (non-ident)
 [B]  $boidentd$b         Make bot try and use oidentd spoofing as BOTNICK.
- 
+
+[B]  $blink_cleartext$b  Allows bots to link without an encryption scheme. This is needed
+                         for allowing older bots to link in. Be sure to never leave this on
+                         unless upgrading or letting an older bot link in to upgrade.
+
 [B]  $bdccauth$b         Boolean (0 or 1). Set to use auth checking on dcc/telnet login.
 [N]  $bop-bots$b         Number of bots to ask every time a oprequest is to be made.
 [N]  $bin-bots$b         Number of bots to ask every time a inrequest is to be made.

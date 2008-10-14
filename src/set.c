@@ -35,6 +35,7 @@ bool oidentd;
 bool ident_botnick;
 int dcc_autoaway;
 bool irc_autoaway;
+bool link_cleartext;
 #ifdef NOT_USED
 int badprocess = DET_IGNORE;
 char process_list[1024] = "";
@@ -92,6 +93,7 @@ static variable_t vars[] = {
  VAR("jupenick",	jupenick,		VAR_STRING|VAR_NOHUB|VAR_JUPENICK|VAR_NODEF,  	0, 0, NULL),
  VAR("kill-threshold",	&kill_threshold,	VAR_INT|VAR_NOLOC,				0, 0, "0"),
  VAR("lag-threshold",	&lag_threshold,		VAR_INT|VAR_NOLHUB,				0, 0, "15"),
+ VAR("link_cleartext",	&link_cleartext,	VAR_INT|VAR_NOLOC|VAR_BOOL,			0, 1, "0"),
  VAR("login",		&login,			VAR_INT|VAR_DETECTED,				0, 4, "warn"),
  VAR("manop-warn",	&manop_warn,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "1"),
  VAR("motd",		motd,			VAR_STRING|VAR_HIDE|VAR_NOLOC,			0, 0, NULL),

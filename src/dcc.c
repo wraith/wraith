@@ -973,6 +973,10 @@ dcc_chat_pass(int idx, char *buf, int atr)
         /* verify we have that type and then initiate it */
         if ((i = link_find_by_type(type)) == -1) {
           putlog(LOG_WARN, "*", STR("%s attempted to link with an invalid encryption. (%d)"), dcc[idx].nick, type);
+          if (type == 0 && !link_cleartext) {
+            putlog(LOG_WARN, "*", "This is likely due to %s needing to be upgraded. Enable 'link_cleartext' to allow linking.", dcc[idx].nick);
+            putlog(LOG_WARN, "*", "Be sure to disable 'link_cleartext' after all bots are upgraded.");
+          }
           killsock(dcc[idx].sock);
           lostdcc(idx);
           return;
@@ -1711,9 +1715,11 @@ dcc_telnet_pass(int idx, int atr)
 
       link_hash(idx, rand);
 
-      for (i = 0; enclink[i].name; i++)
+      
+      for (i = 0; enclink[i].name; i++) {
+        if (enclink[i].type == LINK_CLEARTEXT && !link_cleartext) continue;
         simple_snprintf(buf, sizeof(buf), "%s%d ", buf[0] ? buf : "", enclink[i].type);
-
+      }
       dprintf(-dcc[idx].sock, "neg? %s %s\n", rand, buf);
     } else {
       /* Turn off remote telnet echo (send IAC WILL ECHO). */
