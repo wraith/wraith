@@ -170,10 +170,8 @@ int addparty(char *bot, char *nick, int chan, char flag, int sock, char *from, i
     maxparty += 50;
     party = (party_t *) my_realloc((void *) party, maxparty * sizeof(party_t));
   }
-  strncpy(party[parties].nick, nick, HANDLEN);
-  party[parties].nick[HANDLEN] = 0;
-  strncpy(party[parties].bot, bot, HANDLEN);
-  party[parties].bot[HANDLEN] = 0;
+  strlcpy(party[parties].nick, nick, sizeof(party[parties].nick));
+  strlcpy(party[parties].bot, bot, sizeof(party[parties].bot));
   party[parties].chan = chan;
   party[parties].sock = sock;
   party[parties].status = 0;
@@ -255,8 +253,7 @@ int partynick(char *bot, int sock, char *nick)
   for (int i = 0; i < parties; i++) {
     if (!egg_strcasecmp(party[i].bot, bot) && (party[i].sock == sock)) {
       strlcpy(work, party[i].nick, sizeof(work));
-      strncpy(party[i].nick, nick, HANDLEN);
-      party[i].nick[HANDLEN] = 0;
+      strlcpy(party[i].nick, nick, sizeof(party[i].nick));
       strlcpy(nick, work, HANDLEN + 1);
       return i;
     }

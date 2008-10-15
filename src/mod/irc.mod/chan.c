@@ -505,8 +505,7 @@ static bool detect_chan_flood(char *floodnick, char *floodhost, char *from,
       return 0;
   }
   if (rfc_casecmp(chan->floodwho[which], p)) {	/* new */
-    strncpy(chan->floodwho[which], p, sizeof(chan->floodwho[which]));
-    chan->floodwho[which][sizeof(chan->floodwho[which]) - 1] = 0;
+    strlcpy(chan->floodwho[which], p, sizeof(chan->floodwho[which]));
     chan->floodtime[which] = now;
     chan->floodnum[which] = 1;
     return 0;
@@ -2270,8 +2269,7 @@ static int gotinvite(char *from, char *msg)
       flood = 1;
   if (!flood)
     putlog(LOG_MISC, "*", "%s!%s invited me to %s", nick, from, msg);
-  strncpy(last_invchan, msg, 299);
-  last_invchan[299] = 0;
+  strlcpy(last_invchan, msg, sizeof(last_invchan));
   last_invtime = now;
   chan = findchan(msg);
   if (!chan)

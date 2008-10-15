@@ -44,7 +44,7 @@ struct chanuserrec *add_chanrec(struct userrec *u, char *chname)
     ch->info = NULL;
     ch->flags = 0;
     ch->laston = 0;
-    strncpy(ch->channel, chname, 81);
+    strlcpy(ch->channel, chname, sizeof(ch->channel));
     ch->channel[80] = 0;
     if (!noshare)
       shareout("+cr %s %s\n", u->handle, chname);

@@ -456,7 +456,7 @@ int add_note(char *to, char *from, char *msg, int idx, int echo)
     char x[21] = "";
 
     *p = 0;
-    strncpy(x, to, 20);
+    strlcpy(x, to, sizeof(x));
     x[20] = 0;
     *p = '@';
     p++;

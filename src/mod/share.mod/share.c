@@ -247,9 +247,10 @@ add_delay(struct chanset_t *chan, int plsmns, int mode, char *mask)
   d->chan = chan;
   d->plsmns = plsmns;
   d->mode = mode;
-  d->mask = (char *) my_calloc(1, strlen(mask) + 1);
+  size_t mlen = strlen(mask) + 1;
+  d->mask = (char *) my_calloc(1, mlen);
 
-  strncpy(d->mask, mask, strlen(mask) + 1);
+  strlcpy(d->mask, mask, mlen);
   d->seconds = (int) (now + randint(20));
   d->next = start_delay;
   start_delay = d;
