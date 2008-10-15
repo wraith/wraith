@@ -1275,7 +1275,7 @@ void recheck_channel(struct chanset_t *chan, int dobans)
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
   int stop_reset = 0, botops = 0, nonbotops = 0, botnonops = 0;
 
-  stacking++;
+  ++stacking;
 
   putlog(LOG_DEBUG, "*", "recheck_channel %s", chan->dname);
 
@@ -1285,11 +1285,11 @@ void recheck_channel(struct chanset_t *chan, int dobans)
     if (m) {
       if (m->user && m->user->bot && (m->user->flags & USER_OP)) {
         if (hasop)
-          botops++;
+          ++botops;
         else
-          botnonops++;
+          ++botnonops;
       } else if (hasop)
-        nonbotops++;
+        ++nonbotops;
     }
   }
 
@@ -1310,15 +1310,21 @@ void recheck_channel(struct chanset_t *chan, int dobans)
   /* this can all die, we want to enforce +bitch/+take first :) */
 
   /* This is a bad hack for +e/+I */
-  if (dobans == 2 && !channel_take(chan) && me_op(chan) && do_eI) {
-    chan->channel.last_eI = now;
-    if (!(chan->ircnet_status & CHAN_ASKED_EXEMPTS) && use_exempts == 1) {
+  if (dobans == 2 && !channel_take(chan)) {
+    if (!(chan->status & CHAN_ASKEDBANS)) {
+      chan->status |= CHAN_ASKEDBANS;
+      dprintf(DP_MODE, "MODE %s +b\n", chan->name);
+    }
+    if (do_eI) {
+      chan->channel.last_eI = now;
+      if (!(chan->ircnet_status & CHAN_ASKED_EXEMPTS) && use_exempts == 1) {
         chan->ircnet_status |= CHAN_ASKED_EXEMPTS;
         dprintf(DP_MODE, "MODE %s +e\n", chan->name);
-    }
-    if (!(chan->ircnet_status & CHAN_ASKED_INVITES) && use_invites == 1) {
-      chan->ircnet_status |= CHAN_ASKED_INVITES;
-      dprintf(DP_MODE, "MODE %s +I\n", chan->name);
+      }
+      if (!(chan->ircnet_status & CHAN_ASKED_INVITES) && use_invites == 1) {
+        chan->ircnet_status |= CHAN_ASKED_INVITES;
+        dprintf(DP_MODE, "MODE %s +I\n", chan->name);
+      }
     }
   }
 
