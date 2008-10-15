@@ -17,6 +17,7 @@
 * Fixed countless buffer overflows. (fixes #226)
 * Fixed a rare segfault on userfile transfer timeouts
 * Fixed bots getting confused about their hub/uplink after userfile transfer fails (fixes #61)
+* Fixed cmd_handle not properly bounds checking max handlen. (fixes #305)
 
 1.2.15 - http://wraith.botpack.net/milestone/1.2.15
 * Fix a possible segfault when binaries compiled wrong

@@ -1178,7 +1178,7 @@ static void cmd_handle(int idx, char *par)
 {
   char newhandle[HANDLEN + 1] = "";
 
-  strncpy(newhandle, newsplit(&par), sizeof newhandle);
+  strlcpy(newhandle, newsplit(&par), sizeof newhandle);
 
   if (!newhandle[0]) {
     dprintf(idx, "Usage: handle <new-handle>\n");
@@ -1192,10 +1192,8 @@ static void cmd_handle(int idx, char *par)
     dprintf(idx, "Sorry, perm owners may not change their handle without recompiling binaries.\n");
     return;
   } else if (strchr(BADHANDCHARS, newhandle[0]) != NULL) {
-    dprintf(idx, "Bizarre quantum forces prevent handle from starting with '%c'.\n",
-	    newhandle[0]);
-  } else if (get_user_by_handle(userlist, newhandle) &&
-	     egg_strcasecmp(dcc[idx].nick, newhandle)) {
+    dprintf(idx, "Bizarre quantum forces prevent handle from starting with '%c'.\n", newhandle[0]);
+  } else if (get_user_by_handle(userlist, newhandle) && egg_strcasecmp(dcc[idx].nick, newhandle)) {
     dprintf(idx, "Somebody is already using %s.\n", newhandle);
   } else if (!egg_strcasecmp(newhandle, conf.bot->nick)) {
     dprintf(idx, "Hey!  That's MY name!\n");

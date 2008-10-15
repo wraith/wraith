@@ -558,6 +558,7 @@ int change_handle(struct userrec *u, char *newh)
 	if (dcc[i].u.chat->channel < GLOBAL_CHANS)
 	  botnet_send_nkch(i, s);
       }
+      break;
     }
   return 1;
 }
