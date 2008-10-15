@@ -151,6 +151,13 @@ void bot_remotecmd(int idx, char *par) {
   if (par[0])
     fidx = newsplit(&par);
 
+  /* Make sure the bot is valid */
+  int i = nextbot(fbot);
+  if (i != idx) {
+    fake_alert(idx, "direction", fbot, "rc");
+    return;
+  }
+
   if (!egg_strcasecmp(tbot, conf.bot->nick)) {
     gotremotecmd(tbot, fbot, fhnd, fidx, par);
   } else if (!strcmp(tbot, "*")) {
@@ -173,6 +180,13 @@ void bot_remotereply(int idx, char *par) {
     fhnd = newsplit(&par);
   if (par[0])
     fidx = newsplit(&par);
+
+  /* Make sure the bot is valid */
+  int i = nextbot(fbot);
+  if (i != idx) {
+    fake_alert(idx, "direction", fbot, "rr");
+    return;
+  }
 
   if (!egg_strcasecmp(tbot, conf.bot->nick)) {
     gotremotereply(fbot, fhnd, fidx, par);
