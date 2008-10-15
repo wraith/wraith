@@ -512,11 +512,13 @@ static void transfer_get_timeout(int i)
     }
     unlink(dcc[i].u.xfer->filename);
     putlog(LOG_BOTS, "*","Timeout on userfile transfer.");
-    dprintf(y, "bye\n");
-    simple_snprintf(xx, sizeof xx,"Disconnected %s (timed-out userfile transfer)",
-		 dcc[y].nick);
-    botnet_send_unlinked(y, dcc[y].nick, xx);
-    chatout("*** %s\n", xx);
+    //Bot may have already disconnected, hence y = -1
+    if (y != -1) {
+      dprintf(y, "bye\n");
+      simple_snprintf(xx, sizeof xx,"Disconnected %s (timed-out userfile transfer)", dcc[y].nick);
+      botnet_send_unlinked(y, dcc[y].nick, xx);
+      chatout("*** %s\n", xx);
+    }
     if (y < i) {
       int t = y;
 
@@ -538,11 +540,12 @@ static void transfer_get_timeout(int i)
       dcc[y].status &= ~STAT_SENDINGU;
     }
     putlog(LOG_BOTS, "*","Timeout on binary transfer.");
-    dprintf(y, "bye\n");
-    simple_snprintf(xx, sizeof xx,"Disconnected %s (timed-out binary transfer)",
-		 dcc[y].nick);
-    botnet_send_unlinked(y, dcc[y].nick, xx);
-    chatout("*** %s\n", xx);
+    if (y != -1) {
+      dprintf(y, "bye\n");
+      simple_snprintf(xx, sizeof xx,"Disconnected %s (timed-out binary transfer)", dcc[y].nick);
+      botnet_send_unlinked(y, dcc[y].nick, xx);
+      chatout("*** %s\n", xx);
+    }
     if (y < i) {
       int t = y;
 
@@ -553,8 +556,10 @@ static void transfer_get_timeout(int i)
     lostdcc(y);
     xx[0] = 0;
   }
-  killsock(dcc[i].sock);
-  lostdcc(i);
+  if (i != -1) {
+    killsock(dcc[i].sock);
+    lostdcc(i);
+  }
 }
 
 void tout_dcc_send(int idx)
