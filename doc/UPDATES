@@ -15,6 +15,8 @@
 * Added 'link_cleartext' which allows disabling of cleartext bot linking (needed for upgrades)
 * Fixed bug where salts were not written to binary when first generating them
 * Fixed countless buffer overflows. (fixes #226)
+* Fixed a rare segfault on userfile transfer timeouts
+* Fixed bots getting confused about their hub/uplink after userfile transfer fails (fixes #61)
 
 1.2.15 - http://wraith.botpack.net/milestone/1.2.15
 * Fix a possible segfault when binaries compiled wrong
