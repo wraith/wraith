@@ -1092,7 +1092,7 @@ static void show_flag(int idx, char *work, int *cnt, const char *name, unsigned 
     work[0] = 0;
   }
   if (!work[0])
-    strlcpy(work, "  ", 3);
+    strlcpy(work, "  ", worksiz);
   if (name && name[0]) {
     chr_state[0] = 0;
     if (state) {
@@ -1104,7 +1104,7 @@ static void show_flag(int idx, char *work, int *cnt, const char *name, unsigned 
     }
     strlcat(chr_state, COLOR_END(idx), sizeof(chr_state));
     egg_snprintf(tmp, sizeof tmp, "%s%-17s", chr_state, name);
-    strlcat(work, tmp, sizeof(work));
+    strlcat(work, tmp, worksiz);
   }
   if (*cnt >= FLAG_COLS)
     dprintf(idx, "%s\n", work);
