@@ -1,4 +1,7 @@
 #! /usr/bin/env bash
+
+export TZ=GMT
+
 parse_date() {
   echo "$1" | grep "Last Changed Date" | sed "s/Last Changed Date: \(.* \)[-+].*$/\1/"
 }

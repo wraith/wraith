@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 #endif
     strptime(Time, Format, &ts);
     free(Time);
-    tim = mktime(&ts);
+    tim = timegm(&ts);
     printf("%ld\n", tim);
   } else if (argc == 2) { //18734563281
     const time_t tm = atol(argv[1]);

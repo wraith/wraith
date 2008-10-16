@@ -1,6 +1,6 @@
 #! /bin/sh
 
-unset TZ 
+export TZ=GMT
 
 rm -f ts ts.exe
 gcc -o ts src/timestamp.c > /dev/null 2>&1
