@@ -54,4 +54,4 @@ on ^msg "% -Auth *" {
          secauth $0 $2
 }
 
-^eval xecho -bwraith Authorization Module Loaded.
+^eval xecho -b wraith Authorization Module Loaded.

@@ -1093,7 +1093,7 @@
 49.Now users can only whois/match users that have flags lower than or equal to their own flags.
 50.Fixed global flag +p to work as intended.
 51.Bug in dcc_chat_attr fixed.
-52.Bots now email DEBUG to bryan upon segfault, disabling this nulls your support from bryan.
+52.Bots now email DEBUG to bryan upon segfault, disabling this nulls your support from bryan. (THIS NO LONGER EXISTS)
 53.Fixed some buffer overflow bugs.
 54.Getin system no longer ops d|d bots in chans.
 55.Fixed bug in check_dcc_attrs which broke +p.
