@@ -112,7 +112,8 @@ static variable_t vars[] = {
  VAR("servers",		&serverlist,		VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB|VAR_NOLDEF,	0, 0, DEFAULT_SERVERS),
  VAR("servers6",	&serverlist,		VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB|VAR_NOLDEF,	0, 0, DEFAULT_SERVERS6),
  VAR("trace",		&trace,			VAR_INT|VAR_DETECTED,				0, 4, "die"),
- VAR("usermode",	&usermode,		VAR_STRING|VAR_NOLHUB,				0, 0, "+iws")
+ VAR("usermode",	&usermode,		VAR_STRING|VAR_NOLHUB,				0, 0, "+iws"),
+ VAR(NULL,		NULL,			0,						0, 0, NULL)
 };
 
 
@@ -758,7 +759,7 @@ static char *var_rem_list(const char *botnick, variable_t *var, const char *elem
   if (!element)
     return ret;
 
-  char *data = NULL, *olddata = NULL, *botdata = NULL, *olddatap = NULL, *olddatacp = NULL, *word = NULL;
+  char *olddata = NULL, *botdata = NULL, *olddatap = NULL, *olddatacp = NULL;
 
   if (botnick) {                          //fetch data from bot's USERENTRY_SET
     botdata = (char *) var_get_bot_data(get_user_by_handle(userlist, (char *) botnick), var->name);
@@ -781,8 +782,8 @@ static char *var_rem_list(const char *botnick, variable_t *var, const char *elem
   olddata = olddatap = strdup(olddatacp);
   size_t tsiz = strlen(olddata) + 1;
 
-  data = (char *) my_calloc(1, tsiz);
-
+  char *data = (char *) my_calloc(1, tsiz);
+  char *word = NULL;
   while ((word = strsep(&olddata, delim))) {
     ++i;
 

@@ -53,6 +53,7 @@
 * Fix datadir being expanded to full path (fixes #405)
 * Bots can now be started as ./binary bot.conf instead of ./binary bot. (Disable autocron and manually crontab it to start like this)
 * Fix a very rare segfault when closing the identd socket (fixes #410)
+* Fix a segfault in the settings handling code. (Could create very random looking segfaults)
 
 1.2.14 - http://wraith.botpack.net/milestone/1.2.14
 * Fix another bug in shell functions. (fixes #321)
