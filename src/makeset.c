@@ -21,6 +21,7 @@ int main(int argc, char *argv[]) {
   char c;
 
   while (file.getline(line, sizeof(line))) {
+    if (line[0] == '#') continue;
     if (line[0] == ':') {
       type = &line[1];
       if (type == "end")

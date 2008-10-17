@@ -19,6 +19,7 @@
 * Fixed bots getting confused about their hub/uplink after userfile transfer fails (fixes #61)
 * Fixed cmd_handle not properly bounds checking max handlen. (fixes #305)
 * Bans are now only retrieved from server after being opped. (addresses #406)
+* Update efnet server list and add new alias 'bs' for botset. (To get new defaults: 'set -YES servers -' and 'set -YES alias -')
 
 1.2.15 - http://wraith.botpack.net/milestone/1.2.15
 * Fix a possible segfault when binaries compiled wrong
