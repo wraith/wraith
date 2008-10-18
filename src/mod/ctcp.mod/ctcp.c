@@ -409,9 +409,8 @@ static int ctcp_FINGER(char *nick, char *uhost, struct userrec *u, char *object,
     idletime = now - cloak_awaytime;
   else if (cloak_heretime)
     idletime = now - cloak_heretime;
-  dprintf(DP_HELP, "NOTICE %s :\001%s %s (%s@%s) Idle %d second%s\001\n", nick, keyword, "",
-                   conf.username ? conf.username : conf.bot->nick, 
-                   (strchr(botuserhost, '@') + 1), (int) idletime, idletime == 1 ? "" : "s");
+  dprintf(DP_HELP, "NOTICE %s :\001%s %s (%s) Idle %d second%s\001\n", nick, keyword, "",
+                   botuserhost, (int) idletime, idletime == 1 ? "" : "s");
   return BIND_RET_BREAK;
 }
 
