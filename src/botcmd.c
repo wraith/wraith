@@ -346,7 +346,8 @@ static void remote_tell_who(int idx, char *nick, int chan)
       l = strlen(c->dname);
       if (i + l < 1021) {
 	if (i > 10) {
-          simple_snprintf(s, sizeof(s), "%s, %s", s, c->dname);
+          strlcat(s, ", ", sizeof(s));
+          strlcat(s, c->dname, sizeof(s));
 	} else {
           strlcpy(s, c->dname, sizeof(s));
 	  i += (l + 2);

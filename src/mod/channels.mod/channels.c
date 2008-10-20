@@ -211,7 +211,9 @@ void rcmd_chans(char *fbot, char *fhand, char *fidx) {
   if (server_online) {
     for (chan = chanset; chan; chan = chan->next) {
       if (!channel_active(chan) && (shouldjoin(chan) || chan->channel.jointime)) {
-        simple_snprintf(buf, sizeof(buf), "%s%s%s", buf[0] ? buf : "", buf[0] ? " " : "", chan->dname);
+        if (buf[0])
+          strlcat(buf, " ", sizeof(buf));
+        strlcat(buf, chan->dname, sizeof(buf));
       }
     }
 
@@ -593,7 +595,7 @@ static void set_mode_protect(struct chanset_t *chan, char *set)
     chan->closed_invite = 0;
 }
 
-static void get_mode_protect(struct chanset_t *chan, char *s)
+static void get_mode_protect(struct chanset_t *chan, char *s, size_t ssiz)
 {
   char *p = s, s1[121] = "";
   int tst;
@@ -652,8 +654,8 @@ static void get_mode_protect(struct chanset_t *chan, char *s)
   *p = 0;
   if (s1[0]) {
     s1[strlen(s1) - 1] = 0;
-    strlcat(s, " ", sizeof(s));
-    strlcat(s, s1, sizeof(s));
+    strlcat(s, " ", ssiz);
+    strlcat(s, s1, ssiz);
   }
 }
 
@@ -808,7 +810,7 @@ void channels_report(int idx, int details)
 	s[strlen(s) - 2] = 0;
       if (!s[0])
 	strlcpy(s, "lurking", sizeof(s));
-      get_mode_protect(chan, s2);
+      get_mode_protect(chan, s2, sizeof(s2));
       if (channel_closed(chan)) {
         if (chan->closed_invite)
           strlcat(s2, "i", sizeof(s2));

@@ -737,7 +737,7 @@ bool write_chans(FILE *f, int idx)
     char inactive = 0;
 
     putlog(LOG_DEBUG, "*", "writing channel %s to userfile..", chan->dname);
-    get_mode_protect(chan, w);
+    get_mode_protect(chan, w, sizeof(w));
 
     /* if a bot should explicitly NOT join, just set it +inactive ... */
     if (idx >= 0 && !botshouldjoin(dcc[idx].user, chan))
@@ -841,7 +841,7 @@ bool write_chans_compat(FILE *f, int idx)
     char inactive = 0;
 
     putlog(LOG_DEBUG, "*", "writing channel %s to userfile..", chan->dname);
-    get_mode_protect(chan, w);
+    get_mode_protect(chan, w, sizeof(w));
 
     /* if a bot should explicitly NOT join, just set it +inactive ... */
     if (idx >= 0 && !botshouldjoin(dcc[idx].user, chan))

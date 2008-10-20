@@ -1188,7 +1188,7 @@ static void cmd_chaninfo(int idx, char *par)
     } else
       date[0] = 0;
     if (chan->added_by && chan->added_by[0])
-      simple_snprintf(nick, sizeof nick, "%s", chan->added_by);
+      strlcpy(nick, chan->added_by, sizeof(nick));
     else
       nick[0] = 0;
     putlog(LOG_CMDS, "*", "#%s# chaninfo %s", dcc[idx].nick, chname);
@@ -1197,7 +1197,7 @@ static void cmd_chaninfo(int idx, char *par)
     else
       dprintf(idx, "Settings for channel %s:\n", chan->dname);
 /* FIXME: SHOW_CHAR() here */
-    get_mode_protect(chan, work);
+    get_mode_protect(chan, work, sizeof(work));
     dprintf(idx, "Protect modes (chanmode): %s\n", work[0] ? work : "None");
     dprintf(idx, "Protect topic (topic)   : %s\n", chan->topic[0] ? chan->topic : "");
 /* Chanchar template

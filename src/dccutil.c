@@ -88,14 +88,14 @@ add_cr(char *buf)
   return WBUF;
 }
 
-static void
-colorbuf(char *buf, size_t len, int idx)
+static size_t
+colorbuf(char *buf, size_t len, int idx, size_t bufsiz)
 {
 //  char *buf = *bufp;
   int cidx = coloridx(idx);
   static int cflags;
   int schar = 0;
-  char buf3[1024] = "", buf2[1024] = "", c = 0;
+  char buf3[1024] = "", buf2[15] = "", c = 0;
 
   for (size_t i = 0; i < len; i++) {
     c = buf[i];
@@ -118,33 +118,36 @@ colorbuf(char *buf, size_t len, int idx)
         switch (c) {
           case 'b':
             if (cflags & CFLGS_BOLD) {
-              simple_snprintf(buf2, sizeof(buf2), "%s", BOLD_END(idx));
+              strlcpy(buf2, BOLD_END(idx), sizeof(buf2));
               cflags &= ~CFLGS_BOLD;
             } else {
               cflags |= CFLGS_BOLD;
-              simple_snprintf(buf2, sizeof(buf2), "%s", BOLD(idx));
+              strlcpy(buf2, BOLD(idx), sizeof(buf2));
             }
             break;
           case 'u':
             if (cflags & CFLGS_UNDERLINE) {
-              simple_snprintf(buf2, sizeof(buf2), "%s", UNDERLINE_END(idx));
+              strlcpy(buf2, UNDERLINE_END(idx), sizeof(buf2));
               cflags &= ~CFLGS_UNDERLINE;
             } else {
-              simple_snprintf(buf2, sizeof(buf2), "%s", UNDERLINE(idx));
+              strlcpy(buf2, UNDERLINE(idx), sizeof(buf2));
               cflags |= CFLGS_UNDERLINE;
             }
             break;
           case 'f':
             if (cflags & CFLGS_FLASH) {
-              simple_snprintf(buf2, sizeof(buf2), "%s", FLASH_END(idx));
+              strlcpy(buf2, FLASH_END(idx), sizeof(buf2));
               cflags &= ~CFLGS_FLASH;
             } else {
-              simple_snprintf(buf2, sizeof(buf2), "%s", FLASH(idx));
+              strlcpy(buf2, FLASH(idx), sizeof(buf2));
               cflags |= CFLGS_FLASH;
             }
             break;
           default:
-            simple_snprintf(buf2, sizeof(buf2), "$%c", c);    /* No identifier, put the '$' back in */
+            /* No identifier, put the '$' back in */
+            buf2[0] = '$';
+            buf2[1] = c;
+            buf2[2] = 0;
             break;
         }
       } else {                    /* These are character replacements */
@@ -165,7 +168,8 @@ colorbuf(char *buf, size_t len, int idx)
             simple_snprintf(buf2, sizeof(buf2), "%s%c%s", GREEN(idx), c, COLOR_END(idx));
             break;
           default:
-            simple_snprintf(buf2, sizeof(buf2), "%c", c);
+            buf2[0] = c;
+            buf2[1] = 0;
             break;
         }
       }
@@ -178,7 +182,10 @@ colorbuf(char *buf, size_t len, int idx)
           case 'f':
             break;
           default:
-            simple_snprintf(buf2, sizeof(buf2), "$%c", c);    /* No identifier, put the '$' back in */
+            /* No identifier, put the '$' back in */
+            buf2[0] = '$';
+            buf2[1] = c;
+            buf2[2] = 0;
         }
       } else {
         switch (c) {
@@ -186,15 +193,16 @@ colorbuf(char *buf, size_t len, int idx)
             schar++;
             break;
           default:
-            simple_snprintf(buf2, sizeof(buf2), "%c", c);
+            buf2[0] = c;
+            buf2[1] = 0;
             break;
         }
       }
     }
-    simple_snprintf(buf3, sizeof(buf3), "%s%s", buf3[0] ? buf3 : "", buf2[0] ? buf2 : "");
+    if (buf2[0])
+      strlcat(buf3, buf2, sizeof(buf3));
   }
-  buf3[strlen(buf3)] = 0;
-  strlcpy(buf, buf3, 1024);
+  return strlcpy(buf, buf3, bufsiz);
 }
 
 /* Dump a potentially super-long string of text.
@@ -273,9 +281,7 @@ dprintf(int idx, const char *format, ...)
     tputs(-idx, buf, len);
   } else if (idx > 0x7FF0) {
     if (idx == DP_STDOUT || idx == DP_STDOUT) {
-      colorbuf(buf, len, -1);
-      buf[sizeof(buf) - 1] = 0;
-      len = strlen(buf);
+      len = colorbuf(buf, len, -1, sizeof(buf));
     }
 
     switch (idx) {
@@ -311,14 +317,12 @@ dprintf(int idx, const char *format, ...)
     }
     return;
   } else {                      /* normal chat text */
-    colorbuf(buf, len, idx);
-    buf[sizeof(buf) - 1] = 0;
-    len = strlen(buf);
+    len = colorbuf(buf, len, idx, sizeof(buf));
 
     if (len > 1000) {           /* Truncate to fit */
-      buf[1000] = 0;
-      strlcat(buf, "\n", sizeof(buf));
-      len = 1001;
+      len = 1000;
+      buf[len - 1] = '\n';
+      buf[len] = 0;
     }
     if (dcc[idx].simul >= 0 && !dcc[idx].irc) {
       bounce_simul(idx, buf);

@@ -327,7 +327,7 @@ int u_pass_match(struct userrec *u, char *in)
 
   char *cmp = (char *) get_user(&USERENTRY_PASS, u), pass[MAXPASSLEN + 1] = "";
 
-  simple_snprintf(pass, sizeof pass, "%s", in);
+  strlcpy(pass, in, sizeof(pass));
 
   if (!cmp && (!pass[0] || (pass[0] == '-')))
     return 1;

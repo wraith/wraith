@@ -736,32 +736,25 @@ void werr(int errnum)
 int email(char *subject, char *msg, int who)
 {
   struct utsname un;
-  char run[2048] = "", addrs[1024] = "";
-  int mail = 0, sendmail = 0;
+  char run[2048] = "", addrs[100] = "";
+  bool mail = 0, sendmail = 0;
   FILE *f = NULL;
 
   uname(&un);
   if (is_file(STR("/usr/sbin/sendmail")))
-    sendmail++;
+    sendmail = 1;
   else if (is_file(STR("/usr/bin/mail")))
-    mail++;
+    mail = 1;
   else {
     putlog(LOG_WARN, "*", STR("I Have no usable mail client."));
     return 1;
   }
 
-  if (who & EMAIL_OWNERS) {
-    simple_snprintf(addrs, sizeof(addrs), "%s", replace(settings.owneremail, ",", " "));
-  }
-  if (who & EMAIL_TEAM) {
-    if (addrs[0])
-      simple_snprintf(addrs, sizeof(addrs), STR("%s wraith@shatow.net"), addrs);
-    else
-      simple_snprintf(addrs, sizeof(addrs), STR("wraith@shatow.net"));
-  }
+  if (who & EMAIL_OWNERS)
+    strlcpy(addrs, replace(settings.owneremail, ",", " "), sizeof(addrs));
 
   if (sendmail)
-    simple_snprintf(run, sizeof(run), STR("/usr/sbin/sendmail -t"));
+    strlcpy(run, STR("/usr/sbin/sendmail -t"), sizeof(run));
   else if (mail)
     simple_snprintf(run, sizeof(run), STR("/usr/bin/mail %s -a \"From: %s@%s\" -s \"%s\" -a \"Content-Type: text/plain\""), addrs, conf.bot->nick ? conf.bot->nick : "none", un.nodename, subject);
 
@@ -875,7 +868,7 @@ char *my_username()
     pw = getpwuid(myuid);
     ContextNote(STR("getpwuid(): Success"));
     if (pw)
-      simple_snprintf(username, sizeof username, "%s", pw->pw_name);
+      strlcpy(username, pw->pw_name, sizeof(username));
 #endif /* CYGWIN_HACKS */
   }
   return username[0] ? username : NULL;

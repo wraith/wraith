@@ -267,7 +267,8 @@ void tell_verbose_uptime(int idx)
   simple_snprintf(outbuf, sizeof(outbuf), "Online for %s", s);
   if (restart_time) {
     daysdur(now, restart_time, s, sizeof(s));
-    simple_snprintf(outbuf, sizeof(outbuf), "%s (%s %s)", outbuf, restart_was_update ? "updated" : "restarted", s);
+    size_t olen = strlen(outbuf);
+    simple_snprintf(&outbuf[olen], sizeof(outbuf) - olen, " (%s %s)", restart_was_update ? "updated" : "restarted", s);
   }
 
 #if HAVE_GETRUSAGE
@@ -383,7 +384,7 @@ bool is_hub(const char* nick) {
     if ((p2 = strchr(p, ' '))) {
 
       len = p2 - p;
-      simple_snprintf(hubbuf, len + 1, "%s", p);
+      strlcpy(hubbuf, p, len + 1);
       if (!egg_strncasecmp(nick, hubbuf, HANDLEN))
         return 1;
     }
@@ -402,7 +403,7 @@ void load_internal_users()
   struct userrec *u = NULL;
 
   /* hubs */
-  simple_snprintf(buf, sizeof buf, "%s", settings.hubs);
+  strlcpy(buf, settings.hubs, sizeof(buf));
   p = buf;
   while (p) {
     ln = p;
@@ -455,7 +456,7 @@ void load_internal_users()
   /* perm owners */
   owner[0] = 0;
 
-  simple_snprintf(buf, sizeof buf, "%s", settings.owners);
+  strlcpy(buf, settings.owners, sizeof(buf));
   p = buf;
   while (p) {
     ln = p;

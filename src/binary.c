@@ -395,10 +395,10 @@ static void edpack(settings_t *incfg, const char *in_hash, int what)
 //makes it harder to fuck with, then again, maybe current is fine?
 #define dohash(_field)		do {								\
 	if (what == PACK_ENC)									\
-	  simple_snprintf(nhash, sizeof(nhash), "%s%s", nhash[0] ? nhash : "", _field);		\
+	  strlcat(nhash, _field, sizeof(nhash));						\
 	dofield(_field);									\
 	if (what == PACK_DEC)									\
-	  simple_snprintf(nhash, sizeof(nhash), "%s%s", nhash[0] ? nhash : "", _field);		\
+	  strlcat(nhash, _field, sizeof(nhash));						\
 } while (0)
 
 #define update_hash()		do {				\

@@ -120,7 +120,7 @@ bool check_aliases(int idx, const char *cmd, const char *args)
       /* Rewrite the cmd including the inserted cmdpass if the cmd has one, and the user provided any param */
       if (argsdup && argsdup[0] && has_cmd_pass(p)) {
         pass = newsplit(&argsdup);
-        simple_snprintf(myargs, size, "%s", pass);
+        strlcpy(myargs, pass, size);
         if (a && a[0]) {
           strlcat(myargs, " ", size);
           strlcat(myargs, a, size);
@@ -132,9 +132,11 @@ bool check_aliases(int idx, const char *cmd, const char *args)
       } else {
         /* Otherwise, just construct it based on cmd and params if provided */
         if (argsdup && argsdup[0]) {
-          simple_snprintf(myargs, size, "%s %s", a, argsdup);
+          strlcpy(myargs, a, size);
+          strlcat(myargs, " ", size);
+          strlcat(myargs, argsdup, size);
         } else 
-          simple_snprintf(myargs, size, "%s", a);
+          strlcpy(myargs, a, size);
       }
 
       if (a && a[0])

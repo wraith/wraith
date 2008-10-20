@@ -615,7 +615,7 @@ static int ctcp_CHAT(char *nick, char *uhost, struct userrec *u, char *object, c
     return BIND_RET_LOG;
 
     if (u_pass_match(u, "-")) {
-      simple_snprintf(ctcp_reply, sizeof(ctcp_reply), "%s\001ERROR no password set\001", ctcp_reply);
+      strlcat(ctcp_reply, "\001ERROR no password set\001", sizeof(ctcp_reply));
       return BIND_RET_BREAK;
     }
 
@@ -626,7 +626,7 @@ static int ctcp_CHAT(char *nick, char *uhost, struct userrec *u, char *object, c
         ix = i;
     }
     if (dcc_total == max_dcc || (ix < 0 && (ix = listen_all(0, 0)) < 0))
-      simple_snprintf(ctcp_reply, sizeof(ctcp_reply), "%s\001ERROR no telnet port\001", ctcp_reply);
+      strlcat(ctcp_reply, "\001ERROR no telnet port\001", sizeof(ctcp_reply));
     else {
       if (listen_time <= 2)
         listen_time++;

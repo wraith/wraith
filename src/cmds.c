@@ -497,7 +497,7 @@ static void cmd_newpass(int idx, char *par)
       dprintf(idx, "Please use at least 6 characters.\n");
       return;
     } else {
-      simple_snprintf(pass, sizeof pass, "%s", newpass);
+      strlcpy(pass, newpass, sizeof(pass));
     }
   }
   if (strlen(pass) > MAXPASSLEN)
@@ -529,9 +529,8 @@ static void cmd_secpass(int idx, char *par)
     if (strlen(newpass) < 6) {
       dprintf(idx, "Please use at least 6 characters.\n");
       return;
-    } else {
-      simple_snprintf(pass, sizeof pass, "%s", newpass);
-    }
+    } else
+      strlcpy(pass, newpass, sizeof(pass));
   }
   if (strlen(pass) > MAXPASSLEN)
     pass[MAXPASSLEN] = 0;
@@ -639,7 +638,7 @@ static void cmd_help(int idx, char *par)
   } else {
     if (!strchr(par, '*') && !strchr(par, '?'))
       nowild++;
-    simple_snprintf(match, sizeof match, "%s", newsplit(&par));
+    strlcpy(match, newsplit(&par), sizeof(match));
   }
   if (!nowild)
     dprintf(idx, "Showing help topics matching '%s' for flags: (%s)\n", match, flg);
@@ -686,8 +685,8 @@ static void cmd_help(int idx, char *par)
             /* we dumped the buf to dprintf, now start a new one... */
             simple_snprintf(buf, sizeof(buf), "  ");
           }
-          //This overlaps, behavior undefined with snprintf.
-          sprintf(buf, "%s%-14.14s", buf[0] ? buf : "", cmdlist[n].name);
+          size_t blen = strlen(buf);
+          egg_snprintf(&buf[blen], sizeof(buf) - blen, "%-14.14s", cmdlist[n].name);
           first = 0;
           end = 0;
           i++;
@@ -832,8 +831,8 @@ static void print_users(char *work, int idx, int *cnt, int *tt, int bot, int fla
           (!bot || (bot == 2 && bot_hublevel(u) < 999) || (bot == 1 && bot_hublevel(u) == 999))) {
       if (!*cnt)
         egg_snprintf(work, worksiz, "%-11s: ", str);
-      else
-        simple_snprintf(work, worksiz, "%s, ", work[0] ? work : "");
+      else 
+        strlcat(work, ", ", worksiz);
 
       strlcat(work, u->handle, worksiz);
       (*cnt)++;
@@ -1241,7 +1240,7 @@ static void cmd_chpass(int idx, char *par)
       good = 1;
     } else {
       if (goodpass(newpass, idx, NULL)) {
-        simple_snprintf(pass, sizeof pass, "%s", newpass);
+        strlcpy(pass, newpass, sizeof(pass));
         good = 1;
       }
     }
@@ -1293,9 +1292,8 @@ static void cmd_chsecpass(int idx, char *par)
       if (strlen(newpass) < 6) {
         dprintf(idx, "Please use at least 6 characters.\n");
         return;
-      } else {
-        simple_snprintf(pass, sizeof pass, "%s", newpass);
-      }
+      } else
+        strlcpy(pass, newpass, sizeof(pass));
     }
     if (strlen(pass) > MAXPASSLEN)
       pass[MAXPASSLEN] = 0;

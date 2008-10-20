@@ -25,7 +25,6 @@
 #define ERR_MAX         23
 
 #define EMAIL_OWNERS    BIT0
-#define EMAIL_TEAM      BIT1
 
 #define DETECT_LOGIN 	1
 #define DETECT_TRACE 	2

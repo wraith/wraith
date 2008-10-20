@@ -675,8 +675,11 @@ static int msgc_help(Auth *a, char *chname, char *par)
 
   for (entry = table->entries; entry && entry->next; entry = entry->next)
     if (((chname && chname[0] && entry->cflags & AUTH_CHAN) || 
-        ((!chname || !chname[0]) && entry->cflags & AUTH_MSG)) && flagrec_ok(&entry->user_flags, &fr))
-      simple_snprintf(outbuf, sizeof(outbuf), "%s%s%s", outbuf[0] ? outbuf : "", outbuf[0] ? " " : "", entry->mask);
+        ((!chname || !chname[0]) && entry->cflags & AUTH_MSG)) && flagrec_ok(&entry->user_flags, &fr)) {
+      if (outbuf[0])
+        strlcat(outbuf, " ", sizeof(outbuf));
+      strlcat(outbuf, entry->mask, sizeof(outbuf));
+    }
 
   strlcat(outbuf, "\n", sizeof(outbuf));
 

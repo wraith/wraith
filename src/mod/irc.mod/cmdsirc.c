@@ -1169,8 +1169,10 @@ static void cmd_getkey(int idx, char *par)
     simple_snprintf(outbuf, sizeof(outbuf), "%s has no key set.", chan->dname);
   else
     simple_snprintf(outbuf, sizeof(outbuf), "Key for %s is: %s", chan->dname, chan->channel.key);
-  if (chan->key_prot[0])
-    simple_snprintf(outbuf, sizeof(outbuf), "%s (Enforcing +k %s)", outbuf, chan->key_prot);
+  if (chan->key_prot[0]) {
+    size_t olen = strlen(outbuf);
+    simple_snprintf(&outbuf[olen], sizeof(outbuf) - olen, " (Enforcing +k %s)", chan->key_prot);
+  }
   dprintf(idx, "%s\n", outbuf);
 }
 

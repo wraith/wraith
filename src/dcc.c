@@ -1718,7 +1718,7 @@ dcc_telnet_pass(int idx, int atr)
       
       for (i = 0; enclink[i].name; i++) {
         if (enclink[i].type == LINK_CLEARTEXT && !link_cleartext) continue;
-        simple_snprintf(buf, sizeof(buf), "%s%d ", buf[0] ? buf : "", enclink[i].type);
+        simple_snprintf(&buf[strlen(buf)], sizeof(buf) - strlen(buf), "%d ", enclink[i].type);
       }
       dprintf(-dcc[idx].sock, "neg? %s %s\n", rand, buf);
     } else {

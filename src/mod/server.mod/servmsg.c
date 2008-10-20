@@ -1323,22 +1323,21 @@ static char *
 hide_chans(const char *nick, struct userrec *u, char *_channels, bool publicOnly)
 {
   char *channels = strdup(_channels), *channels_p = channels;
-  char *chans = NULL, *chname = NULL, s[5] = "";
+  char *chname = NULL;
   size_t len = strlen(channels) + 100 + 1;
   struct chanset_t *chan = NULL;
   struct flag_record fr = { FR_CHAN | FR_GLOBAL, 0, 0, 0 };
 
-  chans = (char *) my_calloc(1, len);
+  char *chans = (char *) my_calloc(1, len), *p = NULL;
 
   while ((chname = newsplit(&channels))[0]) {
-    /* save and skip any modes in front of #chan */
-    s[0] = 0;
-    while (chname[0] && chname[0] != '#') {
-      simple_snprintf(s, sizeof(s), "%s%c", s[0] ? s : "", chname[0]);
-      chname++;
-    }
+    /* skip any modes in front of #chan */
+    if (!(p = strchr(chname, '#')))
+      if (!(p = strchr(chname, '&')))
+        if (!(p = strchr(chname, '!')))
+          continue;
 
-    chan = findchan_by_dname(chname);
+    chan = findchan_by_dname(p);
 
     if (chan && !publicOnly)
      get_user_flagrec(u, &fr, chan->dname, chan);
@@ -1353,9 +1352,8 @@ hide_chans(const char *nick, struct userrec *u, char *_channels, bool publicOnly
         (publicOnly && !(channel_hidden(chan)))
        ) {
       if (chans[0])
-        simple_snprintf(chans, len, "%s %s%s", chans, s, chname);
-      else
-        simple_snprintf(chans, len, "%s%s", s, chname);
+        strlcat(chans, " ", len);
+      strlcat(chans, chname, len);
     }
   }
   free(channels_p);

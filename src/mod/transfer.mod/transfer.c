@@ -485,7 +485,8 @@ void dcc_send(int idx, char *buf, int len)
     fclose(dcc[idx].u.xfer->f);
     siz = strlen(tempdir) + strlen(dcc[idx].u.xfer->filename) + 1;
     b = (char *) my_calloc(1, siz);
-    simple_snprintf(b, siz, "%s%s", tempdir, dcc[idx].u.xfer->filename);
+    strlcpy(b, tempdir, siz);
+    strlcat(b, dcc[idx].u.xfer->filename, siz);
     unlink(b);
     free(b);
     killsock(dcc[idx].sock);

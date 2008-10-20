@@ -262,7 +262,7 @@ void putlog(int type, const char *chname, const char *format, ...)
     if (type == last_type && 
         !egg_strncasecmp(chname, last_chname, sizeof(last_chname)) && 
         !egg_strncasecmp(va_out, last_log, sizeof(last_log))) {
-      log_repeats++;
+      ++log_repeats;
 
       return;
     }
@@ -291,9 +291,11 @@ void putlog(int type, const char *chname, const char *format, ...)
 
     egg_strftime(stamp, sizeof(stamp), LOG_TS, t);
     /* Place the timestamp in the string to be printed */
-    simple_snprintf(out, sizeof out, "%s %s", stamp, va_out);
+    strlcpy(out, stamp, sizeof(out));
+    strlcat(out, " ", sizeof(out));
+    strlcat(out, va_out, sizeof(out));
   } else
-    simple_snprintf(out, sizeof out, "%s", va_out);
+    strlcpy(out, va_out, sizeof(out));
 
   /* strcat(out, "\n"); */
 

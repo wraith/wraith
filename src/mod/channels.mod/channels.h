@@ -18,7 +18,7 @@
 
 static void check_expired_masks(void);
 static void tell_masks(const char type, int idx, bool show_inact, char *match, bool all = 0);
-static void get_mode_protect(struct chanset_t *chan, char *s);
+static void get_mode_protect(struct chanset_t *chan, char *s, size_t ssiz);
 static void set_mode_protect(struct chanset_t *chan, char *set);
 static int count_mask(maskrec *);
 

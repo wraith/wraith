@@ -789,12 +789,13 @@ static char *var_rem_list(const char *botnick, variable_t *var, const char *elem
 
     if ((num && num != i) || (!num && egg_strncasecmp(word, element, elen))) {
       /* Reconstruct the left and right part of the list...*/
-      if (data && data[0] && word && word[0])
-        simple_snprintf(data, tsiz, "%s,%s", data, word);
-      else
-        simple_snprintf(data, tsiz, "%s", word);
+      if (data && data[0] && word && word[0]) {
+        strlcat(data, ",", tsiz);
+        strlcat(data, word, tsiz);
+      } else
+        strlcpy(data, word, tsiz);
     } else  /* minus the part we are removing ... */
-      simple_snprintf(ret, sizeof(ret), "%s", word);
+      strlcpy(ret, word, sizeof(ret));
   }
 
   if (num <= i && ret[0]) {

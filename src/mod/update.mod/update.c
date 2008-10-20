@@ -252,12 +252,13 @@ void finish_update(int idx)
     fclose(f);
   }
 
-  simple_snprintf(buf, sizeof(buf), "%s%s", conf.binpath,  strrchr(dcc[idx].u.xfer->filename, '/'));
+  strlcpy(buf, conf.binpath, sizeof(buf));
+  strlcat(buf, strrchr(dcc[idx].u.xfer->filename, '/'), sizeof(buf));
 
   movefile(dcc[idx].u.xfer->filename, buf); 
   fixmod(buf);
 
-  simple_snprintf(buf, sizeof(buf), "%s", strrchr(buf, '/'));
+  strlcpy(buf, strrchr(buf, '/'), sizeof(buf));
   buf2 = buf;
   buf2++;
 
