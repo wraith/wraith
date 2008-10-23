@@ -641,8 +641,6 @@ readsocks(const char *fname)
       floodless = 1;
     else if (!strcmp(type, STR("+buildts")))
       old_buildts = strtol(bufp, NULL, 10);
-    else if (!strcmp(type, STR("+jupenick")))
-      jnick = strdup(bufp);
     else if (!strcmp(type, STR("+botname")))
       nick = strdup(bufp);
     else if (!strcmp(type, STR("+ip4")))
@@ -663,14 +661,6 @@ readsocks(const char *fname)
 
   unlink(fname);
   fclose(f);
-  if (jnick) {
-    var_set_by_name(conf.bot->nick, "jupenick", jnick);
-    var_set_userentry(conf.bot->nick, "jupenick", jnick);
-  }
-  if (nick) {
-    var_set_by_name(conf.bot->nick, "nick", nick);
-    var_set_userentry(conf.bot->nick, "nick", nick);
-  }
 
   if (servidx >= 0) {
     char nserv[50] = "";
@@ -744,8 +734,6 @@ restart(int idx)
   if (server_online) {
     if (botname[0])
       lfprintf(socks->f, STR("+botname %s\n"), botname);
-    if (jupenick[0])
-      lfprintf(socks->f, STR("+jupenick %s\n"), jupenick);
   }
   lfprintf(socks->f, STR("+online_since %li\n"), online_since);
   if (floodless)
