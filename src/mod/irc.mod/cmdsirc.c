@@ -559,11 +559,11 @@ static void cmd_op(int idx, char *par)
 static void mass_mode(const char* chname, const char* mode, char *par)
 {
   char list[101] = "", buf[2048] = "";
-  size_t list_len = 0, buf_len = 0;
+  size_t list_len = 0, buf_len = 0, cnt = 0;
+  register const unsigned short max_lines = floodless ? 15 : default_alines;
+  unsigned short lines = 0;
 
   while (par[0]) {
-    size_t cnt = 0;
-
     *(buf + buf_len++) = 'M';
     *(buf + buf_len++) = 'O';
     *(buf + buf_len++) = 'D';
@@ -578,7 +578,7 @@ static void mass_mode(const char* chname, const char* mode, char *par)
 
       /* Make list of nicks */
       const char* nick = newsplit(&par);
-      list_len += strlcpy(list + list_len, nick, sizeof(list) - list_len); 
+      list_len += strlcpy(list + list_len, nick, sizeof(list) - list_len);
       if ((++cnt < modesperline) && par[0])
         *(list + list_len++) = ' ';
     }
@@ -588,10 +588,18 @@ static void mass_mode(const char* chname, const char* mode, char *par)
     buf_len += strlcpy(buf + buf_len, list, sizeof(buf) - buf_len);
     *(buf + buf_len++) = '\r';
     *(buf + buf_len++) = '\n';
-    list[0] = list_len = 0;
+
+    if (++lines >= max_lines) {
+      buf[buf_len] = 0;
+      tputs(serv, buf, buf_len);
+      buf[0] = buf_len = lines = 0;
+    }
+    list[0] = list_len = cnt = 0;
   }
-  buf[buf_len] = 0;
-  tputs(serv, buf, buf_len);
+  if (buf[0]) {
+    buf[buf_len] = 0;
+    tputs(serv, buf, buf_len);
+  }
 }
 
 void mass_request(char *botnick, char *code, char *par)
@@ -886,9 +894,11 @@ static void cmd_mmode(int idx, char *par)
   while (bots) {
     work = work_list[bpos] = (char*) my_calloc(1, work_size);
 
-    if (local)
-      simple_snprintf(work, work_size, "%s %s", mode, chan->dname);
-    else if (!simul)
+    if (local) {
+      strlcpy(work, mode, work_size);
+      strlcat(work, " ", work_size);
+      strlcat(work, chan->dname, work_size);
+    } else if (!simul)
       simple_snprintf(work, work_size, "mr %s %s", mode, chan->dname);
     else
       work[0] = 0;
@@ -896,8 +906,8 @@ static void cmd_mmode(int idx, char *par)
     /* Make list of assumed lines (alines) */
     for (i = 0; i < amodes; ++i) {
       if (overlaps[tpos]++ < overlap) {
-        strcat(work, " ");
-        strcat(work, targets[tpos]->nick);
+        strlcat(work, " ", work_size);
+        strlcat(work, targets[tpos]->nick, work_size);
       }
       if (++tpos >= targetcount)
         tpos = 0;
@@ -908,8 +918,8 @@ static void cmd_mmode(int idx, char *par)
       int atpos = tpos;
       for (i = 0; i < (smodes - amodes); ++i) {
         if (overlaps[atpos]++ < overlap) {
-          strcat(work, " ");
-          strcat(work, targets[atpos]->nick);
+          strlcat(work, " ", work_size);
+          strlcat(work, targets[atpos]->nick, work_size);
         }
 	if (++atpos >= targetcount)
           atpos = 0;
