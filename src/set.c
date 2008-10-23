@@ -276,6 +276,8 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
     if (!strcmp(var->name, "ident-botnick"))
       strlcpy(botuser, conf.username && !num ? conf.username : origbotname, 21);
   } else if (var->flags & VAR_STRING) {
+    char *olddata = ((char*) var->mem) ? strdup((char*) var->mem) : NULL;
+
     if (data)
       strlcpy((char *) var->mem, data, var->size);
     else
@@ -283,19 +285,27 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
 
     if (!conf.bot->hub) {
       if (var->flags & VAR_JUPENICK) {
+        //Don't allow setting to the same as origbotname
+        if (data && !rfc_casecmp(jupenick, origbotname)) {
+          ((char *) var->mem)[0] = 0;
+          data = NULL;
+        }
+
         //rolls = 0;
         //altnick_char = 0;
         // Don't send nick changes on restart, no need.
         if (server_online && !parsing_botset) {
-          if (data) {
+          //New jupenick, no old value, or old value and it has changed.
+          if (data && (!olddata || (olddata && strcmp(olddata, jupenick)))) {
             // If not on the new nick, jump to it
-            if (rfc_casecmp(botname, (char *) var->mem)) {
+            if (!match_my_nick(jupenick)) {
               tried_jupenick = 1;
-              dprintf(DP_SERVER, "NICK %s\n", (char *) var->mem);
+              dprintf(DP_SERVER, "NICK %s\n", jupenick);
             }
-          } else {
-            // Unset jupenick, try for 'nick' now
-            if (rfc_casecmp(botname, origbotname))
+          // Unset and there was an old value
+          } else if (!data && olddata) { 
+            // Unset jupenick, try for 'nick' now if we were on jupenick
+            if (match_my_nick(olddata))
               dprintf(DP_SERVER, "NICK %s\n", origbotname);
           }
         }
@@ -303,17 +313,28 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
         // Default to botnick
         if (!data)
           strlcpy((char *) var->mem, conf.bot->nick, var->size);
-        // Don't send nick changes on restart, no need.
+
+        // Only send nick changes if online and not loading
         if (server_online && !parsing_botset) {
-          // If not already on jupenick and not on the new nick, jump to the new nick
-          if (jupenick[0] && rfc_casecmp(botname, jupenick) && rfc_casecmp(botname, (char *) var->mem))
-            dprintf(DP_SERVER, "NICK %s\n", (char *) var->mem);
-          // No jupenick set
-          else if (!jupenick[0] && rfc_casecmp(botname, (char *) var->mem))
-            dprintf(DP_SERVER, "NICK %s\n", (char *) var->mem);
+          // the nick changed and not on the new nick already
+          if (((!data && olddata) || (data && !olddata)) && (!olddata || (olddata && strcmp(olddata, origbotname)))) {
+            // Unset the rolls/altnick stuff as we're starting over from scratch.
+
+            // If not already on jupenick and not on the new nick, jump to the new nick
+            if (jupenick[0] && !match_my_nick(jupenick) && !match_my_nick(origbotname)) {
+              altnick_char = rolls = 0;
+              dprintf(DP_SERVER, "NICK %s\n", origbotname);
+              // No jupenick set
+            } else if (!jupenick[0] && !match_my_nick(origbotname)) {
+              altnick_char = rolls = 0;
+              dprintf(DP_SERVER, "NICK %s\n", origbotname);
+            }
+          }
         }
       }
     }
+    if (olddata)
+      free(olddata);
   } else if (var->flags & VAR_RATE) {
     char *p = NULL;
     
