@@ -1002,7 +1002,7 @@ int cmd_set_real(const char *botnick, int idx, char *par)
       return 0;
     }
 
-    if (!strcmp(data, "-"))
+    if (!list && !strcmp(data, "-"))
       data = NULL;
 
     if (botnick) {

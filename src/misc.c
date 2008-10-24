@@ -570,7 +570,7 @@ int str_isdigit(const char *str)
 {
   if (!str || (str && !*str))
     return 0;
-  if (*str == '-')
+  if (*str == '-' && str[1])
     str++;
 
   for(; *str; ++str) {
