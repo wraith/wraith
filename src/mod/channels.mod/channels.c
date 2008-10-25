@@ -144,8 +144,6 @@ static void got_cset(char *botnick, char *code, char *par)
   while (chan) {
     chname = chan->dname;
     do_chanset(NULL, chan, par, DO_LOCAL);
-    if (!conf.bot->hub && chan->status & CHAN_BITCH)
-      recheck_channel(chan, 0);
     if (!all)
       chan = NULL;
     else

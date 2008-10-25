@@ -308,6 +308,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
 {
   bool error = 0;
   int old_status = chan->status,
+      old_ircnet_status = chan->ircnet_status,
       old_mode_mns_prot = chan->mode_mns_prot,
       old_mode_pls_prot = chan->mode_pls_prot;
   char s[121] = "", result_extra[RESULT_LEN / 2] = "";
@@ -783,14 +784,19 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
         chan->status |= CHAN_JOINING;
       }
     }
-    if ((old_status ^ chan->status) & (CHAN_ENFORCEBANS | CHAN_BITCH | CHAN_BOTBITCH | CHAN_CLOSED | CHAN_PRIVATE)) {
-      recheck_channel(chan, 1);
-    /* if we -take, recheck the chan for modes and shit */
-    /* also -[bot]bitch/-private might allow for auto-opping users */
-    } else if ((chan->status ^ old_status) & (CHAN_TAKE | CHAN_BITCH | CHAN_BOTBITCH | CHAN_PRIVATE)) {
-      recheck_channel(chan, 1);
-    } else if (old_mode_pls_prot != chan->mode_pls_prot || old_mode_mns_prot != chan->mode_mns_prot) {
-      recheck_channel_modes(chan);
+    if (me_op(chan)) {
+      if ((old_status ^ chan->status) & (CHAN_ENFORCEBANS|CHAN_NOUSERBANS|CHAN_DYNAMICBANS) || (old_ircnet_status ^ chan->ircnet_status) & (CHAN_NOUSEREXEMPTS|CHAN_NOUSERINVITES|CHAN_DYNAMICEXEMPTS|CHAN_DYNAMICINVITES)) {
+        recheck_channel(chan, 1);
+      /* if we -take, recheck the chan for modes and shit */
+      /* also -[bot]bitch/-private might allow for auto-opping users */
+      } else if ((chan->status ^ old_status) & (CHAN_BITCH | CHAN_BOTBITCH | CHAN_PRIVATE | CHAN_CLOSED)) {
+        recheck_channel(chan, 0);
+      } else if ((old_status & CHAN_TAKE) && !(chan->status & CHAN_TAKE)) {
+        //Set -take, fetch bans/exempts/invites
+        recheck_channel(chan, 2);
+      } else if (old_mode_pls_prot != chan->mode_pls_prot || old_mode_mns_prot != chan->mode_mns_prot) {
+        recheck_channel_modes(chan);
+      }
     }
   }
   if (result && result[0] && result_extra[0])
@@ -867,6 +873,8 @@ void clear_channel(struct chanset_t *chan, bool reset)
   chan->channel.exempt = NULL;
   clear_masklist(chan->channel.invite);
   chan->channel.invite = NULL;
+
+  chan->status &= ~CHAN_HAVEBANS;
 
   if (reset)
     init_channel(chan, 1);

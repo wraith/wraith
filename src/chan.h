@@ -249,6 +249,7 @@ struct chanset_t {
 #define CHAN_AUTOOP         BIT25
 #define CHAN_JOINING        BIT26	/* attempting to join, dont flood with JOIN #chan */
 #define CHAN_MEANKICKS      BIT27	/* use mean/offensive kicks/bans */
+#define CHAN_HAVEBANS       BIT28	/* have been opped and received the ban list */
 
 #define CHAN_ASKED_EXEMPTS  BIT0
 #define CHAN_ASKED_INVITES  BIT1

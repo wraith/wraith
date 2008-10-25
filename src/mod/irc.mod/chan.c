@@ -1277,7 +1277,7 @@ void recheck_channel(struct chanset_t *chan, int dobans)
 
   ++stacking;
 
-  putlog(LOG_DEBUG, "*", "recheck_channel %s", chan->dname);
+  putlog(LOG_DEBUG, "*", "recheck_channel(%s, %d)", chan->dname, dobans);
 
   for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
     bool hasop = chan_hasop(m);
@@ -1308,26 +1308,28 @@ void recheck_channel(struct chanset_t *chan, int dobans)
   }
 
   /* this can all die, we want to enforce +bitch/+take first :) */
+  if (!channel_take(chan)) {
 
-  /* This is a bad hack for +e/+I */
-  if (dobans == 2 && !channel_take(chan)) {
-    if (!(chan->status & CHAN_ASKEDBANS)) {
-      chan->status |= CHAN_ASKEDBANS;
-      dprintf(DP_MODE, "MODE %s +b\n", chan->name);
-    }
-    if (do_eI) {
-      chan->channel.last_eI = now;
-      if (!(chan->ircnet_status & CHAN_ASKED_EXEMPTS) && use_exempts == 1) {
-        chan->ircnet_status |= CHAN_ASKED_EXEMPTS;
-        dprintf(DP_MODE, "MODE %s +e\n", chan->name);
+    /* This is a bad hack for +e/+I */
+    if (dobans == 2 && chan->channel.members > 1) {
+      if (!(chan->status & (CHAN_ASKEDBANS|CHAN_HAVEBANS))) {
+        chan->status |= CHAN_ASKEDBANS;
+        dprintf(DP_MODE, "MODE %s +b\n", chan->name);
       }
-      if (!(chan->ircnet_status & CHAN_ASKED_INVITES) && use_invites == 1) {
-        chan->ircnet_status |= CHAN_ASKED_INVITES;
-        dprintf(DP_MODE, "MODE %s +I\n", chan->name);
+      if (do_eI) {
+        chan->channel.last_eI = now;
+        if (!(chan->ircnet_status & CHAN_ASKED_EXEMPTS) && use_exempts == 1) {
+          chan->ircnet_status |= CHAN_ASKED_EXEMPTS;
+          dprintf(DP_MODE, "MODE %s +e\n", chan->name);
+        }
+        if (!(chan->ircnet_status & CHAN_ASKED_INVITES) && use_invites == 1) {
+          chan->ircnet_status |= CHAN_ASKED_INVITES;
+          dprintf(DP_MODE, "MODE %s +I\n", chan->name);
+        }
       }
     }
-  }
 
+  //Check +d/+O/+k
   for (m = chan->channel.member; m && m->nick[0]; m = m->next) { 
     simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
 
@@ -1338,37 +1340,43 @@ void recheck_channel(struct chanset_t *chan, int dobans)
              simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
              m->user = get_user_by_host(s);
            }
+      }
+      get_user_flagrec(m->user, &fr, chan->dname, chan);
+      //Already a bot opped, dont bother resetting masks
+      if (glob_bot(fr) && chan_hasop(m) && !match_my_nick(m->nick))
+        stop_reset = 1;
+      check_this_member(chan, m->nick, &fr);
     }
-    get_user_flagrec(m->user, &fr, chan->dname, chan);
-    if (glob_bot(fr) && chan_hasop(m) && !match_my_nick(m->nick))
-      stop_reset = 1;
-    check_this_member(chan, m->nick, &fr);
-  }
 
-  if (dobans) {
-    if (channel_nouserbans(chan) && !stop_reset)
-      resetbans(chan);
-    else
-      recheck_bans(chan);
-    if (use_invites && !(chan->ircnet_status & CHAN_ASKED_INVITES)) {
-      if (channel_nouserinvites(chan) && !stop_reset)
-	resetinvites(chan);
+    //Only reset masks if the bot has already received the ban list before (meaning it has already been opped once)
+    //Ie, don't set bans without knowing what they are! (asked for above on first op)
+    if (dobans && (chan->status & CHAN_HAVEBANS)) {
+      if (channel_nouserbans(chan) && !stop_reset)
+        resetbans(chan);
       else
-	recheck_invites(chan);
+        recheck_bans(chan);
+      if (use_invites && !(chan->ircnet_status & CHAN_ASKED_INVITES)) {
+        if (channel_nouserinvites(chan) && !stop_reset)
+          resetinvites(chan);
+        else
+          recheck_invites(chan);
+      }
+      if (use_exempts && !(chan->ircnet_status & CHAN_ASKED_EXEMPTS)) {
+        if (channel_nouserexempts(chan) && !stop_reset)
+          resetexempts(chan);
+        else
+          recheck_exempts(chan);
+      } else {
+        if (channel_enforcebans(chan)) 
+          enforce_bans(chan);
+      }
+      // Flush out mask changes
+      flush_mode(chan, QUICK); 
+
+      if ((chan->status & CHAN_ASKEDMODES) && !channel_inactive(chan)) 
+        dprintf(DP_MODE, "MODE %s\n", chan->name);
+      recheck_channel_modes(chan);
     }
-    if (use_exempts && !(chan->ircnet_status & CHAN_ASKED_EXEMPTS)) {
-      if (channel_nouserexempts(chan) && !stop_reset)
-	resetexempts(chan);
-      else
-	recheck_exempts(chan);
-    } else {
-      if (channel_enforcebans(chan)) 
-        enforce_bans(chan);
-    }
-    flush_mode(chan, QUICK); 
-    if ((chan->status & CHAN_ASKEDMODES) && !channel_inactive(chan)) 
-      dprintf(DP_MODE, "MODE %s\n", chan->name);
-    recheck_channel_modes(chan);
   }
   --stacking;
 }
@@ -1940,8 +1948,15 @@ static int got368(char *from, char *msg)
   newsplit(&msg);
   chname = newsplit(&msg);
   chan = findchan(chname);
-  if (chan)
+  if (chan) {
     chan->status &= ~CHAN_ASKEDBANS;
+    chan->status |= CHAN_HAVEBANS;
+
+    if (channel_nouserbans(chan))
+      resetbans(chan);
+    else
+      recheck_bans(chan);
+  }
   /* If i sent a mode -b on myself (deban) in got367, either
    * resetbans() or recheck_bans() will flush that.
    */
