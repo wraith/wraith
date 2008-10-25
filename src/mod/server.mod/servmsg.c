@@ -740,9 +740,9 @@ void server_send_ison()
     if (!have_jupenick) {
       /* See if my nickname is in use and if if my nick is right.  */
       if (jupenick[0] && !have_jupenick)
-        dprintf(DP_SERVER, "ISON :%s %s\n", origbotname, jupenick);
+        dprintf(DP_SERVER, "ISON %s %s\n", origbotname, jupenick);
       else if (!match_my_nick(origbotname)) 
-        dprintf(DP_SERVER, "ISON :%s\n", origbotname);
+        dprintf(DP_SERVER, "ISON %s\n", origbotname);
     }
   }
 }
