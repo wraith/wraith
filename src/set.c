@@ -317,18 +317,13 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
         // Only send nick changes if online and not loading
         if (server_online && !parsing_botset) {
           // the nick changed and not on the new nick already
-          if (((!data && olddata) || (data && !olddata)) && (!olddata || (olddata && strcmp(olddata, origbotname)))) {
+          if ((olddata && strcmp(olddata, (char *) var->mem)) &&
+              !match_my_nick((char *) var->mem) && 
+              (!jupenick[0] || !match_my_nick(jupenick))) 
+          {
             // Unset the rolls/altnick stuff as we're starting over from scratch.
-
-            // If not already on jupenick and not on the new nick, jump to the new nick
-            if (jupenick[0] && !match_my_nick(jupenick) && !match_my_nick(origbotname)) {
-              altnick_char = rolls = 0;
-              dprintf(DP_SERVER, "NICK %s\n", origbotname);
-              // No jupenick set
-            } else if (!jupenick[0] && !match_my_nick(origbotname)) {
-              altnick_char = rolls = 0;
-              dprintf(DP_SERVER, "NICK %s\n", origbotname);
-            }
+            altnick_char = rolls = 0;
+            dprintf(DP_SERVER, "NICK %s\n", (char *) var->mem);
           }
         }
       }
