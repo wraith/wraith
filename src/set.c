@@ -305,8 +305,10 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
           // Unset and there was an old value
           } else if (!data && olddata) { 
             // Unset jupenick, try for 'nick' now if we were on jupenick
-            if (match_my_nick(olddata))
+            if (match_my_nick(olddata)) {
+              altnick_char = rolls = 0;
               dprintf(DP_SERVER, "NICK %s\n", origbotname);
+            }
           }
         }
       } else if (var->flags & VAR_NICK) {

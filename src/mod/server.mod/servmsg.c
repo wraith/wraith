@@ -824,6 +824,7 @@ static void got303(char *from, char *msg)
     } else if (!ison_orig && rfc_casecmp(botname, origbotname) && (!jupenick[0] || !match_my_nick(jupenick))) {
       if (!nick_juped)
         putlog(LOG_MISC, "*", "Switching back to nick %s", origbotname);
+      altnick_char = rolls = 0;
       dprintf(DP_SERVER, "NICK %s\n", origbotname);
     }
   }
