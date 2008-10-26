@@ -1060,6 +1060,8 @@ static void check_this_member(struct chanset_t *chan, char *nick, struct flag_re
   }
 }
 
+
+//del=1 -user, del=2 -host
 void check_this_user(char *hand, int del, char *host)
 {
   char s[UHOSTLEN] = "";

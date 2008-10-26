@@ -62,6 +62,7 @@
 #include "src/mod/irc.mod/irc.h"
 #include "src/mod/update.mod/update.h"
 #include "src/mod/channels.mod/channels.h"
+#include "src/mod/share.mod/share.h"
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -3716,10 +3717,17 @@ static void cmd_clearhosts(int idx, char *par)
     }
   }
 
-  if (clearhosts(u2))
+  if (get_user(&USERENTRY_HOSTS, u2)) {
+    shareout("ch %s\n", handle);
+    noshare = 1;
+    set_user(&USERENTRY_HOSTS, u2, (void *) "none");
+    noshare = 0;
     dprintf(idx, "Cleared hosts for %s.\n", handle);
-  else
+    if (!conf.bot->hub && server_online)
+      check_this_user(handle, 1, NULL);
+  } else
     dprintf(idx, "%s had no hosts set.\n", handle);
+
   if (conf.bot->hub)
     write_userfile(idx);
 }

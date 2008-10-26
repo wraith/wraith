@@ -661,6 +661,23 @@ share_change(int idx, char *par)
 }
 
 static void
+share_clearhosts(int idx, char *par)
+{
+  if (dcc[idx].status & STAT_SHARE) {
+    char *hand = newsplit(&par);
+    struct userrec *u = get_user_by_handle(userlist, hand);
+    if (u) {
+      shareout_but(idx, "ch %s\n", u->handle);
+      if (!conf.bot->hub && server_online)
+        check_this_user(u->handle, 1, NULL);
+      noshare = 1;
+      set_user(&USERENTRY_HOSTS, u, (void *) "none");
+      noshare = 0;
+    }
+  }
+}
+
+static void
 share_chchinfo(int idx, char *par)
 {
   if (dcc[idx].status & STAT_SHARE) {
@@ -1051,6 +1068,7 @@ static botcmd_t C_share[] = {
   {"-mc", share_mns_maskchan, 0},
   {"a", share_chattr, 0},
   {"c", share_change, 0},
+  {"ch", share_clearhosts, 0},
   {"chchinfo", share_chchinfo, 0},
   {"e", share_end, 0},
   {"h", share_chhand, 0},
