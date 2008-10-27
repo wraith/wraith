@@ -90,6 +90,7 @@ char *encrypt_string(const char *keydata, char *in)
   bdata = encrypt_binary(keydata, (unsigned char *) in, &len);
   if (keydata && *keydata) {
     res = b64enc(bdata, len);
+    OPENSSL_cleanse(bdata, len);
     free(bdata);
     return res;
   } else {
@@ -105,6 +106,7 @@ char *decrypt_string(const char *keydata, char *in)
   if (keydata && *keydata) {
     buf = b64dec((const unsigned char *) in, &len);
     res = (char *) decrypt_binary(keydata, (unsigned char *) buf, &len);
+    OPENSSL_cleanse(buf, len);
     free(buf);
     return res;
   } else {

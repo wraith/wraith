@@ -111,6 +111,7 @@ static int ghost_read(int snum, char *src, size_t *len)
   char *line = decrypt_string(socklist[snum].ikey, src);
 
   strcpy(src, line);
+  OPENSSL_cleanse(line, strlen(line) + 1);
   free(line);
   if (socklist[snum].iseed) {
     *(dword *) & socklist[snum].ikey[0] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
@@ -130,8 +131,9 @@ static char *ghost_write(int snum, char *src, size_t *len)
   char *srcbuf = NULL, *buf = NULL, *line = NULL, *eol = NULL, *eline = NULL;
   size_t bufpos = 0;
 
-  srcbuf = (char *) my_calloc(1, *len + 9 + 1);
-  strcpy(srcbuf, src);
+  const size_t bufsiz = *len + 9 + 1;
+  srcbuf = (char *) my_calloc(1, bufsiz);
+  strlcpy(srcbuf, src, bufsiz);
   line = srcbuf;
 
   eol = strchr(line, '\n');
