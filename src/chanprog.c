@@ -751,7 +751,7 @@ bool bot_shouldjoin(struct userrec* u, struct flag_record* fr, struct chanset_t*
 
 #ifdef DEBUG
   /* Force debugging bots to only join 3 channels */
-  if (!strncmp(u->handle, "wtest", 5) {
+  if (!strncmp(u->handle, "wtest", 5)) {
     if (!strcmp(chan->dname, "#skynet") || 
         !strcmp(chan->dname, "#bryan") || 
         !strcmp(chan->dname, "#wraith"))
