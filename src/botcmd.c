@@ -1215,7 +1215,8 @@ botcmd_t C_bot[] =
   {"vab",		bot_setbroad, 0},
   {"w",			bot_who, 0},
   {"z",			bot_zapf, 0},
-  {"zb",		bot_zapfbroad, 0}
+  {"zb",		bot_zapfbroad, 0},
+  {NULL,		NULL, 0}
 };
 
 static int comp_botcmd_t(const void *m1, const void *m2) {
@@ -1231,7 +1232,7 @@ const botcmd_t *search_botcmd_t(const botcmd_t *table, const char* keyString, si
 }
 
 void parse_botcmd(int idx, const char* code, const char* msg) {
-  const botcmd_t *cmd = search_botcmd_t((const botcmd_t*)&C_bot, code, sizeof(C_bot)/sizeof(botcmd_t));
+  const botcmd_t *cmd = search_botcmd_t((const botcmd_t*)&C_bot, code, (sizeof(C_bot)/sizeof(botcmd_t)) - 1);
 
   if (cmd) {
     /* Found a match */

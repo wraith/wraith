@@ -171,7 +171,8 @@ static botcmd_t C_update[] =
   {"un",	update_ufno, 0},
   {"us",	update_ufsend, 0},
   {"uy",	update_ufyes, 0},
-  {"v",         update_version, 0}
+  {"v",         update_version, 0},
+  {NULL,	NULL, 0}
 };
 
 static void got_nu(char *botnick, char *code, char *par)
@@ -214,7 +215,7 @@ static cmd_t update_bot[] = {
 void updatein(int idx, char *msg)
 {
   char *code = newsplit(&msg);
-  const botcmd_t *cmd = search_botcmd_t((const botcmd_t*)&C_update, code, sizeof(C_update)/sizeof(botcmd_t));
+  const botcmd_t *cmd = search_botcmd_t((const botcmd_t*)&C_update, code, (sizeof(C_update)/sizeof(botcmd_t)) - 1);
   if (cmd) {
     /* Found a match */
     (cmd->func)(idx, msg);
