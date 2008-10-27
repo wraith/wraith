@@ -749,15 +749,17 @@ bool bot_shouldjoin(struct userrec* u, struct flag_record* fr, struct chanset_t*
   /* If the bot is restarting (and hasn't finished getting the userfile for the first time) DO NOT JOIN channels - breaks +B/+backup */
   if (restarting || loading) return 0;
 
+#ifdef DEBUG
   /* Force debugging bots to only join 3 channels */
-  if (!strncmp(u->handle, STR("wtest"), 5)) {
-    if (!strcmp(chan->dname, STR("#skynet")) || 
-        !strcmp(chan->dname, STR("#bryan")) || 
-        !strcmp(chan->dname, STR("#wraith")))
+  if (!strncmp(u->handle, "wtest", 5) {
+    if (!strcmp(chan->dname, "#skynet") || 
+        !strcmp(chan->dname, "#bryan") || 
+        !strcmp(chan->dname, "#wraith"))
       return 1;
     else
       return 0;
   }
+#endif
   return (!channel_inactive(chan) && (channel_backup(chan) || (!glob_backup(*fr) && !chan_backup(*fr))));
 }
 

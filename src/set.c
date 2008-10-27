@@ -614,8 +614,10 @@ void init_vars()
       var_set(&vars[i], NULL, NULL);		//empty out and set to defaults
   }
   var_set_by_name(NULL, "chanset", def_chanset);
+#ifdef DEBUG
   if (!strncmp(conf.bot->nick, "wtest", 5))
     var_set_by_name(NULL, "homechan", "#bryan");
+#endif
 }
 
 /* This is used to parse (GLOBAL) userfile var lines and changes via .set from a remote hub */
