@@ -565,6 +565,7 @@ static void transfer_get_timeout(int i)
 
 void tout_dcc_send(int idx)
 {
+  fclose(dcc[idx].u.xfer->f);
   if (!strcmp(dcc[idx].nick, "*users")) {
     int x, y = -1;
 

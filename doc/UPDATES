@@ -22,6 +22,7 @@
 * Update efnet server list and add new alias 'bs' for botset. (To get new defaults: 'set -YES servers -' and 'set -YES alias -')
 * Fix /ctcp FINGER leaking shell username when using oidentd
 * Fix ISON not working on some ircds.
+* Fix a socket leak from timed out userfile transfers.
 
 1.2.15 - http://wraith.botpack.net/milestone/1.2.15
 * Fix a possible segfault when binaries compiled wrong
