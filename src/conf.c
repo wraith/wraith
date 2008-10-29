@@ -1150,7 +1150,8 @@ bin_to_conf(bool error)
 
   str_redup(&conf.datadir, replace(datadir, conf.binpath, "."));
 
-  Tempfile::FindDir();
+  if (Tempfile::FindDir() == ERROR)
+    werr(ERR_TMPSTAT);
 
   if (clear_tmpdir)
     clear_tmp();	/* clear out the tmp dir, no matter if we are localhub or not */

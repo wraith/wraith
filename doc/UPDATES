@@ -23,6 +23,7 @@
 * Fix /ctcp FINGER leaking shell username when using oidentd
 * Fix ISON not working on some ircds.
 * Fix a socket leak from timed out userfile transfers.
+* Fixed bot dying off when it can't create a temporary file. (fixes #412)
 
 1.2.15 - http://wraith.botpack.net/milestone/1.2.15
 * Fix a possible segfault when binaries compiled wrong

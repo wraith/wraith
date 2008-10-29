@@ -227,8 +227,11 @@ error:
   /* Since we failed to create a file in the given tempdir, let's try finding a new one */
   if (!looking) {
     /* ... Not finding a new tempdir is fatal. */
-    if (FindDir() == ERROR)
-      werr(ERR_TMPSTAT);		/* FIXME: Perhaps this should be an exception? */
+    if (FindDir() == ERROR) {
+      delete[] file;
+      file = NULL;
+      return;
+    }
     /* ... If we found one, let's try all over! */
     else {
       error = 0;
@@ -329,6 +332,6 @@ bool Tempfile::FindDir()
     }
   }
 
-  werr(ERR_TMPSTAT);
+  return ERROR;
 #endif /* CYGWIN_HACKS */
 }
