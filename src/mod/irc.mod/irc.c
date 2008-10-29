@@ -870,7 +870,7 @@ request_in(struct chanset_t *chan)
 
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_BOT, 0, 0, 0 };
 
-  get_user_flagrec(conf.bot->u, &fr, NULL);
+  get_user_flagrec(conf.bot->u, &fr, chan->dname, chan);
 
   if (!chk_op(fr, chan) || glob_kick(fr) || chan_kick(fr)) {
     putlog(LOG_GETIN, "*", "Not requesting help to join %s - I do not have access to that channel.", chan->dname);
