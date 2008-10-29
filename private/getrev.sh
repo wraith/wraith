@@ -17,3 +17,11 @@ else
   rev=$(svk info|grep "Mirrored From"|sed -e 's/Mirrored From: .*, Rev. \([0-9]*\)/\1/')
 fi
 echo $rev
+
+### Touch src/main.c if the revision has changed since the last run
+touch private/.revision.cache
+old_rev=$(< private/.revision.cache)
+if ! [ "$old_rev" = "$rev" ]; then
+  touch src/main.c
+  echo $rev > private/.revision.cache
+fi
