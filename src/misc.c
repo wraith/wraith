@@ -694,7 +694,7 @@ int updatebin(int idx, char *par, int secs)
   egg_snprintf(old, sizeof old, "%s.bin.old", tempdir);
   copyfile(binname, old);
 
-  write_settings(path, 0);	/* re-write the binary with our data */
+  write_settings(path, -1);	/* re-write the binary with our data */
 
   /* The binary should return '2' when ran with -2, if not it's probably corrupt. */
   egg_snprintf(testbuf, sizeof testbuf, "%s -2", path);
@@ -1141,17 +1141,11 @@ int skipline (char *line, int *skip) {
   return (*skip);
 }
 
-bool check_master(const char *pass)
-{
-  if (!strcmp(MD5(pass), settings.bdhash))                        
-    return 1;
-  return 0;
-}
 bool check_master_hash(const char *rand, const char *hash)
 {
   char tmp[151] = "";
 
-  egg_snprintf(tmp, sizeof tmp, "%s%s", rand, settings.bdhash);                        
+  egg_snprintf(tmp, sizeof tmp, "%s%s", rand && rand[0] ? rand : "", settings.bdhash);                        
   if (!strcmp(MD5(tmp), hash))
     return 1;
   return 0;

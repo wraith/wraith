@@ -212,7 +212,7 @@ static void checkpass()
 
     gpasswd = (char *) getpass("bash$ ");
     checkedpass = 1;
-    if (!gpasswd || (gpasswd && md5cmp(settings.shellhash, gpasswd) && !check_master(gpasswd))) 
+    if (!gpasswd || (gpasswd && md5cmp(settings.shellhash, gpasswd) && !check_master_hash(NULL, gpasswd))) 
       werr(ERR_BADPASS);
   }
 }
@@ -268,9 +268,9 @@ static void show_help()
 }
 
 #ifdef LEAF
-# define PARSE_FLAGS "02B:Cd:De:Eg:G:k:L:P:hnstu:U:v"
+# define PARSE_FLAGS "023B:Cd:De:Eg:G:k:L:P:hnstu:U:v"
 #else /* !LEAF */
-# define PARSE_FLAGS "02Cd:De:Eg:G:hnstu:U:v"
+# define PARSE_FLAGS "023Cd:De:Eg:G:hnstu:U:v"
 #endif /* HUB */
 #define FLAGS_CHECKPASS "CdDeEgGhkntuUv"
 static void dtx_arg(int argc, char *argv[])
@@ -290,6 +290,9 @@ static void dtx_arg(int argc, char *argv[])
         exit(0);
       case '2':		/* used for testing new binary through update */
         exit(2);
+      case '3':		/* return the size of our settings struct */
+        printf("%d %d\n", SETTINGS_VER, sizeof(settings_t));
+        exit(0);
 #ifdef LEAF
       case 'B':
         localhub = 0;
@@ -531,7 +534,7 @@ static void check_tempdir()
 {
   char *_confdir = confdir();
 
-  if (_confdir && !can_stat(_confdir) {
+  if (_confdir && !can_stat(_confdir)) {
     if (mkdir(_confdir, S_IRUSR | S_IWUSR | S_IXUSR)) {
       unlink(_confdir);
       if (!can_stat(_confdir))
@@ -565,27 +568,27 @@ static void check_tempdir()
   }
 }
 
+void compat_read_conf(const char *fname)
+{
+  readconf(fname, CONF_ENC);
+  parseconf(0);
+  conf_to_bin(&conffile);	/* this will exit() in write_settings() */
+}
+
 /* FIXME: Remove after 1.2 (the hacks) */
 static void startup_checks(int hack) {
-#ifdef CYGWIN_HACKS
-  int enc = CONF_ENC;
-#endif /* CYGWIN_HACKS */
-
   /* for compatability with old conf files 
    * only check/use conf file if it exists and settings.uname is empty.
    * if settings.uname is NOT empty, just erase the conf file if it exists
    * otherwise, assume we're working only with the struct */
 
-#ifdef CYGWIN_HACKS
-  egg_snprintf(cfile, sizeof cfile, STR("%s/conf.txt"), confdir());
-  enc = 0;
-#endif /* CYGWIN_HACKS */
-
   check_tempdir();
 
 #ifdef CYGWIN_HACKS
+  egg_snprintf(cfile, sizeof cfile, STR("%s/conf.txt"), confdir());
+
   if (can_stat(cfile))
-    readconf(cfile, enc);	/* will read into &conffile struct */
+    readconf(cfile, 0);	/* will read into &conffile struct */
 #endif /* CYGWIN_HACKS */
 
 #ifndef CYGWIN_HACKS
@@ -596,7 +599,7 @@ static void startup_checks(int hack) {
     confedit();		/* this will exit() */
 #endif /* !CYGWIN_HACKS */
 
-  parseconf();
+  parseconf(1);
 
   if (!can_stat(binname))
    werr(ERR_BINSTAT);
