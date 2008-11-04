@@ -843,7 +843,7 @@ static void cmd_channels(int idx, char *par) {
     if (user && whois_access(dcc[idx].user, user)) {
       show_channels(idx, par);
     } else  {
-      dprintf(idx, "There is no user by that name.\n");
+      dprintf(idx, "No such user.\n");
     }
   } else {
       show_channels(idx, NULL);
@@ -3592,7 +3592,7 @@ static void cmd_botserver(int idx, char * par) {
     dprintf(idx, "Usage: botserver <bot>\n");
     return;
   }
-  if (egg_strcasecmp(conf.bot.nick, par) && nextbot(par)<0) {
+  if (egg_strcasecmp(conf.bot->nick, par) && nextbot(par)<0) {
     dprintf(idx, "%s isn't a linked bot.\n", par);
     return;
   }
