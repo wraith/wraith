@@ -17,3 +17,4 @@
 /makeset
 /makeset.exe
 /set_default.h
+*.o
