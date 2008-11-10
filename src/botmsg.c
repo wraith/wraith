@@ -240,11 +240,11 @@ void botnet_send_unlinked(int idx, char *bot, char *args)
   }
 }
 
-void botnet_send_nlinked(int idx, char *bot, char *next, char flag, int vlocalhub, time_t vbuildts, int vrevision, char *vversion)
+void botnet_send_nlinked(int idx, char *bot, char *next, char flag, int vlocalhub, time_t vbuildts, char *vcommit, char *vversion)
 {
   if (tands > 0) {
-    const size_t len = simple_snprintf(OBUF, sizeof(OBUF), "n %s %s %cD0gc %d %d %d %s\n", bot, next, flag, 
-                                       vlocalhub, (int) vbuildts, vrevision, vversion ? vversion : "");
+    const size_t len = simple_snprintf(OBUF, sizeof(OBUF), "n %s %s %cD0gc %d %d %s %s\n", bot, next, flag,
+                                       vlocalhub, (int) vbuildts, vcommit, vversion ? vversion : "");
     send_tand_but(idx, OBUF, len);
   }
 }
@@ -267,8 +267,8 @@ void botnet_send_update(int idx, tand_t * ptr)
 {
   if (tands > 0) {
     /* the D0gc is a lingering hack which probably will never be able to come out. */
-    const size_t len = simple_snprintf(OBUF, sizeof(OBUF), "u %s %cD0gc %d %d %d %s\n", ptr->bot, ptr->share, ptr->localhub, 
-                                                          (int) ptr->buildts, ptr->revision, ptr->version ? ptr->version : "");
+    const size_t len = simple_snprintf(OBUF, sizeof(OBUF), "u %s %cD0gc %d %d %s %s\n", ptr->bot, ptr->share, ptr->localhub,
+                                                          (int) ptr->buildts, ptr->commit, ptr->version ? ptr->version : "");
     send_tand_but(idx, OBUF, len);
   }
 }

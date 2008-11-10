@@ -25,8 +25,8 @@ else
 fi
 rm -f ts ts.exe
 gcc -o ts src/timestamp.c > /dev/null 2>&1
-if [ -f private/getdate.sh ]; then
-  BUILDTS=`./ts \`private/getdate.sh\``
+if [ -d .git ]; then
+  BUILDTS=$(git log -1 --pretty=format:%ct HEAD)
 else
   BUILDTS=`grep -m 1 "BUILDTS = " Makefile.in | ${AWK} '{print $3}'` 
 fi

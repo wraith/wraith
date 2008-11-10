@@ -74,7 +74,7 @@ tand_t *findbot(const char *who)
 
 /* Add a tandem bot to our chain list
  */
-void addbot(char *who, char *from, char *next, char flag, int vlocalhub, time_t vbuildts, int vrevision, char *vversion)
+void addbot(char *who, char *from, char *next, char flag, int vlocalhub, time_t vbuildts, char *vcommit, char *vversion)
 {
   tand_t **ptr = &tandbot, *ptr2 = NULL;
 
@@ -89,7 +89,7 @@ void addbot(char *who, char *from, char *next, char flag, int vlocalhub, time_t 
   ptr2->share = flag;
   ptr2->localhub = vlocalhub;
   ptr2->buildts = vbuildts;
-  ptr2->revision = vrevision;
+  strlcpy(ptr2->commit, vcommit, sizeof(ptr2->commit));
   if (vversion && vversion[0])
     strlcpy(ptr2->version, vversion, 121);
   ptr2->next = *ptr;
@@ -121,7 +121,7 @@ void check_should_backup()
 }
 #endif /* G_BACKUP */
 
-void updatebot(int idx, char *who, char share, int vlocalhub, time_t vbuildts, int vrevision, char *vversion)
+void updatebot(int idx, char *who, char share, int vlocalhub, time_t vbuildts, char *vcommit, char *vversion)
 {
   tand_t *ptr = findbot(who);
 
@@ -132,8 +132,8 @@ void updatebot(int idx, char *who, char share, int vlocalhub, time_t vbuildts, i
       ptr->localhub = vlocalhub;
     if (vbuildts)
       ptr->buildts = vbuildts;
-    if (vrevision)
-      ptr->revision = vrevision;
+    if (vcommit)
+      strlcpy(ptr->commit, vcommit, sizeof(ptr->commit));
     if (vversion && vversion[0])
       strlcpy(ptr->version, vversion, 121);
     botnet_send_update(idx, ptr);
@@ -638,10 +638,10 @@ void tell_bottree(int idx)
 
   if (s[0])
     dprintf(idx, "(%s %s)\n", "No trace info for:", s);
-  dprintf(idx, "%s%s%s (%s %d)\n", color_str ? color_str : "", 
+  dprintf(idx, "%s%s%s (%s %s)\n", color_str ? color_str : "",
                                     conf.bot->nick,
                                     color_str ? COLOR_END(idx) : "",
-                                    egg_version, revision);
+                                    egg_version, commit);
 
   thisbot = (tand_t *) 1;
   work[0] = 0;
@@ -685,10 +685,10 @@ void tell_bottree(int idx)
             i = simple_snprintf(s, sizeof(s), "%c", bot->share);
           else
             i = simple_snprintf(s, sizeof(s), "-");
-          i = simple_snprintf(s + 1, sizeof(s) - 1, "%s%s%s (%s %d)", color_str ? color_str : "",
+          i = simple_snprintf(s + 1, sizeof(s) - 1, "%s%s%s (%s %s)", color_str ? color_str : "",
                                                 bot->bot,
                                                 color_str ? COLOR_END(idx) : "",
-                                                bot->version, bot->revision);
+                                                bot->version, bot->commit);
 	} else
 	  bot = bot->next;
       }
@@ -731,10 +731,10 @@ void tell_bottree(int idx)
                   i = simple_snprintf(s, sizeof(s), "%c", bot->share);
                 else
                   i = simple_snprintf(s, sizeof(s), "-");
-                i = simple_snprintf(s + 1, sizeof(s) - 1, "%s%s%s (%s %d)", color_str ? color_str : "",
+                i = simple_snprintf(s + 1, sizeof(s) - 1, "%s%s%s (%s %s)", color_str ? color_str : "",
                                                       bot->bot,
                                                       color_str ? COLOR_END(idx) : "",
-                                                      bot->version, bot->revision);
+                                                      bot->version, bot->commit);
 	      }
 	    }
 	  }
@@ -795,8 +795,8 @@ void dump_links(int z)
       else
         p = bot->uplink->bot;
 
-      l = simple_snprintf(x, sizeof(x), "n %s %s %cD0gc %d %d %d %s\n", bot->bot, p, bot->share, bot->localhub, 
-                                                        (int) bot->buildts, bot->revision, bot->version ? bot->version : "");
+      l = simple_snprintf(x, sizeof(x), "n %s %s %cD0gc %d %d %s %s\n", bot->bot, p, bot->share, bot->localhub,
+                                                        (int) bot->buildts, bot->commit, bot->version ? bot->version : "");
       tputs(dcc[z].sock, x, l);
     }
   }

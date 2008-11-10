@@ -224,7 +224,7 @@ greet_new_bot(int idx)
     dcc[idx].status |= STAT_LEAF;
   dcc[idx].status |= STAT_LINKING;
 
-  dprintf(idx, "v 1001500 %d Wraith %s <%s> %d %li %d %s\n", HANDLEN, egg_version, "-", conf.bot->localhub, (long)buildts, revision, egg_version);
+  dprintf(idx, "v 1001500 %d Wraith %s <%s> %d %li %s %s\n", HANDLEN, egg_version, "-", conf.bot->localhub, (long)buildts, commit, git_version);
 
   for (int i = 0; i < dcc_total; i++) {
     if (dcc[i].type && dcc[i].type == &DCC_FORK_BOT) {
@@ -268,10 +268,9 @@ bot_version(int idx, char *par)
     return;
   }
 
-  char x[1024] = "", *vversion = NULL;
+  char x[1024] = "", *vversion = NULL, *vcommit = NULL;
   int vlocalhub = 0;
   time_t vbuildts = 0;
-  int vrevision = 0;
 
   strlcpy(dcc[idx].u.bot->version, par, 120);
   newsplit(&par);               /* 'ver' */
@@ -282,7 +281,7 @@ bot_version(int idx, char *par)
   if (par[0])
     vbuildts = atol(newsplit(&par));
   if (par[0])
-    vrevision = atol(newsplit(&par));
+    vcommit = newsplit(&par);
   if (par[0])
     vversion = newsplit(&par);
 
@@ -296,7 +295,7 @@ bot_version(int idx, char *par)
       dcc[idx].hub = 1;
     }
 
-    botnet_send_nlinked(idx, dcc[idx].nick, conf.bot->nick, '!', vlocalhub, vbuildts, vrevision, vversion);
+    botnet_send_nlinked(idx, dcc[idx].nick, conf.bot->nick, '!', vlocalhub, vbuildts, vcommit, vversion);
   } else {
     putlog(LOG_BOTS, "*", "Linked to botnet.");
     chatout("*** Linked to botnet.\n");
@@ -308,7 +307,7 @@ bot_version(int idx, char *par)
 
   touch_laston(dcc[idx].user, "linked", now);
   dcc[idx].type = &DCC_BOT;
-  addbot(dcc[idx].nick, dcc[idx].nick, conf.bot->nick, '-', vlocalhub, vbuildts, vrevision, vversion);
+  addbot(dcc[idx].nick, dcc[idx].nick, conf.bot->nick, '-', vlocalhub, vbuildts, vcommit, vversion);
   simple_snprintf(x, sizeof x, "v 1001500");
   bot_shareupdate(idx, x);
   bot_share(idx, x);

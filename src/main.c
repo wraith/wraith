@@ -89,8 +89,10 @@
 extern int		optind;
 
 const time_t 	buildts = BUILDTS;		/* build timestamp (UTC) */
-const int	revision = REVISION;
-const char	*egg_version = "1.2.16-devel";
+const char	*commit = COMMIT;
+const char	*branch = BRANCH;
+const char	*egg_version = "1.2.16";
+char	git_version[50] = "";
 
 bool	used_B = 0;		/* did we get started with -B? */
 int 	role;
@@ -425,8 +427,8 @@ static void dtx_arg(int& argc, char *argv[])
 
         egg_strftime(date, sizeof date, "%c %Z", gmtime(&buildts));
 	printf(STR("%s\nBuild Date: %s (%s%lu%s)\n"), version, date, BOLD(-1), buildts, BOLD_END(-1));
+        printf(STR("Commit: %s\n"), commit);
         printf(STR("BuildOS: %s%s%s BuildArch: %s%s%s\n"), BOLD(-1), BUILD_OS, BOLD_END(-1), BOLD(-1), BUILD_ARCH, BOLD_END(-1));
-        printf(STR("Revision: %d\n"), revision);
 	printf(STR("pack: %d conf: %d settings_t: %d prefix: %d pad: %d\n"), SIZE_PACK, SIZE_CONF, sizeof(settings_t), PREFIXLEN, SIZE_PAD);
         if (settings.uname[0]) {
           ++sdebug;
@@ -788,8 +790,9 @@ printf("out: %s\n", out);
   init_conf();			/* establishes conf and sets to defaults */
 
   /* Version info! */
-  simple_snprintf(ver, sizeof ver, STR("[%s] Wraith %s"), settings.packname, egg_version);
-  simple_snprintf(version, sizeof version, STR("[%s] Wraith %s (%lu:%d)"), settings.packname, egg_version, buildts, revision);
+  simple_snprintf(git_version, sizeof(git_version), "%s-%s", egg_version, branch);
+  simple_snprintf(ver, sizeof(ver), STR("[%s] Wraith %s"), settings.packname, git_version);
+  simple_snprintf(version, sizeof(version), STR("%s (%lu:%s)"), ver, buildts, commit);
 
   egg_memcpy(&nowtm, gmtime(&now), sizeof(struct tm));
   lastmin = nowtm.tm_min;

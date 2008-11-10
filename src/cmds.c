@@ -386,9 +386,9 @@ static void cmd_about(int idx, char *par)
   dprintf(idx, STR("Wraith botpack by bryan\n"));
   dprintf(idx, STR("http://wraith.botpack.net\n"));
   egg_strftime(c, sizeof c, "%c %Z", gmtime(&buildts));
-  dprintf(idx, "Version: %s\n", egg_version);
+  dprintf(idx, "Version: %s\n", git_version);
   dprintf(idx, "Build: %s (%li)\n", c, (long)buildts);
-  dprintf(idx, "Revision: %d\n", revision);
+  dprintf(idx, "Commit: %s\n", commit);
   dprintf(idx, STR("(written from a base of Eggdrop 1.6.12)\n"));
   dprintf(idx, "..with credits and thanks to the following:\n");
   dprintf(idx, " \n");

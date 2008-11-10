@@ -1021,9 +1021,9 @@ void autolink_cycle_hub(char *start)
       return;
     if (dcc[i].type == &DCC_BOT) {
       if (dcc[i].status & (STAT_OFFEREDU | STAT_GETTINGU | STAT_SENDINGU))
-        continue; /* lets let the binary update have it's peace. */
+        continue; /* lets let the binary update have its peace. */
 
-      if ((bot = findbot(dcc[i].nick)) && bot->revision != revision)
+      if ((bot = findbot(dcc[i].nick)) && bot->buildts != buildts)
         continue; /* same thing. */
 
       if (dcc[i].status & (STAT_SHARE | STAT_OFFERED | STAT_SENDING | STAT_GETTING)) {

@@ -145,6 +145,7 @@ static void update_ufsend(int idx, char *par)
   }
 }
 
+#ifdef NOTUSED
 static void update_version(int idx, char *par)
 {
   return;
@@ -163,6 +164,7 @@ static void update_version(int idx, char *par)
   }
 #endif /* HUB */
 }
+#endif
 
 /* Note: these MUST be sorted. */
 static botcmd_t C_update[] =
@@ -171,7 +173,7 @@ static botcmd_t C_update[] =
   {"un",	update_ufno, 0},
   {"us",	update_ufsend, 0},
   {"uy",	update_ufyes, 0},
-  {"v",         update_version, 0},
+//  {"v",         update_version, 0},
   {NULL,	NULL, 0}
 };
 
@@ -191,10 +193,11 @@ static void got_nu(char *botnick, char *code, char *par)
   }
 
 /* needupdate? curver */
-   newsplit(&par); //newts
-   int newrevision = atol(newsplit(&par));
+   time_t newbuildts = atol(newsplit(&par)); //newts
+   newsplit(&par); //Not used (old svn revision)
+   const char *newcommit = newsplit(&par);
 
-   if (newrevision > revision) {
+   if (newbuildts > buildts) {
      if (!conf.bot->hub) {
        dont_restructure = 1;
        putlog(LOG_MISC, "*", "Linking to %s for binary update.", botnick);
@@ -202,7 +205,7 @@ static void got_nu(char *botnick, char *code, char *par)
        usleep(1000 * 500);
        botlink("", -3, botnick);
      } else 
-       putlog(LOG_MISC, "*", "I need to be updated with %d", newrevision);
+       putlog(LOG_MISC, "*", "I need to be updated with %li/%s", (long) newbuildts, newcommit);
    }  
 }
 
@@ -370,15 +373,16 @@ static void check_updates()
 
         dcc[i].status &= ~(STAT_GETTINGU | STAT_SENDINGU | STAT_OFFEREDU);
 
-        if (bot && (bot->revision < revision)) {
-          putlog(LOG_DEBUG, "@", "Bot: %s has build %d, offering them %d", dcc[i].nick, bot->revision, revision);
+        if (bot && (bot->buildts < buildts)) {
+          putlog(LOG_DEBUG, "@", "Bot: %s has build %li/%s, offering them %li/%s", dcc[i].nick, (long)bot->buildts, bot->commit, (long) buildts, commit);
           dprintf(i, "sb u?\n");
           dcc[i].status |= STAT_OFFEREDU;
         }
       }
     }
     /* send out notice to update remote bots ... */
-    simple_snprintf(buf, sizeof buf, "nu? . %d", revision);
+    /* 9999 is a hack to force all bots from old svn-revisions to upgrade to new git style */
+    simple_snprintf(buf, sizeof buf, "nu? %li 9999 %s", buildts, commit);
     putallbots(buf);
   }
 }

@@ -16,13 +16,12 @@ enum {
 extern int		role, default_flags, default_uflags, do_confedit,
 			updating, do_restart;
 extern bool		use_stderr, backgrd, used_B, term_z, loading, restart_was_update, restarting;
-extern char		tempdir[], *binname, owner[], version[], ver[], quit_msg[], *socksfile;
+extern char		tempdir[], *binname, owner[], version[], ver[], quit_msg[], *socksfile, git_version[50];
 extern time_t		online_since, now, restart_time;
 extern uid_t		myuid;
 extern pid_t            mypid;
 extern const time_t	buildts;
-extern const int	revision;
-extern const char	*egg_version;
+extern const char	*egg_version, *commit, *branch;
 
 void fatal(const char *, int);
 
