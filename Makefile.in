@@ -102,8 +102,8 @@ distclean: clean
 distrib: clean
 	@rm -rf $(DISTRIB)/
 	@mkdir $(DISTRIB) && cp -r $(DISTROFILES) $(DISTRIB)
-	@rm -rf `find $(DISTRIB)/ \( -name '*~' -o -name '*#' -o -name '*.orig' -o -name '*.rej' -o -name '*.bak' -o -name '.cvsignore' -o -name '.*.swp' \) -type f -print`
-	@rm -rf `find $(DISTRIB)/ \( -name '.svn' -o -name '.deps' \) -type d -print`
+	@rm -rf `find $(DISTRIB)/ \( -name '*~' -o -name '*#' -o -name '*.orig' -o -name '*.rej' -o -name '*.bak' -o -name '.gitignore' -o -name '.*.swp' \) -type f -print`
+	@rm -rf `find $(DISTRIB)/ \( -name '.git' -o -name '.deps' \) -type d -print`
 	@for s in $(EXCLUDES); do \
 	 rm -rf $(DISTRIB)/$$s; \
 	done;
