@@ -4,13 +4,22 @@ __  _  ______________  |__|/  |_|  |__
  \     /  |  | \// __ \|  ||  | |   \  \
   \/\_/   |__|  (____  /__||__| |___|  /
                      \/              \/
+       http://wraith.botpack.net
 
-This was downloaded from http://wraith.botpack.net.
-All documentation is present on that site.
-All official releases will be made there as well.
+Wraith is an IRC bot written in C++. It has been in development since late 2001. 
+It is based on Eggdrop 1.6.13 but has since evolved into something much different at its core.
 
-NEVER compile bots on shells.
-Only compile on a secure server, and copy binaries over.
-Never, never, NEVER, put your pack.cfg on a shell server, ever.
+Wraith aims to be a secure and easy to setup and manage botnet. 
+A botnet can be setup in a matter of minutes and updated later with 1 command. 
+Leaf bots save no files locally, but rather store configuration in their own binary. 
+Hubs do not connect to IRC, and keep a local encrypted copy of the userfile.
+
+All official documentation and releases can be found on the site.
+
+Official Git repositories:
+git://git.shatow.net/wraith.git
+git://github.com/bdrewery/wraith.git
+
+NEVER upload your pack.cfg to an untrusted shell.
 -Bryan
 #wraith @ EFnet
