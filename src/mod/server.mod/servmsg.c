@@ -830,7 +830,7 @@ static void got303(char *from, char *msg)
   }
 }
 
-/* 432 : Bad nickname
+/* 432 : Bad nickname (RESV)
  */
 static int got432(char *from, char *msg)
 {
@@ -839,17 +839,20 @@ static int got432(char *from, char *msg)
   newsplit(&msg);
   erroneus = newsplit(&msg);
 
-  bool is_jnick = 0;
+  bool is_jnick = 0, was_juped = 0;
 
-  if (jupenick[0] && !strcmp(botname, jupenick)) {
-    is_jnick = 1;
-    jnick_juped = 1;
-  } else
+  if (jupenick[0] && !strcmp(erroneus, jupenick)) {
+    was_juped = jnick_juped;
+    is_jnick = jnick_juped = 1;
+  } else {
+    was_juped = nick_juped;
     nick_juped = 1;
+  }
 
-  if (server_online)
-    putlog(LOG_MISC, "*", "%sNICK IS INVALID: '%s' (keeping '%s').", is_jnick ? "JUPE" : "", erroneus, botname);
-  else {
+  if (server_online) {
+    if (!was_juped)
+      putlog(LOG_MISC, "*", "%sNICK IS INVALID: '%s' (keeping '%s').", is_jnick ? "JUPE" : "", erroneus, botname);
+  } else {
     putlog(LOG_MISC, "*", "Server says my %snick '%s' is invalid.", is_jnick ? "jupe" : "", botname);
     if (jupenick[0] && !strcmp(botname, jupenick))
       strlcpy(botname, origbotname, NICKLEN);
@@ -914,7 +917,8 @@ static int got433(char *from, char *msg)
   return 0;
 }
 
-/* 437 : Channel/Nickname juped (IRCnet)
+/* 437 : Channel/Nickname juped (IRCnet) (Also temp jupe during splits on efnet)
+ * :ca.us.irc.xzibition.com 437 test1 bryan :Nick/channel is temporarily unavailable
  */
 static int got437(char *from, char *msg)
 {
@@ -939,11 +943,11 @@ static int got437(char *from, char *msg)
   } else if (server_online) {
     if (!rfc_casecmp(s, origbotname)) {
       if (!nick_juped)
-        putlog(LOG_MISC, "*", "NICK IS JUPED: %s (keeping '%s').", s, botname);
+        putlog(LOG_MISC, "*", "NICK IS TEMPORARILY UNAVAILABLE: '%s' (keeping '%s').", s, botname);
       nick_juped = 1;
     } else if (jupenick[0] && !rfc_casecmp(s, jupenick)) {
       if (!jnick_juped)
-        putlog(LOG_MISC, "*", "JUPENICK IS JUPED: %s (keeping '%s').", s, botname);
+        putlog(LOG_MISC, "*", "JUPENICK IS TEMPORARILY UNAVAILABLE: '%s' (keeping '%s').", s, botname);
       jnick_juped = 1;
     }
   } else {
