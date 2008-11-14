@@ -3754,17 +3754,23 @@ static void cmd_botserver(int idx, char * par) {
 
 static void rcmd_cursrv(char * fbot, char * fhand, char * fidx) {
   if (!conf.bot->hub) {
-    char tmp[120] = "";
+    char cursrv[120] = "", tmp[30] = "";
 
     if (server_online) {
+      daysdur(now, server_online, tmp, sizeof(tmp));
       if (floodless)
-        egg_snprintf(tmp, sizeof(tmp), "Currently: %-40s Lag: %ds [floodless ;)]", cursrvname, server_lag);
+        egg_snprintf(cursrv, sizeof(cursrv), "Currently: %-30s (connected %s) [floodless ;)]", cursrvname, tmp);
       else
-        egg_snprintf(tmp, sizeof(tmp), "Currently: %-40s Lag: %ds", cursrvname, server_lag);
-    } else
-      simple_snprintf(tmp, sizeof(tmp), "Currently: none");
+        egg_snprintf(cursrv, sizeof(cursrv), "Currently: %-30s (connected %s)", cursrvname, tmp);
 
-    botnet_send_cmdreply(conf.bot->nick, fbot, fhand, fidx, tmp);
+      if (server_lag > 0) {
+        simple_snprintf(tmp, sizeof(tmp), " Lag:%ds", server_lag);
+        strlcat(cursrv, tmp, sizeof(cursrv));
+      }
+    } else
+      strlcpy(tmp, sizeof(tmp), "Currently: none");
+
+    botnet_send_cmdreply(conf.bot->nick, fbot, fhand, fidx, cursrv);
   }
 }
 
