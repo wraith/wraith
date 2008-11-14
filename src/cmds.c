@@ -406,6 +406,7 @@ static void cmd_about(int idx, char *par)
   dprintf(idx, STR(" * $bpgpkeys$b for finding bugs, and providing input.\n"));
   dprintf(idx, STR(" * $bExcelsior$b for celdrop which inspired many features.\n"));
   dprintf(idx, STR(" * $bsyt$b for giving me inspiration to code a more secure bot.\n"));
+  dprintf(idx, STR(" * $bmulder$b for helping with the cookie op algorithm.\n"));
   dprintf(idx, STR(" * $bBlackjac$b for helping with the bx auth script with his Sentinel script.\n"));
   dprintf(idx, STR(" * $bMystikal$b for various bugs.\n"));
   dprintf(idx, STR(" * $bMany$b others.\n"));
