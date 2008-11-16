@@ -3768,7 +3768,7 @@ static void rcmd_cursrv(char * fbot, char * fhand, char * fidx) {
         strlcat(cursrv, tmp, sizeof(cursrv));
       }
     } else
-      strlcpy(tmp, sizeof(tmp), "Currently: none");
+      strlcpy(tmp, "Currently: none", sizeof(tmp));
 
     botnet_send_cmdreply(conf.bot->nick, fbot, fhand, fidx, cursrv);
   }
