@@ -381,9 +381,29 @@ void makecookie(char *out, size_t len, const char *chname, const memberlist* opp
 
   simple_snprintf2(cookie_clear, sizeof(cookie_clear), STR("%s%s%D"), randstring, &ts[3], counter);
 
-//  const char* cookie = encrypt_string("blah", cookie_clear);
-  const char* cookie = strdup(cookie_clear);
+  char key[150] = "";
+  simple_snprintf2(key, sizeof(key), "%c%c%c%s%c%c%c%c%c%c%^s%c%c%c%c%c%c%c",
+                                        randstring[0],
+                                        settings.salt1[5],
+                                        randstring[3],
+                                        opper->user->handle,
+                                        randstring[2],
+                                        settings.salt1[4],
+                                        settings.salt1[0],
+                                        settings.salt1[1],
+                                        settings.salt1[3],
+                                        settings.salt1[6],
+                                        chname,
+                                        settings.salt1[10],
+                                        randstring[4],
+                                        settings.salt2[15],
+                                        settings.salt2[13],
+                                        settings.salt1[10],
+                                        settings.salt2[3],
+                                        settings.salt2[1]);
+  const char* cookie = encrypt_string(MD5(key), cookie_clear);
 #ifdef DEBUG
+sdprintf("key: %s", key);
 sdprintf("cookie_clear: %s", cookie_clear);
 sdprintf("hash1: %s", hash1);
 if (hash2) sdprintf("hash2: %s", hash2);
@@ -437,8 +457,27 @@ static int checkcookie(const char *chname, const memberlist* opper, const member
   /* How many hashes are in the cookie? */
   const size_t hashes = cookie[3] == '!' ? 1 : (cookie[6] == '!' ? 2 : 3);
 
-//  char* cleartext = decrypt_string("blah", (char*) &cookie[HOST(0)]);
-  char* cleartext = strdup((char*) &cookie[HOST(0)]);
+  char key[150] = "";
+  simple_snprintf2(key, sizeof(key), "%c%c%c%s%c%c%c%c%c%c%^s%c%c%c%c%c%c%c",
+                                        SALT(0),
+                                        settings.salt1[5],
+                                        SALT(3),
+                                        opper->user->handle,
+                                        SALT(2),
+                                        settings.salt1[4],
+                                        settings.salt1[0],
+                                        settings.salt1[1],
+                                        settings.salt1[3],
+                                        settings.salt1[6],
+                                        chname,
+                                        settings.salt1[10],
+                                        SALT(4),
+                                        settings.salt2[15],
+                                        settings.salt2[13],
+                                        settings.salt1[10],
+                                        settings.salt2[3],
+                                        settings.salt2[1]);
+  char* cleartext = decrypt_string(MD5(key), (char*) &cookie[HOST(0)]);
   char ts[8] = "";
   strlcpy(ts, cleartext + 4, sizeof(ts));
   unsigned long counter = base64_to_int(cleartext + 4 + 7);
@@ -450,6 +489,7 @@ static int checkcookie(const char *chname, const memberlist* opper, const member
   }
 
 #ifdef DEBUG
+sdprintf("key: %s", key);
 sdprintf("plaintext from cookie: %s", cleartext);
 sdprintf("ts from cookie: %s", ts);
 sdprintf("counter from cookie: %lu", counter);
