@@ -451,11 +451,11 @@ static int checkcookie(const char *chname, const memberlist* opper, const member
 
   char key[150] = "";
   simple_snprintf2(key, sizeof(key), "%c%c%c%s%c%c%c%c%c%c%^s%c%c%c%c%c%c%c%s",
-                                        SALT(0),
+                                        cookie[SALT(0)],
                                         settings.salt1[5],
-                                        SALT(3),
+                                        cookie[SALT(3)],
                                         opper->user->handle,
-                                        SALT(2),
+                                        cookie[SALT(2)],
                                         settings.salt1[4],
                                         settings.salt1[0],
                                         settings.salt1[1],
@@ -463,7 +463,7 @@ static int checkcookie(const char *chname, const memberlist* opper, const member
                                         settings.salt1[6],
                                         chname,
                                         settings.salt1[10],
-                                        SALT(1),
+                                        cookie[SALT(1)],
                                         settings.salt2[15],
                                         settings.salt2[13],
                                         settings.salt1[10],
