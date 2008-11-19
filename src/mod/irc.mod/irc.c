@@ -329,13 +329,13 @@ static void cache_invite(struct chanset_t *chan, char *nick, char *host, char *h
   dprintf(DP_SERVER, "INVITE %s %s\n", nick, chan->name);
 }
 
-const char * cookie_hash(const char* chname, const memberlist* opper, const memberlist* opped, const char* ts, const char* salt) {
-  char tohash[101] = "";
+const char * cookie_hash(const char* chname, const memberlist* opper, const memberlist* opped, const char* ts, const char* salt, const char* key) {
+  char tohash[201] = "";
   const char salt2[] = SALT2;
 
   /* Only use first 3 chars of chan */
-  simple_snprintf(tohash, sizeof(tohash), STR("%c%c%c%c%s%c%c%c%c%c%s%s%s%s"),
-                                     salt2[0],
+  simple_snprintf(tohash, sizeof(tohash), STR("%c%c%c%c%s%c%c%c%c%c%s%s%s%s%s"),
+                                     salt2[0], 
                                      toupper(chname[0]),
                                      toupper(chname[1]),
                                      toupper(chname[2]),  
@@ -345,7 +345,8 @@ const char * cookie_hash(const char* chname, const memberlist* opper, const memb
                                      opper->nick,
                                      opped->nick,
                                      opped->userhost,
-                                     opper->userhost);
+                                     opper->userhost,
+                                     key);
 #ifdef DEBUG
 sdprintf("chname: %s ts: %s salt: %c%c%c%c", chname, ts, salt[0], salt[1], salt[2], salt[3]);
 sdprintf("tohash: %s", tohash);
@@ -366,10 +367,6 @@ void makecookie(char *out, size_t len, const char *chname, const memberlist* opp
   /* &ts[4] is now last 6 digits of time */
   simple_snprintf(ts, sizeof(ts), "%010li", (long) (now + timesync));
   
-  const char* hash1 = cookie_hash(chname, opper, m1, &ts[4], randstring);
-  const char* hash2 = m2 ? cookie_hash(chname, opper, m2, &ts[4], randstring) : NULL;
-  const char* hash3 = m3 ? cookie_hash(chname, opper, m3, &ts[4], randstring) : NULL;
-
   char cookie_clear[101] = "";
 
   //Lookup my counter
@@ -401,6 +398,9 @@ void makecookie(char *out, size_t len, const char *chname, const memberlist* opp
                                         settings.salt1[10],
                                         settings.salt2[3],
                                         settings.salt2[1]);
+  const char* hash1 = cookie_hash(chname, opper, m1, &ts[4], randstring, key);
+  const char* hash2 = m2 ? cookie_hash(chname, opper, m2, &ts[4], randstring, key) : NULL;
+  const char* hash3 = m3 ? cookie_hash(chname, opper, m3, &ts[4], randstring, key) : NULL;
   const char* cookie = encrypt_string(MD5(key), cookie_clear);
 #ifdef DEBUG
 sdprintf("key: %s", key);
@@ -510,7 +510,7 @@ if (counter != expected_counter)
   hash_table_insert(bot_counters, opper->user->handle, (void *)(counter));
 
   const char *salt = &cookie[SALT(0)];
-  const char *hash = cookie_hash(chname, opper, opped, &ts[1], salt);
+  const char *hash = cookie_hash(chname, opper, opped, &ts[1], salt, key);
 #ifdef DEBUG
 sdprintf("hash: %s", hash);
 #endif
