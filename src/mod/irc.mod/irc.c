@@ -411,9 +411,6 @@ if (hash2) sdprintf("hash2: %s", hash2);
 if (hash3) sdprintf("hash3: %s", hash3);
 #endif
 
-//  register size_t len = m3 ? 25 : (m2 ? 22 : 19);
-//  register char* buf = (char*) my_calloc(1, len + 1);
-
   if (m3)
     simple_snprintf(out, len + 1, STR("%c%c%c%c%c%c%c%c%c!%s@%s"), 
                          hash1[HASH_INDEX1(0)], 
@@ -448,10 +445,8 @@ if (hash3) sdprintf("hash3: %s", hash3);
 sdprintf("cookie: %s", out);
 #endif
   free((char*)cookie);
-//  return buf;
 }
 
-/* 111222333!salt@timestamp. */
 static int checkcookie(const char *chname, const memberlist* opper, const memberlist* opped, const char *cookie, int indexHint) {
 #define HOST(_x) (6 + (_x) + ((hashes << 1) + hashes)) /* x + (hashes * 3) */
 #define SALT(_x) (1 + (_x) + ((hashes << 1) + hashes)) /* x + (hashes * 3) */
