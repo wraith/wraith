@@ -334,7 +334,7 @@ const char * cookie_hash(const char* chname, const memberlist* opper, const memb
   const char salt2[] = SALT2;
 
   /* Only use first 3 chars of chan */
-  simple_snprintf(tohash, sizeof(tohash), STR("%c%c%c%c%s%c%c%c%c%c%s%s%s%s%s"),
+  simple_snprintf(tohash, sizeof(tohash), STR("%c%c%c%c%s%c%c%c%c%c%s%s%s%s"),
                                      salt2[0], 
                                      toupper(chname[0]),
                                      toupper(chname[1]),
@@ -345,7 +345,6 @@ const char * cookie_hash(const char* chname, const memberlist* opper, const memb
                                      opper->nick,
                                      opped->nick,
                                      opped->userhost,
-                                     opper->userhost,
                                      key);
 #ifdef DEBUG
 sdprintf("chname: %s ts: %s salt: %c%c%c%c", chname, ts, salt[0], salt[1], salt[2], salt[3]);
@@ -379,7 +378,7 @@ void makecookie(char *out, size_t len, const char *chname, const memberlist* opp
   simple_snprintf2(cookie_clear, sizeof(cookie_clear), STR("%s%s%D"), randstring, &ts[3], counter);
 
   char key[150] = "";
-  simple_snprintf2(key, sizeof(key), "%c%c%c%s%c%c%c%c%c%c%^s%c%c%c%c%c%c%c",
+  simple_snprintf2(key, sizeof(key), "%c%c%c%s%c%c%c%c%c%c%^s%c%c%c%c%c%c%c%s",
                                         randstring[0],
                                         settings.salt1[5],
                                         randstring[3],
@@ -397,7 +396,9 @@ void makecookie(char *out, size_t len, const char *chname, const memberlist* opp
                                         settings.salt2[13],
                                         settings.salt1[10],
                                         settings.salt2[3],
-                                        settings.salt2[1]);
+                                        settings.salt2[1],
+                                        opper->userhost
+                                        );
   const char* hash1 = cookie_hash(chname, opper, m1, &ts[4], randstring, key);
   const char* hash2 = m2 ? cookie_hash(chname, opper, m2, &ts[4], randstring, key) : NULL;
   const char* hash3 = m3 ? cookie_hash(chname, opper, m3, &ts[4], randstring, key) : NULL;
@@ -458,7 +459,7 @@ static int checkcookie(const char *chname, const memberlist* opper, const member
   const size_t hashes = cookie[3] == '!' ? 1 : (cookie[6] == '!' ? 2 : 3);
 
   char key[150] = "";
-  simple_snprintf2(key, sizeof(key), "%c%c%c%s%c%c%c%c%c%c%^s%c%c%c%c%c%c%c",
+  simple_snprintf2(key, sizeof(key), "%c%c%c%s%c%c%c%c%c%c%^s%c%c%c%c%c%c%c%s",
                                         SALT(0),
                                         settings.salt1[5],
                                         SALT(3),
@@ -476,7 +477,9 @@ static int checkcookie(const char *chname, const memberlist* opper, const member
                                         settings.salt2[13],
                                         settings.salt1[10],
                                         settings.salt2[3],
-                                        settings.salt2[1]);
+                                        settings.salt2[1],
+                                        opper->userhost
+                                        );
   char* cleartext = decrypt_string(MD5(key), (char*) &cookie[HOST(0)]);
   char ts[8] = "";
   strlcpy(ts, cleartext + 4, sizeof(ts));
