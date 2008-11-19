@@ -91,6 +91,9 @@ re_eval_with_modifier:
       case 'l':
         islong = 1;
         goto re_eval_with_modifier;
+      case '^': //STRING
+        caps = true;
+        goto re_eval_with_modifier;
       case 's': //string
         s = va_arg(va, char *);
         break;
@@ -136,9 +139,16 @@ re_eval_with_modifier:
       default:
         continue;
       }
-      if (s)
-        while (*s && c < size - 1)
-          buf[c++] = *s++;
+      if (s) {
+        if (caps) {
+          while (*s && c < size - 1)
+            buf[c++] = toupper(*s++);
+          caps = false;
+        } else {
+          while (*s && c < size - 1)
+            buf[c++] = *s++;
+        }
+      }
       fp++;
     } else
       buf[c++] = *fp++;
