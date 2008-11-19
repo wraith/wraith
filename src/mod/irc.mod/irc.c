@@ -333,12 +333,8 @@ const char * cookie_hash(const char* chname, const memberlist* opper, const memb
   char tohash[201] = "";
   const char salt2[] = SALT2;
 
-  /* Only use first 3 chars of chan */
-  simple_snprintf(tohash, sizeof(tohash), STR("%c%c%c%c%s%c%c%c%c%c%s%s%s%s"),
+  simple_snprintf(tohash, sizeof(tohash), STR("%c%s%c%c%c%c%c%s%s%s%s"),
                                      salt2[0], 
-                                     toupper(chname[0]),
-                                     toupper(chname[1]),
-                                     toupper(chname[2]),  
                                      ts,
                                      salt[0], salt[1], salt[2], salt[3],
                                      salt2[15],
