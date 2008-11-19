@@ -1179,6 +1179,9 @@ gotmode(char *from, char *msg)
               else if (isbadop == BC_SLACK)
                 putlog(LOG_WARN, "*", "Invalid cookie (bad time): %s!%s MODE %s %s", 
                     m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
+              else if (isbadop == BC_COUNTER)
+                putlog(LOG_WARN, "*", "Invalid cookie (bad count): %s!%s MODE %s %s",
+                    m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
             } 
 #ifdef DEBUG
             else

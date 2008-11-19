@@ -31,6 +31,7 @@
 #include "src/adns.h"
 #include "src/match.h"
 #include "src/settings.h"
+#include "src/base64.h"
 #include "src/tandem.h"
 #include "src/net.h"
 #include "src/botnet.h"
@@ -85,6 +86,7 @@ static bool ban_fun = 1;
 static bool prevent_mixing = 1;  /* To prevent mixing old/new modes */
 static bool include_lk = 1;      /* For correct calculation
                                  * in real_add_mode. */
+static hash_table_t *bot_counters = NULL;
 
 static int
 voice_ok(memberlist *m, struct chanset_t *chan)
@@ -337,7 +339,7 @@ const char * cookie_hash(const char* chname, const memberlist* opper, const memb
                                      toupper(chname[0]),
                                      toupper(chname[1]),
                                      toupper(chname[2]),  
-                                     &ts[4],
+                                     ts,
                                      salt[0], salt[1], salt[2], salt[3],
                                      salt2[15],
                                      opper->nick,
@@ -364,16 +366,28 @@ void makecookie(char *out, size_t len, const char *chname, const memberlist* opp
   /* &ts[4] is now last 6 digits of time */
   simple_snprintf(ts, sizeof(ts), "%010li", (long) (now + timesync));
   
-  const char* hash1 = cookie_hash(chname, opper, m1, ts, randstring);
-  const char* hash2 = m2 ? cookie_hash(chname, opper, m2, ts, randstring) : NULL;
-  const char* hash3 = m3 ? cookie_hash(chname, opper, m3, ts, randstring) : NULL;
+  const char* hash1 = cookie_hash(chname, opper, m1, &ts[4], randstring);
+  const char* hash2 = m2 ? cookie_hash(chname, opper, m2, &ts[4], randstring) : NULL;
+  const char* hash3 = m3 ? cookie_hash(chname, opper, m3, &ts[4], randstring) : NULL;
 
+  char cookie_clear[101] = "";
+
+  //Lookup my counter
+  unsigned long counter = 0;
+  if (hash_table_find(bot_counters, opper->user->handle, &counter) == -1) {
+    counter = 0;
+  }
+  hash_table_insert(bot_counters, opper->user->handle, (void *)(counter + 1));
+
+  simple_snprintf2(cookie_clear, sizeof(cookie_clear), STR("%s%s%D"), randstring, &ts[3], counter);
+
+//  const char* cookie = encrypt_string("blah", cookie_clear);
+  const char* cookie = strdup(cookie_clear);
 #ifdef DEBUG
+sdprintf("cookie_clear: %s", cookie_clear);
 sdprintf("hash1: %s", hash1);
-if (hash2)
-sdprintf("hash2: %s", hash2);
-if (hash3)
-sdprintf("hash3: %s", hash3);
+if (hash2) sdprintf("hash2: %s", hash2);
+if (hash3) sdprintf("hash3: %s", hash3);
 #endif
 
 //  register size_t len = m3 ? 25 : (m2 ? 22 : 19);
@@ -391,7 +405,7 @@ sdprintf("hash3: %s", hash3);
                          hash3[HASH_INDEX2(2)], 
                          hash3[HASH_INDEX3(2)], 
                          randstring, 
-                         ts);
+                         cookie);
   else if (m2)
     simple_snprintf(out, len + 1, STR("%c%c%c%c%c%c!%s@%s"), 
                          hash1[HASH_INDEX1(0)], 
@@ -401,38 +415,62 @@ sdprintf("hash3: %s", hash3);
                          hash2[HASH_INDEX2(1)], 
                          hash2[HASH_INDEX3(1)], 
                          randstring, 
-                         ts);
+                         cookie);
   else
     simple_snprintf(out, len + 1, STR("%c%c%c!%s@%s"), 
                          hash1[HASH_INDEX1(0)], 
                          hash1[HASH_INDEX2(0)], 
                          hash1[HASH_INDEX3(0)], 
                          randstring, 
-                         ts);
+                         cookie);
 #ifdef DEBUG
 sdprintf("cookie: %s", out);
 #endif
+  free((char*)cookie);
 //  return buf;
 }
 
 /* 111222333!salt@timestamp. */
 static int checkcookie(const char *chname, const memberlist* opper, const memberlist* opped, const char *cookie, int indexHint) {
-#define TS(_x) (6 + (_x) + ((hashes << 1) + hashes)) /* x + (hashes * 3) */
+#define HOST(_x) (6 + (_x) + ((hashes << 1) + hashes)) /* x + (hashes * 3) */
 #define SALT(_x) (1 + (_x) + ((hashes << 1) + hashes)) /* x + (hashes * 3) */
   /* How many hashes are in the cookie? */
   const size_t hashes = cookie[3] == '!' ? 1 : (cookie[6] == '!' ? 2 : 3);
 
+//  char* cleartext = decrypt_string("blah", (char*) &cookie[HOST(0)]);
+  char* cleartext = strdup((char*) &cookie[HOST(0)]);
+  char ts[8] = "";
+  strlcpy(ts, cleartext + 4, sizeof(ts));
+  unsigned long counter = base64_to_int(cleartext + 4 + 7);
+
+  //Lookup counter for the opper
+  unsigned long expected_counter = 0;
+  if (hash_table_find(bot_counters, opper->user->handle, &expected_counter) == -1) {
+    expected_counter = 0;
+  }
+
 #ifdef DEBUG
-sdprintf("ts from cookie: %s", &cookie[TS(0)]);
+sdprintf("plaintext from cookie: %s", cleartext);
+sdprintf("ts from cookie: %s", ts);
+sdprintf("counter from cookie: %lu", counter);
+if (counter != expected_counter)
+  sdprintf("expected counter for %s: %lu", opper->user->handle, expected_counter);
 #endif
-  /* The timestamp is already null-terminated :) */
-  const char *ts = &cookie[TS(0)];
+
+  free(cleartext);
+
   const time_t optime = atol(ts);
-  if (((now + timesync) - optime) > 1800)
+  if ((((now + timesync) % 10000000) - optime) > 3900)
     return BC_SLACK;
 
+  if (counter <= expected_counter)
+    return BC_COUNTER;
+
+  //Update counter for the opper
+  hash_table_insert(bot_counters, opper->user->handle, (void *)(counter));
+
   const char *salt = &cookie[SALT(0)];
-  const char *hash = cookie_hash(chname, opper, opped, ts, salt);
+  const char *hash = cookie_hash(chname, opper, opped, &ts[1], salt);
 #ifdef DEBUG
 sdprintf("hash: %s", hash);
 #endif
@@ -453,6 +491,8 @@ sdprintf("hash: %s", hash);
 
   /* None matched -> failure */
   return BC_HASH;
+#undef HOST
+#undef SALT
 }
 
 /*
@@ -1694,4 +1734,6 @@ irc_init()
   add_builtins("msgc", C_msgc);
 
   do_nettype();
+
+  bot_counters = hash_table_create(NULL, NULL, 100, HASH_TABLE_STRINGS);
 }

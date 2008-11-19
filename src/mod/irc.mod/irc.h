@@ -8,7 +8,7 @@
 
 #include "src/auth.h"
 
-enum { BC_NOCOOKIE = 1, BC_SLACK, BC_HASH };
+enum { BC_NOCOOKIE = 1, BC_SLACK, BC_HASH, BC_COUNTER };
 
 //#define REVENGE_KICK 1		/* Kicked victim	*/
 //#define REVENGE_DEOP 2		/* Took op		*/
