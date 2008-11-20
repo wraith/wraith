@@ -357,6 +357,7 @@ sdprintf("tohash: %s", tohash);
 
 void makecookie(char *out, size_t len, const char *chname, const memberlist* opper, const memberlist* m1, const memberlist* m2, const memberlist* m3) {
   char randstring[5] = "", ts[11] = "";
+  static unsigned long counter = 0;
 
   make_rand_str(randstring, 4);
   /* &ts[4] is now last 6 digits of time */
@@ -364,13 +365,8 @@ void makecookie(char *out, size_t len, const char *chname, const memberlist* opp
   
   char cookie_clear[101] = "";
 
-  //Lookup my counter
-  unsigned long counter = 0;
-  if (hash_table_find(bot_counters, opper->user->handle, &counter) == -1) {
-    counter = 0;
-  }
-  hash_table_insert(bot_counters, opper->user->handle, (void *)(counter + 1));
-
+  //Increase my counter
+  ++counter;
   simple_snprintf2(cookie_clear, sizeof(cookie_clear), STR("%s%s%D"), randstring, &ts[3], counter);
 
   char key[150] = "";
@@ -477,18 +473,15 @@ static int checkcookie(const char *chname, const memberlist* opper, const member
   unsigned long counter = base64_to_int(cleartext + 4 + 7);
 
   //Lookup counter for the opper
-  unsigned long expected_counter = 0;
-  if (hash_table_find(bot_counters, opper->user->handle, &expected_counter) == -1) {
-    expected_counter = 0;
-  }
+  unsigned long last_counter = 0;
+  if (hash_table_find(bot_counters, opper->user->handle, &last_counter) == -1) last_counter = 0;
 
 #ifdef DEBUG
 sdprintf("key: %s", key);
 sdprintf("plaintext from cookie: %s", cleartext);
 sdprintf("ts from cookie: %s", ts);
+sdprintf("last counter from %s: %lu", opper->user->handle, last_counter);
 sdprintf("counter from cookie: %lu", counter);
-if (counter != expected_counter)
-  sdprintf("expected counter for %s: %lu", opper->user->handle, expected_counter);
 #endif
 
   free(cleartext);
@@ -497,7 +490,7 @@ if (counter != expected_counter)
   if ((((now + timesync) % 10000000) - optime) > 3900)
     return BC_SLACK;
 
-  if (counter <= expected_counter)
+  if (counter <= last_counter)
     return BC_COUNTER;
 
   //Update counter for the opper
