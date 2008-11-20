@@ -333,12 +333,11 @@ const char * cookie_hash(const char* chname, const memberlist* opper, const memb
   char tohash[201] = "";
   const char salt2[] = SALT2;
 
-  simple_snprintf(tohash, sizeof(tohash), STR("%c%s%c%c%c%c%c%s%s%s%s"),
+  simple_snprintf(tohash, sizeof(tohash), STR("%c%s%c%c%c\n%c%c%s%s%s"),
                                      salt2[0], 
                                      ts,
                                      salt[0], salt[1], salt[2], salt[3],
                                      salt2[15],
-                                     opper->nick,
                                      opped->nick,
                                      opped->userhost,
                                      key);
