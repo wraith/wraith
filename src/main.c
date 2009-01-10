@@ -91,7 +91,7 @@ extern int		optind;
 const time_t 	buildts = BUILDTS;		/* build timestamp (UTC) */
 const char	*commit = COMMIT;
 const char	*branch = BRANCH;
-const char	*egg_version = "1.2.16";
+const char	*egg_version = VERSION;
 char	git_version[50] = "";
 
 bool	used_B = 0;		/* did we get started with -B? */
@@ -114,7 +114,7 @@ bool	restart_was_update = 0;
 bool    restarting = 0;
 
 char	owner[121] = "";	/* Permanent owner(s) of the bot */
-char	version[81] = "";	/* Version info (long form) */
+char	version[121] = "";	/* Version info (long form) */
 char	ver[41] = "";		/* Version info (short form) */
 bool	use_stderr = 1;		/* Send stuff to stderr instead of logfiles? */
 char	quit_msg[1024];		/* quit message */
@@ -427,7 +427,6 @@ static void dtx_arg(int& argc, char *argv[])
 
         egg_strftime(date, sizeof date, "%c %Z", gmtime(&buildts));
 	printf(STR("%s\nBuild Date: %s (%s%lu%s)\n"), version, date, BOLD(-1), buildts, BOLD_END(-1));
-        printf(STR("Commit: %s\n"), commit);
         printf(STR("BuildOS: %s%s%s BuildArch: %s%s%s\n"), BOLD(-1), BUILD_OS, BOLD_END(-1), BOLD(-1), BUILD_ARCH, BOLD_END(-1));
 	printf(STR("pack: %d conf: %d settings_t: %d prefix: %d pad: %d\n"), SIZE_PACK, SIZE_CONF, sizeof(settings_t), PREFIXLEN, SIZE_PAD);
         if (settings.uname[0]) {
@@ -790,9 +789,8 @@ printf("out: %s\n", out);
   init_conf();			/* establishes conf and sets to defaults */
 
   /* Version info! */
-  simple_snprintf(git_version, sizeof(git_version), "%s-%s", egg_version, branch);
-  simple_snprintf(ver, sizeof(ver), STR("[%s] Wraith %s"), settings.packname, git_version);
-  simple_snprintf(version, sizeof(version), STR("%s (%lu:%s)"), ver, buildts, commit);
+  simple_snprintf(ver, sizeof(ver), STR("[%s] Wraith %s"), settings.packname, egg_version);
+  simple_snprintf(version, sizeof(version), STR("%s (%lu)"), ver, buildts);
 
   egg_memcpy(&nowtm, gmtime(&now), sizeof(struct tm));
   lastmin = nowtm.tm_min;

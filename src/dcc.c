@@ -224,7 +224,7 @@ greet_new_bot(int idx)
     dcc[idx].status |= STAT_LEAF;
   dcc[idx].status |= STAT_LINKING;
 
-  dprintf(idx, "v 1001500 %d Wraith %s <%s> %d %li %s %s\n", HANDLEN, egg_version, "-", conf.bot->localhub, (long)buildts, commit, git_version);
+  dprintf(idx, "v 1001500 %d Wraith %s <%s> %d %li %s %s\n", HANDLEN, egg_version, "-", conf.bot->localhub, (long)buildts, commit, egg_version);
 
   for (int i = 0; i < dcc_total; i++) {
     if (dcc[i].type && dcc[i].type == &DCC_FORK_BOT) {

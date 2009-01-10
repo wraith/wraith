@@ -22,8 +22,9 @@ EXCLUDES = pack/pack.cfg $(CONFIGFILES) $(STATICMAKEFILES)
 
 COMMIT_FULL 	:= $(shell git log -1 --pretty=format:%H HEAD)
 COMMIT_SHORT 	:= $(shell git log -1 --pretty=format:%h HEAD)
-BRANCH 		:= $(shell git branch --no-color | grep "^*" | sed -e 's/^\* //')
+BRANCH		:= := $(shell git branch --no-color | grep "^*" | sed -e 's/^\* //')
 BUILDTS 	:= $(shell git log -1 --pretty=format:%ct HEAD)
+VERSION		:= $(shell git describe)
 
 HELPFILE = doc/help.txt
 SETTINGSFILE = doc/settings.txt
@@ -57,12 +58,12 @@ _CFLGS = -fno-strict-aliasing -W -Wformat \
 MAKEFLAGS = -s -j4
 
 MAKE_BIN = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CXX)' 'LD=$(LD)' \
-'CCDEPMODE=$(CCDEPMODE)' 'BRANCH=$(BRANCH)' 'COMMIT=$(COMMIT_SHORT)' 'BUILDTS=$(BUILDTS)' \
+'CCDEPMODE=$(CCDEPMODE)' 'BRANCH=$(BRANCH)' 'COMMIT=$(COMMIT_SHORT)' 'BUILDTS=$(BUILDTS)' 'VERSION=$(VERSION)' \
 'STRIP=$(STRIP)' 'CFLGS=$(CFLGS)' \
 'LIBS=$(LIBS)' 'EGGEXEC=$(BINEXEC)' 'EGGBUILD=(wraith)'
 
 MAKE_DEBUG = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CCDEBUG)' 'LD=$(LDDEBUG) -g' \
-'CCDEPMODE=$(CCDEPMODE)' 'BRANCH=$(BRANCH)' 'COMMIT=$(COMMIT_SHORT)' 'BUILDTS=$(BUILDTS)' \
+'CCDEPMODE=$(CCDEPMODE)' 'BRANCH=$(BRANCH)' 'COMMIT=$(COMMIT_SHORT)' 'BUILDTS=$(BUILDTS)' 'VERSION=$(VERSION)' \
 'STRIP=touch' 'CFLGS=$(CFLGS) $(DEBCXXFLAGS)' \
 'LIBS=$(LIBS)' 'EGGEXEC=$(BINEXEC)' 'EGGBUILD=(debug)' 
 
@@ -112,6 +113,7 @@ distrib: clean
 	  -e 's/^COMMIT_SHORT .*/COMMIT_SHORT = $(COMMIT_SHORT)/' \
 	  -e 's/^BRANCH .*/BRANCH = $(BRANCH)/' \
 	  -e 's/^BUILDTS .*/BUILDTS = $(BUILDTS)/' \
+	  -e 's/^VERSION .*/VERSION = $(VERSION)/' \
 	  $(DISTRIB)/Makefile.in > Makefile.in.tmp && mv Makefile.in.tmp $(DISTRIB)/Makefile.in
 #	@for s in `find $(DISTRIB)/src/ -name '*.h' -or -name '*.c'`; do mangle -rnw $$s > /dev/null 2>&1; done
 

@@ -638,10 +638,10 @@ void tell_bottree(int idx)
 
   if (s[0])
     dprintf(idx, "(%s %s)\n", "No trace info for:", s);
-  dprintf(idx, "%s%s%s (%s %s)\n", color_str ? color_str : "",
+  dprintf(idx, "%s%s%s (%s)\n", color_str ? color_str : "",
                                     conf.bot->nick,
                                     color_str ? COLOR_END(idx) : "",
-                                    egg_version, commit);
+                                    egg_version);
 
   thisbot = (tand_t *) 1;
   work[0] = 0;
@@ -685,10 +685,10 @@ void tell_bottree(int idx)
             i = simple_snprintf(s, sizeof(s), "%c", bot->share);
           else
             i = simple_snprintf(s, sizeof(s), "-");
-          i = simple_snprintf(s + 1, sizeof(s) - 1, "%s%s%s (%s %s)", color_str ? color_str : "",
+          i = simple_snprintf(s + 1, sizeof(s) - 1, "%s%s%s (%s)", color_str ? color_str : "",
                                                 bot->bot,
                                                 color_str ? COLOR_END(idx) : "",
-                                                bot->version, bot->commit);
+                                                bot->version);
 	} else
 	  bot = bot->next;
       }
@@ -731,10 +731,10 @@ void tell_bottree(int idx)
                   i = simple_snprintf(s, sizeof(s), "%c", bot->share);
                 else
                   i = simple_snprintf(s, sizeof(s), "-");
-                i = simple_snprintf(s + 1, sizeof(s) - 1, "%s%s%s (%s %s)", color_str ? color_str : "",
+                i = simple_snprintf(s + 1, sizeof(s) - 1, "%s%s%s (%s)", color_str ? color_str : "",
                                                       bot->bot,
                                                       color_str ? COLOR_END(idx) : "",
-                                                      bot->version, bot->commit);
+                                                      bot->version);
 	      }
 	    }
 	  }

@@ -16,7 +16,7 @@ enum {
 extern int		role, default_flags, default_uflags, do_confedit,
 			updating, do_restart;
 extern bool		use_stderr, backgrd, used_B, term_z, loading, restart_was_update, restarting;
-extern char		tempdir[], *binname, owner[], version[], ver[], quit_msg[], *socksfile, git_version[50];
+extern char		tempdir[], *binname, owner[], version[121], ver[], quit_msg[], *socksfile;
 extern time_t		online_since, now, restart_time;
 extern uid_t		myuid;
 extern pid_t            mypid;
