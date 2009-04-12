@@ -6,8 +6,8 @@ __  _  ______________  |__|/  |_|  |__
                      \/              \/
        http://wraith.botpack.net
 
-Wraith is an IRC bot written in C++. It has been in development since late 2001. 
-It is based on Eggdrop 1.6.13 but has since evolved into something much different at its core.
+Wraith is an IRC bot written in C++. It has been in development since late 2003. 
+It is based on Eggdrop 1.6.12 but has since evolved into something much different at its core.
 
 Wraith aims to be a secure and easy to setup and manage botnet. 
 A botnet can be setup in a matter of minutes and updated later with 1 command. 
