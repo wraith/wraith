@@ -3095,7 +3095,7 @@ static int gotmsg(char *from, char *msg)
     int botmatch = 0;
     char *my_msg = NULL, *my_ptr = NULL, *fword = NULL;
 
-    if (me_op(chan) && doflood(chan))
+    if (me_op(chan) && doflood(chan) && 0)
       detect_offense(m, chan, msg);
 
     /* Check even if we're ignoring the host. (modified by Eule 17.7.99) */

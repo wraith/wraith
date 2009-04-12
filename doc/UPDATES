@@ -26,6 +26,7 @@
 * Fixed bot dying off when it can't create a temporary file. (fixes #412)
 * Show connection time in cmd_(net|bot)server now.
 * Fix a segfault in the settings handling code. (Could create very random looking segfaults)
+* Disable bot +f as all it did was cause a segfault. The flood code is unfinished. (fixes #429)
 
 1.2.15 - http://wraith.botpack.net/milestone/1.2.15
 * Fix a possible segfault when binaries compiled wrong
