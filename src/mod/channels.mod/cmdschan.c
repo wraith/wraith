@@ -577,7 +577,7 @@ static void cmd_slowjoin(int idx, char *par)
     }
   }
 
-  if (shouldjoin(chan))
+  if (!conf.bot->hub && shouldjoin(chan))
     count++;
 
   dprintf(idx, "%i bots joining %s during the next %i seconds\n", count, chan->dname, delay);
