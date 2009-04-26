@@ -150,8 +150,16 @@ flush_cookies(struct chanset_t *chan, int pri)
 
   if (post[0]) {
     memberlist* me = ismember(chan, botname);
+
+    if (!me->user && !me->tried_getuser) {
+      char uhost[UHOSTLEN] = "";
+      simple_snprintf(uhost, sizeof(uhost), "%s!%s", me->nick, me->userhost);
+      me->user = get_user_by_host(uhost);
+      me->tried_getuser = 1;
+    }
+
     /* Am I even on the channel? */
-    if (!me)
+    if (!me || !me->user)
       return;
 
     /* remove the trailing space... */
