@@ -382,7 +382,7 @@ static void check_updates()
     }
     /* send out notice to update remote bots ... */
     /* 9999 is a hack to force all bots from old svn-revisions to upgrade to new git style */
-    simple_snprintf(buf, sizeof buf, "nu? %li 9999 %s", buildts, commit);
+    simple_snprintf(buf, sizeof buf, "nu? %li 9999 %s", (long) buildts, commit);
     putallbots(buf);
   }
 }
