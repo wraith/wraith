@@ -479,8 +479,10 @@ static int checkcookie(const char *chname, const memberlist* opper, const member
 sdprintf("key: %s", key);
 sdprintf("plaintext from cookie: %s", cleartext);
 sdprintf("ts from cookie: %s", ts);
-sdprintf("last counter from %s: %lu", opper->user->handle, last_counter);
-sdprintf("counter from cookie: %lu", counter);
+if (indexHint == 0) {
+  sdprintf("last counter from %s: %lu", opper->user->handle, last_counter);
+  sdprintf("counter from cookie: %lu", counter);
+}
 #endif
 
   free(cleartext);
@@ -489,11 +491,14 @@ sdprintf("counter from cookie: %lu", counter);
   if ((((now + timesync) % 10000000) - optime) > 3900)
     return BC_SLACK;
 
-  if (counter <= last_counter)
-    return BC_COUNTER;
+  //Only check on the first cookie
+  if (indexHint == 0) {
+    if (counter <= last_counter)
+      return BC_COUNTER;
 
-  //Update counter for the opper
-  hash_table_insert(bot_counters, opper->user->handle, (void *)(counter));
+    //Update counter for the opper
+    hash_table_insert(bot_counters, opper->user->handle, (void *)(counter));
+  }
 
   const char *salt = &cookie[SALT(0)];
   const char *hash = cookie_hash(chname, opper, opped, &ts[1], salt, key);
