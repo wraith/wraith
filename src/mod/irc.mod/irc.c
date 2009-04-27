@@ -479,7 +479,10 @@ static int checkcookie(const char *chname, const memberlist* opper, const member
 
   //Lookup counter for the opper
   unsigned long last_counter = 0;
-  if (hash_table_find(bot_counters, opper->user->handle, &last_counter) == -1) last_counter = 0;
+  // Don't check counter for my own ops as it may have incremented in the queue before seeing the last last counter
+  if (conf.bot->u != opper->user) {
+    if (hash_table_find(bot_counters, opper->user->handle, &last_counter) == -1) last_counter = 0;
+  }
 
 #ifdef DEBUG
 sdprintf("key: %s", key);
@@ -498,7 +501,7 @@ if (indexHint == 0) {
     return BC_SLACK;
 
   //Only check on the first cookie
-  if (indexHint == 0) {
+  if (indexHint == 0 && conf.bot->u != opper->user) {
     if (counter <= last_counter)
       return BC_COUNTER;
 
