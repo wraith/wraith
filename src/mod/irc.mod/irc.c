@@ -87,6 +87,7 @@ static bool prevent_mixing = 1;  /* To prevent mixing old/new modes */
 static bool include_lk = 1;      /* For correct calculation
                                  * in real_add_mode. */
 static hash_table_t *bot_counters = NULL;
+static unsigned long my_counter = 0;
 
 static int
 voice_ok(memberlist *m, struct chanset_t *chan)
@@ -356,7 +357,6 @@ sdprintf("tohash: %s", tohash);
 
 void makecookie(char *out, size_t len, const char *chname, const memberlist* opper, const memberlist* m1, const memberlist* m2, const memberlist* m3) {
   char randstring[5] = "", ts[11] = "";
-  static unsigned long counter = 0;
 
   make_rand_str(randstring, 4);
   /* &ts[4] is now last 6 digits of time */
@@ -365,8 +365,8 @@ void makecookie(char *out, size_t len, const char *chname, const memberlist* opp
   char cookie_clear[101] = "";
 
   //Increase my counter
-  ++counter;
-  simple_snprintf2(cookie_clear, sizeof(cookie_clear), STR("%s%s%D"), randstring, &ts[3], counter);
+  ++my_counter;
+  simple_snprintf2(cookie_clear, sizeof(cookie_clear), STR("%s%s%D"), randstring, &ts[3], my_counter);
 
   char key[150] = "";
   simple_snprintf2(key, sizeof(key), "%c%c%c%s%c%c%c%c%c%c%^s%c%c%c%c%c%c%c%s",
@@ -436,6 +436,12 @@ if (hash3) sdprintf("hash3: %s", hash3);
 sdprintf("cookie: %s", out);
 #endif
   free((char*)cookie);
+}
+
+// Clear counter for bot
+void counter_clear(struct userrec *u) {
+  unsigned long counter = 0;
+  hash_table_insert(bot_counters, u->handle, (void *)(counter));
 }
 
 static int checkcookie(const char *chname, const memberlist* opper, const memberlist* opped, const char *cookie, int indexHint) {
