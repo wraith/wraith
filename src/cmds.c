@@ -406,16 +406,19 @@ static void cmd_about(int idx, char *par)
   dprintf(idx, STR(" * $bMystikal$b for various bugs.\n"));
   dprintf(idx, STR(" * $bMany$b others.\n"));
   dprintf(idx, " \n");
+  dprintf(idx, STR("For a list of Contributors see: git log master|git shortlog -sen\n"));
+  dprintf(idx, STR("To Contribute see: http://wraith.botpack.net/wiki/Contributing\n"));
   dprintf(idx, STR("Credit for suggestions/bugs can be found at: http://wraith.botpack.net/report/9\n"));
   dprintf(idx, STR("Bugs can be reported at: http://wraith.botpack.net/newticket\n"));
-  dprintf(idx, STR("Bugs can be looked up by #, ie, '#24' in url: http://wraith.botpack.net/ticket/24/\n"));
+  dprintf(idx, STR("Bugs can be looked up by #, ie, '#24' in url: http://wraith.botpack.net/ticket/24\n"));
+  dprintf(idx, STR("Please support wraith by signing up for a shell at http://www.xzibition.com (coupon 'wraith' for 30% off)\n"));
   dprintf(idx, " \n");
 
   dprintf(idx, STR("The botpack ghost inspired the early versions of wraith and a few cmds.\n"));
   dprintf(idx, STR("* $beinride$b\n"));
   dprintf(idx, STR("* $bievil$b\n"));
   dprintf(idx, "\n");
-  dprintf(idx, STR("The following botpacks gave me inspiration and ideas (no code):\n"));
+  dprintf(idx, STR("The following botpacks gave inspiration, ideas, and some code:\n"));
   dprintf(idx, STR(" * $uawptic$u by $blordoptic$b\n"));
   dprintf(idx, STR(" * $uoptikz$u by $bryguy$b and $blordoptic$b\n"));
   dprintf(idx, STR(" * $uceldrop$u by $bexcelsior$b\n"));

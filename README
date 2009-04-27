@@ -20,6 +20,23 @@ Official Git repositories:
 git://git.shatow.net/wraith.git
 git://github.com/bdrewery/wraith.git
 
+For a list of Contributors see: git log master|git shortlog -sen
+To Contribute see: http://wraith.botpack.net/wiki/Contributing
+Bugs can be reported at: http://wraith.botpack.net/newticket
+Bugs can be looked up by #, ie, '#24' in url: http://wraith.botpack.net/ticket/24
+Please support wraith by signing up for a shell at http://www.xzibition.com (coupon 'wraith' for 30% off)
+
+The botpack ghost inspired the early versions of wraith and a few cmds.
+* einride
+* ievil
+
+The following botpacks gave inspiration, ideas, and some code:
+* awptic by lordoptic
+* optikz by ryguy and lordoptic
+* celdrop by excelsior
+* genocide by Crazi, Dor, psychoid, and Ace24
+* tfbot by warknite and loslinux
+
+
 NEVER upload your pack.cfg to an untrusted shell.
--Bryan
 #wraith @ EFnet

@@ -41,7 +41,6 @@ OWNEREMAIL <some@email.com>
  *
  * Your hub hosts should NOT be vhosts. They need to be changable dns.
  * Use a domain you OWN/CONTROL, or a friends.
- * I will *not* rush to remake binaries if asked because of hub host problems.
  */
 HUB <hub1 hub1.domain.tld 1234>
 HUB <hub2 hub2.domain.tld 1235>
