@@ -108,7 +108,9 @@ void init_debug()
 
 void sdprintf (const char *format, ...)
 {
+#ifndef DEBUG
   if (sdebug) {
+#endif
     char s[2001] = "";
     va_list va;
 
@@ -118,11 +120,19 @@ void sdprintf (const char *format, ...)
     
     remove_crlf(s);
 
-    if (!backgrd)
-      dprintf(DP_STDOUT, "[D:%d] %s%s%s\n", mypid, BOLD(-1), s, BOLD_END(-1));
-    else
-      printf("[D:%d] %s%s%s\n", mypid, BOLD(-1), s, BOLD_END(-1));
+#ifdef DEBUG
+    if (sdebug) {
+#endif
+      if (!backgrd)
+        dprintf(DP_STDOUT, "[D:%d] %s%s%s\n", mypid, BOLD(-1), s, BOLD_END(-1));
+      else
+        printf("[D:%d] %s%s%s\n", mypid, BOLD(-1), s, BOLD_END(-1));
+#ifdef DEBUG
+    }
+    logfile(LOG_DEBUG, s);
+#else
   }
+#endif
 }
 
 #ifdef NOTUSED

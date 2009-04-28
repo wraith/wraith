@@ -155,7 +155,7 @@ void logidx(int idx, const char *format, ...)
     dprintf(idx, "%s\n", va_out);
 }
 
-#ifdef no
+#ifdef DEBUG
 /* CURRENTLY SPAWNS TONS OF FILES */
 FILE *logf;
 bool flush_log = 1;
@@ -178,7 +178,12 @@ void logfile_close(void)
 
 bool logfile_open()
 {
-  if (!(logf = fopen(".l", "a")))
+  if (!conf.bot || !conf.bot->nick) return 0;
+
+  char filename[20] = "";
+  simple_snprintf(filename, sizeof(filename), ".l-%s", conf.bot->nick);
+
+  if (!(logf = fopen(filename, "w")))
     return 0;
 
   if (!init_log_exit) {
@@ -214,8 +219,8 @@ void logfile(int type, const char *msg)
   if (!logf && !logfile_open())
     return;
 
-  if (!logfile_stat(".l"))
-    return;
+//  if (!logfile_stat(".l"))
+//    return;
 
   if (!egg_strncasecmp(msg, log_last, sizeof(log_last))) {
     repeats++;
@@ -299,11 +304,11 @@ void putlog(int type, const char *chname, const char *format, ...)
 
   /* strcat(out, "\n"); */
 
-#ifdef no
+#ifdef DEBUG
   /* FIXME: WRITE LOG HERE */
-  int logfile_masks = LOG_CMDS|LOG_ERRORS|LOG_WARN|LOG_BOTS|LOG_MISC;
+  int logfile_masks = LOG_ALL;
 
-  if (logfile_masks && (logfile_masks & type))
+  if ((logfile_masks && (logfile_masks & type)) || 1)
     logfile(type, out);
 #endif
   /* broadcast to hubs */
