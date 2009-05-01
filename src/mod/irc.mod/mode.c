@@ -178,7 +178,8 @@ flush_cookies(struct chanset_t *chan, int pri)
     makecookie(&out[myindex], sizeof(out) - myindex, chan->dname, me, nicks[0], nicks[1], nicks[2]);
   }
   if (out[0]) {
-    if (pri == QUICK) {
+    // Enabling this creates a queued cookie and a dumped cookie, resulting in out-of-order counters.
+    if (pri == QUICK && 0) {
       char outbuf[201] = "";
 
       const size_t len = simple_snprintf(outbuf, sizeof(outbuf), "MODE %s %s\r\n", chan->name, out);
