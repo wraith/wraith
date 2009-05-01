@@ -1,7 +1,6 @@
 1.2.16 - http://wraith.botpack.net/milestone/1.2.16
 * Add 'set altchars' so that alternative characters used for nicks can be changed. (fixes #418)
 * Fix channels added by cmd_slowjoin not having the user who added them associated with the channel.
-* Fix leaf bots not updating behind other hubs (fixes #419)
 * Removed BDHASH as it wasn't even used.
 * SHELLHASH now supports SHA1 hashes.
 * Fix segfault from receiving truncated DNS replies.
@@ -28,6 +27,9 @@
 * Fix a segfault in the settings handling code. (Could create very random looking segfaults)
 * Disable bot +f as all it did was cause a segfault. The flood code is unfinished. (fixes #429)
 * Fix cmd_slowjoin not counting bots correctly. (fixes #431)
+
+1.2.15.1
+* Fix leaf bots not updating behind other hubs (fixes #419)
 
 1.2.15 - http://wraith.botpack.net/milestone/1.2.15
 * Fix a possible segfault when binaries compiled wrong
