@@ -9,8 +9,6 @@ srcdir = @srcdir@
 VPATH = @srcdir@
 
 @SET_MAKE@
-VERSION = @VERSION@
-DISTRIB = wraith-@VERSION@
 CCDEPMODE = @CCDEPMODE@
 BINEXEC = wraith@EXEEXT@
 
@@ -22,9 +20,10 @@ EXCLUDES = pack/pack.cfg $(CONFIGFILES) $(STATICMAKEFILES)
 
 COMMIT_FULL 	:= $(shell git log -1 --pretty=format:%H HEAD)
 COMMIT_SHORT 	:= $(shell git log -1 --pretty=format:%h HEAD)
-BRANCH		:= := $(shell git branch --no-color | grep "^*" | sed -e 's/^\* //')
+BRANCH 		:= $(shell git branch --no-color | grep "^*" | sed -e 's/^\* //')
 BUILDTS 	:= $(shell git log -1 --pretty=format:%ct HEAD)
-VERSION		:= $(shell git describe)
+VERSION 	:= $(shell git describe)
+DISTRIB = wraith-$(VERSION)
 
 HELPFILE = doc/help.txt
 SETTINGSFILE = doc/settings.txt
