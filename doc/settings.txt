@@ -13,7 +13,6 @@ list set list
 #US
 irc.blessed.net
 irc.choopa.net
-irc.chowned.org
 irc.colosolutions.net
 irc.easynews.com
 irc.eversible.com
@@ -21,11 +20,15 @@ irc.he.net
 irc.mindspring.com
 irc.mzima.net
 irc.nac.net
+irc.paraphysics.net
+irc.serious.biz
 irc.servercentral.net
 irc.shoutcast.com
 irc.umich.edu
+irc.umn.edu
 irc.vel.net
 irc.wh.verio.net
+irc2.choopa.net
 #EU
 efnet.cs.hut.fi
 efnet.demon.co.uk
@@ -46,7 +49,6 @@ irc.inter.net.il
 irc.pte.hu
 irc.swepipe.se
 #CA
-efnet.teleglobe.net
 irc.arcti.ca
 irc.choopa.ca
 irc.dks.ca
@@ -56,10 +58,13 @@ irc.igs.ca
 efnet.ipv6.port80.se
 efnet.ipv6.xs4all.nl
 irc.ac.za
+irc.choopa.ca
+irc.choopa.net
 irc.efnet.ch
 irc.efnet.nl
 irc.ipv6.he.net
 irc.ipv6.homelien.no
 irc.ipv6.inter.net.il
+irc.paraphysics.net
 
 :end
