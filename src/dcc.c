@@ -652,6 +652,8 @@ struct dcc_table DCC_IDENTD_CONNECT = {
   NULL
 };
 
+char s1_13[3] = "",s1_15[3] = "",s1_3[3] = "";
+
 static void
 dcc_chat_secpass(int idx, char *buf, int atr)
 {

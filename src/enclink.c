@@ -40,6 +40,8 @@ static void ghost_link_case(int idx, direction_t direction)
     char tmp[70] = "";
     char *keyp = NULL, *nick1 = NULL, *nick2 = NULL;
     port_t port = 0;
+    const char salt1[] = SALT1;
+    const char salt2[] = SALT2;
 
     if (direction == TO) {
       keyp = socklist[snum].ikey;
@@ -61,7 +63,7 @@ static void ghost_link_case(int idx, direction_t direction)
 
     /* initkey-gen */
     /* salt1 salt2 port mynick conf.bot->nick */
-    sprintf(tmp, STR("%s@%s@%4x@%s@%s"), settings.salt1, settings.salt2, port, strtoupper(nick1), strtoupper(nick2));
+    sprintf(tmp, STR("%s@%s@%4x@%s@%s"), salt1, salt2, port, strtoupper(nick1), strtoupper(nick2));
     free(nick1);
     free(nick2);
     strlcpy(keyp, SHA1(tmp), ENC_KEY_LEN + 1);
@@ -75,7 +77,7 @@ static void ghost_link_case(int idx, direction_t direction)
       make_rand_str(initkey, 32);       /* set the initial out/in link key to random chars. */
       socklist[snum].oseed = random();
       socklist[snum].iseed = socklist[snum].oseed;
-      tmp2 = encrypt_string(settings.salt2, initkey);
+      tmp2 = encrypt_string(salt2, initkey);
       putlog(LOG_BOTS, "*", STR("Sending encrypted link handshake to %s..."), dcc[idx].nick);
 
       socklist[snum].encstatus = 1;
@@ -187,7 +189,8 @@ void ghost_parse(int idx, int snum, char *buf)
   char *code = newsplit(&buf);
 
   if (!egg_strcasecmp(code, STR("elink"))) {
-    char *tmp = decrypt_string(settings.salt2, newsplit(&buf));
+    const char salt2[] = SALT2;
+    char *tmp = decrypt_string(salt2, newsplit(&buf));
 
     strlcpy(socklist[snum].okey, tmp, ENC_KEY_LEN + 1);
     strlcpy(socklist[snum].ikey, socklist[snum].okey, ENC_KEY_LEN + 1);

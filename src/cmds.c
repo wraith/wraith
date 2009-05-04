@@ -78,6 +78,7 @@ int    			 cmdi = 0;
 static char		 *btos(unsigned long);
 
 static help_t *findcmd(const char *, bool);
+char s1_10[3] = "",s1_4[3] = "",s1_12[3] = "";
 
 static void tell_who(int idx, int chan)
 {
@@ -1843,7 +1844,8 @@ static void cmd_encrypt(int idx, char *par)
     return;
   }
 
-  char *buf = encrypt_string(key ? key : settings.salt2, par);
+  const char salt2[] = SALT2;
+  char *buf = encrypt_string(key ? key : salt2, par);
 
   dprintf(idx, "encrypt(%s) = %s\n", par, buf);
   free(buf);
@@ -1865,7 +1867,8 @@ static void cmd_decrypt(int idx, char *par)
     return;
   }
 
-  char *buf = decrypt_string(key ? key : settings.salt2, par);
+  const char salt2[] = SALT2;
+  char *buf = decrypt_string(key ? key : salt2, par);
 
   dprintf(idx, "decrypt(%s) = %s\n", par, buf);
   free(buf);

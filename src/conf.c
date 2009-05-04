@@ -658,6 +658,7 @@ readconf(const char *fname, int bits)
   FILE *f = NULL;
   int i = 0, enc = (bits & CONF_ENC) ? 1 : 0;
   char *inbuf = NULL;
+  const char salt1[] = SALT1;
 
   sdprintf(STR("readconf(%s, %d)"), fname, enc);
   Context;
@@ -671,7 +672,7 @@ readconf(const char *fname, int bits)
 
     remove_crlf(inbuf);
     if (enc)
-      line = temp_ptr = decrypt_string(settings.salt1, inbuf);
+      line = temp_ptr = decrypt_string(salt1, inbuf);
     else
       line = inbuf;
 
@@ -805,6 +806,8 @@ readconf(const char *fname, int bits)
 
   return 0;
 }
+
+char s1_9[3] = "",s1_5[3] = "",s1_1[3] = "";
 
 int
 writeconf(char *filename, FILE * stream, int bits)

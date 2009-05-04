@@ -455,11 +455,12 @@ dcc_read(FILE *f, bool enc)
   char inbuf[1024] = "", *type = NULL, *buf = NULL, *buf_ptr = NULL;
   int idx = -1;
   bool isserv = 0;
+  const char salt1[] = SALT1;
 
   while (fgets(inbuf, sizeof(inbuf), f) != NULL) {
     remove_crlf(inbuf);
     if (enc)
-      buf = buf_ptr = decrypt_string(settings.salt1, inbuf);
+      buf = buf_ptr = decrypt_string(salt1, inbuf);
     else
       buf = inbuf;
 

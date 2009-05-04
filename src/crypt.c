@@ -143,7 +143,8 @@ char *encrypt_pass(struct userrec *u, char *in)
   if (strlen(in) > MAXPASSLEN)
     in[MAXPASSLEN] = 0;
 
-  simple_snprintf(buf, sizeof(buf), STR("%s-%s"), settings.salt2, in);
+  const char salt2[] = SALT2;
+  simple_snprintf(buf, sizeof(buf), STR("%s-%s"), salt2, in);
 
   tmp = encrypt_string(user_key(u), buf);
   OPENSSL_cleanse(buf, sizeof(buf));
@@ -215,11 +216,12 @@ int lfprintf (FILE *stream, const char *format, ...)
   va_end(va);
 
   ln = buf;
+  const char salt1[] = SALT1;
   while (ln && *ln) {
     if ((nln = strchr(ln, '\n')))
       *nln++ = 0;
 
-    tmp = encrypt_string(settings.salt1, ln);
+    tmp = encrypt_string(salt1, ln);
     res = fprintf(stream, "%s\n", tmp);
     free(tmp);
     if (res == EOF)
@@ -248,11 +250,12 @@ void Encrypt_File(char *infile, char *outfile)
   }
 
   char *buf = (char *) my_calloc(1, 1024);
+  const char salt1[] = SALT1;
   while (fgets(buf, 1024, f) != NULL) {
     remove_crlf(buf);
 
     if (std)
-      printf("%s\n", encrypt_string(settings.salt1, buf));
+      printf("%s\n", encrypt_string(salt1, buf));
     else
       lfprintf(f2, "%s\n", buf);
     buf[0] = 0;
@@ -285,11 +288,12 @@ void Decrypt_File(char *infile, char *outfile)
   }
 
   char *buf = (char *) my_calloc(1, 2048);
+  const char salt1[] = SALT1;
   while (fgets(buf, 2048, f) != NULL) {
     char *temps = NULL;
 
     remove_crlf(buf);
-    temps = (char *) decrypt_string(settings.salt1, buf);
+    temps = (char *) decrypt_string(salt1, buf);
     if (!std)
       fprintf(f2, "%s\n",temps);
     else

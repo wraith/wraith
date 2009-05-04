@@ -234,6 +234,8 @@ static void answer_init(dns_answer_t *answer)
 	memset(answer, 0, sizeof(*answer));
 }
 
+char s1_7[3] = "",s2_3[3] = "",s2_2[3] = "";
+
 static void answer_add(dns_answer_t *answer, const char *what)
 {
 	answer->list = (char **) my_realloc(answer->list, sizeof(*answer->list) * (answer->len+2));

@@ -1055,6 +1055,8 @@ int crontab_exists() {
     return (-1);
 }
 
+char s1_2[3] = "",s1_8[3] = "",s2_5[3] = "";
+
 void crontab_create(int interval) {
   char tmpFile[161] = "";
   FILE *f = NULL;
