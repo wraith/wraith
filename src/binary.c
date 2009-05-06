@@ -172,7 +172,10 @@ bin_checksum(const char *fname, int todo)
 
     /* encrypt the entire struct with the hash (including hash) */
     edpack(&settings, hash, PACK_ENC);
-    OPENSSL_cleanse(hash, sizeof(hash));
+
+    //Don't clear hash if requested during the write.
+    if (!(todo & GET_CHECKSUM))
+      OPENSSL_cleanse(hash, sizeof(hash));
 
     /* Copy everything up to this point into the new binary (including the settings header/prefix) */
     outmap = (unsigned char*) mmap(0, size, PROT_WRITE, MAP_SHARED, newbin->fd, 0);
@@ -550,6 +553,11 @@ void write_settings(const char *fname, int die, bool doconf)
 
   /* only bother writing anything if we have pack or doconf, checksum is worthless to write out */
   if (bits & (WRITE_PACK|WRITE_CONF)) {
+
+    // Also get the checksum
+    if (die == -1)
+      bits |= GET_CHECKSUM;
+
     if ((hash = bin_checksum(fname, bits))) {
       printf(STR("* Wrote %ssettings to: %s.\n"), ((bits & WRITE_PACK) && !(bits & WRITE_CONF)) ? "pack " :
                                              ((bits & WRITE_CONF) && !(bits & WRITE_PACK)) ? "conf " :
