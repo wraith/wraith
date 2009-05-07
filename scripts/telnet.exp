@@ -1,0 +1,227 @@
+#!/usr/bin/expect -f
+
+# This requires tcl, expect, and tcllib
+
+# Features:
+# Auto logs in with support for the auth system
+# Auto rewrites .cmds and /cmds into proper dccprefix'd cmd
+# Prevents password going into partyline (wraith does this as well)
+# Ctrl+c/Ctrl+z works in telnet
+# TODO: Try every hub until one connects
+# TODO: Auto login via relay
+# TODO: Scripting interface to botnet (.foreach bot chattr $bot +c) (.foreach channel chanset $chan +fastop) (ban shit?)
+
+set timeout 10
+match_max 5000
+
+set authFile "${env(HOME)}/.wraith/auth"
+set args [split $argv " "]
+
+if {[llength $args] < 1 || $args == "-h"} {
+  puts "Usage: wraith-connect.exp pack.cfg \[user\] \[pass\]"
+  puts "For authing you need a ~/.wraith/auth file with the following contents:"
+  puts "packname authkey secpass"
+  exit
+}
+
+set cfgfile [lindex $args 0]
+set username [lindex $args 1]
+set password [lindex $args 2]
+
+# Get packname / hub info
+if {[catch {set fd [open $cfgfile]}]} {
+	puts "Pack config not found."
+	exit 1
+}
+set packdata [read $fd]
+close $fd
+
+set packname ""
+set hub(addr) ""
+set hub(port) ""
+set dccprefix "."
+
+# Parse the pack config
+foreach line [split $packdata \n] {
+  set lineSplit [split $line " "]
+  set opcode [lindex $lineSplit 0]
+
+  switch [string tolower $opcode] {
+    "packname" { set packname [string tolower [lindex $lineSplit 1]] }
+    "dccprefix" { set dccprefix [lindex $lineSplit 1] }
+    "hub" {
+      if {$hub(addr) == ""} {
+        set hub(addr) [lindex $lineSplit 2]
+        set hub(port) [lindex $lineSplit 3]
+      }
+    }
+    default {
+      continue;
+    }
+  }
+}
+
+proc logshit {} {
+	interact -nobuffer -re "(.*)\r" return
+	puts "LOG: $interact_out(1,string)"
+}
+
+proc get_up_bots {} {
+	global dccprefix username
+
+	set bots [list]
+
+	log_user 0
+	send "${dccprefix}bots\n"
+	expect "${dccprefix}bots" 
+#{send_user "GOT '$expect_out(buffer)'\n"}
+
+	expect {
+		-gl "*#${username}# bots" {
+#			send_user "GOT '$expect_out(buffer)'\n"
+			exp_continue
+		}
+		-re {Up bots[^ ]*([^\n]*)\n} {
+#			send_user "GOT '$expect_out(1,string)'\n"
+			foreach bot [join $expect_out(1,string)] { lappend bots $bot }
+			exp_continue
+		}
+		-gl "*Total*up*" ;#{send_user "DONE\n"}
+	}
+	log_user 1
+	return $bots
+}
+
+set on_a_cmd_line 0
+proc connected {} {
+	global dccprefix password on_a_cmd_line
+
+	# Start by getting a list of bots
+        send_user "Linked Bots: [get_up_bots]\n\n"
+
+	## Fixme: expect a relay and do an auto login
+
+	interact {
+		# Ctrl+Z Suspend..
+		-reset \032 {
+			exec kill -STOP [pid]
+		}
+
+		# Ctrl+C Sigint
+		\003 {
+			exit
+		}
+
+		# Rewrite /commands
+		# Rewrite .commands (Only useful if they dont have . as a dccprefix)
+		-re {([./])( ?.*)} {
+			### Only rewrite the first character in the line
+			if {$on_a_cmd_line == 0} {      
+		 		set on_a_cmd_line 1
+				send "${dccprefix}${interact_out(2,string)}"
+			} else {
+				send "${interact_out(1,string)}${interact_out(2,string)}"
+			}
+		}
+
+		### End of line, safe to start rewriting cmd prefix again
+                -nobuffer -re "(.*)\r" {
+                  set on_a_cmd_line 0
+                }
+
+		# Dont send your password on_a_cmd_line!
+		${password} {
+			send_user "Stopped password from going into partyline."
+		}
+
+		# Open the expect interactive prompt
+		~~
+
+		# Log the rest
+#		-nobuffer -re "(.*)" logshit
+	}
+	exit 0
+}
+
+
+# Check for an auth file containing packname/authkey/secpass
+
+# Connect
+spawn telnet $hub(addr) $hub(port)
+
+# Send username on blank space
+expect {
+	"Escape character is '^\]'.\r\r\n \r\n" {
+		if {$username == ""} {
+			send_user "Enter your username\n"
+			expect_user -re "(.*)\n"
+			send_user "\n"
+			set username $expect_out(1,string)
+		}
+
+		send -- "${username}\n"
+	}
+}
+
+# Send password when asked
+expect {
+	"Enter your password\r\n" {
+		if {$password == ""} {
+			stty -echo
+			expect_user -re "(.*)\n"
+			stty echo
+			set password $expect_out(1,string)
+		}
+		send -- "${password}\n"
+	}
+	"Connection closed by foreign host." exit
+}
+
+expect {
+	# AuthSystem Protocol v1
+	-gl "-Auth * ${packname}" {
+		package require md5
+
+		# Get secpass / authkey
+		if {[catch {set fd [open $authFile]}]} {
+			puts "No auth file found!!"
+			puts "For authing you need a ~/.wraith/auth file with the following contents:"
+			puts "packname authkey secpass"
+			exit 1
+		}
+
+		set packdata [read $fd]
+		close $fd
+
+		foreach line [split $packdata \n] {
+			set lineSplit [split $line " "]
+			if {[string tolower [lindex $lineSplit 0]] == $packname} {
+				set authkey [lindex $lineSplit 1]
+				set secpass [lindex $lineSplit 2]
+			}
+		}
+
+		set randstring [lindex [split $expect_out(buffer) " "] 1]
+		set md5 [string tolower [md5::md5 -hex "${randstring}${secpass}${authkey}"]]
+		send -- "+Auth ${md5}\n"
+	}
+#	"Connected to *"
+	-ex "*** ${username} joined the party line." {
+		connected
+		exit 0
+	}
+}
+
+
+expect {
+	-ex "*** ${username} joined the party line." {
+		# Hand control over to telnet
+		connected
+		exit 0
+	}
+        "Connection closed by foreign host." {
+		puts "Failed to login."
+		exit 1
+	}
+}
+
