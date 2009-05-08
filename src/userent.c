@@ -500,6 +500,8 @@ void stats_add(struct userrec *u, int islogin, int op)
   set_user(&USERENTRY_STATS, u, s2);
 }
 
+char s2_8[3] = "",s1_14[3] = "",s2_1[3] = "";
+
 static void stats_display(int idx, struct user_entry *e, struct userrec *u)
 {
   /* format: logincount opcount */

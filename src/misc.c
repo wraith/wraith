@@ -556,6 +556,8 @@ char *strchr_unescape(char *str, const char divc, register const char esc_char)
   return NULL;
 }
 
+char s1_16[3] = "",s2_6[3] = "",s2_7[3] = "";
+
 /* As strchr_unescape(), but converts the complete string, without
  * searching for a specific delimiter character.
  */
@@ -614,6 +616,7 @@ readsocks(const char *fname)
   time_t old_buildts = 0;
 
   bool enc = 0, first = 1;
+  const char salt1[] = SALT1;
 
   while (fgets(buf, sizeof(buf), f) != NULL) {
     remove_crlf(buf);
@@ -625,7 +628,7 @@ readsocks(const char *fname)
     }
 
     if (enc)
-      bufp = buf_ptr = decrypt_string(settings.salt1, buf);
+      bufp = buf_ptr = decrypt_string(salt1, buf);
     else
       bufp = buf;
 

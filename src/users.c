@@ -594,6 +594,7 @@ int readuserfile(const char *file, struct userrec **ret)
   struct flag_record fr;
   struct chanuserrec *cr = NULL;
   int i, line = 0;
+  const char salt1[] = SALT1;
 
   bu = (*ret);
   if (bu == userlist) {
@@ -611,7 +612,7 @@ int readuserfile(const char *file, struct userrec **ret)
   /* read opening comment */
   fgets(cbuf, 180, f);
   remove_crlf(cbuf);
-  temps = (char *) decrypt_string(settings.salt1, cbuf);
+  temps = (char *) decrypt_string(salt1, cbuf);
   simple_snprintf(s, 180, "%s", temps);
   free(temps);
   if (s[1] < '4') {
@@ -626,7 +627,7 @@ int readuserfile(const char *file, struct userrec **ret)
     s = buf;
     fgets(cbuf, 1024, f);
     remove_crlf(cbuf);
-    temps = (char *) decrypt_string(settings.salt1, cbuf);
+    temps = (char *) decrypt_string(salt1, cbuf);
     simple_snprintf(s, 1024, "%s", temps);
     free(temps);
     if (!feof(f)) {

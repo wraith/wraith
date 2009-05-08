@@ -26,6 +26,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+
 settings_t settings = {
   "\200\200\200\200\200\200\200\200\200\200\200\200\200\200\200",
   /* -- STATIC -- */
@@ -466,8 +467,8 @@ tellconfig(settings_t *incfg)
   dofield(incfg->owners);
   dofield(incfg->owneremail);
   dofield(incfg->hubs);
-  dofield(incfg->salt1);
-  dofield(incfg->salt2);
+//  dofield(incfg->salt1);
+//  dofield(incfg->salt2);
   // -- DYNAMIC --
   dofield(incfg->bots);
   dofield(incfg->uid);
@@ -506,6 +507,10 @@ check_sum(const char *fname, const char *cfgfile)
 
 // tellconfig(&settings); 
     edpack(&settings, hash, PACK_DEC);
+
+    INIT_SALTS;
+    OPENSSL_cleanse(settings.salt1, sizeof(settings.salt1));
+    OPENSSL_cleanse(settings.salt2, sizeof(settings.salt2));
 #ifdef DEBUG
  tellconfig(&settings); 
 #endif
@@ -558,14 +563,25 @@ void write_settings(const char *fname, int die, bool doconf)
     if (die == -1)
       bits |= GET_CHECKSUM;
 
+    const char salt1[] = SALT1;
+    const char salt2[] = SALT2;
+    strlcpy(settings.salt1, salt1, sizeof(settings.salt1));
+    strlcpy(settings.salt2, salt2, sizeof(settings.salt2));
+
     if ((hash = bin_checksum(fname, bits))) {
       printf(STR("* Wrote %ssettings to: %s.\n"), ((bits & WRITE_PACK) && !(bits & WRITE_CONF)) ? "pack " :
                                              ((bits & WRITE_CONF) && !(bits & WRITE_PACK)) ? "conf " :
                                              ((bits & WRITE_PACK) && (bits & WRITE_CONF))  ? "pack/conf "  :
                                              "",
                                              fname);
-      if (die == -1)			/* only bother decrypting if we aren't about to exit */
+      if (die == -1) {			/* only bother decrypting if we aren't about to exit */
         edpack(&settings, hash, PACK_DEC);
+        INIT_SALTS;
+      }
+    }
+    if (die == -1) {
+      OPENSSL_cleanse(settings.salt1, sizeof(settings.salt1));
+      OPENSSL_cleanse(settings.salt2, sizeof(settings.salt2));
     }
   }
 
