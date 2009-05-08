@@ -114,8 +114,8 @@ bool	restart_was_update = 0;
 bool    restarting = 0;
 
 char	owner[121] = "";	/* Permanent owner(s) of the bot */
-char	version[121] = "";	/* Version info (long form) */
-char	ver[41] = "";		/* Version info (short form) */
+char	version[151] = "";	/* Version info (long form) */
+char	ver[101] = "";		/* Version info (short form) */
 bool	use_stderr = 1;		/* Send stuff to stderr instead of logfiles? */
 char	quit_msg[1024];		/* quit message */
 time_t	now;			/* duh, now :) */

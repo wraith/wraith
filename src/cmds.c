@@ -3816,7 +3816,7 @@ static void cmd_botversion(int idx, char * par) {
 }
 
 static void rcmd_ver(char * fbot, char * fhand, char * fidx) {
-  char tmp[301] = "";
+  char tmp[401] = "";
   struct utsname un;
 
   simple_snprintf(tmp, sizeof(tmp), "%s ", version);

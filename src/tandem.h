@@ -17,7 +17,7 @@ typedef struct tand_t_struct {
   char *not_chans;
   char commit[10];
   char bot[HANDLEN + 1];
-  char version[121];
+  char version[151];
   char share;
   bool hub;
 } tand_t;
