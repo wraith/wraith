@@ -136,6 +136,7 @@ bin_checksum(const char *fname, int todo)
 
     /* Copy over only the dynamic data, leaving the pack config static */
     memcpy(&settings.bots, &newsettings.bots, SIZE_CONF);
+    OPENSSL_cleanse(&newsettings, sizeof(settings_t));
 
     munmap(map, size);
     close(fd);
