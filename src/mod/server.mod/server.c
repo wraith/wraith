@@ -371,6 +371,17 @@ char *splitnicks(char **rest)
   return r;
 }
 
+void replay_cache(int idx) {
+  struct msgq *r = NULL, *q = NULL;
+
+  for (r = cacheq.head; r; r = q) {
+    q = r->next;
+    server_activity(idx, r->msg, r->len);
+    free(r->msg);
+    free(r);
+  }
+}
+
 static bool fast_deq(int which)
 {
   if (!use_fastdeq)

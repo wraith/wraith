@@ -650,6 +650,8 @@ readsocks(const char *fname)
       ip4 = strdup(bufp);
     else if (!strcmp(type, STR("+ip6")))
       ip6 = strdup(bufp);
+    else if (!strcmp(type, STR("+serv_cache")))
+      dprintf(DP_CACHE, bufp);
 
     if (enc)
       free(buf_ptr);
@@ -679,7 +681,7 @@ readsocks(const char *fname)
       add_server(nserv);
       curserv = 0;
       rehash_server(dcc[servidx].host, nick);
-      dprintf(DP_DUMP, "VERSION\n");
+      replay_cache(servidx);
       reset_chans = 1;
     }
   }
