@@ -122,7 +122,7 @@ bind_table_t *BT_ctcr = NULL, *BT_ctcp = NULL, *BT_msgc = NULL;
 
 /* Maximum messages to store in each queue. */
 static int maxqmsg = 300;
-static struct msgq_head mq, hq, modeq;
+static struct msgq_head mq, hq, modeq, cacheq;
 static int burst;
 
 #include "cmdsserv.c"
@@ -497,6 +497,7 @@ static void empty_msgq()
   msgq_clear(&modeq);
   msgq_clear(&mq);
   msgq_clear(&hq);
+  msgq_clear(&cacheq);
   burst = 0;
 }
 
@@ -542,6 +543,11 @@ void queue_server(int which, char *buf, int len)
     tempq = hq;
     if (double_help)
       doublemsg = 1;
+    break;
+
+  case DP_CACHE:
+    h = &cacheq;
+    tempq = cacheq;
     break;
 
   default:
@@ -632,6 +638,11 @@ void queue_server(int which, char *buf, int len)
     case DP_HELP_NEXT:
       putlog(LOG_SRVOUT, "@", "[!!h] %s", buf);
       break;
+#ifdef DEBUG
+    case DP_CACHE:
+      sdprintf("CACHE: %s", buf);
+      break;
+#endif
     }
   }
 

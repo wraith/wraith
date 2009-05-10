@@ -301,11 +301,12 @@ dprintf(int idx, const char *format, ...)
       case DP_SERVER_NEXT:
       case DP_HELP_NEXT:
       case DP_DUMP:
+      case DP_CACHE:
         if (conf.bot->hub)
           break;
         len -= remove_crlf_r(buf);
 
-        if ((idx == DP_DUMP || floodless)) {
+        if ((idx == DP_DUMP || (floodless && idx != DP_CACHE))) {
          if (serv != -1) {
            if (debug_output)
              putlog(LOG_SRVOUT, "@", "[d->] %s", buf);

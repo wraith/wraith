@@ -27,6 +27,7 @@ struct portmap {
 #define DP_SERVER_NEXT  0x7FF8
 #define DP_HELP_NEXT    0x7FF9
 #define DP_DUMP		0x8000
+#define DP_CACHE	0x8001
 
 
 
