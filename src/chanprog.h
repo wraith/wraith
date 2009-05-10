@@ -16,6 +16,7 @@ int isowner(char *);
 void reaffirm_owners();
 void reload();
 void chanprog();
+void rehash_ip();
 void check_timers();
 void check_utimers();
 void rmspace(char *s);

@@ -1048,7 +1048,7 @@ printf("out: %s\n", out);
         restart(-1);
       else { //rehash()
         reload_bin_data();
-        chanprog();
+        rehash_ip();
       }
       do_restart = 0;
     }

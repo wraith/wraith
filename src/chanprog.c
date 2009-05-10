@@ -541,10 +541,7 @@ void add_myself_to_userlist() {
   }
 }
 
-void chanprog()
-{
-  struct utsname un;
-
+void rehash_ip() {
   /* cache our ip on load instead of every 30 seconds */
   char *ip4 = NULL, *ip6 = NULL;
 
@@ -571,6 +568,18 @@ void chanprog()
     free(ip6);
   }
 
+  if (conf.bot->hub) {
+    struct bot_addr *bi = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, conf.bot->u);
+    listen_all(bi->telnet_port, 0);
+    my_port = bi->telnet_port;
+  }
+}
+
+void chanprog()
+{
+  struct utsname un;
+
+
   sdprintf("I am: %s", conf.bot->nick);
   if (conf.bot->hub) {
     simple_snprintf(userfile, 121, "%s/.u", conf.binpath);
@@ -586,11 +595,7 @@ void chanprog()
 
   add_myself_to_userlist();
 
-  if (conf.bot->hub) {
-    struct bot_addr *bi = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, conf.bot->u);
-    listen_all(bi->telnet_port, 0);
-    my_port = bi->telnet_port;
-  }
+  rehash_ip();
 
   /* set our shell info */
   uname(&un);
