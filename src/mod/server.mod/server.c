@@ -548,6 +548,7 @@ void queue_server(int which, char *buf, int len)
   case DP_CACHE:
     h = &cacheq;
     tempq = cacheq;
+    doublemsg = 0;
     break;
 
   default:
