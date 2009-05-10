@@ -983,13 +983,15 @@ dcc_chat_pass(int idx, char *buf, int atr)
           return;
         }
 
-        const char *expected_nick = newsplit(&buf);
+        if (buf[0]) {
+          const char *expected_nick = newsplit(&buf);
 
-        if (egg_strcasecmp(expected_nick, conf.bot->nick)) {
-          putlog(LOG_WARN, "*", STR("%s failed encrypted link handshake (was expecting '%s' instead of me)"), dcc[idx].nick, expected_nick);
-          killsock(dcc[idx].sock);
-          lostdcc(idx);
-          return;
+          if (egg_strcasecmp(expected_nick, conf.bot->nick)) {
+            putlog(LOG_WARN, "*", STR("%s failed encrypted link handshake (was expecting '%s' instead of me)"), dcc[idx].nick, expected_nick);
+            killsock(dcc[idx].sock);
+            lostdcc(idx);
+            return;
+          }
         }
 
         socklist[snum].enclink = i;
