@@ -399,7 +399,7 @@ dcc_bot_new(int idx, char *buf, int x)
 
       sdprintf(STR("Choosing '%s' (%d/%d) for link"), enclink[i].name, enclink[i].type, i);
       link_hash(idx, rand);
-      dprintf(-dcc[idx].sock, STR("neg %s %d\n"), dcc[idx].shahash, enclink[i].type);
+      dprintf(-dcc[idx].sock, STR("neg %s %d %s\n"), dcc[idx].shahash, enclink[i].type, dcc[idx].nick);
       socklist[snum].enclink = i;
       link_link(idx, -1, i, TO);
     }
@@ -982,6 +982,16 @@ dcc_chat_pass(int idx, char *buf, int atr)
           lostdcc(idx);
           return;
         }
+
+        const char *expected_nick = newsplit(&buf);
+
+        if (egg_strcasecmp(expected_nick, conf.bot->nick)) {
+          putlog(LOG_WARN, "*", STR("%s failed encrypted link handshake (was expecting '%s' instead of me)"), dcc[idx].nick, expected_nick);
+          killsock(dcc[idx].sock);
+          lostdcc(idx);
+          return;
+        }
+
         socklist[snum].enclink = i;
 
         link_link(idx, -1, i, FROM);

@@ -28,6 +28,7 @@
 * Disable bot +f as all it did was cause a segfault. The flood code is unfinished. (fixes #429)
 * Fix cmd_slowjoin not counting bots correctly. (fixes #431)
 * Added telnet 'tcl expect' script in scripts/telnet.exp. Can be used for easier hub management over telnet from shell.
+* Fix bots linking to the wrong hub not giving a good reason why they failed in the log. (fixes #369)
 
 1.2.15.1
 * Fix leaf bots not updating behind other hubs (fixes #419)
