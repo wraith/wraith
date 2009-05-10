@@ -681,7 +681,7 @@ readsocks(const char *fname)
       add_server(nserv);
       curserv = 0;
       rehash_server(dcc[servidx].host, nick);
-      replay_cache(servidx);
+      replay_cache(servidx, NULL);
       reset_chans = 1;
     }
   }
@@ -746,6 +746,7 @@ restart(int idx)
   lfprintf(socks->f, STR("+buildts %li\n"), buildts);
   lfprintf(socks->f, STR("+ip4 %s\n"), myipstr(AF_INET));
   lfprintf(socks->f, STR("+ip6 %s\n"), myipstr(AF_INET6));
+  replay_cache(-1, socks->f);
 
   fflush(socks->f);
   socks->my_close();

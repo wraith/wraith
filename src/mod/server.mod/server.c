@@ -105,6 +105,7 @@ static bool fast_deq(int);
 static char *splitnicks(char **);
 static void msgq_clear(struct msgq_head *qh);
 static int stack_limit = 4;
+static bool replaying_cache = 0;
 
 /* New bind tables. */
 static bind_table_t *BT_raw = NULL, *BT_msg = NULL;
@@ -371,15 +372,24 @@ char *splitnicks(char **rest)
   return r;
 }
 
-void replay_cache(int idx) {
-  struct msgq *r = NULL, *q = NULL;
+void replay_cache(int idx, FILE *f) {
+  struct msgq *r = NULL;
+  char *p_ptr = NULL, *p = NULL;
 
-  for (r = cacheq.head; r; r = q) {
-    q = r->next;
-    server_activity(idx, r->msg, r->len);
-    free(r->msg);
-    free(r);
+  replaying_cache = 1;
+
+  for (r = cacheq.head; r; r = r->next) {
+    if (f)
+      lfprintf(f, STR("+serv_cache %s\n"), r->msg);
+    else {
+      //Create temporary buffer since server_activity may squash the buffer
+      p_ptr = p = strdup(r->msg);
+      server_activity(idx, p, r->len);
+      free(p_ptr);
+    }
   }
+
+  replaying_cache = 0;
 }
 
 static bool fast_deq(int which)

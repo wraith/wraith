@@ -245,7 +245,8 @@ got005(char *from, char *msg)
   //Cache the results for later parsing if needed (after a restart)
   //Sending 'VERSION' does not work on all servers, plus this speeds
   //up a restart by removing the need to wait for the information
-  dprintf(DP_CACHE, ":%s 005 . %s", from, msg);
+  if (!replaying_cache)
+    dprintf(DP_CACHE, ":%s 005 . %s", from, msg);
 
   while ((tmp = newsplit(&msg))[0]) {
     p = NULL;
