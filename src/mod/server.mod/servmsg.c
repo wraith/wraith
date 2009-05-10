@@ -240,6 +240,11 @@ got005(char *from, char *msg)
 {
   char *tmp = NULL, *p, *p2;
 
+  //Cache the results for later parsing if needed (after a restart)
+  //Sending 'VERSION' does not work on all servers, plus this speeds
+  //up a restart by removing the need to wait for the information
+  dprintf(DP_CACHE, ":%s 500 %s", from, msg);
+
   newsplit(&msg); /* nick */
 
   while ((tmp = newsplit(&msg))[0]) {
