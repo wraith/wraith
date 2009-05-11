@@ -615,7 +615,7 @@ readsocks(const char *fname)
   char buf[1024] = "", *nick = NULL, *jnick = NULL, *bufp = NULL, *type = NULL, *buf_ptr = NULL, *ip4 = NULL, *ip6 = NULL;
   time_t old_buildts = 0;
 
-  bool enc = 0, first = 1;
+  bool enc = 0, first = 1, cached_005;
   const char salt1[] = SALT1;
 
   while (fgets(buf, sizeof(buf), f) != NULL) {
@@ -650,8 +650,11 @@ readsocks(const char *fname)
       ip4 = strdup(bufp);
     else if (!strcmp(type, STR("+ip6")))
       ip6 = strdup(bufp);
-    else if (!strcmp(type, STR("+serv_cache")))
+    else if (!strcmp(type, STR("+serv_cache"))) {
+      if (!cached_005 && strstr(bufp, "005"))
+        cached_005 = 1;
       dprintf(DP_CACHE, bufp);
+    }
 
     if (enc)
       free(buf_ptr);
@@ -681,7 +684,10 @@ readsocks(const char *fname)
       add_server(nserv);
       curserv = 0;
       rehash_server(dcc[servidx].host, nick);
-      replay_cache(servidx, NULL);
+      if (cached_005)
+        replay_cache(servidx, NULL);
+      else
+        dprintf(DP_DUMP, "VERSION\n");
       reset_chans = 1;
     }
   }
