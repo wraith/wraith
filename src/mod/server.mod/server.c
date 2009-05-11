@@ -373,6 +373,8 @@ char *splitnicks(char **rest)
 }
 
 void replay_cache(int idx, FILE *f) {
+  if (!cacheq.head) return;
+
   struct msgq *r = NULL;
   char *p_ptr = NULL, *p = NULL;
 
