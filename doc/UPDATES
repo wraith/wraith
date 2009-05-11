@@ -29,6 +29,7 @@
 * Fix cmd_slowjoin not counting bots correctly. (fixes #431)
 * Added telnet 'tcl expect' script in scripts/telnet.exp. Can be used for easier hub management over telnet from shell.
 * Fix 'cmd_rehash' problems on hubs.
+* Fix 'HQ' user getting wiped in -t mode resulting in a crash. (fixes #298)
 
 1.2.15.1
 * Fix leaf bots not updating behind other hubs (fixes #419)

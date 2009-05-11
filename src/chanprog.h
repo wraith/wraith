@@ -30,6 +30,7 @@ char *samechans(const char *, const char *);
 void add_myself_to_userlist();
 bool is_hub(const char*);
 void load_internal_users();
+void setup_HQ(int);
 
 extern struct chanset_t		*chanset;
 extern char			admin[], origbotnick[NICKLEN + 1], origbotname[NICKLEN + 1], jupenick[NICKLEN], botname[NICKLEN + 1];

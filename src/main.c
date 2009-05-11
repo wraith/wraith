@@ -903,20 +903,8 @@ printf("out: %s\n", out);
   if (!backgrd && term_z) {
     int n = new_dcc(&DCC_CHAT, sizeof(struct chat_info));
 
-    dcc[n].addr = iptolong(getmyip());
-    dcc[n].sock = STDOUT;
-    dcc[n].timeval = now;
-    dcc[n].u.chat->con_flags = conmask | LOG_ALL;
-    dcc[n].u.chat->strip_flags = STRIP_ALL;
-    dcc[n].status = STAT_ECHO;
-    strlcpy(dcc[n].nick, STR("HQ"), NICKLEN);
-    strlcpy(dcc[n].host, STR("llama@console"), UHOSTLEN);
-    dcc[n].user = get_user_by_handle(userlist, dcc[n].nick);
-    /* Make sure there's an innocuous HQ user if needed */
-    if (!dcc[n].user) {
-      userlist = adduser(userlist, dcc[n].nick, "none", "-", USER_ADMIN | USER_OWNER | USER_MASTER | USER_VOICE | USER_OP | USER_PARTY | USER_CHUBA | USER_HUBA, 0);
-      dcc[n].user = get_user_by_handle(userlist, dcc[n].nick);
-    }
+    setup_HQ(n);
+
     setsock(STDOUT, 0);          /* Entry in net table */
     dprintf(n, STR("\n### ENTERING DCC CHAT SIMULATION ###\n\n"));
     dcc_chatter(n);
