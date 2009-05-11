@@ -615,7 +615,7 @@ readsocks(const char *fname)
   char buf[1024] = "", *nick = NULL, *jnick = NULL, *bufp = NULL, *type = NULL, *buf_ptr = NULL, *ip4 = NULL, *ip6 = NULL;
   time_t old_buildts = 0;
 
-  bool enc = 0, first = 1, cached_005;
+  bool enc = 0, first = 1, cached_005 = 0;
   const char salt1[] = SALT1;
 
   while (fgets(buf, sizeof(buf), f) != NULL) {
