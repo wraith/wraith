@@ -31,6 +31,7 @@
 * Fix 'cmd_rehash' problems on hubs.
 * Fix 'HQ' user getting wiped in -t mode resulting in a crash. (fixes #298)
 * Fix bots linking to the wrong hub not giving a good reason why they failed in the log. (fixes #369)
+* Fix segfault on some ircds after restart due to them not giving 005 information on VERSION. (fixes #378)
 
 1.2.15.1
 * Fix leaf bots not updating behind other hubs (fixes #419)

@@ -105,6 +105,7 @@ static bool fast_deq(int);
 static char *splitnicks(char **);
 static void msgq_clear(struct msgq_head *qh);
 static int stack_limit = 4;
+static bool replaying_cache = 0;
 
 /* New bind tables. */
 static bind_table_t *BT_raw = NULL, *BT_msg = NULL;
@@ -122,7 +123,7 @@ bind_table_t *BT_ctcr = NULL, *BT_ctcp = NULL, *BT_msgc = NULL;
 
 /* Maximum messages to store in each queue. */
 static int maxqmsg = 300;
-static struct msgq_head mq, hq, modeq;
+static struct msgq_head mq, hq, modeq, cacheq;
 static int burst;
 
 #include "cmdsserv.c"
@@ -371,6 +372,28 @@ char *splitnicks(char **rest)
   return r;
 }
 
+void replay_cache(int idx, FILE *f) {
+  if (!cacheq.head) return;
+
+  struct msgq *r = NULL;
+  char *p_ptr = NULL, *p = NULL;
+
+  replaying_cache = 1;
+
+  for (r = cacheq.head; r; r = r->next) {
+    if (f)
+      lfprintf(f, STR("+serv_cache %s\n"), r->msg);
+    else {
+      //Create temporary buffer since server_activity may squash the buffer
+      p_ptr = p = strdup(r->msg);
+      server_activity(idx, p, r->len);
+      free(p_ptr);
+    }
+  }
+
+  replaying_cache = 0;
+}
+
 static bool fast_deq(int which)
 {
   if (!use_fastdeq)
@@ -497,6 +520,7 @@ static void empty_msgq()
   msgq_clear(&modeq);
   msgq_clear(&mq);
   msgq_clear(&hq);
+  msgq_clear(&cacheq);
   burst = 0;
 }
 
@@ -542,6 +566,12 @@ void queue_server(int which, char *buf, int len)
     tempq = hq;
     if (double_help)
       doublemsg = 1;
+    break;
+
+  case DP_CACHE:
+    h = &cacheq;
+    tempq = cacheq;
+    doublemsg = 0;
     break;
 
   default:
@@ -632,6 +662,11 @@ void queue_server(int which, char *buf, int len)
     case DP_HELP_NEXT:
       putlog(LOG_SRVOUT, "@", "[!!h] %s", buf);
       break;
+#ifdef DEBUG
+    case DP_CACHE:
+      sdprintf("CACHE: %s", buf);
+      break;
+#endif
     }
   }
 
