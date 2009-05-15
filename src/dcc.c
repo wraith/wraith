@@ -963,7 +963,10 @@ dcc_chat_pass(int idx, char *buf, int atr)
       if (snum >= 0) {
         char *hash = newsplit(&buf);
 
-        if (strcmp(dcc[idx].shahash, hash)) {
+        int hash_n = strcmp(dcc[idx].shahash, hash);
+        OPENSSL_cleanse(dcc[idx].shahash, sizeof(dcc[idx].shahash));
+        OPENSSL_cleanse(hash, strlen(hash));
+        if (hash_n) {
           putlog(LOG_WARN, "*", STR("%s attempted to negotiate an encryption with an invalid hash."), dcc[idx].nick);
           killsock(dcc[idx].sock);
           lostdcc(idx);
