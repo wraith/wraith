@@ -657,7 +657,7 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
    */
 // WHO CARES
 //  if (!channel_take(chan) && !chan_bitch(chan) && !(mv->flags & (CHANVOICE | STOPWHO))) {
-//    dprintf(DP_HELP, "WHO %s\n", chan->name);
+//    send_chan_who(DP_HELP, chan);
 //    mv->flags |= STOPWHO;
 //  }
   /* Was the bot deopped? */
@@ -945,7 +945,7 @@ static memberlist *assert_ismember(struct chanset_t *chan, const char *nick)
     if (channel_pending(chan))
       return NULL;
     putlog(LOG_MISC, chan->dname, "* Mode change on %s for nonexistant %s!", chan->dname, nick);
-    dprintf(DP_MODE, "WHO %s\n", chan->name);
+    send_chan_who(DP_MODE, chan);
   }
 
   return m;
@@ -1001,7 +1001,7 @@ gotmode(char *from, char *msg)
             return 0;
           dprintf(DP_MODE, "KICK %s %s :Desync\n", chan->dname, nick);
           putlog(LOG_MISC, "*", "* Mode change on %s for nonexistant %s!", chan->dname, nick);
-          dprintf(DP_MODE, "WHO %s\n", chan->name);
+          send_chan_who(DP_MODE, chan);
           return 0;
         }
       } else

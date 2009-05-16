@@ -1262,13 +1262,17 @@ reset_chan_info(struct chanset_t *chan)
     }
     /* These 2 need to get out asap, so into the mode queue */
     dprintf(DP_MODE, "MODE %s\n", chan->name);
-    if (use_354) /* Added benefit of getting numeric IP! :) */
-      dprintf(DP_MODE, "WHO %s %%c%%h%%n%%u%%f%%r%%d%%i\n", chan->name);
-    else
-      dprintf(DP_MODE, "WHO %s\n", chan->name);
+    send_chan_who(DP_MODE, chan);
     /* clear_channel nuked the data...so */
     dprintf(DP_MODE, "TOPIC %s\n", chan->name);
   }
+}
+
+static void send_chan_who(int queue, struct chanset_t *chan) {
+    if (use_354) /* Added benefit of getting numeric IP! :) */
+      dprintf(queue, "WHO %s %%c%%h%%n%%u%%f%%r%%d%%i\n", chan->name);
+    else
+      dprintf(queue, "WHO %s\n", chan->name);
 }
 
 /* If i'm the only person on the channel, and i'm not op'd,
@@ -1357,7 +1361,7 @@ check_servers(struct chanset_t *chan)
   for (memberlist *m = chan->channel.member; m && m->nick[0]; m = m->next) {
     if (!match_my_nick(m->nick) && chan_hasop(m) && (m->hops == -1)) {
       putlog(LOG_DEBUG, "*", "Updating WHO for '%s' because '%s' is missing data.", chan->dname, m->nick);
-      dprintf(DP_HELP, "WHO %s\n", chan->name);
+      send_chan_who(DP_HELP, chan);
       break;                    /* lets just do one chan at a time to save from flooding */
     }
   }
