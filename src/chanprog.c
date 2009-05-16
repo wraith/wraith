@@ -873,7 +873,6 @@ samechans(const char *nick, const char *delim)
       strlcat(ret, delim, sizeof(ret));
     }
   }
-  ret[strlen(ret) - 1] = 0;
 
   return ret;
 }

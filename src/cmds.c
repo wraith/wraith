@@ -580,6 +580,8 @@ static void cmd_nohelp(int idx, char *par)
   bind_entry_t *entry = NULL;
   bind_table_t *table = bind_table_lookup("dcc");
 
+  buf[0] = 0;
+
   for (entry = table->entries; entry; entry = entry->next) {
     if (findhelp(entry->mask) == NULL) {
       siz = strlen(buf) + 2 + strlen(entry->mask) + 1;
@@ -588,7 +590,6 @@ static void cmd_nohelp(int idx, char *par)
       strlcat(buf, ", ", siz);
     }
   }
-  buf[strlen(buf) - 1] = 0;
 
   dumplots(idx, "", buf);
 }
