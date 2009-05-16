@@ -629,6 +629,7 @@ int readuserfile(const char *file, struct userrec **ret)
     remove_crlf(cbuf);
     temps = (char *) decrypt_string(salt1, cbuf);
     simple_snprintf(s, 1024, "%s", temps);
+    OPENSSL_cleanse(temps, strlen(temps));
     free(temps);
     if (!feof(f)) {
       line++;

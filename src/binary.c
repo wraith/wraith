@@ -392,12 +392,11 @@ static void edpack(settings_t *incfg, const char *in_hash, int what)
 		  egg_memcpy(_field, tmp, len);							\
 		else 										\
 		  simple_snprintf(_field, sizeof(_field), "%s", tmp);				\
+		OPENSSL_cleanse(tmp, len);							\
 		free(tmp);									\
 	}											\
 } while (0)
 
-//FIXME: Maybe this should be done for EACH dofield(), ie, each entry changes the encryption for next line?
-//makes it harder to fuck with, then again, maybe current is fine?
 #define dohash(_field)		do {								\
 	if (what == PACK_ENC)									\
 	  strlcat(nhash, _field, sizeof(nhash));						\
@@ -407,6 +406,7 @@ static void edpack(settings_t *incfg, const char *in_hash, int what)
 } while (0)
 
 #define update_hash()		do {				\
+	MD5(NULL);						\
 	hash = MD5(nhash);					\
 	OPENSSL_cleanse(nhash, sizeof(nhash));			\
 	nhash[0] = 0;						\
@@ -578,6 +578,7 @@ void write_settings(const char *fname, int die, bool doconf)
       if (die == -1) {			/* only bother decrypting if we aren't about to exit */
         edpack(&settings, hash, PACK_DEC);
         INIT_SALTS;
+        OPENSSL_cleanse(hash, strlen(hash));
       }
     }
     if (die == -1) {

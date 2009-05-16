@@ -47,6 +47,8 @@ encrypt_binary(const char *keydata, unsigned char *in, size_t *inlen)
     blocks = len / CRYPT_BLOCKSIZE;
     for (block = blocks - 1; block >= 0; block--)
       AES_encrypt(&out[block * CRYPT_BLOCKSIZE], &out[block * CRYPT_BLOCKSIZE], &e_key);
+    OPENSSL_cleanse(key, sizeof(key));
+    OPENSSL_cleanse(&e_key, sizeof(e_key));
   }
   out[len] = 0;
   return out;
@@ -75,6 +77,8 @@ decrypt_binary(const char *keydata, unsigned char *in, size_t *len)
 
     for (block = blocks - 1; block >= 0; block--)
       AES_decrypt(&out[block * CRYPT_BLOCKSIZE], &out[block * CRYPT_BLOCKSIZE], &d_key);
+    OPENSSL_cleanse(key, sizeof(key));
+    OPENSSL_cleanse(&d_key, sizeof(d_key));
   }
 
   return out;
@@ -166,6 +170,7 @@ char *decrypt_pass(struct userrec *u)
     tmp = decrypt_string(user_key(u), &pass[1]);
     if ((p = strchr(tmp, '-')))
       ret = strdup(++p); 
+    OPENSSL_cleanse(tmp, strlen(tmp));
     free(tmp);
   }
   if (!ret)

@@ -72,6 +72,7 @@ static void ghost_link_case(int idx, direction_t direction)
     putlog(LOG_DEBUG, "@", "outkey (%zu): %s", strlen(keyp), keyp);
 #endif
     OPENSSL_cleanse(tmp, sizeof(tmp));
+    SHA1(NULL);
 
     if (direction == FROM) {
       make_rand_str(initkey, 32);       /* set the initial out/in link key to random chars. */
@@ -87,6 +88,7 @@ static void ghost_link_case(int idx, direction_t direction)
       free(tmp2);
       strlcpy(socklist[snum].okey, initkey, ENC_KEY_LEN + 1);
       strlcpy(socklist[snum].ikey, initkey, ENC_KEY_LEN + 1);
+      OPENSSL_cleanse(initkey, sizeof(initkey));
     } else {
       socklist[snum].encstatus = 1;
       socklist[snum].gz = 1;
@@ -175,6 +177,7 @@ static char *ghost_write(int snum, char *src, size_t *len)
     free(eline);
     strcat(buf, "\n");
   }
+  OPENSSL_cleanse(srcbuf, bufsiz);
   free(srcbuf);
 
   *len = strlen(buf);
@@ -193,11 +196,14 @@ void ghost_parse(int idx, int snum, char *buf)
     char *tmp = decrypt_string(salt2, newsplit(&buf));
 
     strlcpy(socklist[snum].okey, tmp, ENC_KEY_LEN + 1);
+    OPENSSL_cleanse(tmp, strlen(tmp));
+    free(tmp);
+
     strlcpy(socklist[snum].ikey, socklist[snum].okey, ENC_KEY_LEN + 1);
+
     socklist[snum].iseed = atoi(buf);
     socklist[snum].oseed = atoi(buf);
     putlog(LOG_BOTS, "*", STR("Handshake with %s succeeded, we're linked."), dcc[idx].nick);
-    free(tmp);
     link_done(idx);
   }
 }
@@ -226,9 +232,9 @@ static int binary_read(int snum, char *src, size_t *len)
 static char *binary_write(int snum, char *src, size_t *len)
 {
   char *srcbuf = NULL, *buf = NULL, *line = NULL, *eol = NULL, *eline = NULL;
-  size_t bufpos = 0;
+  size_t bufpos = 0, bufsiz = *len + 9 + 1;
 
-  srcbuf = (char *) my_calloc(1, *len + 9 + 1);
+  srcbuf = (char *) my_calloc(1, bufsiz);
   strcpy(srcbuf, src);
   line = srcbuf;
 
@@ -269,6 +275,7 @@ static char *binary_write(int snum, char *src, size_t *len)
     free(eline);
     strcat(buf, "\n");
   }
+  OPENSSL_cleanse(srcbuf, bufsiz);
   free(srcbuf);
 
   *len = strlen(buf);
@@ -349,6 +356,7 @@ void link_hash(int idx, char *rand)
   /* nothing fancy, just something simple that can stop people from playing */
   simple_snprintf(hash, sizeof(hash), STR("enclink%s"), rand);
   strlcpy(dcc[idx].shahash, SHA1(hash), SHA_HASH_LENGTH + 1);
+  SHA1(NULL);
   OPENSSL_cleanse(hash, sizeof(hash));
   return;
 }

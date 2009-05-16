@@ -305,6 +305,7 @@ void convert_password(struct userrec *u)
       pass[MAXPASSLEN] = 0;
 
     set_user(&USERENTRY_PASS, u, pass);
+    OPENSSL_cleanse(pass, strlen(pass));
     free(pass);
 
     /* clear old record */
