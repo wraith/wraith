@@ -148,13 +148,21 @@ static int burst;
  */
 static void deq_msg()
 {
+  static const struct {
+    struct msgq_head *q;
+    int idx;
+    const char *pfx;
+  } qdsc[2] = {
+    { &modeq, 	DP_MODE, 	"[m->]" },
+    { &mq, 	DP_SERVER, 	"[s->]" },
+  };
   bool ok = 0;
 
   /* now < last_time tested 'cause clock adjustments could mess it up */
   if ((now - last_time) >= msgrate || now < (last_time - 90)) {
     last_time = now;
     if (burst > 0)
-      burst--;
+      burst = 0;
     ok = 1;
   }
   if (serv < 0)
@@ -162,50 +170,42 @@ static void deq_msg()
 
   struct msgq *q = NULL;
 
-  /* Send upto 4 msgs to server if the *critical queue* has anything in it */
-  if (modeq.head) {
-    while (modeq.head && (burst < 4) && ((last_time - now) < MAXPENALTY)) {
-      if (!modeq.head)
+  /* Send upto 4 msgs to server if the *critical queue* has anything in it;
+   * otherwise, dequeue and burst up to 4 messages from the `normal' message
+   * queue.
+   */
+  bool nm = 0;
+  for(size_t nq = 0; nq < (sizeof(qdsc) / sizeof(qdsc[0])); ++nq) {
+    while (qdsc[nq].q->head && (burst < 4) && ((last_time - now) < MAXPENALTY)) {
+#ifdef not_implemented
+      if (deq_kick(qdsc[nq].idx)) {
+        ++burst;
+        nm = 1;
+      }
+#endif
+      if (!qdsc[nq].q->head)
         break;
-      if (fast_deq(DP_MODE)) {
-        burst++;
+      if (fast_deq(qdsc[nq].idx)) {
+        ++burst;
+        nm = 1;
         continue;
       }
-      write_to_server(modeq.head->msg, modeq.head->len);
+      write_to_server(qdsc[nq].q->head->msg, qdsc[nq].q->head->len);
       if (debug_output)
-        putlog(LOG_SRVOUT, "@", "[m->] %s", modeq.head->msg);
-      modeq.tot--;
-      last_time += calc_penalty(modeq.head->msg);
-      q = modeq.head->next;
-      free(modeq.head->msg);
-      free(modeq.head);
-      modeq.head = q;
-      burst++;
+        putlog(LOG_SRVOUT, "*", "%s %s", qdsc[nq].pfx, qdsc[nq].q->head->msg);
+      --(qdsc[nq].q->tot);
+      last_time += calc_penalty(qdsc[nq].q->head->msg);
+      q = qdsc[nq].q->head->next;
+      free(qdsc[nq].q->head->msg);
+      free(qdsc[nq].q->head);
+      qdsc[nq].q->head = q;
+      ++burst;
+      nm = 1;
     }
-    if (!modeq.head)
-      modeq.last = 0;
-    return;
-  }
-  /* Send something from the normal msg q even if we're slightly bursting */
-  if (burst > 1)
-    return;
-  if (mq.head) {
-    burst++;
-    if (fast_deq(DP_SERVER))
+    if (!qdsc[nq].q->head)
+      qdsc[nq].q->last = NULL;
+    if(nm)
       return;
-    write_to_server(mq.head->msg, mq.head->len);
-    if (debug_output) {
-      putlog(LOG_SRVOUT, "@", "[s->] %s", mq.head->msg);
-    }
-    mq.tot--;
-    last_time += calc_penalty(mq.head->msg);
-    q = mq.head->next;
-    free(mq.head->msg);
-    free(mq.head);
-    mq.head = q;
-    if (!mq.head)
-      mq.last = NULL;
-    return;
   }
   /* Never send anything from the help queue unless everything else is
    * finished.
