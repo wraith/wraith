@@ -708,7 +708,7 @@ void add_server(char *ss)
     } else {
 #ifdef USE_IPV6
       if (ss[0] == '[') {
-        *ss++;
+        ++ss;
         q = strchr(ss, ']');
         *q++ = 0; /* intentional */
         r = strchr(q, ':');
