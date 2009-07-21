@@ -653,7 +653,7 @@ readsocks(const char *fname)
     else if (!strcmp(type, STR("+serv_cache"))) {
       if (!cached_005 && strstr(bufp, "005"))
         cached_005 = 1;
-      dprintf(DP_CACHE, bufp);
+      dprintf(DP_CACHE, "%s", bufp);
     }
 
     if (enc)

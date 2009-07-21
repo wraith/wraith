@@ -681,9 +681,7 @@ static int msgc_help(Auth *a, char *chname, char *par)
       strlcat(outbuf, entry->mask, sizeof(outbuf));
     }
 
-  strlcat(outbuf, "\n", sizeof(outbuf));
-
-  reply(a->nick, NULL, outbuf);
+  reply(a->nick, NULL, "%s\n", outbuf);
   return BIND_RET_BREAK;
 }
 

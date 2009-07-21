@@ -193,12 +193,10 @@ send_timesync(int idx)
   if (idx >= 0)
     dprintf(idx, "ts %li\n", (long)(timesync + now));
   else {
-    char s[15] = "";
 
-    simple_snprintf(s, sizeof(s), "ts %li\n", (long)(timesync + now));
     for (int i = 0; i < dcc_total; i++) {
       if (dcc[i].type && (dcc[i].type == &DCC_BOT) && (bot_aggressive_to(dcc[i].user))) {
-        dprintf(i, s);
+        dprintf(i, "ts %li\n", (long)(timesync + now));
       }
     }
   }

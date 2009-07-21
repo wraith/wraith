@@ -631,7 +631,7 @@ void detected(int code, const char *msg)
   case DET_IGNORE:
     break;
   case DET_WARN:
-    putlog(LOG_WARN, "*", msg);
+    putlog(LOG_WARN, "*", "%s", msg);
     break;
   case DET_REJECT:
     do_fork();

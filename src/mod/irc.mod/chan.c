@@ -59,7 +59,7 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
           if (pe) {
             char user[15] = "";
 
-            simple_snprintf(user, pe - ps + 1, m->userhost);
+            strlcpy(user, m->userhost, pe - ps + 1);
             simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, ips[0]);
             if (!m->user) {
               simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
