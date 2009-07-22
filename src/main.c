@@ -311,8 +311,8 @@ static void show_help()
   printf(format, STR("-h"), STR("Display this help listing"));
   printf(format, STR("-k <botname>"), STR("Terminates (botname) with kill -9 (see also: -r)"));
   printf(format, STR("-n"), STR("Disables backgrounding bot (requires [-B] <botnick>)"));
-  printf(format, STR("-q <pack.cfg>") STR("Initialize the binary with the given pack.cfg (Can only be done once per binary)"));
-  printf(format, STR("-Q") STR("Securely initialize the binary by reading the PackConfig from stdin (paste). (Can only be done once per binary)"));
+  printf(format, STR("-q <pack.cfg>"), STR("Initialize the binary with the given pack.cfg (Can only be done once per binary)"));
+  printf(format, STR("-Q"), STR("Securely initialize the binary by reading the PackConfig from stdin (paste). (Can only be done once per binary)"));
   printf(format, STR("-r <botname>"), STR("Restarts the specified bot (see also: -k)"));
 //  printf(format, STR("-s"), STR("Disables checking for ptrace/strace during startup (no pass needed)"));
   printf(format, STR("-t"), STR("Enables \"Partyline\" emulation (requires -nB)"));
