@@ -311,6 +311,8 @@ static void show_help()
   printf(format, STR("-h"), STR("Display this help listing"));
   printf(format, STR("-k <botname>"), STR("Terminates (botname) with kill -9 (see also: -r)"));
   printf(format, STR("-n"), STR("Disables backgrounding bot (requires [-B] <botnick>)"));
+  printf(format, STR("-q <pack.cfg>") STR("Initialize the binary with the given pack.cfg (Can only be done once per binary)"));
+  printf(format, STR("-Q") STR("Securely initialize the binary by reading the PackConfig from stdin (paste). (Can only be done once per binary)"));
   printf(format, STR("-r <botname>"), STR("Restarts the specified bot (see also: -k)"));
 //  printf(format, STR("-s"), STR("Disables checking for ptrace/strace during startup (no pass needed)"));
   printf(format, STR("-t"), STR("Enables \"Partyline\" emulation (requires -nB)"));
@@ -773,7 +775,12 @@ printf("out: %s\n", out);
     exit(5);				/* not initialized */
   }
 
-  check_sum(binname, argc >= 3 && !strcmp(argv[1], STR("-q")) ? argv[2] : NULL);
+  {
+    bool read_stdin = 0;
+    if (argc == 2 && !strcmp(argv[1], STR("-Q")))
+      read_stdin =1;
+    check_sum(binname, argc >= 3 && !strcmp(argv[1], STR("-q")) ? argv[2] : NULL, read_stdin);
+  }
   // Now settings struct is decrypted
   if (!checked_bin_buf)
     exit(1);

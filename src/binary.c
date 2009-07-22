@@ -25,7 +25,7 @@
 #include <signal.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
+#include <termios.h>
 
 settings_t settings = {
   "\200\200\200\200\200\200\200\200\200\200\200\200\200\200\200",
@@ -276,21 +276,60 @@ features_find(const char *buffer)
   return 0;
 }
 
+/* It is desirable to use this bit on systems that have it.
+   The only bit of terminal state we want to twiddle is echoing, which is
+   done in software; there is no need to change the state of the terminal
+   hardware.  */
+
+#ifndef TCSASOFT
+# define TCSASOFT 0
+#endif
+
+typedef struct line_list {
+  struct line_list* next;
+  int line;
+} line_list_t;
+
 static int
-readcfg(const char *cfgfile)
+readcfg(const char *cfgfile, bool read_stdin)
 {
   FILE *f = NULL;
+  struct termios s, t;
+  bool tty_changed = false;
+  line_list_t *error_list = NULL, *error_line = NULL;
 
-  if ((f = fopen(cfgfile, "r")) == NULL) {
-    printf(STR("Error: Can't open '%s' for reading\n"), cfgfile);
-    exit(1);
+  if (read_stdin) {
+    f = stdin;
+    setbuf(stdin, NULL);
+    setbuf(stdout, NULL);
+    /* Taken from libc: getpass.c */
+    /* Turn echoing off if it is on now.  */
+    if (tcgetattr (fileno (stdin), &t) == 0) {
+      s = t;
+      t.c_lflag &= ~(ECHO | ISIG);
+      tty_changed = (tcsetattr (fileno (stdin), TCSAFLUSH | TCSASOFT, &t) == 0);
+    }
+    printf(STR("// Paste in your PACKCONFIG. Reference http://wraith.botpack.net/wiki/PackConfig\n"));
+    printf(STR("// Press <enter> if it gets hung up. If that doesn't work hit ^D (CTRL+d)\n"));
+    fflush(stdout);
+  } else {
+    if ((f = fopen(cfgfile, "r")) == NULL) {
+      fprintf(stderr, STR("Error: Can't open '%s' for reading\n"), cfgfile);
+      exit(1);
+    }
   }
 
   char *buffer = NULL, *p = NULL;
   int skip = 0, line = 0, feature = 0;
+  bool error = 0;
 
-  printf(STR("Reading '%s' "), cfgfile);
+  if (!read_stdin)
+    printf(STR("Reading '%s' "), cfgfile);
   while ((!feof(f)) && ((buffer = step_thru_file(f)) != NULL)) {
+    if (tty_changed) {
+      printf(".");
+      fflush(stdout);
+    }
     ++line;
     if ((*buffer)) {
       if (strchr(buffer, '\n'))
@@ -298,9 +337,11 @@ readcfg(const char *cfgfile)
       if ((skipline(buffer, &skip)))
         continue;
       if ((strchr(buffer, '<') || strchr(buffer, '>')) && !strstr(buffer, "SALT")) {
-        printf(STR(" Failed\n"));
-        printf(STR("%s:%d: error: Look at your configuration file again...\n"), cfgfile, line);
-//        exit(1);
+        error_line = (line_list_t *) my_calloc(1, sizeof(line_list_t));
+        error_line->line = line;
+        error_line->next = NULL;
+        list_append((struct list_type **) &(error_list), (struct list_type *) error_line);
+        error = 1;
       }
       p = strchr(buffer, ' ');
       while (p && (strchr(LISTSEPERATORS, p[0])))
@@ -308,56 +349,62 @@ readcfg(const char *cfgfile)
       if (p) {
         if (!egg_strcasecmp(buffer, STR("packname"))) {
           strlcpy(settings.packname, trim(p), sizeof settings.packname);
-          printf(".");
         } else if (!egg_strcasecmp(buffer, STR("shellhash"))) {
           strlcpy(settings.shellhash, trim(p), sizeof settings.shellhash);
-          printf(".");
         } else if (!egg_strcasecmp(buffer, STR("dccprefix"))) {
           strlcpy(settings.dcc_prefix, trim(p), sizeof settings.dcc_prefix);
-          printf(".");
         } else if (!egg_strcasecmp(buffer, STR("owner"))) {
           strlcat(settings.owners, trim(p), sizeof(settings.owners));
           strlcat(settings.owners, ",", sizeof(settings.owners));
-          printf(".");
         } else if (!egg_strcasecmp(buffer, STR("owneremail"))) {
           strlcat(settings.owneremail, trim(p), sizeof(settings.owneremail));
           strlcat(settings.owneremail, ",", sizeof(settings.owneremail));
-          printf(".");
         } else if (!egg_strcasecmp(buffer, STR("hub"))) {
           strlcat(settings.hubs, trim(p), sizeof(settings.hubs));
           strlcat(settings.hubs, ",", sizeof(settings.hubs));
-          printf(".");
         } else if (!egg_strcasecmp(buffer, STR("salt1"))) {
           strlcat(settings.salt1, trim(p), sizeof(settings.salt1));
-          printf(".");
         } else if (!egg_strcasecmp(buffer, STR("salt2"))) {
           strlcat(settings.salt2, trim(p), sizeof(settings.salt2));
-          printf(".");
-        } else {
-          printf("%s %s\n", buffer, p);
-          printf(",");
+          if (read_stdin) break;
         }
       } else { /* SINGLE DIRECTIVES */
         if ((feature = features_find(buffer))) {
           int features = atol(settings.features);
           features |= feature;
           simple_snprintf(settings.features, sizeof(settings.features), "%d", features);
-          printf(".");
         }
       }
     }
     buffer = NULL;
   }
-  if (f)
+
+  if (f && !read_stdin) {
     fclose(f);
+  } else if (read_stdin && tty_changed) {
+    /* Restore the original setting.  */
+    tcsetattr (fileno (stdin), TCSAFLUSH | TCSASOFT, &s);
+  }
+
+  if (error) {
+    printf("\n");
+    fprintf(stderr, STR("Error: Look at your configuration again and remove any <>\n"));
+    for (error_line = error_list; error_line; error_line = error_line->next)
+        fprintf(stderr, STR("Line %d\n"), error_line->line);
+  }
+
   if (!settings.salt1[0] || !settings.salt2[0]) {
     /* Write salts back to the cfgfile */
     char salt1[SALT1LEN + 1] = "", salt2[SALT2LEN + 1] = "";
 
-    printf(STR("Creating Salts"));
-    if ((f = fopen(cfgfile, "a")) == NULL) {
-      printf(STR("Cannot open cfgfile for appending.. aborting\n"));
-      exit(1);
+    if (read_stdin) {
+      f = stdout;
+    } else {
+      printf(STR("Creating Salts"));
+      if ((f = fopen(cfgfile, "a")) == NULL) {
+        fprintf(stderr, STR("Cannot open cfgfile for appending.. aborting\n"));
+        exit(1);
+      }
     }
     make_rand_str(salt1, SALT1LEN);
     make_rand_str(salt2, SALT2LEN);
@@ -367,9 +414,14 @@ readcfg(const char *cfgfile)
     fprintf(f, STR("SALT1 %s\n"), salt1);
     fprintf(f, STR("SALT2 %s\n"), salt2);
     fflush(f);
-    fclose(f);
+    if (!read_stdin)
+      fclose(f);
   }
-  printf(STR(" Success\n"));
+
+  if (error)
+    exit(1);
+
+  if (!read_stdin) printf(STR(" Success\n"));
   return 1;
 }
 
@@ -490,14 +542,14 @@ tellconfig(settings_t *incfg)
 #endif
 
 void
-check_sum(const char *fname, const char *cfgfile)
+check_sum(const char *fname, const char *cfgfile, bool read_stdin)
 {
    if (!settings.hash[0]) {
 
-    if (!cfgfile)
+    if (!cfgfile && !read_stdin)
       fatal(STR("Binary not initialized."), 0);
 
-    readcfg(cfgfile);
+    readcfg(cfgfile, read_stdin);
 
 // tellconfig(&settings); 
     if (bin_checksum(fname, WRITE_CHECKSUM|WRITE_CONF|WRITE_PACK))
