@@ -250,11 +250,12 @@ static void checkpass()
   else
     hash_cmp = sha1cmp;
 
+#define SHELL_PROMPT STR("Enter your binary password: ")
 #ifdef HAVE_GETPASSPHRASE
   /* Solaris' getpass() truncates at 8 */
-  char *gpasswd = (char*) getpassphrase(STR("bash$ "));
+  char *gpasswd = (char*) getpassphrase(SHELL_PROMPT);
 #else
-  char *gpasswd = (char*) getpass(STR("bash$ "));
+  char *gpasswd = (char*) getpass(SHELL_PROMPT);
 #endif
   if (!gpasswd)
     werr(ERR_BADPASS);
