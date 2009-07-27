@@ -2473,11 +2473,11 @@ static int gotjoin(char *from, char *chname)
           m->user = get_user_by_host(from);
           m->tried_getuser = 1;
  
-          if (!m->user && doresolv(chan)) {
-            if (is_dotted_ip(host)) 
+          if (!m->user && !m->userip[0] && doresolv(chan)) {
+            if (is_dotted_ip(host))
               strlcpy(m->userip, uhost, sizeof(m->userip));
             else
-              resolve_to_member(chan, nick, host); 
+              resolve_to_member(chan, nick, host);
           }
         }
       } else {
@@ -2490,15 +2490,13 @@ static int gotjoin(char *from, char *chname)
 	m->last = now;
 	m->delay = 0L;
 	strlcpy(m->userhost, uhost, sizeof(m->userhost));
+        if (is_dotted_ip(host))
+          strlcpy(m->userip, uhost, sizeof(m->userip));
         m->user = get_user_by_host(from);
         m->tried_getuser = 1;
 
-        if (!m->user && doresolv(chan)) {
-          if (is_dotted_ip(host)) 
-            strlcpy(m->userip, uhost, sizeof(m->userip));
-          else
-            resolve_to_member(chan, nick, host); 
-        }
+        if (!m->userip[0] && doresolv(chan))
+          resolve_to_member(chan, nick, host);
 
 //	m->flags |= STOPWHO;
 
