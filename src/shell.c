@@ -832,11 +832,13 @@ char *my_uname()
       vers_n = "";
     } else {
       unix_n = un.nodename;
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
       vers_n = un.release;
-#else /* __linux__ */
+#elif defined(__linux__)
       vers_n = un.version;
-#endif /* __FreeBSD__ */
+#else
+# error "Don't know how to handle uname for this system!"
+#endif
     }
     simple_snprintf(os_uname, sizeof os_uname, "%s %s", unix_n, vers_n);
   }
