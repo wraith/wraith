@@ -513,9 +513,6 @@ static void core_secondly()
   static int cnt = 0, ison_cnt = 0;
   time_t miltime;
 
-#ifdef CRAZY_TRACE 
-  if (!attached) crazy_trace();
-#endif /* CRAZY_TRACE */
   if (fork_interval && backgrd && ((now - lastfork) > fork_interval))
       do_fork();
   ++cnt;
@@ -862,25 +859,10 @@ printf("out: %s\n", out);
       mypid = do_fork();
   conf_setmypid(mypid);
 
-/*
-    printf("  |- %-10s (%d)\n", conf.bot->nick, pid);
-    if (conf.bot->localhub) {
-      if (bots_ran)
-        printf("  `- %d bots launched\n", bots_ran + 1);
-      else
-        printf("  `- 1 bot launched\n");
-    }
-*/
     printf(STR("%s[%s%s%s]%s -%s- initiated %s(%s%d%s)%s\n"),
            BOLD(-1), BOLD_END(-1), settings.packname, BOLD(-1), BOLD_END(-1), conf.bot->nick,
            BOLD(-1), BOLD_END(-1), mypid, BOLD(-1), BOLD_END(-1));
 
-#ifdef lame	/* keeping for god knows why */
-    printf(STR("%s%s%c%s%s%s l%sA%su%sN%sc%sH%se%sD%s %s(%s%d%s)%s\n"),
-            RED(-1), BOLD(-1), conf.bot->nick[0], BOLD_END(-1), &conf.bot->nick[1],
-            COLOR_END(-1), BOLD(-1), BOLD_END(-1), BOLD(-1), BOLD_END(-1), BOLD(-1), BOLD_END(-1),
-            BOLD(-1), BOLD_END(-1), YELLOW(-1), COLOR_END(-1), mypid, YELLOW(-1), COLOR_END(-1));
-#endif
     } else
       writepid(conf.bot->pid_file, mypid);
     close_tty();

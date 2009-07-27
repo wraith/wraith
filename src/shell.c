@@ -996,42 +996,6 @@ void crontab_create(int interval) {
 }
 #endif /* !CYGWIN_HACKS */
 
-#ifdef CRAZY_TRACE
-/* This code will attach a ptrace() to getpid() hence blocking process hijackers/tracers on the pid
- * only problem.. it just creates a new pid to be traced/hijacked :\
- */
-int attached = 0;
-void crazy_trace()
-{
-  pid_t parent = getpid();
-  int x = fork();
-
-  if (x == -1) {
-    printf("Can't fork(): %s\n", strerror(errno));
-  } else if (x == 0) {
-    /* child */
-    int i;
-    i = ptrace(PTRACE_ATTACH, parent, (char *) 1, 0);
-    if (i == -1) {
-      printf("CANT PTRACE PARENT: errno: %d %s, i: %d\n", errno, strerror(errno), i);
-      waitpid(parent, &i, 0);
-      kill(parent, SIGCHLD);
-      ptrace(PTRACE_DETACH, parent, 0, 0);
-      kill(parent, SIGCHLD);
-      exit(0);
-    } else {
-      printf("SUCCESSFUL ATTACH to %d: %d\n", parent, i);
-      attached++;
-    }
-  } else {
-    /* parent */
-    printf("wait()\n");
-    wait(&x);
-  }
-  printf("end\n");
-}
-#endif /* CRAZY_TRACE */
-
 int det_translate(const char *word)
 {
   if (word && word[0]) {

@@ -677,26 +677,6 @@ void reload_bin_data() {
        /* deluser removed bots from conf */
       if (oldbots)
         deluser_removed_bots(oldbots, conf.bots);
-#ifdef this_is_handled_by_confedit_now
-      /* no longer the localhub (or removed), need to alert the new one to rehash (or start it) */
-      if (!conf.bot || !conf.bot->localhub) {
-        conf_bot *localhub = conf_getlocalhub(conf.bots);
-
-        /* then SIGHUP new localhub or spawn new localhub */
-        if (localhub) {
-          /* Check for pid again - may be using fork-interval */
-          localhub->pid = checkpid(localhub->nick, localhub);
-          if (localhub->pid)
-            conf_killbot(NULL, localhub, SIGHUP);		//restart the new localhub
-          /* else
-               start new localhub - done below in spawnbots() */
-        }
-      }
-
-      /* start/disable new bots as necesary */
-      conf_checkpids(conf.bots);
-      spawnbots(1);		//1 signifies to not start me!
-#endif
     }
 
     if (conf.bot && conf.bot->disabled) {
