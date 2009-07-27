@@ -1749,8 +1749,12 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
   if (!m->userhost[0])
     simple_snprintf(m->userhost, sizeof(m->userhost), "%s@%s", user, host);
 
-  if (!m->userip[0] && ip)
-    simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, ip);
+  if (!m->userip[0]) {
+    if (ip)
+      simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, ip);
+    else if (is_dotted_ip(host))
+      simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, host);
+  }
 
   simple_snprintf(userhost, sizeof(userhost), "%s!%s", nick, m->userhost);
 
@@ -1774,13 +1778,9 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
     m->tried_getuser = 1;
   }
 
-  //This bot is set +r, so always resolve.
-  if (!ip && doresolv(chan)) { /* !ip.. already checked for user earlier if set */
-    if (is_dotted_ip(host))
-      simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, host);
-    else  
-      resolve_to_member(chan, nick, host);
-  }
+  //This bot is set +r, so resolve.
+  if (!m->userip[0] && doresolv(chan))
+    resolve_to_member(chan, nick, host);
 
   get_user_flagrec(m->user, &fr, chan->dname, chan);
   
