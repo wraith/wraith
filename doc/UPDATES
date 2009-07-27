@@ -1,4 +1,5 @@
 * Binary pass prompt has been changed to be more clear.
+* Cleanup +r implementation a bit to lookup users more often than only on join.
 
 1.2.16 - http://wraith.botpack.net/milestone/1.2.16
 * Add 'set altchars' so that alternative characters used for nicks can be changed. (fixes #418)
