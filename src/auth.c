@@ -40,10 +40,6 @@
 
 hash_table_t *Auth::ht_handle = NULL, *Auth::ht_host = NULL;
 
-#ifdef no
-static const char* makebdhash(char *);
-#endif
-
 Auth::Auth(const char *_nick, const char *_host, struct userrec *u)
 {
   Status(AUTHING);
@@ -69,9 +65,6 @@ Auth::Auth(const char *_nick, const char *_host, struct userrec *u)
 
   sdprintf(STR("New auth created! (%s!%s) [%s]"), nick, host, handle);
   authtime = atime = now;
-#ifdef NOTUSED
-  bd = 0;
-#endif
   idx = -1;
 }
 
@@ -83,25 +76,17 @@ Auth::~Auth()
   hash_table_remove(ht_host, host, this);
 }
 
-void Auth::MakeHash(bool bd)
+void Auth::MakeHash()
 {
  make_rand_str(rand, 50);
-#ifdef NOTUSED
- if (bd)
-   strlcpy(hash, makebdhash(rand), sizeof hash);
- else
-#endif
-   makehash(user, rand, hash, 50);
+ makehash(user, rand, hash, 50);
 }
 
-void Auth::Done(bool _bd)
+void Auth::Done()
 {
   hash[0] = 0;
   rand[0] = 0;
   Status(AUTHED);
-#ifdef NOTUSED
-  bd = _bd;
-#endif
 }
 
 void Auth::NewNick(const char *newnick) {
@@ -268,7 +253,6 @@ static int auth_tell_walk(const void *key, void *data, void *param)
   long lparam = (long) param;
   int idx = (int) lparam;
 
-//  dprintf(idx, "%s(%s!%s) [%s] authtime: %li, atime: %li, Status: %d\n", auth->bd ? "x " : "", auth->nick, 
   dprintf(idx, "(%s!%s) [%s] authtime: %li, atime: %li, Status: %d\n", auth->nick, 
         auth->host, auth->handle, (long)auth->authtime, (long)auth->atime, auth->Status());
   
@@ -295,23 +279,6 @@ void makehash(struct userrec *u, const char *randstring, char *out, size_t out_s
   strlcpy(out, MD5(hash), out_size);
   OPENSSL_cleanse(hash, sizeof(hash));
 }
-
-#ifdef no
-/* This isn't even used */
-const char*
-makebdhash(char *randstring)
-{
-  char hash[70] = "";
-  const char *bdpass = STR("bdpass");
-
-  simple_snprintf(hash, sizeof hash, "%s%s%s", randstring, bdpass, settings.packname);
-  sdprintf(STR("bdhash: %s"), hash);
-
-  const char* md5 = MD5(hash);
-  OPENSSL_cleanse(hash, sizeof(hash));
-  return md5;
-}
-#endif
 
 void check_auth_dcc(Auth *auth, const char *cmd, const char *par)
 {

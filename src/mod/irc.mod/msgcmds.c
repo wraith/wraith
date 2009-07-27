@@ -418,58 +418,6 @@ static int msg_unauth(char *nick, char *host, struct userrec *u, char *par)
   return BIND_RET_BREAK;
 }
 
-#ifdef NOTUSED
-static int msg_bd(char *nick, char *host, struct userrec *u, char *par)
-{
-  if (match_my_nick(nick))
-    return BIND_RET_BREAK;
-
-  Auth *auth = Auth::Find(host);
-
-  if (auth) {
-    if (auth->Authed()) {
-      if (!auth->bd)
-        dprintf(DP_HELP, "NOTICE %s :You are already authed, unauth and start over.\n", nick);
-      else
-        dprintf(DP_HELP, "NOTICE %s :You are already authed for backdoor.\n", nick);
-      return 0;
-    }
-  } else
-    auth = new Auth(nick, host, u);
-
-  /* Send "auth." if they are recognized, otherwise "auth!" */
-  auth->Status(AUTH_BDHASH);
-  auth->MakeHash(1);
-
-  dprintf(DP_HELP, "PRIVMSG %s :-BD %s %s\n", nick, auth->rand, conf.bot->nick);
-
-  return BIND_RET_BREAK;
-}
-
-static int msg_pls_bd(char *nick, char *host, struct userrec *u, char *par)
-{
-  if (match_my_nick(nick))
-    return BIND_RET_BREAK;
-  if (u && u->bot)
-    return BIND_RET_BREAK;
-
-  Auth *auth = Auth::Find(host);
-
-  if (!auth || auth->Status() != AUTH_BDHASH)
-    return BIND_RET_BREAK;
-
-  if (!strcmp(auth->hash, par)) { /* good hash! */
-    /* putlog(LOG_CMDS, "*", "(%s!%s) !%s! +AUTH", nick, host, u->handle); */
-    auth->Done(1);
-    dprintf(DP_HELP, "NOTICE %s :You are now authorized for the backdoor. See '%cbd help'\n", nick, auth_prefix[0]);
-  } else { /* bad hash! */
-    dprintf(DP_HELP, "NOTICE %s :Invalid hash.\n", nick);
-    delete auth;
-  } 
-  return BIND_RET_BREAK;
-}
-#endif
-
 /* MSG COMMANDS
  *
  * Function call should be:
@@ -485,10 +433,6 @@ static cmd_t C_msg[] =
   {"auth",		"",	(Function) msg_auth,		NULL, LEAF},
   {"+auth",		"",	(Function) msg_pls_auth,	NULL, LEAF},
   {"unauth",		"",	(Function) msg_unauth,		NULL, LEAF},
-#ifdef NOTUSED
-  {"bd",		"",	(Function) msg_bd,		NULL, LEAF},
-  {"+bd",		"",	(Function) msg_pls_bd,		NULL, LEAF},
-#endif
   {"ident",   		"",	(Function) msg_ident,		NULL, LEAF},
   {"invite",		"",	(Function) msg_invite,		NULL, LEAF},
   {"op",		"",	(Function) msg_op,		NULL, LEAF},

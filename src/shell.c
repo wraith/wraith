@@ -218,106 +218,6 @@ void check_last() {
   }
 }
 
-#ifdef NOT_USED
-void check_processes()
-{
-  if (badprocess == DET_IGNORE)
-    return;
-
-  char *proclist = NULL, *out = NULL, *p = NULL, *np = NULL, *curp = NULL, buf[1024] = "", bin[128] = "";
-
-  proclist = process_list[0] ? process_list : NULL;
-
-  if (!proclist)
-    return;
-
-  if (!shell_exec("ps x", NULL, &out, NULL))
-    return;
-
-  /* Get this binary's filename */
-  strlcpy(buf, shell_escape(binname), sizeof(buf));
-  p = strrchr(buf, '/');
-  if (p) {
-    p++;
-    strlcpy(bin, p, sizeof(bin));
-  } else {
-    bin[0] = 0;
-  }
-  /* Fix up the "permitted processes" list */
-  p = (char *) my_calloc(1, strlen(proclist) + strlen(bin) + 6);
-  strcpy(p, proclist);
-  strcat(p, " ");
-  strcat(p, bin);
-  strcat(p, " ");
-  proclist = p;
-  curp = out;
-  while (curp) {
-    np = strchr(curp, '\n');
-    if (np)
-      *np++ = 0;
-    if (atoi(curp) > 0) {
-      char *pid = NULL, *tty = NULL, *mystat = NULL, *mytime = NULL, cmd[512] = "", line[2048] = "";
-
-      strlcpy(line, curp, sizeof(line));
-      /* it's a process line */
-      /* Assuming format: pid tty stat time cmd */
-      pid = newsplit(&curp);
-      tty = newsplit(&curp);
-      mystat = newsplit(&curp);
-      mytime = newsplit(&curp);
-      strlcpy(cmd, curp, sizeof(cmd));
-      /* skip any <defunct> procs "/bin/sh -c" crontab stuff and binname crontab stuff */
-      if (!strstr(cmd, "<defunct>") && !strncmp(cmd, "/bin/sh -c", 10) && 
-          !strncmp(cmd, shell_escape(binname), strlen(shell_escape(binname)))) {
-        /* get rid of any args */
-        if ((p = strchr(cmd, ' ')))
-          *p = 0;
-        /* remove [] or () */
-        if (strlen(cmd)) {
-          p = cmd + strlen(cmd) - 1;
-          if (((cmd[0] == '(') && (*p == ')')) || ((cmd[0] == '[') && (*p == ']'))) {
-            *p = 0;
-            strcpy(buf, cmd + 1);
-            strcpy(cmd, buf);
-          }
-        }
-
-        /* remove path */
-        if ((p = strrchr(cmd, '/'))) {
-          p++;
-          strcpy(buf, p);
-          strcpy(cmd, buf);
-        }
-
-        /* skip "ps" */
-        if (strcmp(cmd, "ps")) {
-          /* see if proc's in permitted list */
-          strcat(cmd, " ");
-          if ((p = strstr(proclist, cmd))) {
-            /* Remove from permitted list */
-            while (*p != ' ')
-              *p++ = 1;
-          } else {
-            char *work = NULL;
-            size_t size = 0;
-
-            size = strlen(line) + 22;
-            work = (char *) my_calloc(1, size);
-            simple_snprintf(work, size, "Unexpected process: %s", line);
-            detected(DETECT_PROCESS, work);
-            free(work);
-          }
-        }
-      }
-    }
-    curp = np;
-  }
-  free(proclist);
-  if (out)
-    free(out);
-}
-#endif /* NOT_USED */
-
 void check_promisc()
 {
 #ifdef SIOCGIFCONF
@@ -620,10 +520,6 @@ void detected(int code, const char *msg)
     act = trace;
   if (code == DETECT_PROMISC)
     act = promisc;
-#ifdef NOT_USED
-  if (code == DETECT_PROCESS)
-    act = badprocess;
-#endif
   if (code == DETECT_HIJACK)
     act = hijack;
 

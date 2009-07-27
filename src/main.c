@@ -478,12 +478,6 @@ void core_10secondly()
         check_last();
     }
 
-#ifdef NOT_USED
-    if (curcheck == 3) {
-      check_processes();
-    }
-#endif
-
     if (curcheck == 3)
       curcheck = 0;
   }
@@ -929,20 +923,9 @@ printf("out: %s\n", out);
   debug0(STR("main: entering loop"));
 
   int socket_cleanup = 0, xx, i = 0, idx = 0;
-#if !defined(CYGWIN_HACKS) && !defined(__sun__)
-#ifdef NO
-  int status = 0;
-#endif
-#endif /* !CYGWIN_HACKS */
   char buf[SGRAB + 10] = "";
 
   while (1) {
-#if !defined(CYGWIN_HACKS) && !defined(__sun__)
-#ifdef NO
-    if (conf.watcher && waitpid(watcher, &status, WNOHANG))
-      fatal("watcher PID died/stopped", 0);
-#endif
-#endif /* !CYGWIN_HACKS */
 
     /* Lets move some of this here, reducing the numer of actual
      * calls to periodic_timers

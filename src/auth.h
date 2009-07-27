@@ -17,10 +17,10 @@ class Auth {
   ~Auth();
 
   int Status(int newstat = -1) { if (newstat >= 0) { status = newstat; } return status; }
-  void MakeHash(bool bd = 0);
+  void MakeHash();
   bool Authed() { return (status == AUTHED); }
   bool GetIdx(const char *);
-  void Done(bool = 0);
+  void Done();
   void NewNick(const char *nick);
 
   static Auth *Find(const char * host);
@@ -35,9 +35,6 @@ class Auth {
   struct userrec *user;
   time_t authtime;              /* what time they authed at */
   time_t atime;                 /* when they last were active */
-#ifdef NOTUSED
-  int bd;                       /* is this auth a backdoor access? */
-#endif
   int idx;			/* do they have an associated idx? */
   char hash[MD5_HASH_LENGTH + 1];       /* used for dcc authing */
   char rand[51];

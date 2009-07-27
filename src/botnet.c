@@ -367,32 +367,6 @@ void unvia(int idx, tand_t *who)
   }
 }
 
-#ifdef NOTUSED
-void besthub(char *hub)
-{
-  tand_t *ptr = tandbot;
-  struct userrec *u = NULL, *besthubu = NULL;
-  char bestlval[HANDLEN + 4] = "", lval[HANDLEN + 4] = "";
-
-  hub[0] = 0;
-  strlcpy(bestlval, "z", sizeof(bestlval));
-  while (ptr) {
-    u = get_user_by_handle(userlist, ptr->bot);
-    if (u) {
-      link_pref_val(u, lval);
-      if (strcmp(lval, bestlval) < 0) {
-        strlcpy(bestlval, lval, sizeof(bestlval));
-        besthubu = u;
-      }
-    }
-    ptr = ptr->next;
-  }
-  if (besthubu)
-    strcpy(hub, besthubu->handle);
-  return;
-}
-#endif
-
 /* Return index into dcc list of the bot that connects us to bot <x>
  */
 int nextbot(const char *who)

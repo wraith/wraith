@@ -226,52 +226,6 @@ static void bind_entry_really_del(bind_table_t *table, bind_entry_t *entry)
 	free(entry);
 }
 
-#ifdef NO
-/* Modify a bind entry's flags and mask. */
-int bind_entry_modify(bind_table_t *table, int id, const char *mask, const char *function_name, const char *newflags, const char *newmask)
-{
-	bind_entry_t *entry = bind_entry_lookup(table, id, mask, function_name, NULL);
-
-	if (!entry) 
-          return(-1);
-
-	/* Modify it. */
-	if (newflags) {
-          entry->user_flags.match = FR_GLOBAL | FR_CHAN;
-          break_down_flags(newflags, &entry->user_flags, NULL);
-        }
-/*	if (newflags) flag_from_str(&entry->user_flags, newflags); */
-	if (newmask) str_redup(&entry->mask, newmask);
-
-	return(0);
-}
-/* void blah()
-{
-  bind_entry_t *entry = NULL;
-  bind_table_t *table = NULL;
-
-  table = bind_table_lookup_or_fake("dcc");
-
-  for (entry = table->entries; entry && entry->next; entry = entry->next) {
-    printf("MASK: %s\n", entry->mask);
-  }
-}
-*/
-
-/* Overwrite a bind entry's callback and client_data. */
-int bind_entry_overwrite(bind_table_t *table, int id, const char *mask, const char *function_name, Function callback, void *client_data)
-{
-	bind_entry_t *entry = bind_entry_lookup(table, id, mask, function_name, NULL);
-
-	if (!entry) 
-          return(-1);
-
-	entry->callback = (HashFunc) callback;
-	entry->client_data = client_data;
-	return(0);
-}
-#endif
-
 int bind_entry_add(bind_table_t *table, const char *flags, int cflags, const char *mask, const char *function_name, int bind_flags, Function callback, void *client_data)
 {
 	bind_entry_t *entry = NULL, *old_entry = bind_entry_lookup(table, -1, mask, function_name, NULL);

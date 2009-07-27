@@ -145,27 +145,6 @@ static void update_ufsend(int idx, char *par)
   }
 }
 
-#ifdef NOTUSED
-static void update_version(int idx, char *par)
-{
-  return;
-  /* Cleanup any share flags */
-#ifdef HUBNO
-  tand_t *bot = NULL;
-
-  if (bupdating) return;
-
-  dcc[idx].status &= ~(STAT_GETTINGU | STAT_SENDINGU | STAT_OFFEREDU);
-  bot = findbot(dcc[idx].nick);
-  if (bot && (bot->revision < revision) && (isupdatehub())) {
-    putlog(LOG_DEBUG, "@", "Asking %s to accept update from me", dcc[idx].nick);
-    dprintf(idx, "sb u?\n");
-    dcc[idx].status |= STAT_OFFEREDU;
-  }
-#endif /* HUB */
-}
-#endif
-
 /* Note: these MUST be sorted. */
 static botcmd_t C_update[] =
 {
@@ -173,7 +152,6 @@ static botcmd_t C_update[] =
   {"un",	update_ufno, 0},
   {"us",	update_ufsend, 0},
   {"uy",	update_ufyes, 0},
-//  {"v",         update_version, 0},
   {NULL,	NULL, 0}
 };
 

@@ -547,16 +547,6 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
       chan->status |= CHAN_INACTIVE;
     else if (!strcmp(item[i], "-inactive"))
       chan->status&= ~CHAN_INACTIVE;
-#ifdef no
-    else if (!strcmp(item[i], "+revenge"))
-      chan->status |= CHAN_REVENGE;
-    else if (!strcmp(item[i], "-revenge"))
-      chan->status &= ~CHAN_REVENGE;
-    else if (!strcmp(item[i], "+revengebot"))
-      chan->status |= CHAN_REVENGEBOT;
-    else if (!strcmp(item[i], "-revengebot"))
-      chan->status &= ~CHAN_REVENGEBOT;
-#endif
     else if (!strcmp(item[i], "+secret"))
       chan->status |= CHAN_SECRET;
     else if (!strcmp(item[i], "-secret"))
