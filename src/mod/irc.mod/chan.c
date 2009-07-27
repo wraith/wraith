@@ -224,7 +224,7 @@ void priority_do(struct chanset_t * chan, bool opsonly, int action)
 
       simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
       m->user = get_user_by_host(s);
-      if (!m->user && doresolv(chan) && m->userip[0]) {
+      if (!m->user && m->userip[0]) {
         simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
         m->user = get_user_by_host(s);
       }
@@ -1338,7 +1338,7 @@ void recheck_channel(struct chanset_t *chan, int dobans)
     if (!m->user && !m->tried_getuser) {
            m->tried_getuser = 1;
            m->user = get_user_by_host(s);
-           if (!m->user && doresolv(chan) && m->userip[0]) {
+           if (!m->user && m->userip[0]) {
              simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
              m->user = get_user_by_host(s);
            }

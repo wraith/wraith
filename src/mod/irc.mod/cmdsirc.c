@@ -1242,7 +1242,7 @@ static void cmd_mop(int idx, char *par)
         if (!m->user) {
           simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
           m->user = get_user_by_host(s);
-          if (!m->user && doresolv(chan) && m->userip[0]) {
+          if (!m->user && m->userip[0]) {
             simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
             m->user = get_user_by_host(s);
           }
@@ -1308,7 +1308,7 @@ static void cmd_find(int idx, char *par)
         simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
         if (!m->user && !m->tried_getuser) {
           m->user = get_user_by_host(s);
-          if (!m->user && doresolv(chan) && m->userip[0]) {
+          if (!m->user && m->userip[0]) {
             simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
             m->user = get_user_by_host(s);
           }
@@ -1503,7 +1503,7 @@ static void cmd_channel(int idx, char *par)
       if (m->user == NULL) {
 	simple_snprintf(s1, sizeof s1, "%s!%s", m->nick, m->userhost);
 	m->user = get_user_by_host(s1);
-        if (!m->user && doresolv(chan) && m->userip[0]) {
+        if (!m->user && m->userip[0]) {
           simple_snprintf(s1, sizeof(s1), "%s!%s", m->nick, m->userip);
           m->user = get_user_by_host(s1);
         }
