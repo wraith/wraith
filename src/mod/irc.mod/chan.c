@@ -1774,8 +1774,8 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
     m->tried_getuser = 1;
   }
 
-  //userhost failed, let's try resolving them...
-  if (!m->user && !ip && doresolv(chan)) { /* !ip.. already checked for user earlier if set */
+  //This bot is set +r, so always resolve.
+  if (!ip && doresolv(chan)) { /* !ip.. already checked for user earlier if set */
     if (is_dotted_ip(host))
       simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, host);
     else  
