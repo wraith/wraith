@@ -167,65 +167,6 @@ static void got_bus(int z)
 #endif /* DEBUG */
 }
 
-#ifndef CYGWIN_HACKS
-#ifdef __i386__
-#ifndef PAGESIZE
-#define PAGESIZE 4096
-#endif
-
-struct stackframe {
-  struct stackframe *ebp;
-  unsigned long addr;
-};
-
-/*
-  CALL x
-  PUSH EBP
-  MOV EBP, ESP
-
-  0x10: EBP
-  0x14: EIP
-
- */
-
-static int
-canaccess(void *addr)
-{
-  addr = (void *) (((unsigned long) addr / PAGESIZE) * PAGESIZE);
-  if (mprotect(addr, PAGESIZE, PROT_READ | PROT_WRITE | PROT_EXEC))
-    if (errno != EACCES)
-      return 0;
-  return 1;
-}
-
-struct stackframe *sf = NULL;
-int stackdepth = 0;
-
-void
-stackdump(int idx)
-{
-  __asm__("movl %EBP, %EAX");
-  __asm__("movl %EAX, sf");
-  if (idx == 0)
-    putlog(LOG_MISC, "*", "STACK DUMP");
-  else
-    dprintf(idx, "STACK DUMP\n");
-
-  while (canaccess(sf) && stackdepth < 20 && sf->ebp) {
-    if (idx == 0)
-      putlog(LOG_MISC, "*", " %02d: 0x%08lx/0x%08lx", stackdepth, (unsigned long) sf->ebp, sf->addr);
-    else
-      dprintf(idx, " %02d: 0x%08lx/0x%08lx\n", stackdepth, (unsigned long) sf->ebp, sf->addr);
-    sf = sf->ebp;
-    stackdepth++;
-  }
-  stackdepth = 0;
-  sf = NULL;
-  sleep(1);
-}
-#endif /* __i386__ */
-#endif /* !CYGWIN_HACKS */
-
 #ifndef DEBUG
 static void got_segv(int) __attribute__ ((noreturn));
 #endif /* DEBUG */
@@ -235,7 +176,6 @@ static void got_segv(int z)
   segfaulted = 1;
   alarm(0);		/* dont let anything jump out of this signal! */
   signal(SIGSEGV, SIG_DFL);
-  /* stackdump(0); */
 #ifdef DEBUG_CONTEXT
   write_debug();
 #endif
