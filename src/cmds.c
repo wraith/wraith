@@ -1937,10 +1937,6 @@ static void cmd_debug(int idx, char *par)
     tell_netdebug(idx);
   if (!cmd || (cmd && !strcmp(cmd, "dns")))
     tell_dnsdebug(idx);
-#if !defined(CYGWIN_HACKS) && defined(__i386__)
-  if (!cmd || (cmd &&!strcmp(cmd, "stackdump")))
-    stackdump(0);
-#endif /* !CYGWIN_HACKS */
 }
 
 static void cmd_timers(int idx, char *par)
