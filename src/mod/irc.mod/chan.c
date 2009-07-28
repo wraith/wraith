@@ -64,6 +64,10 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
             if (!m->user) {
               simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
               m->user = get_user_by_host(s);
+
+              /* Act on this lookup */
+              if (m->user)
+                check_this_user(m->user->handle, 0, NULL);
             }
             return;
           }
