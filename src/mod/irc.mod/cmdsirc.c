@@ -1507,6 +1507,17 @@ static void cmd_channel(int idx, char *par)
           simple_snprintf(s1, sizeof(s1), "%s!%s", m->nick, m->userip);
           m->user = get_user_by_host(s1);
         }
+
+        if (!m->userip[0] && doresolv(chan)) {
+          char host[UHOSTLEN] = "", *p = NULL;
+          p = strchr(m->userhost, '@');
+          if (p) {
+            ++p;
+            strlcpy(host, p, strlen(m->userhost) - (p - host));
+            resolve_to_member(chan, m->nick, host);
+          }
+        }
+
         m->tried_getuser = 1;
       }
       if (m->user == NULL)
