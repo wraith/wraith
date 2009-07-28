@@ -115,7 +115,7 @@ const char *dns_ip = NULL;
 static int make_header(char *buf, int id);
 static int cut_host(const char *host, char *query);
 static int reverse_ip(const char *host, char *reverse);
-static void read_resolv(char *fname);
+static int read_resolv(char *fname);
 static void read_hosts(char *fname);
 static int get_dns_idx();
 //static void dns_resend_queries();
@@ -684,20 +684,25 @@ static int read_thing(char *buf, char *ip)
 	return(skip + len);
 }
 
-static void read_resolv(char *fname)
+static int read_resolv(char *fname)
 {
 	FILE *fp;
 	char buf[512], ip[512];
+        int count = 0;
 
 	fp = fopen(fname, "r");
-	if (!fp) return;
+	if (!fp) return 0;
 	while (fgets(buf, sizeof(buf), fp)) {
 		if (!strncasecmp(buf, "nameserver", 10)) {
 			read_thing(buf+10, ip);
-			if (strlen(ip)) add_dns_server(ip);
+			if (strlen(ip)) {
+				add_dns_server(ip);
+                                ++count;
+                        }
 		}
 	}
 	fclose(fp);
+        return count;
 }
 
 static void read_hosts(char *fname)
@@ -1019,14 +1024,15 @@ static void expire_queries()
 int egg_dns_init()
 {
 	_dns_header.flags = htons(1 << 8 | 1 << 7);
-	read_resolv(".resolv.conf");
-	read_resolv("/etc/resolv.conf");
+	if (!read_resolv(".resolv.conf")) {
+		read_resolv("/etc/resolv.conf");
+		/* some backup servers, probably will never be used. */
+		add_dns_server("4.2.2.2");
+        }
+
 //	read_hosts("/etc/hosts");
 	read_hosts(".hosts");
     
-        /* some backup servers, probably will never be used. */
-        add_dns_server("4.2.2.2");
-
 /* root servers for future development (tracing down)
 	add_dns_server("198.41.0.4");
 	add_dns_server("192.228.79.201");
