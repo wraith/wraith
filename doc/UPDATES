@@ -1,7 +1,8 @@
+1.2.17 - http://wraith.botpack.net/milestone/1.2.17
 * Binary pass prompt has been changed to be more clear.
-* Make errors non-obscure. (Compile with OBSCURE_ERRORS to re-enable)
-* EFnet server list updates
 * Fix uname checking on NetBSD and OpenBSD
+* EFnet server list updates
+* Make errors non-obscure. (Compile with OBSCURE_ERRORS to re-enable)
 * PackConfig can now be securely read over STDIN. Use ./wraith -Q, then paste it in.
 * Binary will no longer generate SALTS if missing from the PackConfig. This was causing too much confusion.
 
