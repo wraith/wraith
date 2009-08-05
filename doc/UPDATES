@@ -1,4 +1,5 @@
 * Sanitize cmd_set input locally as well as remotely
+* Ensure that some set variables are only 1 word long.
 
 1.2.16 - http://wraith.botpack.net/milestone/1.2.16
 * Add 'set altchars' so that alternative characters used for nicks can be changed. (fixes #418)
