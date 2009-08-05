@@ -1052,11 +1052,23 @@ int cmd_set_real(const char *botnick, int idx, char *par)
       dprintf(idx, "Failed to modify %s list.\n", var->name);
       return 0;
     } else {
+      /* If no data or data is not -
+         sanitize the data */
+      char *sdata = NULL;
+      /* Make a temporary to free at the end */
+      if (data && strcmp(data, "-") && (!var->def || (var->def && strcmp(data, var->def)))) {
+        sdata = var_sanitize(var, data);
+        data = sdata;
+      }
+
       var_set(var, botnick, data);
       if (botnick)
         var_set_userentry(botnick, name, data);
 
       dprintf(idx, "%s: %s\n", name, botnick ? (!data || (data[0] == '-' && !data[1]) ? "(not set)" : data) : (var->gdata ? var->gdata : "(not set)"));
+
+      if (sdata)
+        free(sdata);
     }
     return 1;
   }
