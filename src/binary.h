@@ -11,7 +11,7 @@ extern int checked_bin_buf;
 #  define WRITE_CONF            BIT3
 #  define GET_CONF              BIT4
 
-void check_sum(const char *, const char *);
+void check_sum(const char *, const char *, bool);
 void write_settings(const char *, int, bool);
 void conf_to_bin(conf_t *, bool, int);
 void reload_bin_data();
