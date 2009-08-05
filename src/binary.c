@@ -350,25 +350,6 @@ readcfg(const char *cfgfile)
   }
   if (f)
     fclose(f);
-  if (!settings.salt1[0] || !settings.salt2[0]) {
-    /* Write salts back to the cfgfile */
-    char salt1[SALT1LEN + 1] = "", salt2[SALT2LEN + 1] = "";
-
-    printf(STR("Creating Salts"));
-    if ((f = fopen(cfgfile, "a")) == NULL) {
-      printf(STR("Cannot open cfgfile for appending.. aborting\n"));
-      exit(1);
-    }
-    make_rand_str(salt1, SALT1LEN);
-    make_rand_str(salt2, SALT2LEN);
-    salt1[sizeof salt1 - 1] = salt2[sizeof salt2 - 1] = 0;
-    strlcpy(settings.salt1, salt1, sizeof(settings.salt1));
-    strlcpy(settings.salt2, salt2, sizeof(settings.salt2));
-    fprintf(f, STR("SALT1 %s\n"), salt1);
-    fprintf(f, STR("SALT2 %s\n"), salt2);
-    fflush(f);
-    fclose(f);
-  }
   printf(STR(" Success\n"));
   return 1;
 }

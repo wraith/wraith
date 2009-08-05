@@ -2,6 +2,7 @@
 * Make errors non-obscure. (Compile with OBSCURE_ERRORS to re-enable)
 * EFnet server list updates
 * Fix uname checking on NetBSD and OpenBSD
+* Binary will no longer generate SALTS if missing from the PackConfig. This was causing too much confusion.
 
 1.2.16 - http://wraith.botpack.net/milestone/1.2.16
 * Add 'set altchars' so that alternative characters used for nicks can be changed. (fixes #418)
