@@ -1,4 +1,5 @@
 * PackConfig can now be securely read over STDIN. Use ./wraith -Q, then paste it in.
+* Binary will no longer generate SALTS if missing from the PackConfig. This was causing too much confusion.
 
 1.2.16 - http://wraith.botpack.net/milestone/1.2.16
 * Add 'set altchars' so that alternative characters used for nicks can be changed. (fixes #418)

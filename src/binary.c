@@ -391,35 +391,8 @@ readcfg(const char *cfgfile, bool read_stdin)
     fprintf(stderr, STR("Error: Look at your configuration again and remove any <>\n"));
     for (error_line = error_list; error_line; error_line = error_line->next)
         fprintf(stderr, STR("Line %d\n"), error_line->line);
-  }
-
-  if (!settings.salt1[0] || !settings.salt2[0]) {
-    /* Write salts back to the cfgfile */
-    char salt1[SALT1LEN + 1] = "", salt2[SALT2LEN + 1] = "";
-
-    if (read_stdin) {
-      f = stdout;
-    } else {
-      printf(STR("Creating Salts"));
-      if ((f = fopen(cfgfile, "a")) == NULL) {
-        fprintf(stderr, STR("Cannot open cfgfile for appending.. aborting\n"));
-        exit(1);
-      }
-    }
-    make_rand_str(salt1, SALT1LEN);
-    make_rand_str(salt2, SALT2LEN);
-    salt1[sizeof salt1 - 1] = salt2[sizeof salt2 - 1] = 0;
-    strlcpy(settings.salt1, salt1, sizeof(settings.salt1));
-    strlcpy(settings.salt2, salt2, sizeof(settings.salt2));
-    fprintf(f, STR("SALT1 %s\n"), salt1);
-    fprintf(f, STR("SALT2 %s\n"), salt2);
-    fflush(f);
-    if (!read_stdin)
-      fclose(f);
-  }
-
-  if (error)
     exit(1);
+  }
 
   if (!read_stdin) printf(STR(" Success\n"));
   return 1;
