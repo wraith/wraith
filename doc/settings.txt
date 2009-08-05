@@ -31,7 +31,6 @@ irc.wh.verio.net
 irc2.choopa.net
 #EU
 efnet.cs.hut.fi
-efnet.demon.co.uk
 efnet.port80.se
 efnet.xs4all.nl
 irc.ac.za
@@ -46,12 +45,10 @@ irc.efnet.ru
 irc.homelien.no
 irc.inet.tele.dk
 irc.inter.net.il
-irc.pte.hu
 irc.swepipe.se
 #CA
 irc.arcti.ca
 irc.choopa.ca
-irc.dks.ca
 irc.igs.ca
 
 :servers6
