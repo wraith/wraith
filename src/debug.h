@@ -39,8 +39,4 @@ void init_signals();
 void init_debug();
 void eggContext(const char *, int);
 void eggContextNote(const char *, int, const char *);
-void printstr(unsigned char *, int);
-#ifdef NOTUSED
-char* hexize(const unsigned char*, size_t);
-#endif
 #endif /* !_DEBUG_H */

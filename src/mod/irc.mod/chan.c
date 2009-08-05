@@ -1761,13 +1761,6 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
 //    strcpy(botuserhost, m->userhost);		/* Yes, save my own userhost */
     m->joined = now;				/* set this to keep the whining masses happy */
   }
-#ifdef do_this_at_end_of_who
-    if (!waschanop && me_op(chan))
-      recheck_channel(chan, 2);
-    if (!me_op(chan) && any_ops(chan))
-      chan->channel.do_opreq = 1;
-  }
-#endif
 
   if (!m->user && !m->tried_getuser) {
     m->user = get_user_by_host(userhost);

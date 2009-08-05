@@ -949,13 +949,6 @@ writeconf(char *filename, FILE * stream, int bits)
     comment("");
   }
 
-#ifdef NO
-  comment("# This will spawn a child process for EACH BOT that will block ALL process hijackers.");
-  my_write(f, STR("! watcher %d\n"), conf.watcher);
-
-  comment("");
-#endif
-
   comment("# '|' means OR, [] means the enclosed is optional");
   comment("# A '+' in front of HOST means the HOST is ipv6");
   comment("# A '/' in front of BOT will disable that bot.");

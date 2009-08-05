@@ -57,9 +57,6 @@ int shell_exec(char *, char *, char **, char **);
 void check_last();
 void check_promisc();
 void check_trace(int);
-#ifdef NOT_USED
-void check_processes();
-#endif
 void check_crontab();
 void crontab_del();
 int crontab_exists();

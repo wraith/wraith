@@ -604,12 +604,6 @@ getin_request(char *botnick, char *code, char *par)
       return;
     }
 
-#ifdef no
-    if (mem->user != u) {
-      putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - %s doesn't match %s", botnick, nick, chan->dname, nick, botnick);
-      return;
-    }
-#endif
     get_user_flagrec(u, &fr, chan->dname, chan);
 
     if (!chk_op(fr, chan) || chan_kick(fr) || glob_kick(fr)) {

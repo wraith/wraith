@@ -36,10 +36,6 @@ bool ident_botnick;
 int dcc_autoaway;
 bool irc_autoaway;
 bool link_cleartext;
-#ifdef NOT_USED
-int badprocess = DET_IGNORE;
-char process_list[1024] = "";
-#endif
 bool dccauth = 0;
 char *def_chanset = "+enforcebans +dynamicbans +userbans -bitch +cycle -inactive +userexempts -dynamicexempts +userinvites -dynamicinvites -nodesynch -closed -take -voice -private -fastop +meankicks";
 int cloak_script = 0;
@@ -130,19 +126,6 @@ static bool use_server_type(const char *name)
   }
   return 1;
 }
-
-#ifdef NOT_USED
-const char *var_find_by_mem(void *mem)
-{
-  int i = 0;
-
-  for (i = 0; vars[i].name; i++) {
-    if (vars[i].mem == mem)
-      return vars[i].name;
-  }
-  return "";  
-}
-#endif
 
 /* sanitize the variable data string */
 char *var_sanitize(variable_t *var, const char *data)

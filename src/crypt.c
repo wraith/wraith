@@ -417,33 +417,3 @@ char *btoh(const unsigned char *md, size_t len)
   ret = buf;
   return ret;
 }
-#ifdef k
-void do_crypt_console()
-{
-  char inbuf[1024] = "";
-  int which = 5;
-  char *p = NULL;
-
-  printf("Crypt menu:\n");
-  printf("-----------\n");
-  printf("1) String\n");
-  printf("2) File\n");
-
-  printf("1) MD5\n");
-  printf("2) SHA1\n");
-  printf("3) AES256 (binary)\n");
-  printf("4) AES256+base64\n");
-  printf("5) exit\n");
-  printf("\n");
-  printf("[5]: ");
-
-  fgets(inbuf, sizeof(inbuf), stdin);
-  if ((p = strchr(inbuf, '\n')))
-    *p = 0;
-
-  which = atoi(inbuf);
-
-  switch (which) {
-    case 
-}
-#endif
