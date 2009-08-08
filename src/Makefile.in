@@ -94,14 +94,14 @@ stringfix: stringfix.c common.h ../config.h eggdrop.h
 	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) stringfix.c -o stringfix
 	@$(STRIP) stringfix@EXEEXT@
 
-#../$(EGGEXEC): build_msg $(OBJS) mycrypto compatability ../lib/bdlib/src/libbdlib.a
-../$(EGGEXEC): build_msg $(OBJS) mycrypto compatability 
+#../$(EGGEXEC): build_msg $(OBJS) mycrypto compatability
+../$(EGGEXEC): build_msg $(OBJS) mycrypto compatability ../lib/bdlib/src/libbdlib.a
 	@echo "[*] Linking"
 	@echo ""
 	@echo "Linking wraith... $(EGGBUILD)"
 	@echo ""
-#	$(LD) -o ../$(EGGEXEC) $(OBJS) $(MODOBJS) $(LIBS) compat/*.o crypto/*.o ../lib/bdlib/src/libbdlib.a
-	$(LD) -o ../$(EGGEXEC) $(OBJS) $(MODOBJS) $(LIBS) compat/*.o crypto/*.o
+	$(LD) -o ../$(EGGEXEC) $(OBJS) $(MODOBJS) $(LIBS) compat/*.o crypto/*.o ../lib/bdlib/src/libbdlib.a
+#	$(LD) -o ../$(EGGEXEC) $(OBJS) $(MODOBJS) $(LIBS) compat/*.o crypto/*.o
 	@$(STRIP) ../$(EGGEXEC)
 	@$(OBJCOPY) ../$(EGGEXEC)
 	@echo "Successful compile: $(EGGEXEC)"

@@ -13,11 +13,11 @@ VPATH = @srcdir@
 default: normal
 
 clean:
-#	-+@cd bdlib && $(MAKE) clean
+	-+@cd bdlib && $(MAKE) clean
 	@rm -f *.a
 
 distclean: clean
-#	-+@cd bdlib && $(MAKE) distclean
+	-+@cd bdlib && $(MAKE) distclean
 
 notice:
 	@echo "[*] Making libraries"
@@ -32,7 +32,7 @@ debug: general notice_debug build
 general:
 
 build:
-#	+@cd bdlib && $(MAKE) bdlib
+	+@cd bdlib && $(MAKE) bdlib
 
 buildcheck: build
 

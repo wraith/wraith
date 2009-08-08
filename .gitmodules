@@ -1,0 +1,3 @@
+[submodule "lib/bdlib"]
+	path = lib/bdlib
+	url = git://git.shatow.net/bdlib
