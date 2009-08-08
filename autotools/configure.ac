@@ -200,7 +200,12 @@ AH_BOTTOM([/*
 #endif
 ])
 
-#echo ""
-#echo ""
-#echo "------------ Configuring BDLIB ------------"
-#cd lib/bdlib && ./configure
+echo ""
+echo ""
+echo "------------ Configuring BDLIB ------------"
+[
+if test -d .git && ! test -d lib/bdlib/.git; then
+  git submodule update --init
+fi
+]
+cd lib/bdlib && ./configure
