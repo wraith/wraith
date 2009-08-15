@@ -35,6 +35,7 @@
 /* (short) number */
 #define VAR_SHORT 	BIT18
 #define VAR_JUPENICK    BIT19
+#define VAR_WORD	BIT20
 
 #define VAR_NOHUB       VAR_NOLHUB|VAR_NOGHUB
 

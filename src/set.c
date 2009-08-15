@@ -66,11 +66,11 @@ char usermode[15] = "";
 // VAR("process-list",	process_list,		VAR_STRING|VAR_LIST,				0, 0, NULL),
 static variable_t vars[] = {
  VAR("alias", 		alias,			VAR_STRING|VAR_LIST|VAR_NOLOC|VAR_PERM,		0, 0, DEFAULT_ALIAS),
- VAR("altchars",	altchars,		VAR_STRING|VAR_NOLHUB,				0, 0, "-_\\`^[]"),
+ VAR("altchars",	altchars,		VAR_WORD|VAR_NOLHUB,				0, 0, "-_\\`^[]"),
  VAR("auth-chan",	&auth_chan,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "1"),
  VAR("auth-key",	auth_key,		VAR_STRING|VAR_PERM,				0, 0, NULL),
  VAR("auth-obscure",	&auth_obscure,		VAR_INT|VAR_BOOL,				0, 1, "0"),
- VAR("auth-prefix",	auth_prefix,		VAR_STRING|VAR_NOLHUB|VAR_PERM,			0, 0, "+"),
+ VAR("auth-prefix",	auth_prefix,		VAR_WORD|VAR_NOLHUB|VAR_PERM,			0, 0, "+"),
  VAR("chanset",		glob_chanset,		VAR_STRING|VAR_CHANSET|VAR_NOLHUB,		0, 0, NULL),
  VAR("cloak-script",	&cloak_script,		VAR_INT|VAR_CLOAK|VAR_NOLHUB,			0, 10, "0"),
  VAR("close-threshold",	&close_threshold,	VAR_RATE|VAR_NOLOC,				0, 0, "0:0"),
@@ -82,22 +82,22 @@ static variable_t vars[] = {
  VAR("flood-msg",	&flood_msg,		VAR_RATE|VAR_NOLHUB,				0, 0, "5:60"),
  VAR("fork-interval",	&fork_interval,		VAR_INT,					10, 0, "0"),
  VAR("hijack",		&hijack,		VAR_INT|VAR_DETECTED|VAR_PERM,			0, 4, "die"),
- VAR("homechan",	homechan,		VAR_STRING|VAR_NOLOC|VAR_HIDE,			0, 0, NULL),
+ VAR("homechan",	homechan,		VAR_WORD|VAR_NOLOC|VAR_HIDE,			0, 0, NULL),
  VAR("ident-botnick",   &ident_botnick,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "0"),
  VAR("in-bots",		&in_bots,		VAR_INT|VAR_NOLOC,				1, MAX_BOTS, "2"),
  VAR("irc-autoaway",	&irc_autoaway,		VAR_INT|VAR_NOLHUB|VAR_BOOL,			0, 1, "1"),
- VAR("jupenick",	jupenick,		VAR_STRING|VAR_NOHUB|VAR_JUPENICK|VAR_NODEF,  	0, 0, NULL),
+ VAR("jupenick",	jupenick,		VAR_WORD|VAR_NOHUB|VAR_JUPENICK|VAR_NODEF,  	0, 0, NULL),
  VAR("kill-threshold",	&kill_threshold,	VAR_INT|VAR_NOLOC,				0, 0, "0"),
  VAR("lag-threshold",	&lag_threshold,		VAR_INT|VAR_NOLHUB,				0, 0, "15"),
  VAR("link_cleartext",	&link_cleartext,	VAR_INT|VAR_NOLOC|VAR_BOOL,			0, 1, "0"),
  VAR("login",		&login,			VAR_INT|VAR_DETECTED,				0, 4, "warn"),
  VAR("manop-warn",	&manop_warn,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "1"),
  VAR("motd",		motd,			VAR_STRING|VAR_HIDE|VAR_NOLOC,			0, 0, NULL),
- VAR("msg-ident",	msgident,		VAR_STRING|VAR_NOLHUB,				0, 0, NULL),
- VAR("msg-invite",	msginvite,		VAR_STRING|VAR_NOLHUB,				0, 0, NULL),
- VAR("msg-op",		msgop,			VAR_STRING|VAR_NOLHUB,				0, 0, NULL),
- VAR("msg-pass",	msgpass,		VAR_STRING|VAR_NOLHUB,				0, 0, NULL),
- VAR("nick",		origbotname,		VAR_STRING|VAR_NOHUB|VAR_NICK|VAR_NODEF,	0, 0, NULL),
+ VAR("msg-ident",	msgident,		VAR_WORD|VAR_NOLHUB,				0, 0, NULL),
+ VAR("msg-invite",	msginvite,		VAR_WORD|VAR_NOLHUB,				0, 0, NULL),
+ VAR("msg-op",		msgop,			VAR_WORD|VAR_NOLHUB,				0, 0, NULL),
+ VAR("msg-pass",	msgpass,		VAR_WORD|VAR_NOLHUB,				0, 0, NULL),
+ VAR("nick",		origbotname,		VAR_WORD|VAR_NOHUB|VAR_NICK|VAR_NODEF,	0, 0, NULL),
  VAR("notify-time",	&ison_time,		VAR_INT|VAR_NOLHUB,				1, 30, "10"),
  VAR("oidentd",		&oidentd,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "0"),
  VAR("op-bots",		&op_bots,		VAR_INT|VAR_NOLOC,				1, MAX_BOTS, "1"),
@@ -108,7 +108,7 @@ static variable_t vars[] = {
  VAR("servers",		&serverlist,		VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB|VAR_NOLDEF,	0, 0, DEFAULT_SERVERS),
  VAR("servers6",	&serverlist,		VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB|VAR_NOLDEF,	0, 0, DEFAULT_SERVERS6),
  VAR("trace",		&trace,			VAR_INT|VAR_DETECTED,				0, 4, "die"),
- VAR("usermode",	&usermode,		VAR_STRING|VAR_NOLHUB,				0, 0, "+iws"),
+ VAR("usermode",	&usermode,		VAR_WORD|VAR_NOLHUB,				0, 0, "+iws"),
  VAR(NULL,		NULL,			0,						0, 0, NULL)
 };
 
@@ -181,6 +181,18 @@ char *var_sanitize(variable_t *var, const char *data)
     simple_snprintf(dataout, 2, "%u", num ? 1 : 0);
   } else if (var->flags & VAR_STRING) {
     dataout = data ? strdup(data) : NULL;
+  } else if (var->flags & VAR_WORD) {
+    if (data) {
+      char *p = strchr(data, ' ');
+      if (!p)
+        dataout = strdup(data);
+      else
+        dataout = strldup(data, p - data);
+    } else {
+      data = NULL;
+    }
+
+
   } else if (var->flags & VAR_RATE) {
     char *p = NULL;
     rate_t rate = {0, 0};
@@ -258,7 +270,7 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
 
     if (!strcmp(var->name, "ident-botnick"))
       strlcpy(botuser, conf.username && !num ? conf.username : origbotname, 21);
-  } else if (var->flags & VAR_STRING) {
+  } else if (var->flags & (VAR_STRING|VAR_WORD)) {
     char *olddata = ((char*) var->mem) ? strdup((char*) var->mem) : NULL;
 
     if (data)
@@ -385,7 +397,7 @@ const char *var_string(variable_t *var)
       /* Only actually set 0 or 1 */
       simple_snprintf(data, 2, "%d", num ? 1 : 0);
     }
-  } else if (var->flags & VAR_STRING) {
+  } else if (var->flags & (VAR_STRING|VAR_WORD)) {
     /* only bother setting if we have a non-empty string */
     if ((char *)var->mem && *(char *)var->mem)
       data = strdup((char *) var->mem);
@@ -1035,11 +1047,23 @@ int cmd_set_real(const char *botnick, int idx, char *par)
       dprintf(idx, "Failed to modify %s list.\n", var->name);
       return 0;
     } else {
+      /* If no data or data is not -
+         sanitize the data */
+      char *sdata = NULL;
+      /* Make a temporary to free at the end */
+      if (data && strcmp(data, "-") && (!var->def || (var->def && strcmp(data, var->def)))) {
+        sdata = var_sanitize(var, data);
+        data = sdata;
+      }
+
       var_set(var, botnick, data);
       if (botnick)
         var_set_userentry(botnick, name, data);
 
       dprintf(idx, "%s: %s\n", name, botnick ? (!data || (data[0] == '-' && !data[1]) ? "(not set)" : data) : (var->gdata ? var->gdata : "(not set)"));
+
+      if (sdata)
+        free(sdata);
     }
     return 1;
   }
