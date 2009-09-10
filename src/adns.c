@@ -155,7 +155,7 @@ static int cache_find(const char *);
 static void dns_on_read(int idx, char *buf, int atr);
 static void dns_on_eof(int idx);
 static const char *dns_next_server();
-static int parse_reply(char *response, size_t nbytes);
+static int parse_reply(char *response, size_t nbytes, const char* server_ip);
 
 interval_t async_lookup_timeout = 30;
 interval_t async_server_timeout = 40;
@@ -585,7 +585,7 @@ static void dns_on_read(int idx, char *buf, int atr)
         }
         sdprintf("SETTING TIMEOUT to 0");
         dns_handler.timeout_val = 0;
-	if (parse_reply(buf, atr))
+	if (parse_reply(buf, atr, dns_ip))
           dns_on_eof(idx);
 	return;
 }
@@ -865,7 +865,7 @@ void print_reply(dns_rr_t &reply)
 }
 */
 
-static int parse_reply(char *response, size_t nbytes)
+static int parse_reply(char *response, size_t nbytes, const char* server_ip)
 {
 	dns_header_t header;
 	dns_query_t *q = NULL, *prev = NULL;
