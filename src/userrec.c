@@ -543,14 +543,11 @@ int change_handle(struct userrec *u, char *newh)
   if (!noshare)
     shareout("h %s %s\n", u->handle, newh);
 
-  char s[HANDLEN + 1] = "", *pass = NULL;
+  char s[HANDLEN + 1] = "";
 
-  pass = decrypt_pass(u);
   strlcpy(s, u->handle, sizeof s);
   strlcpy(u->handle, newh, sizeof u->handle);
-  set_user(&USERENTRY_PASS, u, pass);
-  OPENSSL_cleanse(pass, strlen(pass));
-  free(pass);
+
   for (int i = 0; i < dcc_total; i++)
     if (dcc[i].type && dcc[i].type != &DCC_BOT && !egg_strcasecmp(dcc[i].nick, s)) {
       strlcpy(dcc[i].nick, newh, sizeof dcc[i].nick);

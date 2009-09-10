@@ -26,7 +26,6 @@ char *encrypt_string(const char *, char *);
 char *decrypt_string(const char *, char *);
 void encrypt_cmd_pass(char *, char *);
 char *encrypt_pass(struct userrec *, char *);
-char *decrypt_pass(struct userrec *);
 char *cryptit (char *);
 char *decryptit (char *);
 int lfprintf (FILE *, const char *, ...) __attribute__((format(printf, 2, 3)));
