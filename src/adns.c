@@ -54,6 +54,26 @@ typedef struct dns_query {
 	int remaining;
 } dns_query_t;
 
+/* RFC1035
+                                    1  1  1  1  1  1
+      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
+      1  1  1  1  1  0  9  8  7  6  5  4  3  2  1  0
+      5  4  3  2  1  1
+    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+    |                      ID                       |
+    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+    |QR|   Opcode  |AA|TC|RD|RA|   Z    |   RCODE   |
+    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+    |                    QDCOUNT                    |
+    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+    |                    ANCOUNT                    |
+    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+    |                    NSCOUNT                    |
+    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+    |                    ARCOUNT                    |
+    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+*/
+
 typedef struct {
 	unsigned short id;
 	unsigned short flags;
@@ -62,6 +82,16 @@ typedef struct {
 	unsigned short ns_count;
 	unsigned short ar_count;
 } dns_header_t;
+
+#define GET_QR(x)     (((x) >> 15) & BIT0)
+#define GET_OPCODE(x) (((x) >> 11) & (BIT3|BIT2|BIT1|BIT0))
+#define GET_AA(x)     (((x) >> 10) & BIT0)
+#define GET_TC(x)     (((x) >> 9)  & BIT0)
+#define GET_RD(x)     (((x) >> 8)  & BIT0)
+#define GET_RA(x)     (((x) >> 7)  & BIT0)
+#define GET_RCODE(x)  ((x)         & (BIT3|BIT2|BIT1|BIT0))
+
+#define SET_RD(x) (x) |= ((x) | (1 << 8))
 
 #define HEAD_SIZE 12
 
@@ -125,7 +155,7 @@ static int cache_find(const char *);
 static void dns_on_read(int idx, char *buf, int atr);
 static void dns_on_eof(int idx);
 static const char *dns_next_server();
-static int parse_reply(char *response, size_t nbytes);
+static int parse_reply(char *response, size_t nbytes, const char* server_ip);
 
 interval_t async_lookup_timeout = 30;
 interval_t async_server_timeout = 40;
@@ -555,7 +585,7 @@ static void dns_on_read(int idx, char *buf, int atr)
         }
         sdprintf("SETTING TIMEOUT to 0");
         dns_handler.timeout_val = 0;
-	if (parse_reply(buf, atr))
+	if (parse_reply(buf, atr, dns_ip))
           dns_on_eof(idx);
 	return;
 }
@@ -840,7 +870,7 @@ void print_reply(dns_rr_t &reply)
 }
 */
 
-static int parse_reply(char *response, size_t nbytes)
+static int parse_reply(char *response, size_t nbytes, const char* server_ip)
 {
 	dns_header_t header;
 	dns_query_t *q = NULL, *prev = NULL;
@@ -868,8 +898,56 @@ static int parse_reply(char *response, size_t nbytes)
 		if (q->id == header.id) break;
 		prev = q;
 	}
-	if (!q) return 0;
-        
+
+        sdprintf("Reply (%d) questions: %d answers: %d ar: %d ns: %d from: %s QR: %d OPCODE: %d AA: %d TC: %d RD: %d RA: %d RCODE: %d",
+            header.id,
+            header.question_count,
+            header.answer_count,
+            header.ar_count,
+            header.ns_count,
+            server_ip,
+            GET_QR(header.flags),
+            GET_OPCODE(header.flags),
+            GET_AA(header.flags),
+            GET_TC(header.flags),
+            GET_RD(header.flags),
+            GET_RA(header.flags),
+            GET_RCODE(header.flags)
+        );
+
+	if (!q) {
+          sdprintf("Reply(%d) not found??", header.id);
+          return 0;
+        }
+
+        /* Did this server give us recursion? */
+        if (!GET_RA(header.flags)) {
+                sdprintf("Ignoring reply(%d) from %s: no recusion available.", header.id, server_ip);
+		return 1;		/* get a new server */
+        }
+
+        /* Check for errors */
+        switch (GET_RCODE(header.flags)) {
+          case 1:
+		/* Format error */
+                sdprintf("Ignoring reply(%d) from %s: Format error.", header.id, server_ip);
+		return 0;
+          case 2:
+		/* Server error */
+                sdprintf("Ignoring reply(%d) from %s: Server error.", header.id, server_ip);
+		return 1;		/* get a new server */
+          case 3:
+		/* Name error */
+                sdprintf("Ignoring reply(%d) from %s: NXDOMAIN.", header.id, server_ip);
+		return 0;
+          case 4:
+                sdprintf("Ignoring reply(%d) from %s: Query not supported", header.id, server_ip);
+		return 0;
+          case 5:
+                sdprintf("Ignoring reply(%d) from %s: REFUSED", header.id, server_ip);
+		return 1;		/* get a new server */
+        }
+
 //        /* destroy our async timeout */
 //        timer_destroy(q->timer_id);
 
@@ -1023,7 +1101,12 @@ static void expire_queries()
 /* Read in .hosts and /etc/hosts and .resolv.conf and /etc/resolv.conf */
 int egg_dns_init()
 {
-	_dns_header.flags = htons(1 << 8 | 1 << 7);
+	/* Set RECURSION DESIRED */
+        SET_RD(_dns_header.flags);
+
+        /* Convert flags to network order */
+        _dns_header.flags = htons(_dns_header.flags);
+
 	if (!read_resolv(".resolv.conf")) {
 		read_resolv("/etc/resolv.conf");
 		/* some backup servers, probably will never be used. */
