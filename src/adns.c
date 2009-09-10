@@ -894,6 +894,14 @@ static int parse_reply(char *response, size_t nbytes)
 		prev = q;
 	}
 	if (!q) return 0;
+
+        /* Did this server give us recursion? */
+        if (!GET_RA(header.flags)) {
+                sdprintf("Ignoring reply(%d) from %s: no recusion available.", header.id, server_ip);
+		return 1;		/* get a new server */
+        }
+
+        sdprintf("Reply (%d) questions: %d answers: %d ar: %d ns: %d flags: %d from: %s", header.id, header.question_count, header.answer_count, header.ar_count, header.ns_count, header.flags, server_ip);
         
 //        /* destroy our async timeout */
 //        timer_destroy(q->timer_id);
