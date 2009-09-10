@@ -643,7 +643,7 @@ struct user_entry_type USERENTRY_PASS1 =
   def_write_userfile,
   def_kill,
   def_get,
-  tmppass_set,
+  pass1_set,
   NULL,
   "PASS1"
 };
