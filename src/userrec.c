@@ -342,7 +342,8 @@ int u_pass_match(struct userrec *u, char *in)
 
     if (strlen(pass) > MAXPASSLEN)
       pass[MAXPASSLEN] = 0;
-    newpass = encrypt_pass(u, pass);
+    /* Pass the salted pass in so the same salt can be used */
+    newpass = encrypt_pass(u, pass, cmp);
     if (!strcmp(cmp, newpass)) {
       free(newpass);
       return 1;

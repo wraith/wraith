@@ -133,7 +133,7 @@ void encrypt_cmd_pass(char *in, char *out)
   free(tmp);
 }
 
-char *encrypt_pass(struct userrec *u, char *in)
+char *encrypt_pass(struct userrec *u, char *in, const char *saltin)
 {
   char *tmp = NULL, buf[101] = "", *ret = NULL;
   size_t ret_size = 0;
@@ -143,7 +143,11 @@ char *encrypt_pass(struct userrec *u, char *in)
 
   /* Create a 5 byte salt */
   char salt[6] = "";
-  make_rand_str(salt, sizeof(salt) - 1);
+  if (saltin) {
+    strlcpy(salt, saltin, sizeof(salt));
+  } else {
+    make_rand_str(salt, sizeof(salt) - 1);
+  }
 
   /* SHA1 the salt+password */
   simple_snprintf(buf, sizeof(buf), STR("%s%s"), salt, in);
