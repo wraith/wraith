@@ -291,7 +291,7 @@ bool user_has_host(const char *handle, struct userrec *u, char *host)
 
 void convert_password(struct userrec *u)
 {
-  char *oldpass = (char *) get_user(&USERENTRY_TMPPASS, u);
+  char *oldpass = (char *) get_user(&USERENTRY_PASS1, u);
 
   if (oldpass && oldpass[0]) {
     char *pass = NULL;
@@ -310,7 +310,7 @@ void convert_password(struct userrec *u)
 
     /* clear old record */
     noshare = 1;
-    set_user(&USERENTRY_TMPPASS, u, NULL);
+    set_user(&USERENTRY_PASS1, u, NULL);
     noshare = 0;
   }
   

@@ -52,7 +52,7 @@ void init_userent()
   add_entry_type(&USERENTRY_ARCH);
   add_entry_type(&USERENTRY_OSVER);
   add_entry_type(&USERENTRY_PASS);
-  add_entry_type(&USERENTRY_TMPPASS);
+  add_entry_type(&USERENTRY_PASS1);
   add_entry_type(&USERENTRY_SECPASS);
   add_entry_type(&USERENTRY_HOSTS);
   add_entry_type(&USERENTRY_STATS);
@@ -606,11 +606,10 @@ struct user_entry_type USERENTRY_PASS =
   def_get,
   pass_set,
   NULL,
-  "PASS1"
+  "PASS2"
 };
 
-/* FIXME: remove after 1.2.3 */
-static bool tmppass_set(struct userrec *u, struct user_entry *e, void *buf)
+static bool pass1_set(struct userrec *u, struct user_entry *e, void *buf)
 {
   register char *pass = (char *) buf;
 
@@ -632,11 +631,11 @@ static bool tmppass_set(struct userrec *u, struct user_entry *e, void *buf)
       e->u.extra = encrypt_string(u->handle, pass);
   }
   if (!noshare)
-    shareout("c TMPPASS %s %s\n", u->handle, pass ? pass : "");
+    shareout("c PASS1 %s %s\n", u->handle, pass ? pass : "");
   return 1;
 }
 
-struct user_entry_type USERENTRY_TMPPASS =
+struct user_entry_type USERENTRY_PASS1 =
 {
   0,
   def_gotshare,
@@ -646,7 +645,7 @@ struct user_entry_type USERENTRY_TMPPASS =
   def_get,
   tmppass_set,
   NULL,
-  "TMPPASS"
+  "PASS1"
 };
 
 
