@@ -84,12 +84,12 @@ typedef struct {
 } dns_header_t;
 
 #define GET_QR(x)     (((x) >> 15) & BIT0)
-#define GET_OPCODE(x) (((x) >> 11) & BIT3|BIT2|BIT1|BIT0)
+#define GET_OPCODE(x) (((x) >> 11) & (BIT3|BIT2|BIT1|BIT0))
 #define GET_AA(x)     (((x) >> 10) & BIT0)
 #define GET_TC(x)     (((x) >> 9)  & BIT0)
 #define GET_RD(x)     (((x) >> 8)  & BIT0)
 #define GET_RA(x)     (((x) >> 7)  & BIT0)
-#define GET_RCODE(x)  ((x)         & BIT3|BIT2|BIT1|BIT0)
+#define GET_RCODE(x)  ((x)         & (BIT3|BIT2|BIT1|BIT0))
 
 #define SET_RD(x) (x) |= ((x) | (1 << 8))
 
