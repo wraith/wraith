@@ -921,6 +921,28 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip)
 		return 1;		/* get a new server */
         }
 
+        /* Check for errors */
+        switch (GET_RCODE(header.flags)) {
+          case 1:
+		/* Format error */
+                sdprintf("Ignoring reply(%d) from %s: Format error.", header.id, server_ip);
+		return 0;
+          case 2:
+		/* Server error */
+                sdprintf("Ignoring reply(%d) from %s: Server error.", header.id, server_ip);
+		return 1;		/* get a new server */
+          case 3:
+		/* Name error */
+                sdprintf("Ignoring reply(%d) from %s: NXDOMAIN.", header.id, server_ip);
+		return 0;
+          case 4:
+                sdprintf("Ignoring reply(%d) from %s: Query not supported", header.id, server_ip);
+		return 0;
+          case 5:
+                sdprintf("Ignoring reply(%d) from %s: REFUSED", header.id, server_ip);
+		return 1;		/* get a new server */
+        }
+
 //        /* destroy our async timeout */
 //        timer_destroy(q->timer_id);
 
