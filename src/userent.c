@@ -631,7 +631,7 @@ static bool pass1_set(struct userrec *u, struct user_entry *e, void *buf)
       e->u.extra = encrypt_string(u->handle, pass);
   }
   if (!noshare)
-    shareout("c PASS1 %s %s\n", u->handle, pass ? pass : "");
+    shareout("c %s %s %s\n", e->type->name, u->handle, pass ? pass : "");
   return 1;
 }
 
