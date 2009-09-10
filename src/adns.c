@@ -893,7 +893,27 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip)
 		if (q->id == header.id) break;
 		prev = q;
 	}
-	if (!q) return 0;
+
+        sdprintf("Reply (%d) questions: %d answers: %d ar: %d ns: %d from: %s QR: %d OPCODE: %d AA: %d TC: %d RD: %d RA: %d RCODE: %d",
+            header.id,
+            header.question_count,
+            header.answer_count,
+            header.ar_count,
+            header.ns_count,
+            server_ip,
+            GET_QR(header.flags),
+            GET_OPCODE(header.flags),
+            GET_AA(header.flags),
+            GET_TC(header.flags),
+            GET_RD(header.flags),
+            GET_RA(header.flags),
+            GET_RCODE(header.flags)
+        );
+
+	if (!q) {
+          sdprintf("Reply(%d) not found??", header.id);
+          return 0;
+        }
 
         /* Did this server give us recursion? */
         if (!GET_RA(header.flags)) {
@@ -901,8 +921,6 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip)
 		return 1;		/* get a new server */
         }
 
-        sdprintf("Reply (%d) questions: %d answers: %d ar: %d ns: %d flags: %d from: %s", header.id, header.question_count, header.answer_count, header.ar_count, header.ns_count, header.flags, server_ip);
-        
 //        /* destroy our async timeout */
 //        timer_destroy(q->timer_id);
 
