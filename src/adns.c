@@ -54,6 +54,26 @@ typedef struct dns_query {
 	int remaining;
 } dns_query_t;
 
+/* RFC1035
+                                    1  1  1  1  1  1
+      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
+      1  1  1  1  1  0  9  8  7  6  5  4  3  2  1  0
+      5  4  3  2  1  1
+    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+    |                      ID                       |
+    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+    |QR|   Opcode  |AA|TC|RD|RA|   Z    |   RCODE   |
+    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+    |                    QDCOUNT                    |
+    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+    |                    ANCOUNT                    |
+    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+    |                    NSCOUNT                    |
+    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+    |                    ARCOUNT                    |
+    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+*/
+
 typedef struct {
 	unsigned short id;
 	unsigned short flags;
@@ -62,6 +82,16 @@ typedef struct {
 	unsigned short ns_count;
 	unsigned short ar_count;
 } dns_header_t;
+
+#define GET_QR(x)     (((x) >> 15) & BIT0)
+#define GET_OPCODE(x) (((x) >> 11) & BIT3|BIT2|BIT1|BIT0)
+#define GET_AA(x)     (((x) >> 10) & BIT0)
+#define GET_TC(x)     (((x) >> 9)  & BIT0)
+#define GET_RD(x)     (((x) >> 8)  & BIT0)
+#define GET_RA(x)     (((x) >> 7)  & BIT0)
+#define GET_RCODE(x)  ((x)         & BIT3|BIT2|BIT1|BIT0)
+
+#define SET_RD(x) (x) |= ((x) | (1 << 8))
 
 #define HEAD_SIZE 12
 
@@ -1018,7 +1048,12 @@ static void expire_queries()
 /* Read in .hosts and /etc/hosts and .resolv.conf and /etc/resolv.conf */
 int egg_dns_init()
 {
-	_dns_header.flags = htons(1 << 8 | 1 << 7);
+	/* Set RECURSION DESIRED */
+        SET_RD(_dns_header.flags);
+
+        /* Convert flags to network order */
+        _dns_header.flags = htons(_dns_header.flags);
+
 	read_resolv(".resolv.conf");
 	read_resolv("/etc/resolv.conf");
 //	read_hosts("/etc/hosts");
