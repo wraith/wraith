@@ -920,6 +920,7 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip)
         if (!GET_RA(header.flags)) {
                 sdprintf("Ignoring reply(%d) from %s: no recusion available.", header.id, server_ip);
                 return_code = 1;		/* get a new server */
+		q->remaining = 0;		/* Force this query to be removed, any further answers are ignored */
                 goto callback;
         }
 
@@ -932,6 +933,7 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip)
             case 2:   /* Server error */
                   sdprintf("Ignoring reply(%d) from %s: Server error.", header.id, server_ip);
                   return_code = 1;		/* get a new server */
+		  q->remaining = 0;		/* Force this query to be removed, any further answers are ignored */
                   break;
             case 3:   /* Name error */
                   sdprintf("Ignoring reply(%d) from %s: NXDOMAIN.", header.id, server_ip);
@@ -942,6 +944,7 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip)
             case 5:
                   sdprintf("Ignoring reply(%d) from %s: REFUSED", header.id, server_ip);
                   return_code = 1;		/* get a new server */
+		  q->remaining = 0;		/* Force this query to be removed, any further answers are ignored */
                   break;
           }
 
@@ -1005,7 +1008,7 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip)
 		ptr += reply.rdlength;
                 if ((size_t) (ptr - (unsigned char*) response) > nbytes) {
                   sdprintf("MALFORMED/TRUNCATED DNS PACKET detected (need TCP).");
-                  q->remaining = 0;
+		  q->remaining = 0;		/* Force this query to be removed, any further answers are ignored */
                   break;
                 }
 	}
@@ -1013,6 +1016,7 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip)
         if (q->answer.len == 0) {
           sdprintf("Failed to get any answers for query");
           return_code = 1;	/* get a new server */
+	  q->remaining = 0;	/* Force this query to be removed, any further answers are ignored */
           goto callback;
         }
 
