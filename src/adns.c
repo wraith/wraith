@@ -945,6 +945,8 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip)
                   break;
             case 3:   /* Name error */
                   sdprintf("Ignoring reply(%d) from %s: NXDOMAIN.", header.id, server_ip);
+                  /* Ignore the incoming AAAA or A reply as it will still be NXDOMAIN */
+		  q->remaining = 0;		/* Force this query to be removed, any further answers are ignored */
                   break;
             case 4:
                   sdprintf("Ignoring reply(%d) from %s: Query not supported", header.id, server_ip);
