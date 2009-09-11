@@ -291,26 +291,28 @@ bool user_has_host(const char *handle, struct userrec *u, char *host)
 
 void convert_password(struct userrec *u)
 {
-  char *oldpass = (char *) get_user(&USERENTRY_TMPPASS, u);
+  char *oldpass = (char *) get_user(&USERENTRY_PASS1, u);
 
   if (oldpass && oldpass[0]) {
-    char *pass = NULL;
+    char *pass = NULL, *passp = NULL;
     /* need to convert into new password format and remove old */
 
     /* --------- this changes to reflect how to decrypt old password --------- */
-    pass = decrypt_string(u->handle, oldpass);
+    passp = pass = decrypt_string(u->handle, &oldpass[1]);
+    /* Advance pass over the salt */
+    pass += 17;
     /* ----------------------------------------------------------------------- */
 
     if (strlen(pass) > MAXPASSLEN)
       pass[MAXPASSLEN] = 0;
 
     set_user(&USERENTRY_PASS, u, pass);
-    OPENSSL_cleanse(pass, strlen(pass));
-    free(pass);
+    OPENSSL_cleanse(passp, strlen(passp));
+    free(passp);
 
     /* clear old record */
     noshare = 1;
-    set_user(&USERENTRY_TMPPASS, u, NULL);
+    set_user(&USERENTRY_PASS1, u, NULL);
     noshare = 0;
   }
   
@@ -326,23 +328,23 @@ int u_pass_match(struct userrec *u, char *in)
 
   convert_password(u);
 
-  char *cmp = (char *) get_user(&USERENTRY_PASS, u), pass[MAXPASSLEN + 1] = "";
+  const char *cmp = (const char *) get_user(&USERENTRY_PASS, u);
 
-  strlcpy(pass, in, sizeof(pass));
-
-  if (!cmp && (!pass[0] || (pass[0] == '-')))
+  if (!cmp && (!in[0] || (in[0] == '-')))
     return 1;
-  if (!cmp || !pass[0] || (pass[0] == '-'))
+  if (!cmp || !in[0] || (in[0] == '-'))
     return 0;
   if (u->bot) {
-    if (!strcmp(cmp, pass))
+    if (!strcmp(cmp, in))
       return 1;
   } else {
-    char *newpass = NULL;
+    char pass[MAXPASSLEN + 1] = "";
 
-    if (strlen(pass) > MAXPASSLEN)
-      pass[MAXPASSLEN] = 0;
-    newpass = encrypt_pass(u, pass);
+    strlcpy(pass, in, sizeof(pass));
+
+    /* Pass the salted pass in so the same salt can be used */
+    char* newpass = encrypt_pass(u, in, &cmp[1]);
+    OPENSSL_cleanse(pass, sizeof(pass));
     if (!strcmp(cmp, newpass)) {
       free(newpass);
       return 1;
@@ -543,14 +545,11 @@ int change_handle(struct userrec *u, char *newh)
   if (!noshare)
     shareout("h %s %s\n", u->handle, newh);
 
-  char s[HANDLEN + 1] = "", *pass = NULL;
+  char s[HANDLEN + 1] = "";
 
-  pass = decrypt_pass(u);
   strlcpy(s, u->handle, sizeof s);
   strlcpy(u->handle, newh, sizeof u->handle);
-  set_user(&USERENTRY_PASS, u, pass);
-  OPENSSL_cleanse(pass, strlen(pass));
-  free(pass);
+
   for (int i = 0; i < dcc_total; i++)
     if (dcc[i].type && dcc[i].type != &DCC_BOT && !egg_strcasecmp(dcc[i].nick, s)) {
       strlcpy(dcc[i].nick, newh, sizeof dcc[i].nick);

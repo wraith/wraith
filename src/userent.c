@@ -52,7 +52,7 @@ void init_userent()
   add_entry_type(&USERENTRY_ARCH);
   add_entry_type(&USERENTRY_OSVER);
   add_entry_type(&USERENTRY_PASS);
-  add_entry_type(&USERENTRY_TMPPASS);
+  add_entry_type(&USERENTRY_PASS1);
   add_entry_type(&USERENTRY_SECPASS);
   add_entry_type(&USERENTRY_HOSTS);
   add_entry_type(&USERENTRY_STATS);
@@ -589,10 +589,16 @@ static bool pass_set(struct userrec *u, struct user_entry *e, void *buf)
     else
       newpass = encrypt_pass(u, pass);
     e->u.extra = strdup(newpass);
-    free(newpass);
   }
   if (!noshare)
-    shareout("c %s %s %s\n", e->type->name, u->handle, pass ? pass : "");
+    shareout("c %s %s %s\n", e->type->name, u->handle, newpass ? newpass : "");
+  if (newpass)
+    free(newpass);
+
+  /* clear old records */
+  noshare = 1;
+  set_user(&USERENTRY_PASS1, u, NULL);
+  noshare = 0;
   return 1;
 }
 
@@ -606,11 +612,10 @@ struct user_entry_type USERENTRY_PASS =
   def_get,
   pass_set,
   NULL,
-  "PASS1"
+  "PASS2"
 };
 
-/* FIXME: remove after 1.2.3 */
-static bool tmppass_set(struct userrec *u, struct user_entry *e, void *buf)
+static bool pass1_set(struct userrec *u, struct user_entry *e, void *buf)
 {
   register char *pass = (char *) buf;
 
@@ -632,11 +637,11 @@ static bool tmppass_set(struct userrec *u, struct user_entry *e, void *buf)
       e->u.extra = encrypt_string(u->handle, pass);
   }
   if (!noshare)
-    shareout("c TMPPASS %s %s\n", u->handle, pass ? pass : "");
+    shareout("c %s %s %s\n", e->type->name, u->handle, pass ? pass : "");
   return 1;
 }
 
-struct user_entry_type USERENTRY_TMPPASS =
+struct user_entry_type USERENTRY_PASS1 =
 {
   0,
   def_gotshare,
@@ -644,9 +649,9 @@ struct user_entry_type USERENTRY_TMPPASS =
   def_write_userfile,
   def_kill,
   def_get,
-  tmppass_set,
+  pass1_set,
   NULL,
-  "TMPPASS"
+  "PASS1"
 };
 
 

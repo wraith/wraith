@@ -133,13 +133,7 @@ void encrypt_cmd_pass(char *in, char *out)
   free(tmp);
 }
 
-static char *user_key(struct userrec *u)
-{
-  /* FIXME: fix after 1.2.3 */
-  return u->handle;
-}
-
-char *encrypt_pass(struct userrec *u, char *in)
+char *encrypt_pass(struct userrec *u, char *in, const char *saltin)
 {
   char *tmp = NULL, buf[101] = "", *ret = NULL;
   size_t ret_size = 0;
@@ -147,69 +141,28 @@ char *encrypt_pass(struct userrec *u, char *in)
   if (strlen(in) > MAXPASSLEN)
     in[MAXPASSLEN] = 0;
 
-  const char salt2[] = SALT2;
-  simple_snprintf(buf, sizeof(buf), STR("%s-%s"), salt2, in);
-
-  tmp = encrypt_string(user_key(u), buf);
-  OPENSSL_cleanse(buf, sizeof(buf));
-  ret_size = strlen(tmp) + 1 + 1;
-  ret = (char *) my_calloc(1, ret_size);
-
-  simple_snprintf(ret, ret_size, STR("+%s"), tmp);
-  free(tmp);
-
-  return ret;
-}
-
-char *decrypt_pass(struct userrec *u)
-{
-  char *tmp = NULL, *p = NULL, *ret = NULL, *pass = NULL;
-  
-  pass = (char *) get_user(&USERENTRY_PASS, u);
-  if (pass && pass[0] == '+') {
-    tmp = decrypt_string(user_key(u), &pass[1]);
-    if ((p = strchr(tmp, '-')))
-      ret = strdup(++p); 
-    OPENSSL_cleanse(tmp, strlen(tmp));
-    free(tmp);
+  /* Create a 5 byte salt */
+  char salt[6] = "";
+  if (saltin) {
+    strlcpy(salt, saltin, sizeof(salt));
+  } else {
+    make_rand_str(salt, sizeof(salt) - 1);
   }
-  if (!ret)
-    ret = (char *) my_calloc(1, 1);
+
+  /* SHA1 the salt+password */
+  simple_snprintf(buf, sizeof(buf), STR("%s%s"), salt, in);
+  tmp = SHA1(buf);
+
+  ret_size = 1 + (sizeof(salt) - 1) + 1 + SHA_HASH_LENGTH + 1;
+  ret = (char *) my_calloc(1, ret_size);
+  simple_snprintf(ret, ret_size, STR("+%s$%s"), salt, tmp);
+
+  /* Wipe cleartext pass from sha1 buffers/tmp */
+  SHA1(NULL);
 
   return ret;
 }
 
-/*
-static char *passkey()
-{
-  static char key[SHA1_HASH_LENGTH + 1] = "";
-
-  if (key[0])
-    return key;
-
-  char *tmp = my_calloc(1, 512);
-
-  simple_snprintf(tmp, sizeof(tmp), "%s-%s.%s!%s", settings.salt1, settings.salt2, settings.packname, settings.bdhash);
-  key = SHA1(tmp);
-  free(tmp);
-  egg_bzero(tmp, 512);
-
-  return key;
-}
-
-void encrypt_pass_new(char *s1, char *s2)
-{
-  char *tmp = NULL;
-
-  if (strlen(s1) > MAXPASSLEN)
-    s1[MAXPASSLEN] = 0;
-  tmp = encrypt_string(s1, passkey);
-  strcpy(s2, "+");
-  strlcat(s2, tmp, MAXPASSLEN + 1);
-  s2[MAXPASSLEN] = 0;
-  free(tmp);
-}
-*/
 int lfprintf (FILE *stream, const char *format, ...)
 {
   va_list va;
