@@ -875,6 +875,7 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip)
 	int r = -1;
 	unsigned const char *eop = (unsigned char *) response + nbytes;
 	unsigned char *ptr = (unsigned char *) response;
+        int return_code = 0;
 
 	egg_memcpy(&header, ptr, HEAD_SIZE);
 	ptr += HEAD_SIZE;
@@ -918,30 +919,34 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip)
         /* Did this server give us recursion? */
         if (!GET_RA(header.flags)) {
                 sdprintf("Ignoring reply(%d) from %s: no recusion available.", header.id, server_ip);
-		return 1;		/* get a new server */
+                return_code = 1;		/* get a new server */
+                goto callback;
         }
 
         /* Check for errors */
-        switch (GET_RCODE(header.flags)) {
-          case 1:
-		/* Format error */
-                sdprintf("Ignoring reply(%d) from %s: Format error.", header.id, server_ip);
-		return 0;
-          case 2:
-		/* Server error */
-                sdprintf("Ignoring reply(%d) from %s: Server error.", header.id, server_ip);
-		return 1;		/* get a new server */
-          case 3:
-		/* Name error */
-                sdprintf("Ignoring reply(%d) from %s: NXDOMAIN.", header.id, server_ip);
-		return 0;
-          case 4:
-                sdprintf("Ignoring reply(%d) from %s: Query not supported", header.id, server_ip);
-		return 0;
-          case 5:
-                sdprintf("Ignoring reply(%d) from %s: REFUSED", header.id, server_ip);
-		return 1;		/* get a new server */
-        }
+        if (GET_RCODE(header.flags)) {
+          switch (GET_RCODE(header.flags)) {
+            case 1:   /* Format error */
+                  sdprintf("Ignoring reply(%d) from %s: Format error.", header.id, server_ip);
+                  break;
+            case 2:   /* Server error */
+                  sdprintf("Ignoring reply(%d) from %s: Server error.", header.id, server_ip);
+                  return_code = 1;		/* get a new server */
+                  break;
+            case 3:   /* Name error */
+                  sdprintf("Ignoring reply(%d) from %s: NXDOMAIN.", header.id, server_ip);
+                  break;
+            case 4:
+                  sdprintf("Ignoring reply(%d) from %s: Query not supported", header.id, server_ip);
+                  break;
+            case 5:
+                  sdprintf("Ignoring reply(%d) from %s: REFUSED", header.id, server_ip);
+                  return_code = 1;		/* get a new server */
+                  break;
+          }
+
+          goto callback;
+	}
 
 //        /* destroy our async timeout */
 //        timer_destroy(q->timer_id);
@@ -1009,33 +1014,30 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip)
 
         if (q->answer.len == 0) {
           sdprintf("Failed to get any answers for query");
-
-          if (prev) prev->next = q->next;
-          else query_head = q->next;
-
-          q->callback(q->id, q->client_data, q->query, NULL);
-
-          free(q->query);
-          if (q->ip)
-            free(q->ip);
-          free(q);
-          return 1;		/* get a new server */
+          return_code = 1;	/* get a new server */
+          goto callback;
         }
 
+callback:
 	/* Ok, we have, so now issue the callback with the answers. */
 	if (prev) prev->next = q->next;
 	else query_head = q->next;
 
-	cache_add(q->query, &q->answer);
+        if (q->answer.len > 0) {
+		cache_add(q->query, &q->answer);
 
-	q->callback(q->id, q->client_data, q->query, q->answer.list);
-	answer_free(&q->answer);
+		q->callback(q->id, q->client_data, q->query, q->answer.list);
+		answer_free(&q->answer);
+        } else {
+		q->callback(q->id, q->client_data, q->query, NULL);
+        }
+
 	free(q->query);
         if (q->ip)
           free(q->ip);
 	free(q);
 
-	return(0);
+	return return_code;
 }
 
 
