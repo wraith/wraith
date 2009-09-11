@@ -294,19 +294,21 @@ void convert_password(struct userrec *u)
   char *oldpass = (char *) get_user(&USERENTRY_PASS1, u);
 
   if (oldpass && oldpass[0]) {
-    char *pass = NULL;
+    char *pass = NULL, *passp = NULL;
     /* need to convert into new password format and remove old */
 
     /* --------- this changes to reflect how to decrypt old password --------- */
-    pass = decrypt_string(u->handle, oldpass);
+    passp = pass = decrypt_string(u->handle, &oldpass[1]);
+    /* Advance pass over the salt */
+    pass += 17;
     /* ----------------------------------------------------------------------- */
 
     if (strlen(pass) > MAXPASSLEN)
       pass[MAXPASSLEN] = 0;
 
     set_user(&USERENTRY_PASS, u, pass);
-    OPENSSL_cleanse(pass, strlen(pass));
-    free(pass);
+    OPENSSL_cleanse(passp, strlen(passp));
+    free(passp);
 
     /* clear old record */
     noshare = 1;
