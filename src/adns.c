@@ -1009,8 +1009,6 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip)
                   break;
                 }
 	}
-	/* Don't continue if we haven't gotten all expected replies. */
-	if (--q->remaining > 0) return 0;
 
         if (q->answer.len == 0) {
           sdprintf("Failed to get any answers for query");
@@ -1019,6 +1017,9 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip)
         }
 
 callback:
+	/* Don't continue if we haven't gotten all expected replies. */
+	if (--q->remaining > 0) return 0;
+
 	/* Ok, we have, so now issue the callback with the answers. */
 	if (prev) prev->next = q->next;
 	else query_head = q->next;
