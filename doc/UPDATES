@@ -1,5 +1,3 @@
-* New userfile pass algorithm
-
 1.2.17 - http://wraith.botpack.net/milestone/1.2.17
 * Binary pass prompt has been changed to be more clear.
 * Fix uname checking on NetBSD and OpenBSD
@@ -11,6 +9,7 @@
 * Ensure that some set variables are only 1 word long.
 * More DNS errors are now handled which fixes some misc DNS issues.
 * Give localhubs credit for adding their child bots in 'whois'
+* New userfile pass algorithm
 
 1.2.16 - http://wraith.botpack.net/milestone/1.2.16
 * Add 'set altchars' so that alternative characters used for nicks can be changed. (fixes #418)
