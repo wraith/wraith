@@ -1172,7 +1172,7 @@ void conf_add_userlist_bots()
         userlist = adduser(userlist, bot->nick, "none", "-", USER_OP, 1);
         u = get_user_by_handle(userlist, bot->nick);
 
-        egg_snprintf(tmp, sizeof(tmp), "%li [internal]", (long)now);
+        egg_snprintf(tmp, sizeof(tmp), "%li %s", (long)now, conf.bot->nick);
         set_user(&USERENTRY_ADDED, u, tmp);
 
         bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));

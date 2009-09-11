@@ -8,6 +8,7 @@
 * Sanitize cmd_set input locally as well as remotely
 * Ensure that some set variables are only 1 word long.
 * More DNS errors are now handled which fixes some misc DNS issues.
+* Give localhubs credit for adding their child bots in 'whois'
 
 1.2.16 - http://wraith.botpack.net/milestone/1.2.16
 * Add 'set altchars' so that alternative characters used for nicks can be changed. (fixes #418)
