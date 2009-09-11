@@ -153,9 +153,9 @@ char *encrypt_pass(struct userrec *u, char *in, const char *saltin)
   simple_snprintf(buf, sizeof(buf), STR("%s%s"), salt, in);
   tmp = SHA1(buf);
 
-  ret_size = (sizeof(salt) - 1) + 1 + SHA_HASH_LENGTH + 1;
+  ret_size = 1 + (sizeof(salt) - 1) + 1 + SHA_HASH_LENGTH + 1;
   ret = (char *) my_calloc(1, ret_size);
-  simple_snprintf(ret, ret_size, STR("%s$%s"), salt, tmp);
+  simple_snprintf(ret, ret_size, STR("+%s$%s"), salt, tmp);
 
   /* Wipe cleartext pass from sha1 buffers/tmp */
   SHA1(NULL);
