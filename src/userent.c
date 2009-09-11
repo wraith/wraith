@@ -594,6 +594,11 @@ static bool pass_set(struct userrec *u, struct user_entry *e, void *buf)
     shareout("c %s %s %s\n", e->type->name, u->handle, newpass ? newpass : "");
   if (newpass)
     free(newpass);
+
+  /* clear old records */
+  noshare = 1;
+  set_user(&USERENTRY_PASS1, u, NULL);
+  noshare = 0;
   return 1;
 }
 
