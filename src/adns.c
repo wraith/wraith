@@ -441,11 +441,10 @@ int egg_dns_lookup(const char *host, interval_t timeout, dns_callback_t callback
 	dns_query_t *q = NULL;
 	int i, cache_id;
 
-	sdprintf("egg_dns_lookup(%s, %d)", host, timeout);
-
 	if (is_dotted_ip(host)) {
 		/* If it's already an ip, we're done. */
 		dns_answer_t answer;
+		sdprintf("egg_dns_lookup(%s, %d): Already an ip.", host, timeout);
 
 		answer_init(&answer);
 		answer_add(&answer, host);
@@ -459,6 +458,7 @@ int egg_dns_lookup(const char *host, interval_t timeout, dns_callback_t callback
 		if (!egg_strcasecmp(host, hosts[i].host)) {
 			dns_answer_t answer;
 
+			sdprintf("egg_dns_lookup(%s, %d): Found in hosts -> %s", host, timeout, hosts[i].ip);
 			answer_init(&answer);
 			answer_add(&answer, hosts[i].ip);
 			callback(-1, client_data, host, answer.list);
@@ -470,17 +470,21 @@ int egg_dns_lookup(const char *host, interval_t timeout, dns_callback_t callback
 	cache_id = cache_find(host);
 	if (cache_id >= 0) {
 		shuffleArray(cache[cache_id].answer.list, cache[cache_id].answer.len);
+		sdprintf("egg_dns_lookup(%s, %d): Found in cache -> %s", host, timeout, cache[cache_id].answer.list[0]);
 		callback(-1, client_data, host, cache[cache_id].answer.list);
 		return(-1);
 	}
 
 	/* check if the query was already made */
-        if (find_query(host))
+        if ((q = find_query(host))) {
+	  sdprintf("egg_dns_lookup(%s, %d): Already querying -> %d", host, timeout, q->id);
           return(-2);
+	}
 
 	/* Allocate our query struct. */
         q = alloc_query(client_data, callback, host);
 
+	sdprintf("egg_dns_lookup(%s, %d) -> %d", host, timeout, q->id);
         dns_send_query(q);
 
 //        /* setup a timer to detect dead ns */
@@ -499,10 +503,9 @@ int egg_dns_reverse(const char *ip, interval_t timeout, dns_callback_t callback,
 	dns_query_t *q;
 	int i, cache_id;
 
-	sdprintf("egg_dns_reverse(%s, %d)", ip, timeout);
-
 	if (!is_dotted_ip(ip)) {
 		/* If it's not a valid ip, don't even make the request. */
+		sdprintf("egg_dns_reverse(%s, %d): Not an ip.", ip, timeout);
 		callback(-1, client_data, ip, NULL);
 		return(-1);
 	}
@@ -512,6 +515,7 @@ int egg_dns_reverse(const char *ip, interval_t timeout, dns_callback_t callback,
 		if (!egg_strcasecmp(hosts[i].ip, ip)) {
 			dns_answer_t answer;
 
+			sdprintf("egg_dns_reverse(%s, %d): Found in hosts -> %s", ip, timeout, hosts[i].host);
 			answer_init(&answer);
 			answer_add(&answer, hosts[i].host);
 			callback(-1, client_data, ip, answer.list);
@@ -523,15 +527,19 @@ int egg_dns_reverse(const char *ip, interval_t timeout, dns_callback_t callback,
 	cache_id = cache_find(ip);
         if (cache_id >= 0) {
 		shuffleArray(cache[cache_id].answer.list, cache[cache_id].answer.len);
+		sdprintf("egg_dns_reverse(%s, %d): Found in cache -> %s", ip, timeout, cache[cache_id].answer.list[0]);
 		callback(-1, client_data, ip, cache[cache_id].answer.list);
 		return(-1);
 	}
 
 	/* check if the query was already made */
-        if (find_query(ip))
+        if ((q = find_query(ip))) {
+	  sdprintf("egg_dns_reverse(%s, %d): Already querying -> %d", ip, timeout, q->id);
           return(-1);
+	}
 
 	q = alloc_query(client_data, callback, ip);
+	sdprintf("egg_dns_reverse(%s, %d) -> %d", ip, timeout, q->id);
 
 	/* We need to transform the ip address into the proper form
 	 * for reverse lookup. */
@@ -880,6 +888,7 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip)
 	int r = -1;
 	unsigned const char *eop = (unsigned char *) response + nbytes;
 	unsigned char *ptr = (unsigned char *) response;
+        int return_code = 0;
 
 	egg_memcpy(&header, ptr, HEAD_SIZE);
 	ptr += HEAD_SIZE;
@@ -923,30 +932,39 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip)
         /* Did this server give us recursion? */
         if (!GET_RA(header.flags)) {
                 sdprintf("Ignoring reply(%d) from %s: no recusion available.", header.id, server_ip);
-		return 1;		/* get a new server */
+                return_code = 1;		/* get a new server */
+		q->remaining = 0;		/* Force this query to be removed, any further answers are ignored */
+                goto callback;
         }
 
         /* Check for errors */
-        switch (GET_RCODE(header.flags)) {
-          case 1:
-		/* Format error */
-                sdprintf("Ignoring reply(%d) from %s: Format error.", header.id, server_ip);
-		return 0;
-          case 2:
-		/* Server error */
-                sdprintf("Ignoring reply(%d) from %s: Server error.", header.id, server_ip);
-		return 1;		/* get a new server */
-          case 3:
-		/* Name error */
-                sdprintf("Ignoring reply(%d) from %s: NXDOMAIN.", header.id, server_ip);
-		return 0;
-          case 4:
-                sdprintf("Ignoring reply(%d) from %s: Query not supported", header.id, server_ip);
-		return 0;
-          case 5:
-                sdprintf("Ignoring reply(%d) from %s: REFUSED", header.id, server_ip);
-		return 1;		/* get a new server */
-        }
+        if (GET_RCODE(header.flags)) {
+          switch (GET_RCODE(header.flags)) {
+            case 1:   /* Format error */
+                  sdprintf("Ignoring reply(%d) from %s: Format error.", header.id, server_ip);
+                  break;
+            case 2:   /* Server error */
+                  sdprintf("Ignoring reply(%d) from %s: Server error.", header.id, server_ip);
+                  return_code = 1;		/* get a new server */
+		  q->remaining = 0;		/* Force this query to be removed, any further answers are ignored */
+                  break;
+            case 3:   /* Name error */
+                  sdprintf("Ignoring reply(%d) from %s: NXDOMAIN.", header.id, server_ip);
+                  /* Ignore the incoming AAAA or A reply as it will still be NXDOMAIN */
+		  q->remaining = 0;		/* Force this query to be removed, any further answers are ignored */
+                  break;
+            case 4:
+                  sdprintf("Ignoring reply(%d) from %s: Query not supported", header.id, server_ip);
+                  break;
+            case 5:
+                  sdprintf("Ignoring reply(%d) from %s: REFUSED", header.id, server_ip);
+                  return_code = 1;		/* get a new server */
+		  q->remaining = 0;		/* Force this query to be removed, any further answers are ignored */
+                  break;
+          }
+
+          goto callback;
+	}
 
 //        /* destroy our async timeout */
 //        timer_destroy(q->timer_id);
@@ -1005,42 +1023,43 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip)
 		ptr += reply.rdlength;
                 if ((size_t) (ptr - (unsigned char*) response) > nbytes) {
                   sdprintf("MALFORMED/TRUNCATED DNS PACKET detected (need TCP).");
-                  q->remaining = 0;
+		  q->remaining = 0;		/* Force this query to be removed, any further answers are ignored */
                   break;
                 }
 	}
-	/* Don't continue if we haven't gotten all expected replies. */
-	if (--q->remaining > 0) return 0;
 
         if (q->answer.len == 0) {
+          /* This could simply be that there are no answers... query A or AAAA and receive nothing back...
+           * With the new NXDOMAIN / SERVFAIL error checks, this hard error of jumping servers is probably
+           * no longer needed */
           sdprintf("Failed to get any answers for query");
-
-          if (prev) prev->next = q->next;
-          else query_head = q->next;
-
-          q->callback(q->id, q->client_data, q->query, NULL);
-
-          free(q->query);
-          if (q->ip)
-            free(q->ip);
-          free(q);
-          return 1;		/* get a new server */
+          return_code = 1;	/* get a new server */
+          goto callback;
         }
+
+callback:
+	/* Don't continue if we haven't gotten all expected replies. */
+	if (--q->remaining > 0) return 0;
 
 	/* Ok, we have, so now issue the callback with the answers. */
 	if (prev) prev->next = q->next;
 	else query_head = q->next;
 
-	cache_add(q->query, &q->answer);
+        if (q->answer.len > 0) {
+		cache_add(q->query, &q->answer);
 
-	q->callback(q->id, q->client_data, q->query, q->answer.list);
-	answer_free(&q->answer);
+		q->callback(q->id, q->client_data, q->query, q->answer.list);
+		answer_free(&q->answer);
+        } else {
+		q->callback(q->id, q->client_data, q->query, NULL);
+        }
+
 	free(q->query);
         if (q->ip)
           free(q->ip);
 	free(q);
 
-	return(0);
+	return return_code;
 }
 
 
