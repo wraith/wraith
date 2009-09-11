@@ -326,24 +326,24 @@ int u_pass_match(struct userrec *u, char *in)
 
   convert_password(u);
 
-  char *cmp = (char *) get_user(&USERENTRY_PASS, u), pass[MAXPASSLEN + 1] = "";
+  const char *cmp = (const char *) get_user(&USERENTRY_PASS, u);
 
-  strlcpy(pass, in, sizeof(pass));
-
-  if (!cmp && (!pass[0] || (pass[0] == '-')))
+  if (!cmp && (!in[0] || (in[0] == '-')))
     return 1;
-  if (!cmp || !pass[0] || (pass[0] == '-'))
+  if (!cmp || !in[0] || (in[0] == '-'))
     return 0;
   if (u->bot) {
-    if (!strcmp(cmp, pass))
+    if (!strcmp(cmp, in))
       return 1;
   } else {
-    char *newpass = NULL;
+    char pass[MAXPASSLEN + 1] = "";
+
+    strlcpy(pass, in, sizeof(pass));
 
     if (strlen(pass) > MAXPASSLEN)
       pass[MAXPASSLEN] = 0;
     /* Pass the salted pass in so the same salt can be used */
-    newpass = encrypt_pass(u, pass, cmp);
+    char* newpass = encrypt_pass(u, pass, cmp);
     if (!strcmp(cmp, newpass)) {
       free(newpass);
       return 1;
