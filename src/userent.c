@@ -589,10 +589,11 @@ static bool pass_set(struct userrec *u, struct user_entry *e, void *buf)
     else
       newpass = encrypt_pass(u, pass);
     e->u.extra = strdup(newpass);
-    free(newpass);
   }
   if (!noshare)
-    shareout("c %s %s %s\n", e->type->name, u->handle, pass ? pass : "");
+    shareout("c %s %s %s\n", e->type->name, u->handle, newpass ? newpass : "");
+  if (newpass)
+    free(newpass);
   return 1;
 }
 
