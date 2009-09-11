@@ -441,11 +441,10 @@ int egg_dns_lookup(const char *host, interval_t timeout, dns_callback_t callback
 	dns_query_t *q = NULL;
 	int i, cache_id;
 
-	sdprintf("egg_dns_lookup(%s, %d)", host, timeout);
-
 	if (is_dotted_ip(host)) {
 		/* If it's already an ip, we're done. */
 		dns_answer_t answer;
+		sdprintf("egg_dns_lookup(%s, %d): Already an ip.", host, timeout);
 
 		answer_init(&answer);
 		answer_add(&answer, host);
@@ -459,6 +458,7 @@ int egg_dns_lookup(const char *host, interval_t timeout, dns_callback_t callback
 		if (!egg_strcasecmp(host, hosts[i].host)) {
 			dns_answer_t answer;
 
+			sdprintf("egg_dns_lookup(%s, %d): Found in hosts -> %s", host, timeout, hosts[i].ip);
 			answer_init(&answer);
 			answer_add(&answer, hosts[i].ip);
 			callback(-1, client_data, host, answer.list);
@@ -470,17 +470,21 @@ int egg_dns_lookup(const char *host, interval_t timeout, dns_callback_t callback
 	cache_id = cache_find(host);
 	if (cache_id >= 0) {
 		shuffleArray(cache[cache_id].answer.list, cache[cache_id].answer.len);
+		sdprintf("egg_dns_lookup(%s, %d): Found in cache -> %s", host, timeout, cache[cache_id].answer.list[0]);
 		callback(-1, client_data, host, cache[cache_id].answer.list);
 		return(-1);
 	}
 
 	/* check if the query was already made */
-        if (find_query(host))
+        if ((q = find_query(host))) {
+	  sdprintf("egg_dns_lookup(%s, %d): Already querying -> %d", host, timeout, q->id);
           return(-2);
+	}
 
 	/* Allocate our query struct. */
         q = alloc_query(client_data, callback, host);
 
+	sdprintf("egg_dns_lookup(%s, %d) -> %d", host, timeout, q->id);
         dns_send_query(q);
 
 //        /* setup a timer to detect dead ns */
@@ -499,10 +503,9 @@ int egg_dns_reverse(const char *ip, interval_t timeout, dns_callback_t callback,
 	dns_query_t *q;
 	int i, cache_id;
 
-	sdprintf("egg_dns_reverse(%s, %d)", ip, timeout);
-
 	if (!is_dotted_ip(ip)) {
 		/* If it's not a valid ip, don't even make the request. */
+		sdprintf("egg_dns_reverse(%s, %d): Not an ip.", ip, timeout);
 		callback(-1, client_data, ip, NULL);
 		return(-1);
 	}
@@ -512,6 +515,7 @@ int egg_dns_reverse(const char *ip, interval_t timeout, dns_callback_t callback,
 		if (!egg_strcasecmp(hosts[i].ip, ip)) {
 			dns_answer_t answer;
 
+			sdprintf("egg_dns_reverse(%s, %d): Found in hosts -> %s", ip, timeout, hosts[i].host);
 			answer_init(&answer);
 			answer_add(&answer, hosts[i].host);
 			callback(-1, client_data, ip, answer.list);
@@ -523,15 +527,19 @@ int egg_dns_reverse(const char *ip, interval_t timeout, dns_callback_t callback,
 	cache_id = cache_find(ip);
         if (cache_id >= 0) {
 		shuffleArray(cache[cache_id].answer.list, cache[cache_id].answer.len);
+		sdprintf("egg_dns_reverse(%s, %d): Found in cache -> %s", ip, timeout, cache[cache_id].answer.list[0]);
 		callback(-1, client_data, ip, cache[cache_id].answer.list);
 		return(-1);
 	}
 
 	/* check if the query was already made */
-        if (find_query(ip))
+        if ((q = find_query(ip))) {
+	  sdprintf("egg_dns_reverse(%s, %d): Already querying -> %d", ip, timeout, q->id);
           return(-1);
+	}
 
 	q = alloc_query(client_data, callback, ip);
+	sdprintf("egg_dns_reverse(%s, %d) -> %d", ip, timeout, q->id);
 
 	/* We need to transform the ip address into the proper form
 	 * for reverse lookup. */
