@@ -1,3 +1,5 @@
+* Give localhubs credit for adding their child bots in 'whois'
+
 1.2.16 - http://wraith.botpack.net/milestone/1.2.16
 * Add 'set altchars' so that alternative characters used for nicks can be changed. (fixes #418)
 * Fix channels added by cmd_slowjoin not having the user who added them associated with the channel.
