@@ -133,13 +133,11 @@ void encrypt_cmd_pass(char *in, char *out)
   free(tmp);
 }
 
-char *encrypt_pass(struct userrec *u, char *in, const char *saltin)
+char *salted_sha1(const char *in, const char* saltin)
 {
   char *tmp = NULL, buf[101] = "", *ret = NULL;
   size_t ret_size = 0;
 
-  if (strlen(in) > MAXPASSLEN)
-    in[MAXPASSLEN] = 0;
 
   /* Create a 5 byte salt */
   char salt[6] = "";

@@ -25,7 +25,7 @@ unsigned char *decrypt_binary(const char *, unsigned char *, size_t *);
 char *encrypt_string(const char *, char *);
 char *decrypt_string(const char *, char *);
 void encrypt_cmd_pass(char *, char *);
-char *encrypt_pass(struct userrec *, char *, const char* = NULL);
+char *salted_sha1(const char *, const char* = NULL);
 char *cryptit (char *);
 char *decryptit (char *);
 int lfprintf (FILE *, const char *, ...) __attribute__((format(printf, 2, 3)));

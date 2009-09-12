@@ -587,7 +587,7 @@ static bool pass_set(struct userrec *u, struct user_entry *e, void *buf)
     if (u->bot || (pass[0] == '+'))
       newpass = strdup(pass);
     else
-      newpass = encrypt_pass(u, pass);
+      newpass = salted_sha1(pass);
     e->u.extra = strdup(newpass);
   }
   if (!noshare)
