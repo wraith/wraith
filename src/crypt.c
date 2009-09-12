@@ -120,19 +120,6 @@ char *decrypt_string(const char *keydata, char *in)
   }
 }
 
-void encrypt_cmd_pass(char *in, char *out)
-{
-  char *tmp = NULL;
-
-  if (strlen(in) > MAXPASSLEN)
-    in[MAXPASSLEN] = 0;
-  tmp = encrypt_string(in, in);
-  strlcpy(out, "+", 2);
-  strlcat(out, tmp, MAXPASSLEN + 1);
-  out[MAXPASSLEN] = 0;
-  free(tmp);
-}
-
 char *salted_sha1(const char *in, const char* saltin)
 {
   char *tmp = NULL, buf[101] = "", *ret = NULL;

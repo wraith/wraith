@@ -27,7 +27,6 @@ unsigned char *encrypt_binary(const char *, unsigned char *, size_t *);
 unsigned char *decrypt_binary(const char *, unsigned char *, size_t *);
 char *encrypt_string(const char *, char *);
 char *decrypt_string(const char *, char *);
-void encrypt_cmd_pass(char *, char *);
 char *salted_sha1(const char *, const char* = NULL);
 char *cryptit (char *);
 char *decryptit (char *);
