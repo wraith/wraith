@@ -26,7 +26,6 @@ irc.servercentral.net
 irc.shoutcast.com
 irc.umich.edu
 irc.umn.edu
-irc.vel.net
 irc.wh.verio.net
 irc2.choopa.net
 #EU
