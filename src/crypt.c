@@ -140,7 +140,7 @@ char *salted_sha1(const char *in, const char* saltin)
 
 
   /* Create a 5 byte salt */
-  char salt[6] = "";
+  char salt[SHA1_SALT_LEN + 1] = "";
   if (saltin) {
     strlcpy(salt, saltin, sizeof(salt));
   } else {
@@ -151,7 +151,7 @@ char *salted_sha1(const char *in, const char* saltin)
   simple_snprintf(buf, sizeof(buf), STR("%s%s"), salt, in);
   tmp = SHA1(buf);
 
-  ret_size = 1 + (sizeof(salt) - 1) + 1 + SHA_HASH_LENGTH + 1;
+  ret_size = SHA1_SALTED_LEN + 1;
   ret = (char *) my_calloc(1, ret_size);
   simple_snprintf(ret, ret_size, STR("+%s$%s"), salt, tmp);
 

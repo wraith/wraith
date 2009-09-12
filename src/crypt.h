@@ -14,6 +14,9 @@
 #define SHA_HASH_LENGTH (SHA_DIGEST_LENGTH << 1)
 #define MD5_HASH_LENGTH (MD5_DIGEST_LENGTH << 1)
 
+#define SHA1_SALT_LEN 5
+#define SHA1_SALTED_LEN (1 + SHA1_SALT_LEN + 1 + SHA_HASH_LENGTH)
+
 char *MD5(const char *);
 int md5cmp(const char *, const char*);
 char *MD5FILE(const char *);
