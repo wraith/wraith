@@ -296,6 +296,9 @@ static void cmd_cmdpass(int idx, char *par)
     return;
   }
 
+  if (strlen(pass) > MAXPASSLEN)
+    pass[MAXPASSLEN] = 0;
+
   if (has_pass) {
     if (!check_cmd_pass(cmd, pass)) {
       putlog(LOG_WARN, "*", "%s attempted to modify command password for %s - invalid password specified", dcc[idx].nick, cmd);
@@ -310,10 +313,11 @@ static void cmd_cmdpass(int idx, char *par)
     }
   }
 
-  char epass[36] = "", tmp[256] = "";
+  char *epass = NULL, tmp[256] = "";
 
-  encrypt_cmd_pass(par[0] ? par : pass, epass);
+  epass = salted_sha1(par[0] ? par : pass);
   simple_snprintf(tmp, sizeof tmp, "%s %s", cmd, epass);
+  free(epass);
   if (has_pass)
     dprintf(idx, "Changed command password for %s\n", cmd);
   else

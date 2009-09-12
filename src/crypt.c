@@ -120,29 +120,14 @@ char *decrypt_string(const char *keydata, char *in)
   }
 }
 
-void encrypt_cmd_pass(char *in, char *out)
-{
-  char *tmp = NULL;
-
-  if (strlen(in) > MAXPASSLEN)
-    in[MAXPASSLEN] = 0;
-  tmp = encrypt_string(in, in);
-  strlcpy(out, "+", 2);
-  strlcat(out, tmp, MAXPASSLEN + 1);
-  out[MAXPASSLEN] = 0;
-  free(tmp);
-}
-
-char *encrypt_pass(struct userrec *u, char *in, const char *saltin)
+char *salted_sha1(const char *in, const char* saltin)
 {
   char *tmp = NULL, buf[101] = "", *ret = NULL;
   size_t ret_size = 0;
 
-  if (strlen(in) > MAXPASSLEN)
-    in[MAXPASSLEN] = 0;
 
   /* Create a 5 byte salt */
-  char salt[6] = "";
+  char salt[SHA1_SALT_LEN + 1] = "";
   if (saltin) {
     strlcpy(salt, saltin, sizeof(salt));
   } else {
@@ -153,7 +138,7 @@ char *encrypt_pass(struct userrec *u, char *in, const char *saltin)
   simple_snprintf(buf, sizeof(buf), STR("%s%s"), salt, in);
   tmp = SHA1(buf);
 
-  ret_size = 1 + (sizeof(salt) - 1) + 1 + SHA_HASH_LENGTH + 1;
+  ret_size = SHA1_SALTED_LEN + 1;
   ret = (char *) my_calloc(1, ret_size);
   simple_snprintf(ret, ret_size, STR("+%s$%s"), salt, tmp);
 

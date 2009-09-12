@@ -14,6 +14,9 @@
 #define SHA_HASH_LENGTH (SHA_DIGEST_LENGTH << 1)
 #define MD5_HASH_LENGTH (MD5_DIGEST_LENGTH << 1)
 
+#define SHA1_SALT_LEN 5
+#define SHA1_SALTED_LEN (1 + SHA1_SALT_LEN + 1 + SHA_HASH_LENGTH)
+
 char *MD5(const char *);
 int md5cmp(const char *, const char*);
 char *MD5FILE(const char *);
@@ -24,8 +27,7 @@ unsigned char *encrypt_binary(const char *, unsigned char *, size_t *);
 unsigned char *decrypt_binary(const char *, unsigned char *, size_t *);
 char *encrypt_string(const char *, char *);
 char *decrypt_string(const char *, char *);
-void encrypt_cmd_pass(char *, char *);
-char *encrypt_pass(struct userrec *, char *, const char* = NULL);
+char *salted_sha1(const char *, const char* = NULL);
 char *cryptit (char *);
 char *decryptit (char *);
 int lfprintf (FILE *, const char *, ...) __attribute__((format(printf, 2, 3)));

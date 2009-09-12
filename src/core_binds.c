@@ -187,7 +187,7 @@ void real_check_bind_dcc(const char *cmd, int idx, const char *text, Auth *auth)
       if (!egg_strncasecmp(cmd, entry->mask, cmdlen)) {
         if (has_cmd_pass(entry->mask)) {
           if (flagrec_ok(&entry->user_flags, &fr)) {
-            char *p = NULL, work[1024] = "", pass[128] = "";
+            char *p = NULL, work[1024] = "", pass[MAXPASSLEN + 1] = "";
 
             p = strchr(args, ' ');
             if (p)

@@ -37,7 +37,7 @@ const botcmd_t *search_botcmd_t(const botcmd_t *table, const char* key, size_t e
 typedef struct cmd_pass {
   struct cmd_pass *next;
   char *name;
-  char pass[25];
+  char pass[SHA1_SALTED_LEN + 1];
 } cmd_pass_t;
 
 extern mycmds 		cmdlist[]; 

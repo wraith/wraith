@@ -1071,11 +1071,36 @@ int check_cmd_pass(const char *cmd, char *pass)
 
   for (cp = cmdpass; cp; cp = cp->next)
     if (!egg_strcasecmp(cmd, cp->name)) {
-      char tmp[32] = "";
+      char *epass = NULL;
 
-      encrypt_cmd_pass(pass, tmp);
-      if (!strcmp(tmp, cp->pass))
+      /* Does the old pass need to be converted? */
+      if (strlen(cp->pass) < SHA1_SALTED_LEN) {
+        char out[MAXPASSLEN + 1] = "", *tmp = encrypt_string(pass, pass);
+        strlcpy(out, "+", 2);
+        strlcat(out, tmp, MAXPASSLEN + 1);
+        out[MAXPASSLEN] = 0;
+        free(tmp);
+
+        /* No match */
+        if (strcmp(out, cp->pass))
+          return 0;
+
+        /* Successful match on the old version, convert it and save it */
+        char ctmp[256] = "";
+        epass = salted_sha1(pass);
+
+        simple_snprintf(ctmp, sizeof(ctmp), "%s %s", cmd, epass);
+        free(epass);
+        set_cmd_pass(tmp, 1);
         return 1;
+      }
+
+      epass = salted_sha1(pass, &(cp->pass)[1]);
+      if (!strcmp(epass, cp->pass)) {
+        free(epass);
+        return 1;
+      }
+      free(epass);
       return 0;
     }
   return 0;
