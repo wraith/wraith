@@ -1475,13 +1475,24 @@ check_expired_chanstuff(struct chanset_t *chan)
         continue;
       }
 
+      //This bot is set +r, so resolve.
+      if (!m->userip[0] && doresolv(chan)) {
+        char host[UHOSTLEN] = "", *p = NULL;
+        p = strchr(m->userhost, '@');
+        if (p) {
+          ++p;
+          strlcpy(host, p, strlen(m->userhost) - (p - host));
+          resolve_to_member(chan, m->nick, host);
+        }
+      }
+
       if (me_op(chan)) {
         if (dovoice(chan) && !loading) {      /* autovoice of +v users if bot is +y */
           if (!chan_hasop(m) && !chan_hasvoice(m)) {
             if (!m->user && !m->tried_getuser) {
               simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
               m->user = get_user_by_host(s);
-              if (!m->user && doresolv(chan) && m->userip[0]) {
+              if (!m->user && m->userip[0]) {
                 simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
                 m->user = get_user_by_host(s);
               }

@@ -11,6 +11,7 @@
 * Give localhubs credit for adding their child bots in 'whois'
 * New userfile pass algorithm (salted-sha1)
 * New userfile cmdpass algorithm (salted-sha1)
+* Cleanup +r implementation a bit to lookup users more often than only on join.
 
 1.2.16 - http://wraith.botpack.net/milestone/1.2.16
 * Add 'set altchars' so that alternative characters used for nicks can be changed. (fixes #418)

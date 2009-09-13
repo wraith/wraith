@@ -1311,6 +1311,8 @@ static int got311(char *from, char *msg)
 
   irc_whois(nick, "$b%s$b [%s@%s]", nick, username, address);
 
+  // FIXME: This should incorporate userip and member/client lookups - and should ACT on discovering a user.
+  // FIXME: This should also use whois_actually to cache userip
   simple_snprintf(uhost, sizeof uhost, "%s!%s@%s", nick, username, address);
   if ((u = get_user_by_host(uhost))) {
     int idx = 0;

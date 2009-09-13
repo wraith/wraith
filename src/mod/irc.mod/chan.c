@@ -64,6 +64,10 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
             if (!m->user) {
               simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
               m->user = get_user_by_host(s);
+
+              /* Act on this lookup */
+              if (m->user)
+                check_this_user(m->user->handle, 0, NULL);
             }
             return;
           }
@@ -224,7 +228,7 @@ void priority_do(struct chanset_t * chan, bool opsonly, int action)
 
       simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
       m->user = get_user_by_host(s);
-      if (!m->user && doresolv(chan) && m->userip[0]) {
+      if (!m->user && m->userip[0]) {
         simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
         m->user = get_user_by_host(s);
       }
@@ -1338,7 +1342,7 @@ void recheck_channel(struct chanset_t *chan, int dobans)
     if (!m->user && !m->tried_getuser) {
            m->tried_getuser = 1;
            m->user = get_user_by_host(s);
-           if (!m->user && doresolv(chan) && m->userip[0]) {
+           if (!m->user && m->userip[0]) {
              simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
              m->user = get_user_by_host(s);
            }
@@ -1749,8 +1753,12 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
   if (!m->userhost[0])
     simple_snprintf(m->userhost, sizeof(m->userhost), "%s@%s", user, host);
 
-  if (!m->userip[0] && ip)
-    simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, ip);
+  if (!m->userip[0]) {
+    if (ip)
+      simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, ip);
+    else if (is_dotted_ip(host))
+      simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, host);
+  }
 
   simple_snprintf(userhost, sizeof(userhost), "%s!%s", nick, m->userhost);
 
@@ -1767,13 +1775,9 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
     m->tried_getuser = 1;
   }
 
-  //userhost failed, let's try resolving them...
-  if (!m->user && !ip && doresolv(chan)) { /* !ip.. already checked for user earlier if set */
-    if (is_dotted_ip(host))
-      simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, host);
-    else  
-      resolve_to_member(chan, nick, host);
-  }
+  //This bot is set +r, so resolve.
+  if (!m->userip[0] && doresolv(chan))
+    resolve_to_member(chan, nick, host);
 
   get_user_flagrec(m->user, &fr, chan->dname, chan);
   
@@ -2466,11 +2470,11 @@ static int gotjoin(char *from, char *chname)
           m->user = get_user_by_host(from);
           m->tried_getuser = 1;
  
-          if (!m->user && doresolv(chan)) {
-            if (is_dotted_ip(host)) 
+          if (!m->user && !m->userip[0] && doresolv(chan)) {
+            if (is_dotted_ip(host))
               strlcpy(m->userip, uhost, sizeof(m->userip));
             else
-              resolve_to_member(chan, nick, host); 
+              resolve_to_member(chan, nick, host);
           }
         }
       } else {
@@ -2483,15 +2487,13 @@ static int gotjoin(char *from, char *chname)
 	m->last = now;
 	m->delay = 0L;
 	strlcpy(m->userhost, uhost, sizeof(m->userhost));
+        if (is_dotted_ip(host))
+          strlcpy(m->userip, uhost, sizeof(m->userip));
         m->user = get_user_by_host(from);
         m->tried_getuser = 1;
 
-        if (!m->user && doresolv(chan)) {
-          if (is_dotted_ip(host)) 
-            strlcpy(m->userip, uhost, sizeof(m->userip));
-          else
-            resolve_to_member(chan, nick, host); 
-        }
+        if (!m->userip[0] && doresolv(chan))
+          resolve_to_member(chan, nick, host);
 
 //	m->flags |= STOPWHO;
 
