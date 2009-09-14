@@ -351,6 +351,14 @@ readcfg(const char *cfgfile, bool read_stdin)
         if (!egg_strcasecmp(buffer, STR("packname"))) {
           strlcpy(settings.packname, trim(p), sizeof settings.packname);
         } else if (!egg_strcasecmp(buffer, STR("shellhash"))) {
+          if (strlen(trim(p)) != 40) {
+            fprintf(stderr, STR("SHELLHASH should be a SHA1 hash.\n"));
+            error_line = (line_list_t *) my_calloc(1, sizeof(line_list_t));
+            error_line->line = line;
+            error_line->next = NULL;
+            list_append((struct list_type **) &(error_list), (struct list_type *) error_line);
+            error = 1;
+          }
           strlcpy(settings.shellhash, trim(p), sizeof settings.shellhash);
         } else if (!egg_strcasecmp(buffer, STR("dccprefix"))) {
           strlcpy(settings.dcc_prefix, trim(p), 2);
