@@ -6,37 +6,55 @@ __  _  ______________  |__|/  |_|  |__
                      \/              \/
        http://wraith.botpack.net
 
-Wraith is an IRC bot written in C++. It has been in development since late 2003. 
-It is based on Eggdrop 1.6.12 but has since evolved into something much different at its core.
+Wraith is an IRC bot written purely in C/C++. It has been in development since late 2003.
+It is based on Eggdrop 1.6.12 but has since evolved into something much different at its
+core. TCL and loadable modules are currently not supported.
 
-Wraith aims to be a secure and easy to setup and manage botnet. 
-A botnet can be setup in a matter of minutes and updated later with 1 command. 
-Leaf bots save no files locally, but rather store configuration in their own binary. 
+Wraith aims to be a secure and easy to setup and manage botnet.
+A botnet can be setup in a matter of minutes and updated later with 1 command.
+Leaf bots save no files locally, but rather store configuration encrypted in their own binary.
 Hubs do not connect to IRC, and keep a local encrypted copy of the userfile.
 
-All official documentation and releases can be found on the site.
+All official sites, documentation, support venues, repositories and source urls are referenced here.
+
+Source URL scheme: http://botpack.net/wraith-BRANCH.tar.gz
+Pre-compiled Binary URL scheme: http://botpack.net/wraith.SYSTEM-BRANCH.tar.gz
+  Binaries are 32bit i486.
+  SYSTEM is either Linux or FreeBSD (case sensitive)
+  BRANCH is one of:
+    release - current release
+    stable  - git:master - changes ready for the next release
+    devel   - git:next - unstable changes being tested potentially for next release.
+  These binaries will not work on Linux 2.4,<2.6.20 or FreeBSD 4.
+  Example: http://botpack.net/wraith.FreeBSD-release.tar.gz
 
 Official Git repositories:
-git://git.shatow.net/wraith.git
-git://github.com/bdrewery/wraith.git
+  git://git.shatow.net/wraith.git
+  git://github.com/bdrewery/wraith.git
+  git://gitorious.org/wraith/mainline.git
+  git://repo.or.cz/wraith.git
 
-For a list of Contributors see: git log master|git shortlog -sen
-To Contribute see: http://wraith.botpack.net/wiki/Contributing
-Bugs can be reported at: http://wraith.botpack.net/newticket
-Bugs can be looked up by #, ie, '#24' in url: http://wraith.botpack.net/ticket/24
+See git for a list of Contributors: git shortlog -sen master
+
+Support:
+  How To Contribute: http://wraith.botpack.net/wiki/Contributing
+  Getting Started: http://wraith.botpack.net/wiki/GettingStarted
+  FAQ: http://wraith.botpack.net/wiki/FrequentlyAskedQuestions
+  Documentation Index: http://wraith.botpack.net/wiki/Documentation
+  Bugs can be reported at: http://wraith.botpack.net/newticket
+  Bugs can be looked up by #, ie, '#24' in url: http://wraith.botpack.net/ticket/24
+  #wraith @ EFnet
+
 Please support wraith by signing up for a shell at http://www.xzibition.com (coupon 'wraith' for 30% off)
 
 The botpack ghost inspired the early versions of wraith and a few cmds.
-* einride
-* ievil
+  einride
+  ievil
 
 The following botpacks gave inspiration, ideas, and some code:
-* awptic by lordoptic
-* optikz by ryguy and lordoptic
-* celdrop by excelsior
-* genocide by Crazi, Dor, psychoid, and Ace24
-* tfbot by warknite and loslinux
+  awptic by lordoptic
+  optikz by ryguy and lordoptic
+  celdrop by excelsior
+  genocide by Crazi, Dor, psychoid, and Ace24
+  tfbot by warknite and loslinux
 
-
-NEVER upload your pack.cfg to an untrusted shell.
-#wraith @ EFnet

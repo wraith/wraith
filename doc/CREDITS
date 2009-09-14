@@ -16,12 +16,7 @@ Credits and thanks to the following:
 * Mystikal for various bugs.
 * Many others.
 
-For a list of Contributors see: git log master|git shortlog -sen
-To Contribute see: http://wraith.botpack.net/wiki/Contributing
-Credit for suggestions/bugs can be found at: http://wraith.botpack.net/report/9
-Bugs can be reported at: http://wraith.botpack.net/newticket
-Bugs can be looked up by #, ie, '#24' in url: http://wraith.botpack.net/ticket/24
-Please support wraith by signing up for a shell at http://www.xzibition.com (coupon 'wraith' for 30% off)
+For a list of code Contributors see: git shortlog -sen master
 
 The botpack ghost inspired the early versions of wraith and a few cmds.
 * einride
