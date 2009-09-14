@@ -323,6 +323,13 @@ readcfg(const char *cfgfile, bool read_stdin)
   int skip = 0, line = 0, feature = 0;
   bool error = 0;
 
+#define ADD_ERROR \
+  error_line = (line_list_t *) my_calloc(1, sizeof(line_list_t)); \
+  error_line->line = line; \
+  error_line->next = NULL; \
+  list_append((struct list_type **) &(error_list), (struct list_type *) error_line); \
+  error = 1;
+
   settings.salt1[0] = settings.salt2[0] = 0;
   if (!read_stdin)
     printf(STR("Reading '%s' "), cfgfile);
@@ -338,11 +345,7 @@ readcfg(const char *cfgfile, bool read_stdin)
       if ((skipline(buffer, &skip)))
         continue;
       if ((strchr(buffer, '<') || strchr(buffer, '>')) && !strstr(buffer, "SALT")) {
-        error_line = (line_list_t *) my_calloc(1, sizeof(line_list_t));
-        error_line->line = line;
-        error_line->next = NULL;
-        list_append((struct list_type **) &(error_list), (struct list_type *) error_line);
-        error = 1;
+        ADD_ERROR
       }
       p = strchr(buffer, ' ');
       while (p && (strchr(LISTSEPERATORS, p[0])))
@@ -352,12 +355,8 @@ readcfg(const char *cfgfile, bool read_stdin)
           strlcpy(settings.packname, trim(p), sizeof settings.packname);
         } else if (!egg_strcasecmp(buffer, STR("shellhash"))) {
           if (strlen(trim(p)) != 40) {
-            fprintf(stderr, STR("SHELLHASH should be a SHA1 hash.\n"));
-            error_line = (line_list_t *) my_calloc(1, sizeof(line_list_t));
-            error_line->line = line;
-            error_line->next = NULL;
-            list_append((struct list_type **) &(error_list), (struct list_type *) error_line);
-            error = 1;
+            fprintf(stderr, STR("\nSHELLHASH should be a SHA1 hash.\n"));
+            ADD_ERROR
           }
           strlcpy(settings.shellhash, trim(p), sizeof settings.shellhash);
         } else if (!egg_strcasecmp(buffer, STR("dccprefix"))) {
