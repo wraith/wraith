@@ -323,6 +323,7 @@ readcfg(const char *cfgfile, bool read_stdin)
   int skip = 0, line = 0, feature = 0;
   bool error = 0;
 
+  settings.salt1[0] = settings.salt2[0] = 0;
   if (!read_stdin)
     printf(STR("Reading '%s' "), cfgfile);
   while ((!feof(f)) && ((buffer = step_thru_file(f)) != NULL)) {
@@ -391,6 +392,13 @@ readcfg(const char *cfgfile, bool read_stdin)
     fprintf(stderr, STR("Error: Look at your configuration again and remove any <>\n"));
     for (error_line = error_list; error_line; error_line = error_line->next)
         fprintf(stderr, STR("Line %d\n"), error_line->line);
+    exit(1);
+  }
+
+  /* Was the entire pack read in? */
+  if (!settings.salt1[0] || !settings.salt2[0]) {
+    printf("\n");
+    fprintf(stderr, STR("Missing SALTS\n"));
     exit(1);
   }
 
