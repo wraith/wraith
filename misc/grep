@@ -1,2 +1,0 @@
-#!/bin/sh
-grep "$@" | egrep -v "(configure|bdlib|Binary|src/_|tmp|help\..*:|\.deps.*\.Po|\.c~:|tags:|\.orig:)"

@@ -2,5 +2,4 @@ Type 'make' whenever one of these conditions are met:
 
 - Any files in autotools/ are modified.
 - Any Makefiles are added or removed (Editting of includes/depend.m4 required)
-- Any defines are added/removed from pack/pack.cfg
 
