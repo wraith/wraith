@@ -353,7 +353,7 @@ readcfg(const char *cfgfile, bool read_stdin)
         } else if (!egg_strcasecmp(buffer, STR("shellhash"))) {
           strlcpy(settings.shellhash, trim(p), sizeof settings.shellhash);
         } else if (!egg_strcasecmp(buffer, STR("dccprefix"))) {
-          strlcpy(settings.dcc_prefix, trim(p), sizeof settings.dcc_prefix);
+          strlcpy(settings.dcc_prefix, trim(p), 2);
         } else if (!egg_strcasecmp(buffer, STR("owner"))) {
           strlcat(settings.owners, trim(p), sizeof(settings.owners));
           strlcat(settings.owners, ",", sizeof(settings.owners));
