@@ -204,7 +204,7 @@ echo ""
 echo ""
 echo "------------ Configuring BDLIB ------------"
 [
-if test -d .git && ! test -d lib/bdlib/.git; then
+if test -d .git; then
   git submodule update --init
 fi
 ]
