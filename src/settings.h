@@ -22,7 +22,6 @@ typedef struct settings_struct {
   char bots[1025];
   char uid[17];
   char autouname[17];        /* should we just auto update any changed in uname output? */
-  char pscloak[17];          /* should the bots bother trying to cloak `ps`? */
   char autocron[17];         /* should the bot auto crontab itself? */
   char watcher[17];          /* spawn a watcher pid to block ptrace? */
   char uname[113];
@@ -34,7 +33,7 @@ typedef struct settings_struct {
   char portmin[17];       /* for hubs, the reserved port range for incoming connections */
   char portmax[17];       /* for hubs, the reserved port range for incoming connections */
   /* -- PADDING -- */
-  char padding[8];
+  char padding[9];
 } settings_t;
 
 #define SALT1 {s1_1[0],s1_1[1],s1_5[0],s1_5[1],s1_8[0],s1_8[1],s1_4[0],s1_9[1],s1_2[0],s1_13[0],s1_6[0],s1_6[1],s1_7[0],s1_7[1],s1_3[0],s1_13[1],s1_16[1],s1_4[1],s1_15[0],s1_10[1],s1_14[0],s1_14[1],s1_12[0],s1_12[1],s1_2[1],s1_3[1],s1_11[0],s1_11[1],s1_10[0],s1_15[1],s1_16[0],s1_9[0],'\0'}
@@ -49,7 +48,7 @@ sizeof(settings.owners) + sizeof(settings.hubs) + sizeof(settings.owneremail) + 
 sizeof(settings.salt1) + sizeof(settings.salt2) + sizeof(settings.dcc_prefix) + sizeof(settings.features)
 
 #define SIZE_CONF sizeof(settings.bots) + sizeof(settings.uid) + sizeof(settings.autouname) + \
-sizeof(settings.pscloak) + sizeof(settings.autocron) + sizeof(settings.watcher) + sizeof(settings.uname) + \
+sizeof(settings.autocron) + sizeof(settings.watcher) + sizeof(settings.uname) + \
 sizeof(settings.username) + sizeof(settings.homedir) + sizeof(settings.binpath) + sizeof(settings.binname) + \
 sizeof(settings.portmin) + sizeof(settings.portmin) + sizeof(settings.datadir)
 

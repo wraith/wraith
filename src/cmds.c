@@ -1756,7 +1756,6 @@ static void cmd_conf(int idx, char *par)
         else if (!egg_strcasecmp(what, "datadir"))   str_redup(&conf.datadir, par);
         else if (!egg_strcasecmp(what, "portmin"))   conf.portmin = atoi(par);
         else if (!egg_strcasecmp(what, "portmax"))   conf.portmax = atoi(par);
-        else if (!egg_strcasecmp(what, "pscloak"))   conf.pscloak = atoi(par);
         else if (!egg_strcasecmp(what, "autocron"))  conf.autocron = atoi(par);
         else if (!egg_strcasecmp(what, "autouname")) conf.autouname = atoi(par);
         else if (!egg_strcasecmp(what, "watcher"))  conf.watcher = atoi(par);
@@ -1780,7 +1779,6 @@ static void cmd_conf(int idx, char *par)
       if (!what || !egg_strcasecmp(what, "datadir"))    dprintf(idx, "%sdatadir: %s\n", ss, conf.datadir);
       if (!what || !egg_strcasecmp(what, "portmin"))    dprintf(idx, "%sportmin: %d\n", ss, conf.portmin);
       if (!what || !egg_strcasecmp(what, "portmax"))    dprintf(idx, "%sportmax: %d\n", ss, conf.portmax);
-      if (!what || !egg_strcasecmp(what, "pscloak"))    dprintf(idx, "%spscloak: %d\n", ss, conf.pscloak);
       if (!what || !egg_strcasecmp(what, "autocron"))   dprintf(idx, "%sautocron: %d\n", ss, conf.autocron);
       if (!what || !egg_strcasecmp(what, "autouname"))  dprintf(idx, "%sautouname: %d\n", ss, conf.autouname);
       if (!what || !egg_strcasecmp(what, "watcher"))    dprintf(idx, "%swatcher: %d\n", ss, conf.watcher);

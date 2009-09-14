@@ -740,7 +740,7 @@ See also: console, echo, login, page, strip
       WARNING: Options changed MAY OR MAY NOT affect bots already running,
                it is a good idea to restart all bots on the shell
                if you change any of the following: 
-    $bhomedir$b, $bbinpath$b, $bbinname$b, $bportmin$b, $bportmax$b, $bpscloak$b
+    $bhomedir$b, $bbinpath$b, $bbinname$b, $bportmin$b, $bportmax$b
  
 See also: newleaf
 ::console:
