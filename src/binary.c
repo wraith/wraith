@@ -323,6 +323,14 @@ readcfg(const char *cfgfile, bool read_stdin)
   int skip = 0, line = 0, feature = 0;
   bool error = 0;
 
+#define ADD_ERROR \
+  error_line = (line_list_t *) my_calloc(1, sizeof(line_list_t)); \
+  error_line->line = line; \
+  error_line->next = NULL; \
+  list_append((struct list_type **) &(error_list), (struct list_type *) error_line); \
+  error = 1;
+
+  settings.salt1[0] = settings.salt2[0] = 0;
   if (!read_stdin)
     printf(STR("Reading '%s' "), cfgfile);
   while ((!feof(f)) && ((buffer = step_thru_file(f)) != NULL)) {
@@ -337,11 +345,7 @@ readcfg(const char *cfgfile, bool read_stdin)
       if ((skipline(buffer, &skip)))
         continue;
       if ((strchr(buffer, '<') || strchr(buffer, '>')) && !strstr(buffer, "SALT")) {
-        error_line = (line_list_t *) my_calloc(1, sizeof(line_list_t));
-        error_line->line = line;
-        error_line->next = NULL;
-        list_append((struct list_type **) &(error_list), (struct list_type *) error_line);
-        error = 1;
+        ADD_ERROR
       }
       p = strchr(buffer, ' ');
       while (p && (strchr(LISTSEPERATORS, p[0])))
@@ -350,9 +354,13 @@ readcfg(const char *cfgfile, bool read_stdin)
         if (!egg_strcasecmp(buffer, STR("packname"))) {
           strlcpy(settings.packname, trim(p), sizeof settings.packname);
         } else if (!egg_strcasecmp(buffer, STR("shellhash"))) {
+          if (strlen(trim(p)) != 40) {
+            fprintf(stderr, STR("\nSHELLHASH should be a SHA1 hash.\n"));
+            ADD_ERROR
+          }
           strlcpy(settings.shellhash, trim(p), sizeof settings.shellhash);
         } else if (!egg_strcasecmp(buffer, STR("dccprefix"))) {
-          strlcpy(settings.dcc_prefix, trim(p), sizeof settings.dcc_prefix);
+          strlcpy(settings.dcc_prefix, trim(p), 2);
         } else if (!egg_strcasecmp(buffer, STR("owner"))) {
           strlcat(settings.owners, trim(p), sizeof(settings.owners));
           strlcat(settings.owners, ",", sizeof(settings.owners));
@@ -391,6 +399,13 @@ readcfg(const char *cfgfile, bool read_stdin)
     fprintf(stderr, STR("Error: Look at your configuration again and remove any <>\n"));
     for (error_line = error_list; error_line; error_line = error_line->next)
         fprintf(stderr, STR("Line %d\n"), error_line->line);
+    exit(1);
+  }
+
+  /* Was the entire pack read in? */
+  if (!settings.salt1[0] || !settings.salt2[0]) {
+    printf("\n");
+    fprintf(stderr, STR("Missing SALTS\n"));
     exit(1);
   }
 
