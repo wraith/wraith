@@ -144,7 +144,6 @@ const char *dns_ip = NULL;
 
 static int make_header(char *buf, int id);
 static int cut_host(const char *host, char *query);
-static int reverse_ip(const char *host, char *reverse);
 static int read_resolv(char *fname);
 static void read_hosts(char *fname);
 static int get_dns_idx();
@@ -797,7 +796,7 @@ static int cut_host(const char *host, char *query)
 	return(query-orig);
 }
 
-static int reverse_ip(const char *host, char *reverse)
+int reverse_ip(const char *host, char *reverse)
 {
 	char *period;
 	int offset, len;

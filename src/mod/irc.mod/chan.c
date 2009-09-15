@@ -63,6 +63,7 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
 
             strlcpy(user, m->userhost, pe - ps + 1);
             simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, ips[0]);
+            resolve_to_rbl(r->chan, r->nick, ips[0]);
             if (!m->user) {
               simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
               m->user = get_user_by_host(s);
@@ -92,6 +93,60 @@ void resolve_to_member(struct chanset_t *chan, char *nick, char *host)
   r->nick = strdup(nick);
 
   egg_dns_lookup(host, 20, resolv_member_callback, (void *) r);
+}
+
+/* RBL */
+static void resolve_rbl_callback(int id, void *client_data, const char *host, char **ips)
+{
+  resolv_member *r = (resolv_member *) client_data;
+
+  if (!r || !r->chan || !r->nick || !ips || (ips && !ips[0])) {
+    if (r->nick) free(r->nick);
+    return;
+  }
+
+  memberlist *m = ismember(r->chan, r->nick);
+  if (m) {
+    if (chan_sentkick(m)) {
+      free(r->nick);
+      return;
+    }
+    m->flags |= SENTKICK;
+    sdprintf("ips: %s", ips[0]);
+
+    char *s1 = NULL, s[UHOSTLEN] = "";
+    simple_snprintf(s, sizeof s, "%s!%s", m->nick, m->userhost);
+    s1 = strchr(s, '@');
+    s1 -= 3;
+    s1[0] = '*';
+    s1[1] = '!';
+    s1[2] = '*';
+    do_mask(r->chan, r->chan->channel.ban, s1, 'b');
+    dprintf(DP_MODE, "KICK %s %s :%s%s\n", r->chan->name, m->nick, bankickprefix, "listed in rbl");
+    u_addmask('b', r->chan, s1, "rbl", "listed in rbl", now + (60 * r->chan->ban_time), 0);
+  }
+  free(r->nick);
+  return;
+}
+
+
+void resolve_to_rbl(struct chanset_t *chan, char *nick, char *host)
+{
+  resolv_member *r = (resolv_member *) my_calloc(1, sizeof(resolv_member));
+
+  r->chan = chan;
+  r->nick = strdup(nick);
+
+  const char *rbl_domain = "rbl.efnet.org";
+  size_t iplen = strlen(host) + 1 + strlen(rbl_domain) + 1;
+  char *ip = (char *) my_calloc(1, iplen);
+  reverse_ip(host, ip);
+  strlcat(ip, ".", iplen);
+  strlcat(ip, rbl_domain, iplen);
+
+  egg_dns_lookup(ip, 20, resolve_rbl_callback, (void *) r);
+
+  free(ip);
 }
 
 /* ID length for !channels.
@@ -1782,6 +1837,9 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
   //This bot is set +r, so resolve.
   if (!m->userip[0] && doresolv(chan))
     resolve_to_member(chan, nick, host);
+  else if (m->userip[0] && doresolv(chan))
+    resolve_to_rbl(chan, nick, host);
+
 
   get_user_flagrec(m->user, &fr, chan->dname, chan);
   
@@ -2475,9 +2533,10 @@ static int gotjoin(char *from, char *chname)
           m->tried_getuser = 1;
  
           if (!m->user && !m->userip[0] && doresolv(chan)) {
-            if (is_dotted_ip(host))
+            if (is_dotted_ip(host)) {
               strlcpy(m->userip, uhost, sizeof(m->userip));
-            else
+              resolve_to_rbl(chan, nick, host);
+            } else
               resolve_to_member(chan, nick, host);
           }
         }
@@ -2498,6 +2557,8 @@ static int gotjoin(char *from, char *chname)
 
         if (!m->userip[0] && doresolv(chan))
           resolve_to_member(chan, nick, host);
+        else if (m->userip[0] && doresolv(chan))
+          resolve_to_rbl(chan, nick, host);
 
 //	m->flags |= STOPWHO;
 

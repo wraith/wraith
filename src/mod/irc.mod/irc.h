@@ -94,6 +94,9 @@ static void send_chan_who(int queue, struct chanset_t* chan);
 #define newban(chan, mask, who)         new_mask((chan)->channel.ban, mask, who)
 #define newexempt(chan, mask, who)      new_mask((chan)->channel.exempt, mask, who)
 #define newinvite(chan, mask, who)      new_mask((chan)->channel.invite, mask, who)
+void resolve_to_member(struct chanset_t *chan, char *nick, char *host);
+void resolve_to_rbl(struct chanset_t *chan, char *nick, char *host);
+static void do_mask(struct chanset_t *chan, masklist *m, char *mask, char Mode);
 
 #endif /* MAKING_IRC */
 

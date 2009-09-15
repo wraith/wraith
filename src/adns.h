@@ -30,6 +30,7 @@ int egg_dns_cancel(int id, int issue_callback);
 void tell_dnsdebug(int);
 void dns_cache_flush();
 bool valid_dns_id(int, int);
+int reverse_ip(const char *host, char *reverse);
 
 extern int		dns_sock, dns_idx;
 extern const char	*dns_ip;
