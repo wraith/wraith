@@ -44,8 +44,10 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
 {
   resolv_member *r = (resolv_member *) client_data;
 
-  if (!r || !r->chan || !r->nick)
+  if (!r || !r->chan || !r->nick) {
+    if (r->nick) free(r->nick);
     return;
+  }
 
   memberlist *m = NULL;
   char *ps = NULL, *pe = NULL, s[UHOSTLEN + 1];
@@ -69,6 +71,7 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
               if (m->user)
                 check_this_user(m->user->handle, 0, NULL);
             }
+            free(r->nick);
             return;
           }
         }
@@ -76,6 +79,7 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
     }
   }
 
+  free(r->nick);
   return;
 }
 
