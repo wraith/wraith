@@ -417,7 +417,7 @@ static void cmd_about(int idx, char *par)
   dprintf(idx, STR("Bugs can be reported at: http://wraith.botpack.net/newticket\n"));
   dprintf(idx, STR("Bugs can be looked up by #, ie, '#24' in url: http://wraith.botpack.net/ticket/24\n"));
   dprintf(idx, " \n");
-  dprintf(idx, STR("Please support wraith by signing up for a shell at http://www.xzibition.com (coupon 'wraith' for 30% off)\n"));
+  dprintf(idx, STR("Please support wraith by signing up for a shell at http://www.xzibition.com (coupon 'wraith' for 30%% off)\n"));
   dprintf(idx, " \n");
   dprintf(idx, STR("The botpack ghost inspired the early versions of wraith and a few cmds.\n"));
   dprintf(idx, STR("* $beinride$b\n"));
