@@ -17,7 +17,6 @@ irc.colosolutions.net
 irc.easynews.com
 irc.eversible.com
 irc.he.net
-irc.mindspring.com
 irc.mzima.net
 irc.nac.net
 irc.paraphysics.net
