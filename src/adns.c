@@ -1028,15 +1028,6 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip)
                 }
 	}
 
-        if (q->answer.len == 0) {
-          /* This could simply be that there are no answers... query A or AAAA and receive nothing back...
-           * With the new NXDOMAIN / SERVFAIL error checks, this hard error of jumping servers is probably
-           * no longer needed */
-          sdprintf("Failed to get any answers for query");
-          return_code = 1;	/* get a new server */
-          goto callback;
-        }
-
 callback:
 	/* Don't continue if we haven't gotten all expected replies. */
 	if (--q->remaining > 0) return 0;
