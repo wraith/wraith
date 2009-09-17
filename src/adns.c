@@ -1002,18 +1002,22 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip)
 		case DNS_A:
 			egg_inet_ntop(AF_INET, ptr, result, 512);
 			answer_add(&q->answer, result);
+			sdprintf("Reply(%d): %s. \t %d \t IN A \t %s", header.id, q->query, reply.ttl, result);
 			break;
 		case DNS_AAAA:
 #ifdef USE_IPV6
 			egg_inet_ntop(AF_INET6, ptr, result, 512);
 			answer_add(&q->answer, result);
+			sdprintf("Reply(%d): %s. \t %d \t IN AAAA \t %s", header.id, q->query, reply.ttl, result);
 #endif /* USE_IPV6 */
 			break;
 		case DNS_PTR:
 			r = my_dn_expand((const unsigned char *) response, eop, ptr, result, sizeof(result));
 
-			if (r != -1 && result[0])
+			if (r != -1 && result[0]) {
 				answer_add(&q->answer, result);
+				sdprintf("Reply(%d): %s. \t %d \t IN PTR \t %s", header.id, q->query, reply.ttl, result);
+			}
 			break;
 		default:
 			sdprintf("Unhandled DNS reply type: %d", reply.type);
