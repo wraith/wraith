@@ -182,7 +182,7 @@ static void tell_who(int idx, int chan)
 	else if (!dcc[i].u.chat->channel)
 	  strlcat(s, "(party) ", sizeof(s));
 	else
-	  sprintf(&s[strlen(s)], "(%5d) ", dcc[i].u.chat->channel);
+	  egg_snprintf(&s[strlen(s)], sizeof(s) - strlen(s), "(%5d) ", dcc[i].u.chat->channel);
       }
       strlcat(s, dcc[i].host, sizeof(s));
       if (atr & USER_MASTER) {
