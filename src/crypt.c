@@ -342,7 +342,7 @@ int sha1cmp(const char *hash, const char *string) {
 
 void btoh(const unsigned char *md, size_t md_len, char *buf, const size_t buf_len)
 {
-#define doblock(n) snprintf(&(buf[(i + n) << 1]), buf_len - ((i + n) << 1), "%02x", md[i + n]);
+#define doblock(n) simple_snprintf(&(buf[(i + n) << 1]), buf_len - ((i + n) << 1), "%02x", md[i + n]);
   for (size_t i = 0; i < md_len; i+=4) {
     doblock(0);
     doblock(1);

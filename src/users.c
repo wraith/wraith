@@ -965,7 +965,7 @@ void link_pref_val(struct userrec *u, char *val)
   if (!ba->hublevel || ba->hublevel == 999) {
     return;
   }
-  egg_snprintf(val, HANDLEN + 4, "%02d%s", ba->hublevel, u->handle);
+  simple_snprintf(val, HANDLEN + 4, "%02d%s", ba->hublevel, u->handle);
 }
 
 /*
