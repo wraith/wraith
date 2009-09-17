@@ -79,14 +79,26 @@ size_t simple_vsnprintf(char *buf, size_t size, const char *format, va_list va)
   char *s = NULL;
   char *fp = (char *) format;
   size_t c = 0;
-  unsigned long i = 0;
-  bool islong = 0, caps = false;
+  unsigned long i = 0, width = 0;
+  bool islong = 0, caps = false, width_modifier = false;
 
+re_eval:
   while (*fp && c < size - 1) {
-    if (*fp == '%') {
+    if (*fp == '%' || width_modifier) {
 re_eval_with_modifier:
       ++fp;
+      if (width_modifier) {
+        if (egg_isdigit(*fp)) {
+          width = 10 * width + (*fp - '0');
+          goto re_eval;
+        } else
+          width_modifier = false;
+      }
+
       switch (*fp) {
+      case '0':
+        width_modifier = true;
+        goto re_eval_with_modifier;
       case 'z':
       case 'l':
         islong = 1;
@@ -140,6 +152,13 @@ re_eval_with_modifier:
         continue;
       }
       if (s) {
+        if (width > 0) {
+          width -= strlen(s);
+          while (width > 0 && c < size - 1) {
+            buf[c++] = '0';
+            --width;
+          }
+        }
         if (caps) {
           while (*s && c < size - 1)
             buf[c++] = toupper(*s++);
