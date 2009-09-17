@@ -97,7 +97,7 @@ bin_checksum(const char *fname, int todo)
     MD5_Update(&ctx, &map[offset], size - offset);
 
     MD5_Final(md5out, &ctx);
-    strlcpy(hash, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(hash));
+    btoh(md5out, MD5_DIGEST_LENGTH, hash, sizeof(hash));
     OPENSSL_cleanse(&ctx, sizeof(ctx));
 
     munmap(map, size);
@@ -122,7 +122,7 @@ bin_checksum(const char *fname, int todo)
     MD5_Update(&ctx, &map[offset + sizeof(settings_t)], size - (offset + sizeof(settings_t)));
 
     MD5_Final(md5out, &ctx);
-    strlcpy(hash, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(hash));
+    btoh(md5out, MD5_DIGEST_LENGTH, hash, sizeof(hash));
     OPENSSL_cleanse(&ctx, sizeof(ctx));
 
     settings_t newsettings;
@@ -167,7 +167,7 @@ bin_checksum(const char *fname, int todo)
     /* Hash everything after the packdata too */
     MD5_Update(&ctx, &map[offset + sizeof(settings_t)], size - (offset + sizeof(settings_t)));
     MD5_Final(md5out, &ctx);
-    strlcpy(hash, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(hash));
+    btoh(md5out, MD5_DIGEST_LENGTH, hash, sizeof(hash));
     OPENSSL_cleanse(&ctx, sizeof(ctx));
 
     strlcpy(settings.hash, hash, sizeof(settings.hash));

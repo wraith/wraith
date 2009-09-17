@@ -33,7 +33,7 @@ char *decryptit (char *);
 int lfprintf (FILE *, const char *, ...) __attribute__((format(printf, 2, 3)));
 void Encrypt_File(char *, char *);
 void Decrypt_File(char *, char *);
-char *btoh(const unsigned char *, size_t);
+void btoh(const unsigned char *md, size_t md_len, char *buf, const size_t buf_len);
 void do_crypt_console();
 
 #endif /* !_CRYPT_H */

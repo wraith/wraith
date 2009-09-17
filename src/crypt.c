@@ -271,7 +271,7 @@ char *MD5(const char *string)
   MD5_Init(&ctx);
   MD5_Update(&ctx, string, strlen(string));
   MD5_Final(md5out, &ctx);
-  strlcpy(md5string, btoh(md5out, MD5_DIGEST_LENGTH), MD5_HASH_LENGTH + 1);
+  btoh(md5out, MD5_DIGEST_LENGTH, md5string, MD5_HASH_LENGTH + 1);
   OPENSSL_cleanse(&ctx, sizeof(ctx));
 
   if (n == 5) n = 0;
@@ -304,7 +304,7 @@ MD5FILE(const char *bin)
     MD5_Update(&ctx, buffer, len);
   }
   MD5_Final(md5out, &ctx);
-  strlcpy(md5string, btoh(md5out, MD5_DIGEST_LENGTH), sizeof(md5string));
+  btoh(md5out, MD5_DIGEST_LENGTH, md5string, sizeof(md5string));
   OPENSSL_cleanse(&ctx, sizeof(ctx));
 
   return md5string;
@@ -326,7 +326,7 @@ char *SHA1(const char *string)
   SHA1_Init(&ctx);
   SHA1_Update(&ctx, string, strlen(string));
   SHA1_Final(sha1out, &ctx);
-  strlcpy(sha1string, btoh(sha1out, SHA_DIGEST_LENGTH), SHA_HASH_LENGTH + 1);
+  btoh(sha1out, SHA_DIGEST_LENGTH, sha1string, SHA_HASH_LENGTH + 1);
   OPENSSL_cleanse(&ctx, sizeof(ctx));
 
   if (n == 5) n = 0;
@@ -340,18 +340,13 @@ int sha1cmp(const char *hash, const char *string) {
   return n;
 }
 
-/* convert binary hashes to hex */
-char *btoh(const unsigned char *md, size_t len)
+void btoh(const unsigned char *md, size_t md_len, char *buf, const size_t buf_len)
 {
-  char buf[100] = "", *ret = NULL;
-
-  for (size_t i = 0; i < len; i+=4) {
-    sprintf(&(buf[i << 1]), "%02x", md[i]);
-    sprintf(&(buf[(i + 1) << 1]), "%02x", md[i + 1]);
-    sprintf(&(buf[(i + 2) << 1]), "%02x", md[i + 2]);
-    sprintf(&(buf[(i + 3) << 1]), "%02x", md[i + 3]);
+#define doblock(n) snprintf(&(buf[(i + n) << 1]), buf_len - ((i + n) << 1), "%02x", md[i + n]);
+  for (size_t i = 0; i < md_len; i+=4) {
+    doblock(0);
+    doblock(1);
+    doblock(2);
+    doblock(3);
   }
-
-  ret = buf;
-  return ret;
 }
