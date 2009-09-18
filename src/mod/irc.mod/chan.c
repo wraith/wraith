@@ -63,7 +63,8 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
 
             strlcpy(user, m->userhost, pe - ps + 1);
             simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, ips[0]);
-            resolve_to_rbl(r->chan, r->nick, ips[0]);
+            if (channel_rbl(r->chan))
+              resolve_to_rbl(r->chan, r->nick, ips[0]);
             if (!m->user) {
               simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
               m->user = get_user_by_host(s);
@@ -1837,7 +1838,7 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
   //This bot is set +r, so resolve.
   if (!m->userip[0] && doresolv(chan))
     resolve_to_member(chan, nick, host);
-  else if (m->userip[0] && doresolv(chan))
+  else if (m->userip[0] && doresolv(chan) && channel_rbl(chan))
     resolve_to_rbl(chan, nick, host);
 
 
@@ -2535,7 +2536,8 @@ static int gotjoin(char *from, char *chname)
           if (!m->user && !m->userip[0] && doresolv(chan)) {
             if (is_dotted_ip(host)) {
               strlcpy(m->userip, uhost, sizeof(m->userip));
-              resolve_to_rbl(chan, nick, host);
+              if (channel_rbl(chan))
+                resolve_to_rbl(chan, nick, host);
             } else
               resolve_to_member(chan, nick, host);
           }
@@ -2557,7 +2559,7 @@ static int gotjoin(char *from, char *chname)
 
         if (!m->userip[0] && doresolv(chan))
           resolve_to_member(chan, nick, host);
-        else if (m->userip[0] && doresolv(chan))
+        else if (m->userip[0] && doresolv(chan) && channel_rbl(chan))
           resolve_to_rbl(chan, nick, host);
 
 //	m->flags |= STOPWHO;
