@@ -37,51 +37,44 @@ static char   last_invchan[300] = "";
 
 typedef struct resolvstruct {
   struct chanset_t *chan;
-  char *nick;
+  char *host;
 } resolv_member;
 
 static void resolv_member_callback(int id, void *client_data, const char *host, char **ips)
 {
   resolv_member *r = (resolv_member *) client_data;
 
-  if (!r || !r->chan || !r->nick) {
-    if (r->nick) free(r->nick);
+  if (!r || !r->chan || !r->host || !ips || !ips[0]) {
+    if (r->host) free(r->host);
     return;
   }
 
   memberlist *m = NULL;
-  char *ps = NULL, *pe = NULL, s[UHOSTLEN + 1];
+  char *ps = NULL, *pe = NULL, s[UHOSTLEN + 1], user[15] = "";
 
-  if (ips && ips[0]) {
-    for (m = r->chan->channel.member; m && m->nick[0]; m = m->next) {
-      if (!rfc_casecmp(m->nick, r->nick)) {
-        if (!m->userip[0] && m->userhost[0]) {
-          ps = m->userhost;
-          pe = strchr(ps, '@');
-          if (pe) {
-            char user[15] = "";
+  /* Apply lookup results to all matching members by host */
+  for (m = r->chan->channel.member; m && m->nick[0]; m = m->next) {
+    if (!m->userip[0] && m->userhost[0] && !strcmp(m->userhost, r->host)) {
+      ps = m->userhost;
+      pe = strchr(ps, '@');
+      if (pe) {
+        strlcpy(user, m->userhost, pe - ps + 1);
+        simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, ips[0]);
+        if (channel_rbl(r->chan))
+          resolve_to_rbl(r->chan, m->nick, ips[0]);
+        if (!m->user) {
+          simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
+          m->user = get_user_by_host(s);
 
-            strlcpy(user, m->userhost, pe - ps + 1);
-            simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, ips[0]);
-            if (channel_rbl(r->chan))
-              resolve_to_rbl(r->chan, r->nick, ips[0]);
-            if (!m->user) {
-              simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
-              m->user = get_user_by_host(s);
-
-              /* Act on this lookup */
-              if (m->user)
-                check_this_user(m->user->handle, 0, NULL);
-            }
-            free(r->nick);
-            return;
-          }
+          /* Act on this lookup */
+          if (m->user)
+            check_this_user(m->user->handle, 0, NULL);
         }
       }
     }
   }
 
-  free(r->nick);
+  free(r->host);
   return;
 }
 
@@ -91,7 +84,7 @@ void resolve_to_member(struct chanset_t *chan, char *nick, char *host)
   resolv_member *r = (resolv_member *) my_calloc(1, sizeof(resolv_member));
 
   r->chan = chan;
-  r->nick = strdup(nick);
+  r->host = strdup(host);
 
   egg_dns_lookup(host, 20, resolv_member_callback, (void *) r);
 }
@@ -101,32 +94,32 @@ static void resolve_rbl_callback(int id, void *client_data, const char *host, ch
 {
   resolv_member *r = (resolv_member *) client_data;
 
-  if (!r || !r->chan || !r->nick || !ips || (ips && !ips[0])) {
-    if (r->nick) free(r->nick);
+  if (!r || !r->chan || !r->host || !ips || (ips && !ips[0])) {
+    if (r->host) free(r->host);
     return;
   }
 
-  memberlist *m = ismember(r->chan, r->nick);
-  if (m) {
-    if (chan_sentkick(m)) {
-      free(r->nick);
-      return;
-    }
-    m->flags |= SENTKICK;
-    sdprintf("ips: %s", ips[0]);
+  memberlist *m = NULL;
 
-    char *s1 = NULL, s[UHOSTLEN] = "";
-    simple_snprintf(s, sizeof s, "%s!%s", m->nick, m->userhost);
-    s1 = strchr(s, '@');
-    s1 -= 3;
-    s1[0] = '*';
-    s1[1] = '!';
-    s1[2] = '*';
-    do_mask(r->chan, r->chan->channel.ban, s1, 'b');
-    dprintf(DP_MODE, "KICK %s %s :%s%s\n", r->chan->name, m->nick, bankickprefix, "listed in rbl");
-    u_addmask('b', r->chan, s1, "rbl", "listed in rbl", now + (60 * r->chan->ban_time), 0);
+  /* Apply lookup results to all matching members by host */
+  for (m = r->chan->channel.member; m && m->nick[0]; m = m->next) {
+    if (!chan_sentkick(m) && !m->userip[0] && m->userhost[0] && !strcmp(m->userhost, r->host)) {
+      m->flags |= SENTKICK;
+      sdprintf("ips: %s", ips[0]);
+
+      char *s1 = NULL, s[UHOSTLEN] = "";
+      simple_snprintf(s, sizeof s, "%s!%s", m->nick, m->userhost);
+      s1 = strchr(s, '@');
+      s1 -= 3;
+      s1[0] = '*';
+      s1[1] = '!';
+      s1[2] = '*';
+      do_mask(r->chan, r->chan->channel.ban, s1, 'b');
+      dprintf(DP_MODE, "KICK %s %s :%s%s\n", r->chan->name, m->nick, bankickprefix, "listed in rbl");
+      u_addmask('b', r->chan, s1, "rbl", "listed in rbl", now + (60 * r->chan->ban_time), 0);
+    }
   }
-  free(r->nick);
+  free(r->host);
   return;
 }
 
@@ -136,7 +129,7 @@ void resolve_to_rbl(struct chanset_t *chan, char *nick, char *host)
   resolv_member *r = (resolv_member *) my_calloc(1, sizeof(resolv_member));
 
   r->chan = chan;
-  r->nick = strdup(nick);
+  r->host = strdup(host);
 
   const char *rbl_domain = "rbl.efnet.org";
   size_t iplen = strlen(host) + 1 + strlen(rbl_domain) + 1;
