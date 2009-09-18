@@ -157,7 +157,7 @@ static void dns_on_eof(int idx);
 static const char *dns_next_server();
 static int parse_reply(char *response, size_t nbytes, const char* server_ip);
 
-interval_t async_lookup_timeout = 30;
+interval_t async_lookup_timeout = 10;
 interval_t async_server_timeout = 40;
 //int resend_on_read = 0;
 
