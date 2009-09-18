@@ -757,7 +757,7 @@ flood-exempt %d flood-lock-time %d \
 %cmeankicks %cenforcebans %cdynamicbans %cuserbans %cbitch \
 %cprivate %ccycle %cinactive %cdynamicexempts %cuserexempts \
 %cdynamicinvites %cuserinvites %cnodesynch %cclosed %cvoice \
-%cfastop %cautoop %cbotbitch %cbackup %cnomassjoin %cknock %c%s}\n",
+%cfastop %cautoop %cbotbitch %cbackup %cnomassjoin %cknock %crbl %c%s}\n",
 	chan->dname,
 	w,
         chan->added_by,
@@ -813,6 +813,7 @@ flood-exempt %d flood-lock-time %d \
         PLSMNS(channel_backup(chan)),
         PLSMNS(channel_nomassjoin(chan)),
         PLSMNS(channel_knock(chan)),
+        PLSMNS(channel_rbl(chan)),
 	HAVE_TAKE ? PLSMNS(channel_take(chan)) : ' ',
         HAVE_TAKE ? "take " : " "
 /* Chanflag template
