@@ -81,7 +81,7 @@ size_t simple_vsnprintf(char *buf, size_t size, const char *format, va_list va)
   size_t c = 0;
   unsigned long i = 0;
   long width = 0;
-  bool islong = 0, caps = false, width_modifier = false;
+  bool islong = 0, caps = false, width_modifier = false, rpad = false;
   char pad = ' ';
 
 re_eval:
@@ -102,6 +102,10 @@ re_eval_with_modifier:
       case '0':
         width_modifier = true;
         pad = '0';
+        goto re_eval_with_modifier;
+      /* Right padding with spaces */
+      case '-':
+        rpad = true;
         goto re_eval_with_modifier;
       /* Left padding with spaces */
       case '1':
@@ -172,12 +176,23 @@ re_eval_with_modifier:
       if (s) {
         if (width > 0) {
           width -= strlen(s);
+          if (width < 0) width = 0;
+          if (rpad) {
+            width = -width;
+            rpad = false;
+          }
+        }
+
+        /* Left padding / right justification */
+        if (width > 0) {
           while (width > 0 && c < size - 1) {
             buf[c++] = pad;
             --width;
           }
           width = 0;
         }
+
+        /* Advance the buffer with content */
         if (caps) {
           while (*s && c < size - 1)
             buf[c++] = toupper(*s++);
@@ -185,6 +200,12 @@ re_eval_with_modifier:
         } else {
           while (*s && c < size - 1)
             buf[c++] = *s++;
+        }
+
+        /* Right padding / left justification */
+        while (width < 0 && c < size - 1) {
+          buf[c++] = pad;
+          ++width;
         }
       }
       fp++;
