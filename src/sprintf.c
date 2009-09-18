@@ -79,8 +79,10 @@ size_t simple_vsnprintf(char *buf, size_t size, const char *format, va_list va)
   char *s = NULL;
   char *fp = (char *) format;
   size_t c = 0;
-  unsigned long i = 0, width = 0;
+  unsigned long i = 0;
+  long width = 0;
   bool islong = 0, caps = false, width_modifier = false;
+  char pad = ' ';
 
 re_eval:
   while (*fp && c < size - 1) {
@@ -96,8 +98,24 @@ re_eval_with_modifier:
       }
 
       switch (*fp) {
+      /* Left padding with zeroes */
       case '0':
         width_modifier = true;
+        pad = '0';
+        goto re_eval_with_modifier;
+      /* Left padding with spaces */
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9':
+        width_modifier = true;
+        width = 10 * width + (*fp - '0');
+        pad = ' ';
         goto re_eval_with_modifier;
       case 'z':
       case 'l':
@@ -155,9 +173,10 @@ re_eval_with_modifier:
         if (width > 0) {
           width -= strlen(s);
           while (width > 0 && c < size - 1) {
-            buf[c++] = '0';
+            buf[c++] = pad;
             --width;
           }
+          width = 0;
         }
         if (caps) {
           while (*s && c < size - 1)
