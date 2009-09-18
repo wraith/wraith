@@ -1595,11 +1595,11 @@ static void cmd_channel(int idx, char *par)
       } else {
 	/* Determine idle time */
 	if (now - (m->last) > 86400)
-	  egg_snprintf(s1, sizeof s1, "%2dd", (int) ((now - (m->last)) / 86400));
+	  simple_snprintf(s1, sizeof s1, "%2dd", (int) ((now - (m->last)) / 86400));
 	else if (now - (m->last) > 3600)
-	  egg_snprintf(s1, sizeof s1, "%2dh", (int) ((now - (m->last)) / 3600));
+	  simple_snprintf(s1, sizeof s1, "%2dh", (int) ((now - (m->last)) / 3600));
 	else if (now - (m->last) > 180)
-	  egg_snprintf(s1, sizeof s1, "%2dm", (int) ((now - (m->last)) / 60));
+	  simple_snprintf(s1, sizeof s1, "%2dm", (int) ((now - (m->last)) / 60));
 	else
 	  strlcpy(s1, "   ", sizeof s1);
 	simple_snprintf(format, sizeof format, "%%c%%c%%-%zus %%-%zus %%s %%c   %%d %%s  %%s %%s\n", 

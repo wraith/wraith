@@ -373,7 +373,7 @@ static void remote_tell_who(int idx, char *nick, int chan)
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type && dcc[i].type->flags & DCT_REMOTEWHO) {
       if (dcc[i].u.chat->channel == chan) {
-	k = egg_snprintf(s, sizeof(s), "  %c%-15s %s", (geticon(i) == '-' ? ' ' : geticon(i)),
+	k = simple_snprintf(s, sizeof(s), "  %c%-15s %s", (geticon(i) == '-' ? ' ' : geticon(i)),
 		    dcc[i].nick, dcc[i].host);
 	if (now - dcc[i].timeval > 300) {
 	  unsigned long mydays, hrs, mins;
@@ -400,7 +400,7 @@ static void remote_tell_who(int idx, char *nick, int chan)
 	ok = 1;
 	botnet_send_priv(idx, conf.bot->nick, nick, NULL, "%s:", "Bots connected");
       }
-      egg_snprintf(s, sizeof(s), "  %s%c%-15s %s",
+      simple_snprintf(s, sizeof(s), "  %s%c%-15s %s",
 	      dcc[i].status & STAT_CALLED ? "<-" : "->",
 	      dcc[i].status & STAT_SHARE ? '+' : ' ',
 	      dcc[i].nick, dcc[i].u.bot->version);
@@ -415,7 +415,7 @@ static void remote_tell_who(int idx, char *nick, int chan)
 	  ok = 1;
 	  botnet_send_priv(idx, conf.bot->nick, nick, NULL, "%s:", "Other people on the bot");
 	}
-	l = egg_snprintf(s, sizeof(s), "  %c%-15s %s", (geticon(i) == '-' ? ' ' : geticon(i)), dcc[i].nick, dcc[i].host);
+	l = simple_snprintf(s, sizeof(s), "  %c%-15s %s", (geticon(i) == '-' ? ' ' : geticon(i)), dcc[i].nick, dcc[i].host);
 	if (now - dcc[i].timeval > 300) {
 	  k = (now - dcc[i].timeval) / 60;
 	  if (k < 60)

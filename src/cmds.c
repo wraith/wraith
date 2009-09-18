@@ -182,7 +182,7 @@ static void tell_who(int idx, int chan)
 	else if (!dcc[i].u.chat->channel)
 	  strlcat(s, "(party) ", sizeof(s));
 	else
-	  egg_snprintf(&s[strlen(s)], sizeof(s) - strlen(s), "(%5d) ", dcc[i].u.chat->channel);
+	  simple_snprintf(&s[strlen(s)], sizeof(s) - strlen(s), "(%5d) ", dcc[i].u.chat->channel);
       }
       strlcat(s, dcc[i].host, sizeof(s));
       if (atr & USER_MASTER) {
@@ -840,7 +840,7 @@ static void print_users(char *work, int idx, int *cnt, int *tt, int bot, int fla
          ((!notflags) || !(u->flags & notflags)) &&
           (!bot || (bot == 2 && bot_hublevel(u) < 999) || (bot == 1 && bot_hublevel(u) == 999))) {
       if (!*cnt)
-        egg_snprintf(work, worksiz, "%-11s: ", str);
+        simple_snprintf(work, worksiz, "%-11s: ", str);
       else 
         strlcat(work, ", ", worksiz);
 
@@ -3766,9 +3766,9 @@ static void rcmd_cursrv(char * fbot, char * fhand, char * fidx) {
     if (server_online) {
       daysdur(now, server_online, tmp, sizeof(tmp));
       if (floodless)
-        egg_snprintf(cursrv, sizeof(cursrv), "Currently: %-30s (connected %s) [floodless ;)]", cursrvname, tmp);
+        simple_snprintf(cursrv, sizeof(cursrv), "Currently: %-30s (connected %s) [floodless ;)]", cursrvname, tmp);
       else
-        egg_snprintf(cursrv, sizeof(cursrv), "Currently: %-30s (connected %s)", cursrvname, tmp);
+        simple_snprintf(cursrv, sizeof(cursrv), "Currently: %-30s (connected %s)", cursrvname, tmp);
 
       if (server_lag > 0) {
         simple_snprintf(tmp, sizeof(tmp), " Lag:%ds", server_lag);
@@ -3861,7 +3861,7 @@ static void rcmd_curnick(char * fbot, char * fhand, char * fidx) {
     char tmp[301] = "";
 
     if (server_online)
-      egg_snprintf(tmp, sizeof(tmp), "Currently: %-20s ", botname);
+      simple_snprintf(tmp, sizeof(tmp), "Currently: %-20s ", botname);
     if (jupenick[0] && strncmp(botname, jupenick, strlen(botname)))
       simple_snprintf(tmp, sizeof(tmp), "%sJupe: %s ", tmp, jupenick);
     else if (jupenick[0] && strcmp(botname, origbotname))
