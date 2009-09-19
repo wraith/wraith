@@ -59,6 +59,7 @@
 #include <sys/stat.h>
 #include "tandem.h"
 #include "core_binds.h"
+#include "src/mod/console.mod/console.h"
 
 
 struct cmd_pass *cmdpass = NULL;
@@ -685,19 +686,38 @@ dcc_chat_secpass(int idx, char *buf, int atr)
     if (dcc[idx].status & STAT_TELNET)
       dprintf(idx, TLN_IAC_C TLN_WONT_C TLN_ECHO_C "\n");
     stats_add(dcc[idx].user, 1, 0);
+    bool writeuserfile = 0;
     if (!get_user(&USERENTRY_SECPASS, dcc[idx].user)) {	/* this should check how many logins instead */
       char pass[MAXPASSLEN + 1] = "";
+
+      writeuserfile = 1;
 
       dprintf(idx, "********************************************************************\n \n \n");
       dprintf(idx, "%sWARNING: YOU DO NOT HAVE A SECPASS SET, NOW SETTING A RANDOM ONE....%s\n", FLASH(-1), FLASH_END(-1));
       make_rand_str(pass, MAXPASSLEN);
       set_user(&USERENTRY_SECPASS, dcc[idx].user, pass);
-      if (conf.bot->hub)
-        write_userfile(idx);
       dprintf(idx, "Your secpass is now: %s%s%s\n", pass, BOLD(-1), BOLD_END(-1));
-      dprintf(idx, "Make sure you do not lose this, as it is needed to login for now on.\n \n");
+      dprintf(idx, "Make sure you do not lose this, as it may be needed in the future.\n \n");
       dprintf(idx, "********************************************************************\n");
     }
+    if (!get_user(&USERENTRY_CONSOLE, dcc[idx].user)) { /* No console, force them to have at least +mcobseuw */
+      struct flag_record fr = {FR_GLOBAL, 0, 0, 0 };
+
+      get_user_flagrec(dcc[idx].user, &fr, NULL);
+
+      strlcpy(dcc[idx].u.chat->con_chan, "*", 2);
+      dcc[idx].u.chat->con_flags = LOG_MSGS|LOG_SERV;
+      if (glob_owner(fr))
+        dcc[idx].u.chat->con_flags |= LOG_ERRORS|LOG_WARN;
+      if (glob_master(fr))
+        dcc[idx].u.chat->con_flags |= LOG_BOTS|LOG_CMDS|LOG_MISC|LOG_WALL;
+
+      /* Avoid rewriting it later */
+      writeuserfile = 0;
+      console_dostore(idx);
+    }
+    if (writeuserfile && conf.bot->hub)
+      write_userfile(idx);
     dcc_chatter(idx);
   } else if ((dccauth && badauth) || dcc[idx].wrong_pass) { 		/* bad auth */
     dprintf(idx, "%s\n", response(RES_BADUSERPASS));
