@@ -917,7 +917,7 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip)
 		prev = q;
 	}
 
-        sdprintf("Reply (%d) questions: %d answers: %d ar: %d ns: %d from: %s QR: %d OPCODE: %d AA: %d TC: %d RD: %d RA: %d RCODE: %d",
+        sdprintf("Reply(%d) questions: %d answers: %d ar: %d ns: %d from: %s QR: %d OPCODE: %d AA: %d TC: %d RD: %d RA: %d RCODE: %d",
             header.id,
             header.question_count,
             header.answer_count,
