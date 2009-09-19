@@ -242,7 +242,7 @@ console_display(int idx, struct user_entry *e, struct userrec *u)
   }
 }
 
-static struct user_entry_type USERENTRY_CONSOLE = {
+struct user_entry_type USERENTRY_CONSOLE = {
   0,                            /* always 0 ;) */
   console_gotshare,
   console_unpack,
