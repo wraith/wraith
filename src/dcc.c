@@ -72,7 +72,7 @@ int uplink_idx = -1;
 static interval_t password_timeout = 40;       /* Time to wait for a password from a user */
 static interval_t auth_timeout = 80;
 static interval_t bot_timeout = 15;    /* Bot timeout value                       */
-static interval_t identtimeout = 15;   /* Timeout value for ident lookups         */
+static interval_t identtimeout = 5;   /* Timeout value for ident lookups         */
 static interval_t dupwait_timeout = 5; /* Timeout for rejecting duplicate entries */
 
 bool protect_telnet = 0;  /* Even bother with ident lookups :)       */
