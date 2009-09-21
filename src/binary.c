@@ -566,7 +566,7 @@ check_sum(const char *fname, const char *cfgfile, bool read_stdin)
   }
 }
 
-static bool check_bin_initialized(const char *fname)
+bool check_bin_initialized(const char *fname)
 {
   int i = 0;
   size_t len = strlen(shell_escape(fname)) + 3 + 1;
@@ -582,12 +582,38 @@ static bool check_bin_initialized(const char *fname)
   return 0;
 }
 
-void write_settings(const char *fname, int die, bool doconf)
+bool check_bin_compat(const char *fname)
+{
+  int i = 0;
+  size_t len = strlen(shell_escape(fname)) + 3 + 1;
+  char *path = (char *) my_calloc(1, len);
+
+  char *out = NULL;
+
+  simple_snprintf(path, len, STR("%s -3"), shell_escape(fname));
+  if (shell_exec(path, NULL, &out, NULL)) {
+    if (out) {
+      char *buf = out;
+      size_t settings_ver = atoi(newsplit(&buf)), settings_len = atoi(newsplit(&buf));
+      if (settings_ver == SETTINGS_VER && settings_len == sizeof(settings_t)) {
+        free(path);
+        free(out);
+        return 1;
+      }
+      free(out);
+    }
+  }
+  free(path);
+  return 0;
+}
+
+void write_settings(const char *fname, int die, bool doconf, int initialized)
 {
   char *hash = NULL;
   int bits = WRITE_CHECKSUM;
   /* see if the binary is already initialized or not */
-  bool initialized = check_bin_initialized(fname);
+  if (initialized == -1)
+    initialized = check_bin_initialized(fname);
 
   /* only write pack data if the binary is uninitialized
    * otherwise, assume it has similar/correct/updated pack data

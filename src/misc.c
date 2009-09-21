@@ -855,12 +855,21 @@ int updatebin(int idx, char *par, int secs)
     return 1;
   }
 
+  /* Check if the new binary is compatible */
+  int initialized = (int)check_bin_initialized(path);
+  if (!initialized && !check_bin_compat(path)) {
+    logidx(idx, STR("New binary must be initialized as pack structure has been changed in new version."));
+    free(path);
+    return 1;
+  }
+
+
   /* make a backup just in case. */
 
   simple_snprintf(buf, sizeof(buf), STR("%s/.bin.old"), conf.datadir);
   copyfile(binname, buf);
 
-  write_settings(path, -1, 0);	/* re-write the binary with our packdata */
+  write_settings(path, -1, 0, initialized);	/* re-write the binary with our packdata */
 
   Tempfile *conffile = new Tempfile("conf");
 
