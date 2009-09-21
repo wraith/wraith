@@ -1320,7 +1320,7 @@ void bounce_simul(int idx, char *buf)
   if (p)
     *p = 0;
 
-  simple_snprintf(rmsg, sizeof rmsg, "r-sr %d %s", dcc[idx].simul, buf);          /* remote-simul[r]eturn idx buf */
+  simple_snprintf(rmsg, sizeof rmsg, "r-sr %d %s %s", dcc[idx].simul, dcc[idx].user->handle, buf);          /* remote-simul[r]eturn idx buf */
   putbot(dcc[idx].simulbot, rmsg);
 }
 
@@ -1329,12 +1329,15 @@ static void bot_rsimr(char *botnick, char *code, char *msg)
   if (msg[0]) {
     char * par = strdup(msg), *parp = par, *prefix = NULL;
     int idx = atoi(newsplit(&par));
+    char *nick = newsplit(&par);
     size_t size = strlen(botnick) + 4;
 
-    prefix = (char *) my_calloc(1, size);
-    simple_snprintf(prefix, size, "[%s] ", botnick);
-    dumplots(idx, prefix, par);
-    free(prefix);
+    if (dcc[idx].type && (dcc[idx].type == &DCC_CHAT) && dcc[idx].user && !strcmp(dcc[idx].user->handle, nick)) {
+      prefix = (char *) my_calloc(1, size);
+      simple_snprintf(prefix, size, "[%s] ", botnick);
+      dumplots(idx, prefix, par);
+      free(prefix);
+    }
     free(parp);
   }
 }
