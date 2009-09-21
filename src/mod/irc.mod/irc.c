@@ -335,7 +335,7 @@ const char * cookie_hash(const char* chname, const memberlist* opper, const memb
   const char salt2[] = SALT2;
 
   simple_snprintf(tohash, sizeof(tohash), STR("%c%s%c%c%c\n%c%c%s%s%s"),
-                                     salt2[0], 
+                                     salt2[0],
                                      ts,
                                      salt[0], salt[1], salt[2], salt[3],
                                      salt2[15],
@@ -369,25 +369,27 @@ void makecookie(char *out, size_t len, const char *chname, const memberlist* opp
   simple_snprintf2(cookie_clear, sizeof(cookie_clear), STR("%s%s%D"), randstring, &ts[3], my_counter);
 
   char key[150] = "";
+  const char salt1[] = SALT1;
+  const char salt2[] = SALT2;
   simple_snprintf2(key, sizeof(key), "%c%c%c%s%c%c%c%c%c%c%^s%c%c%c%c%c%c%c%s",
                                         randstring[0],
-                                        settings.salt1[5],
+                                        salt1[5],
                                         randstring[3],
                                         opper->user->handle,
                                         randstring[2],
-                                        settings.salt1[4],
-                                        settings.salt1[0],
-                                        settings.salt1[1],
-                                        settings.salt1[3],
-                                        settings.salt1[6],
+                                        salt1[4],
+                                        salt1[0],
+                                        salt1[1],
+                                        salt1[3],
+                                        salt1[6],
                                         chname,
-                                        settings.salt1[10],
+                                        salt1[10],
                                         randstring[1],
-                                        settings.salt2[15],
-                                        settings.salt2[13],
-                                        settings.salt1[10],
-                                        settings.salt2[3],
-                                        settings.salt2[1],
+                                        salt2[15],
+                                        salt2[13],
+                                        salt1[10],
+                                        salt2[3],
+                                        salt2[1],
                                         opper->userhost
                                         );
   const char* hash1 = cookie_hash(chname, opper, m1, &ts[4], randstring, key);
@@ -451,25 +453,27 @@ static int checkcookie(const char *chname, const memberlist* opper, const member
   const size_t hashes = cookie[3] == '!' ? 1 : (cookie[6] == '!' ? 2 : 3);
 
   char key[150] = "";
+  const char salt1[] = SALT1;
+  const char salt2[] = SALT2;
   simple_snprintf2(key, sizeof(key), "%c%c%c%s%c%c%c%c%c%c%^s%c%c%c%c%c%c%c%s",
                                         cookie[SALT(0)],
-                                        settings.salt1[5],
+                                        salt1[5],
                                         cookie[SALT(3)],
                                         opper->user->handle,
                                         cookie[SALT(2)],
-                                        settings.salt1[4],
-                                        settings.salt1[0],
-                                        settings.salt1[1],
-                                        settings.salt1[3],
-                                        settings.salt1[6],
+                                        salt1[4],
+                                        salt1[0],
+                                        salt1[1],
+                                        salt1[3],
+                                        salt1[6],
                                         chname,
-                                        settings.salt1[10],
+                                        salt1[10],
                                         cookie[SALT(1)],
-                                        settings.salt2[15],
-                                        settings.salt2[13],
-                                        settings.salt1[10],
-                                        settings.salt2[3],
-                                        settings.salt2[1],
+                                        salt2[15],
+                                        salt2[13],
+                                        salt1[10],
+                                        salt2[3],
+                                        salt2[1],
                                         opper->userhost
                                         );
   char* cleartext = decrypt_string(MD5(key), (char*) &cookie[HOST(0)]);
