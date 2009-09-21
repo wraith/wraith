@@ -216,7 +216,7 @@ static int msg_ident(char *nick, char *host, struct userrec *u, char *par)
     } else {
       putlog(LOG_CMDS, "*", "(%s!%s) !*! IDENT %s", nick, host, who);
       simple_snprintf(s, sizeof s, "%s!%s", nick, host);
-      maskhost(s, s1);
+      maskaddr(s, s1, 0); /* *!user@host */
       dprintf(DP_HELP, "NOTICE %s :Added hostmask: %s\n", nick, s1);
       addhost_by_handle(who, s1);
       check_this_user(who, 0, NULL);

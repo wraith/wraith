@@ -1762,7 +1762,7 @@ static void cmd_adduser(int idx, char *par)
     return;
   }
   if (!statichost)
-    maskhost(s, s1);
+    maskaddr(s, s1, 0); /* *!user@host.com */
   else {
     strlcpy(s1, s, sizeof s1);
     p1 = strchr(s1, '!');
