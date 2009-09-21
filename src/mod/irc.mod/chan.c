@@ -645,7 +645,7 @@ static char *quickban(struct chanset_t *chan, char *uhost)
 {
   static char s1[512] = "";
 
-  maskhost(uhost, s1);
+  maskaddr(uhost, s1, chan->ban_type);
   /* this used to only happen with strict_host == 0 */
   if (strlen(s1) != 1)
     s1[2] = '*';		/* arthur2 */
