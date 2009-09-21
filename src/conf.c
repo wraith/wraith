@@ -322,6 +322,8 @@ confedit()
 #endif
     if (timespecisset(&ts2)) {
       printf(STR("* Config unchanged.\n"));
+      tmpconf.my_close();
+      unlink(tmpconf.file);
       exit(0);            
     }
   }
