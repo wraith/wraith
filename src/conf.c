@@ -56,7 +56,6 @@ tellconf()
   sdprintf(STR("datadir: %s\n"), replace(conf.datadir, conf.homedir, "~"));
   sdprintf(STR("portmin: %d\n"), conf.portmin);
   sdprintf(STR("portmax: %d\n"), conf.portmax);
-  sdprintf(STR("pscloak: %d\n"), conf.pscloak);
   sdprintf(STR("autocron: %d\n"), conf.autocron);
   sdprintf(STR("autouname: %d\n"), conf.autouname);
   sdprintf(STR("watcher: %d\n"), conf.watcher);
@@ -391,7 +390,6 @@ init_conf()
   conf.features = 0;
   conf.portmin = 0;
   conf.portmax = 0;
-  conf.pscloak = 0;
   conf.uid = -1;
   conf.uname = NULL;
   conf.username = NULL;
@@ -753,10 +751,6 @@ readconf(const char *fname, int bits)
           if (egg_isdigit(line[0]))
             conf.portmax = atoi(line);
 
-        } else if (!egg_strcasecmp(option, STR("pscloak"))) {        /* should bots on this shell pscloak? */
-          if (egg_isdigit(line[0]))
-            conf.pscloak = atoi(line);
-
         } else if (!egg_strcasecmp(option, STR("uid"))) {    /* new method uid */
           if (str_isdigit(line))
             conf.uid = atoi(line);
@@ -930,13 +924,6 @@ writeconf(char *filename, FILE * stream, int bits)
   }
 
 
-  if (conf.pscloak) {
-    comment("# Attempt to \"cloak\" the process name in `ps` for Linux?");
-    my_write(f, STR("! pscloak %d\n"), conf.pscloak);
-
-    comment("");
-  }
-
   if (conf.autocron == 0) {
     comment("# Automatically add the bot to crontab?");
     my_write(f, STR("! autocron %d\n"), conf.autocron);
@@ -1104,7 +1091,6 @@ bin_to_conf(bool error)
   conf.autouname = atoi(settings.autouname);
   conf.autocron = atoi(settings.autocron);
   conf.watcher = atoi(settings.watcher);
-  conf.pscloak = atoi(settings.pscloak);
 
 
   prep_homedir(error);

@@ -249,41 +249,6 @@
  reporting you for spam.
  Congratulations, prick, you've just made my ignore list. Was it worth it to you to make your 'witty' comments and snide in-jokes to your irc pals about me if it meant you are now disappeared from my online experience? Have a nice life.
  brb getting u glined
-:pscloak
- -bash
- ftp
- /usr/sbin/sshd
- man
- pine
- bash
- top
- last
- w
- ps ux
- bash
- ./psybnc
- BitchX
- who
- irssi
- sh
- -sh
- screen -r
- -screen
- -SCREEN
- pico
- vi
- eggdrop
- ./eggdrop
- lynx
- ssh-agent
- epic (epic-EPIC4-2.2)
- screen epic
- screen BitchX
- screen irssi
- ezbnc
- ./bnc
- ./sbnc
- /usr/bin/bash
 :mIRCver
  5.91
  6.01

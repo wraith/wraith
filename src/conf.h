@@ -33,7 +33,6 @@ typedef struct conf_b {
   int features;		/* Pack features (take, mdop, beta... etc..) */
   int uid;
   int autouname;        /* should we just auto update any changed in uname output? */
-  int pscloak;          /* should the bots bother trying to cloak `ps`? */
   int autocron;         /* should the bot auto crontab itself? */
   int watcher;		/* spawn a watcher pid to block ptrace? */
   char *localhub;	/* my localhub */

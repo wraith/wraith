@@ -15,6 +15,7 @@
 * If a user does not have a console setting, they will be given default settings on login.
 * Fix a case where the temporary file was not cleaned up when exiting config editor (-C) (fixes #428)
 * Fix cmd_slowpart issues
+* Remove pscloak feature, it was too malicious, pointless and stupid.
 
 1.2.16 - http://wraith.botpack.net/milestone/1.2.16
 * Add 'set altchars' so that alternative characters used for nicks can be changed. (fixes #418)

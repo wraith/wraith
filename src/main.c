@@ -843,17 +843,6 @@ printf("out: %s\n", out);
     check_crontab();
 #endif /* !CYGWIN_HACKS */
 
-#ifdef __linux__
-  if (conf.pscloak) {
-    const char *p = response(RES_PSCLOAK);
-
-    for (int argi = 0; argi < argc; argi++)
-      egg_memset(argv[argi], 0, strlen(argv[argi]));
-
-    strcpy(argv[0], p);
-  }
-#endif /* __linux_ */
-
   /* Move into background? */
   /* we don't split cygwin because to run as a service the bot shouldn't exit.
      confuses windows ;)
