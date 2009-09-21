@@ -371,7 +371,7 @@ void makecookie(char *out, size_t len, const char *chname, const memberlist* opp
   char key[150] = "";
   const char salt1[] = SALT1;
   const char salt2[] = SALT2;
-  simple_snprintf2(key, sizeof(key), "%c%c%c%s%c%c%c%c%c%c%^s%c%c%c%c%c%c%c%s",
+  simple_snprintf2(key, sizeof(key), STR("%c%c%c%s%c%c%c%c%c%c%^s%c%c%c%c%c%c%c%s"),
                                         randstring[0],
                                         salt1[5],
                                         randstring[3],
@@ -455,7 +455,7 @@ static int checkcookie(const char *chname, const memberlist* opper, const member
   char key[150] = "";
   const char salt1[] = SALT1;
   const char salt2[] = SALT2;
-  simple_snprintf2(key, sizeof(key), "%c%c%c%s%c%c%c%c%c%c%^s%c%c%c%c%c%c%c%s",
+  simple_snprintf2(key, sizeof(key), STR("%c%c%c%s%c%c%c%c%c%c%^s%c%c%c%c%c%c%c%s"),
                                         cookie[SALT(0)],
                                         salt1[5],
                                         cookie[SALT(3)],
