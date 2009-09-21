@@ -37,7 +37,7 @@ int dcc_autoaway;
 bool irc_autoaway;
 bool link_cleartext;
 bool dccauth = 0;
-char *def_chanset = "+enforcebans +dynamicbans +userbans -bitch +cycle -inactive +userexempts -dynamicexempts +userinvites -dynamicinvites -nodesynch -closed -take -voice -private -fastop +meankicks";
+char *def_chanset = "+enforcebans +dynamicbans +userbans -bitch +cycle -inactive +userexempts -dynamicexempts +userinvites -dynamicinvites -nodesynch -closed -take -voice -private -fastop +meankicks ban-type 3";
 int cloak_script = 0;
 rate_t close_threshold;
 int fight_threshold;

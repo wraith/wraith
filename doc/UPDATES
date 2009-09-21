@@ -1,3 +1,5 @@
+* Add new channel setting 'ban-type' which support mIRC style ban types (adapted from recent eggdrop patch)
+
 1.2.17 - http://wraith.botpack.net/milestone/1.2.17
 * Binary pass prompt has been changed to be more clear.
 * Fix uname checking on NetBSD and OpenBSD
