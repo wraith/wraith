@@ -346,7 +346,7 @@ static bool set_gotshare(struct userrec *u, struct user_entry *e, char *buf, int
 
   if (!egg_strcasecmp(u->handle, conf.bot->nick)) {
     set_noshare = 1;
-    var_set_by_name(conf.bot->nick, name, buf);
+    var_set_by_name(conf.bot->nick, name, buf[0] ? buf : NULL);
     set_noshare = 0;
   /* var_set_by_name() called set_user(), no need to do it again... */
   } 
