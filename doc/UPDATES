@@ -14,6 +14,7 @@
 * Cleanup +r implementation a bit to lookup users more often than only on join. (fixes #127)
 * If a user does not have a console setting, they will be given default settings on login.
 * Fix a case where the temporary file was not cleaned up when exiting config editor (-C) (fixes #428)
+* Fix cmd_slowpart issues
 
 1.2.16 - http://wraith.botpack.net/milestone/1.2.16
 * Add 'set altchars' so that alternative characters used for nicks can be changed. (fixes #418)

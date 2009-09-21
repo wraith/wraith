@@ -612,18 +612,10 @@ static void cmd_slowpart(int idx, char *par)
     dprintf(idx, "No such channel %s\n", chname);
     return;
   }
-  remove_channel(chan);
-  if (conf.bot->hub)
-    write_userfile(-1);
-  dprintf(idx, "Channel %s removed from the bot.\n", chname);
-  dprintf(idx, "This includes any channel specific bans, invites, exemptions and user records that you set.\n");
 
-  if (findchan_by_dname(chname)) {
-    dprintf(idx, "Failed to remove channel.\n");
-    return;
-  }
   if (conf.bot->hub)
     count = 0;
+
   for (bot = tandbot; bot; bot = bot->next) {
     char tmp[100] = "";
 
@@ -647,6 +639,18 @@ static void cmd_slowpart(int idx, char *par)
         putbot(bot->bot, tmp);
     }  
   }
+
+  remove_channel(chan);
+  if (conf.bot->hub)
+    write_userfile(-1);
+  dprintf(idx, "Channel %s removed from the bot.\n", chname);
+  dprintf(idx, "This includes any channel specific bans, invites, exemptions and user records that you set.\n");
+
+  if (findchan_by_dname(chname)) {
+    dprintf(idx, "Failed to remove channel.\n");
+    return;
+  }
+
   dprintf(idx, "%i bots parting %s during the next %i seconds\n", count, chname, delay);
   if (!conf.bot->hub)
     dprintf(DP_MODE, "PART %s\n", chname);
