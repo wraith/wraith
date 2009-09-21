@@ -410,6 +410,7 @@ readcfg(const char *cfgfile, bool read_stdin)
   }
 
   if (!read_stdin) printf(STR(" Success\n"));
+  else printf("\n");
   return 1;
 }
 
