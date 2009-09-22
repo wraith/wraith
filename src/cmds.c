@@ -1239,7 +1239,7 @@ static void cmd_chpass(int idx, char *par)
     dprintf(idx, "Removed password.\n");
   } else {
     bool good = 0, randpass = 0;
-    char *newpass = newsplit(&par), pass[MAXPASSLEN] = "";
+    char *newpass = newsplit(&par), pass[MAXPASSLEN + 1] = "";
     size_t l = strlen(newpass);
 
     if (l > MAXPASSLEN)
@@ -1255,7 +1255,7 @@ static void cmd_chpass(int idx, char *par)
       }
     }
     if (strlen(pass) > MAXPASSLEN)
-      pass[MAXPASSLEN - 1] = 0;
+      pass[MAXPASSLEN] = 0;
 
     if (good) {
       set_user(&USERENTRY_PASS, u, pass);
@@ -3183,7 +3183,7 @@ static void cmd_nopass(int idx, char *par)
 {
   int cnt = 0;
   struct userrec *cu = NULL;
-  char *users = (char *) my_calloc(1, 1), pass[MAXPASSLEN] = "";
+  char *users = (char *) my_calloc(1, 1), pass[MAXPASSLEN + 1] = "";
   size_t userssiz = 1;
   bool dopass = 0;
 
