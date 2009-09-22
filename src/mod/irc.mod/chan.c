@@ -54,11 +54,10 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
 
   /* Apply lookup results to all matching members by host */
   for (m = r->chan->channel.member; m && m->nick[0]; m = m->next) {
-    if (!m->userip[0] && m->userhost[0] && !strcmp(m->userhost, r->host)) {
-      ps = m->userhost;
-      pe = strchr(ps, '@');
-      if (pe) {
-        strlcpy(user, m->userhost, pe - ps + 1);
+    if (!m->userip[0] && m->userhost[0]) {
+      pe = strchr(m->userhost, '@');
+      if (pe && !strcmp(pe + 1, r->host)) {
+        strlcpy(user, m->userhost, pe - m->userhost + 1);
         simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, ips[0]);
         if (channel_rbl(r->chan))
           resolve_to_rbl(r->chan, m->nick, ips[0]);
@@ -100,23 +99,27 @@ static void resolve_rbl_callback(int id, void *client_data, const char *host, ch
   }
 
   memberlist *m = NULL;
+  char *pe = NULL;
 
   /* Apply lookup results to all matching members by host */
   for (m = r->chan->channel.member; m && m->nick[0]; m = m->next) {
-    if (!chan_sentkick(m) && !m->userip[0] && m->userhost[0] && !strcmp(m->userhost, r->host)) {
-      m->flags |= SENTKICK;
-      sdprintf("ips: %s", ips[0]);
+    if (!chan_sentkick(m) && !m->userip[0] && m->userhost[0]) {
+      pe = strchr(m->userhost, '@');
+      if (pe && !strcmp(pe + 1, r->host)) {
+        m->flags |= SENTKICK;
+        sdprintf("ips: %s", ips[0]);
 
-      char *s1 = NULL, s[UHOSTLEN] = "";
-      simple_snprintf(s, sizeof s, "%s!%s", m->nick, m->userhost);
-      s1 = strchr(s, '@');
-      s1 -= 3;
-      s1[0] = '*';
-      s1[1] = '!';
-      s1[2] = '*';
-      do_mask(r->chan, r->chan->channel.ban, s1, 'b');
-      dprintf(DP_MODE, "KICK %s %s :%s%s\n", r->chan->name, m->nick, bankickprefix, "listed in rbl");
-      u_addmask('b', r->chan, s1, "rbl", "listed in rbl", now + (60 * r->chan->ban_time), 0);
+        char *s1 = NULL, s[UHOSTLEN] = "";
+        simple_snprintf(s, sizeof s, "%s!%s", m->nick, m->userhost);
+        s1 = strchr(s, '@');
+        s1 -= 3;
+        s1[0] = '*';
+        s1[1] = '!';
+        s1[2] = '*';
+        do_mask(r->chan, r->chan->channel.ban, s1, 'b');
+        dprintf(DP_MODE, "KICK %s %s :%s%s\n", r->chan->name, m->nick, bankickprefix, "listed in rbl");
+        u_addmask('b', r->chan, s1, "rbl", "listed in rbl", now + (60 * r->chan->ban_time), 0);
+      }
     }
   }
   free(r->host);
