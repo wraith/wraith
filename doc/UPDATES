@@ -17,6 +17,7 @@
 * Fix cmd_slowpart issues
 * Remove pscloak feature, it was too malicious, pointless and stupid.
 * Fix cmd_botset not setting default/global value on leaf bots when clearing a var (fixes #389)
+* Fix cmd_pls_chan causing bots to reset a channels settings when it already existed.
 
 1.2.16 - http://wraith.botpack.net/milestone/1.2.16
 * Add 'set altchars' so that alternative characters used for nicks can be changed. (fixes #418)

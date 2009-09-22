@@ -944,11 +944,9 @@ static void pls_chan(int idx, char *par, char *bot)
   }
     
   if (!bot && findchan_by_dname(chname)) {
-    putallbots(buf);
     dprintf(idx, "That channel already exists!\n");
     return;
   } else if ((chan = findchan(chname)) && !bot) {
-    putallbots(buf);
     dprintf(idx, "That channel already exists as %s!\n", chan->dname);
     return;
   } else if (strchr(CHANMETA, chname[0]) == NULL) {
