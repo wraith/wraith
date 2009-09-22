@@ -1,6 +1,7 @@
 * DNS now works on servers which tend to only return partial results (fixes #424)
 * Lower DNS lookup timeout from 40 seconds to 10 seconds
 * Use random query ids for DNS lookups
+* Fix problem of bots never reconnecting to hub after being up for long periods.
 
 1.2.17 - http://wraith.botpack.net/milestone/1.2.17
 * Binary pass prompt has been changed to be more clear.
