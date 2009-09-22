@@ -584,7 +584,6 @@ bool check_bin_initialized(const char *fname)
 
 bool check_bin_compat(const char *fname)
 {
-  int i = 0;
   size_t len = strlen(shell_escape(fname)) + 3 + 1;
   char *path = (char *) my_calloc(1, len);
 
