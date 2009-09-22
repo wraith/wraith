@@ -148,7 +148,6 @@ typedef struct {
 } dns_cache_t;
 
 
-static int query_id = 1;
 static dns_header_t _dns_header = {0, 0, 0, 0, 0, 0};
 static dns_query_t *query_head = NULL;
 static dns_host_t *hosts = NULL;
@@ -308,7 +307,7 @@ static dns_query_t *alloc_query(void *client_data, dns_callback_t callback, cons
 {
 	dns_query_t *q = (dns_query_t *) my_calloc(1, sizeof(*q));
 
-	q->id = query_id++;
+	q->id = randint(65534);
 	q->query = strdup(query);
 	q->answers = 0;
 	q->callback = callback;
