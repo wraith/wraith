@@ -344,9 +344,6 @@ static void dtx_arg(int& argc, char *argv[])
         exit(0);
       case '2':		/* used for testing new binary through update */
         exit(2);
-      case '3':		/* return the size of our settings struct */
-        printf("%d %zu\n", SETTINGS_VER, sizeof(settings_t));
-        exit(0);
       case '4':
         readconf(optarg, CONF_ENC);
         expand_tilde(&conf.binpath);
@@ -765,6 +762,12 @@ printf("out: %s\n", out);
   if (argc == 2 && !strcmp(argv[1], STR("-p"))) {
     if (settings.hash[0]) exit(4);	/* initialized */
     exit(5);				/* not initialized */
+  }
+
+  /* return the size of our settings struct */
+  if (argc == 2 && !strcmp(argv[1], STR("-3"))) {
+    printf("%d %zu\n", SETTINGS_VER, sizeof(settings_t));
+    exit(0);
   }
 
   {
