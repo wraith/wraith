@@ -19,6 +19,13 @@
 * Fix cmd_botset not setting default/global value on leaf bots when clearing a var (fixes #389)
 * Fix cmd_pls_chan causing bots to reset a channels settings when it already existed.
 * Fix password length discrepencies / off-by-1 problems in cmd_chpass and cmd_nopass (fixes #436)
+* Compiling fixes
+* SHELLHASH must now be a SHA1 hash
+* build.sh cleanups
+* Now including bdlib
+* Ident lookup timeout is now 5 seconds (will speed up linking / partyline connecting)
+* If a .resolv.conf exists, only use the nameservers listed in it
+* Remove all backup nameservers except for 4.2.2.2
 
 1.2.16 - http://wraith.botpack.net/milestone/1.2.16
 * Add 'set altchars' so that alternative characters used for nicks can be changed. (fixes #418)
