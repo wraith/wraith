@@ -251,15 +251,15 @@ comp_with_mask(void *addr, void *dest, unsigned int mask)
 int
 match_cidr(const char *s1, const char *s2)
 {
-  char *len = strrchr(s1, '/');
+  char *len = strrchr((char*)s1, '/');
   if(len == NULL)
     return 0;
 
-  char *ipmask = strrchr(s1, '@');
+  char *ipmask = strrchr((char*)s1, '@');
   if(ipmask == NULL)
     return 0;
 
-  char *ip = strrchr(s2, '@');
+  char *ip = strrchr((char*)s2, '@');
   if(ip == NULL)
     return 0;
 

@@ -202,7 +202,7 @@ char *var_sanitize(variable_t *var, const char *data)
     char *p = NULL;
     rate_t rate = {0, 0};
     
-    if (data && (p = strchr(data, ':'))) {
+    if (data && (p = strchr((char*)data, ':'))) {
       *p = 0;
       p++;
 
@@ -724,7 +724,7 @@ static bool var_find_list(const char *botnick, variable_t *var, const char *elem
   char *p = NULL;
 
   /* The first word only .. */
-  if (!strcmp(var->name, "alias") && (p = strchr(element, ' ')))
+  if (!strcmp(var->name, "alias") && (p = strchr((char*)element, ' ')))
     slen = p - element;
   /* Or the whole word */
   else
@@ -1023,7 +1023,7 @@ int cmd_set_real(const char *botnick, int idx, char *par)
       if (list == LIST_ADD) {
         if (var_find_list(botnick, var, data)) {
           if (!strcmp(var->name, "alias")) {
-            char *p = strchr(data, ' ');
+            char *p = strchr((char*)data, ' ');
             if (p)
               *p = 0;
           }
@@ -1041,7 +1041,7 @@ int cmd_set_real(const char *botnick, int idx, char *par)
           return 1;
         } else if (!var_find_list(botnick, var, data)) {
           if (!strcmp(var->name, "alias")) {
-            char *p = strchr(data, ' ');
+            char *p = strchr((char*)data, ' ');
             if (p)
               *p = 0;
           }

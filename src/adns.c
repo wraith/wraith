@@ -736,7 +736,7 @@ static int cut_host(const char *host, char *query)
 	int len;
 
 	orig = query;
-	while ((period = strchr(host, '.'))) {
+	while ((period = strchr((char*)host, '.'))) {
 		len = period - host;
 		if (len > 63) return(-1);
 		*query++ = len;
@@ -759,7 +759,7 @@ static int reverse_ip(const char *host, char *reverse)
 	char *period;
 	int offset, len;
 
-	period = strchr(host, '.');
+	period = strchr((char*)host, '.');
 	if (!period) {
 		len = strlen(host);
 		egg_memcpy(reverse, host, len);
