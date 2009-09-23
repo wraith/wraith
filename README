@@ -17,6 +17,8 @@ Hubs do not connect to IRC, and keep a local encrypted copy of the userfile.
 
 All official sites, documentation, support venues, repositories and source urls are referenced here.
 
+For official release announcements send an email to: wraith-announce-subscribe@botpack.net
+
 Source URL scheme: http://botpack.net/wraith-BRANCH.tar.gz
 Pre-compiled Binary URL scheme: http://botpack.net/wraith.SYSTEM-BRANCH.tar.gz
   Binaries are 32bit i486.
