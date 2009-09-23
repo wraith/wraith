@@ -205,7 +205,8 @@ echo ""
 echo "------------ Configuring BDLIB ------------"
 [
 if test -d .git; then
-  git submodule update --init
+  git submodule init
+  git submodule update
 fi
 ]
-cd lib/bdlib && ./configure
+test -f lib/bdlib/configure && cd lib/bdlib && ./configure
