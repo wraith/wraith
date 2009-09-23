@@ -27,6 +27,7 @@
 * If a .resolv.conf exists, only use the nameservers listed in it
 * Remove all backup nameservers except for 4.2.2.2
 * Prefer g++ 4.4.1 when compiling.
+* Enable SSP for debug binary/testing.
 
 1.2.16 - http://wraith.botpack.net/milestone/1.2.16
 * Add 'set altchars' so that alternative characters used for nicks can be changed. (fixes #418)

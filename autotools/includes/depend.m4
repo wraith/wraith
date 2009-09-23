@@ -11,12 +11,16 @@ num=`$CXX -dumpversion | sed "s/^\\\(.\\\).*/\\\1/"`
 if test $num -ge "3"; then
   CCDEPMODE=gcc3
 #  GCC3="-Wpadded -Wpacked -Wno-unused-parameter -Wmissing-format-attribute -Wdisabled-optimization"
-  GCC3="-W -Wno-unused-parameter -Wdisabled-optimization -Wno-write-strings -Wno-format-security -no-strict-aliasing"
+  GCC3="-W -Wno-unused-parameter -Wdisabled-optimization -Wno-write-strings -Wno-format-security -fno-strict-aliasing"
   GCC3DEB="-Wno-disabled-optimization -Wmissing-format-attribute"
+fi
+if test $num -ge "4"; then
+  GCC4DEB="-fstack-protector-all"
 fi
 AC_SUBST(CCDEPMODE)dnl
 AC_SUBST(GCC3)dnl
 AC_SUBST(GCC3DEB)dnl
+AC_SUBST(GCC4DEB)dnl
 ])
 
 AC_DEFUN([DO_DEPS],

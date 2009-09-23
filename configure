@@ -659,6 +659,7 @@ BASENAME
 AWK
 HEAD_1
 SET_MAKE
+GCC4DEB
 GCC3DEB
 GCC3
 CCDEPMODE
@@ -3841,6 +3842,9 @@ if test $num -ge "3"; then
 #  GCC3="-Wpadded -Wpacked -Wno-unused-parameter -Wmissing-format-attribute -Wdisabled-optimization"
   GCC3="-W -Wno-unused-parameter -Wdisabled-optimization -Wno-write-strings -Wno-format-security -fno-strict-aliasing"
   GCC3DEB="-Wno-disabled-optimization -Wmissing-format-attribute"
+fi
+if test $num -ge "4"; then
+  GCC4DEB="-fstack-protector-all"
 fi
 
 
