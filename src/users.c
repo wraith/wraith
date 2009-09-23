@@ -610,7 +610,11 @@ int readuserfile(const char *file, struct userrec **ret)
     return 0;
   noshare = 1;
   /* read opening comment */
-  fgets(cbuf, 180, f);
+  if (!fgets(cbuf, 180, f)) {
+    fclose(f);
+    putlog(LOG_MISC, "*", "!*! Failed to read userfile.");
+    return 0;
+  }
   remove_crlf(cbuf);
   temps = (char *) decrypt_string(salt1, cbuf);
   simple_snprintf(s, 180, "%s", temps);
@@ -625,7 +629,11 @@ int readuserfile(const char *file, struct userrec **ret)
   }
   while (!feof(f)) {
     s = buf;
-    fgets(cbuf, 1024, f);
+    if (!fgets(cbuf, 1024, f)) {
+      fclose(f);
+      putlog(LOG_MISC, "*", "!*! Failed to parse userfile.");
+      return 0;
+    }
     remove_crlf(cbuf);
     temps = (char *) decrypt_string(salt1, cbuf);
     simple_snprintf(s, 1024, "%s", temps);

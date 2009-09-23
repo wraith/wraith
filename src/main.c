@@ -748,7 +748,8 @@ printf("out: %s\n", out);
   }
 
   binname = getfullbinname(argv[0]);
-  chdir(dirname(binname));
+  if (chdir(dirname(binname)))
+    werr(ERR_BINSTAT);
 
   /* Find a temporary tempdir until we load binary data */
   /* setup initial tempdir as /tmp until we read in tmpdir from conf */

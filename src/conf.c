@@ -433,7 +433,10 @@ checkpid(const char *nick, conf_bot *bot)
   if ((f = fopen(buf, "r"))) {
     char *bufp = NULL, *pids = NULL;
 
-    fgets(buf, sizeof(buf), f);
+    if (!fgets(buf, sizeof(buf), f)) {
+      fclose(f);
+      return 0;
+    }
     fclose(f);
     remove_crlf(buf);
 

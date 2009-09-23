@@ -1296,8 +1296,7 @@ char *step_thru_file(FILE *fd)
   size_t ret_siz = 0;
 
   while (!feof(fd)) {
-    fgets(tempBuf, sizeof(tempBuf), fd);
-    if (!feof(fd)) {
+    if (fgets(tempBuf, sizeof(tempBuf), fd) && !feof(fd)) {
       if (retStr == NULL) {
         ret_siz = strlen(tempBuf) + 2;
         retStr = (char *) my_calloc(1, ret_siz);
