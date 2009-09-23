@@ -229,17 +229,14 @@ char *newsplit(char **rest)
 void maskaddr(const char *s, char *nw, int type)
 {
   int d = type % 5, num = 1;
-  register char *p, *u = 0, *h = 0, *ss;
+  register const char *u = NULL, *h = NULL, *p = NULL;
 
   /* Look for user and host.. */
-  ss = (char *)s;
-  u = strchr(s, '!');
-  if (u)
+  if ((u = strchr(s, '!')))
     h = strchr(u, '@');
-  if (!h){
+
+  if (!h)
     h = strchr(s, '@');
-    u = 0;
-  }
 
   /* Print nick if required and available */
   if (!u || (type % 10) < 5)
@@ -251,7 +248,7 @@ void maskaddr(const char *s, char *nw, int type)
   *nw++ = '!';
 
   /* Write user if required and available */
-  u = (u ? u + 1 : ss);
+  u = (u ? u + 1 : s);
   if (!h || (d == 2) || (d == 4))
     *nw++ = '*';
   else {
@@ -266,7 +263,7 @@ void maskaddr(const char *s, char *nw, int type)
   *nw++ = '@';
 
   /* The rest is for the host */
-  h = (h ? h + 1 : ss);
+  h = (h ? h + 1 : s);
   for (p = h; *p; p++) /* hostname? */
     if ((*p > '9' || *p < '0') && *p != '.') {
       num = 0;
