@@ -50,7 +50,7 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
   }
 
   memberlist *m = NULL;
-  char *ps = NULL, *pe = NULL, s[UHOSTLEN + 1], user[15] = "";
+  char *pe = NULL, s[UHOSTLEN + 1], user[15] = "";
 
   /* Apply lookup results to all matching members by host */
   for (m = r->chan->channel.member; m && m->nick[0]; m = m->next) {
