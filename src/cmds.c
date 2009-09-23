@@ -3823,9 +3823,9 @@ static void rcmd_ver(char * fbot, char * fhand, char * fidx) {
     strlcat(tmp, "(unknown OS)", sizeof(tmp));
   } else {
     if (updated) {
-      simple_snprintf(tmp, sizeof(tmp), "%s %s %s (%s) - UPDATED", tmp, un.sysname, un.release, un.machine);
+      simple_snprintf(&tmp[strlen(tmp)], sizeof(tmp) - strlen(tmp), " %s %s (%s) - UPDATED", un.sysname, un.release, un.machine);
     } else
-      simple_snprintf(tmp, sizeof(tmp), "%s %s %s (%s)", tmp, un.sysname, un.release, un.machine);
+      simple_snprintf(&tmp[strlen(tmp)], sizeof(tmp) - strlen(tmp), " %s %s (%s)", un.sysname, un.release, un.machine);
   }
   botnet_send_cmdreply(conf.bot->nick, fbot, fhand, fidx, tmp);
 }
@@ -3861,13 +3861,13 @@ static void rcmd_curnick(char * fbot, char * fhand, char * fidx) {
     if (server_online)
       egg_snprintf(tmp, sizeof(tmp), "Currently: %-20s ", botname);
     if (jupenick[0] && strncmp(botname, jupenick, strlen(botname)))
-      simple_snprintf(tmp, sizeof(tmp), "%sJupe: %s ", tmp, jupenick);
+      simple_snprintf(&tmp[strlen(tmp)], sizeof(tmp) - strlen(tmp), "Jupe: %s ", jupenick);
     else if (jupenick[0] && strcmp(botname, origbotname))
-      simple_snprintf(tmp, sizeof(tmp), "%sJupe: %s Main: %s ", tmp, jupenick, origbotname);
+      simple_snprintf(&tmp[strlen(tmp)], sizeof(tmp) - strlen(tmp), "Jupe: %s Main: %s ", jupenick, origbotname);
     else if (strcmp(botname, origbotname))
-      simple_snprintf(tmp, sizeof(tmp), "%sMain: %s ", tmp, origbotname);
+      simple_snprintf(&tmp[strlen(tmp)], sizeof(tmp) - strlen(tmp), "Main: %s ", origbotname);
     if (!server_online)
-      simple_snprintf(tmp, sizeof(tmp), "%s(not online)", tmp);
+      strlcat(tmp, "(not online)", sizeof(tmp));
     botnet_send_cmdreply(conf.bot->nick, fbot, fhand, fidx, tmp);
   }
 }
