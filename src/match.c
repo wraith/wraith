@@ -249,33 +249,33 @@ comp_with_mask(void *addr, void *dest, unsigned int mask)
  */
 
 int
-match_cidr(const char *s1, const char *s2)
+match_cidr(const char *m, const char *a)
 {
-  char *len = strrchr(s1, '/');
-  if(len == NULL)
+  const char *len_p = strrchr(m, '/');
+  if(len_p == NULL)
     return 0;
 
-  char *ipmask = strrchr(s1, '@');
-  if(ipmask == NULL)
+  const char *ip_mask_p = strrchr(m, '@');
+  if(ip_mask_p == NULL)
     return 0;
 
-  char *ip = strrchr(s2, '@');
-  if(ip == NULL)
+  const char *ip_p = strrchr(a, '@');
+  if(ip_p == NULL)
     return 0;
 
-  char mask[NICKLEN + UHOSTLEN + 6] = "";
+  char mask[NICKLEN + UHOSTLEN + 6] = "", *ipmask = NULL, *ip = NULL, *len = NULL;
 
-  strlcpy(mask, s1, sizeof(mask));
-  ipmask = mask + (ipmask - s1);
+  strlcpy(mask, m, sizeof(mask));
+  ipmask = mask + (ip_mask_p - m);
 
   char address[NICKLEN + UHOSTLEN + 6] = "";
 
-  strlcpy(address, s2, sizeof(address));
-  ip = address + (ip - s2);
+  strlcpy(address, a, sizeof(address));
+  ip = address + (ip_p - a);
 
   *ipmask++ = '\0';
 
-  len = mask + (len - s1);
+  len = mask + (len_p - m);
   *len++ = '\0';
 
   if (!str_isdigit(len))

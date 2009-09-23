@@ -183,7 +183,7 @@ char *var_sanitize(variable_t *var, const char *data)
     dataout = data ? strdup(data) : NULL;
   } else if (var->flags & VAR_WORD) {
     if (data) {
-      char *p = strchr(data, ' ');
+      const char *p = strchr(data, ' ');
       if (!p)
         dataout = strdup(data);
       else
@@ -194,19 +194,17 @@ char *var_sanitize(variable_t *var, const char *data)
 
 
   } else if (var->flags & VAR_RATE) {
-    char *p = NULL;
+    const char *p = NULL;
     rate_t rate = {0, 0};
     
     if (data && (p = strchr(data, ':'))) {
-      *p = 0;
-      p++;
+      char *p_count = strldup(data, p - data);
 
-      if (str_isdigit(data))
-        rate.count = atoi(data);
-      if (str_isdigit(p))
-        rate.time = atoi(p);
-      p--;
-      *p = ':';
+      if (str_isdigit(p_count))
+        rate.count = atoi(p_count);
+      free(p_count);
+      if (str_isdigit(p + 1))
+        rate.time = atoi(p + 1);
     }
 
     /* No limit enforcing yet */
@@ -716,7 +714,7 @@ static bool var_find_list(const char *botnick, variable_t *var, const char *elem
   char *item = NULL, *data = strdup(olddata), *datap = data;
   const char *delim = ",";
   size_t slen = 0;
-  char *p = NULL;
+  const char *p = NULL;
 
   /* The first word only .. */
   if (!strcmp(var->name, "alias") && (p = strchr(element, ' ')))
@@ -1017,12 +1015,16 @@ int cmd_set_real(const char *botnick, int idx, char *par)
       }
       if (list == LIST_ADD) {
         if (var_find_list(botnick, var, data)) {
+          char *data_word = NULL;
+          const char *p = NULL;
           if (!strcmp(var->name, "alias")) {
-            char *p = strchr(data, ' ');
-            if (p)
-              *p = 0;
-          }
-          dprintf(idx, "Item '%s' is already in the %s list.\n", data, var->name);
+            if ((p = strchr(data, ' ')))
+              data_word = strldup(data, p - data);
+          } else
+            data_word = (char*)data;
+          dprintf(idx, "Item '%s' is already in the %s list.\n", data_word, var->name);
+          if (p)
+            free(data_word);
           return 0;
         } else if (var_add_list(botnick, var, data)) {
           dprintf(idx, "Added '%s' to %s list.\n", data, var->name);
@@ -1035,12 +1037,16 @@ int cmd_set_real(const char *botnick, int idx, char *par)
           dprintf(idx, "Removed '%s' from %s list.\n", expanded_data, var->name);
           return 1;
         } else if (!var_find_list(botnick, var, data)) {
+          char *data_word = NULL;
+          const char *p = NULL;
           if (!strcmp(var->name, "alias")) {
-            char *p = strchr(data, ' ');
-            if (p)
-              *p = 0;
-          }
+            if ((p = strchr(data, ' ')))
+              data_word = strldup(data, p - data);
+          } else
+            data_word = (char*)data;
           dprintf(idx, "Item '%s' does not exist in the %s list.\n", data, var->name);
+          if (p)
+            free(data_word);
           return 0;
         }
       }

@@ -775,7 +775,7 @@ static int make_header(char *buf, int id)
 
 static int cut_host(const char *host, char *query)
 {
-	char *period, *orig;
+	const char *period = NULL, *orig = NULL;
 	int len;
 
 	orig = query;
@@ -799,7 +799,7 @@ static int cut_host(const char *host, char *query)
 
 static int reverse_ip(const char *host, char *reverse)
 {
-	char *period;
+	const char *period = NULL;
 	int offset, len;
 
 	period = strchr(host, '.');
