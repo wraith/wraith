@@ -416,7 +416,8 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
       } else {
         buf = (char *) my_calloc(1, fs + 1);
         fseek(err->f, 0, SEEK_SET);
-        fread(buf, 1, fs, err->f);
+        if (!fread(buf, 1, fs, err->f))
+          fs = 0;
         buf[fs] = 0;
         (*erroutput) = buf;
       }
@@ -432,7 +433,8 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
       } else {
         buf = (char *) my_calloc(1, fs + 1);
         fseek(out->f, 0, SEEK_SET);
-        fread(buf, 1, fs, out->f);
+        if (!fread(buf, 1, fs, out->f))
+          fs = 0;
         buf[fs] = 0;
         (*output) = buf;
       }
