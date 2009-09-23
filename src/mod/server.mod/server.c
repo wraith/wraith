@@ -946,7 +946,7 @@ static void dcc_chat_hostresolved(int i)
 
   simple_snprintf(buf, sizeof buf, "%d", dcc[i].port);
 
-  simple_snprintf(ip, sizeof ip, "%lu", iptolong(htonl(dcc[i].addr)));
+  simple_snprintf(ip, sizeof ip, "%lu", (0xffffffff & ((long) dcc[i].addr)));
 #ifdef USE_IPV6
   dcc[i].sock = getsock(0, AF_INET);
 #else
