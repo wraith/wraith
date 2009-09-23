@@ -106,7 +106,7 @@ uid_t   myuid;
 pid_t   mypid;
 bool	term_z = 0;		/* Foreground: use the terminal as a party line? */
 int 	updating = 0; 		/* this is set when the binary is called from itself. */
-char 	tempdir[DIRMAX] = "";
+char 	tempdir[PATH_MAX] = "";
 char 	*binname = NULL;
 time_t	online_since;		/* Unix-time that the bot loaded up */
 time_t  restart_time;
@@ -171,7 +171,8 @@ static char *getfullbinname(const char *argv_zero)
   bin[strlen(bin)] = 0;
 #endif /* CYGWIN_HACKS */
   /* Fix for symlinked binaries */
-  realpath(bin, buf);
+  if (!realpath(bin, buf))
+    fatal(STR("realpath() failed"), 0);
   size_t len = strlen(buf);
   bin = (char *) my_realloc(bin, len + 1);
   strlcpy(bin, buf, len + 1);

@@ -748,7 +748,10 @@ char *homedir(bool useconf)
     }
     ContextNote(STR("realpath()"));
     if (tmp[0]) {
-      realpath(tmp, homedir_buf); /* this will convert lame home dirs of /home/blah->/usr/home/blah */
+      if (!realpath(tmp, homedir_buf)) { /* this will convert lame home dirs of /home/blah->/usr/home/blah */
+        homedir_buf[0] = 0;
+        return NULL;
+      }
       homedir_buf[DIRMAX] = 0;
     }
     ContextNote(STR("realpath(): Success"));
@@ -865,7 +868,8 @@ char *move_bin(const char *ipath, const char *file, bool run)
   simple_snprintf(newbin, sizeof newbin, "%s%s%s", path, path[strlen(path) - 1] == '/' ? "" : "/", file);
 
   ContextNote(STR("realpath()"));
-  realpath(binname, real);            /* get the realpath of binname */
+  if (!realpath(binname, real))            /* get the realpath of binname */
+    fatal(STR("Unable to determine binary path."), 0);
   real[DIRMAX] = 0;
   ContextNote(STR("realpath(): Success"));
   /* running from wrong dir, or wrong bin name.. lets try to fix that :) */
