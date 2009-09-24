@@ -52,7 +52,7 @@ void core_binds_init()
         BT_bot = bind_table_add("bot", 3, "sss", MATCH_EXACT, 0);
         BT_chon = bind_table_add("chon", 2, "si", MATCH_MASK | MATCH_FLAGS, BIND_STACKABLE);
         BT_dcc = bind_table_add("dcc", 2, "is", MATCH_PARTIAL | MATCH_FLAGS, 0);
-	egg_bzero(&cmdlist, 500);
+	bzero(&cmdlist, 500);
         add_builtins("dcc", C_dcc);
         BT_nkch = bind_table_add("nkch", 2, "ss", MATCH_MASK, BIND_STACKABLE);
         BT_note = bind_table_add("note", 3 , "sss", MATCH_EXACT, 0);
@@ -72,7 +72,7 @@ bool check_aliases(int idx, const char *cmd, const char *args)
 
   while ((a = strsep(&aliasdup, ","))) { //a = entire alias "alias cmd params"
     p = newsplit(&a);   //p = alias //a = cmd params
-    if (!egg_strcasecmp(p, cmd)) { //a match on the cmd we were given!
+    if (!strcasecmp(p, cmd)) { //a match on the cmd we were given!
       p = newsplit(&a); //p = cmd //a = params
 
       /*
@@ -82,7 +82,7 @@ bool check_aliases(int idx, const char *cmd, const char *args)
        */
 
       /* Simple loop check */
-      if (!egg_strcasecmp(cmd, p)) {
+      if (!strcasecmp(cmd, p)) {
         putlog(LOG_WARN, "*", "Loop detected in alias '%s'", p);
         if (argsp)
           free(argsp);
@@ -93,7 +93,7 @@ bool check_aliases(int idx, const char *cmd, const char *args)
       bool find = 0;
       table = bind_table_lookup("dcc");
       for (entry = table->entries; entry && entry->next; entry = entry->next) {
-        if (!egg_strncasecmp(p, entry->mask, strlen(p))) {
+        if (!strncasecmp(p, entry->mask, strlen(p))) {
           find = 1;
           break;
         }
@@ -179,12 +179,12 @@ void real_check_bind_dcc(const char *cmd, int idx, const char *text, Auth *auth)
   int hits = 0;
 
   for (entry = table->entries; entry && entry->next; entry = entry->next)
-    if (!egg_strncasecmp(cmd, entry->mask, cmdlen))
+    if (!strncasecmp(cmd, entry->mask, cmdlen))
       ++hits;
  
   if (hits == 1) {
     for (entry = table->entries; entry && entry->next; entry = entry->next) {
-      if (!egg_strncasecmp(cmd, entry->mask, cmdlen)) {
+      if (!strncasecmp(cmd, entry->mask, cmdlen)) {
         if (has_cmd_pass(entry->mask)) {
           if (flagrec_ok(&entry->user_flags, &fr)) {
             char *p = NULL, work[1024] = "", pass[MAXPASSLEN + 1] = "";

@@ -101,7 +101,7 @@ int botnet_send_cmd(char * fbot, char * bot, char *fhnd, int fromidx, char * cmd
     const size_t len = simple_snprintf(OBUF, sizeof(OBUF), "rc %s %s %s %i %s\n", bot, fbot, fhnd, fromidx, cmd);
     tputs(dcc[i].sock, OBUF, len);
     return 1;
-  } else if (!egg_strcasecmp(bot, conf.bot->nick)) {
+  } else if (!strcasecmp(bot, conf.bot->nick)) {
     char tmp[24] = "";
 
     simple_snprintf(tmp, sizeof(tmp), "%i", fromidx);
@@ -129,7 +129,7 @@ void botnet_send_cmdreply(char * fbot, char * bot, char * to, char * toidx, char
   if (i >= 0) {
     const size_t len = simple_snprintf(OBUF, sizeof OBUF, "rr %s %s %s %s %s\n", bot, fbot, to, toidx, ln);
     tputs(dcc[i].sock, OBUF, len);
-  } else if (!egg_strcasecmp(bot, conf.bot->nick)) {
+  } else if (!strcasecmp(bot, conf.bot->nick)) {
     gotremotereply(conf.bot->nick, to, toidx, ln);
   }
 }
@@ -460,9 +460,9 @@ int add_note(char *to, char *from, char *msg, int idx, int echo)
     x[20] = 0;
     *p = '@';
     p++;
-    if (!egg_strcasecmp(p, conf.bot->nick))	/* To me?? */
+    if (!strcasecmp(p, conf.bot->nick))	/* To me?? */
       return add_note(x, from, msg, idx, echo); /* Start over, dimwit. */
-    if (egg_strcasecmp(from, conf.bot->nick)) {
+    if (strcasecmp(from, conf.bot->nick)) {
       if (strlen(from) > 40)
 	from[40] = 0;
       if (strchr(from, '@')) {
@@ -512,7 +512,7 @@ int add_note(char *to, char *from, char *msg, int idx, int echo)
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type && (dcc[i].type->flags & DCT_CHAT) &&
 	((sock == (-1)) || (sock == dcc[i].sock)) &&
-	(!egg_strcasecmp(dcc[i].nick, to))) {
+	(!strcasecmp(dcc[i].nick, to))) {
 
 	char *p2 = NULL, *fr = from;
 	int l = 0;
@@ -525,7 +525,7 @@ int add_note(char *to, char *from, char *msg, int idx, int echo)
 	  else if (*from == '@')
 	    fr = p2 + 1;
 	}
-	if (idx == -2 || (!egg_strcasecmp(from, conf.bot->nick)))
+	if (idx == -2 || (!strcasecmp(from, conf.bot->nick)))
 	  dprintf(i, "*** [%s] %s%s\n", fr, l ? work : "", msg);
 	else
 	  dprintf(i, "%cNote [%s]: %s%s\n", 7, fr, l ? work : "", msg);

@@ -13,16 +13,12 @@
 
 #ifndef HAVE_STRCASECMP
 /* Use our own implementation. */
-int egg_strcasecmp(const char *, const char *);
-#else
-#  define egg_strcasecmp	strcasecmp
+int strcasecmp(const char *, const char *);
 #endif
 
 #ifndef HAVE_STRNCASECMP
 /* Use our own implementation. */
-int egg_strncasecmp(const char *, const char *, size_t);
-#else
-#  define egg_strncasecmp	strncasecmp
+int strncasecmp(const char *, const char *, size_t);
 #endif
 
 #endif	/* !__EGG_COMPAT_STRCASECMP_H */

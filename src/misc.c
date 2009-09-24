@@ -307,7 +307,7 @@ void daysago(time_t mynow, time_t then, char *out, size_t outsiz)
     simple_snprintf(out, outsiz, "%d day%s ago", mydays, (mydays == 1) ? "" : "s");
     return;
   }
-  egg_strftime(out, 6, "%H:%M", gmtime(&then));
+  strftime(out, 6, "%H:%M", gmtime(&then));
 }
 
 /* Convert an interval (in seconds) to one of:
@@ -321,7 +321,7 @@ void days(time_t mynow, time_t then, char *out, size_t outsiz)
     simple_snprintf(out, outsiz, "in %d day%s", mydays, (mydays == 1) ? "" : "s");
     return;
   }
-  egg_strftime(out, 9, "at %H:%M", gmtime(&now));
+  strftime(out, 9, "at %H:%M", gmtime(&now));
 }
 
 /* Convert an interval (in seconds) to one of:
@@ -384,7 +384,7 @@ void show_motd(int idx)
     buf = buf_ptr = strdup(motd);
     who = newsplit(&buf);
     when = atoi(newsplit(&buf));
-    egg_strftime(date, sizeof date, "%c %Z", gmtime(&when));
+    strftime(date, sizeof date, "%c %Z", gmtime(&when));
     dprintf(idx, "Motd set by %s%s%s (%s)\n", BOLD(idx), who, BOLD_END(idx), date);
     dumplots(idx, "* ", replace(buf, "\\n", "\n"));
     dprintf(idx, " \n");
@@ -1040,7 +1040,7 @@ char *replace(const char *string, const char *oldie, const char *newbie)
   static char newstring_buf[REPLACES][1024];
   char *newstring = newstring_buf[n++];
 
-  egg_memset(newstring, 0, 1024);
+  memset(newstring, 0, 1024);
   if (n == REPLACES)
     n = 0;
 
@@ -1158,7 +1158,7 @@ void shuffle(char *string, char *delim, size_t str_len)
   char *array[501], *str = NULL, *work = NULL;
   size_t len = 0;
 
-  egg_bzero(&array, sizeof array);
+  bzero(&array, sizeof array);
   work = strdup(string);
 
   str = strtok(work, delim);

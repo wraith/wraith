@@ -390,9 +390,9 @@ tell_user(int idx, struct userrec *u)
   else {
     now2 = now - li->laston;
     if (now2 > 86400)
-      egg_strftime(s1, 7, "%d %b", gmtime(&li->laston));
+      strftime(s1, 7, "%d %b", gmtime(&li->laston));
     else
-      egg_strftime(s1, 6, "%H:%M", gmtime(&li->laston));
+      strftime(s1, 6, "%H:%M", gmtime(&li->laston));
   }
   if (!u->bot) {
     simple_snprintf(format, sizeof format, "%%-%us %%-5s %%-15s %%s (%%-10.10s)\n", HANDLEN);
@@ -413,9 +413,9 @@ tell_user(int idx, struct userrec *u)
         else {
   	  now2 = now - (ch->laston);
 	  if (now2 > 86400)
-	    egg_strftime(s1, 7, "%d %b", gmtime(&ch->laston));
+	    strftime(s1, 7, "%d %b", gmtime(&ch->laston));
 	  else
-	    egg_strftime(s1, 6, "%H:%M", gmtime(&ch->laston));
+	    strftime(s1, 6, "%H:%M", gmtime(&ch->laston));
         }
         fr.match = FR_CHAN;
         fr.chan = ch->flags;
@@ -809,7 +809,7 @@ int readuserfile(const char *file, struct userrec **ret)
 	    int ok = 0;
 
 	    for (ue = u->entries; ue && !ok; ue = ue->next)
-	      if (ue->name && !egg_strcasecmp(code + 2, ue->name)) {
+	      if (ue->name && !strcasecmp(code + 2, ue->name)) {
 		struct list_type *list = NULL;
 
 		list = (struct list_type *) my_calloc(1, sizeof(struct list_type));
@@ -897,10 +897,10 @@ int readuserfile(const char *file, struct userrec **ret)
 
 	      u = get_user_by_handle(bu, code);
 	      for (i = 0; i < dcc_total; i++)
-		if (dcc[i].type && !egg_strcasecmp(code, dcc[i].nick))
+		if (dcc[i].type && !strcasecmp(code, dcc[i].nick))
 		  dcc[i].user = u;
         
-              if (!egg_strcasecmp(code, conf.bot->nick))
+              if (!strcasecmp(code, conf.bot->nick))
                 conf.bot->u = u;
 
 	      /* if s starts with '/' it's got file info */
@@ -919,7 +919,7 @@ int readuserfile(const char *file, struct userrec **ret)
   for (u = bu; u; u = u->next) {
     struct user_entry *e = NULL;
 
-    if (!u->bot && !egg_strcasecmp (u->handle, conf.bot->nick)) {
+    if (!u->bot && !strcasecmp (u->handle, conf.bot->nick)) {
       putlog(LOG_MISC, "*", "(!) I have a user record, but am not classified as a BOT!");
       u->bot = 1;
     }
@@ -988,7 +988,7 @@ struct userrec *next_hub(struct userrec *current, char *lowval, char *highval)
       cur = userlist;
     if (cur == current)
       break;
-    if (cur->bot && (egg_strcasecmp(cur->handle, conf.bot->nick))) {
+    if (cur->bot && (strcasecmp(cur->handle, conf.bot->nick))) {
       link_pref_val(cur, thisval);
       if ((strcmp(thisval, lowval) < 0) && (strcmp(thisval, highval) > 0) &&(strcmp(thisval, bestmatchval) < 0)) {
         strlcpy(bestmatchval, thisval, sizeof(bestmatchval));
@@ -1097,7 +1097,7 @@ void autolink_random_hub(char *avoidbot) {
 
   for (struct userrec *u = userlist; u; u = u->next) {
     get_user_flagrec(u, &fr, NULL);
-    if (glob_bot(fr) && egg_strcasecmp(u->handle, conf.bot->nick) && (bot_hublevel(u) < 999)) {
+    if (glob_bot(fr) && strcasecmp(u->handle, conf.bot->nick) && (bot_hublevel(u) < 999)) {
       if (strcmp(u->handle, avoidbot)) {
         hl2 = hl;
         hl = (struct hublist_entry *) my_calloc(1, sizeof(struct hublist_entry));

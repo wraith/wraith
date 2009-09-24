@@ -170,7 +170,7 @@ void logfile_close(void)
 
   char date[50] = "";
 
-  egg_strftime(date, sizeof date, "%c %Z", gmtime(&now));
+  strftime(date, sizeof date, "%c %Z", gmtime(&now));
   fprintf(logf, "--- Log session end: %s ---\n", date);
   fclose(logf);
   logf = NULL;  
@@ -193,7 +193,7 @@ bool logfile_open()
 
   char date[50] = "";
 
-  egg_strftime(date, sizeof date, "%c %Z", gmtime(&now));
+  strftime(date, sizeof date, "%c %Z", gmtime(&now));
   fprintf(logf, "--- Log session begin: %s ---\n", date);
   return 1;
 }
@@ -222,7 +222,7 @@ void logfile(int type, const char *msg)
 //  if (!logfile_stat(".l"))
 //    return;
 
-  if (!egg_strncasecmp(msg, log_last, sizeof(log_last))) {
+  if (!strncasecmp(msg, log_last, sizeof(log_last))) {
     repeats++;
     return;
   }
@@ -265,8 +265,8 @@ void putlog(int type, const char *chname, const char *format, ...)
 
   if (!log_repeated) {
     if (type == last_type && 
-        !egg_strncasecmp(chname, last_chname, sizeof(last_chname)) && 
-        !egg_strncasecmp(va_out, last_log, sizeof(last_log))) {
+        !strncasecmp(chname, last_chname, sizeof(last_chname)) &&
+        !strncasecmp(va_out, last_log, sizeof(last_log))) {
       ++log_repeats;
 
       return;
@@ -294,7 +294,7 @@ void putlog(int type, const char *chname, const char *format, ...)
     char stamp[34] = "";
     struct tm *t = gmtime(&now);
 
-    egg_strftime(stamp, sizeof(stamp), LOG_TS, t);
+    strftime(stamp, sizeof(stamp), LOG_TS, t);
     /* Place the timestamp in the string to be printed */
     strlcpy(out, stamp, sizeof(out));
     strlcat(out, " ", sizeof(out));
@@ -341,7 +341,7 @@ irc_log(struct chanset_t *chan, const char *format, ...)
   egg_vsnprintf(va_out, sizeof(va_out), format, va);
   va_end(va);
 
-  if ((chan && egg_strcasecmp(chan->dname, "#!obs")) || !chan)
+  if ((chan && strcasecmp(chan->dname, "#!obs")) || !chan)
     dprintf(DP_HELP, "PRIVMSG %s :[%s] %s\n", relay_chan, chan ? chan->dname : "*" , va_out);
 /*
   chanout_but(-1, 1, "[%s] %s\n", chan->dname, va_out);

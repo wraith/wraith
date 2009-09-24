@@ -378,7 +378,7 @@ void update_report(int idx, int details)
 	  for (j = 0; j < dcc_total; j++)
 	    if (dcc[j].type && ((dcc[j].type->flags & (DCT_FILETRAN | DCT_FILESEND))
 		 == (DCT_FILETRAN | DCT_FILESEND)) &&
-		!egg_strcasecmp(dcc[j].host, dcc[i].nick)) {
+		!strcasecmp(dcc[j].host, dcc[i].nick)) {
 	      dprintf(idx, "Downloading binary from %s (%d%% done)\n",
 		      dcc[i].nick,
 		      (int) (100.0 * ((float) dcc[j].status) /
@@ -393,7 +393,7 @@ void update_report(int idx, int details)
 	  for (j = 0; j < dcc_total; j++) {
 	    if (dcc[j].type && ((dcc[j].type->flags & (DCT_FILETRAN | DCT_FILESEND))
 		 == DCT_FILETRAN)
-		&& !egg_strcasecmp(dcc[j].host, dcc[i].nick)) {
+		&& !strcasecmp(dcc[j].host, dcc[i].nick)) {
 	      if (dcc[j].type == &DCC_GET)
 		dprintf(idx, "Sending binary to %s (%d%% done)\n",
 			dcc[i].nick,
@@ -413,7 +413,7 @@ void update_report(int idx, int details)
 static void cmd_bupdate(int idx, char *par)
 {
   for (int i = 0; i < dcc_total; i++) {
-    if (dcc[i].type && !egg_strcasecmp(dcc[i].nick, par)) {
+    if (dcc[i].type && !strcasecmp(dcc[i].nick, par)) {
       dprintf(i, "sb u?\n");
       dcc[i].status &= ~(STAT_SENDINGU | STAT_UPDATED);
       dcc[i].status |= STAT_OFFEREDU;

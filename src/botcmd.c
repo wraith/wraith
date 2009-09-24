@@ -158,7 +158,7 @@ void bot_remotecmd(int idx, char *par) {
     return;
   }
 
-  if (!egg_strcasecmp(tbot, conf.bot->nick)) {
+  if (!strcasecmp(tbot, conf.bot->nick)) {
     gotremotecmd(tbot, fbot, fhnd, fidx, par);
   } else if (!strcmp(tbot, "*")) {
     botnet_send_cmd_broad(idx, fbot, fhnd, atoi(fidx), par);
@@ -188,7 +188,7 @@ void bot_remotereply(int idx, char *par) {
     return;
   }
 
-  if (!egg_strcasecmp(tbot, conf.bot->nick)) {
+  if (!strcasecmp(tbot, conf.bot->nick)) {
     gotremotereply(fbot, fhnd, fidx, par);
   } else {
     if (nextbot(tbot)!= idx)
@@ -290,7 +290,7 @@ static void bot_priv(int idx, char *par)
   if (!to[0])
     return;			/* Silently ignore notes to '@bot' this
 				 * is legacy code */
-  if (!egg_strcasecmp(tobot, conf.bot->nick)) {		/* For me! */
+  if (!strcasecmp(tobot, conf.bot->nick)) {		/* For me! */
     if (p == from)
       add_note(to, from, par, -2, 0);
     else {
@@ -465,7 +465,7 @@ static void bot_who(int idx, char *par)
     from = TBUF;
   }
   to = newsplit(&par);
-  if (!egg_strcasecmp(to, conf.bot->nick))
+  if (!strcasecmp(to, conf.bot->nick))
     to[0] = 0;			/* (for me) */
   chan = base64_to_int(par);
   if (to[0]) {			/* Pass it on */
@@ -506,7 +506,7 @@ static void bot_link(int idx, char *par)
   from = newsplit(&par);
   bot = newsplit(&par);
 
-  if (!egg_strcasecmp(bot, conf.bot->nick)) {
+  if (!strcasecmp(bot, conf.bot->nick)) {
     if ((rfrom = strchr(from, ':')))
       rfrom++;
     else
@@ -563,7 +563,7 @@ static void bot_unlink(int idx, char *par)
   from = newsplit(&par);
   bot = newsplit(&par);
   undes = newsplit(&par);
-  if (!egg_strcasecmp(bot, conf.bot->nick)) {
+  if (!strcasecmp(bot, conf.bot->nick)) {
     if ((rfrom = strchr(from, ':')))
       rfrom++;
     else
@@ -650,7 +650,7 @@ static void bot_nlinked(int idx, char *par)
     putlog(LOG_BOTS, "*", "Invalid eggnet protocol from %s (zapfing)", dcc[idx].nick);
     simple_snprintf(s, sizeof(s), "Disconnected %s (invalid bot)", dcc[idx].nick);
     dprintf(idx, "error invalid eggnet protocol for 'nlinked'\n");
-  } else if ((in_chain(newbot)) || (!egg_strcasecmp(newbot, conf.bot->nick))) {
+  } else if ((in_chain(newbot)) || (!strcasecmp(newbot, conf.bot->nick))) {
     /* Loop! */
     putlog(LOG_BOTS, "*", "Loop detected %s (mutual: %s)", dcc[idx].nick, newbot);
     simple_snprintf(s, sizeof(s), "Detected loop: two bots exist named %s: disconnecting %s", newbot, dcc[idx].nick);
@@ -744,7 +744,7 @@ static void bot_trace(int idx, char *par)
   dest = newsplit(&par);
   simple_snprintf(TBUF, sizeof(TBUF), "%s:%s", par, conf.bot->nick);
   botnet_send_traced(idx, from, TBUF);
-  if (egg_strcasecmp(dest, conf.bot->nick) && ((i = nextbot(dest)) > 0))
+  if (strcasecmp(dest, conf.bot->nick) && ((i = nextbot(dest)) > 0))
     botnet_send_trace(i, from, dest, par);
 }
 
@@ -763,7 +763,7 @@ static void bot_traced(int idx, char *par)
     *p = 0;
     p++;
   }
-  if (!egg_strcasecmp(p, conf.bot->nick)) {
+  if (!strcasecmp(p, conf.bot->nick)) {
     time_t t = 0;
     char *p2 = par, *ss = TBUF;
 
@@ -781,7 +781,7 @@ static void bot_traced(int idx, char *par)
 	p2 = par + 1;
     }
     for (i = 0; i < dcc_total; i++) {
-      if (dcc[i].type && (dcc[i].type->flags & DCT_CHAT) && (!egg_strcasecmp(dcc[i].nick, to)) && 
+      if (dcc[i].type && (dcc[i].type->flags & DCT_CHAT) && (!strcasecmp(dcc[i].nick, to)) &&
           ((sock == (-1)) || (sock == dcc[i].sock))) {
 	if (t) {
           int j=0;
@@ -840,12 +840,12 @@ static void bot_reject(int idx, char *par)
   who = newsplit(&par);
   destbot = strchr(who, '@');
   *destbot++ = 0;
-  if (!egg_strcasecmp(destbot, conf.bot->nick)) {
+  if (!strcasecmp(destbot, conf.bot->nick)) {
     /* Kick someone here! */
     int ok = 0;
 
     for (i = 0; i < dcc_total; i++) {
-      if (dcc[i].type && dcc[i].simul == -1 && !egg_strcasecmp(who, dcc[i].nick) && (dcc[i].type->flags & DCT_CHAT)) {
+      if (dcc[i].type && dcc[i].simul == -1 && !strcasecmp(who, dcc[i].nick) && (dcc[i].type->flags & DCT_CHAT)) {
         u = get_user_by_handle(userlist, from);
         if (u) {
           if (!whois_access(u, dcc[idx].user)) {
@@ -868,7 +868,7 @@ static void bot_reject(int idx, char *par)
 
 static void bot_thisbot(int idx, char *par)
 {
-  if (egg_strcasecmp(par, dcc[idx].nick)) {
+  if (strcasecmp(par, dcc[idx].nick)) {
     char s[1024] = "";
 
     putlog(LOG_BOTS, "*", "Wrong bot--wanted %s, got %s", dcc[idx].nick, par);
@@ -904,7 +904,7 @@ static void bot_zapf(int idx, char *par)
     fake_alert(idx, "direction", from, "zapf");
     return;
   }
-  if (!egg_strcasecmp(to, conf.bot->nick)) {
+  if (!strcasecmp(to, conf.bot->nick)) {
     /* For me! */
     char *opcode;
 
@@ -1066,7 +1066,7 @@ static void bot_part(int idx, char *par)
   for (i = 0; i < dcc_total; i++) {
     /* This will potentially close all simul-idxs with matching nick, even though they may be connected multiple times
        but, it won't matter as a new will just be made as needed. */
-    if (dcc[i].type && dcc[i].simul >= 0 && !egg_strcasecmp(dcc[i].nick, nick)) {
+    if (dcc[i].type && dcc[i].simul >= 0 && !strcasecmp(dcc[i].nick, nick)) {
         dcc[i].simul = -1;
         lostdcc(i);
     }
@@ -1151,7 +1151,7 @@ static void bot_versions(int sock, char *par)
 
   if (nextbot(frombot) != sock)
     fake_alert(sock, "direction", frombot, "versions");
-  else if (egg_strcasecmp(tobot = newsplit(&par), conf.bot->nick)) {
+  else if (strcasecmp(tobot = newsplit(&par), conf.bot->nick)) {
     if ((sock = nextbot(tobot)) >= 0)
       dprintf(sock, "v %s %s %s\n", frombot, tobot, par);
   } else {
@@ -1220,7 +1220,7 @@ botcmd_t C_bot[] =
 static int comp_botcmd_t(const void *m1, const void *m2) {
   const botcmd_t *mi1 = (const botcmd_t *) m1;
   const botcmd_t *mi2 = (const botcmd_t *) m2;
-  return egg_strcasecmp(mi1->name, mi2->name);
+  return strcasecmp(mi1->name, mi2->name);
 }
 
 const botcmd_t *search_botcmd_t(const botcmd_t *table, const char* keyString, size_t elements) {
@@ -1276,7 +1276,7 @@ static void bot_rsim(char *botnick, char *code, char *msg)
 
   for (i = 0; i < dcc_total; i++) {
    /* See if we can find a simul-idx for the same ridx/nick */
-   if (dcc[i].type && dcc[i].simul == ridx && !egg_strcasecmp(dcc[i].nick, nick)) {
+   if (dcc[i].type && dcc[i].simul == ridx && !strcasecmp(dcc[i].nick, nick)) {
      putlog(LOG_DEBUG, "*", "Simul found old idx for %s: %d (ridx: %d)", nick, i, ridx);
      dcc[i].simultime = now;
      idx = i;

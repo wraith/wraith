@@ -428,7 +428,7 @@ static void dtx_arg(int& argc, char *argv[])
       {
         char date[50] = "";
 
-        egg_strftime(date, sizeof date, "%c %Z", gmtime(&buildts));
+        strftime(date, sizeof date, "%c %Z", gmtime(&buildts));
 	printf(STR("%s\nBuild Date: %s (%s%lu%s)\n"), version, date, BOLD(-1), buildts, BOLD_END(-1));
         printf(STR("BuildOS: %s%s%s BuildArch: %s%s%s\n"), BOLD(-1), BUILD_OS, BOLD_END(-1), BOLD(-1), BUILD_ARCH, BOLD_END(-1));
 	printf(STR("pack: %d conf: %d settings_t: %d prefix: %d pad: %d\n"), SIZE_PACK, SIZE_CONF, sizeof(settings_t), PREFIXLEN, SIZE_PAD);
@@ -506,8 +506,8 @@ static void event_resettraffic()
 	traffic.in_total.trans += traffic.in_today.trans;
 	traffic.in_total.unknown += traffic.in_today.unknown;
 
-	egg_memset(&traffic.out_today, 0, sizeof(traffic.out_today));
-	egg_memset(&traffic.in_today, 0, sizeof(traffic.in_today));
+	memset(&traffic.out_today, 0, sizeof(traffic.out_today));
+	memset(&traffic.in_today, 0, sizeof(traffic.in_today));
 }
 
 static void core_secondly()
@@ -534,7 +534,7 @@ static void core_secondly()
       ++ison_cnt;
   }
 
-  egg_memcpy(&nowtm, gmtime(&now), sizeof(struct tm));
+  memcpy(&nowtm, gmtime(&now), sizeof(struct tm));
   if (nowtm.tm_min != lastmin) {
     int i = 0;
 
@@ -791,7 +791,7 @@ printf("out: %s\n", out);
   simple_snprintf(ver, sizeof(ver), STR("[%s] Wraith %s"), settings.packname, egg_version);
   simple_snprintf(version, sizeof(version), STR("%s (%lu)"), ver, buildts);
 
-  egg_memcpy(&nowtm, gmtime(&now), sizeof(struct tm));
+  memcpy(&nowtm, gmtime(&now), sizeof(struct tm));
   lastmin = nowtm.tm_min;
 
   if (argc)

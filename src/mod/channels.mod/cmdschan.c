@@ -319,10 +319,10 @@ static void cmd_masks(const char type, int idx, char *par)
 {
   const char *str_type = (type == 'b' ? "ban" : type == 'e' ? "exempt" : "invite");
 
-  if (!egg_strcasecmp(par, "all")) {
+  if (!strcasecmp(par, "all")) {
     putlog(LOG_CMDS, "*", "#%s# %ss all", dcc[idx].nick, str_type);
     tell_masks(type, idx, 1, "");
-  } else if (!egg_strcasecmp(par, "global")) {
+  } else if (!strcasecmp(par, "global")) {
     putlog(LOG_CMDS, "*", "#%s# %ss global", dcc[idx].nick, str_type);
     tell_masks(type, idx, 1, "", 1);
   } else {
@@ -389,7 +389,7 @@ static void cmd_info(int idx, char *par)
     dprintf(idx, "Your info line is locked.  Sorry.\n");
     return;
   }
-  if (!egg_strcasecmp(par, "none")) {
+  if (!strcasecmp(par, "none")) {
     if (chname) {
       par[0] = 0;
       set_handle_chaninfo(userlist, dcc[idx].nick, chname, NULL);
@@ -465,7 +465,7 @@ static void cmd_chinfo(int idx, char *par)
     }
   }
   putlog(LOG_CMDS, "*", "#%s# chinfo %s %s %s", dcc[idx].nick, handle, chname ? chname : par, chname ? par : "");
-  if (!egg_strcasecmp(par, "none"))
+  if (!strcasecmp(par, "none"))
     par[0] = 0;
   if (chname) {
     set_handle_chaninfo(userlist, handle, chname, par);
@@ -666,9 +666,9 @@ static void cmd_stick_yn(int idx, char *par, int yn)
   stick_type = newsplit(&par);
   strlcpy(s, newsplit(&par), sizeof s);
   strlcpy(chname, newsplit(&par), sizeof chname);
-  if (egg_strcasecmp(stick_type, "exempt") &&
-      egg_strcasecmp(stick_type, "invite") &&
-      egg_strcasecmp(stick_type, "ban")) {
+  if (strcasecmp(stick_type, "exempt") &&
+      strcasecmp(stick_type, "invite") &&
+      strcasecmp(stick_type, "ban")) {
     strlcpy(chname, s, sizeof chname);
     strlcpy(s, stick_type, sizeof s);
     stick_type = "ban";
@@ -678,13 +678,13 @@ static void cmd_stick_yn(int idx, char *par, int yn)
     return;
   }
   /* Now deal with exemptions */
-  if (!egg_strcasecmp(stick_type, "exempt")) {
+  if (!strcasecmp(stick_type, "exempt")) {
     type = 'e';
     str_type = "exempt";
-  } else if (!egg_strcasecmp(stick_type, "invite")) {
+  } else if (!strcasecmp(stick_type, "invite")) {
     type = 'I';
     str_type = "invite";
-  } else if (!egg_strcasecmp(stick_type, "ban")) {
+  } else if (!strcasecmp(stick_type, "ban")) {
     type = 'b';
     str_type = "ban";
   } else
@@ -1186,7 +1186,7 @@ static void cmd_chaninfo(int idx, char *par)
     int deflag = 0;
 
     if (chan->added_ts) {
-      egg_strftime(date, sizeof date, "%c %Z", gmtime(&(chan->added_ts)));
+      strftime(date, sizeof date, "%c %Z", gmtime(&(chan->added_ts)));
     } else
       date[0] = 0;
     if (chan->added_by && chan->added_by[0])

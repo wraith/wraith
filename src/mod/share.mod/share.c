@@ -139,7 +139,7 @@ static bool flush_tbuf(char *bot)
 
   for (t = tbuf; t; t = tnext) {
     tnext = t->next;
-    if (!egg_strcasecmp(t->bot, bot)) {
+    if (!strcasecmp(t->bot, bot)) {
       del_tbuf(t);
       return 1;
     }
@@ -185,7 +185,7 @@ static void q_tbuf(char *bot, char *s)
   tandbuf *t = NULL;
 
   for (t = tbuf; t && t->bot[0]; t = t->next)
-    if (!egg_strcasecmp(t->bot, bot)) {
+    if (!strcasecmp(t->bot, bot)) {
       if ((q = q_addmsg(t->q, s)))
         t->q = q;
       break;
@@ -211,7 +211,7 @@ static void q_resync_but(char *s, const char *bot)
   tandbuf *t = NULL;
 
   for (t = tbuf; t && t->bot[0]; t = t->next) {
-    if (egg_strcasecmp(t->bot, bot)) {
+    if (strcasecmp(t->bot, bot)) {
       if ((q = q_addmsg(t->q, s)))
         t->q = q;
     }
@@ -226,7 +226,7 @@ void dump_resync(int idx)
   tandbuf *t = NULL;
 
   for (t = tbuf; t && t->bot[0]; t = t->next)
-    if (!egg_strcasecmp(dcc[idx].nick, t->bot)) {
+    if (!strcasecmp(dcc[idx].nick, t->bot)) {
       for (q = t->q; q && q->msg[0]; q = q->next) {
         dprintf(idx, "%s", q->msg);
       }
@@ -1252,7 +1252,7 @@ finish_share(int idx)
   int i, j = -1;
 
   for (i = 0; i < dcc_total; i++)
-    if (dcc[i].type && !egg_strcasecmp(dcc[i].nick, dcc[idx].host) && (dcc[i].type->flags & DCT_BOT)) {
+    if (dcc[i].type && !strcasecmp(dcc[i].nick, dcc[idx].host) && (dcc[i].type->flags & DCT_BOT)) {
       j = i;
       break;
     }
@@ -1498,7 +1498,7 @@ cancel_user_xfer(int idx, void *x)
     /* look for any transfers from this bot and kill them */
     if (dcc[idx].status & STAT_GETTING) {
       for (i = 0; i < dcc_total; i++)
-        if (dcc[i].type && !egg_strcasecmp(dcc[i].host, dcc[idx].nick) &&
+        if (dcc[i].type && !strcasecmp(dcc[i].host, dcc[idx].nick) &&
             ((dcc[i].type->flags & (DCT_FILETRAN | DCT_FILESEND)) == (DCT_FILETRAN | DCT_FILESEND))) {
           j = i;
           break;
@@ -1513,7 +1513,7 @@ cancel_user_xfer(int idx, void *x)
     /* look for any transfers we were sending them */
     if (dcc[idx].status & STAT_SENDING) {
       for (i = 0; i < dcc_total; i++)
-        if (dcc[i].type && (!egg_strcasecmp(dcc[i].host, dcc[idx].nick)) &&
+        if (dcc[i].type && (!strcasecmp(dcc[i].host, dcc[idx].nick)) &&
             ((dcc[i].type->flags & (DCT_FILETRAN | DCT_FILESEND)) == DCT_FILETRAN)) {
           j = i;
           break;
@@ -1545,7 +1545,7 @@ share_report(int idx, int details)
 
           for (j = 0; j < dcc_total; j++)
             if (dcc[j].type && ((dcc[j].type->flags & (DCT_FILETRAN | DCT_FILESEND))
-                 == (DCT_FILETRAN | DCT_FILESEND)) && !egg_strcasecmp(dcc[j].host, dcc[i].nick)) {
+                 == (DCT_FILETRAN | DCT_FILESEND)) && !strcasecmp(dcc[j].host, dcc[i].nick)) {
               dprintf(idx, "Downloading userlist from %s (%d%% done)\n",
                       conf.bot->hub ? dcc[i].nick : "[botnet]", (int) (100.0 * ((float) dcc[j].status) / ((float) dcc[j].u.xfer->length)));
               ok = 1;
@@ -1557,7 +1557,7 @@ share_report(int idx, int details)
           for (j = 0; j < dcc_total; j++) {
             if (dcc[j].type && ((dcc[j].type->flags & (DCT_FILETRAN | DCT_FILESEND))
                  == DCT_FILETRAN)
-                && !egg_strcasecmp(dcc[j].host, dcc[i].nick)) {
+                && !strcasecmp(dcc[j].host, dcc[i].nick)) {
               if (dcc[j].type == &DCC_GET)
                 dprintf(idx, "Sending userlist to %s (%d%% done)\n",
                         dcc[i].nick,

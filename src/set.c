@@ -154,9 +154,9 @@ char *var_sanitize(variable_t *var, const char *data)
       if (str_isdigit(data)) {
         int number = atoi(data);
         dataout = strdup(det_translate_num(number));
-      } else if (!egg_strcasecmp(data, "ignore") || !egg_strcasecmp(data, "warn") ||
-                 !egg_strcasecmp(data, "die") || !egg_strcasecmp(data, "reject") ||
-                 !egg_strcasecmp(data, "suicide")) {
+      } else if (!strcasecmp(data, "ignore") || !strcasecmp(data, "warn") ||
+                 !strcasecmp(data, "die") || !strcasecmp(data, "reject") ||
+                 !strcasecmp(data, "suicide")) {
         dataout = strdup(data);
       }
     } else
@@ -165,16 +165,16 @@ char *var_sanitize(variable_t *var, const char *data)
     int num = 0;
 
     if (data && (str_isdigit(data) || 
-                 !egg_strcasecmp(data, "true") || 
-                 !egg_strcasecmp(data, "on") || 
-                 !egg_strcasecmp(data, "off") || 
-                 !egg_strcasecmp(data, "false"))) {
+                 !strcasecmp(data, "true") ||
+                 !strcasecmp(data, "on") ||
+                 !strcasecmp(data, "off") ||
+                 !strcasecmp(data, "false"))) {
       if (str_isdigit(data))
         num = atoi(data);
 
-      if (num > 0 || !egg_strcasecmp(data, "true") || !egg_strcasecmp(data, "on"))
+      if (num > 0 || !strcasecmp(data, "true") || !strcasecmp(data, "on"))
         num = 1;
-      else if (num < 0 || !egg_strcasecmp(data, "false") || !egg_strcasecmp(data, "off"))
+      else if (num < 0 || !strcasecmp(data, "false") || !strcasecmp(data, "off"))
         num = 0;
     }
     dataout = (char*) my_calloc(1, 2);
@@ -253,7 +253,7 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
   } else if (var->flags & VAR_DETECTED) {
     int number = data ? det_translate(data) : DET_IGNORE;
 #ifndef DEBUG
-    if (number < 2 && !egg_strcasecmp(var->name, "trace"))
+    if (number < 2 && !strcasecmp(var->name, "trace"))
       number = DET_DIE;
 #endif
     *(int *) (var->mem) = number;
@@ -448,7 +448,7 @@ const char *var_string(variable_t *var)
 static int comp_variable_t(const void *m1, const void *m2) {
   const variable_t *mi1 = (const variable_t *) m1;
   const variable_t *mi2 = (const variable_t *) m2;
-  return egg_strcasecmp(mi1->name, mi2->name);
+  return strcasecmp(mi1->name, mi2->name);
 }
 
 static inline variable_t *var_get_var_by_name(const char *name)
@@ -504,7 +504,7 @@ void var_set(variable_t *var, const char *target, const char *datain)
   if (target) {
     bool me = 0;
 
-    if (!egg_strcasecmp(conf.bot->nick, target)) {
+    if (!strcasecmp(conf.bot->nick, target)) {
       me = 1;
       domem = 1;				/* always set the mem if it's local */
       if (var->ldata)
@@ -560,7 +560,7 @@ void var_set_userentry(const char *target, const char *name, const char *data)
   struct userrec *u = NULL;
   bool me = 0;
 
-  if (!egg_strcasecmp(conf.bot->nick, target))
+  if (!strcasecmp(conf.bot->nick, target))
     me = 1;
 
   if (me && conf.bot)
@@ -724,7 +724,7 @@ static bool var_find_list(const char *botnick, variable_t *var, const char *elem
     slen = strlen(element);
   
   while ((item = strsep(&data, delim)))
-    if (!egg_strncasecmp(item, element, slen)) {
+    if (!strncasecmp(item, element, slen)) {
       free(datap);
       return true;
     }
@@ -800,7 +800,7 @@ static char *var_rem_list(const char *botnick, variable_t *var, const char *elem
   while ((word = strsep(&olddata, delim))) {
     ++i;
 
-    if ((num && num != i) || (!num && egg_strncasecmp(word, element, elen))) {
+    if ((num && num != i) || (!num && strncasecmp(word, element, elen))) {
       /* Reconstruct the left and right part of the list...*/
       if (data && data[0] && word && word[0]) {
         strlcat(data, ",", tsiz);
@@ -856,7 +856,7 @@ int cmd_set_real(const char *botnick, int idx, char *par)
   int list = 0, i = 0;
   bool notyes = 1, wildcard = 0;
 
-  if (par[0] && !egg_strncasecmp(par, "-yes", 4)) {
+  if (par[0] && !strncasecmp(par, "-yes", 4)) {
     notyes = 0;
     newsplit(&par);
   }
@@ -874,12 +874,12 @@ int cmd_set_real(const char *botnick, int idx, char *par)
       list = LIST_ADD; 
     else if (name[0] == '-')
       list = LIST_RM;
-    else if (!egg_strcasecmp(name, "list"))
+    else if (!strcasecmp(name, "list"))
       list = LIST_SHOW;
   }
 
   if (list) {
-    if (list != LIST_SHOW && name[1] && egg_strcasecmp(&name[1], "list"))
+    if (list != LIST_SHOW && name[1] && strcasecmp(&name[1], "list"))
       name = &name[1];
     else {
       if (!par[0]) {

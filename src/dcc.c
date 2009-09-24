@@ -163,11 +163,11 @@ send_sysinfo()
   uarch = gotun ? un.machine : "*";
   uosver = gotun ? un.release : "*";
 
-  if (((sysname && egg_strcasecmp(sysname, usysname)) ||
-       (username && egg_strcasecmp(username, uusername)) ||
-       (nodename && egg_strcasecmp(nodename, unodename)) ||
-       (arch && egg_strcasecmp(arch, uarch)) ||
-       (osver && egg_strcasecmp(osver, uosver))
+  if (((sysname && strcasecmp(sysname, usysname)) ||
+       (username && strcasecmp(username, uusername)) ||
+       (nodename && strcasecmp(nodename, unodename)) ||
+       (arch && strcasecmp(arch, uarch)) ||
+       (osver && strcasecmp(osver, uosver))
       ) ||
       ((!sysname && usysname) || 
        (!username && uusername) || 
@@ -370,13 +370,13 @@ dcc_bot_new(int idx, char *buf, int x)
 
   strip_telnet(dcc[idx].sock, buf, &x);
   code = newsplit(&buf);
-  if (!egg_strcasecmp(code, "goodbye!")) {
+  if (!strcasecmp(code, "goodbye!")) {
     greet_new_bot(idx);
-  } else if (!egg_strcasecmp(code, "v")) {
+  } else if (!strcasecmp(code, "v")) {
     bot_version(idx, buf);
-  } else if (!egg_strcasecmp(code, STR("neg!"))) {	/* something to parse in enclink.c */
+  } else if (!strcasecmp(code, STR("neg!"))) {	/* something to parse in enclink.c */
     link_parse(idx, buf);
-  } else if (!egg_strcasecmp(code, STR("neg?"))) {	/* we're connecting to THEM */
+  } else if (!strcasecmp(code, STR("neg?"))) {	/* we're connecting to THEM */
     int snum = findanysnum(dcc[idx].sock);
 
     if (snum >= 0) {
@@ -402,7 +402,7 @@ dcc_bot_new(int idx, char *buf, int x)
       socklist[snum].enclink = i;
       link_link(idx, -1, i, TO);
     }
-  } else if (!egg_strcasecmp(code, "error")) {
+  } else if (!strcasecmp(code, "error")) {
     putlog(LOG_MISC, "*", "ERROR linking %s: %s", dcc[idx].nick, buf);
     killsock(dcc[idx].sock);
     lostdcc(idx);
@@ -965,9 +965,9 @@ dcc_chat_pass(int idx, char *buf, int atr)
   pass = newsplit(&buf);
 
   if (dcc[idx].user->bot) {
-    if (!egg_strcasecmp(pass, STR("neg!"))) {		/* we're the hub */
+    if (!strcasecmp(pass, STR("neg!"))) {		/* we're the hub */
       link_parse(idx, buf);
-    } else if (!egg_strcasecmp(pass, STR("neg."))) {		/* we're done, link up! */
+    } else if (!strcasecmp(pass, STR("neg."))) {		/* we're done, link up! */
       dcc[idx].type = &DCC_BOT_NEW;
       dcc[idx].u.bot = (struct bot_info *) my_calloc(1, sizeof(struct bot_info));
       dcc[idx].status = STAT_CALLED;
@@ -975,7 +975,7 @@ dcc_chat_pass(int idx, char *buf, int atr)
       greet_new_bot(idx);
       if (conf.bot->hub)
         send_timesync(idx);
-    } else if (!egg_strcasecmp(pass, STR("neg"))) {
+    } else if (!strcasecmp(pass, STR("neg"))) {
       int snum = findanysnum(dcc[idx].sock);
 
       if (snum >= 0) {
@@ -1007,7 +1007,7 @@ dcc_chat_pass(int idx, char *buf, int atr)
         if (buf[0]) {
           const char *expected_nick = newsplit(&buf);
 
-          if (egg_strcasecmp(expected_nick, conf.bot->nick)) {
+          if (strcasecmp(expected_nick, conf.bot->nick)) {
             putlog(LOG_WARN, "*", STR("%s failed encrypted link handshake (was expecting '%s' instead of me)"), dcc[idx].nick, expected_nick);
             killsock(dcc[idx].sock);
             lostdcc(idx);
@@ -1323,7 +1323,7 @@ detect_telnet_flood(char *floodhost)
   get_user_flagrec(get_user_by_host(floodhost), &fr, NULL);
   if (!flood_telnet_thr || glob_noflood(fr))
     return 0;                   /* No flood protection */
-  if (egg_strcasecmp(lasttelnethost, floodhost)) {      /* New... */
+  if (strcasecmp(lasttelnethost, floodhost)) {      /* New... */
     strlcpy(lasttelnethost, floodhost, sizeof(lasttelnethost));
     lasttelnettime = now;
     lasttelnets = 0;
@@ -1618,7 +1618,7 @@ void
 dupwait_notify(const char *who)
 {
   for (register int idx = 0; idx < dcc_total; idx++)
-    if (dcc[idx].type && (dcc[idx].type == &DCC_DUPWAIT) && !egg_strcasecmp(dcc[idx].nick, who)) {
+    if (dcc[idx].type && (dcc[idx].type == &DCC_DUPWAIT) && !strcasecmp(dcc[idx].nick, who)) {
       dcc_telnet_pass(idx, dcc[idx].u.dupwait->atr);
       break;
     }
@@ -1683,7 +1683,7 @@ dcc_telnet_id(int idx, char *buf, int atr)
   correct_handle(nick);
   strlcpy(dcc[idx].nick, nick, NICKLEN);
   if (dcc[idx].user->bot) {
-    if (!egg_strcasecmp(conf.bot->nick, dcc[idx].nick)) {
+    if (!strcasecmp(conf.bot->nick, dcc[idx].nick)) {
       putlog(LOG_BOTS, "*", "Refused telnet connection from %s (tried using my botnetnick)", dcc[idx].host);
       killsock(dcc[idx].sock);
       lostdcc(idx);

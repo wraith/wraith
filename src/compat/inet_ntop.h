@@ -14,9 +14,7 @@
 #include <arpa/inet.h>
 
 #ifndef HAVE_INET_NTOP
-const char *egg_inet_ntop(int af, const void *src, char *dst, socklen_t size);
-#else
-#  define egg_inet_ntop inet_ntop
+const char *inet_ntop(int af, const void *src, char *dst, socklen_t size);
 #endif
 
 #endif /* !_EGG_COMPAT_INET_NTOP_H */

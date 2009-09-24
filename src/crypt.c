@@ -32,12 +32,12 @@ encrypt_binary(const char *keydata, unsigned char *in, size_t *inlen)
     len += (CRYPT_BLOCKSIZE - (len % CRYPT_BLOCKSIZE));
 
   out = (unsigned char *) my_calloc(1, len + 1);
-  egg_memcpy(out, in, *inlen);
+  memcpy(out, in, *inlen);
   *inlen = len;
 
   if (!keydata || !*keydata) {
     /* No key, no encryption */
-    egg_memcpy(out, in, len);
+    memcpy(out, in, len);
   } else {
     char key[CRYPT_KEYSIZE + 1] = "";
 
@@ -62,7 +62,7 @@ decrypt_binary(const char *keydata, unsigned char *in, size_t *len)
 
   *len -= *len % CRYPT_BLOCKSIZE;
   out = (unsigned char *) my_calloc(1, *len + 1);
-  egg_memcpy(out, in, *len);
+  memcpy(out, in, *len);
 
   if (!keydata || !*keydata) {
     /* No key, no decryption */

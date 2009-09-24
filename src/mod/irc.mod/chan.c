@@ -432,7 +432,7 @@ static bool detect_chan_flood(char *floodnick, char *floodhost, char *from,
   /* Okay, make sure i'm not flood-checking myself */
   if (match_my_nick(floodnick))
     return 0;
-  if (!egg_strcasecmp(floodhost, botuserhost))
+  if (!strcasecmp(floodhost, botuserhost))
     return 0;
   /* My user@host (?) */
 
@@ -1081,7 +1081,7 @@ void check_this_user(char *hand, int del, char *host)
     for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
       simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
       u = m->user ? m->user : get_user_by_host(s);
-      if ((u && !egg_strcasecmp(u->handle, hand) && del < 2) ||
+      if ((u && !strcasecmp(u->handle, hand) && del < 2) ||
 	  (!u && del == 2 && wild_match(host, s))) {
 	u = del ? NULL : u;
 	get_user_flagrec(u, &fr, chan->dname, chan);
@@ -1122,7 +1122,7 @@ take_massopline(char *op, char **to_op)
   register bool useop = 0;
   static char ret[182] = "";
 
-  egg_memset(ret, 0, sizeof(ret));
+  memset(ret, 0, sizeof(ret));
   for (register unsigned int i = 0; i < modesperline; i++) {
     if (*to_op[0] || op) {
       /* if 'op' then use it, then move on to to_op */
@@ -1157,7 +1157,7 @@ take_makeline(char *op, char *deops, unsigned int deopn, size_t deops_len)
   unsigned int pos = randint(deopn), i;
   static char ret[151] = "";
 
-  egg_memset(ret, 0, sizeof(ret));
+  memset(ret, 0, sizeof(ret));
   for (i = 0; i < n; i++) {
     if (opn && i == pos)
       strlcat(ret, "+o", sizeof(ret));
@@ -2459,7 +2459,7 @@ static int gotjoin(char *from, char *chname)
       bool splitjoin = 0;
 
       /* Net-join */
-      if (m && m->split && !egg_strcasecmp(m->userhost, uhost)) {
+      if (m && m->split && !strcasecmp(m->userhost, uhost)) {
         splitjoin = 1;
 	m->split = 0;
 	m->last = now;
@@ -2584,7 +2584,7 @@ static int gotjoin(char *from, char *chname)
         if (cache) {
           cache_chan_t *cchan = NULL;
 
-          if (egg_strcasecmp(cache->uhost, m->userhost)) {
+          if (strcasecmp(cache->uhost, m->userhost)) {
 
 
           }

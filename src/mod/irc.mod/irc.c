@@ -297,14 +297,14 @@ static void cache_invite(struct chanset_t *chan, char *nick, char *host, char *h
   cache->bot = bot;
 
   /* if we find they have a host but it doesnt match the new host, wipe it */
-  if (host && cache->uhost[0] && egg_strcasecmp(cache->uhost, host))
+  if (host && cache->uhost[0] && strcasecmp(cache->uhost, host))
     cache->uhost[0] = 0;
 
   if (host && !cache->uhost[0])
     strlcpy(cache->uhost, host, sizeof(cache->uhost));
 
   /* if we find they have a handle but it doesnt match the new handle, wipe it */
-  if (handle && cache->handle[0] && egg_strcasecmp(cache->handle, handle))
+  if (handle && cache->handle[0] && strcasecmp(cache->handle, handle))
     cache->handle[0] = 0;
 
   if (handle && !cache->handle[0])
@@ -963,7 +963,7 @@ punish_badguy(struct chanset_t *chan, char *whobad,
   get_user_flagrec(u, &fr, chan->dname, chan);
 
   /* Get current time into a string */
-  egg_strftime(ct, sizeof ct, "%d %b %Z", gmtime(&now));
+  strftime(ct, sizeof ct, "%d %b %Z", gmtime(&now));
 
   /* Put together log and kick messages */
   reason[0] = 0;

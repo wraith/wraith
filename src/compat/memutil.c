@@ -16,7 +16,7 @@ str_redup(char **str, const char *newstr)
         }
         len = strlen(newstr) + 1;
         *str = (char *) my_realloc(*str, len);
-        egg_memcpy(*str, newstr, len);
+        memcpy(*str, newstr, len);
 }
 
 char *
@@ -26,7 +26,7 @@ strdup(const char *entry)
   char *target = (char *) my_calloc(1, len + 1);
   if (target == NULL) return NULL;
   target[len] = 0;
-  return (char *) egg_memcpy(target, entry, len);
+  return (char *) memcpy(target, entry, len);
 }
 
 char *
@@ -37,7 +37,7 @@ strldup(const char *entry, size_t maxlen)
   char *target = (char *) my_calloc(1, len + 1);
   if (target == NULL) return NULL;
   target[len] = 0;
-  return (char *) egg_memcpy(target, entry, len);
+  return (char *) memcpy(target, entry, len);
 }
 
 

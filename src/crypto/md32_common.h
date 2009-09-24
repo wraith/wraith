@@ -494,7 +494,7 @@ int HASH_UPDATE (HASH_CTX *c, const void *data_, unsigned long len)
 #if !defined(HASH_BLOCK_DATA_ORDER)
 			while (sw--)
 				{
-				egg_memcpy (p=c->data,data,HASH_CBLOCK);
+				memcpy (p=c->data,data,HASH_CBLOCK);
 				HASH_BLOCK_DATA_ORDER_ALIGNED(c,p,1);
 				data+=HASH_CBLOCK;
 				len-=HASH_CBLOCK;
@@ -537,7 +537,7 @@ void HASH_TRANSFORM (HASH_CTX *c, const unsigned char *data)
 	else
 #if !defined(HASH_BLOCK_DATA_ORDER)
 		{
-		egg_memcpy (c->data,data,HASH_CBLOCK);
+		memcpy (c->data,data,HASH_CBLOCK);
 		HASH_BLOCK_DATA_ORDER_ALIGNED (c,c->data,1);
 		}
 #endif

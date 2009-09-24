@@ -56,7 +56,7 @@ static void ghost_link_case(int idx, direction_t direction)
       struct sockaddr_in sa;
       socklen_t socklen = sizeof(sa);
 
-      egg_bzero(&sa, socklen);
+      bzero(&sa, socklen);
       getsockname(socklist[snum].sock, (struct sockaddr *) &sa, &socklen);
       port = sa.sin_port;
     }
@@ -191,7 +191,7 @@ void ghost_parse(int idx, int snum, char *buf)
 
   char *code = newsplit(&buf);
 
-  if (!egg_strcasecmp(code, STR("elink"))) {
+  if (!strcasecmp(code, STR("elink"))) {
     const char salt2[] = SALT2;
     char *tmp = decrypt_string(salt2, newsplit(&buf));
 

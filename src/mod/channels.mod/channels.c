@@ -161,7 +161,7 @@ parsebots(char *bots, char *botn) {
     char *list = strdup(bots), *bot = strtok(list, ",");
 
     while(bot && *bot) {
-      if (!egg_strcasecmp(bot, botn))
+      if (!strcasecmp(bot, botn))
         return 1;
       bot = strtok((char*) NULL, ",");
     }

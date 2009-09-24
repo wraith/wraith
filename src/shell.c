@@ -1005,15 +1005,15 @@ void crontab_create(int interval) {
 int det_translate(const char *word)
 {
   if (word && word[0]) {
-    if (!egg_strcasecmp(word, STR("ignore")))
+    if (!strcasecmp(word, STR("ignore")))
       return DET_IGNORE;
-    else if (!egg_strcasecmp(word, STR("warn")))
+    else if (!strcasecmp(word, STR("warn")))
       return DET_WARN;
-    else if (!egg_strcasecmp(word, STR("reject")))
+    else if (!strcasecmp(word, STR("reject")))
       return DET_REJECT;
-    else if (!egg_strcasecmp(word, STR("die")))
+    else if (!strcasecmp(word, STR("die")))
       return DET_DIE;
-    else if (!egg_strcasecmp(word, STR("suicide")))
+    else if (!strcasecmp(word, STR("suicide")))
       return DET_SUICIDE;
   }
   return DET_IGNORE;

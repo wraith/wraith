@@ -12,13 +12,12 @@
 
 #ifndef HAVE_MEMSET
 /* Use our own implementation. */
-void *egg_memset(void *dest, int c, size_t n);
-#else
-#  define egg_memset	memset
+void *memset(void *dest, int c, size_t n);
 #endif
 
 /* Use memset instead of bzero.
  */
-#define egg_bzero(dest, n)	egg_memset(dest, 0, n)
+#undef bzero
+#define bzero(dest, n)	memset(dest, 0, n)
 
 #endif	/* !__EGG_COMPAT_MEMSET_H */

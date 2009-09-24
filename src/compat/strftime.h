@@ -14,9 +14,7 @@
  * use our own.
  */
 #ifndef HAVE_STRFTIME
-size_t egg_strftime(char *s, size_t maxsize, const char *format, const struct tm *tp);
-#else
-#  define egg_strftime strftime
+size_t strftime(char *s, size_t maxsize, const char *format, const struct tm *tp);
 #endif
 
 #endif	/* !_EGG_COMPAT_STRFTIME_H_ */

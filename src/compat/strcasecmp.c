@@ -8,7 +8,7 @@
 #include "memcpy.h"
 
 #ifndef HAVE_STRCASECMP
-int egg_strcasecmp(const char *s1, const char *s2)
+int strcasecmp(const char *s1, const char *s2)
 {
   while ((*s1) && (*s2) && (toupper(*s1) == toupper(*s2))) {
     s1++;
@@ -19,7 +19,7 @@ int egg_strcasecmp(const char *s1, const char *s2)
 #endif /* !HAVE_STRCASECMP */
 
 #ifndef HAVE_STRNCASECMP
-int egg_strncasecmp(const char *s1, const char *s2, size_t n)
+int strncasecmp(const char *s1, const char *s2, size_t n)
 {
   if (!n)
     return 0;

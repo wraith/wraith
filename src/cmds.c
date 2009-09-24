@@ -144,7 +144,7 @@ static void tell_who(int idx, int chan)
 	ok = 1;
 	dprintf(idx, "Bots connected:\n");
       }
-      egg_strftime(s, 20, "%d %b %H:%M %Z", gmtime(&dcc[i].timeval));
+      strftime(s, 20, "%d %b %H:%M %Z", gmtime(&dcc[i].timeval));
       s[20] = 0;
       if (atr & USER_OWNER) {
         simple_snprintf(format, sizeof format, "  [%%.2lu]  %%s%%c%%-%zus (%%s) %%s\n", nicklen);
@@ -390,7 +390,7 @@ static void cmd_about(int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# about", dcc[idx].nick);
   dprintf(idx, STR("Wraith botpack by bryan\n"));
   dprintf(idx, STR("http://wraith.botpack.net\n"));
-  egg_strftime(c, sizeof c, "%c %Z", gmtime(&buildts));
+  strftime(c, sizeof c, "%c %Z", gmtime(&buildts));
   dprintf(idx, "Version: %s\n", egg_version);
   dprintf(idx, "Build: %s (%li)\n", c, (long)buildts);
   dprintf(idx, "Commit: %s\n", commit);
@@ -600,7 +600,7 @@ static void cmd_nohelp(int idx, char *par)
 
 bool is_restricted_cmd(const char* name) {
   if (name) {
-    if (!HAVE_MDOP && !egg_strcasecmp(name, "mmode"))
+    if (!HAVE_MDOP && !strcasecmp(name, "mmode"))
       return 1;
   }
   return 0;
@@ -609,7 +609,7 @@ bool is_restricted_cmd(const char* name) {
 static int comp_help_t(const void *m1, const void *m2) {
   const help_t *mi1 = (const help_t *) m1;
   const help_t *mi2 = (const help_t *) m2;
-  return egg_strcasecmp(mi1->cmd, mi2->cmd);
+  return strcasecmp(mi1->cmd, mi2->cmd);
 }
 
 static help_t *
@@ -740,7 +740,7 @@ static void cmd_who(int idx, char *par)
       return;
     }
     putlog(LOG_CMDS, "*", "#%s# who %s", dcc[idx].nick, par);
-    if (!egg_strcasecmp(par, conf.bot->nick))
+    if (!strcasecmp(par, conf.bot->nick))
       tell_who(idx, dcc[idx].u.chat->channel);
     else {
       int i = nextbot(par);
@@ -919,7 +919,7 @@ static void cmd_status(int idx, char *par)
 {
   int atr = dcc[idx].user ? dcc[idx].user->flags : 0, all = 0;
 
-  if (!egg_strcasecmp(par, "all")) {
+  if (!strcasecmp(par, "all")) {
     if (!(atr & USER_MASTER)) {
       dprintf(idx, "You do not have Bot Master privileges.\n");
       return;
@@ -963,7 +963,7 @@ static void cmd_boot(int idx, char *par)
     char whonick[HANDLEN + 1];
 
     splitcn(whonick, who, '@', HANDLEN + 1);
-    if (!egg_strcasecmp(who, conf.bot->nick)) {
+    if (!strcasecmp(who, conf.bot->nick)) {
       cmd_boot(idx, whonick);
       return;
     }
@@ -977,7 +977,7 @@ static void cmd_boot(int idx, char *par)
     return;
   }
   for (i = 0; i < dcc_total; i++) {
-    if (dcc[i].type && dcc[i].simul == -1 && !egg_strcasecmp(dcc[i].nick, who) && (dcc[i].type->flags & DCT_CANBOOT)) {
+    if (dcc[i].type && dcc[i].simul == -1 && !strcasecmp(dcc[i].nick, who) && (dcc[i].type->flags & DCT_CANBOOT)) {
       if (!whois_access(dcc[idx].user, dcc[i].user)) {
         dprintf(idx, "Sorry, you cannot boot %s.\n", dcc[i].nick);
         return;
@@ -1015,7 +1015,7 @@ static void cmd_console(int idx, char *par)
    */
   if (nick[0] && !strchr(CHANMETA "+-*", nick[0]) && glob_master(fr)) {
     for (i = 0; i < dcc_total; i++) {
-      if (dcc[i].type && !egg_strcasecmp(nick, dcc[i].nick) && (dcc[i].type == &DCC_CHAT) && (!ok)) {
+      if (dcc[i].type && !strcasecmp(nick, dcc[i].nick) && (dcc[i].type == &DCC_CHAT) && (!ok)) {
 	ok = 1;
 	dest = i;
       }
@@ -1114,13 +1114,13 @@ static void cmd_date(int idx, char *par)
 
   putlog(LOG_CMDS, "*", "#%s# date", dcc[idx].nick);
 
-  egg_strftime(date, sizeof date, "%c %Z", localtime(&now));
+  strftime(date, sizeof date, "%c %Z", localtime(&now));
   dprintf(idx, "%s (local shell time)\n", date);
-  egg_strftime(date, sizeof date, "%c %Z", gmtime(&now));
+  strftime(date, sizeof date, "%c %Z", gmtime(&now));
   dprintf(idx, "%s <-- This time is used on the bot.\n", date);
   
   hub = now + timesync;
-  egg_strftime(date, sizeof date, "%c %Z", gmtime(&hub));
+  strftime(date, sizeof date, "%c %Z", gmtime(&hub));
   dprintf(idx, "%s <-- Botnet uses this\n", date);
 }
 
@@ -1157,7 +1157,7 @@ static void cmd_chhandle(int idx, char *par)
     return;
   } else if (strchr(BADHANDCHARS, newhand[0]) != NULL)
     dprintf(idx, "Bizarre quantum forces prevent nicknames from starting with '%c'.\n", newhand[0]);
-  else if (get_user_by_handle(userlist, newhand) && egg_strcasecmp(hand, newhand))
+  else if (get_user_by_handle(userlist, newhand) && strcasecmp(hand, newhand))
     dprintf(idx, "Somebody is already using %s.\n", newhand);
   else {
     int atr = dcc[idx].user ? dcc[idx].user->flags : 0, atr2 = u2 ? u2->flags : 0;
@@ -1167,11 +1167,11 @@ static void cmd_chhandle(int idx, char *par)
     else if (u2->bot && !(atr & USER_OWNER))
       dprintf(idx, "You can't change a bot's nick.\n");
     else if ((atr2 & USER_OWNER) && !(atr & USER_OWNER) &&
-            egg_strcasecmp(dcc[idx].nick, hand))
+            strcasecmp(dcc[idx].nick, hand))
       dprintf(idx, "You can't change a bot owner's handle.\n");
-    else if (isowner(hand) && egg_strcasecmp(dcc[idx].nick, hand))
+    else if (isowner(hand) && strcasecmp(dcc[idx].nick, hand))
       dprintf(idx, "You can't change a permanent bot owner's handle.\n");
-    else if (!egg_strcasecmp(newhand, conf.bot->nick) && !(u2->bot || nextbot(hand) != -1))
+    else if (!strcasecmp(newhand, conf.bot->nick) && !(u2->bot || nextbot(hand) != -1))
       dprintf(idx, "Hey! That's MY name!\n");
     else if (change_handle(u2, newhand)) {
       putlog(LOG_CMDS, "*", "#%s# chhandle %s %s", dcc[idx].nick,
@@ -1202,9 +1202,9 @@ static void cmd_handle(int idx, char *par)
     return;
   } else if (strchr(BADHANDCHARS, newhandle[0]) != NULL) {
     dprintf(idx, "Bizarre quantum forces prevent handle from starting with '%c'.\n", newhandle[0]);
-  } else if (get_user_by_handle(userlist, newhandle) && egg_strcasecmp(dcc[idx].nick, newhandle)) {
+  } else if (get_user_by_handle(userlist, newhandle) && strcasecmp(dcc[idx].nick, newhandle)) {
     dprintf(idx, "Somebody is already using %s.\n", newhandle);
-  } else if (!egg_strcasecmp(newhandle, conf.bot->nick)) {
+  } else if (!strcasecmp(newhandle, conf.bot->nick)) {
     dprintf(idx, "Hey!  That's MY name!\n");
   } else {
     char oldhandle[HANDLEN + 1] = "";
@@ -1280,9 +1280,9 @@ static void cmd_chsecpass(int idx, char *par)
   else if (u->bot)
     dprintf(idx, "Bots do not have secpasses.\n");
 //  int atr = dcc[idx].user ? dcc[idx].user->flags : 0;
-//  else if ((u->flags & USER_OWNER) && !(atr & USER_OWNER) && egg_strcasecmp(handle, dcc[idx].nick))
+//  else if ((u->flags & USER_OWNER) && !(atr & USER_OWNER) && strcasecmp(handle, dcc[idx].nick))
 //    dprintf(idx, "You can't change a bot owner's secpass.\n");
-//  else if (isowner(handle) && egg_strcasecmp(dcc[idx].nick, handle))
+//  else if (isowner(handle) && strcasecmp(dcc[idx].nick, handle))
 //    dprintf(idx, "You can't change a permanent bot owner's secpass.\n");
   else if (!par[0]) {
     putlog(LOG_CMDS, "*", "#%s# chsecpass %s [nothing]", dcc[idx].nick, handle);
@@ -1341,8 +1341,8 @@ static void cmd_botcmd(int idx, char *par)
     putlog(LOG_CMDS, "*", "#%s# botcmd %s %s ...", dcc[idx].nick, botm, cmd);
 
   if (!strcmp(botm, "*")) {
-    if (!egg_strncasecmp(cmd, "di", 2) || (!egg_strncasecmp(cmd, "res", 3) && egg_strncasecmp(cmd, "reset", 5)) || !egg_strncasecmp(cmd, "sui", 3) || 
-        !egg_strncasecmp(cmd, "j", 1)) {
+    if (!strncasecmp(cmd, "di", 2) || (!strncasecmp(cmd, "res", 3) && strncasecmp(cmd, "reset", 5)) || !strncasecmp(cmd, "sui", 3) ||
+        !strncasecmp(cmd, "j", 1)) {
       dprintf(idx, "Not a good idea.\n");
       return;
     } else if (!(dcc[idx].user->flags & USER_OWNER)) {
@@ -1385,7 +1385,7 @@ static void cmd_botcmd(int idx, char *par)
   }
 
   /* Only wild_match when not using botm=? and strlen(conf.bot->nick) > 1, ie dont match on hubs with 1 letter nicks */
-  if ((!(strlen(conf.bot->nick) == 1 && !strcmp(botm, "?")) && wild_match(botm, conf.bot->nick)) || !egg_strcasecmp(botm, conf.bot->nick)) {
+  if ((!(strlen(conf.bot->nick) == 1 && !strcmp(botm, "?")) && wild_match(botm, conf.bot->nick)) || !strcasecmp(botm, conf.bot->nick)) {
     found++;
     check_bind_dcc(cmd, idx, par);
   }
@@ -1575,7 +1575,7 @@ static void cmd_comment(int idx, char *par)
   }
 
   putlog(LOG_CMDS, "*", "#%s# comment %s %s", dcc[idx].nick, handle, par);
-  if (!egg_strcasecmp(par, "none")) {
+  if (!strcasecmp(par, "none")) {
     dprintf(idx, "Okay, comment blanked.\n");
     set_user(&USERENTRY_COMMENT, u1, NULL);
     return;
@@ -1659,7 +1659,7 @@ static void cmd_conf(int idx, char *par)
   conf_bot *oldlist = conf_bots_dup(conf.bots);
   
   putlog(LOG_CMDS, "*", "#%s# conf %s %s", dcc[idx].nick, cmd, par[0] ? par : "");
-  if (!egg_strcasecmp(cmd, "add") || !egg_strcasecmp(cmd, "change")) {
+  if (!strcasecmp(cmd, "add") || !strcasecmp(cmd, "change")) {
     char *nick = NULL, *host = NULL, *ip = NULL, *ipsix = NULL;
 
     nick = newsplit(&par);
@@ -1687,7 +1687,7 @@ static void cmd_conf(int idx, char *par)
       dprintf(idx, "Changed bot: %s\n", nick);
     listbot = strdup(nick);
     save++;
-  } else if (!egg_strncasecmp(cmd, "del", 3) || !egg_strncasecmp(cmd, "rem", 3)) {
+  } else if (!strncasecmp(cmd, "del", 3) || !strncasecmp(cmd, "rem", 3)) {
     if (!par[0]) {
       dprintf(idx, "Usage: conf del <bot>\n");
 
@@ -1712,12 +1712,12 @@ static void cmd_conf(int idx, char *par)
       save++;
     } else
       dprintf(idx, "Error trying to remove bot '%s'\n", par);
-  } else if (!egg_strcasecmp(cmd, "disable") || !egg_strcasecmp(cmd, "enable")) {
+  } else if (!strcasecmp(cmd, "disable") || !strcasecmp(cmd, "enable")) {
     conf_bot *bot = NULL;
 
     for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
-      if (!egg_strcasecmp(bot->nick, par)) {
-        if (!egg_strcasecmp(cmd, "enable")) {
+      if (!strcasecmp(bot->nick, par)) {
+        if (!strcasecmp(cmd, "enable")) {
           if (bot->disabled) {
             dprintf(idx, "Enabled '%s'.\n", bot->nick);
             bot->disabled = 0;
@@ -1736,7 +1736,7 @@ static void cmd_conf(int idx, char *par)
     }
   }
 #ifndef CYGWIN_HACKS
-  if (!egg_strcasecmp(cmd, "set")) {
+  if (!strcasecmp(cmd, "set")) {
     char *what = NULL;
     int show = 1, set = 0;
 
@@ -1746,19 +1746,19 @@ static void cmd_conf(int idx, char *par)
       if (par[0] && what) { /* set */
         set++;
         save = 1;
-/*        if (!egg_strcasecmp(what, "uid"))            conf.uid = atoi(par);
-        else if (!egg_strcasecmp(what, "uname"))     str_redup(&conf.uname, par);
-        else if (!egg_strcasecmp(what, "username"))  str_redup(&conf.username, par);
+/*        if (!strcasecmp(what, "uid"))            conf.uid = atoi(par);
+        else if (!strcasecmp(what, "uname"))     str_redup(&conf.uname, par);
+        else if (!strcasecmp(what, "username"))  str_redup(&conf.username, par);
 */
-        if (!egg_strcasecmp(what, "homedir"))   str_redup(&conf.homedir, par);
-        else if (!egg_strcasecmp(what, "binpath"))   str_redup(&conf.binpath, par);
-        else if (!egg_strcasecmp(what, "binname"))   str_redup(&conf.binname, par);
-        else if (!egg_strcasecmp(what, "datadir"))   str_redup(&conf.datadir, par);
-        else if (!egg_strcasecmp(what, "portmin"))   conf.portmin = atoi(par);
-        else if (!egg_strcasecmp(what, "portmax"))   conf.portmax = atoi(par);
-        else if (!egg_strcasecmp(what, "autocron"))  conf.autocron = atoi(par);
-        else if (!egg_strcasecmp(what, "autouname")) conf.autouname = atoi(par);
-        else if (!egg_strcasecmp(what, "watcher"))  conf.watcher = atoi(par);
+        if (!strcasecmp(what, "homedir"))   str_redup(&conf.homedir, par);
+        else if (!strcasecmp(what, "binpath"))   str_redup(&conf.binpath, par);
+        else if (!strcasecmp(what, "binname"))   str_redup(&conf.binname, par);
+        else if (!strcasecmp(what, "datadir"))   str_redup(&conf.datadir, par);
+        else if (!strcasecmp(what, "portmin"))   conf.portmin = atoi(par);
+        else if (!strcasecmp(what, "portmax"))   conf.portmax = atoi(par);
+        else if (!strcasecmp(what, "autocron"))  conf.autocron = atoi(par);
+        else if (!strcasecmp(what, "autouname")) conf.autouname = atoi(par);
+        else if (!strcasecmp(what, "watcher"))  conf.watcher = atoi(par);
         else { 
           set--;
           save = 0;
@@ -1769,31 +1769,31 @@ static void cmd_conf(int idx, char *par)
     if (show) {
       const char *ss = set ? "Set: " : "";
       
-/*      if (!what || !egg_strcasecmp(what, "uid"))        dprintf(idx, "%suid: %d\n", ss, conf.uid);
-      if (!what || !egg_strcasecmp(what, "uname"))      dprintf(idx, "%suname: %s\n", ss, conf.uname);
-      if (!what || !egg_strcasecmp(what, "username"))   dprintf(idx, "%susername: %s\n", ss, conf.username);
+/*      if (!what || !strcasecmp(what, "uid"))        dprintf(idx, "%suid: %d\n", ss, conf.uid);
+      if (!what || !strcasecmp(what, "uname"))      dprintf(idx, "%suname: %s\n", ss, conf.uname);
+      if (!what || !strcasecmp(what, "username"))   dprintf(idx, "%susername: %s\n", ss, conf.username);
 */
-      if (!what || !egg_strcasecmp(what, "homedir"))    dprintf(idx, "%shomedir: %s\n", ss, conf.homedir);
-      if (!what || !egg_strcasecmp(what, "binpath"))    dprintf(idx, "%sbinpath: %s\n", ss, conf.binpath);
-      if (!what || !egg_strcasecmp(what, "binname"))    dprintf(idx, "%sbinname: %s\n", ss, conf.binname);
-      if (!what || !egg_strcasecmp(what, "datadir"))    dprintf(idx, "%sdatadir: %s\n", ss, conf.datadir);
-      if (!what || !egg_strcasecmp(what, "portmin"))    dprintf(idx, "%sportmin: %d\n", ss, conf.portmin);
-      if (!what || !egg_strcasecmp(what, "portmax"))    dprintf(idx, "%sportmax: %d\n", ss, conf.portmax);
-      if (!what || !egg_strcasecmp(what, "autocron"))   dprintf(idx, "%sautocron: %d\n", ss, conf.autocron);
-      if (!what || !egg_strcasecmp(what, "autouname"))  dprintf(idx, "%sautouname: %d\n", ss, conf.autouname);
-      if (!what || !egg_strcasecmp(what, "watcher"))    dprintf(idx, "%swatcher: %d\n", ss, conf.watcher);
+      if (!what || !strcasecmp(what, "homedir"))    dprintf(idx, "%shomedir: %s\n", ss, conf.homedir);
+      if (!what || !strcasecmp(what, "binpath"))    dprintf(idx, "%sbinpath: %s\n", ss, conf.binpath);
+      if (!what || !strcasecmp(what, "binname"))    dprintf(idx, "%sbinname: %s\n", ss, conf.binname);
+      if (!what || !strcasecmp(what, "datadir"))    dprintf(idx, "%sdatadir: %s\n", ss, conf.datadir);
+      if (!what || !strcasecmp(what, "portmin"))    dprintf(idx, "%sportmin: %d\n", ss, conf.portmin);
+      if (!what || !strcasecmp(what, "portmax"))    dprintf(idx, "%sportmax: %d\n", ss, conf.portmax);
+      if (!what || !strcasecmp(what, "autocron"))   dprintf(idx, "%sautocron: %d\n", ss, conf.autocron);
+      if (!what || !strcasecmp(what, "autouname"))  dprintf(idx, "%sautouname: %d\n", ss, conf.autouname);
+      if (!what || !strcasecmp(what, "watcher"))    dprintf(idx, "%swatcher: %d\n", ss, conf.watcher);
     }
   }
 #endif /* !CYGWIN_HACKS */
 
-  if (listbot || !egg_strcasecmp(cmd, "list")) {
+  if (listbot || !strcasecmp(cmd, "list")) {
     conf_checkpids(conf.bots);
     conf_bot *bot = NULL;
     unsigned int i = 0;
 
     for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
       i++;
-      if (!listbot || (listbot && !egg_strcasecmp(listbot, bot->nick)))
+      if (!listbot || (listbot && !strcasecmp(listbot, bot->nick)))
         dprintf(idx, "%d: %s%s IP: %s HOST: %s IP6: %s HOST6: %s HUB: %d PID: %d\n", i,
                       bot->disabled ? "/" : "",
                       bot->nick,
@@ -1985,7 +1985,7 @@ static void cmd_simul(int idx, char *par)
   bool ok = 0;
 
   for (int i = 0; i < dcc_total; i++) {
-    if (dcc[i].type && !egg_strcasecmp(nick, dcc[i].nick) && !ok && (dcc[i].type->flags & DCT_SIMUL)) {
+    if (dcc[i].type && !strcasecmp(nick, dcc[i].nick) && !ok && (dcc[i].type->flags & DCT_SIMUL)) {
       putlog(LOG_CMDS, "*", "#%s# simul %s %s", dcc[idx].nick, nick, par);
       if (dcc[i].type && dcc[i].type->activity) {
 	dcc[i].type->activity(i, par, strlen(par));
@@ -2014,7 +2014,7 @@ static void cmd_link(int idx, char *par)
     return;
   }
 
-  if (!par[0] || !egg_strcasecmp(par, conf.bot->nick))
+  if (!par[0] || !strcasecmp(par, conf.bot->nick))
     botlink(dcc[idx].nick, idx, s);
   else {
     char x[40] = "";
@@ -2047,7 +2047,7 @@ static void cmd_unlink(int idx, char *par)
   /* If we're directly connected to that bot, just do it
    * (is nike gunna sue?)
    */
-  if (!egg_strcasecmp(dcc[i].nick, bot))
+  if (!strcasecmp(dcc[i].nick, bot))
     botunlink(idx, bot, par);
   else {
     char x[40] = "";
@@ -2106,7 +2106,7 @@ static void cmd_trace(int idx, char *par)
     dprintf(idx, "Usage: trace <bot>\n");
     return;
   }
-  if (!egg_strcasecmp(par, conf.bot->nick)) {
+  if (!strcasecmp(par, conf.bot->nick)) {
     dprintf(idx, "That's me!  Hiya! :)\n");
     return;
   }
@@ -2154,7 +2154,7 @@ int check_dcc_attrs(struct userrec *u, flag_t oatr)
       continue;
     }
 
-    if ((dcc[i].type->flags & DCT_MASTER) && (!egg_strcasecmp(u->handle, dcc[i].nick))) {
+    if ((dcc[i].type->flags & DCT_MASTER) && (!strcasecmp(u->handle, dcc[i].nick))) {
       stat = dcc[i].status;
       if ((dcc[i].type == &DCC_CHAT) &&
 	  ((u->flags & (USER_OP | USER_MASTER | USER_OWNER))
@@ -2256,7 +2256,7 @@ int check_dcc_chanattrs(struct userrec *u, char *chname, flag_t chflags, flag_t 
   struct chat_info dummy;
 
   for (int i = 0; i < dcc_total; i++) {
-    if (dcc[i].type && dcc[i].simul == -1 && (dcc[i].type->flags & DCT_MASTER) && !egg_strcasecmp(u->handle, dcc[i].nick)) {
+    if (dcc[i].type && dcc[i].simul == -1 && (dcc[i].type->flags & DCT_MASTER) && !strcasecmp(u->handle, dcc[i].nick)) {
       if ((dcc[i].type == &DCC_CHAT) &&
 	  ((chflags & (USER_OP | USER_MASTER | USER_OWNER))
 	   != (ochatr & (USER_OP | USER_MASTER | USER_OWNER))))
@@ -2541,7 +2541,7 @@ static void cmd_chat(int idx, char *par)
 
   char *arg = newsplit(&par);
 
-  if (!egg_strcasecmp(arg, "off")) {
+  if (!strcasecmp(arg, "off")) {
     /* Turn chat off */
     if (dcc[idx].u.chat->channel < 0) {
       dprintf(idx, "You weren't in chat anyway!\n");
@@ -2577,7 +2577,7 @@ static void cmd_chat(int idx, char *par)
       }
     } else {
       if (((arg[0] < '0') || (arg[0] > '9')) && (arg[0])) {
-	if (!egg_strcasecmp(arg, "on"))
+	if (!strcasecmp(arg, "on"))
 	  newchan = 0;
 	else {
           newchan = -1;
@@ -2741,10 +2741,10 @@ static void cmd_echo(int idx, char *par)
     dprintf(idx, "Echo is currently %s.\n", dcc[idx].status & STAT_ECHO ? "on" : "off");
     return;
   }
-  if (!egg_strcasecmp(par, "on")) {
+  if (!strcasecmp(par, "on")) {
     dprintf(idx, "Echo turned on.\n");
     dcc[idx].status |= STAT_ECHO;
-  } else if (!egg_strcasecmp(par, "off")) {
+  } else if (!strcasecmp(par, "off")) {
     dprintf(idx, "Echo turned off.\n");
     dcc[idx].status &= ~STAT_ECHO;
   } else {
@@ -2766,13 +2766,13 @@ static void cmd_login(int idx, char *par)
 
   which = newsplit(&par);
 
-  if (!egg_strcasecmp(which, "banner"))
+  if (!strcasecmp(which, "banner"))
     whichbit = STAT_BANNER;
-  else if (!egg_strcasecmp(which, "bots"))
+  else if (!strcasecmp(which, "bots"))
     whichbit = STAT_BOTS;
-  else if (!egg_strcasecmp(which, "channels"))
+  else if (!strcasecmp(which, "channels"))
     whichbit = STAT_CHANNELS;
-  else if (!egg_strcasecmp(which, "whom"))
+  else if (!strcasecmp(which, "whom"))
     whichbit = STAT_WHOM;
   else {
     dprintf(idx, "Unrecognized option '$b%s$b'\n", which);
@@ -2784,9 +2784,9 @@ static void cmd_login(int idx, char *par)
     return;
   }
 
-  if (!egg_strcasecmp(par, "on"))
+  if (!strcasecmp(par, "on"))
     set = 1;
-  else if (!egg_strcasecmp(par, "off"))
+  else if (!strcasecmp(par, "off"))
     set = 0;
   else {
     dprintf(idx, "Unrecognized setting '$b%s$b'\n", par);
@@ -2818,9 +2818,9 @@ static void cmd_color(int idx, char *par)
 
   char *of = newsplit(&par);
 
-  if (!egg_strcasecmp(of, "on")) {
+  if (!strcasecmp(of, "on")) {
     dcc[idx].status |= STAT_COLOR;
-  } else if (!egg_strcasecmp(of, "off")) {
+  } else if (!strcasecmp(of, "off")) {
     dcc[idx].status &= ~(STAT_COLOR);
     dprintf(idx, "Color turned off.\n");
   } else {
@@ -2922,7 +2922,7 @@ static void cmd_strip(int idx, char *par)
 
   if ((nick[0] != '+') && (nick[0] != '-') &&dcc[idx].user && (dcc[idx].user->flags & USER_MASTER)) {
     for (i = 0; i < dcc_total; i++) {
-      if (dcc[i].type && !egg_strcasecmp(nick, dcc[i].nick) && dcc[i].type == &DCC_CHAT && !ok) {
+      if (dcc[i].type && !strcasecmp(nick, dcc[i].nick) && dcc[i].type == &DCC_CHAT && !ok) {
 	ok = 1;
 	dest = i;
       }
@@ -3091,7 +3091,7 @@ static void cmd_page(int idx, char *par)
     return;
   }
   a = atoi(par);
-  if ((!a && !par[0]) || !egg_strcasecmp(par, "off")) {
+  if ((!a && !par[0]) || !strcasecmp(par, "off")) {
     dcc[idx].status &= ~STAT_PAGE;
     dcc[idx].u.chat->max_line = 0x7ffffff;	/* flush_lines needs this */
     while (dcc[idx].u.chat->buffer)
@@ -3334,7 +3334,7 @@ static void cmd_pls_user(int idx, char *par)
     dprintf(idx, "Someone already exists by that name.\n");
   else if (strchr(BADHANDCHARS, handle[0]) != NULL)
     dprintf(idx, "You can't start a nick with '%c'.\n", handle[0]);
-  else if (!egg_strcasecmp(handle, conf.bot->nick))
+  else if (!strcasecmp(handle, conf.bot->nick))
     dprintf(idx, "Hey! That's MY name!\n");
   else {
     struct userrec *u2 = NULL;
@@ -3415,7 +3415,7 @@ static void cmd_mns_user(int idx, char *par)
         dprintf(idx, "You can't remove bots.\n");
         return;
     }
-    if (!egg_strcasecmp(u2->handle, conf.bot->nick)) {
+    if (!strcasecmp(u2->handle, conf.bot->nick)) {
       dprintf(idx, "The 'suicide' cmd should be used instead.\n");
       return;
     }
@@ -3424,7 +3424,7 @@ static void cmd_mns_user(int idx, char *par)
 
     if (i < 0)
       botunlink(idx, handle, "Bot removed.");
-    else if (!egg_strcasecmp(dcc[i].nick, handle))
+    else if (!strcasecmp(dcc[i].nick, handle))
       botunlink(idx, handle, "Bot removed.");
     else {
       char x[40] = "";
@@ -3473,7 +3473,7 @@ static void cmd_pls_host(int idx, char *par)
                      fr  = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
 
   get_user_flagrec(dcc[idx].user, &fr, NULL);
-  if (egg_strcasecmp(handle, dcc[idx].nick)) {
+  if (strcasecmp(handle, dcc[idx].nick)) {
     get_user_flagrec(u2, &fr2, NULL);
     if (!glob_master(fr) && !glob_bot(fr2) && !chan_master(fr)) {
       dprintf(idx, "You can't add hostmasks to non-bots.\n");
@@ -3590,7 +3590,7 @@ static void cmd_mns_host(int idx, char *par)
       return;
     }
 
-  if (egg_strcasecmp(handle, dcc[idx].nick)) {
+  if (strcasecmp(handle, dcc[idx].nick)) {
     if (!glob_master(fr) && !glob_bot(fr2) && !chan_master(fr)) {
       dprintf(idx, "You can't remove hostmasks from non-bots.\n");
       return;
@@ -3694,7 +3694,7 @@ static void cmd_clearhosts(int idx, char *par)
       return;
     }
 
-  if (egg_strcasecmp(handle, dcc[idx].nick)) {
+  if (strcasecmp(handle, dcc[idx].nick)) {
     if (!glob_master(fr) && !glob_bot(fr2) && !chan_master(fr)) {
       dprintf(idx, "You can't remove hostmasks from non-bots.\n");
       return;
@@ -3749,7 +3749,7 @@ static void cmd_botserver(int idx, char * par) {
     dprintf(idx, "Usage: botserver <bot>\n");
     return;
   }
-  if (egg_strcasecmp(conf.bot->nick, par) && nextbot(par)<0) {
+  if (strcasecmp(conf.bot->nick, par) && nextbot(par)<0) {
     dprintf(idx, "%s isn't a linked bot.\n", par);
     return;
   }
@@ -3807,7 +3807,7 @@ static void cmd_botversion(int idx, char * par) {
     dprintf(idx, "Usage: botversion <bot>\n");
     return;
   }
-  if (egg_strcasecmp(conf.bot->nick, par) && nextbot(par)<0) {
+  if (strcasecmp(conf.bot->nick, par) && nextbot(par)<0) {
     dprintf(idx, "%s isn't a linked bot.\n", par);
     return;
   }
@@ -3884,7 +3884,7 @@ static void cmd_botmsg(int idx, char * par) {
     dprintf(idx, "Usage: botmsg <bot> <nick|#channel> <message>\n");
     return;
   }
-  if (egg_strcasecmp(conf.bot->nick, tbot) && nextbot(tbot)<0) {
+  if (strcasecmp(conf.bot->nick, tbot) && nextbot(tbot)<0) {
     dprintf(idx, "%s isn't a linked bot.\n", tbot);
     return;
   }
@@ -3918,7 +3918,7 @@ static void rcmd_msg(char * tobot, char * frombot, char * fromhand, char * fromi
     char *nick = newsplit(&par);
 
     dprintf(DP_SERVER, "PRIVMSG %s :%s\n", nick, par);
-    if (!egg_strcasecmp(tobot, conf.bot->nick)) {
+    if (!strcasecmp(tobot, conf.bot->nick)) {
       char buf[1024] = "";
 
       simple_snprintf(buf, sizeof buf, "Sent message to %s", nick);
@@ -4082,7 +4082,7 @@ static void cmd_dns(int idx, char *par)
      return;
   }
 
-  if (!egg_strcasecmp(par, "flush")) {
+  if (!strcasecmp(par, "flush")) {
     dprintf(idx, "Flushing cache...\n");
     dns_cache_flush();
     return;
@@ -4209,7 +4209,7 @@ static void cmd_botjump(int idx, char * par) {
     dprintf(idx, "Usage: botjump <bot> [server [port [pass]]]\n");
     return;
   }
-  if (egg_strcasecmp(conf.bot->nick, tbot) && nextbot(tbot)<0) {
+  if (strcasecmp(conf.bot->nick, tbot) && nextbot(tbot)<0) {
     dprintf(idx, "%s isn't a linked bot.\n", tbot);
     return;
   }
