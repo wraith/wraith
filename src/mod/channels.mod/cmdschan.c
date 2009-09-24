@@ -1005,6 +1005,9 @@ static void cmd_botjoin(int idx, char *par)
   } else {
     dprintf(idx, "Error: '%s' is not a bot.\n", bot);
   }
+
+  dprintf(idx, "!!!! Warning: botjoin is an unfinished feature which will pretty much make all bots join the channel.\n");
+  dprintf(idx, "!!!! Warning: You should probably -chan the channel now to avoid problems/confusion later.\n");
 }
 
 static void mns_chan(int idx, char *par, char *bot)
