@@ -43,7 +43,8 @@ typedef struct cmd_pass {
 extern mycmds 		cmdlist[]; 
 extern int		cmdi;
 
-help_t* findhelp(const char *);
+#define findhelp(x) findcmd(x, 1)
+help_t *findcmd(const char *lookup, bool care_about_type);
 int check_dcc_attrs(struct userrec *, flag_t);
 int check_dcc_chanattrs(struct userrec *, char *, flag_t, flag_t);
 int stripmodes(char *);

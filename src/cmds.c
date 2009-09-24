@@ -77,7 +77,6 @@ int    			 cmdi = 0;
 
 static char		 *btos(unsigned long);
 
-static help_t *findcmd(const char *, bool);
 char s1_10[3] = "",s1_4[3] = "",s1_12[3] = "";
 
 static void tell_who(int idx, int chan)
@@ -612,7 +611,7 @@ static int comp_help_t(const void *m1, const void *m2) {
   return egg_strcasecmp(mi1->cmd, mi2->cmd);
 }
 
-static help_t *
+help_t *
 findcmd(const char *lookup, bool care_about_type)
 {
   help_t key;
@@ -622,12 +621,6 @@ findcmd(const char *lookup, bool care_about_type)
       return h_entry;
 
   return NULL;
-}
-
-help_t *
-findhelp(const char *cmd)
-{
-  return findcmd(cmd, 1);
 }
 
 static void cmd_help(int idx, char *par)

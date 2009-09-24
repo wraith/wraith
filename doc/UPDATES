@@ -35,6 +35,7 @@
 * Fix problem of upgrading with uninitialized binaries causing corruption (will kick in on future upgrades)
 * Fix botcmd to make sure that results are delivered only to the requester (fixes #208)
 * Fix issues with server-port not being updated to the current server list (fixes #176)
+* Fix aliases not properly indicating bad command on leaf bots (fixes #297)
 
 1.2.16 - http://wraith.botpack.net/milestone/1.2.16
 * Add 'set altchars' so that alternative characters used for nicks can be changed. (fixes #418)

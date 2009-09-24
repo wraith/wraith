@@ -38,6 +38,7 @@
 #include "misc.h"
 #include "binds.h"
 #include "dcc.h"
+#include "cmds.h"
 
 extern cmd_t 		C_dcc[];
 
@@ -98,15 +99,23 @@ bool check_aliases(int idx, const char *cmd, const char *args)
           break;
         }
       }
-      /* FIXME: see cmt */
-      /* If the cmd wasnt found in the binds list, it's probably an alias, or invalid cmd? */
+
       if (!find) {
-        dprintf(idx, "'%s' is an invalid alias: references alias '%s'.\n", cmd, p);
-        putlog(LOG_ERROR, "*", "Invalid alias '%s' attempted: references alias '%s'.", cmd, p);
-        if (argsp)
-          free(argsp);
-        free(aliasp);
-        return 1; /* Alias was found -- just not accepted */
+        /* Does the cmd exist though? (Hub-only cmd from a leaf or a leaf-only cmd from a hub, or restricted cmd) */
+        if (findcmd(cmd, 0)) {
+          if (argsp)
+            free(argsp);
+          free(aliasp);
+          return 0; /* Show bad cmd */
+        } else {
+          /* nope, show alias error */
+          dprintf(idx, "'%s' is an invalid alias: references alias '%s'.\n", cmd, p);
+          putlog(LOG_ERROR, "*", "Invalid alias '%s' attempted: references alias '%s'.", cmd, p);
+          if (argsp)
+            free(argsp);
+          free(aliasp);
+          return 1; /* Alias was found -- just not accepted */
+        }
       }
 
       char *myargs = NULL, *pass = NULL;
@@ -237,9 +246,10 @@ void real_check_bind_dcc(const char *cmd, int idx, const char *text, Auth *auth)
     log_bad = 1;
 
   if (hits == 0) {
-    if (!check_aliases(idx, cmd, args)) 
+    if (!check_aliases(idx, cmd, args)) {
+      log_bad = 1;
       dprintf(idx, "What?  You need '%shelp'\n", (dcc[idx].u.chat->channel >= 0) ? settings.dcc_prefix : "");
-    else
+    } else
       log_bad = 0;
   } else if (hits > 1)
     dprintf(idx, "Ambiguous command.\n");
