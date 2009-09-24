@@ -60,8 +60,7 @@ char *step_thru_file(FILE *fd)
   }
   retStr = NULL;
   while (!feof(fd)) {
-    fgets(tempBuf, sizeof(tempBuf), fd);
-    if (!feof(fd)) {
+    if (fgets(tempBuf, sizeof(tempBuf), fd) && !feof(fd)) {
       if (retStr == NULL) {
         retStr = (char *) calloc(1, strlen(tempBuf) + 2);
         strcpy(retStr, tempBuf);

@@ -103,7 +103,7 @@ void processline(char *line)
   char tmpin[WTF] = "", tmpout[WTF] = "", *in = NULL, *out = NULL;
 
   strcpy(tmpin, line); 
-  memset((char *) &tmpin[strlen(tmpin)], 20, 0);
+  memset((char *) &tmpin[strlen(tmpin)], 0, 20);
   in = tmpin;
   out = tmpout;
   if (*in) {
@@ -144,7 +144,9 @@ int main(int argc, char *argv[])
   insize = ftell(f);
   fseek(f, 0, SEEK_SET);
   buf = (char *) calloc(1, insize + 1);
-  fread(buf, 1, insize, f);
+  if (!fread(buf, 1, insize, f)) {
+    ;
+  }
   fclose(f);
   buf[insize] = 0;
 
@@ -159,7 +161,9 @@ int main(int argc, char *argv[])
   }
 
   if ((f = fopen(argv[2], "w"))) {
-    fwrite(outbuf, strlen(outbuf), 1, f);
+    if (!fwrite(outbuf, strlen(outbuf), 1, f)) {
+      ;
+    }
     fclose(f);
   }
   /*  printf(outbuf); */
