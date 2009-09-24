@@ -680,9 +680,6 @@ void queue_server(int which, char *buf, int len)
 void add_server(char *ss)
 {
   struct server_list *x = NULL, *z = NULL;
-#ifdef USE_IPV6
-  char *r = NULL;
-#endif /* USE_IPV6 */
   char *p = NULL, *q = NULL;
 
   for (z = serverlist; z && z->next; z = z->next)
@@ -702,7 +699,6 @@ void add_server(char *ss)
     z = x;
     q = strchr(ss, ':');
     if (!q) {
-      x->port = default_port;
       x->pass = 0;
       x->name = strdup(ss);
     } else {
@@ -711,9 +707,6 @@ void add_server(char *ss)
         ++ss;
         q = strchr(ss, ']');
         *q++ = 0; /* intentional */
-        r = strchr(q, ':');
-        if (!r)
-          x->port = default_port;
       }
 #endif /* USE_IPV6 */
       *q++ = 0;
@@ -727,13 +720,9 @@ void add_server(char *ss)
 	*q++ = 0;
         x->pass = strdup(q);
       }
-#ifdef USE_IPV6
       if (!x->port) {
         x->port = atoi(ss);
       }
-#else
-      x->port = atoi(ss);
-#endif /* USE_IPV6 */
     }
     ss = p;
   }
