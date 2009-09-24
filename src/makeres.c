@@ -172,7 +172,7 @@ typedef const char * res_t;\n\n");
           if (total_responses == 1)
             fprintf(outf, " = 1");
           fprintf(outsf, "static res_t res_%s[] = {\n", cmd);
-          sprintf(lower_resps, "%s,\n\tres_%s", lower_resps, cmd);
+          sprintf(&lower_resps[strlen(lower_resps)], ",\n\tres_%s", cmd);
         } else {			/* END */
           fprintf(outf, "\tRES_END\n};\n\n#define RES_TYPES %d\n", total_responses);
           fprintf(outf, "const char *response(response_t);\nvoid init_responses();\nconst char *r_banned(struct chanset_t* chan);\n\n#endif /* !_RESPONSE_H */\n");

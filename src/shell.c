@@ -984,9 +984,8 @@ void crontab_create(int interval) {
 
       while (i < 60) {
         if (buf[0])
-          simple_snprintf(buf, sizeof(buf), "%s,%i", buf[0] ? buf : "", (i + si) % 60);
-        else
-          simple_snprintf(buf, sizeof(buf), "%i", (i + si) % 60);
+          strlcat(buf, ",", sizeof(buf));
+        simple_snprintf(&buf[strlen(buf)], sizeof(buf) - strlen(buf), "%i", (i + si) % 60);
         i += interval;
       }
     }
@@ -1050,9 +1049,9 @@ char *shell_escape(const char *path)
 
   for (c = (char *) path; c && *c; ++c) {
     if (strchr(ESCAPESHELL, *c))
-      simple_snprintf(ret, sizeof(ret1), "%s\\%c", ret[0] ? ret : "", *c);
+      simple_snprintf(&ret[strlen(ret)], sizeof(ret1) - strlen(ret), "\\%c", *c);
     else
-      simple_snprintf(ret, sizeof(ret1), "%s%c", ret[0] ? ret : "", *c);
+      simple_snprintf(&ret[strlen(ret)], sizeof(ret1) - strlen(ret), "%c", *c);
   }
 
   return ret;
