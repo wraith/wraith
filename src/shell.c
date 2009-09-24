@@ -754,7 +754,7 @@ char *homedir(bool useconf)
         homedir_buf[0] = 0;
         return NULL;
       }
-      homedir_buf[DIRMAX] = 0;
+      homedir_buf[DIRMAX < PATH_MAX ? DIRMAX - 1 : PATH_MAX - 1] = 0;
     }
     ContextNote(STR("realpath(): Success"));
   }
@@ -872,7 +872,7 @@ char *move_bin(const char *ipath, const char *file, bool run)
   ContextNote(STR("realpath()"));
   if (!realpath(binname, real))            /* get the realpath of binname */
     fatal(STR("Unable to determine binary path."), 0);
-  real[DIRMAX] = 0;
+  real[(DIRMAX < PATH_MAX ? DIRMAX : PATH_MAX) - 1] = 0;
   ContextNote(STR("realpath(): Success"));
   /* running from wrong dir, or wrong bin name.. lets try to fix that :) */
   sdprintf(STR("binname: %s"), binname);
