@@ -2,7 +2,8 @@
 #define _SETTINGS_H
 #define PREFIXLEN 16
 
-#define SETTINGS_VER 1
+/* !!! THIS MUST BE CHANGED WHEN CHANGING THE PACK STRUCT OR ALGORITHMS !!! */
+#define SETTINGS_VER 2
 
 typedef struct settings_struct {
   char prefix[PREFIXLEN];

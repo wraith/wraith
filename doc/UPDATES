@@ -32,6 +32,7 @@
 * Lower DNS lookup timeout from 40 seconds to 10 seconds
 * Use random query ids for DNS lookups
 * Fix problem of bots never reconnecting to hub after being up for long periods.
+* Fix problem of upgrading with uninitialized binaries causing corruption (will kick in on future upgrades)
 
 1.2.16 - http://wraith.botpack.net/milestone/1.2.16
 * Add 'set altchars' so that alternative characters used for nicks can be changed. (fixes #418)
