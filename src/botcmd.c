@@ -75,8 +75,7 @@ static void bot_chan2(int idx, char *msg)
   /* Strip annoying control chars */
   for (p = from; *p;) {
     if ((*p < 32) || (*p == 127))
-/* FIXME: overlap      strcpy(p, p + 1); */
-      simple_sprintf(p, "%s", p + 1);
+      memmove(p, p + 1, strlen(p));
     else
       p++;
   }
@@ -250,8 +249,7 @@ static void bot_actchan(int idx, char *par)
   chan = base64_to_int(p);
   for (p = from; *p;) {
     if ((*p < 32) || (*p == 127))
-      simple_sprintf(p, "%s", p + 1);
-/* FIXME: overlap      strcpy(p, p + 1); */
+      memmove(p, p + 1, strlen(p));
     else
       p++;
   }

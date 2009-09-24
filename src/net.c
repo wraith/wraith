@@ -1284,7 +1284,7 @@ int sockgets(char *s, int *len)
 	  /* Split up into chunks of SGRAB bytes. */
 	  *len = SGRAB;
 	  egg_memcpy(s, socklist[i].inbuf, *len);
-	  egg_memcpy(socklist[i].inbuf, socklist[i].inbuf + *len, *len);
+	  memmove(socklist[i].inbuf, socklist[i].inbuf + *len, *len);
 	  socklist[i].inbuflen -= *len;
 	  socklist[i].inbuf = (char *) my_realloc(socklist[i].inbuf, socklist[i].inbuflen);
 	}
