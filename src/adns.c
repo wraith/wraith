@@ -95,6 +95,29 @@ typedef struct {
 
 #define HEAD_SIZE 12
 
+/* RFC1035
+                                    1  1  1  1  1  1
+      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
+    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+    |                                               |
+    /                                               /
+    /                      NAME                     /
+    |                                               |
+    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+    |                      TYPE                     |
+    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+    |                     CLASS                     |
+    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+    |                      TTL                      |
+    |                                               |
+    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+    |                   RDLENGTH                    |
+    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
+    /                     RDATA                     /
+    /                                               /
+    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+*/
+
 typedef struct {
 	/* char name[]; */
 	unsigned short type;
@@ -125,7 +148,6 @@ typedef struct {
 } dns_cache_t;
 
 
-static int query_id = 1;
 static dns_header_t _dns_header = {0, 0, 0, 0, 0, 0};
 static dns_query_t *query_head = NULL;
 static dns_host_t *hosts = NULL;
@@ -157,7 +179,7 @@ static void dns_on_eof(int idx);
 static const char *dns_next_server();
 static int parse_reply(char *response, size_t nbytes, const char* server_ip);
 
-interval_t async_lookup_timeout = 30;
+interval_t async_lookup_timeout = 10;
 interval_t async_server_timeout = 40;
 //int resend_on_read = 0;
 
@@ -285,7 +307,7 @@ static dns_query_t *alloc_query(void *client_data, dns_callback_t callback, cons
 {
 	dns_query_t *q = (dns_query_t *) my_calloc(1, sizeof(*q));
 
-	q->id = query_id++;
+	q->id = randint(65534);
 	q->query = strdup(query);
 	q->answers = 0;
 	q->callback = callback;
@@ -830,7 +852,16 @@ int egg_dns_cancel(int id, int issue_callback)
 	if (prev) prev->next = q->next;
 	else query_head = q->next;
 	sdprintf("Cancelling query: %s", q->query);
-	if (issue_callback) q->callback(q->id, q->client_data, q->query, NULL);
+	if (issue_callback) {
+		if (q->answer.len > 0) {
+			cache_add(q->query, &q->answer);
+
+			q->callback(q->id, q->client_data, q->query, q->answer.list);
+			answer_free(&q->answer);
+		} else {
+			q->callback(q->id, q->client_data, q->query, NULL);
+		}
+	}
 	if (q->ip)
 		free(q->ip);
 	free(q->query);
@@ -908,7 +939,7 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip)
 		prev = q;
 	}
 
-        sdprintf("Reply (%d) questions: %d answers: %d ar: %d ns: %d from: %s QR: %d OPCODE: %d AA: %d TC: %d RD: %d RA: %d RCODE: %d",
+        sdprintf("Reply(%d) questions: %d answers: %d ar: %d ns: %d from: %s QR: %d OPCODE: %d AA: %d TC: %d RD: %d RA: %d RCODE: %d",
             header.id,
             header.question_count,
             header.answer_count,
@@ -1002,18 +1033,22 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip)
 		case DNS_A:
 			egg_inet_ntop(AF_INET, ptr, result, 512);
 			answer_add(&q->answer, result);
+			sdprintf("Reply(%d): %s. \t %d \t IN A \t %s", header.id, q->query, reply.ttl, result);
 			break;
 		case DNS_AAAA:
 #ifdef USE_IPV6
 			egg_inet_ntop(AF_INET6, ptr, result, 512);
 			answer_add(&q->answer, result);
+			sdprintf("Reply(%d): %s. \t %d \t IN AAAA \t %s", header.id, q->query, reply.ttl, result);
 #endif /* USE_IPV6 */
 			break;
 		case DNS_PTR:
 			r = my_dn_expand((const unsigned char *) response, eop, ptr, result, sizeof(result));
 
-			if (r != -1 && result[0])
+			if (r != -1 && result[0]) {
 				answer_add(&q->answer, result);
+				sdprintf("Reply(%d): %s. \t %d \t IN PTR \t %s", header.id, q->query, reply.ttl, result);
+			}
 			break;
 		default:
 			sdprintf("Unhandled DNS reply type: %d", reply.type);
@@ -1027,15 +1062,6 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip)
                   break;
                 }
 	}
-
-        if (q->answer.len == 0) {
-          /* This could simply be that there are no answers... query A or AAAA and receive nothing back...
-           * With the new NXDOMAIN / SERVFAIL error checks, this hard error of jumping servers is probably
-           * no longer needed */
-          sdprintf("Failed to get any answers for query");
-          return_code = 1;	/* get a new server */
-          goto callback;
-        }
 
 callback:
 	/* Don't continue if we haven't gotten all expected replies. */
