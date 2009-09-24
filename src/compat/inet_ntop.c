@@ -21,12 +21,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef SPRINTF_CHAR
-# define SPRINTF(x) strlen(sprintf/**/x)
-#else
-# define SPRINTF(x) ((size_t)sprintf x)
-#endif
-
 #define NS_INADDRSZ     4       /* IPv4 T_A */
 #define NS_IN6ADDRSZ    16      /* IPv6 T_AAAA */
 #define NS_INT16SZ      2       /* #/bytes of data in a u_int16_t */
@@ -82,7 +76,7 @@ egg_inet_ntop4(const u_char *src, char *dst, socklen_t size)
 	static const char fmt[] = "%u.%u.%u.%u";
 	char tmp[sizeof "255.255.255.255"];
 
-	if (SPRINTF((tmp, fmt, src[0], src[1], src[2], src[3])) > size) {
+	if (simple_snprintf(tmp, sizeof(tmp), fmt, src[0], src[1], src[2], src[3]) > size) {
 		return (NULL);
 	}
 	return strcpy(dst, tmp);

@@ -277,13 +277,13 @@ void tell_verbose_uptime(int idx)
   total = ru.ru_utime.tv_sec + ru.ru_stime.tv_sec;
   hr = (int) (total / 60);
   min = (int) (total - (hr * 60));
-  snprintf(s2, sizeof(s2), "CPU %02d:%02d (load avg %3.1f%%)", (int) hr, (int) min, 100.0 * ((float) total / (float) (now - online_since)));
+  egg_snprintf(s2, sizeof(s2), "CPU %02d:%02d (load avg %3.1f%%)", (int) hr, (int) min, 100.0 * ((float) total / (float) (now - online_since)));
 #else
 # if HAVE_CLOCK
   cl = (clock() / CLOCKS_PER_SEC);
   hr = (int) (cl / 60);
   min = (int) (cl - (hr * 60));
-  snprintf(s2, sizeof(s2), "CPU %02d:%02d (load avg %3.1f%%)", (int) hr, (int) min,  100.0 * ((float) cl / (float) (now - online_since)));
+  egg_snprintf(s2, sizeof(s2), "CPU %02d:%02d (load avg %3.1f%%)", (int) hr, (int) min,  100.0 * ((float) cl / (float) (now - online_since)));
 # else
   simple_snprintf(s2, sizeof(s2), "CPU ???");
 # endif
@@ -430,7 +430,7 @@ void load_internal_users()
             userlist = adduser(userlist, hand, "none", "-", USER_OP, 1);
             u = get_user_by_handle(userlist, hand);
 
-            egg_snprintf(tmp, sizeof(tmp), "%li [internal]", (long)now);
+            simple_snprintf(tmp, sizeof(tmp), "%li [internal]", (long)now);
             set_user(&USERENTRY_ADDED, u, tmp);
 
             bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
@@ -487,7 +487,7 @@ void load_internal_users()
             userlist = adduser(userlist, hand, "none", "-", USER_ADMIN | USER_OWNER | USER_MASTER | USER_OP | USER_PARTY | USER_HUBA | USER_CHUBA, 0);
             u = get_user_by_handle(userlist, hand);
             set_user(&USERENTRY_PASS, u, pass);
-            egg_snprintf(tmp, sizeof(tmp), "%li [internal]", (long)now);
+            simple_snprintf(tmp, sizeof(tmp), "%li [internal]", (long)now);
             set_user(&USERENTRY_ADDED, u, tmp);
             while (hosts) {
               char x[1024] = "";

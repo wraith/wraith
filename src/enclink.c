@@ -63,7 +63,7 @@ static void ghost_link_case(int idx, direction_t direction)
 
     /* initkey-gen */
     /* salt1 salt2 port mynick conf.bot->nick */
-    sprintf(tmp, STR("%s@%s@%4x@%s@%s"), salt1, salt2, port, strtoupper(nick1), strtoupper(nick2));
+    simple_snprintf(tmp, sizeof(tmp), STR("%s@%s@%4x@%s@%s"), salt1, salt2, port, strtoupper(nick1), strtoupper(nick2));
     free(nick1);
     free(nick2);
     strlcpy(keyp, SHA1(tmp), ENC_KEY_LEN + 1);

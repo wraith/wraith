@@ -342,7 +342,7 @@ void daysdur(time_t mynow, time_t then, char *out, size_t outsiz)
   mynow -= then;
   int hrs = (int) (mynow / 3600);
   int mins = (int) ((mynow - (hrs * 3600)) / 60);
-  egg_snprintf(s, sizeof(s), "%02d:%02d", hrs, mins);
+  simple_snprintf(s, sizeof(s), "%02d:%02d", hrs, mins);
   strlcat(out, s, outsiz);
 }
 
@@ -492,7 +492,7 @@ char *str_escape(const char *str, const char divc, const char mask)
     }
 
     if (*s == divc || *s == mask) {
-      egg_snprintf(b, buflen, "%c%02x", mask, *s);
+      simple_snprintf(b, buflen, "%c%02x", mask, *s);
       b += 3;
       blen += 3;
     } else {

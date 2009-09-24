@@ -543,7 +543,7 @@ static void tell_masks(const char type, int idx, bool show_inact, char *match, b
 	  if (ml->timer != 0) {
 	    min = (now - ml->timer) / 60;
 	    sec = (now - ml->timer) - (min * 60);
-	    egg_snprintf(s, sizeof(s), " (active %02d:%02d)", min, sec);
+	    simple_snprintf(s, sizeof(s), " (active %02d:%02d)", min, sec);
 	    strlcat(fill, s, sizeof(fill));
 	  }
 	  if ((!match[0]) || (wild_match(match, ml->mask)))

@@ -1105,7 +1105,7 @@ static void show_flag(int idx, char *work, int *cnt, const char *name, unsigned 
       strlcat(chr_state, "-", sizeof(chr_state));
     }
     strlcat(chr_state, COLOR_END(idx), sizeof(chr_state));
-    egg_snprintf(tmp, sizeof tmp, "%s%-17s", chr_state, name);
+    simple_snprintf(tmp, sizeof tmp, "%s%-17s", chr_state, name);
     strlcat(work, tmp, worksiz);
   }
   if (*cnt >= FLAG_COLS)
@@ -1146,7 +1146,7 @@ static void show_int(int idx, char *work, int *cnt, const char *desc, int state,
       strlcat(tmp2, chr_state, sizeof(tmp2));
     }
     strlcat(tmp2, BOLD_END(idx), sizeof(tmp2));
-    egg_snprintf(tmp, sizeof tmp, "%-30s %-20s %s", desc, tmp2, tmp3[0] ? tmp3 : "");
+    simple_snprintf(tmp, sizeof tmp, "%-30s %-20s %s", desc, tmp2, tmp3[0] ? tmp3 : "");
     strlcat(work, tmp, worksiz);
   }
   if (*cnt >= INT_COLS)
