@@ -455,7 +455,7 @@ static bool detect_chan_flood(char *floodnick, char *floodhost, char *from,
       ((which != FLOOD_DEOP) && (which != FLOOD_KICK) && 
        ( (chk_noflood(fr) || 
          (m && chan->flood_exempt_mode == FLOOD_EXEMPT_OP && chan_hasop(m)) || 
-         (m && chan->flood_exempt_mode == FLOOD_EXEMPT_VOICE && chan_hasvoice(m)) )
+         (m && chan->flood_exempt_mode == FLOOD_EXEMPT_VOICE && (chan_hasvoice(m) || chan_hasop(m))) )
       )))
     return 0;
 
