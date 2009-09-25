@@ -37,7 +37,6 @@ static void ghost_link_case(int idx, direction_t direction)
 
   if (snum >= 0) {
     char initkey[33] = "", *tmp2 = NULL;
-    char tmp[90] = "";
     char *keyp = NULL, *nick1 = NULL, *nick2 = NULL;
     port_t port = 0;
     const char salt1[] = SALT1;
@@ -63,6 +62,7 @@ static void ghost_link_case(int idx, direction_t direction)
 
     /* initkey-gen */
     /* salt1 salt2 port mynick conf.bot->nick */
+    char tmp[SALT1LEN + 1 + SALT2LEN + 1 + 4 + 1 + HANDLEN + 1 + HANDLEN + 1] = "";
     simple_snprintf(tmp, sizeof(tmp), STR("%s@%s@%4x@%s@%s"), salt1, salt2, port, strtoupper(nick1), strtoupper(nick2));
     free(nick1);
     free(nick2);
