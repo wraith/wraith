@@ -37,6 +37,7 @@ static void cmd_pls_mask(const char type, int idx, char *par)
   const char *cmd = (type == 'b' ? "ban" : type == 'e' ? "exempt" : "invite");
 
   if (!par[0]) {
+usage:
     dprintf(idx, "Usage: +%s <hostmask> [channel] [%%<XdXhXm>] [reason]\n", cmd);
     return;
   }
@@ -49,8 +50,17 @@ static void cmd_pls_mask(const char type, int idx, char *par)
   who = newsplit(&par);
   if (par[0] && strchr(CHANMETA, par[0]))
     chname = newsplit(&par);
-  else
-    chname = 0;
+
+  /* Did they mix up the two params? */
+  if (!chname && strchr(CHANMETA, who[0])) {
+    if (par[0]) {
+      chname = who;
+      who = newsplit(&par);
+    } else {
+      goto usage;
+    }
+  }
+
   if (chname || !(dcc[idx].user->flags & USER_MASTER)) {
     if (!chname)
       chname = dcc[idx].u.chat->con_chan;
@@ -191,6 +201,7 @@ static void cmd_mns_mask(const char type, int idx, char *par)
   const char *cmd = (type == 'b' ? "ban" : type == 'e' ? "exempt" : "invite");
 
   if (!par[0]) {
+usage:
     dprintf(idx, "Usage: -%s <hostmask> [channel]\n", cmd);
     return;
   }
@@ -203,8 +214,20 @@ static void cmd_mns_mask(const char type, int idx, char *par)
   who = newsplit(&par);
   if (par[0] && strchr(CHANMETA, par[0]))
     chname = newsplit(&par);
-  else
+
+  /* Did they mix up the two params? */
+  if (!chname && strchr(CHANMETA, who[0])) {
+    if (par[0]) {
+      chname = who;
+      who = newsplit(&par);
+    } else {
+      goto usage;
+    }
+  }
+
+  if (!chname)
     chname = dcc[idx].u.chat->con_chan;
+
   if (chname || !(dcc[idx].user->flags & USER_MASTER)) {
     if (!chname)
       chname = dcc[idx].u.chat->con_chan;
