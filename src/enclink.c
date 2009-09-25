@@ -37,7 +37,7 @@ static void ghost_link_case(int idx, direction_t direction)
 
   if (snum >= 0) {
     char initkey[33] = "", *tmp2 = NULL;
-    char tmp[70] = "";
+    char tmp[90] = "";
     char *keyp = NULL, *nick1 = NULL, *nick2 = NULL;
     port_t port = 0;
     const char salt1[] = SALT1;
