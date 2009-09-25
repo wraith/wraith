@@ -323,7 +323,7 @@ void convert_password(struct userrec *u)
 /* Try: pass_match_by_host("-",host)
  * will return 1 if no password is set for that host
  */
-int u_pass_match(struct userrec *u, char *in)
+int u_pass_match(struct userrec *u, const char *in)
 {
   if (!u)
     return 0;

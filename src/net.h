@@ -104,10 +104,10 @@ int allocsock(int, int);
 
 #ifdef USE_IPV6
 #define getsock(opt, af) real_getsock(opt, af, __FILE__, __LINE__)
-int real_getsock(int, int, char *, int);
+int real_getsock(int, int, const char *, int);
 #else
 #define getsock(opt) real_getsock(opt, __FILE__, __LINE__)
-int real_getsock(int, char *, int);
+int real_getsock(int, const char *, int);
 #endif /* USE_IPV6 */
 
 
@@ -125,7 +125,7 @@ int open_address_listen(in_addr_t, port_t *);
 int open_telnet(const char *, port_t, bool proxy = 0, int identd = 0);
 int open_telnet_dcc(int, char *, char *);
 int open_telnet_raw(int, const char *, port_t, bool, int = 0);
-void tputs(int, char *, size_t);
+void tputs(int, const char *, size_t);
 void dequeue_sockets();
 int sockgets(char *, int *);
 void tell_netdebug(int);

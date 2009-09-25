@@ -393,10 +393,10 @@ void setsock(int sock, int options)
 }
 
 #ifdef USE_IPV6
-int real_getsock(int options, int af_def, char *fname, int line)
+int real_getsock(int options, int af_def, const char *fname, int line)
 {
 #else
-int real_getsock(int options, char *fname, int line)
+int real_getsock(int options, const char *fname, int line)
 {
   int af_def = AF_INET;
 #endif /* USE_IPV6 */
@@ -1228,7 +1228,7 @@ int sockgets(char *s, int *len)
  * 
  * NOTE: Do NOT put Contexts in here if you want DEBUG to be meaningful!!
  */
-void tputs(register int z, char *s, size_t len)
+void tputs(register int z, const char *s, size_t len)
 {
   if (z < 0)			/* um... HELLO?!  sanity check please! */
     return;			
@@ -1312,8 +1312,9 @@ void tputs(register int z, char *s, size_t len)
 
     putlog(LOG_MISC, "*", "!!! writing to nonexistent socket: %d", z);
     if (strlen(s)) {
-      s[strlen(s) - 1] = 0;
-      putlog(LOG_MISC, "*", "!-> '%s'", s);
+      char *tmp = strdup(s); /* To null-terminate */
+      putlog(LOG_MISC, "*", "!-> '%s'", tmp);
+      free(tmp);
     }
 
     inhere = 0;
