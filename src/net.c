@@ -1274,8 +1274,8 @@ void tputs(register int z, char *s, size_t len)
 	memcpy(p + socklist[i].outbuflen, s, len);
 	socklist[i].outbuf = p;
 	socklist[i].outbuflen += len;
-        if (socklist[i].encstatus && s)
-          free(s);
+//        if (socklist[i].encstatus && s)
+//          free(s);
 	return;
       }
       /* Try. */
@@ -1298,8 +1298,8 @@ void tputs(register int z, char *s, size_t len)
 	memcpy(socklist[i].outbuf, &s[x], len - x);
 	socklist[i].outbuflen = len - x;
       }
-      if (socklist[i].encstatus && s)
-        free(s);
+//      if (socklist[i].encstatus && s)
+//        free(s);
       return;
     }
   }

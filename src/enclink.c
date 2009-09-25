@@ -130,9 +130,10 @@ static int ghost_read(int snum, char *src, size_t *len)
   return OK;
 }
 
-static char *ghost_write(int snum, char *src, size_t *len)
+static const char *ghost_write(int snum, const char *src, size_t *len)
 {
-  char *srcbuf = NULL, *buf = NULL, *line = NULL, *eol = NULL, *eline = NULL;
+  static char buf[SGRAB + 14] = "";
+  char *srcbuf = NULL, *line = NULL, *eol = NULL, *eline = NULL;
   size_t bufpos = 0;
 
   const size_t bufsiz = *len + 9 + 1;
@@ -153,7 +154,7 @@ static char *ghost_write(int snum, char *src, size_t *len)
       if (!socklist[snum].oseed)
         socklist[snum].oseed++;
     }
-    buf = (char *) my_realloc(buf, bufpos + strlen(eline) + 1 + 9);
+//    buf = (char *) my_realloc(buf, bufpos + strlen(eline) + 1 + 9);
     strcpy((char *) &buf[bufpos], eline);
     free(eline);
     strcat(buf, "\n");
@@ -172,7 +173,7 @@ static char *ghost_write(int snum, char *src, size_t *len)
       if (!socklist[snum].oseed)
         socklist[snum].oseed++;
     }
-    buf = (char *) my_realloc(buf, bufpos + strlen(eline) + 1 + 9);
+//    buf = (char *) my_realloc(buf, bufpos + strlen(eline) + 1 + 9);
     strcpy((char *) &buf[bufpos], eline);
     free(eline);
     strcat(buf, "\n");
@@ -264,7 +265,7 @@ int link_read(int snum, char *buf, size_t *len)
   return -1;
 }
 
-char *link_write(int snum, char *buf, size_t *len)
+const char *link_write(int snum, const char *buf, size_t *len)
 {
   int i = socklist[snum].enclink;
 
