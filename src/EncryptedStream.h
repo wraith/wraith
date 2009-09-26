@@ -19,15 +19,6 @@ class EncryptedStream : public bd::Stream {
         EncryptedStream(EncryptedStream& stream) : Stream(stream), key(stream.key) {};
 
         virtual int gets(char *, size_t);
-#ifdef __GNUC__
-        /* GNU GCC DOC:
-           Since non-static C++ methods have an implicit this argument, the arguments of such methods
-           should be counted from two, not one, when giving values for string-index and first-to-check.
-         */
-        virtual void printf(const char*, ...) __attribute__ ((format(printf, 2, 3)));
-#else
-	virtual void printf(const char*, ...);
-#endif
-
+        virtual void puts (const bd::String& string);
 };
 #endif

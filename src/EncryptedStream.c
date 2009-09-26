@@ -21,17 +21,9 @@ int EncryptedStream::gets (char *_data, size_t maxSize) {
   return size;
 }
 
-void EncryptedStream::printf (const char* format, ...)
+void EncryptedStream::puts (const bd::String& str_in)
 {
-  char va_out[1024] = "";
-  va_list va;
-  size_t len = 0;
-
-  va_start(va, format);
-  len = vsnprintf(va_out, sizeof(va_out), format, va);
-  va_end(va);
-
-  bd::String string(va_out, len);
+  bd::String string(str_in);
   if (key.length()) {
     if (string[string.length() - 1] == '\n')
       --string;
