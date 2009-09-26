@@ -421,9 +421,9 @@ static void edpack(settings_t *incfg, const char *in_hash, int what)
   size_t len = 0;
 
   if (what == PACK_ENC)
-    enc_dec_string = encrypt_binary;
+    enc_dec_string = aes_encrypt_ecb_binary;
   else
-    enc_dec_string = decrypt_binary;
+    enc_dec_string = aes_decrypt_ecb_binary;
 
 #define dofield(_field) 		do {							\
 	if (_field) {										\

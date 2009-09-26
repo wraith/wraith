@@ -22,7 +22,7 @@ char *encrypt_string(const char *keydata, char *in)
   char *res = NULL;
 
   len = strlen(in);
-  bdata = encrypt_binary(keydata, (unsigned char *) in, &len);
+  bdata = aes_encrypt_ecb_binary(keydata, (unsigned char *) in, &len);
   if (keydata && *keydata) {
     res = b64enc(bdata, &len);
     OPENSSL_cleanse(bdata, len);
@@ -42,7 +42,7 @@ char *encrypt_string(const char *keydata, char *in)
 bd::String encrypt_string(const bd::String& key, const bd::String& data) {
   if (!key) return data;
   size_t len = data.length();
-  char *bdata = (char*) encrypt_binary(key.c_str(), (unsigned char*) data.c_str(), &len);
+  char *bdata = (char*) aes_encrypt_ecb_binary(key.c_str(), (unsigned char*) data.c_str(), &len);
   bd::String encrypted(bdata, len);
   free(bdata);
   return encrypted;
@@ -55,7 +55,7 @@ char *decrypt_string(const char *keydata, char *in)
 
   if (keydata && *keydata) {
     buf = b64dec((const unsigned char *) in, &len);
-    res = (char *) decrypt_binary(keydata, (unsigned char *) buf, &len);
+    res = (char *) aes_decrypt_ecb_binary(keydata, (unsigned char *) buf, &len);
     OPENSSL_cleanse(buf, len);
     free(buf);
     return res;
@@ -75,7 +75,7 @@ char *decrypt_string(const char *keydata, char *in)
 bd::String decrypt_string(const bd::String& key, const bd::String& data) {
   if (!key) return data;
   size_t len = data.length();
-  char *bdata = (char*) decrypt_binary(key.c_str(), (unsigned char*) data.c_str(), &len);
+  char *bdata = (char*) aes_decrypt_ecb_binary(key.c_str(), (unsigned char*) data.c_str(), &len);
   bd::String decrypted(bdata, len);
   free(bdata);
   return decrypted;

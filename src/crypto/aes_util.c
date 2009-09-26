@@ -12,7 +12,7 @@
 AES_KEY e_key, d_key;
 
 unsigned char *
-encrypt_binary(const char *keydata, unsigned char *in, size_t *inlen)
+aes_encrypt_ecb_binary(const char *keydata, unsigned char *in, size_t *inlen)
 {
   size_t len = *inlen;
   int blocks = 0, block = 0;
@@ -46,7 +46,7 @@ encrypt_binary(const char *keydata, unsigned char *in, size_t *inlen)
 }
 
 unsigned char *
-decrypt_binary(const char *keydata, unsigned char *in, size_t *len)
+aes_decrypt_ecb_binary(const char *keydata, unsigned char *in, size_t *len)
 {
   int blocks = 0, block = 0;
   unsigned char *out = NULL;
