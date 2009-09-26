@@ -55,7 +55,6 @@
 #include <arpa/inet.h>
 #include "misc_file.h"
 #include "EncryptedStream.h"
-#include "String.h"
 
 char userfile[121] = "";	/* where the user records are stored */
 interval_t ignore_time = 10;		/* how many minutes will ignores last? */
