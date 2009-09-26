@@ -1077,7 +1077,7 @@ static void share_userfile_line(int idx, char *par) {
   char *size = newsplit(&par);
   size_t len = atoi(size);
 
-  stream_in.puts(par);
+  stream_in.puts(par, len);
   stream_in.puts('\n');
 }
 
