@@ -37,7 +37,7 @@
 #include "dccutil.h"
 #include "crypt.h"
 #include "botmsg.h"
-#include "Stream.h"
+#include <bdlib/src/Stream.h>
 
 static struct user_entry_type *entry_type_list = NULL;
 
@@ -92,14 +92,14 @@ bool def_kill(struct user_entry *e)
   return 1;
 }
 
-void write_userfile_protected(Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
+void write_userfile_protected(bd::Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
 {
   /* only write if saving local, or if sending to hub, or if sending to same user as entry */
   if (idx == -1 || dcc[idx].hub || dcc[idx].user == u)
     stream.printf("--%s %s\n", e->type->name, e->u.string);
 }
 
-void def_write_userfile(Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
+void def_write_userfile(bd::Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
 {
   stream.printf("--%s %s\n", e->type->name, e->u.string);
 }
@@ -358,7 +358,7 @@ static bool set_gotshare(struct userrec *u, struct user_entry *e, char *buf, int
   return 1;
 }
 
-static void set_write_userfile(Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
+static void set_write_userfile(bd::Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
 {
   /* only write if saving local, or if sending to hub, or if sending to same user as entry */
   if (idx == -1 || dcc[idx].hub || dcc[idx].user == u) {
@@ -694,7 +694,7 @@ static bool laston_unpack(struct userrec *u, struct user_entry *e)
   return 1;
 }
 
-static void laston_write_userfile(Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
+static void laston_write_userfile(bd::Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
 {
   struct laston_info *li = (struct laston_info *) e->u.extra;
 
@@ -816,7 +816,7 @@ static bool botaddr_kill(struct user_entry *e)
   return 1;
 }
 
-static void botaddr_write_userfile(Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
+static void botaddr_write_userfile(bd::Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
 {
   register struct bot_addr *bi = (struct bot_addr *) e->u.extra;
 
@@ -903,7 +903,7 @@ struct user_entry_type USERENTRY_BOTADDR =
   "BOTADDR"
 };
 
-static void hosts_write_userfile(Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
+static void hosts_write_userfile(bd::Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
 {
   struct list_type *h = NULL;
 

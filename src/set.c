@@ -20,7 +20,7 @@
 #include "userrec.h"
 #include "userent.h"
 #include "rfc1459.h"
-#include "Stream.h"
+#include <bdlib/src/Stream.h>
 
 #include "set_default.h"
 
@@ -824,7 +824,7 @@ static char *var_rem_list(const char *botnick, variable_t *var, const char *elem
   return ret;
 }
 
-void write_vars_and_cmdpass(Stream& stream, int idx)
+void write_vars_and_cmdpass(bd::Stream& stream, int idx)
 {
   putlog(LOG_DEBUG, "@", "Writing set entries...");
   stream.printf(SET_NAME " - -\n");

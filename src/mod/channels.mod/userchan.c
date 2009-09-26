@@ -24,7 +24,7 @@
  */
 
 
-#include "src/Stream.h"
+#include <bdlib/src/Stream.h>
 extern struct cmd_pass *cmdpass;
 
 struct chanuserrec *get_chanrec(struct userrec *u, char *chname)
@@ -569,7 +569,7 @@ static void tell_masks(const char type, int idx, bool show_inact, char *match, b
 
 /* Write the ban lists and the ignore list to a file.
  */
-void write_bans(Stream& stream, int idx)
+void write_bans(bd::Stream& stream, int idx)
 {
   if (global_ign)
     stream.printf(IGNORE_NAME " - -\n");
@@ -620,7 +620,7 @@ void write_bans(Stream& stream, int idx)
 }
 /* Write the exemptlists to a file.
  */
-void write_exempts(Stream& stream, int idx)
+void write_exempts(bd::Stream& stream, int idx)
 {
   if (global_exempts)
     stream.printf(EXEMPT_NAME " - -\n");
@@ -657,7 +657,7 @@ void write_exempts(Stream& stream, int idx)
 
 /* Write the invitelists to a file.
  */
-void write_invites(Stream& stream, int idx)
+void write_invites(bd::Stream& stream, int idx)
 {
   if (global_invites)
     stream.printf(INVITE_NAME " - -\n");
@@ -695,7 +695,7 @@ void write_invites(Stream& stream, int idx)
 
 /* Write the channels to the userfile
  */
-void write_chans(Stream& stream, int idx)
+void write_chans(bd::Stream& stream, int idx)
 {
   putlog(LOG_DEBUG, "*", "Writing channels..");
 
@@ -796,7 +796,7 @@ flood-exempt %d flood-lock-time %d \
 /* FIXME: remove after 1.2.14 */
 /* Write the channels to the userfile
  */
-void write_chans_compat(Stream& stream, int idx)
+void write_chans_compat(bd::Stream& stream, int idx)
 {
   putlog(LOG_DEBUG, "*", "Writing channels..");
 
@@ -889,13 +889,13 @@ exempt-time %d invite-time %d voice-non-ident %d auto-delay %d \
   }
 }
 
-void channels_writeuserfile(Stream& stream, bool old)
+void channels_writeuserfile(bd::Stream& stream, bool old)
 {
   putlog(LOG_DEBUG, "@", "Writing channel/ban/exempt/invite entries.");
   if (!old)
     write_chans(stream, -1);
   else
-    write_chans_compat(stream -1);
+    write_chans_compat(stream, -1);
   write_vars_and_cmdpass(stream, -1);
   write_bans(stream, -1);
   write_exempts(stream, -1);

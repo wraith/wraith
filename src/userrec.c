@@ -355,7 +355,7 @@ int u_pass_match(struct userrec *u, char *in)
   return 0;
 }
 
-static void write_user(const struct userrec *u, Stream& stream, int idx)
+static void write_user(const struct userrec *u, bd::Stream& stream, int idx)
 {
   char s[181] = "";
   struct flag_record fr = {FR_GLOBAL, u->flags, 0, 0 };
@@ -461,7 +461,7 @@ static void sort_userlist()
   }
 }
 
-void stream_writeuserfile(Stream& stream, const struct userrec *bu, int idx, old) {
+void stream_writeuserfile(bd::Stream& stream, const struct userrec *bu, int idx, old) {
   time_t tt = now;
   char s1[81] = "";
 

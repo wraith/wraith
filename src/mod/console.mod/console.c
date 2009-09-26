@@ -39,7 +39,7 @@
 #include "src/users.h"
 #include "src/misc.h"
 #include "src/core_binds.h"
-#include "src/Stream.h"
+#include <bdlib/src/Stream.h>
 
 struct console_info {
   char *channel;
@@ -101,7 +101,7 @@ console_kill(struct user_entry *e)
 }
 
 static void
-console_write_userfile(Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
+console_write_userfile(bd::Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
 {
   if (u->bot)
     return;

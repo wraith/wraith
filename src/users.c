@@ -595,7 +595,7 @@ int readuserfile(const char *file, struct userrec **ret)
   return res;
 }
 
-int stream_readuserfile(Stream& stream, struct userrec **ret)
+int stream_readuserfile(bd::Stream& stream, struct userrec **ret)
 {
   char *p = NULL, buf[1024] = "", lasthand[512] = "", *attr = NULL, *pass = NULL;
   char *code = NULL, s1[1024] = "", *s = buf, ignored[512] = "";

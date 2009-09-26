@@ -55,7 +55,7 @@
 
 static struct flag_record fr = { 0, 0, 0, 0 };
 
-static Stream stream_in;
+static bd::Stream stream_in;
 
 struct delay_mode {
   struct delay_mode *next;
@@ -71,7 +71,7 @@ static struct delay_mode *start_delay = NULL;
 /* Prototypes */
 static void start_sending_users(int);
 static void stream_send_users(int);
-static void share_read_stream(int, Stream&);
+static void share_read_stream(int, bd::Stream&);
 #ifdef __GNUC__
  static void shareout_but(int, const char *, ...)  __attribute__ ((format(printf, 2, 3)));
 #else
@@ -1312,7 +1312,7 @@ finish_share(int idx)
   }
 */
 }
-static void share_read_stream(int idx, Stream& stream) {
+static void share_read_stream(int idx, bd::Stream& stream) {
   struct userrec *u = NULL, *ou = NULL;
   struct chanset_t *chan = NULL;
   int i;
@@ -1478,7 +1478,7 @@ ulsend(int idx, const char* data, size_t datalen)
 static void
 stream_send_users(int idx)
 {
-  Stream stream;
+  bd::Stream stream;
   stream_writeuserfile(stream, userlist, idx);
   stream.seek(0, SEEK_SET);
   dprintf(idx, "s ls\n");
