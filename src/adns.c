@@ -369,33 +369,39 @@ dns_query_t *find_query(const char *host)
   return NULL;
 }
 
-void dns_send_query(dns_query_t *q)
+static void dns_send_query(dns_query_t *q, int type = (DNS_LOOKUP_A|DNS_LOOKUP_AAAA))
 {
   char buf[512] = "";
   int len;
 
-  if (!q->ip) {
-    /* Send the ipv4 query. */
-    q->remaining = 1;
-    len = make_header(buf, q->id);
-    len += cut_host(q->query, buf + len);
-    buf[len] = 0; len++; buf[len] = DNS_A; len++;
-    buf[len] = 0; len++; buf[len] = 1; len++;
+  q->remaining = 0;
 
-    egg_dns_send(buf, len);
+  if (!q->ip) {
+    if (type & DNS_LOOKUP_A) {
+      /* Send the ipv4 query. */
+      q->remaining++;
+      len = make_header(buf, q->id);
+      len += cut_host(q->query, buf + len);
+      buf[len] = 0; len++; buf[len] = DNS_A; len++;
+      buf[len] = 0; len++; buf[len] = 1; len++;
+
+      egg_dns_send(buf, len);
+    }
 
 #ifdef USE_IPV6
-    /* Now send the ipv6 query. */
-    q->remaining++;
-    len = make_header(buf, q->id);
-    len += cut_host(q->query, buf + len);
-    buf[len] = 0; len++; buf[len] = DNS_AAAA; len++;
-    buf[len] = 0; len++; buf[len] = 1; len++;
+    if (type & DNS_LOOKUP_AAAA) {
+      /* Now send the ipv6 query. */
+      q->remaining++;
+      len = make_header(buf, q->id);
+      len += cut_host(q->query, buf + len);
+      buf[len] = 0; len++; buf[len] = DNS_AAAA; len++;
+      buf[len] = 0; len++; buf[len] = 1; len++;
 
-    egg_dns_send(buf, len);
+      egg_dns_send(buf, len);
+    }
 #endif
   } else if (q->ip) {
-    q->remaining = 1;
+    q->remaining++;
     len = make_header(buf, q->id);
     len += cut_host(q->ip, buf + len);
     buf[len] = 0; len++; buf[len] = DNS_PTR; len++;
@@ -435,7 +441,7 @@ void dns_create_timeout_timer(dns_query_t **qm, const char *query, int timeout)
 /* Perform an async dns lookup. This is host -> ip. For ip -> host, use
  * egg_dns_reverse(). We return a dns id that you can use to cancel the
  * lookup. */
-int egg_dns_lookup(const char *host, interval_t timeout, dns_callback_t callback, void *client_data)
+int egg_dns_lookup(const char *host, interval_t timeout, dns_callback_t callback, void *client_data, int type)
 {
 	dns_query_t *q = NULL;
 	int i, cache_id;
@@ -484,7 +490,7 @@ int egg_dns_lookup(const char *host, interval_t timeout, dns_callback_t callback
         q = alloc_query(client_data, callback, host);
 
 	sdprintf("egg_dns_lookup(%s, %d) -> %d", host, timeout, q->id);
-        dns_send_query(q);
+        dns_send_query(q, type);
 
 //        /* setup a timer to detect dead ns */
 //	dns_create_timeout_timer(&q, host, timeout);

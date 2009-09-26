@@ -141,7 +141,7 @@ void resolve_to_rbl(struct chanset_t *chan, char *nick, char *host)
   strlcat(ip, ".", iplen);
   strlcat(ip, rbl_domain, iplen);
 
-  egg_dns_lookup(ip, 20, resolve_rbl_callback, (void *) r);
+  egg_dns_lookup(ip, 20, resolve_rbl_callback, (void *) r, DNS_A);
 
   free(ip);
 }
