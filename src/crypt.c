@@ -17,15 +17,16 @@
 
 char *encrypt_string(const char *keydata, char *in)
 {
-  size_t len = 0;
+  size_t len = 0, blen = 0;
   unsigned char *bdata = NULL;
   char *res = NULL;
 
   len = strlen(in);
   bdata = aes_encrypt_ecb_binary(keydata, (unsigned char *) in, &len);
+  blen = len;
   if (keydata && *keydata) {
     res = b64enc(bdata, &len);
-    OPENSSL_cleanse(bdata, len);
+    OPENSSL_cleanse(bdata, blen);
     free(bdata);
     return res;
   } else {
@@ -77,6 +78,7 @@ bd::String decrypt_string(const bd::String& key, const bd::String& data) {
   size_t len = data.length();
   char *bdata = (char*) aes_decrypt_ecb_binary(key.c_str(), (unsigned char*) data.c_str(), &len);
   bd::String decrypted(bdata, len);
+  OPENSSL_cleanse(bdata, len);
   free(bdata);
   return decrypted;
 }
