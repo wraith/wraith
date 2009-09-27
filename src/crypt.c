@@ -17,16 +17,15 @@
 
 char *encrypt_string(const char *keydata, char *in)
 {
-  size_t len = 0, blen = 0;
+  size_t len = 0;
   unsigned char *bdata = NULL;
   char *res = NULL;
 
   len = strlen(in);
   bdata = aes_encrypt_ecb_binary(keydata, (unsigned char *) in, &len);
-  blen = len;
   if (keydata && *keydata) {
-    res = b64enc(bdata, &len);
-    OPENSSL_cleanse(bdata, blen);
+    res = b64enc(bdata, len);
+    OPENSSL_cleanse(bdata, len);
     free(bdata);
     return res;
   } else {

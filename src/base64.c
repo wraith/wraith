@@ -29,6 +29,12 @@
 #include "src/compat/compat.h"
 #include <bdlib/src/String.h>
 
+static char *b64enc_bd(const unsigned char *data, size_t *len);
+static char *b64dec_bd(const unsigned char *data, size_t *len);
+static void b64enc_buf(const unsigned char *data, size_t len, char *dest);
+static void b64dec_buf(const unsigned char *data, size_t *len, char *dest);
+static void b64dec_bd_buf(const unsigned char *data, size_t *len, char *dest);
+
 static const char base64[65] = ".\\0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 static const char base64r[256] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -102,16 +108,17 @@ char *int_to_base64(unsigned int val)
   return buf_base64 + i;
 }
 
+/* These are all broken */
+
 #define NUM_ASCII_BYTES 3
 #define NUM_ENCODED_BYTES 4
 
 char *
-b64enc(const unsigned char *data, size_t *len)
+b64enc(const unsigned char *data, size_t len)
 {
-  size_t dlen = (((*len + (NUM_ASCII_BYTES - 1)) / NUM_ASCII_BYTES) * NUM_ENCODED_BYTES);
-  char *dest = (char *) my_calloc(1, dlen + 1);
-  b64enc_buf(data, *len, dest);
-  *len = dlen;
+  char *dest = (char *) my_calloc(1, (len << 2) / 3 + 4 + 1);
+
+  b64enc_buf(data, len, dest);
   return (dest);
 }
 
@@ -122,7 +129,7 @@ b64enc(const unsigned char *data, size_t *len)
  */
 bd::String broken_base64Encode(const bd::String& string) {
   size_t len = string.length();
-  char *p = b64enc((unsigned char*) string.data(), &len);
+  char *p = b64enc_bd((unsigned char*) string.data(), &len);
   bd::String encoded(p, len);
   free(p);
   return encoded;
@@ -135,7 +142,7 @@ bd::String broken_base64Encode(const bd::String& string) {
  */
 bd::String broken_base64Decode(const bd::String& string) {
   size_t len = string.length();
-  char *p = b64dec((unsigned char*) string.data(), &len);
+  char *p = b64dec_bd((unsigned char*) string.data(), &len);
   bd::String decoded(p, len);
   free(p);
   return decoded;
@@ -143,7 +150,7 @@ bd::String broken_base64Decode(const bd::String& string) {
 
 
 /* Encode 3 8-bit bytes to 4 6-bit characters */
-void
+static void
 b64enc_buf(const unsigned char *data, size_t len, char *dest)
 {
 #define DB(x) ((unsigned char) ((x + i) < len ? data[x + i] : 0))
@@ -160,27 +167,53 @@ b64enc_buf(const unsigned char *data, size_t len, char *dest)
   dest[t] = 0;
 }
 
+
 char *
 b64dec(const unsigned char *data, size_t *len)
 {
-//  size_t dlen = (((*len >> 2) * 3) - 2);
   char *dest = (char *) my_calloc(1, ((*len * 3) >> 2) + 6 + 1);
-//  char *dest = (char *) my_calloc(1, dlen + 1);
+
   b64dec_buf(data, len, dest);
-//*len = dlen;
-  return dest;
+  return (dest);
 }
 
-/* Decode 4 6-bit characters to 3 8-bit bytes */
-void
+static void
 b64dec_buf(const unsigned char *data, size_t *len, char *dest)
 {
 #define DB(x) ((unsigned char) (x + i < *len ? base64r[(unsigned char) data[x + i]] : 0))
-//#define XB(x) ((unsigned char) (x + i < *len ? (unsigned char) data[x + i] : 0))
   register size_t t, i;
-//  const size_t wholeBlocks = (*len / NUM_ENCODED_BYTES);
-//  const size_t remainingBytes (*len % NUM_ENCODED_BYTES);
-//  size_t maxTotal = (wholeBlocks + (0 != remainingBytes)) * NUM_ASCII_BYTES;
+
+  for (i = 0, t = 0; i < *len; i += 4, t += 3) {
+    dest[t] = (DB(0) << 2) + (DB(1) >> 4);
+    dest[t + 1] = ((DB(1) & 0x0F) << 4) + (DB(2) >> 2);
+    dest[t + 2] = ((DB(2) & 3) << 6) + DB(3);
+  };
+#undef DB
+  t += 3;
+  t -= (t % 4);
+  dest[t] = 0;
+  *len = t;
+}
+
+/* These are adapated for use with bd::String */
+
+static char *
+b64enc_bd(const unsigned char *data, size_t *len)
+{
+  size_t dlen = (((*len + (NUM_ASCII_BYTES - 1)) / NUM_ASCII_BYTES) * NUM_ENCODED_BYTES);
+  char *dest = (char *) my_calloc(1, dlen + 1);
+  b64enc_buf(data, *len, dest);
+  *len = dlen;
+  return (dest);
+}
+
+
+/* Decode 4 6-bit characters to 3 8-bit bytes */
+static void
+b64dec_bd_buf(const unsigned char *data, size_t *len, char *dest)
+{
+#define DB(x) ((unsigned char) (x + i < *len ? base64r[(unsigned char) data[x + i]] : 0))
+  register size_t t, i;
   register int pads = 0;
 
   for (i = 0, t = 0; i < *len; i += NUM_ENCODED_BYTES, t += NUM_ASCII_BYTES) {
@@ -194,24 +227,18 @@ b64dec_buf(const unsigned char *data, size_t *len, char *dest)
       if (dest[t+1] == 0) ++pads;
       if (dest[t+2] == 0) ++pads;
     }
-/*
-printf("i: %d *len: %d\n", i, *len);
-if (dest[t] == 0) printf("t:%d %d+%d '%c'\n", t, (XB(0) << 2), (XB(1) >> 4), base64r[(XB(0) << 2)] + base64r[(XB(1) >> 4)]);
-else printf("t/%d\n", t);
-if (dest[t+1] == 0) printf("t+1:%d %d+%d '%c'\n", t+1, ((XB(1) & 0x0F) << 4), (XB(2) >> 2), base64r[((XB(1) & 0x0F) << 4)] + base64r[(XB(2) >> 2)]);
-else printf("t+1/%d\n", t+1);
-if (dest[t+2] == 0) printf("t+2:%d %d+%d '%c'\n", t+2, ((XB(2) & 3) << 6), XB(3), base64r[((XB(2) & 3) << 6)] + base64r[XB(3)]);
-else printf("t+2/%d\n", t+2);
-*/
+
   };
 #undef DB
-//  t += 3;
-//  t -= (t % 4);
-//*len = t;
-//dest[t] = 0;
 
   *len = t - pads;
-//printf("pads: %d\n", pads);
-//*len = t;
   dest[*len] = 0;
+}
+
+static char *
+b64dec_bd(const unsigned char *data, size_t *len)
+{
+  char *dest = (char *) my_calloc(1, ((*len * 3) >> 2) + 6 + 1);
+  b64dec_bd_buf(data, len, dest);
+  return dest;
 }
