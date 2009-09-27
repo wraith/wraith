@@ -23,6 +23,10 @@ int EncryptedStream::gets (char *_data, size_t maxSize) {
 
 void EncryptedStream::puts (const bd::String& str_in)
 {
+  if (loading) {
+    bd::Stream::puts(str_in);
+    return;
+  }
   bd::String string(str_in);
   if (key.length()) {
     if (string[string.length() - 1] == '\n')
