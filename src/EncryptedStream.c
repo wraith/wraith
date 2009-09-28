@@ -7,18 +7,16 @@
 #include <stdarg.h>
 #include "compat/compat.h"
 
-int EncryptedStream::gets (char *_data, size_t maxSize) {
-  size_t size = bd::Stream::gets(_data, maxSize);
-  if (key.length()) {
-    bd::String tmp(_data, size);
-    if (tmp[tmp.length() - 1] == '\n')
-      --tmp;
-    bd::String decrypted(decrypt_string(key, broken_base64Decode(tmp)));
-    decrypted += '\n';
-    strlcpy(_data, decrypted.c_str(), maxSize);
-    return decrypted.length();
-  }
-  return size;
+bd::String EncryptedStream::gets (size_t maxSize, char delim) {
+  if (!key.length()) return bd::Stream::gets(maxSize, delim);
+  bd::String tmp(bd::Stream::gets(maxSize, delim));
+  if (delim && tmp[tmp.length() - 1] == delim)
+    --tmp;
+  bd::String decrypted(decrypt_string(key, broken_base64Decode(tmp)));
+  /* The delimeter (\n) is not encrypted */
+  if (delim)
+    decrypted += delim;
+  return decrypted;
 }
 
 void EncryptedStream::puts (const bd::String& str_in)

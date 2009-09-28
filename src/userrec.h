@@ -17,6 +17,7 @@ int change_handle(struct userrec *, char *);
 void correct_handle(char *);
 void stream_writeuserfile(bd::Stream&, const struct userrec *, int, bool = 0);
 int write_userfile(int);
+int real_writeuserfile(int idx, const struct userrec *bu, FILE *f);
 void touch_laston(struct userrec *, char *, time_t);
 void user_del_chan(char *);
 struct userrec *host_conflicts(char *);

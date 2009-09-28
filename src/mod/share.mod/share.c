@@ -38,6 +38,7 @@
 #include "src/auth.h"
 #include "src/set.h"
 #include "src/EncryptedStream.h"
+#include <bdlib/src/String.h>
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -1075,16 +1076,14 @@ share_end(int idx, char *par)
 
 static void share_userfile_line(int idx, char *par) {
   char *size = newsplit(&par);
-  size_t len = atoi(size);
 
-  stream_in.puts(par, len);
-  stream_in.puts('\n');
+  stream_in << bd::String(par, atoi(size));
+  stream_in << '\n';
 }
 
 static void share_userfile_start(int idx, char *par) {
   dcc[idx].status |= STAT_GETTING;
-  stream_in.seek(0, SEEK_SET);
-  stream_in.truncate();
+  stream_in.clear();
 }
 
 static void share_userfile_end(int idx, char *par) {
@@ -1252,17 +1251,7 @@ write_tmp_userfile(char *fn, const struct userrec *bu, int idx)
   int ok = 1;
 
   if ((f = fopen(fn, "wb"))) {
-/* FIXME: REMOVE AFTER 1.2.14 */
-    bool old = 0;
-
-    tand_t* bot = idx != -1 ? findbot(dcc[idx].nick) : NULL;
-    if (bot && bot->buildts < 1175102242) /* flood-* hacks */
-      old = 1;
-
-    const char salt1[] = SALT1;
-    EncryptedStream stream(salt1);
-    stream_writeuserfile(stream, bu, idx, old);
-    if ((fwrite(stream.data(), 1, stream.length(), f) != stream.length()) || (fflush(f)))
+    if (real_writeuserfile(idx, bu, f))
       ok = 0;
     fclose(f);
     fixmod(fn);
@@ -1469,7 +1458,7 @@ static void share_read_stream(int idx, bd::Stream& stream) {
 static void
 ulsend(int idx, const char* data, size_t datalen)
 {
-  char buf[1040];
+  char buf[1040] = "";
 
   size_t len = simple_snprintf(buf, sizeof(buf), "s l %d %s", datalen-1, data);/* -1 for newline */
   tputs(dcc[idx].sock, buf, len);
@@ -1482,11 +1471,10 @@ stream_send_users(int idx)
   stream_writeuserfile(stream, userlist, idx);
   stream.seek(0, SEEK_SET);
   dprintf(idx, "s ls\n");
-  char buf[1024] = "";
-  size_t len = 0;
+  bd::String buf;
   while (stream.tell() < stream.length()) {
-    len = stream.gets(buf, sizeof(buf));
-    ulsend(idx, buf, len);
+    buf = stream.getline(1024);
+    ulsend(idx, buf.c_str(), buf.length());
   }
   dprintf(idx, "s le\n");
 }

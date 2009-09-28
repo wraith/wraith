@@ -506,18 +506,9 @@ int write_userfile(int idx)
     sort_userlist();
 
 
-/* FIXME: REMOVE AFTER 1.2.14 */
-  bool old = 0;
-
-  tand_t* bot = idx != -1 ? findbot(dcc[idx].nick) : NULL;
-  if (bot && bot->buildts < 1175102242) /* flood-* hacks */
-    old = 1;
   putlog(LOG_DEBUG, "@", "Writing user entries.");
 
-  const char salt1[] = SALT1;
-  EncryptedStream stream(salt1);
-  stream_writeuserfile(stream, userlist, idx, old);
-  if ((fwrite(stream.data(), 1, stream.length(), f) != stream.length()) || fflush(f)) {
+  if (real_writeuserfile(idx, userlist, f)) {
     putlog(LOG_MISC, "*", "ERROR writing user file. (%s)", strerror(ferror(f)));
     fclose(f);
     free(new_userfile);
@@ -529,6 +520,23 @@ int write_userfile(int idx)
   copyfile(userfile, backup);
   movefile(new_userfile, userfile);
   free(new_userfile);
+  return 0;
+}
+
+/* Used by writeuserfile() and write_tmp_userfile() in share.c */
+int real_writeuserfile(int idx, const struct userrec *bu, FILE *f) {
+/* FIXME: REMOVE AFTER 1.2.14 */
+  bool old = 0;
+
+  tand_t* bot = idx != -1 ? findbot(dcc[idx].nick) : NULL;
+  if (bot && bot->buildts < 1175102242) /* flood-* hacks */
+    old = 1;
+
+  const char salt1[] = SALT1;
+  EncryptedStream stream(salt1);
+  stream_writeuserfile(stream, bu, idx, old);
+  if ((fwrite(bd::String(stream).data(), 1, stream.length(), f) != stream.length()) || (fflush(f)))
+    return 1;
   return 0;
 }
 

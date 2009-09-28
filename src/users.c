@@ -590,8 +590,7 @@ int readuserfile(const char *file, struct userrec **ret)
   const char salt1[] = SALT1;
   EncryptedStream stream(salt1);
   stream.loadFile(file);
-  int res = stream_readuserfile(stream, ret);
-  return res;
+  return stream_readuserfile(stream, ret);
 }
 
 int stream_readuserfile(bd::Stream& stream, struct userrec **ret)
@@ -615,19 +614,19 @@ int stream_readuserfile(bd::Stream& stream, struct userrec **ret)
   }
   noshare = 1;
   /* read opening comment */
-  stream.gets(s, 180);
-  remove_crlf(s);
-  if (s[1] < '4') {
+  bd::String str(stream.getline(180));
+  if (str[1] < '4') {
     putlog(LOG_MISC, "*", "!*! Empty or malformed userfile.");
     return 0;
   }
-  if (s[1] > '4') {
+  if (str[1] > '4') {
     putlog(LOG_MISC, "*", "Invalid userfile format.");
     return 0;
   }
   while (stream.tell() < stream.length()) {
     s = buf;
-    stream.gets(s, sizeof(buf));
+    str = stream.getline(sizeof(buf));
+    strlcpy(s, str.c_str(), std::min(str.length(), sizeof(buf)));
     remove_crlf(s);
     if (1) {
       line++;

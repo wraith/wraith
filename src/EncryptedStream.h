@@ -6,6 +6,7 @@ namespace bd {
 }
 #include <iostream>
 #include <bdlib/src/Stream.h>
+#include <bdlib/src/String.h>
 
 class EncryptedStream : public bd::Stream {
   private:
@@ -18,7 +19,7 @@ class EncryptedStream : public bd::Stream {
         EncryptedStream(bd::String& keyStr) : Stream(), key(keyStr) {};
         EncryptedStream(EncryptedStream& stream) : Stream(stream), key(stream.key) {};
 
-        virtual int gets(char *, size_t);
+        virtual bd::String gets(size_t, char delim = 0);
         virtual void puts (const bd::String& string);
 };
 #endif
