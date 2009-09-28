@@ -50,6 +50,7 @@
 #include "socket.h"
 #include "net.h"
 #include "EncryptedStream.h"
+#include <bdlib/src/String.h>
 
 bool             noshare = 1;		/* don't send out to sharebots	    */
 struct userrec	*userlist = NULL;	/* user records are stored here	    */
@@ -359,9 +360,10 @@ static void write_user(const struct userrec *u, bd::Stream& stream, int idx)
 {
   char s[181] = "";
   struct flag_record fr = {FR_GLOBAL, u->flags, 0, 0 };
+  bd::String buf;
 
   build_flags(s, &fr, NULL);
-  stream.printf("%s%-10s - %-24s\n", u->bot ? "-" : "", u->handle, s);
+  stream << buf.printf("%s%-10s - %-24s\n", u->bot ? "-" : "", u->handle, s);
 
   struct chanset_t *cst = NULL;
 
@@ -375,7 +377,7 @@ static void write_user(const struct userrec *u, bd::Stream& stream, int idx)
       fr.match = FR_CHAN;
       fr.chan = ch->flags;
       build_flags(s, &fr, NULL);
-      stream.printf("! %-20s %li %-10s %s\n", ch->channel, (long) ch->laston, s, ch->info ? ch->info : "");
+      stream << buf.printf("! %-20s %li %-10s %s\n", ch->channel, (long) ch->laston, s, ch->info ? ch->info : "");
     }
   }
   for (struct user_entry *ue = u->entries; ue; ue = ue->next) {
@@ -464,10 +466,11 @@ static void sort_userlist()
 void stream_writeuserfile(bd::Stream& stream, const struct userrec *bu, int idx, bool old) {
   time_t tt = now;
   char s1[81] = "";
+  bd::String buf;
 
   strcpy(s1, ctime(&tt));
 
-  stream.printf("#4v: %s -- %s -- written %s", ver, conf.bot->nick, s1);
+  stream << buf.printf("#4v: %s -- %s -- written %s", ver, conf.bot->nick, s1);
   channels_writeuserfile(stream, old);
 
   for (const struct userrec *u = bu; u; u = u->next)

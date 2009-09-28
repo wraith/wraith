@@ -40,6 +40,7 @@
 #include "src/misc.h"
 #include "src/core_binds.h"
 #include <bdlib/src/Stream.h>
+#include <bdlib/src/String.h>
 
 struct console_info {
   char *channel;
@@ -107,8 +108,9 @@ console_write_userfile(bd::Stream& stream, const struct userrec *u, const struct
     return;
 
   struct console_info *i = (struct console_info *) e->u.extra;
+  bd::String buf;
 
-  stream.printf("--CONSOLE %s %s %s %d %d %d %d %d %d %d %d\n",
+  stream << buf.printf("--CONSOLE %s %s %s %d %d %d %d %d %d %d %d\n",
                i->channel, masktype(i->conflags),
                stripmasktype(i->stripflags), i->echoflags,
                i->page, i->conchan, i->color, i->banner, i->channels, i->bots, i->whom);

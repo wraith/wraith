@@ -21,6 +21,7 @@
 #include "userent.h"
 #include "rfc1459.h"
 #include <bdlib/src/Stream.h>
+#include <bdlib/src/String.h>
 
 #include "set_default.h"
 
@@ -826,18 +827,20 @@ static char *var_rem_list(const char *botnick, variable_t *var, const char *elem
 
 void write_vars_and_cmdpass(bd::Stream& stream, int idx)
 {
+  bd::String buf;
+
   putlog(LOG_DEBUG, "@", "Writing set entries...");
-  stream.printf(SET_NAME " - -\n");
+  stream << buf.printf(SET_NAME " - -\n");
 
   int i = 0;
 
   for (i = 0; vars[i].name; i++) {
     /* send blanks if our variable isn't set, theirs MIGHT be set and needs to be UNSET */
-    stream.printf("@ %s %s\n", vars[i].name, vars[i].gdata ? vars[i].gdata : "");
+    stream << buf.printf("@ %s %s\n", vars[i].name, vars[i].gdata ? vars[i].gdata : "");
   }
 
   for (struct cmd_pass *cp = cmdpass; cp; cp = cp->next)
-    stream.printf("- %s %s\n", cp->name, cp->pass);
+    stream << buf.printf("- %s %s\n", cp->name, cp->pass);
 }
 
 

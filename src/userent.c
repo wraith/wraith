@@ -38,6 +38,7 @@
 #include "crypt.h"
 #include "botmsg.h"
 #include <bdlib/src/Stream.h>
+#include <bdlib/src/String.h>
 
 static struct user_entry_type *entry_type_list = NULL;
 
@@ -95,13 +96,16 @@ bool def_kill(struct user_entry *e)
 void write_userfile_protected(bd::Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
 {
   /* only write if saving local, or if sending to hub, or if sending to same user as entry */
-  if (idx == -1 || dcc[idx].hub || dcc[idx].user == u)
-    stream.printf("--%s %s\n", e->type->name, e->u.string);
+  if (idx == -1 || dcc[idx].hub || dcc[idx].user == u) {
+    bd::String buf;
+    stream << buf.printf("--%s %s\n", e->type->name, e->u.string);
+  }
 }
 
 void def_write_userfile(bd::Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
 {
-  stream.printf("--%s %s\n", e->type->name, e->u.string);
+  bd::String buf;
+  stream << buf.printf("--%s %s\n", e->type->name, e->u.string);
 }
 
 void *def_get(struct userrec *u, struct user_entry *e)
@@ -363,9 +367,10 @@ static void set_write_userfile(bd::Stream& stream, const struct userrec *u, cons
   /* only write if saving local, or if sending to hub, or if sending to same user as entry */
   if (idx == -1 || dcc[idx].hub || dcc[idx].user == u) {
     struct xtra_key *x = (struct xtra_key *) e->u.extra;
+    bd::String buf;
 
     for (; x; x = x->next)
-      stream.printf("--%s %s %s\n", e->type->name, x->key, x->data ? x->data : "");
+      stream << buf.printf("--%s %s %s\n", e->type->name, x->key, x->data ? x->data : "");
   }
 }
 
@@ -697,8 +702,9 @@ static bool laston_unpack(struct userrec *u, struct user_entry *e)
 static void laston_write_userfile(bd::Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
 {
   struct laston_info *li = (struct laston_info *) e->u.extra;
+  bd::String buf;
 
-  stream.printf("--LASTON %li %s\n", (long) li->laston, li->lastonplace ? li->lastonplace : "");
+  stream << buf.printf("--LASTON %li %s\n", (long) li->laston, li->lastonplace ? li->lastonplace : "");
 }
 
 static bool laston_kill(struct user_entry *e)
@@ -819,8 +825,9 @@ static bool botaddr_kill(struct user_entry *e)
 static void botaddr_write_userfile(bd::Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
 {
   register struct bot_addr *bi = (struct bot_addr *) e->u.extra;
+  bd::String buf;
 
-  stream.printf("--%s %s:%u/%u:%u:%s\n", e->type->name, bi->address, bi->telnet_port, bi->relay_port, bi->hublevel, bi->uplink);
+  stream << buf.printf("--%s %s:%u/%u:%u:%s\n", e->type->name, bi->address, bi->telnet_port, bi->relay_port, bi->hublevel, bi->uplink);
 }
 
 static bool botaddr_set(struct userrec *u, struct user_entry *e, void *buf)
@@ -906,9 +913,10 @@ struct user_entry_type USERENTRY_BOTADDR =
 static void hosts_write_userfile(bd::Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
 {
   struct list_type *h = NULL;
+  bd::String buf;
 
   for (h = (struct list_type *) e->u.extra; h; h = h->next)
-    stream.printf("--HOSTS %s\n", h->extra);
+    stream << buf.printf("--HOSTS %s\n", h->extra);
 }
 
 static bool hosts_null(struct userrec *u, struct user_entry *e)
