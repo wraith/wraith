@@ -168,20 +168,6 @@ conf_killbot(conf_bot *bots, const char *botnick, conf_bot *bot, int signal, boo
 }
 
 #ifndef CYGWIN_HACKS
-static uid_t save_euid, save_egid;
-static int
-swap_uids()
-{
-  save_euid = geteuid();
-  save_egid = getegid();
-  return (setegid(getgid()) || seteuid(getuid()))? -1 : 0;
-}
-static int
-swap_uids_back()
-{
-  return (setegid(save_egid) || seteuid(save_euid)) ? -1 : 0;
-}
-
 static int
 my_gettime(struct timespec *ts)
 {
@@ -245,8 +231,6 @@ confedit()
   signal(SIGQUIT, SIG_IGN);
   signal(SIGCONT, SIG_DFL);
 
-  swap_uids();
-
   my_gettime(&ts1);
   switch (pid = fork()) {
     case -1:
@@ -256,8 +240,6 @@ confedit()
       char *run = NULL;
       size_t size = tmpconf.len + strlen(editor) + 5;
 
-      setgid(getgid());
-      setuid(getuid());
       run = (char *) my_calloc(1, size);
       /* child */
       simple_snprintf(run, size, "%s %s", editor, tmpconf.file);
@@ -303,7 +285,6 @@ confedit()
   signal(SIGINT, SIG_DFL);
   signal(SIGQUIT, SIG_DFL);
 
-  swap_uids_back();
   if (fstat(tmpconf.fd, &sn))
     fatal(STR("Error reading new config file"), 0);
 
