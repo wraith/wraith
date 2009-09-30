@@ -160,10 +160,10 @@ break_down_flags(const char *string, struct flag_record *plus, struct flag_recor
     else
       return;                   /* We dont actually want any..huh? */
   }
-  egg_bzero(plus, sizeof(struct flag_record));
+  bzero(plus, sizeof(struct flag_record));
 
   if (minus)
-    egg_bzero(minus, sizeof(struct flag_record));
+    bzero(minus, sizeof(struct flag_record));
 
   plus->match = FR_OR;          /* Default binding type OR */
   while (*string) {
@@ -624,13 +624,13 @@ int deflag_translate(const char *buf)
   if (str_isdigit(buf))
     return (atoi(buf));
 
-  if (!egg_strcasecmp(buf, "ignore"))
+  if (!strcasecmp(buf, "ignore"))
     return P_IGNORE;
-  else if (!egg_strcasecmp(buf, "deop"))
+  else if (!strcasecmp(buf, "deop"))
     return P_DEOP;
-  else if (!egg_strcasecmp(buf, "kick"))
+  else if (!strcasecmp(buf, "kick"))
     return P_KICK;
-  else if (!egg_strcasecmp(buf, "delete") || !egg_strcasecmp(buf, "remove"))
+  else if (!strcasecmp(buf, "delete") || !strcasecmp(buf, "remove"))
     return P_DELETE;
   return P_IGNORE;
 }

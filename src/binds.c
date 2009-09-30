@@ -388,7 +388,7 @@ static int bind_vcheck_hits (bind_table_t *table, const char *match, struct flag
 		}
 		else if (table->match_type & MATCH_PARTIAL) {
 			cmp = 1;
-			if (!egg_strncasecmp(match, entry->mask, matchlen)) {
+			if (!strncasecmp(match, entry->mask, matchlen)) {
 				winner = entry;
 				/* Is it an exact match? */
 				if (!entry->mask[matchlen]) {

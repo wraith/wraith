@@ -80,7 +80,7 @@ int count_users(struct userrec *bu)
 static struct userrec *check_dcclist_hand(char *handle)
 {
   for (int i = 0; i < dcc_total; i++)
-    if (dcc[i].type && !egg_strcasecmp(dcc[i].nick, handle))
+    if (dcc[i].type && !strcasecmp(dcc[i].nick, handle))
       return dcc[i].user;
   return NULL;
 }
@@ -113,7 +113,7 @@ struct userrec *get_user_by_handle(struct userrec *bu, char *handle)
   struct userrec *ret = NULL;
 
   if (bu == userlist) {
-    if (lastuser && !egg_strcasecmp(lastuser->handle, handle)) {
+    if (lastuser && !strcasecmp(lastuser->handle, handle)) {
       cache_hit++;
       return lastuser;
     }
@@ -130,7 +130,7 @@ struct userrec *get_user_by_handle(struct userrec *bu, char *handle)
     cache_miss++;
   }
   for (struct userrec *u = bu; u; u = u->next)
-    if (!egg_strcasecmp(u->handle, handle)) {
+    if (!strcasecmp(u->handle, handle)) {
       if (bu == userlist)
 	lastuser = u;
       return u;
@@ -285,7 +285,7 @@ bool user_has_host(const char *handle, struct userrec *u, char *host)
   struct list_type *q = NULL;
 
   for (q = (struct list_type *) get_user(&USERENTRY_HOSTS, u); q; q = q->next)
-    if (!egg_strcasecmp(q->extra, host))
+    if (!strcasecmp(q->extra, host))
       return 1;
 
   return 0;
@@ -432,7 +432,7 @@ static int sort_compare(struct userrec *a, struct userrec *b)
     if (a->flags & ~b->flags & USER_OP)
       return 0;
   }
-  return (egg_strcasecmp(a->handle, b->handle) > 0);
+  return (strcasecmp(a->handle, b->handle) > 0);
 }
 
 static void sort_userlist()
@@ -561,7 +561,7 @@ int change_handle(struct userrec *u, char *newh)
   strlcpy(u->handle, newh, sizeof u->handle);
 
   for (int i = 0; i < dcc_total; i++)
-    if (dcc[i].type && dcc[i].type != &DCC_BOT && !egg_strcasecmp(dcc[i].nick, s)) {
+    if (dcc[i].type && dcc[i].type != &DCC_BOT && !strcasecmp(dcc[i].nick, s)) {
       strlcpy(dcc[i].nick, newh, sizeof dcc[i].nick);
       if (dcc[i].type == &DCC_CHAT && dcc[i].u.chat->channel >= 0) {
 	chanout_but(-1, dcc[i].u.chat->channel, "*** Handle change: %s -> %s\n", s, newh);
@@ -673,7 +673,7 @@ int deluser(char *handle)
   int fnd = 0;
 
   while ((u != NULL) && (!fnd)) {
-    if (!egg_strcasecmp(u->handle, handle))
+    if (!strcasecmp(u->handle, handle))
       fnd = 1;
     else {
       prev = u;
@@ -693,7 +693,7 @@ int deluser(char *handle)
       if (u->bot) {
         int i = nextbot(handle);
 
-        if (i != -1 && !egg_strcasecmp(dcc[i].nick, handle))
+        if (i != -1 && !strcasecmp(dcc[i].nick, handle))
           botunlink(-1, handle, "Bot removed.");
         else { /* This will probably never be called -- but just in case */
           /* Kill link in attempt/progress */

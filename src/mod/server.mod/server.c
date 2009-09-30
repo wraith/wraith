@@ -244,7 +244,7 @@ static int calc_penalty(char * msg)
     return 0;
   }
   penalty = (1 + i / 100);
-  if (!egg_strcasecmp(cmd, "KICK")) {
+  if (!strcasecmp(cmd, "KICK")) {
     par1 = newsplit(&msg); /* channel */
     par2 = newsplit(&msg); /* victim(s) */
     par3 = splitnicks(&par2);
@@ -259,7 +259,7 @@ static int calc_penalty(char * msg)
       par3 = splitnicks(&par1);
       penalty += ii;
     }
-  } else if (!egg_strcasecmp(cmd, "MODE")) {
+  } else if (!strcasecmp(cmd, "MODE")) {
     i = 0;
     par1 = newsplit(&msg); /* channel */
     par2 = newsplit(&msg); /* mode(s) */
@@ -282,7 +282,7 @@ static int calc_penalty(char * msg)
       ii++;
     }
     penalty += (ii * i);
-  } else if (!egg_strcasecmp(cmd, "TOPIC")) {
+  } else if (!strcasecmp(cmd, "TOPIC")) {
     penalty++;
     par1 = newsplit(&msg); /* channel */
     par2 = newsplit(&msg); /* topic */
@@ -294,15 +294,15 @@ static int calc_penalty(char * msg)
         penalty += 2;
       }
     }
-  } else if (!egg_strcasecmp(cmd, "PRIVMSG") ||
-	     !egg_strcasecmp(cmd, "NOTICE")) {
+  } else if (!strcasecmp(cmd, "PRIVMSG") ||
+	     !strcasecmp(cmd, "NOTICE")) {
     par1 = newsplit(&msg); /* channel(s)/nick(s) */
     /* Add one sec penalty for each recipient */
     while (strlen(par1) > 0) {
       splitnicks(&par1);
       penalty++;
     }
-  } else if (!egg_strcasecmp(cmd, "WHO")) {
+  } else if (!strcasecmp(cmd, "WHO")) {
     par1 = newsplit(&msg); /* masks */
     par2 = par1;
     while (strlen(par1) > 0) {
@@ -312,33 +312,33 @@ static int calc_penalty(char * msg)
       else
         penalty += 5;
     }
-  } else if (!egg_strcasecmp(cmd, "AWAY")) {
+  } else if (!strcasecmp(cmd, "AWAY")) {
     if (strlen(msg) > 0)
       penalty += 2;
     else
       penalty += 1;
-  } else if (!egg_strcasecmp(cmd, "INVITE")) {
+  } else if (!strcasecmp(cmd, "INVITE")) {
     /* Successful invite receives 2 or 3 penalty points. Let's go
      * with the maximum.
      */
     penalty += 3;
-  } else if (!egg_strcasecmp(cmd, "JOIN")) {
+  } else if (!strcasecmp(cmd, "JOIN")) {
     penalty += 2;
-  } else if (!egg_strcasecmp(cmd, "PART")) {
+  } else if (!strcasecmp(cmd, "PART")) {
     penalty += 4;
-  } else if (!egg_strcasecmp(cmd, "VERSION")) {
+  } else if (!strcasecmp(cmd, "VERSION")) {
     penalty += 2;
-  } else if (!egg_strcasecmp(cmd, "TIME")) {
+  } else if (!strcasecmp(cmd, "TIME")) {
     penalty += 2;
-  } else if (!egg_strcasecmp(cmd, "TRACE")) {
+  } else if (!strcasecmp(cmd, "TRACE")) {
     penalty += 2;
-  } else if (!egg_strcasecmp(cmd, "NICK")) {
+  } else if (!strcasecmp(cmd, "NICK")) {
     penalty += 3;
-  } else if (!egg_strcasecmp(cmd, "ISON")) {
+  } else if (!strcasecmp(cmd, "ISON")) {
     penalty += 1;
-  } else if (!egg_strcasecmp(cmd, "WHOIS")) {
+  } else if (!strcasecmp(cmd, "WHOIS")) {
     penalty += 2;
-  } else if (!egg_strcasecmp(cmd, "DNS")) {
+  } else if (!strcasecmp(cmd, "DNS")) {
     penalty += 2;
   } else
     penalty++; /* just add standard-penalty */
@@ -428,7 +428,7 @@ static bool fast_deq(int which)
     strlcpy(stackable, stackablecmds, sizeof stackable);
     stckbl = stackable;
     while (strlen(stckbl) > 0)
-      if (!egg_strcasecmp(newsplit(&stckbl), cmd)) {
+      if (!strcasecmp(newsplit(&stckbl), cmd)) {
         found = 1;
         break;
       }
@@ -444,7 +444,7 @@ static bool fast_deq(int which)
     strlcpy(stackable, stackable2cmds, sizeof stackable);
     stckbl = stackable;
     while (strlen(stckbl) > 0)
-      if (!egg_strcasecmp(newsplit(&stckbl), cmd)) {
+      if (!strcasecmp(newsplit(&stckbl), cmd)) {
         stack_method = 2;
         break;
       }    
@@ -586,7 +586,7 @@ void queue_server(int which, char *buf, int len)
 
       for (tq = tempq.head; tq; tq = tqq) {
 	tqq = tq->next;
-	if (!egg_strcasecmp(tq->msg, buf)) {
+	if (!strcasecmp(tq->msg, buf)) {
 	  if (!double_warned) {
 	    if (buf[len - 1] == '\n')
 	      buf[len - 1] = 0;
@@ -762,7 +762,7 @@ void next_server(int *ptr, char *servname, port_t *port, char *pass)
   if (*ptr == (-1)) {
     for (; x; x = x->next) {
       if (x->port == *port) {
-	if (!egg_strcasecmp(x->name, servname)) {
+	if (!strcasecmp(x->name, servname)) {
 	  *ptr = i;
 	  return;
 	}
@@ -881,7 +881,7 @@ static int ctcp_DCC_CHAT(char *nick, char *from, struct userrec *u, char *object
   ip = newsplit(&text);
   prt = newsplit(&text);
 
-  if (egg_strcasecmp(action, "CHAT") || egg_strcasecmp(object, botname) || !u)
+  if (strcasecmp(action, "CHAT") || strcasecmp(object, botname) || !u)
     return BIND_RET_LOG;
 
   int i;

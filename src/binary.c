@@ -269,9 +269,9 @@ bin_checksum(const char *fname, int todo)
 static int
 features_find(const char *buffer)
 {
-  if (!egg_strcasecmp(buffer, STR("no_take")))
+  if (!strcasecmp(buffer, STR("no_take")))
     return FEATURE_NO_TAKE;
-  else if (!egg_strcasecmp(buffer, STR("no_mdop")))
+  else if (!strcasecmp(buffer, STR("no_mdop")))
     return FEATURE_NO_MDOP;
   return 0;
 }
@@ -351,28 +351,28 @@ readcfg(const char *cfgfile, bool read_stdin)
       while (p && (strchr(LISTSEPERATORS, p[0])))
         *p++ = 0;
       if (p) {
-        if (!egg_strcasecmp(buffer, STR("packname"))) {
+        if (!strcasecmp(buffer, STR("packname"))) {
           strlcpy(settings.packname, trim(p), sizeof settings.packname);
-        } else if (!egg_strcasecmp(buffer, STR("shellhash"))) {
+        } else if (!strcasecmp(buffer, STR("shellhash"))) {
           if (strlen(trim(p)) != 40) {
             fprintf(stderr, STR("\nSHELLHASH should be a SHA1 hash.\n"));
             ADD_ERROR
           }
           strlcpy(settings.shellhash, trim(p), sizeof settings.shellhash);
-        } else if (!egg_strcasecmp(buffer, STR("dccprefix"))) {
+        } else if (!strcasecmp(buffer, STR("dccprefix"))) {
           strlcpy(settings.dcc_prefix, trim(p), 2);
-        } else if (!egg_strcasecmp(buffer, STR("owner"))) {
+        } else if (!strcasecmp(buffer, STR("owner"))) {
           strlcat(settings.owners, trim(p), sizeof(settings.owners));
           strlcat(settings.owners, ",", sizeof(settings.owners));
-        } else if (!egg_strcasecmp(buffer, STR("owneremail"))) {
+        } else if (!strcasecmp(buffer, STR("owneremail"))) {
           strlcat(settings.owneremail, trim(p), sizeof(settings.owneremail));
           strlcat(settings.owneremail, ",", sizeof(settings.owneremail));
-        } else if (!egg_strcasecmp(buffer, STR("hub"))) {
+        } else if (!strcasecmp(buffer, STR("hub"))) {
           strlcat(settings.hubs, trim(p), sizeof(settings.hubs));
           strlcat(settings.hubs, ",", sizeof(settings.hubs));
-        } else if (!egg_strcasecmp(buffer, STR("salt1"))) {
+        } else if (!strcasecmp(buffer, STR("salt1"))) {
           strlcat(settings.salt1, trim(p), sizeof(settings.salt1));
-        } else if (!egg_strcasecmp(buffer, STR("salt2"))) {
+        } else if (!strcasecmp(buffer, STR("salt2"))) {
           strlcat(settings.salt2, trim(p), sizeof(settings.salt2));
           if (read_stdin) break;
         }
@@ -430,7 +430,7 @@ static void edpack(settings_t *incfg, const char *in_hash, int what)
 		len = sizeof(_field) - 1;							\
 		tmp = (char *) enc_dec_string(hash, (unsigned char *) _field, &len);		\
 		if (what == PACK_ENC) 								\
-		  egg_memcpy(_field, tmp, len);							\
+		  memcpy(_field, tmp, len);							\
 		else 										\
 		  simple_snprintf(_field, sizeof(_field), "%s", tmp);				\
 		OPENSSL_cleanse(tmp, len);							\
@@ -658,8 +658,8 @@ void write_settings(const char *fname, int die, bool doconf, int initialized)
 static void 
 clear_settings(void)
 {
-//  egg_memset(&settings.bots, 0, sizeof(settings_t) - SIZE_PACK - PREFIXLEN);
-  egg_memset(&settings.bots, 0, SIZE_CONF);
+//  memset(&settings.bots, 0, sizeof(settings_t) - SIZE_PACK - PREFIXLEN);
+  memset(&settings.bots, 0, SIZE_CONF);
 }
 
 void conf_to_bin(conf_t *in, bool move, int die)

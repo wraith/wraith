@@ -111,7 +111,7 @@ void eof_dcc_fork_send(int idx)
     int x, y = -1;
 
     for (x = 0; x < dcc_total; x++)
-      if (dcc[x].type && (!egg_strcasecmp(dcc[x].nick, dcc[idx].host)) && (dcc[x].type->flags & DCT_BOT)) {
+      if (dcc[x].type && (!strcasecmp(dcc[x].nick, dcc[idx].host)) && (dcc[x].type->flags & DCT_BOT)) {
 	y = x;
 	break;
       }
@@ -125,7 +125,7 @@ void eof_dcc_fork_send(int idx)
     int x, y = -1;
 
     for (x = 0; x < dcc_total; x++)
-      if (dcc[x].type && (!egg_strcasecmp(dcc[x].nick, dcc[idx].host)) && (dcc[x].type->flags & DCT_BOT)) {
+      if (dcc[x].type && (!strcasecmp(dcc[x].nick, dcc[idx].host)) && (dcc[x].type->flags & DCT_BOT)) {
 	y = x;
 	break;
       }
@@ -168,7 +168,7 @@ static void eof_dcc_send(int idx)
     int x, y = -1;
 
     for (x = 0; x < dcc_total; x++) {
-      if (dcc[x].type && (!egg_strcasecmp(dcc[x].nick, dcc[idx].host)) && (dcc[x].type->flags & DCT_BOT)) {
+      if (dcc[x].type && (!strcasecmp(dcc[x].nick, dcc[idx].host)) && (dcc[x].type->flags & DCT_BOT)) {
 	y = x;
         break;
       }
@@ -200,7 +200,7 @@ static void eof_dcc_send(int idx)
     int x, y = -1;
 
     for (x = 0; x < dcc_total; x++)
-      if (dcc[x].type && (!egg_strcasecmp(dcc[x].nick, dcc[idx].host)) && (dcc[x].type->flags & DCT_BOT)) {
+      if (dcc[x].type && (!strcasecmp(dcc[x].nick, dcc[idx].host)) && (dcc[x].type->flags & DCT_BOT)) {
 	y = x;
         break;
       }
@@ -278,7 +278,7 @@ void dcc_get(int idx, char *buf, int len)
    */
   if (w < 4 ||
       (w < 8 && dcc[idx].u.xfer->type == XFER_RESEND_PEND)) {
-    egg_memcpy(&(dcc[idx].u.xfer->buf[dcc[idx].u.xfer->sofar]), buf, len);
+    memcpy(&(dcc[idx].u.xfer->buf[dcc[idx].u.xfer->sofar]), buf, len);
     dcc[idx].u.xfer->sofar += len;
     return;
   /* Waiting for the 8 bit reget packet? */
@@ -287,8 +287,8 @@ void dcc_get(int idx, char *buf, int len)
     if (w == 8) {
       transfer_reget reget_data;
 
-      egg_memcpy(&reget_data, dcc[idx].u.xfer->buf, dcc[idx].u.xfer->sofar);
-      egg_memcpy(&reget_data + dcc[idx].u.xfer->sofar, buf, len);
+      memcpy(&reget_data, dcc[idx].u.xfer->buf, dcc[idx].u.xfer->sofar);
+      memcpy(&reget_data + dcc[idx].u.xfer->sofar, buf, len);
       handle_resend_packet(idx, &reget_data);
       cmp = dcc[idx].u.xfer->offset;
     } else
@@ -298,16 +298,16 @@ void dcc_get(int idx, char *buf, int len)
   } else {
     /* Complete packet? */
     if (w == 4) {
-      egg_memcpy(bbuf, dcc[idx].u.xfer->buf, dcc[idx].u.xfer->sofar);
-      egg_memcpy(&(bbuf[dcc[idx].u.xfer->sofar]), buf, len);
+      memcpy(bbuf, dcc[idx].u.xfer->buf, dcc[idx].u.xfer->sofar);
+      memcpy(&(bbuf[dcc[idx].u.xfer->sofar]), buf, len);
     } else {
       p = ((w - 1) & ~3) - dcc[idx].u.xfer->sofar;
       w = w - ((w - 1) & ~3);
       if (w < 4) {
-	egg_memcpy(dcc[idx].u.xfer->buf, &(buf[p]), w);
+	memcpy(dcc[idx].u.xfer->buf, &(buf[p]), w);
 	return;
       }
-      egg_memcpy(bbuf, &(buf[p]), w);
+      memcpy(bbuf, &(buf[p]), w);
     }
     /* This is more compatible than ntohl for machines where an int
      * is more than 4 bytes:
@@ -356,7 +356,7 @@ void dcc_get(int idx, char *buf, int len)
       int x, y = -1;
 
       for (x = 0; x < dcc_total; x++)
-	if (dcc[x].type && !egg_strcasecmp(dcc[x].nick, dcc[idx].host) && (dcc[x].type->flags & DCT_BOT)) {
+	if (dcc[x].type && !strcasecmp(dcc[x].nick, dcc[idx].host) && (dcc[x].type->flags & DCT_BOT)) {
 	  y = x;
           break;
         }
@@ -371,7 +371,7 @@ void dcc_get(int idx, char *buf, int len)
       int x, y = -1;
 
       for (x = 0; x < dcc_total; x++)
-	if (dcc[x].type && !egg_strcasecmp(dcc[x].nick, dcc[idx].host) && (dcc[x].type->flags & DCT_BOT)) {
+	if (dcc[x].type && !strcasecmp(dcc[x].nick, dcc[idx].host) && (dcc[x].type->flags & DCT_BOT)) {
 	  y = x;
           break;
         }
@@ -404,7 +404,7 @@ void eof_dcc_get(int idx)
     int x, y = -1;
 
     for (x = 0; x < dcc_total; x++)
-      if (dcc[x].type && !egg_strcasecmp(dcc[x].nick, dcc[idx].host) && (dcc[x].type->flags & DCT_BOT)) {
+      if (dcc[x].type && !strcasecmp(dcc[x].nick, dcc[idx].host) && (dcc[x].type->flags & DCT_BOT)) {
 	y = x;
         break;
       }
@@ -428,7 +428,7 @@ void eof_dcc_get(int idx)
     int x, y = -1;
 
     for (x = 0; x < dcc_total; x++)
-      if (dcc[x].type && !egg_strcasecmp(dcc[x].nick, dcc[idx].host) && (dcc[x].type->flags & DCT_BOT)) {
+      if (dcc[x].type && !strcasecmp(dcc[x].nick, dcc[idx].host) && (dcc[x].type->flags & DCT_BOT)) {
 	y = x;
         break;
       }
@@ -503,7 +503,7 @@ static void transfer_get_timeout(int i)
     int x, y = -1;
 
     for (x = 0; x < dcc_total; x++)
-      if (dcc[x].type && (!egg_strcasecmp(dcc[x].nick, dcc[i].host)) && (dcc[x].type->flags & DCT_BOT)) {
+      if (dcc[x].type && (!strcasecmp(dcc[x].nick, dcc[i].host)) && (dcc[x].type->flags & DCT_BOT)) {
 	y = x;
         break;
       }
@@ -533,7 +533,7 @@ static void transfer_get_timeout(int i)
     int x, y = -1;
 
     for (x = 0; x < dcc_total; x++)
-      if (dcc[x].type && (!egg_strcasecmp(dcc[x].nick, dcc[i].host)) && (dcc[x].type->flags & DCT_BOT)) {
+      if (dcc[x].type && (!strcasecmp(dcc[x].nick, dcc[i].host)) && (dcc[x].type->flags & DCT_BOT)) {
 	y = x;
         break;
       }
@@ -570,7 +570,7 @@ void tout_dcc_send(int idx)
     int x, y = -1;
 
     for (x = 0; x < dcc_total; x++)
-      if (dcc[x].type && !egg_strcasecmp(dcc[x].nick, dcc[idx].host) && (dcc[x].type->flags & DCT_BOT)) {
+      if (dcc[x].type && !strcasecmp(dcc[x].nick, dcc[idx].host) && (dcc[x].type->flags & DCT_BOT)) {
 	y = x;
         break;
       }
@@ -584,7 +584,7 @@ void tout_dcc_send(int idx)
     int x, y = -1;
 
     for (x = 0; x < dcc_total; x++)
-      if (dcc[x].type && !egg_strcasecmp(dcc[x].nick, dcc[idx].host) && (dcc[x].type->flags & DCT_BOT)) {
+      if (dcc[x].type && !strcasecmp(dcc[x].nick, dcc[idx].host) && (dcc[x].type->flags & DCT_BOT)) {
 	y = x;
         break;
       }

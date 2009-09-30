@@ -129,7 +129,7 @@ int egg_client(int idx, const char *host, int port, const char *vip, int vport, 
 
 int socket_name(sockname_t *name, const char *ipaddr, int port)
 {
-        egg_bzero(name, sizeof(*name));
+        bzero(name, sizeof(*name));
 
         if (inet_pton(AF_INET, ipaddr, &name->u.ipv4.sin_addr) > 0) {
                 name->len = sizeof(name->u.ipv4);

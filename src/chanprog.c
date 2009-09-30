@@ -141,7 +141,7 @@ struct userrec *check_chanlist(const char *host)
   nick = splitnick(&uhost);
   for (chan = chanset; chan; chan = chan->next)
     for (m = chan->channel.member; m && m->nick[0]; m = m->next) 
-      if (!rfc_casecmp(nick, m->nick) && !egg_strcasecmp(uhost, m->userhost))
+      if (!rfc_casecmp(nick, m->nick) && !strcasecmp(uhost, m->userhost))
 	return m->user;
   return NULL;
 }
@@ -155,7 +155,7 @@ struct userrec *check_chanlist_hand(const char *hand)
 
   for (chan = chanset; chan; chan = chan->next)
     for (m = chan->channel.member; m && m->nick[0]; m = m->next)
-      if (m->user && !egg_strcasecmp(m->user->handle, hand))
+      if (m->user && !strcasecmp(m->user->handle, hand))
 	return m->user;
   return NULL;
 }
@@ -210,7 +210,7 @@ void set_chanlist(const char *host, struct userrec *rec)
   nick = splitnick(&uhost);
   for (chan = chanset; chan; chan = chan->next)
     for (m = chan->channel.member; m && m->nick[0]; m = m->next)
-      if (!rfc_casecmp(nick, m->nick) && !egg_strcasecmp(uhost, m->userhost))
+      if (!rfc_casecmp(nick, m->nick) && !strcasecmp(uhost, m->userhost))
 	m->user = rec;
 }
 
@@ -386,7 +386,7 @@ bool is_hub(const char* nick) {
 
       len = p2 - p;
       strlcpy(hubbuf, p, len + 1);
-      if (!egg_strncasecmp(nick, hubbuf, HANDLEN))
+      if (!strncasecmp(nick, hubbuf, HANDLEN))
         return 1;
     }
     if ((p = strchr(p, ',')))
@@ -439,7 +439,7 @@ void load_internal_users()
             bi->telnet_port = atoi(port) ? atoi(port) : 0;
             bi->relay_port = bi->telnet_port;
             bi->hublevel = hublevel;
-            if (conf.bot->hub && (!bi->hublevel) && (!egg_strcasecmp(hand, conf.bot->nick)))
+            if (conf.bot->hub && (!bi->hublevel) && (!strcasecmp(hand, conf.bot->nick)))
               bi->hublevel = 99;
             bi->uplink = (char *) my_calloc(1, 1);
             set_user(&USERENTRY_BOTADDR, u, bi);
@@ -692,7 +692,7 @@ int isowner(char *name)
       pb++;
     }
     pl = pb - pa;
-    if (pl == nl && !egg_strncasecmp(pa, name, nl))
+    if (pl == nl && !strncasecmp(pa, name, nl))
       return (1);
     while (1) {
       if ((*pb == 0) || ((*pb != ',') && (*pb != ' ')))

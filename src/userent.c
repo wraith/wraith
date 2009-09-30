@@ -220,7 +220,7 @@ static void added_display(int idx, struct user_entry *e, struct userrec *u)
       *hnd++ = 0;
     tm = atoi(tmp);
 
-    egg_strftime(tmp2, sizeof(tmp2), "%a, %d %b %Y %H:%M:%S %Z", gmtime(&tm));
+    strftime(tmp2, sizeof(tmp2), "%a, %d %b %Y %H:%M:%S %Z", gmtime(&tm));
     if (hnd)
       dprintf(idx, "  -- Added %s by %s\n", tmp2, hnd);
     else
@@ -248,7 +248,7 @@ static bool set_set(struct userrec *u, struct user_entry *e, void *buf)
 
   /* find the curr key if it exists */
   for (; curr; curr = curr->next) {
-    if (curr->key && !egg_strcasecmp(curr->key, newxk->key)) {
+    if (curr->key && !strcasecmp(curr->key, newxk->key)) {
       old = curr;
       break;
     }
@@ -299,7 +299,7 @@ static bool set_unpack(struct userrec *u, struct user_entry *e)
   head = curr = e->u.list;
   e->u.extra = NULL;
 
-  if (conf.bot->hub || !egg_strcasecmp(conf.bot->nick, u->handle)) {
+  if (conf.bot->hub || !strcasecmp(conf.bot->nick, u->handle)) {
     struct xtra_key *t = NULL;
     char *key = NULL, *data = NULL;
 
@@ -344,7 +344,7 @@ static bool set_gotshare(struct userrec *u, struct user_entry *e, char *buf, int
   if (!name || !name[0])
     return 1;
 
-  if (!egg_strcasecmp(u->handle, conf.bot->nick)) {
+  if (!strcasecmp(u->handle, conf.bot->nick)) {
     set_noshare = 1;
     var_set_by_name(conf.bot->nick, name, buf[0] ? buf : NULL);
     set_noshare = 0;
@@ -543,7 +543,7 @@ static void modified_display(int idx, struct user_entry *e, struct userrec *u)
     if (hnd)
       *hnd++ = 0;
     tm = atoi(tmp);
-    egg_strftime(tmp2, sizeof(tmp2), "%a, %d %b %Y %H:%M:%S %Z", gmtime(&tm));
+    strftime(tmp2, sizeof(tmp2), "%a, %d %b %Y %H:%M:%S %Z", gmtime(&tm));
     if (hnd)
       dprintf(idx, "  -- Modified %s by %s\n", tmp2, hnd);
     else
@@ -968,7 +968,7 @@ static void hosts_display(int idx, struct user_entry *e, struct userrec *u)
 
 static bool hosts_set(struct userrec *u, struct user_entry *e, void *buf)
 {
-  if (!buf || !egg_strcasecmp((const char *) buf, "none")) {
+  if (!buf || !strcasecmp((const char *) buf, "none")) {
     /* When the bot crashes, it's in this part, not in the 'else' part */
     list_type_kill(e->u.list);
     e->u.list = NULL;
@@ -1074,7 +1074,7 @@ struct user_entry_type *find_entry_type(char *name)
   struct user_entry_type *p = NULL;
 
   for (p = entry_type_list; p; p = p->next) {
-    if (!egg_strcasecmp(name, p->name))
+    if (!strcasecmp(name, p->name))
       return p;
   }
   return NULL;
@@ -1085,7 +1085,7 @@ struct user_entry *find_user_entry(struct user_entry_type *et, struct userrec *u
   struct user_entry **e = NULL, *t = NULL;
 
   for (e = &(u->entries); *e; e = &((*e)->next)) {
-    if (((*e)->type == et) || ((*e)->name && !egg_strcasecmp((*e)->name, et->name))) {
+    if (((*e)->type == et) || ((*e)->name && !strcasecmp((*e)->name, et->name))) {
       t = *e;
       *e = t->next;
       t->next = u->entries;

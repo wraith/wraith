@@ -74,7 +74,7 @@ char *getnick(const char *handle, struct chanset_t *chan)
 
   for (register memberlist *m = chan->channel.member; m && m->nick[0]; m = m->next) {
     simple_snprintf(s, sizeof s, "%s!%s", m->nick, m->userhost);
-    if ((u = get_user_by_host(s)) && !egg_strcasecmp(u->handle, handle))
+    if ((u = get_user_by_host(s)) && !strcasecmp(u->handle, handle))
       return m->nick;
   }
   return NULL;
@@ -721,7 +721,7 @@ static void cmd_mmode(int idx, char *par)
 
   while (par && par[0]) {
     char *p = newsplit(&par);
-    if (!egg_strncasecmp(p, "bots=", 5)) {
+    if (!strncasecmp(p, "bots=", 5)) {
       p += 5;
       force_bots = atoi(p);
       if ((force_bots < 1) || (force_bots > chanbotcount)) {
@@ -731,7 +731,7 @@ static void cmd_mmode(int idx, char *par)
 	free(chanbots);
 	return;
       }
-    } else if (!egg_strncasecmp(p, "alines=", 7)) {
+    } else if (!strncasecmp(p, "alines=", 7)) {
       p += 7;
       force_alines = atoi(p);
       if (force_alines > 5)
@@ -744,7 +744,7 @@ static void cmd_mmode(int idx, char *par)
 	free(chanbots);
 	return;
       }
-    } else if (!egg_strncasecmp(p, "slines=", 7)) {
+    } else if (!strncasecmp(p, "slines=", 7)) {
       p += 7;
       force_slines = atoi(p);
       if ((force_slines < 1) || (force_slines > 20)) {
@@ -755,7 +755,7 @@ static void cmd_mmode(int idx, char *par)
 	free(chanbots);
 	return;
       }
-    } else if (!egg_strncasecmp(p, "overlap=", 8)) {
+    } else if (!strncasecmp(p, "overlap=", 8)) {
       p += 8;
       force_overlap = atoi(p);
       if ((force_overlap < 1) || (force_overlap > 8)) {
@@ -765,11 +765,11 @@ static void cmd_mmode(int idx, char *par)
 	free(chanbots);
 	return;
       }
-    } else if (!egg_strncasecmp(p, "bitch", 5)) {
+    } else if (!strncasecmp(p, "bitch", 5)) {
       bitch = 1;
-    } else if (!egg_strncasecmp(p, "simul", 5)) {
+    } else if (!strncasecmp(p, "simul", 5)) {
       simul = 1;
-    } else if (!egg_strncasecmp(p, "local", 5)) {
+    } else if (!strncasecmp(p, "local", 5)) {
       local = 1;
     } else {
       dprintf(idx, "Unrecognized option %s\n", p);
@@ -1496,9 +1496,9 @@ static void cmd_channel(int idx, char *par)
     for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
       if (m->joined > 0) {
 	if ((now - (m->joined)) > 86400)
-	  egg_strftime(s, 6, "%d%b", gmtime(&(m->joined)));
+	  strftime(s, 6, "%d%b", gmtime(&(m->joined)));
 	else
-	  egg_strftime(s, 6, "%H:%M", gmtime(&(m->joined)));
+	  strftime(s, 6, "%H:%M", gmtime(&(m->joined)));
       } else
 	strlcpy(s, " --- ", sizeof s);
       if (m->user == NULL) {
@@ -1758,7 +1758,7 @@ static void cmd_adduser(int idx, char *par)
   }
   u = get_user_by_handle(userlist, hand);
   if (u && (u->flags & (USER_OWNER | USER_MASTER)) &&
-      !(atr & USER_OWNER) && egg_strcasecmp(dcc[idx].nick, hand)) {
+      !(atr & USER_OWNER) && strcasecmp(dcc[idx].nick, hand)) {
     dprintf(idx, "You can't add hostmasks to the bot owner/master.\n");
     return;
   }
@@ -1842,7 +1842,7 @@ static void cmd_deluser(int idx, char *par)
     dprintf(idx, "You can't remove a channel master!\n");
   } else if (glob_bot(victim) && !glob_owner(user)) {
     dprintf(idx, "You can't remove a bot!\n");
-  } else if (!glob_master(user) && egg_strcasecmp(dcc[idx].nick, added)) {
+  } else if (!glob_master(user) && strcasecmp(dcc[idx].nick, added)) {
     dprintf(idx, "Sorry, you may not delete this user as you did not add them.\n");
   } else {
     char buf[HANDLEN + 1] = "";

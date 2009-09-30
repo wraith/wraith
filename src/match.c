@@ -293,8 +293,8 @@ match_cidr(const char *m, const char *a)
 #endif
 
   sockname_t ipaddr, maskaddr;
-  egg_bzero(&ipaddr, sizeof(ipaddr));
-  egg_bzero(&maskaddr, sizeof(maskaddr));
+  bzero(&ipaddr, sizeof(ipaddr));
+  bzero(&maskaddr, sizeof(maskaddr));
 
   if (!strchr(ip, ':') && !strchr(ipmask, ':'))
     aftype = ipaddr.family = maskaddr.family =  AF_INET;

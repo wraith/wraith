@@ -216,7 +216,7 @@ static int got001(char *from, char *msg)
   join_chans();
 
 #ifdef no
-  if (egg_strcasecmp(from, dcc[servidx].host)) {
+  if (strcasecmp(from, dcc[servidx].host)) {
     struct server_list *x = serverlist;
 
     if (x == NULL)
@@ -253,32 +253,32 @@ got005(char *from, char *msg)
 
     if ((p = strchr(tmp, '=')))
       *p++ = 0;
-    if (!egg_strcasecmp(tmp, ":are"))
+    if (!strcasecmp(tmp, ":are"))
       break;
-    else if (!egg_strcasecmp(tmp, "MODES")) {
+    else if (!strcasecmp(tmp, "MODES")) {
       modesperline = atoi(p);
 
       if (modesperline > MODES_PER_LINE_MAX)
         modesperline = MODES_PER_LINE_MAX;
-    } else if (!egg_strcasecmp(tmp, "NICKLEN"))
+    } else if (!strcasecmp(tmp, "NICKLEN"))
       nick_len = atoi(p);
-    else if (!egg_strcasecmp(tmp, "NETWORK"))
+    else if (!strcasecmp(tmp, "NETWORK"))
       strlcpy(curnetwork, p, 120);
-    else if (!egg_strcasecmp(tmp, "PENALTY"))
+    else if (!strcasecmp(tmp, "PENALTY"))
       use_penalties = 1;
-    else if (!egg_strcasecmp(tmp, "WHOX"))
+    else if (!strcasecmp(tmp, "WHOX"))
       use_354 = 1;
-    else if (!egg_strcasecmp(tmp, "EXCEPTS"))
+    else if (!strcasecmp(tmp, "EXCEPTS"))
       use_exempts = 1;
-    else if (!egg_strcasecmp(tmp, "INVEX"))
+    else if (!strcasecmp(tmp, "INVEX"))
       use_invites = 1;
-    else if (!egg_strcasecmp(tmp, "MAXBANS")) {
+    else if (!strcasecmp(tmp, "MAXBANS")) {
       max_bans = atoi(p);
       max_modes = max_bans;
       max_exempts = max_bans;
       max_invites = max_bans;
     }
-    else if (!egg_strcasecmp(tmp, "MAXLIST")) {
+    else if (!strcasecmp(tmp, "MAXLIST")) {
       p2 = NULL;
       
       if ((p2 = strchr(p, ':'))) {
@@ -293,10 +293,10 @@ got005(char *from, char *msg)
       
       }
     }
-    else if (!egg_strcasecmp(tmp, "CASEMAPPING")) {
+    else if (!strcasecmp(tmp, "CASEMAPPING")) {
       /* we are default set to rfc1459, so only switch if NOT rfc1459 */
-      if (egg_strcasecmp(p, "rfc1459")) {
-        rfc_casecmp = egg_strcasecmp;
+      if (strcasecmp(p, "rfc1459")) {
+        rfc_casecmp = strcasecmp;
         rfc_toupper = toupper;
       }
     }
@@ -315,7 +315,7 @@ static int got442(char *from, char *msg)
 
   for (x = serverlist, i = 0; x; x = x->next, i++)
     if (i == curserv) {
-      if (egg_strcasecmp(from, x->name))
+      if (strcasecmp(from, x->name))
 	return 0;
       break;
     }
@@ -399,7 +399,7 @@ static bool detect_flood(char *floodnick, char *floodhost, char *from, int which
   /* Okay, make sure i'm not flood-checking myself */
   if (match_my_nick(floodnick))
     return 0;
-  if (!egg_strcasecmp(floodhost, botuserhost))
+  if (!strcasecmp(floodhost, botuserhost))
     return 0;			/* My user@host (?) */
 
   //FIXME: hack for +g 
@@ -429,7 +429,7 @@ static bool detect_flood(char *floodnick, char *floodhost, char *from, int which
   p = strchr(floodhost, '@');
   if (p) {
     p++;
-    if (egg_strcasecmp(lastmsghost[which], p)) {	/* New */
+    if (strcasecmp(lastmsghost[which], p)) {	/* New */
       strlcpy(lastmsghost[which], p, 128);
       lastmsgtime[which] = now;
       lastmsgs[which] = 0;
@@ -618,20 +618,20 @@ static int gotmsg(char *from, char *msg)
         struct userrec *my_u = get_user_by_host(from);
         bool doit = 1;
 
-        if (!egg_strcasecmp(my_code, "op") || !egg_strcasecmp(my_code, "pass") || !egg_strcasecmp(my_code, "invite") 
-            || !egg_strcasecmp(my_code, "ident")
-            || !egg_strcasecmp(my_code, msgop) || !egg_strcasecmp(my_code, msgpass) 
-            || !egg_strcasecmp(my_code, msginvite) || !egg_strcasecmp(my_code, msgident)) {
+        if (!strcasecmp(my_code, "op") || !strcasecmp(my_code, "pass") || !strcasecmp(my_code, "invite")
+            || !strcasecmp(my_code, "ident")
+            || !strcasecmp(my_code, msgop) || !strcasecmp(my_code, msgpass)
+            || !strcasecmp(my_code, msginvite) || !strcasecmp(my_code, msgident)) {
           const char *buf2 = NULL;
 
           doit = 0;
-          if (!egg_strcasecmp(my_code, msgop))
+          if (!strcasecmp(my_code, msgop))
             buf2 = "op";
-          else if (!egg_strcasecmp(my_code, msgpass))
+          else if (!strcasecmp(my_code, msgpass))
             buf2 = "pass";
-          else if (!egg_strcasecmp(my_code, msginvite))
+          else if (!strcasecmp(my_code, msginvite))
             buf2 = "invite";
-          else if (!egg_strcasecmp(my_code, msgident))
+          else if (!strcasecmp(my_code, msgident))
             buf2 = "ident";
 
           if (buf2)
@@ -1457,7 +1457,7 @@ static int got317(char *from, char *msg)
   signon = atol(newsplit(&msg));
   fixcolon(msg);
 
-  egg_strftime(date, sizeof date, "%c %Z", gmtime(&signon));
+  strftime(date, sizeof date, "%c %Z", gmtime(&signon));
 
   mydays = idle / 86400;
   idle = idle % 86400;

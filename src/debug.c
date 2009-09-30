@@ -101,8 +101,8 @@ void init_debug()
     Context;
 
 #ifdef DEBUG_CONTEXT
-  egg_bzero(&cx_file, sizeof cx_file);
-  egg_bzero(&cx_note, sizeof cx_note);
+  bzero(&cx_file, sizeof cx_file);
+  bzero(&cx_note, sizeof cx_note);
 #endif /* DEBUG_CONTEXT */
 }
 

@@ -120,7 +120,7 @@ spawnbots(conf_bot *bots, bool rehashed)
       -if updating and we find our nick, skip
       -if pid exists and not updating, bot is running and we have nothing more to do, skip.
      */
-    } else if ((conf.bot && !egg_strcasecmp(bot->nick, conf.bot->nick) && 
+    } else if ((conf.bot && !strcasecmp(bot->nick, conf.bot->nick) &&
                (updating == UPDATE_AUTO || rehashed)) || (bot->pid && !updating)) {
       sdprintf(STR(" ... skipping. Updating: %d, pid: %d"), updating, bot->pid);
       continue;
@@ -149,10 +149,10 @@ conf_killbot(conf_bot *bots, const char *botnick, conf_bot *bot, int signal, boo
       /* kill all bots but myself if botnick==NULL, otherwise just kill botnick */
       if ((!conf.bot) || 
           (!botnick && 
-             (conf.bot->nick && egg_strcasecmp(conf.bot->nick, bot->nick))) || 
+             (conf.bot->nick && strcasecmp(conf.bot->nick, bot->nick))) ||
           (botnick && 
-             ((notbotnick == 0 && !egg_strcasecmp(botnick, bot->nick)) || 
-              (notbotnick == 1 && egg_strcasecmp(botnick, bot->nick))
+             ((notbotnick == 0 && !strcasecmp(botnick, bot->nick)) ||
+              (notbotnick == 1 && strcasecmp(botnick, bot->nick))
              )  
           ) 
          ) {
@@ -408,7 +408,7 @@ checkpid(const char *nick, conf_bot *bot)
 
   if (bot && !(bot->pid_file))
     bot->pid_file = strdup(buf);
-  else if (bot && egg_strcasecmp(bot->pid_file, buf))
+  else if (bot && strcasecmp(bot->pid_file, buf))
     str_redup(&bot->pid_file, buf);
 
   if ((f = fopen(buf, "r"))) {
@@ -433,7 +433,7 @@ checkpid(const char *nick, conf_bot *bot)
 
 
     if (bufp[0] && pid && can_stat(bufp) && (getpid() == pid) &&
-        !egg_strncasecmp(nick, origbotnick, HANDLEN)) {
+        !strncasecmp(nick, origbotnick, HANDLEN)) {
       socksfile = strdup(bufp);
       return 0;
     }
@@ -541,7 +541,7 @@ conf_delbot(char *botn, bool kill)
   conf_bot *bot = NULL;
 
   for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
-    if (!egg_strcasecmp(bot->nick, botn)) {     /* found it! */
+    if (!strcasecmp(bot->nick, botn)) {     /* found it! */
       if (kill) {
         bot->pid = checkpid(bot->nick, bot);
         conf_killbot(conf.bots, NULL, bot, SIGKILL);
@@ -701,45 +701,45 @@ readconf(const char *fname, int bits)
         if (!option || !line[0])
           continue;
 
-        if (!egg_strcasecmp(option, STR("autocron"))) {      /* automatically check/create crontab? */
+        if (!strcasecmp(option, STR("autocron"))) {      /* automatically check/create crontab? */
           if (egg_isdigit(line[0]))
             conf.autocron = atoi(line);
 
-        } else if (!egg_strcasecmp(option, STR("autouname"))) {      /* auto update uname contents? */
+        } else if (!strcasecmp(option, STR("autouname"))) {      /* auto update uname contents? */
           if (egg_isdigit(line[0]))
             conf.autouname = atoi(line);
 
-        } else if (!egg_strcasecmp(option, STR("username"))) {       /* shell username */
+        } else if (!strcasecmp(option, STR("username"))) {       /* shell username */
           str_redup(&conf.username, line);
 
-        } else if (!egg_strcasecmp(option, STR("homedir"))) {        /* homedir */
+        } else if (!strcasecmp(option, STR("homedir"))) {        /* homedir */
           str_redup(&conf.homedir, line);
 
-        } else if (!egg_strcasecmp(option, STR("datadir"))) {        /* datadir */
+        } else if (!strcasecmp(option, STR("datadir"))) {        /* datadir */
           str_redup(&conf.datadir, line);
 
-        } else if (!egg_strcasecmp(option, STR("binpath"))) {        /* path that the binary should move to? */
+        } else if (!strcasecmp(option, STR("binpath"))) {        /* path that the binary should move to? */
           str_redup(&conf.binpath, line);
 
-        } else if (!egg_strcasecmp(option, STR("binname"))) {        /* filename of the binary? */
+        } else if (!strcasecmp(option, STR("binname"))) {        /* filename of the binary? */
           str_redup(&conf.binname, line);
 
-        } else if (!egg_strcasecmp(option, STR("portmin"))) {
+        } else if (!strcasecmp(option, STR("portmin"))) {
           if (egg_isdigit(line[0]))
             conf.portmin = atoi(line);
 
-        } else if (!egg_strcasecmp(option, STR("portmax"))) {
+        } else if (!strcasecmp(option, STR("portmax"))) {
           if (egg_isdigit(line[0]))
             conf.portmax = atoi(line);
 
-        } else if (!egg_strcasecmp(option, STR("uid"))) {    /* new method uid */
+        } else if (!strcasecmp(option, STR("uid"))) {    /* new method uid */
           if (str_isdigit(line))
             conf.uid = atoi(line);
 
-        } else if (!egg_strcasecmp(option, STR("uname"))) {  /* new method uname */
+        } else if (!strcasecmp(option, STR("uname"))) {  /* new method uname */
           str_redup(&conf.uname, line);
 
-        } else if (!egg_strcasecmp(option, STR("watcher"))) {
+        } else if (!strcasecmp(option, STR("watcher"))) {
           if (egg_isdigit(line[0]))
             conf.watcher = atoi(line);
 
@@ -991,12 +991,12 @@ void deluser_removed_bots(conf_bot *oldlist, conf_bot *newlist)
     for (botold = oldlist; botold && botold->nick; botold = botold->next) {
       found = 0;
       for (botnew = newlist; botnew && botnew->nick; botnew = botnew->next) {
-        if (!egg_strcasecmp(botold->nick, botnew->nick)) {
+        if (!strcasecmp(botold->nick, botnew->nick)) {
           found = 1;
           break;
         }
       }
-      if (!found && egg_strcasecmp(botold->nick, origbotnick)) {	/* Never kill ME.. will handle it elsewhere */
+      if (!found && strcasecmp(botold->nick, origbotnick)) {	/* Never kill ME.. will handle it elsewhere */
 	/* No need to kill -- they are signalled and they will die on their own now */
         //botold->pid = checkpid(botold->nick, botold);
         //conf_killbot(conf.bots, NULL, botold, SIGKILL);
@@ -1035,10 +1035,10 @@ fill_conf_bot(bool fatal)
   sdprintf(STR("mynick: %s"), mynick);
 
   for (me = conf.bots; me && me->nick; me = me->next)
-    if (!egg_strcasecmp(me->nick, mynick))
+    if (!strcasecmp(me->nick, mynick))
       break;
 
-  if (fatal && (!me || (me->nick && egg_strcasecmp(me->nick, mynick))))
+  if (fatal && (!me || (me->nick && strcasecmp(me->nick, mynick))))
     werr(ERR_BADBOT);
 
   free(mynick);
@@ -1212,7 +1212,7 @@ void conf_setmypid(pid_t pid) {
   conf.bot->pid = pid;
   conf_bot *bot = conf.bots;
   if (conf.bots) {
-    for (; bot && egg_strcasecmp(bot->nick, conf.bot->nick); bot = bot->next)
+    for (; bot && strcasecmp(bot->nick, conf.bot->nick); bot = bot->next)
      ;
     if (bot)
       bot->pid = pid;

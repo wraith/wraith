@@ -30,9 +30,9 @@
  * sizeof(int) < 4.  sizeof(int) > 4 is fine; all the world's not a VAX.
  */
 
-static const char *egg_inet_ntop4 (const u_char *src, char *dst, socklen_t size);
+static const char *inet_ntop4 (const u_char *src, char *dst, socklen_t size);
 #ifdef USE_IPV6
-static const char *egg_inet_ntop6 (const u_char *src, char *dst, socklen_t size);
+static const char *inet_ntop6 (const u_char *src, char *dst, socklen_t size);
 #endif /* USE_IPV6 */
 
 /* char *
@@ -44,14 +44,14 @@ static const char *egg_inet_ntop6 (const u_char *src, char *dst, socklen_t size)
  *	Paul Vixie, 1996.
  */
 const char *
-egg_inet_ntop(int af, const void *src, char *dst, socklen_t size)
+inet_ntop(int af, const void *src, char *dst, socklen_t size)
 {
 	switch (af) {
 	case AF_INET:
-		return (egg_inet_ntop4((const u_char *) src, dst, size));
+		return (inet_ntop4((const u_char *) src, dst, size));
 #ifdef USE_IPV6
 	case AF_INET6:
-		return (egg_inet_ntop6((const u_char *) src, dst, size));
+		return (inet_ntop6((const u_char *) src, dst, size));
 #endif /* USE_IPV6 */
 	default:
 		return (NULL);
@@ -71,7 +71,7 @@ egg_inet_ntop(int af, const void *src, char *dst, socklen_t size)
  *	Paul Vixie, 1996.
  */
 static const char *
-egg_inet_ntop4(const u_char *src, char *dst, socklen_t size)
+inet_ntop4(const u_char *src, char *dst, socklen_t size)
 {
 	static const char fmt[] = "%u.%u.%u.%u";
 	char tmp[sizeof "255.255.255.255"];
@@ -90,7 +90,7 @@ egg_inet_ntop4(const u_char *src, char *dst, socklen_t size)
  *	Paul Vixie, 1996.
  */
 static const char *
-egg_inet_ntop6(const u_char *src, char *dst, socklen_t size)
+inet_ntop6(const u_char *src, char *dst, socklen_t size)
 {
 	/*
 	 * Note that int32_t and int16_t need only be "at least" large enough
@@ -109,7 +109,7 @@ egg_inet_ntop6(const u_char *src, char *dst, socklen_t size)
 	 *	Copy the input (bytewise) array into a wordwise array.
 	 *	Find the longest run of 0x00's in src[] for :: shorthanding.
 	 */
-	egg_memset(words, '\0', sizeof words);
+	memset(words, '\0', sizeof words);
 	for (i = 0; i < NS_IN6ADDRSZ; i += 2)
 		words[i >> 1] = (src[i] << 8) | src[i + 1];
 	best.base = -1;
@@ -155,7 +155,7 @@ egg_inet_ntop6(const u_char *src, char *dst, socklen_t size)
 		/* Is this address an encapsulated IPv4? */
 		if (i == 6 && best.base == 0 &&
 		    (best.len == 6 || (best.len == 5 && words[5] == 0xffff))) {
-			if (!egg_inet_ntop4(src+12, tp, sizeof tmp - (tp - tmp)))
+			if (!inet_ntop4(src+12, tp, sizeof tmp - (tp - tmp)))
 				return (NULL);
 			tp += strlen(tp);
 			break;

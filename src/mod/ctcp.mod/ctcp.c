@@ -511,7 +511,7 @@ static int ctcp_INVITE_UNBAN(char *nick, char *uhost, struct userrec *u, char *o
       *p = 0;
     while (chan) {
       if (chan->status & CHAN_ACTIVE) {
-        if (!egg_strcasecmp(chan->name, chname)) {
+        if (!strcasecmp(chan->name, chname)) {
           dprintf(DP_HELP, "NOTICE %s :\002BitchX\002: Access Denied\n", nick);
           return BIND_RET_LOG;
         }
@@ -544,51 +544,51 @@ static int ctcp_CLIENTINFO(char *nick, char *uhost, struct userrec *u, char *obj
 
   if (!text[0]) {
     strlcpy(buf, "SED UTC ACTION DCC CDCC BDCC XDCC VERSION CLIENTINFO USERINFO ERRMSG FINGER TIME PING ECHO INVITE WHOAMI OP OPS UNBAN IDENT XLINK UPTIME :Use CLIENTINFO <COMMAND> to get more specific information", sizeof(buf));
-  } else if (!egg_strcasecmp(text, "UNBAN"))
+  } else if (!strcasecmp(text, "UNBAN"))
     strlcpy(buf, "UNBAN unbans the person from channel", sizeof(buf));
-  else if (!egg_strcasecmp(text, "OPS"))
+  else if (!strcasecmp(text, "OPS"))
     strlcpy(buf, "OPS ops the person if on userlist", sizeof(buf));
-  else if (!egg_strcasecmp(text, "ECHO"))
+  else if (!strcasecmp(text, "ECHO"))
     strlcpy(buf, "ECHO returns the arguments it receives", sizeof(buf));
-  else if (!egg_strcasecmp(text, "WHOAMI"))
+  else if (!strcasecmp(text, "WHOAMI"))
     strlcpy(buf, "WHOAMI user list information", sizeof(buf));
-  else if (!egg_strcasecmp(text, "INVITE"))
+  else if (!strcasecmp(text, "INVITE"))
     strlcpy(buf, "INVITE invite to channel specified", sizeof(buf));
-  else if (!egg_strcasecmp(text, "PING"))
+  else if (!strcasecmp(text, "PING"))
     strlcpy(buf, "PING returns the arguments it receives", sizeof(buf));
-  else if (!egg_strcasecmp(text, "UTC"))
+  else if (!strcasecmp(text, "UTC"))
     strlcpy(buf, "UTC substitutes the local timezone", sizeof(buf));
-  else if (!egg_strcasecmp(text, "XDCC"))
+  else if (!strcasecmp(text, "XDCC"))
     strlcpy(buf, "XDCC checks cdcc info for you", sizeof(buf));
-  else if (!egg_strcasecmp(text, "BDCC"))
+  else if (!strcasecmp(text, "BDCC"))
     strlcpy(buf, "BDCC checks cdcc info for you", sizeof(buf));
-  else if (!egg_strcasecmp(text, "CDCC"))
+  else if (!strcasecmp(text, "CDCC"))
     strlcpy(buf, "CDCC checks cdcc info for you", sizeof(buf));
-  else if (!egg_strcasecmp(text, "DCC"))
+  else if (!strcasecmp(text, "DCC"))
     strlcpy(buf, "DCC requests a direct_client_connection", sizeof(buf));
-  else if (!egg_strcasecmp(text, "ACTION"))
+  else if (!strcasecmp(text, "ACTION"))
     strlcpy(buf, "ACTION contains action descriptions for atmosphere", sizeof(buf));
-  else if (!egg_strcasecmp(text, "FINGER"))
+  else if (!strcasecmp(text, "FINGER"))
     strlcpy(buf, "FINGER shows real name, login name and idle time of user", sizeof(buf));
-  else if (!egg_strcasecmp(text, "ERRMSG"))
+  else if (!strcasecmp(text, "ERRMSG"))
     strlcpy(buf, "ERRMSG returns error messages", sizeof(buf));
-  else if (!egg_strcasecmp(text, "USERINFO"))
+  else if (!strcasecmp(text, "USERINFO"))
     strlcpy(buf, "USERINFO returns user settable information", sizeof(buf));
-  else if (!egg_strcasecmp(text, "CLIENTINFO"))
+  else if (!strcasecmp(text, "CLIENTINFO"))
     strlcpy(buf, "CLIENTINFO gives information about available CTCP commands", sizeof(buf));
-  else if (!egg_strcasecmp(text, "SED"))
+  else if (!strcasecmp(text, "SED"))
     strlcpy(buf, "SED contains simple_encrypted_data", sizeof(buf));
-  else if (!egg_strcasecmp(text, "OP"))
+  else if (!strcasecmp(text, "OP"))
     strlcpy(buf, "OP ops the person if on userlist", sizeof(buf));
-  else if (!egg_strcasecmp(text, "VERSION"))
+  else if (!strcasecmp(text, "VERSION"))
     strlcpy(buf, "VERSION shows client type, version and environment", sizeof(buf));
-  else if (!egg_strcasecmp(text, "XLINK"))
+  else if (!strcasecmp(text, "XLINK"))
     strlcpy(buf, "XLINK x-filez rule", sizeof(buf));
-  else if (!egg_strcasecmp(text, "IDENT"))
+  else if (!strcasecmp(text, "IDENT"))
     strlcpy(buf, "IDENT change userhost of userlist", sizeof(buf));
-  else if (!egg_strcasecmp(text, "TIME"))
+  else if (!strcasecmp(text, "TIME"))
     strlcpy(buf, "TIME tells you the time on the user's host", sizeof(buf));
-  else if (!egg_strcasecmp(text, "UPTIME"))
+  else if (!strcasecmp(text, "UPTIME"))
     strlcpy(buf, "UPTIME my uptime", sizeof(buf));
   else {
     dprintf(DP_HELP, "NOTICE %s :\001ERRMSG %s is not a valid function\001\n", nick, text);
@@ -663,7 +663,7 @@ void ctcp_init()
 #ifndef CYGWIN_HACKS
   struct utsname un;
 
-  egg_bzero(&un, sizeof(un));
+  bzero(&un, sizeof(un));
   if (!uname(&un)) {
     strlcpy(cloak_os, un.sysname, sizeof(cloak_os));
     strlcpy(cloak_osver, un.release, sizeof(cloak_osver));

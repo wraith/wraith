@@ -10,7 +10,7 @@
 #ifndef HAVE_STRFTIME
 #  undef emacs
 #  undef _LIBC
-#  define strftime	egg_strftime
+#  define strftime	strftime
 
 #  include "gnu_strftime.c"
 #endif	/* !HAVE_STRFTIME */

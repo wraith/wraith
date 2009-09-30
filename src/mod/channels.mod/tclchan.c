@@ -284,13 +284,13 @@ int SplitList(char *resultBuf, const char *list, int *argcPtr, const char ***arg
         argv[i] = p;
 
         if (brace) {
-            egg_memcpy(p, element, elSize);
+            memcpy(p, element, elSize);
             p += elSize;
             *p = 0;
             p++;
         } else {
 /*            CopyAndCollapse(elSize, element, p); */
-            egg_memcpy(p, element, elSize);
+            memcpy(p, element, elSize);
             p += elSize + 1;
         }
     }
@@ -484,11 +484,11 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
         return ERROR;
       }
       if (!str_isdigit(item[i])) {
-        if (!egg_strcasecmp("Op",  item[i]))
+        if (!strcasecmp("Op",  item[i]))
           chan->flood_exempt_mode = FLOOD_EXEMPT_OP;
-        else if (!egg_strcasecmp("Voice", item[i]))
+        else if (!strcasecmp("Voice", item[i]))
           chan->flood_exempt_mode = FLOOD_EXEMPT_VOICE;
-        else if (!egg_strcasecmp("None", item[i]))
+        else if (!strcasecmp("None", item[i]))
           chan->flood_exempt_mode = 0;
       } else
         chan->flood_exempt_mode = atoi(item[i]);

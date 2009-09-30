@@ -562,7 +562,7 @@ lostdcc(int n)
 
 //  This is also done when we new_dcc(), so don't bother for now, we set sock/type to NULL, so it won't even be 
 //  parsed by anything.
-//  egg_bzero(&dcc[n], sizeof(struct dcc_t));
+//  bzero(&dcc[n], sizeof(struct dcc_t));
 
   dcc[n].sock = -1;
   dcc[n].type = NULL;
@@ -721,7 +721,7 @@ new_dcc(struct dcc_table *type, int xtra_size)
   dccn++;
 
   /* empty out the memory for the entry */
-  egg_bzero((char *) &dcc[i], sizeof(struct dcc_t));
+  bzero((char *) &dcc[i], sizeof(struct dcc_t));
 
   dcc[i].type = type;
   if (xtra_size)
@@ -1070,7 +1070,7 @@ int check_cmd_pass(const char *cmd, char *pass)
   struct cmd_pass *cp = NULL;
 
   for (cp = cmdpass; cp; cp = cp->next)
-    if (!egg_strcasecmp(cmd, cp->name)) {
+    if (!strcasecmp(cmd, cp->name)) {
       char *epass = NULL;
 
       /* Does the old pass need to be converted? */
@@ -1111,7 +1111,7 @@ int has_cmd_pass(const char *cmd)
   struct cmd_pass *cp = NULL;
 
   for (cp = cmdpass; cp; cp = cp->next)
-    if (!egg_strcasecmp(cmd, cp->name))
+    if (!strcasecmp(cmd, cp->name))
       return 1;
   return 0;
 }

@@ -12,9 +12,7 @@
 
 #ifndef HAVE_MEMCPY
 /* Use our own implementation. */
-void *egg_memcpy(void *dest, const void *src, size_t n);
-#else
-#  define egg_memcpy	memcpy
+void *memcpy(void *dest, const void *src, size_t n);
 #endif
 
 #endif	/* !__EGG_COMPAT_MEMCPY_H */

@@ -387,7 +387,7 @@ dns_query_t *find_query(const char *host)
   dns_query_t *q = NULL;
 
   for (q = query_head; q; q = q->next)
-    if (!egg_strcasecmp(q->query, host))
+    if (!strcasecmp(q->query, host))
       return q;
   return NULL;
 }
@@ -477,7 +477,7 @@ int egg_dns_lookup(const char *host, interval_t timeout, dns_callback_t callback
 
 	/* Ok, now see if it's in our host cache. */
 	for (i = 0; i < nhosts; i++) {
-		if (!egg_strcasecmp(host, hosts[i].host)) {
+		if (!strcasecmp(host, hosts[i].host)) {
 			dns_answer_t answer;
 
 			sdprintf("egg_dns_lookup(%s, %d): Found in hosts -> %s", host, timeout, hosts[i].ip);
@@ -534,7 +534,7 @@ int egg_dns_reverse(const char *ip, interval_t timeout, dns_callback_t callback,
 
 	/* Ok, see if we have it in our host cache. */
 	for (i = 0; i < nhosts; i++) {
-		if (!egg_strcasecmp(hosts[i].ip, ip)) {
+		if (!strcasecmp(hosts[i].ip, ip)) {
 			dns_answer_t answer;
 
 			sdprintf("egg_dns_reverse(%s, %d): Found in hosts -> %s", ip, timeout, hosts[i].host);
@@ -691,8 +691,8 @@ static void cache_del(int id)
 
 	ncache--;
 
-	if (id < ncache) egg_memcpy(&cache[id], &cache[ncache], sizeof(dns_cache_t));
-	else egg_bzero(&cache[id], sizeof(dns_cache_t));
+	if (id < ncache) memcpy(&cache[id], &cache[ncache], sizeof(dns_cache_t));
+	else bzero(&cache[id], sizeof(dns_cache_t));
 
 	cache = (dns_cache_t *) my_realloc(cache, (ncache+1)*sizeof(*cache));
 }
@@ -702,7 +702,7 @@ static void cache_add(const char *query, dns_answer_t *answer)
 	int i;
 
 	cache = (dns_cache_t *) my_realloc(cache, (ncache+1)*sizeof(*cache));
-	egg_bzero(&cache[ncache], sizeof(cache[ncache]));
+	bzero(&cache[ncache], sizeof(cache[ncache]));
 	cache[ncache].query = strdup(query);
 	answer_init(&cache[ncache].answer);
         for (i = 0; i < answer->len; i++)
@@ -716,7 +716,7 @@ static int cache_find(const char *query)
 	int i;
 
 	for (i = 0; i < ncache; i++)
-		if (!egg_strcasecmp(cache[i].query, query)) return (i);
+		if (!strcasecmp(cache[i].query, query)) return (i);
 
 	return (-1);
 }
@@ -739,7 +739,7 @@ static int read_thing(char *buf, char *ip)
 	skip = strspn(buf, separators);
 	buf += skip;
 	len = strcspn(buf, separators);
-	egg_memcpy(ip, buf, len);
+	memcpy(ip, buf, len);
 	ip[len] = 0;
 	return(skip + len);
 }
@@ -791,7 +791,7 @@ static int make_header(char *buf, int id)
 	_dns_header.question_count = htons(1);
 //	_dns_header.id = htons(id);
 	_dns_header.id = id;
-	egg_memcpy(buf, &_dns_header, HEAD_SIZE);
+	memcpy(buf, &_dns_header, HEAD_SIZE);
 	return(HEAD_SIZE);
 }
 
@@ -805,14 +805,14 @@ static int cut_host(const char *host, char *query)
 		len = period - host;
 		if (len > 63) return(-1);
 		*query++ = len;
-		egg_memcpy(query, host, len);
+		memcpy(query, host, len);
 		query += len;
 		host = period+1;
 	}
 	len = strlen(host);
 	if (len) {
 		*query++ = len;
-		egg_memcpy(query, host, len);
+		memcpy(query, host, len);
 		query += len;
 	}
 	*query++ = 0;
@@ -827,14 +827,14 @@ static int reverse_ip(const char *host, char *reverse)
 	period = strchr(host, '.');
 	if (!period) {
 		len = strlen(host);
-		egg_memcpy(reverse, host, len);
+		memcpy(reverse, host, len);
 		return(len);
 	}
 	else {
 		len = period - host;
 		offset = reverse_ip(host+len+1, reverse);
 		reverse[offset++] = '.';
-		egg_memcpy(reverse+offset, host, len);
+		memcpy(reverse+offset, host, len);
 		reverse[offset+len] = 0;
 		return(offset+len);
 	}
@@ -921,7 +921,7 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip)
 	unsigned char *ptr = (unsigned char *) response;
         int return_code = 0;
 
-	egg_memcpy(&header, ptr, HEAD_SIZE);
+	memcpy(&header, ptr, HEAD_SIZE);
 	ptr += HEAD_SIZE;
 
 	/* header.id is already in our order, echoed by the server */
@@ -1017,7 +1017,7 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip)
 		/* Read in the answer. */
 		ptr += skip_name(ptr);
 
-		egg_memcpy(&reply, ptr, RR_SIZE);
+		memcpy(&reply, ptr, RR_SIZE);
 		ptr += RR_SIZE;
 
 		reply.type = ntohs(reply.type);
@@ -1031,13 +1031,13 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip)
 
 		switch (reply.type) {
 		case DNS_A:
-			egg_inet_ntop(AF_INET, ptr, result, 512);
+			inet_ntop(AF_INET, ptr, result, 512);
 			answer_add(&q->answer, result);
 			sdprintf("Reply(%d): %s. \t %d \t IN A \t %s", header.id, q->query, reply.ttl, result);
 			break;
 		case DNS_AAAA:
 #ifdef USE_IPV6
-			egg_inet_ntop(AF_INET6, ptr, result, 512);
+			inet_ntop(AF_INET6, ptr, result, 512);
 			answer_add(&q->answer, result);
 			sdprintf("Reply(%d): %s. \t %d \t IN AAAA \t %s", header.id, q->query, reply.ttl, result);
 #endif /* USE_IPV6 */

@@ -67,7 +67,7 @@ void init_party()
 tand_t *findbot(const char *who)
 {
   for (tand_t* ptr = tandbot; ptr; ptr = ptr->next)
-    if (!egg_strcasecmp(ptr->bot, who))
+    if (!strcasecmp(ptr->bot, who))
       return ptr;
   return NULL;
 }
@@ -79,7 +79,7 @@ void addbot(char *who, char *from, char *next, char flag, int vlocalhub, time_t 
   tand_t **ptr = &tandbot, *ptr2 = NULL;
 
   while (*ptr) {
-    if (!egg_strcasecmp((*ptr)->bot, who))
+    if (!strcasecmp((*ptr)->bot, who))
       putlog(LOG_BOTS, "*", "!!! Duplicate botnet bot entry!!");
     ptr = &((*ptr)->next);
   }
@@ -100,7 +100,7 @@ void addbot(char *who, char *from, char *next, char flag, int vlocalhub, time_t 
   ptr2->hub = is_hub(who);
   /* Cache user record */
   ptr2->u = userlist ? get_user_by_handle(userlist, who) : NULL;
-  if (!egg_strcasecmp(next, conf.bot->nick))
+  if (!strcasecmp(next, conf.bot->nick))
     ptr2->uplink = (tand_t *) 1;
   else
     ptr2->uplink = findbot(next);
@@ -148,7 +148,7 @@ int addparty(char *bot, char *nick, int chan, char flag, int sock, char *from, i
 
   for (i = 0; i < parties; i++) {
     /* Just changing the channel of someone already on? */
-    if (!egg_strcasecmp(party[i].bot, bot) && (party[i].sock == sock)) {
+    if (!strcasecmp(party[i].bot, bot) && (party[i].sock == sock)) {
       int oldchan = party[i].chan;
 
       party[i].chan = chan;
@@ -196,7 +196,7 @@ int addparty(char *bot, char *nick, int chan, char flag, int sock, char *from, i
 void partystat(char *bot, int sock, int add, int rem)
 {
   for (int i = 0; i < parties; i++) {
-    if ((!egg_strcasecmp(party[i].bot, bot)) &&
+    if ((!strcasecmp(party[i].bot, bot)) &&
 	(party[i].sock == sock)) {
       party[i].status |= add;
       party[i].status &= ~rem;
@@ -209,7 +209,7 @@ void partystat(char *bot, int sock, int add, int rem)
 void partysetidle(char *bot, int sock, int secs)
 {
   for (int i = 0; i < parties; i++) {
-    if ((!egg_strcasecmp(party[i].bot, bot)) &&
+    if ((!strcasecmp(party[i].bot, bot)) &&
 	(party[i].sock == sock)) {
       party[i].timer = (now - (time_t) secs);
     }
@@ -221,7 +221,7 @@ void partysetidle(char *bot, int sock, int secs)
 int getparty(char *bot, int sock)
 {
   for (int i = 0; i < parties; i++) {
-    if (!egg_strcasecmp(party[i].bot, bot) &&
+    if (!strcasecmp(party[i].bot, bot) &&
 	(party[i].sock == sock)) {
       return i;
     }
@@ -236,7 +236,7 @@ bool partyidle(char *bot, char *nick)
   bool ok = 0;
 
   for (int i = 0; i < parties; i++) {
-    if ((!egg_strcasecmp(party[i].bot, bot)) && (!egg_strcasecmp(party[i].nick, nick))) {
+    if ((!strcasecmp(party[i].bot, bot)) && (!strcasecmp(party[i].nick, nick))) {
       party[i].timer = now;
       ok = 1;
     }
@@ -251,7 +251,7 @@ int partynick(char *bot, int sock, char *nick)
   char work[HANDLEN + 1] = "";
 
   for (int i = 0; i < parties; i++) {
-    if (!egg_strcasecmp(party[i].bot, bot) && (party[i].sock == sock)) {
+    if (!strcasecmp(party[i].bot, bot) && (party[i].sock == sock)) {
       strlcpy(work, party[i].nick, sizeof(work));
       strlcpy(party[i].nick, nick, sizeof(party[i].nick));
       strlcpy(nick, work, HANDLEN + 1);
@@ -266,7 +266,7 @@ int partynick(char *bot, int sock, char *nick)
 void partyaway(char *bot, int sock, char *msg)
 {
   for (int i = 0; i < parties; i++) {
-    if ((!egg_strcasecmp(party[i].bot, bot)) &&
+    if ((!strcasecmp(party[i].bot, bot)) &&
 	(party[i].sock == sock)) {
       if (party[i].away)
 	free(party[i].away);
@@ -286,7 +286,7 @@ void rembot(const char *whoin)
   char *who = strdup(whoin);
 
   while (*ptr) {
-    if (!egg_strcasecmp((*ptr)->bot, who))
+    if (!strcasecmp((*ptr)->bot, who))
       break;
     ptr = &((*ptr)->next);
   }
@@ -313,7 +313,7 @@ void rembot(const char *whoin)
 void remparty(char *bot, int sock)
 {
   for (int i = 0; i < parties; i++)
-    if ((!egg_strcasecmp(party[i].bot, bot)) &&
+    if ((!strcasecmp(party[i].bot, bot)) &&
 	(party[i].sock == sock)) {
       parties--;
       if (party[i].from)
@@ -339,7 +339,7 @@ void remparty(char *bot, int sock)
 void rempartybot(char *bot)
 {
   for (int i = 0; i < parties; i++)
-    if (!egg_strcasecmp(party[i].bot, bot)) {
+    if (!strcasecmp(party[i].bot, bot)) {
       remparty(bot, party[i].sock);
       i--;
     }
@@ -377,7 +377,7 @@ int nextbot(const char *who)
     return -1;
 
   for (int j = 0; j < dcc_total; j++) {
-    if (dcc[j].type && bot->via && !egg_strcasecmp(bot->via->bot, dcc[j].nick) && (dcc[j].type == &DCC_BOT))
+    if (dcc[j].type && bot->via && !strcasecmp(bot->via->bot, dcc[j].nick) && (dcc[j].type == &DCC_BOT))
       return j;
   }
 
@@ -540,7 +540,7 @@ tell_bots(int idx, int up, const char *nodename)
 
   for (u = userlist; u; u = u->next) {
     if (u->bot) {
-      if (egg_strcasecmp(u->handle, conf.bot->nick)) {
+      if (strcasecmp(u->handle, conf.bot->nick)) {
         bool found = 0;
         
         if (findbot(u->handle))
@@ -802,7 +802,7 @@ void dump_links(int z)
 
 int in_chain(char *who)
 {
-  if (!egg_strcasecmp(who, conf.bot->nick))
+  if (!strcasecmp(who, conf.bot->nick))
     return 1;
   if (findbot(who))
     return 1;
@@ -834,7 +834,7 @@ int users_in_subtree(tand_t *bot)
   tand_t *b = NULL;
 
   for (i = 0; i < parties; i++)
-    if (!egg_strcasecmp(party[i].bot, bot->bot))
+    if (!strcasecmp(party[i].bot, bot->bot))
       nr++;
   for (b = tandbot; b; b = b->next)
     if (b->bot && (b->uplink == bot))
@@ -853,7 +853,7 @@ int botunlink(int idx, const char *nick, const char *reason)
   if (nick[0] == '*')
     dprintf(idx, "%s\n", "Unlinking all bots...");
   for (i = 0; i < dcc_total; i++) {
-    if (dcc[i].type && ((nick[0] == '*') || !egg_strcasecmp(dcc[i].nick, nick))) {
+    if (dcc[i].type && ((nick[0] == '*') || !strcasecmp(dcc[i].nick, nick))) {
       if (dcc[i].type == &DCC_FORK_BOT) {
 	if (idx >= 0)
 	  dprintf(idx, "%s: %s -> %s.\n", "Killed link attempt to",
@@ -952,7 +952,7 @@ int botlink(char *linker, int idx, char *nick)
   if (!u || !u->bot) {
     if (idx >= 0)
       dprintf(idx, "%s %s\n", nick, "is not a known bot.");
-  } else if (!egg_strcasecmp(nick, conf.bot->nick)) {
+  } else if (!strcasecmp(nick, conf.bot->nick)) {
     if (idx >= 0)
       dprintf(idx, "%s\n", "Link to myself?  Oh boy, Freud would have a field day.");
   } else if (in_chain(nick) && (idx != -3)) {
@@ -1123,7 +1123,7 @@ void tandem_relay(int idx, char *nick, register int i)
     dprintf(idx, "%s %s\n", nick, "is not a known bot.");
     return;
   }
-  if (!egg_strcasecmp(nick, conf.bot->nick)) {
+  if (!strcasecmp(nick, conf.bot->nick)) {
     dprintf(idx, "%s\n", "Relay to myself?  What on EARTH would be the point?!");
     return;
   }
@@ -1270,7 +1270,7 @@ static void pre_relay(int idx, char *buf, register int len)
     lostdcc(idx);
     return;
   }
-  if (!egg_strcasecmp(buf, "*bye*")) {
+  if (!strcasecmp(buf, "*bye*")) {
     /* Disconnect */
     struct chat_info *ci = dcc[idx].u.relay->chat;
 
@@ -1470,7 +1470,7 @@ static void dcc_relay(int idx, char *buf, int j)
 
 static void dcc_relaying(int idx, char *buf, int j)
 {
-  if (egg_strcasecmp(buf, "*bye*")) {
+  if (strcasecmp(buf, "*bye*")) {
     dprintf(-dcc[idx].u.relay->sock, "%s\n", buf);
     return;
   }
