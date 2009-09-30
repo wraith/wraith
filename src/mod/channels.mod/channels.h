@@ -24,6 +24,10 @@ static int count_mask(maskrec *);
 
 #endif				/* MAKING_CHANNELS */
 
+namespace bd {
+  class Stream;
+}
+
 void remove_channel(struct chanset_t *);
 void add_chanrec_by_handle(struct userrec *, char *, char *);
 void get_handle_chaninfo(char *, char *, char *);
@@ -31,11 +35,11 @@ void set_handle_chaninfo(struct userrec *, char *, char *, char *);
 struct chanuserrec *get_chanrec(struct userrec *u, char *);
 struct chanuserrec *add_chanrec(struct userrec *u, char *);
 void del_chanrec(struct userrec *, char *);
-bool write_bans(FILE *, int);
-bool write_exempts (FILE *, int);
-bool write_chans (FILE *, int);
-bool write_chans_compat (FILE *, int);
-bool write_invites (FILE *, int);
+void write_bans(bd::Stream&, int);
+void write_exempts(bd::Stream&, int);
+void write_chans(bd::Stream&, int);
+void write_chans_compat(bd::Stream&, int);
+void write_invites(bd::Stream&, int);
 bool expired_mask(struct chanset_t *, char *);
 void set_handle_laston(char *, struct userrec *, time_t);
 int u_delmask(char type, struct chanset_t *c, char *who, int doit);
@@ -51,7 +55,7 @@ bool u_match_mask(struct maskrec *, char *);
 bool ismasked(masklist *, const char *);
 bool ismodeline(masklist *, const char *);
 void channels_report(int, int);
-void channels_writeuserfile(bool = 0);
+void channels_writeuserfile(bd::Stream&, bool = 0);
 void rcmd_chans(char *, char *, char *);
 
 extern char		glob_chanset[512];

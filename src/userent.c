@@ -37,6 +37,8 @@
 #include "dccutil.h"
 #include "crypt.h"
 #include "botmsg.h"
+#include <bdlib/src/Stream.h>
+#include <bdlib/src/String.h>
 
 static struct user_entry_type *entry_type_list = NULL;
 
@@ -91,21 +93,19 @@ bool def_kill(struct user_entry *e)
   return 1;
 }
 
-bool write_userfile_protected(FILE * f, struct userrec *u, struct user_entry *e, int idx)
+void write_userfile_protected(bd::Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
 {
   /* only write if saving local, or if sending to hub, or if sending to same user as entry */
   if (idx == -1 || dcc[idx].hub || dcc[idx].user == u) {
-    if (lfprintf(f, "--%s %s\n", e->type->name, e->u.string) == EOF)
-      return 0;
+    bd::String buf;
+    stream << buf.printf("--%s %s\n", e->type->name, e->u.string);
   }
-  return 1;
 }
 
-bool def_write_userfile(FILE * f, struct userrec *u, struct user_entry *e, int idx)
+void def_write_userfile(bd::Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
 {
-  if (lfprintf(f, "--%s %s\n", e->type->name, e->u.string) == EOF)
-    return 0;
-  return 1;
+  bd::String buf;
+  stream << buf.printf("--%s %s\n", e->type->name, e->u.string);
 }
 
 void *def_get(struct userrec *u, struct user_entry *e)
@@ -362,17 +362,16 @@ static bool set_gotshare(struct userrec *u, struct user_entry *e, char *buf, int
   return 1;
 }
 
-static bool set_write_userfile(FILE *f, struct userrec *u, struct user_entry *e, int idx)
+static void set_write_userfile(bd::Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
 {
   /* only write if saving local, or if sending to hub, or if sending to same user as entry */
   if (idx == -1 || dcc[idx].hub || dcc[idx].user == u) {
     struct xtra_key *x = (struct xtra_key *) e->u.extra;
+    bd::String buf;
 
     for (; x; x = x->next)
-      if (lfprintf(f, "--%s %s %s\n", e->type->name, x->key, x->data ? x->data : "") == EOF)
-        return 0;
+      stream << buf.printf("--%s %s %s\n", e->type->name, x->key, x->data ? x->data : "");
   }
-  return 1;
 }
 
 static bool set_kill(struct user_entry *e)
@@ -700,13 +699,12 @@ static bool laston_unpack(struct userrec *u, struct user_entry *e)
   return 1;
 }
 
-static bool laston_write_userfile(FILE * f, struct userrec *u, struct user_entry *e, int idx)
+static void laston_write_userfile(bd::Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
 {
   struct laston_info *li = (struct laston_info *) e->u.extra;
+  bd::String buf;
 
-  if (lfprintf(f, "--LASTON %li %s\n", (long) li->laston, li->lastonplace ? li->lastonplace : "") == EOF)
-    return 0;
-  return 1;
+  stream << buf.printf("--LASTON %li %s\n", (long) li->laston, li->lastonplace ? li->lastonplace : "");
 }
 
 static bool laston_kill(struct user_entry *e)
@@ -824,14 +822,12 @@ static bool botaddr_kill(struct user_entry *e)
   return 1;
 }
 
-static bool botaddr_write_userfile(FILE *f, struct userrec *u, struct user_entry *e, int idx)
+static void botaddr_write_userfile(bd::Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
 {
   register struct bot_addr *bi = (struct bot_addr *) e->u.extra;
+  bd::String buf;
 
-  if (lfprintf(f,  "--%s %s:%u/%u:%u:%s\n", e->type->name, bi->address,
-  	      bi->telnet_port, bi->relay_port, bi->hublevel, bi->uplink) == EOF)
-    return 0;
-  return 1;
+  stream << buf.printf("--%s %s:%u/%u:%u:%s\n", e->type->name, bi->address, bi->telnet_port, bi->relay_port, bi->hublevel, bi->uplink);
 }
 
 static bool botaddr_set(struct userrec *u, struct user_entry *e, void *buf)
@@ -914,14 +910,13 @@ struct user_entry_type USERENTRY_BOTADDR =
   "BOTADDR"
 };
 
-static bool hosts_write_userfile(FILE *f, struct userrec *u, struct user_entry *e, int idx)
+static void hosts_write_userfile(bd::Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
 {
   struct list_type *h = NULL;
+  bd::String buf;
 
   for (h = (struct list_type *) e->u.extra; h; h = h->next)
-    if (lfprintf(f, "--HOSTS %s\n", h->extra) == EOF)
-      return 0;
-  return 1;
+    stream << buf.printf("--HOSTS %s\n", h->extra);
 }
 
 static bool hosts_null(struct userrec *u, struct user_entry *e)

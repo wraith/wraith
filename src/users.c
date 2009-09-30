@@ -54,6 +54,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include "misc_file.h"
+#include "EncryptedStream.h"
 
 char userfile[121] = "";	/* where the user records are stored */
 interval_t ignore_time = 10;		/* how many minutes will ignores last? */
@@ -586,15 +587,21 @@ void backup_userfile()
 
 int readuserfile(const char *file, struct userrec **ret)
 {
+  const char salt1[] = SALT1;
+  EncryptedStream stream(salt1);
+  stream.loadFile(file);
+  return stream_readuserfile(stream, ret);
+}
+
+int stream_readuserfile(bd::Stream& stream, struct userrec **ret)
+{
   char *p = NULL, buf[1024] = "", lasthand[512] = "", *attr = NULL, *pass = NULL;
-  char *code = NULL, s1[1024] = "", *s = buf, cbuf[1024] = "", *temps = NULL, ignored[512] = "";
-  FILE *f = NULL;
+  char *code = NULL, s1[1024] = "", *s = buf, ignored[512] = "";
   struct userrec *bu = NULL, *u = NULL;
   struct chanset_t *cst = NULL;
   struct flag_record fr;
   struct chanuserrec *cr = NULL;
   int i, line = 0;
-  const char salt1[] = SALT1;
 
   bu = (*ret);
   if (bu == userlist) {
@@ -605,33 +612,23 @@ int readuserfile(const char *file, struct userrec **ret)
     global_exempts = NULL;
     global_invites = NULL;
   }
-  f = fopen(file, "r");
-  if (f == NULL)
-    return 0;
   noshare = 1;
   /* read opening comment */
-  fgets(cbuf, 180, f);
-  remove_crlf(cbuf);
-  temps = (char *) decrypt_string(salt1, cbuf);
-  simple_snprintf(s, 180, "%s", temps);
-  free(temps);
-  if (s[1] < '4') {
+  bd::String str(stream.getline(180));
+  if (str[1] < '4') {
     putlog(LOG_MISC, "*", "!*! Empty or malformed userfile.");
     return 0;
   }
-  if (s[1] > '4') {
+  if (str[1] > '4') {
     putlog(LOG_MISC, "*", "Invalid userfile format.");
     return 0;
   }
-  while (!feof(f)) {
+  while (stream.tell() < stream.length()) {
     s = buf;
-    fgets(cbuf, 1024, f);
-    remove_crlf(cbuf);
-    temps = (char *) decrypt_string(salt1, cbuf);
-    simple_snprintf(s, 1024, "%s", temps);
-    OPENSSL_cleanse(temps, strlen(temps));
-    free(temps);
-    if (!feof(f)) {
+    str = stream.getline(sizeof(buf));
+    strlcpy(s, str.c_str(), std::min(str.length(), sizeof(buf)));
+    remove_crlf(s);
+    if (1) {
       line++;
       if (s[0] != '#' && s[0] != ';' && s[0]) {
 	code = newsplit(&s);
@@ -739,7 +736,6 @@ int readuserfile(const char *file, struct userrec **ret)
            if (channel_add(resultbuf, chan, options) != OK) {
              putlog(LOG_MISC, "*", "Channel parsing error in userfile on line %d", line);
              free(my_ptr);
-             fclose(f);
              noshare = 0;
              return 0;
            }
@@ -862,7 +858,6 @@ int readuserfile(const char *file, struct userrec **ret)
 	  if (!attr[0] || !pass[0]) {
 	    putlog(LOG_MISC, "*", "* Corrupt user record line: %d!", line);
 	    lasthand[0] = 0;
-            fclose(f);
             noshare = 0;
             return 0;
 	  } else {
@@ -910,7 +905,7 @@ int readuserfile(const char *file, struct userrec **ret)
       }
     }
   }
-  fclose(f);
+
   (*ret) = bu;
   if (ignored[0]) {
     putlog(LOG_MISC, "*", "Ignored masks for channel(s): %s", ignored);

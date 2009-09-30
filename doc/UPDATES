@@ -1,3 +1,5 @@
+* Userfile transfer is now made over botlink (no extra ports needed) (works behind NAT/firewall)
+
 1.2.17 - http://wraith.botpack.net/milestone/1.2.17
 * Binary pass prompt has been changed to be more clear.
 * Fix uname checking on NetBSD and OpenBSD

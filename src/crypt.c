@@ -13,76 +13,7 @@
 #include "base64.h"
 #include "src/crypto/crypto.h"
 #include <stdarg.h>
-
-#define CRYPT_BLOCKSIZE AES_BLOCK_SIZE
-#define CRYPT_KEYBITS 256
-#define CRYPT_KEYSIZE (CRYPT_KEYBITS >> 3)
-
-AES_KEY e_key, d_key;
-
-unsigned char *
-encrypt_binary(const char *keydata, unsigned char *in, size_t *inlen)
-{
-  size_t len = *inlen;
-  int blocks = 0, block = 0;
-  unsigned char *out = NULL;
-
-  /* First pad indata to CRYPT_BLOCKSIZE multiple */
-  if (len % CRYPT_BLOCKSIZE)             /* more than 1 block? */
-    len += (CRYPT_BLOCKSIZE - (len % CRYPT_BLOCKSIZE));
-
-  out = (unsigned char *) my_calloc(1, len + 1);
-  egg_memcpy(out, in, *inlen);
-  *inlen = len;
-
-  if (!keydata || !*keydata) {
-    /* No key, no encryption */
-    egg_memcpy(out, in, len);
-  } else {
-    char key[CRYPT_KEYSIZE + 1] = "";
-
-    strlcpy(key, keydata, sizeof(key));
-    AES_set_encrypt_key((const unsigned char *) key, CRYPT_KEYBITS, &e_key);
-    /* Now loop through the blocks and crypt them */
-    blocks = len / CRYPT_BLOCKSIZE;
-    for (block = blocks - 1; block >= 0; block--)
-      AES_encrypt(&out[block * CRYPT_BLOCKSIZE], &out[block * CRYPT_BLOCKSIZE], &e_key);
-    OPENSSL_cleanse(key, sizeof(key));
-    OPENSSL_cleanse(&e_key, sizeof(e_key));
-  }
-  out[len] = 0;
-  return out;
-}
-
-unsigned char *
-decrypt_binary(const char *keydata, unsigned char *in, size_t *len)
-{
-  int blocks = 0, block = 0;
-  unsigned char *out = NULL;
-
-  *len -= *len % CRYPT_BLOCKSIZE;
-  out = (unsigned char *) my_calloc(1, *len + 1);
-  egg_memcpy(out, in, *len);
-
-  if (!keydata || !*keydata) {
-    /* No key, no decryption */
-  } else {
-    /* Init/fetch key */
-    char key[CRYPT_KEYSIZE + 1] = "";
-
-    strlcpy(key, keydata, sizeof(key));
-    AES_set_decrypt_key((const unsigned char *) key, CRYPT_KEYBITS, &d_key);
-    /* Now loop through the blocks and crypt them */
-    blocks = *len / CRYPT_BLOCKSIZE;
-
-    for (block = blocks - 1; block >= 0; block--)
-      AES_decrypt(&out[block * CRYPT_BLOCKSIZE], &out[block * CRYPT_BLOCKSIZE], &d_key);
-    OPENSSL_cleanse(key, sizeof(key));
-    OPENSSL_cleanse(&d_key, sizeof(d_key));
-  }
-
-  return out;
-}
+#include <bdlib/src/String.h>
 
 char *encrypt_string(const char *keydata, char *in)
 {
@@ -91,7 +22,7 @@ char *encrypt_string(const char *keydata, char *in)
   char *res = NULL;
 
   len = strlen(in);
-  bdata = encrypt_binary(keydata, (unsigned char *) in, &len);
+  bdata = aes_encrypt_ecb_binary(keydata, (unsigned char *) in, &len);
   if (keydata && *keydata) {
     res = b64enc(bdata, len);
     OPENSSL_cleanse(bdata, len);
@@ -102,6 +33,21 @@ char *encrypt_string(const char *keydata, char *in)
   }
 }
 
+/**
+ * @brief Encrypt a string
+ * @param key The key to encrypt with
+ * @param data The string to encrypt
+ * @return A new, encrypted string
+ */
+bd::String encrypt_string(const bd::String& key, const bd::String& data) {
+  if (!key) return data;
+  size_t len = data.length();
+  char *bdata = (char*) aes_encrypt_ecb_binary(key.c_str(), (unsigned char*) data.c_str(), &len);
+  bd::String encrypted(bdata, len);
+  free(bdata);
+  return encrypted;
+}
+
 char *decrypt_string(const char *keydata, char *in)
 {
   size_t len = strlen(in);
@@ -109,7 +55,7 @@ char *decrypt_string(const char *keydata, char *in)
 
   if (keydata && *keydata) {
     buf = b64dec((const unsigned char *) in, &len);
-    res = (char *) decrypt_binary(keydata, (unsigned char *) buf, &len);
+    res = (char *) aes_decrypt_ecb_binary(keydata, (unsigned char *) buf, &len);
     OPENSSL_cleanse(buf, len);
     free(buf);
     return res;
@@ -118,6 +64,22 @@ char *decrypt_string(const char *keydata, char *in)
     strlcpy(res, in, len + 1);
     return res;
   }
+}
+
+/**
+ * @brief Decrypt a string
+ * @param key The key to decrypt with
+ * @param data The string to decrypt
+ * @return A new, decrypted string
+ */
+bd::String decrypt_string(const bd::String& key, const bd::String& data) {
+  if (!key) return data;
+  size_t len = data.length();
+  char *bdata = (char*) aes_decrypt_ecb_binary(key.c_str(), (unsigned char*) data.c_str(), &len);
+  bd::String decrypted(bdata, len);
+  OPENSSL_cleanse(bdata, len);
+  free(bdata);
+  return decrypted;
 }
 
 char *salted_sha1(const char *in, const char* saltin)

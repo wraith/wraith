@@ -11,6 +11,10 @@
 #include "src/crypto/crypto.h"
 #include "users.h"
 
+namespace bd {
+  class String;
+};
+
 #define SHA_HASH_LENGTH (SHA_DIGEST_LENGTH << 1)
 #define MD5_HASH_LENGTH (MD5_DIGEST_LENGTH << 1)
 
@@ -23,11 +27,11 @@ char *MD5FILE(const char *);
 char *SHA1(const char *);
 int sha1cmp(const char *, const char*);
 
-unsigned char *encrypt_binary(const char *, unsigned char *, size_t *);
-unsigned char *decrypt_binary(const char *, unsigned char *, size_t *);
 char *encrypt_string(const char *, char *);
+bd::String encrypt_string(const bd::String&, const bd::String&);
 char *decrypt_string(const char *, char *);
 char *salted_sha1(const char *, const char* = NULL);
+bd::String decrypt_string(const bd::String&, const bd::String&);
 char *cryptit (char *);
 char *decryptit (char *);
 int lfprintf (FILE *, const char *, ...) __attribute__((format(printf, 2, 3)));

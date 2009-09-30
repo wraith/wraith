@@ -49,6 +49,8 @@
 #include "core_binds.h"
 #include "socket.h"
 #include "net.h"
+#include "EncryptedStream.h"
+#include <bdlib/src/String.h>
 
 bool             noshare = 1;		/* don't send out to sharebots	    */
 struct userrec	*userlist = NULL;	/* user records are stored here	    */
@@ -354,14 +356,14 @@ int u_pass_match(struct userrec *u, char *in)
   return 0;
 }
 
-bool write_user(struct userrec *u, FILE * f, int idx)
+static void write_user(const struct userrec *u, bd::Stream& stream, int idx)
 {
   char s[181] = "";
   struct flag_record fr = {FR_GLOBAL, u->flags, 0, 0 };
+  bd::String buf;
 
   build_flags(s, &fr, NULL);
-  if (lfprintf(f, "%s%-10s - %-24s\n", u->bot ? "-" : "", u->handle, s) == EOF)
-    return 0;
+  stream << buf.printf("%s%-10s - %-24s\n", u->bot ? "-" : "", u->handle, s);
 
   struct chanset_t *cst = NULL;
 
@@ -375,8 +377,7 @@ bool write_user(struct userrec *u, FILE * f, int idx)
       fr.match = FR_CHAN;
       fr.chan = ch->flags;
       build_flags(s, &fr, NULL);
-      if (lfprintf(f, "! %-20s %li %-10s %s\n", ch->channel, (long) ch->laston, s, ch->info ? ch->info : "") == EOF)
-        return 0;
+      stream << buf.printf("! %-20s %li %-10s %s\n", ch->channel, (long) ch->laston, s, ch->info ? ch->info : "");
     }
   }
   for (struct user_entry *ue = u->entries; ue; ue = ue->next) {
@@ -390,10 +391,9 @@ bool write_user(struct userrec *u, FILE * f, int idx)
     } else
 #endif
     if (ue->type)
-      if (conf.bot->hub && !ue->type->write_userfile(f, u, ue, idx))
-	return 0;
+      if (conf.bot->hub)
+        ue->type->write_userfile(stream, u, ue, idx);
   }
-  return 1;
 }
 
 static int sort_compare(struct userrec *a, struct userrec *b)
@@ -463,6 +463,20 @@ static void sort_userlist()
   }
 }
 
+void stream_writeuserfile(bd::Stream& stream, const struct userrec *bu, int idx, bool old) {
+  time_t tt = now;
+  char s1[81] = "";
+  bd::String buf;
+
+  strcpy(s1, ctime(&tt));
+
+  stream << buf.printf("#4v: %s -- %s -- written %s", ver, conf.bot->nick, s1);
+  channels_writeuserfile(stream, old);
+
+  for (const struct userrec *u = bu; u; u = u->next)
+    write_user(u, stream, -1);
+}
+
 /* Rewrite the entire user file. Call USERFILE hook as well, probably
  * causing the channel file to be rewritten as well.
  */
@@ -487,38 +501,17 @@ int write_userfile(int idx)
   fchmod(fileno(f), S_IRUSR | S_IWUSR);
 
   char backup[DIRMAX] = "";
-  bool ok = 1;
 
   if (idx >= 0)
     dprintf(idx, "Saving userfile...\n");
+
   if (sort_users)
     sort_userlist();
 
-  time_t tt = now;
-
-  lfprintf(f, "#4v: %s -- %s -- written %s", ver, conf.bot->nick, ctime(&tt));
-  fclose(f);
-
-
-/* FIXME: REMOVE AFTER 1.2.14 */
-  bool old = 0;
-
-  tand_t* bot = idx != -1 ? findbot(dcc[idx].nick) : NULL;
-  if (bot && bot->buildts < 1175102242) /* flood-* hacks */
-    old = 1;
-  channels_writeuserfile(old);
-
-  f = fopen(new_userfile, "a");
-  if (f == NULL) {
-    putlog(LOG_MISC, "*", "ERROR writing user file.");
-    free(new_userfile);
-    return 2;
-  }
 
   putlog(LOG_DEBUG, "@", "Writing user entries.");
-  for (struct userrec *u = userlist; u && ok; u = u->next)
-    ok = write_user(u, f, -1);
-  if (!ok || fflush(f)) {
+
+  if (real_writeuserfile(idx, userlist, f)) {
     putlog(LOG_MISC, "*", "ERROR writing user file. (%s)", strerror(ferror(f)));
     fclose(f);
     free(new_userfile);
@@ -530,6 +523,23 @@ int write_userfile(int idx)
   copyfile(userfile, backup);
   movefile(new_userfile, userfile);
   free(new_userfile);
+  return 0;
+}
+
+/* Used by writeuserfile() and write_tmp_userfile() in share.c */
+int real_writeuserfile(int idx, const struct userrec *bu, FILE *f) {
+/* FIXME: REMOVE AFTER 1.2.14 */
+  bool old = 0;
+
+  tand_t* bot = idx != -1 ? findbot(dcc[idx].nick) : NULL;
+  if (bot && bot->buildts < 1175102242) /* flood-* hacks */
+    old = 1;
+
+  const char salt1[] = SALT1;
+  EncryptedStream stream(salt1);
+  stream_writeuserfile(stream, bu, idx, old);
+  if ((fwrite(bd::String(stream).data(), 1, stream.length(), f) != stream.length()) || (fflush(f)))
+    return 1;
   return 0;
 }
 

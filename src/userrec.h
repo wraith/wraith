@@ -1,6 +1,10 @@
 #ifndef _USERREC_H
 #define _USERREC_H
 
+namespace bd {
+  class Stream;
+}
+
 struct userrec *adduser(struct userrec *, char *, char *, char *, flag_t, int);
 void addhost_by_handle(char *, char *);
 void clear_masks(struct maskrec *);
@@ -11,8 +15,9 @@ int count_users(struct userrec *);
 int deluser(char *);
 int change_handle(struct userrec *, char *);
 void correct_handle(char *);
-bool write_user(struct userrec *u, FILE * f, int shr);
+void stream_writeuserfile(bd::Stream&, const struct userrec *, int, bool = 0);
 int write_userfile(int);
+int real_writeuserfile(int idx, const struct userrec *bu, FILE *f);
 void touch_laston(struct userrec *, char *, time_t);
 void user_del_chan(char *);
 struct userrec *host_conflicts(char *);

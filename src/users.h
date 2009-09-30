@@ -25,6 +25,9 @@ bool list_append(struct list_type **, struct list_type *);
 bool list_delete(struct list_type **, struct list_type *);
 bool list_contains(struct list_type *, struct list_type *);
 
+namespace bd {
+  class Stream;
+}
 
 /* New userfile format stuff
  */
@@ -34,7 +37,7 @@ struct user_entry_type {
   struct user_entry_type *next;
   bool (*got_share) (struct userrec *, struct user_entry *, char *, int);
   bool (*unpack) (struct userrec *, struct user_entry *);
-  bool (*write_userfile) (FILE *, struct userrec *, struct user_entry *, int);
+  void (*write_userfile) (bd::Stream&, const struct userrec *, const struct user_entry *, int);
   bool (*kill) (struct user_entry *);
   void *(*get) (struct userrec *, struct user_entry *);
   bool (*set) (struct userrec *, struct user_entry *, void *);
@@ -171,6 +174,7 @@ void tell_file_stats(int, char *);
 void tell_user_ident(int, char *);
 void tell_users_match(int, char *, int, int, char *, int);
 int readuserfile(const char *, struct userrec **);
+int stream_readuserfile(bd::Stream&, struct userrec **);
 void check_pmode();
 void link_pref_val(struct userrec *u, char *lval);
 void check_stale_dcc_users();

@@ -39,6 +39,8 @@
 #include "src/users.h"
 #include "src/misc.h"
 #include "src/core_binds.h"
+#include <bdlib/src/Stream.h>
+#include <bdlib/src/String.h>
 
 struct console_info {
   char *channel;
@@ -99,20 +101,19 @@ console_kill(struct user_entry *e)
   return 1;
 }
 
-static bool
-console_write_userfile(FILE * f, struct userrec *u, struct user_entry *e, int idx)
+static void
+console_write_userfile(bd::Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
 {
   if (u->bot)
-    return 1;
+    return;
 
   struct console_info *i = (struct console_info *) e->u.extra;
+  bd::String buf;
 
-  if (lfprintf(f, "--CONSOLE %s %s %s %d %d %d %d %d %d %d %d\n",
+  stream << buf.printf("--CONSOLE %s %s %s %d %d %d %d %d %d %d %d\n",
                i->channel, masktype(i->conflags),
                stripmasktype(i->stripflags), i->echoflags,
-               i->page, i->conchan, i->color, i->banner, i->channels, i->bots, i->whom) == EOF)
-    return 0;
-  return 1;
+               i->page, i->conchan, i->color, i->banner, i->channels, i->bots, i->whom);
 }
 
 static bool
