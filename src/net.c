@@ -1370,10 +1370,9 @@ int sockgets(char *s, int *len)
     p = strchr(xx, '\r');
   if (p != NULL) {
     *p = 0;
-/* FIXME: overlapping here */
 
-   strlcpy(s, xx, SGRAB + 10); //buf@main.c
-   strlcpy(xx, p + 1, sizeof(xx));
+    strlcpy(s, xx, SGRAB + 10); //buf@main.c
+    memmove(xx, p + 1, strlen(p + 1) + 1);
 
 /*    if (s[0] && strlen(s) && (s[strlen(s) - 1] == '\r')) */
     if (s[strlen(s) - 1] == '\r')
