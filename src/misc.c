@@ -611,22 +611,22 @@ readsocks(const char *fname)
 //    dprintf(DP_STDOUT, "read line: %s\n", buf.c_str());
     if (type == STR("-dcc"))
       dprintf(DP_STDOUT, STR("Added dcc: %d\n"), dcc_read(stream));
-    else if (type == "-sock")
+    else if (type == STR("-sock"))
       dprintf(DP_STDOUT, STR("Added fd: %d\n"), sock_read(stream));
-    else if (type == "+online_since")
+    else if (type == STR("+online_since"))
       online_since = strtol(str.c_str(), NULL, 10);
-    else if (type == "+server_floodless")
+    else if (type == STR("+server_floodless"))
       floodless = 1;
-    else if (type == "+buildts")
+    else if (type == STR("+buildts"))
       old_buildts = strtol(str.c_str(), NULL, 10);
-    else if (type == "+botname")
+    else if (type == STR("+botname"))
       nick = strdup(str.c_str());
-    else if (type == "+ip4")
+    else if (type == STR("+ip4"))
       ip4 = strdup(str.c_str());
-    else if (type == "+ip6")
+    else if (type == STR("+ip6"))
       ip6 = strdup(str.c_str());
-    else if (type == "+serv_cache") {
-      if (!cached_005 && str.find("005"))
+    else if (type == STR("+serv_cache")) {
+      if (!cached_005 && str.find(STR("005")))
         cached_005 = 1;
       dprintf(DP_CACHE, "%s", str.c_str());
     }

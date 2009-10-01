@@ -368,11 +368,11 @@ sock_read(bd::Stream& stream)
   while (stream.tell() < stream.length()) {
     buf = stream.getline().chomp();
 
-    if (buf == "+sock")
+    if (buf == STR("+sock"))
       return fd;
 
     type = newsplit(buf);
-    if (type == "sock") {
+    if (type == STR("sock")) {
       int sock = atoi(newsplit(buf).c_str()), options = atoi(newsplit(buf).c_str());
 
       fd = allocsock(sock, options);
@@ -380,12 +380,12 @@ sock_read(bd::Stream& stream)
 
     if (fd >= 0) {
 #ifdef USE_IPV6
-      if (type == "af")
+      if (type == STR("af"))
         socklist[fd].af = atoi(buf.c_str());
 #endif
-      if (type == "host")
+      if (type == STR("host"))
         socklist[fd].host = strdup(buf.c_str());
-      if (type == "port")
+      if (type == STR("port"))
         socklist[fd].port = atoi(buf.c_str());
     }
   }
@@ -398,16 +398,16 @@ sock_write(bd::Stream &stream, int fd)
   if (socklist[fd].sock > 0) {
     bd::String buf;
 
-    stream << buf.printf("-sock\n");
-    stream << buf.printf("sock %d %d\n", socklist[fd].sock, socklist[fd].flags);
+    stream << buf.printf(STR("-sock\n"));
+    stream << buf.printf(STR("sock %d %d\n"), socklist[fd].sock, socklist[fd].flags);
 #ifdef USE_IPV6
-    stream << buf.printf("af %u\n", socklist[fd].af);
+    stream << buf.printf(STR("af %u\n"), socklist[fd].af);
 #endif
     if (socklist[fd].host)
-      stream << buf.printf("host %s\n", socklist[fd].host);
+      stream << buf.printf(STR("host %s\n"), socklist[fd].host);
     if (socklist[fd].port)
-      stream << buf.printf("port %d\n", socklist[fd].port);
-    stream << buf.printf("+sock\n");
+      stream << buf.printf(STR("port %d\n"), socklist[fd].port);
+    stream << buf.printf(STR("+sock\n"));
   }    
 }
 

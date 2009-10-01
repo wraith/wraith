@@ -462,21 +462,21 @@ dcc_read(bd::Stream& stream)
   while (stream.tell() < stream.length()) {
     buf = stream.getline().chomp();
 
-    if (buf == "+dcc")
+    if (buf == STR("+dcc"))
       return idx;
     
     type = newsplit(buf);
-    if (type == "type") {
+    if (type == STR("type")) {
       struct dcc_table *dcc_type = NULL;
       size_t dcc_size = 0;
 
-//      if (buf == "CHAT")
+//      if (buf == STR("CHAT"))
 //        dcc_type = &DCC_CHAT;
-      if (buf == "SERVER") {
+      if (buf == STR("SERVER")) {
         dcc_type = &SERVER_SOCKET;
         isserv = 1;
       }
-//      if (buf == "BOT")
+//      if (buf == STR("BOT"))
 //        dcc_type = &DCC_BOT;
     
       if (dcc_type) {
@@ -487,18 +487,18 @@ dcc_read(bd::Stream& stream)
     }
 
     if (idx >= 0) {
-      if (type == "addr")
+      if (type == STR("addr"))
         dcc[idx].addr = my_atoul(buf.c_str());
-      if (type == "sock") {
+      if (type == STR("sock")) {
         dcc[idx].sock = atoi(buf.c_str());
         if (isserv)
           serv = dcc[idx].sock;
       }
-      if (type == "port")
+      if (type == STR("port"))
         dcc[idx].port = atoi(buf.c_str());
-      if (type == "nick")
+      if (type == STR("nick"))
         strlcpy(dcc[idx].nick, buf.c_str(), NICKLEN);
-      if (type == "host")
+      if (type == STR("host"))
         strlcpy(dcc[idx].host, buf.c_str(), UHOSTLEN);
     }
   }
@@ -511,24 +511,24 @@ dcc_write(bd::Stream &stream, int idx)
   if (dcc[idx].sock > 0) {
     bd::String buf;
 
-    stream << buf.printf("-dcc\n");
+    stream << buf.printf(STR("-dcc\n"));
     if (dcc[idx].type)
-      stream << buf.printf("type %s\n", dcc[idx].type->name);
+      stream << buf.printf(STR("type %s\n"), dcc[idx].type->name);
 //  if (user)
-//  stream << buf.printf("user %s\n", dcc[idx].user->handle);
+//  stream << buf.printf(STR("user %s\n"), dcc[idx].user->handle);
     if (dcc[idx].addr)
-      stream << buf.printf("addr %u\n", dcc[idx].addr);
+      stream << buf.printf(STR("addr %u\n"), dcc[idx].addr);
     if (dcc[idx].status)
-      stream << buf.printf("status %lu\n", dcc[idx].status);
-    stream << buf.printf("sock %d\n", dcc[idx].sock);
-//  stream << buf.printf("simul %d\n", dcc[idx].simul);
+      stream << buf.printf(STR("status %lu\n"), dcc[idx].status);
+    stream << buf.printf(STR("sock %d\n"), dcc[idx].sock);
+//  stream << buf.printf(STR("simul %d\n"), dcc[idx].simul);
     if (dcc[idx].port)
-      stream << buf.printf("port %d\n", dcc[idx].port);
+      stream << buf.printf(STR("port %d\n"), dcc[idx].port);
     if (dcc[idx].nick[0])
-      stream << buf.printf("nick %s\n", dcc[idx].nick);
+      stream << buf.printf(STR("nick %s\n"), dcc[idx].nick);
     if (dcc[idx].host[0])
-      stream << buf.printf("host %s\n", dcc[idx].host);
-    stream << buf.printf("+dcc\n");
+      stream << buf.printf(STR("host %s\n"), dcc[idx].host);
+    stream << buf.printf(STR("+dcc\n"));
   }
 }
 
