@@ -41,7 +41,7 @@ DIFF = @DIFF@
 LIBS = @LIBS@
 
 DEBCXXFLAGS = -DDEBUG -fno-inline -g3 -ggdb3 -O0 -Wshadow -Wpointer-arith -Wcast-align @GCC3DEB@ @GCC4DEB@
-CFLGS = @GCC3@
+CFLGS = -fno-rtti @GCC3@
 _CFLGS = -fno-strict-aliasing -W -Wformat \
 #-Wshadow -Wnested-externs -Wno-format-y2k \
 #-Wlarger-than-6608 -Wpointer-arith -Wcast-align \
