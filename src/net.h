@@ -111,7 +111,7 @@ typedef struct {
 
 # define killsock(x)     	real_killsock((x),__FILE__,__LINE__)
 
-unsigned long my_atoul(char *);
+unsigned long my_atoul(const char *);
 #ifdef HAVE_SSL
 int ssl_cleanup();
 int ssl_link(int, int);

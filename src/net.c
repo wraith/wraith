@@ -91,14 +91,14 @@ port_t firewallport = 1080;    /* Default port of Sock4/5 firewalls        */
 
 /* I need an UNSIGNED long for dcc type stuff
  */
-unsigned long my_atoul(char *s)
+unsigned long my_atoul(const char *s)
 {
   unsigned long ret = 0;
 
   while ((*s >= '0') && (*s <= '9')) {
     ret *= 10;
     ret += ((*s) - '0');
-    s++;
+    ++s;
   }
   return ret;
 }
