@@ -14,6 +14,8 @@
 #include "src/crypto/crypto.h"
 #include <stdarg.h>
 #include <bdlib/src/String.h>
+#include <bdlib/src/Stream.h>
+#include "EncryptedStream.h"
 
 char *encrypt_string(const char *keydata, char *in)
 {
@@ -138,81 +140,24 @@ int lfprintf (FILE *stream, const char *format, ...)
 
 void Encrypt_File(char *infile, char *outfile)
 {
-  FILE *f = NULL, *f2 = NULL;
-  bool std = 0;
-
-  if (!strcmp(outfile, "STDOUT"))
-    std = 1;
-  f  = fopen(infile, "r");
-  if(!f)
-    return;
-  if (!std) {
-    f2 = fopen(outfile, "w");
-    if (!f2)
-      return;
-  } else {
-    printf(STR("----------------------------------START----------------------------------\n"));
-  }
-
-  char *buf = (char *) my_calloc(1, 1024);
   const char salt1[] = SALT1;
-  while (fgets(buf, 1024, f) != NULL) {
-    remove_crlf(buf);
+  bd::Stream stream_in;
+  EncryptedStream stream_out(salt1);
 
-    if (std)
-      printf("%s\n", encrypt_string(salt1, buf));
-    else
-      lfprintf(f2, "%s\n", buf);
-    buf[0] = 0;
-  }
-  free(buf);
-  if (std)
-    printf(STR("-----------------------------------END-----------------------------------\n"));
-
-  fclose(f);
-  if (f2)
-    fclose(f2);
+  stream_in.loadFile(infile);
+  stream_out << bd::String(stream_in);
+  stream_out.writeFile(outfile);
 }
 
 void Decrypt_File(char *infile, char *outfile)
 {
-  FILE *f = NULL, *f2 = NULL;
-  bool std = 0;
-
-  if (!strcmp(outfile, "STDOUT"))
-    std = 1;
-  f  = fopen(infile, "r");
-  if (!f)
-    return;
-  if (!std) {
-    f2 = fopen(outfile, "w");
-    if (!f2)
-      return;
-  } else {
-    printf(STR("----------------------------------START----------------------------------\n"));
-  }
-
-  char *buf = (char *) my_calloc(1, 2048);
   const char salt1[] = SALT1;
-  while (fgets(buf, 2048, f) != NULL) {
-    char *temps = NULL;
+  bd::Stream stream_out;
+  EncryptedStream stream_in(salt1);
 
-    remove_crlf(buf);
-    temps = (char *) decrypt_string(salt1, buf);
-    if (!std)
-      fprintf(f2, "%s\n",temps);
-    else
-      printf("%s\n", temps);
-    free(temps);
-    buf[0] = 0;
-  }
-  free(buf);
-  if (std)
-    printf(STR("-----------------------------------END-----------------------------------\n"));
-
-  fclose(f);
-  if (f2)
-    fclose(f2);
+  stream_in.loadFile(infile);
+  stream_out << bd::String(stream_in);
+  stream_out.writeFile(outfile);
 }
 
 
