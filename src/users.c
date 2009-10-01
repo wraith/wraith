@@ -625,9 +625,8 @@ int stream_readuserfile(bd::Stream& stream, struct userrec **ret)
   }
   while (stream.tell() < stream.length()) {
     s = buf;
-    str = stream.getline(sizeof(buf));
+    str = stream.getline(sizeof(buf)).chomp();
     strlcpy(s, str.c_str(), std::min(str.length(), sizeof(buf)));
-    remove_crlf(s);
     if (1) {
       line++;
       if (s[0] != '#' && s[0] != ';' && s[0]) {

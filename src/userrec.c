@@ -538,7 +538,7 @@ int real_writeuserfile(int idx, const struct userrec *bu, FILE *f) {
   const char salt1[] = SALT1;
   EncryptedStream stream(salt1);
   stream_writeuserfile(stream, bu, idx, old);
-  if ((fwrite(bd::String(stream).data(), 1, stream.length(), f) != stream.length()) || (fflush(f)))
+  if (stream.writeFile(fileno(f)))
     return 1;
   return 0;
 }
