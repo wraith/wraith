@@ -59,7 +59,7 @@ void identd_open(const char * = NULL, const char * = NULL);
 void identd_close();
 int listen_all(port_t, bool);
 bool valid_idx(int);
-int dcc_read(FILE *, bool);
+int dcc_read(bd::Stream&);
 void dcc_write(bd::Stream&, int);
 int check_cmd_pass(const char *, char *);
 int has_cmd_pass(const char *);

@@ -153,7 +153,7 @@ char *iptostr(in_addr_t);
 bool sock_has_data(int, int);
 int sockoptions(int sock, int operation, int sock_options);
 void init_net(void);
-int sock_read(FILE *, bool);
+int sock_read(bd::Stream&);
 void sock_write(bd::Stream&, int);
 
 extern union sockaddr_union 		cached_myip4_so;

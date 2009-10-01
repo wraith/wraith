@@ -453,38 +453,30 @@ dcc_chatter(int idx)
 }
 
 int
-dcc_read(FILE *f, bool enc)
+dcc_read(bd::Stream& stream)
 {
-  char inbuf[1024] = "", *type = NULL, *buf = NULL, *buf_ptr = NULL;
   int idx = -1;
   bool isserv = 0;
-  const char salt1[] = SALT1;
+  bd::String buf, type;
 
-  while (fgets(inbuf, sizeof(inbuf), f) != NULL) {
-    remove_crlf(inbuf);
-    if (enc)
-      buf = buf_ptr = decrypt_string(salt1, inbuf);
-    else
-      buf = inbuf;
+  while (stream.tell() < stream.length()) {
+    buf = stream.getline().chomp();
 
-    if (!strcmp(buf, "+dcc")) {
-      if (enc)
-        free(buf_ptr);
+    if (buf == "+dcc")
       return idx;
-    }
     
-    type = newsplit(&buf);
-    if (!strcmp(type, "type")) {
+    type = newsplit(buf);
+    if (type == "type") {
       struct dcc_table *dcc_type = NULL;
       size_t dcc_size = 0;
 
-//      if (!strcmp(buf, "CHAT"))
+//      if (buf == "CHAT")
 //        dcc_type = &DCC_CHAT;
-      if (!strcmp(buf, "SERVER")) {
+      if (buf == "SERVER") {
         dcc_type = &SERVER_SOCKET;
         isserv = 1;
       }
-//      if (!strcmp(buf, "BOT"))
+//      if (buf == "BOT")
 //        dcc_type = &DCC_BOT;
     
       if (dcc_type) {
@@ -495,23 +487,20 @@ dcc_read(FILE *f, bool enc)
     }
 
     if (idx >= 0) {
-      if (!strcmp(type, "addr"))
-        dcc[idx].addr = my_atoul(buf);
-      if (!strcmp(type, "sock")) {
-        dcc[idx].sock = atoi(buf);
+      if (type == "addr")
+        dcc[idx].addr = my_atoul(buf.c_str());
+      if (type == "sock") {
+        dcc[idx].sock = atoi(buf.c_str());
         if (isserv)
           serv = dcc[idx].sock;
       }
-      if (!strcmp(type, "port"))
-        dcc[idx].port = atoi(buf);
-      if (!strcmp(type, "nick"))
-        strlcpy(dcc[idx].nick, buf, NICKLEN);
-      if (!strcmp(type, "host")) {
-        strlcpy(dcc[idx].host, buf, UHOSTLEN);
-      }
+      if (type == "port")
+        dcc[idx].port = atoi(buf.c_str());
+      if (type == "nick")
+        strlcpy(dcc[idx].nick, buf.c_str(), NICKLEN);
+      if (type == "host")
+        strlcpy(dcc[idx].host, buf.c_str(), UHOSTLEN);
     }
-    if (enc)
-      free(buf_ptr);
   }
   return -1;
 }

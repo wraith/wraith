@@ -360,45 +360,34 @@ int sockoptions(int sock, int operation, int sock_options)
 }
 
 int
-sock_read(FILE *f, bool enc)
+sock_read(bd::Stream& stream)
 {
-  char inbuf[1024] = "", *type = NULL, *buf = NULL, *buf_ptr = NULL;
   int fd = -1;
-  const char salt1[] = SALT1;
+  bd::String buf, type;
 
-  while (fgets(inbuf, sizeof(inbuf), f) != NULL) {
-    remove_crlf(inbuf);
+  while (stream.tell() < stream.length()) {
+    buf = stream.getline().chomp();
 
-    if (enc)
-      buf = buf_ptr = decrypt_string(salt1, inbuf);
-    else
-      buf = inbuf;
-
-    if (!strcmp(buf, "+sock")) {
-      if (enc)
-        free(buf_ptr);
+    if (buf == "+sock")
       return fd;
-    }
 
-    type = newsplit(&buf);
-    if (!strcmp(type, "sock")) {
-      int sock = atoi(newsplit(&buf)), options = atoi(newsplit(&buf));
+    type = newsplit(buf);
+    if (type == "sock") {
+      int sock = atoi(newsplit(buf).c_str()), options = atoi(newsplit(buf).c_str());
 
       fd = allocsock(sock, options);
     }
 
     if (fd >= 0) {
 #ifdef USE_IPV6
-      if (!strcmp(type, "af"))
-        socklist[fd].af = atoi(buf);
+      if (type == "af")
+        socklist[fd].af = atoi(buf.c_str());
 #endif
-      if (!strcmp(type, "host"))
-        socklist[fd].host = strdup(buf);
-      if (!strcmp(type, "port"))
-        socklist[fd].port = atoi(buf);
+      if (type == "host")
+        socklist[fd].host = strdup(buf.c_str());
+      if (type == "port")
+        socklist[fd].port = atoi(buf.c_str());
     }
-    if (enc)
-      free(buf_ptr);
   }
   return -1;
 }

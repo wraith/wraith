@@ -595,58 +595,41 @@ readsocks(const char *fname)
   if (!conf.bot->hub)
     restarting = 1;
 
-  FILE *f = NULL;
-
-  if (!(f = fopen(fname, "r"))) {
-    fatal(STR("CANT READ SOCKSFILE"), 0);
-  }
-
-  char buf[1024] = "", *nick = NULL, *jnick = NULL, *bufp = NULL, *type = NULL, *buf_ptr = NULL, *ip4 = NULL, *ip6 = NULL;
+  char *nick = NULL, *jnick = NULL, *ip4 = NULL, *ip6 = NULL;
   time_t old_buildts = 0;
 
-  bool enc = 0, first = 1, cached_005 = 0;
+  bool cached_005 = 0;
   const char salt1[] = SALT1;
+  EncryptedStream stream(salt1);
+  stream.loadFile(fname);
+  bd::String str, type;
 
-  while (fgets(buf, sizeof(buf), f) != NULL) {
-    remove_crlf(buf);
+  while (stream.tell() < stream.length()) {
+    str = stream.getline().chomp();
+    type = newsplit(str);
 
-    if (first) {
-      if (!strncmp(buf, STR("+enc"), 4))
-        enc = 1;
-      first = 0;
-    }
-
-    if (enc)
-      bufp = buf_ptr = decrypt_string(salt1, buf);
-    else
-      bufp = buf;
-
-//    dprintf(DP_STDOUT, "read line: %s\n", buf);
-    type = newsplit(&bufp);
-    if (!strcmp(type, STR("-dcc")))
-      dprintf(DP_STDOUT, STR("Added dcc: %d\n"), dcc_read(f, enc));
-    else if (!strcmp(type, STR("-sock")))
-      dprintf(DP_STDOUT, STR("Added fd: %d\n"), sock_read(f, enc));
-    else if (!strcmp(type, STR("+online_since")))
-      online_since = strtol(bufp, NULL, 10);
-    else if (!strcmp(type, STR("+server_floodless")))
+//    dprintf(DP_STDOUT, "read line: %s\n", buf.c_str());
+    if (type == STR("-dcc"))
+      dprintf(DP_STDOUT, STR("Added dcc: %d\n"), dcc_read(stream));
+    else if (type == "-sock")
+      dprintf(DP_STDOUT, STR("Added fd: %d\n"), sock_read(stream));
+    else if (type == "+online_since")
+      online_since = strtol(str.c_str(), NULL, 10);
+    else if (type == "+server_floodless")
       floodless = 1;
-    else if (!strcmp(type, STR("+buildts")))
-      old_buildts = strtol(bufp, NULL, 10);
-    else if (!strcmp(type, STR("+botname")))
-      nick = strdup(bufp);
-    else if (!strcmp(type, STR("+ip4")))
-      ip4 = strdup(bufp);
-    else if (!strcmp(type, STR("+ip6")))
-      ip6 = strdup(bufp);
-    else if (!strcmp(type, STR("+serv_cache"))) {
-      if (!cached_005 && strstr(bufp, "005"))
+    else if (type == "+buildts")
+      old_buildts = strtol(str.c_str(), NULL, 10);
+    else if (type == "+botname")
+      nick = strdup(str.c_str());
+    else if (type == "+ip4")
+      ip4 = strdup(str.c_str());
+    else if (type == "+ip6")
+      ip6 = strdup(str.c_str());
+    else if (type == "+serv_cache") {
+      if (!cached_005 && str.find("005"))
         cached_005 = 1;
-      dprintf(DP_CACHE, "%s", bufp);
+      dprintf(DP_CACHE, "%s", str.c_str());
     }
-
-    if (enc)
-      free(buf_ptr);
   }
 
   restart_time = now;
@@ -657,7 +640,6 @@ readsocks(const char *fname)
   tell_netdebug(DP_STDOUT);
 
   unlink(fname);
-  fclose(f);
 
   if (servidx >= 0) {
     char nserv[50] = "";
@@ -718,9 +700,6 @@ restart(int idx)
       lostdcc(fd);
     }
   }
-
-  fprintf(socks->f, STR("+enc\n"));
-  fflush(socks->f);
 
   const char salt1[] = SALT1;
   EncryptedStream stream(salt1);
