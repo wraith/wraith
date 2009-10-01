@@ -24,6 +24,9 @@
         tputs(serv, "\r\n", 2);                         \
 } while (0)
 
+namespace bd {
+  class Stream;
+}
 
 struct server_list {
   struct server_list	*next;
@@ -72,7 +75,7 @@ void clearq(struct server_list *);
 void nuke_server(const char *);
 bool match_my_nick(char *);
 void rehash_server(const char *, const char *);
-void replay_cache(int, FILE *);
+void replay_cache(int, bd::Stream*);
 void join_chans();
 void check_hostmask();
 void next_server(int *, char *, port_t *, char *);

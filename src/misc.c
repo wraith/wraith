@@ -53,6 +53,9 @@
 #include "userrec.h"
 #include "stat.h"
 #include "net.h"
+#include "EncryptedStream.h"
+#include <bdlib/src/String.h>
+#include <bdlib/src/Stream.h>
 
 #include <sys/wait.h>
 #include <stdarg.h>
@@ -717,30 +720,37 @@ restart(int idx)
   }
 
   fprintf(socks->f, STR("+enc\n"));
+  fflush(socks->f);
+
+  const char salt1[] = SALT1;
+  EncryptedStream stream(salt1);
 
   /* write out all leftover dcc[] entries */
   for (fd = 0; fd < dcc_total; fd++)
     if (dcc[fd].type && dcc[fd].sock != STDOUT)
-      dcc_write(socks->f, fd);
+      dcc_write(stream, fd);
 
   /* write out all leftover socklist[] entries */
   for (fd = 0; fd < MAXSOCKS; fd++)
     if (socklist[fd].sock != STDOUT)
-      sock_write(socks->f, fd);
+      sock_write(stream, fd);
+
+  bd::String buf;
 
   if (server_online) {
     if (botname[0])
-      lfprintf(socks->f, STR("+botname %s\n"), botname);
+      stream << buf.printf(STR("+botname %s\n"), botname);
   }
-  lfprintf(socks->f, STR("+online_since %li\n"), online_since);
+  stream << buf.printf(STR("+online_since %li\n"), online_since);
   if (floodless)
-    lfprintf(socks->f, STR("+server_floodless %d\n"), floodless);
-  lfprintf(socks->f, STR("+buildts %li\n"), buildts);
-  lfprintf(socks->f, STR("+ip4 %s\n"), myipstr(AF_INET));
-  lfprintf(socks->f, STR("+ip6 %s\n"), myipstr(AF_INET6));
-  replay_cache(-1, socks->f);
+    stream << buf.printf(STR("+server_floodless %d\n"), floodless);
+  stream << buf.printf(STR("+buildts %li\n"), buildts);
+  stream << buf.printf(STR("+ip4 %s\n"), myipstr(AF_INET));
+  stream << buf.printf(STR("+ip6 %s\n"), myipstr(AF_INET6));
+  replay_cache(-1, &stream);
 
-  fflush(socks->f);
+  stream.writeFile(fileno(socks->f));
+
   socks->my_close();
 
   if (conf.bot->hub)

@@ -37,6 +37,9 @@
 #include "egg_timer.h"
 #include "traffic.h"
 #include "adns.h"
+#include <bdlib/src/String.h>
+#include <bdlib/src/Stream.h>
+
 #include <limits.h>
 #include <string.h>
 #include <netdb.h>
@@ -401,19 +404,21 @@ sock_read(FILE *f, bool enc)
 }
 
 void 
-sock_write(FILE *f, int fd)
+sock_write(bd::Stream &stream, int fd)
 {
   if (socklist[fd].sock > 0) {
-    lfprintf(f, "-sock\n");
-    lfprintf(f, "sock %d %d\n", socklist[fd].sock, socklist[fd].flags);
+    bd::String buf;
+
+    stream << buf.printf("-sock\n");
+    stream << buf.printf("sock %d %d\n", socklist[fd].sock, socklist[fd].flags);
 #ifdef USE_IPV6
-    lfprintf(f, "af %u\n", socklist[fd].af);
+    stream << buf.printf("af %u\n", socklist[fd].af);
 #endif
     if (socklist[fd].host)
-      lfprintf(f, "host %s\n", socklist[fd].host);
+      stream << buf.printf("host %s\n", socklist[fd].host);
     if (socklist[fd].port)
-      lfprintf(f, "port %d\n", socklist[fd].port);
-    lfprintf(f, "+sock\n");
+      stream << buf.printf("port %d\n", socklist[fd].port);
+    stream << buf.printf("+sock\n");
   }    
 }
 

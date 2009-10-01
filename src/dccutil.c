@@ -51,6 +51,8 @@
 #include "egg_timer.h"
 #include "src/mod/server.mod/server.h"
 #include <stdarg.h>
+#include <bdlib/src/String.h>
+#include <bdlib/src/Stream.h>
 
 static struct portmap *root = NULL;
 
@@ -515,27 +517,29 @@ dcc_read(FILE *f, bool enc)
 }
 
 void 
-dcc_write(FILE *f, int idx)
+dcc_write(bd::Stream &stream, int idx)
 {
   if (dcc[idx].sock > 0) {
-    lfprintf(f, "-dcc\n");
+    bd::String buf;
+
+    stream << buf.printf("-dcc\n");
     if (dcc[idx].type)
-      lfprintf(f, "type %s\n", dcc[idx].type->name);
+      stream << buf.printf("type %s\n", dcc[idx].type->name);
 //  if (user)
-//  lfprintf(f, "user %s\n", dcc[idx].user->handle);
+//  stream << buf.printf("user %s\n", dcc[idx].user->handle);
     if (dcc[idx].addr)
-      lfprintf(f, "addr %u\n", dcc[idx].addr);
+      stream << buf.printf("addr %u\n", dcc[idx].addr);
     if (dcc[idx].status)
-      lfprintf(f, "status %lu\n", dcc[idx].status);
-    lfprintf(f, "sock %d\n", dcc[idx].sock);
-//  lfprintf(f, "simul %d\n", dcc[idx].simul);
+      stream << buf.printf("status %lu\n", dcc[idx].status);
+    stream << buf.printf("sock %d\n", dcc[idx].sock);
+//  stream << buf.printf("simul %d\n", dcc[idx].simul);
     if (dcc[idx].port)
-      lfprintf(f, "port %d\n", dcc[idx].port);  
+      stream << buf.printf("port %d\n", dcc[idx].port);
     if (dcc[idx].nick[0])
-      lfprintf(f, "nick %s\n", dcc[idx].nick);
+      stream << buf.printf("nick %s\n", dcc[idx].nick);
     if (dcc[idx].host[0])
-      lfprintf(f, "host %s\n", dcc[idx].host);
-    lfprintf(f, "+dcc\n");
+      stream << buf.printf("host %s\n", dcc[idx].host);
+    stream << buf.printf("+dcc\n");
   }
 }
 

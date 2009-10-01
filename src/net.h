@@ -10,6 +10,9 @@
 #include <sys/socket.h>
 #include <setjmp.h>
 
+namespace bd {
+  class Stream;
+}
 
 #define ENC_KEY_LEN 32
 
@@ -151,7 +154,7 @@ bool sock_has_data(int, int);
 int sockoptions(int sock, int operation, int sock_options);
 void init_net(void);
 int sock_read(FILE *, bool);
-void sock_write(FILE *, int);
+void sock_write(bd::Stream&, int);
 
 extern union sockaddr_union 		cached_myip4_so;
 #ifdef USE_IPV6
