@@ -37,17 +37,8 @@ int EncryptedStream::loadFile (const int fd) {
 
   if (enc_flags & ENC_KEEP_NEWLINES) {
     bd::String buf(in_buf), line, out_buf;
-    /* terribly ineffecient, but this is used infrequently */
-    while (buf.find('\n') != bd::String::npos) {
+    while (buf.length()) {
       line = newsplit(buf, '\n');
-      unapply_filters(line, enc_flags);
-      line += '\n';
-      out_buf += line;
-    }
-
-    /* Finish the rest off */
-    if (buf.length()) {
-      line = buf;
       unapply_filters(line, enc_flags);
       line += '\n';
       out_buf += line;
@@ -95,17 +86,8 @@ int EncryptedStream::writeFile (const int fd, const char enc_flags) const {
 
   if (enc_flags & ENC_KEEP_NEWLINES) {
     bd::String buf(str), line;
-    /* terribly ineffecient, but this is used infrequently */
-    while (buf.find('\n') != bd::String::npos) {
+    while (buf.length()) {
       line = newsplit(buf, '\n');
-      apply_filters(line, enc_flags);
-      line += '\n';
-      out_buf += line;
-    }
-
-    /* Finish the rest off */
-    if (buf.length()) {
-      line = buf;
       apply_filters(line, enc_flags);
       line += '\n';
       out_buf += line;
