@@ -23,7 +23,6 @@ namespace bd {
 
 char *MD5(const char *);
 int md5cmp(const char *, const char*);
-char *MD5FILE(const char *);
 char *SHA1(const char *);
 int sha1cmp(const char *, const char*);
 

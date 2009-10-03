@@ -192,31 +192,6 @@ int md5cmp(const char *hash, const char *string) {
   return n;
 }
 
-char *
-MD5FILE(const char *bin)
-{
-  FILE *f = NULL;
-
-  if (!(f = fopen(bin, "rb")))
-    return "";
-
-  static char     md5string[MD5_HASH_LENGTH + 1] = "";
-  unsigned char   md5out[MD5_HASH_LENGTH + 1] = "", buffer[1024] = "";
-  MD5_CTX ctx;
-  size_t binsize = 0, len = 0;
-
-  MD5_Init(&ctx);
-  while ((len = fread(buffer, 1, sizeof buffer, f))) {
-    binsize += len;
-    MD5_Update(&ctx, buffer, len);
-  }
-  MD5_Final(md5out, &ctx);
-  btoh(md5out, MD5_DIGEST_LENGTH, md5string, sizeof(md5string));
-  OPENSSL_cleanse(&ctx, sizeof(ctx));
-
-  return md5string;
-}
-
 char *SHA1(const char *string)
 {
   static int n = 0;
