@@ -527,7 +527,7 @@ int write_userfile(int idx)
 }
 
 /* Used by writeuserfile() and write_tmp_userfile() in share.c */
-int real_writeuserfile(int idx, const struct userrec *bu, FILE *f) {
+int real_writeuserfile(int idx, const struct userrec *bu, FILE *f, bool compat) {
 /* FIXME: REMOVE AFTER 1.2.14 */
   bool old = 0;
 
@@ -538,7 +538,7 @@ int real_writeuserfile(int idx, const struct userrec *bu, FILE *f) {
   const char salt1[] = SALT1;
   EncryptedStream stream(salt1);
   stream_writeuserfile(stream, bu, idx, old);
-  if (stream.writeFile(fileno(f)))
+  if (stream.writeFile(fileno(f)), compat ? ENC_DEFAULT : (ENC_KEEP_NEWLINES|ENC_AES_256_ECB|ENC_BASE64_BROKEN))
     return 1;
   return 0;
 }
