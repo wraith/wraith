@@ -33,7 +33,6 @@ char *salted_sha1(const char *, const char* = NULL);
 bd::String decrypt_string(const bd::String&, const bd::String&);
 char *cryptit (char *);
 char *decryptit (char *);
-int lfprintf (FILE *, const char *, ...) __attribute__((format(printf, 2, 3)));
 void Encrypt_File(char *, char *);
 void Decrypt_File(char *, char *);
 void btoh(const unsigned char *md, size_t md_len, char *buf, const size_t buf_len);

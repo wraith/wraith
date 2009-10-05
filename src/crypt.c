@@ -112,32 +112,6 @@ char *salted_sha1(const char *in, const char* saltin)
   return ret;
 }
 
-int lfprintf (FILE *stream, const char *format, ...)
-{
-  va_list va;
-  char buf[2048] = "", *ln = NULL, *nln = NULL, *tmp = NULL;
-  int res;
-
-  va_start(va, format);
-  egg_vsnprintf(buf, sizeof buf, format, va);
-  va_end(va);
-
-  ln = buf;
-  const char salt1[] = SALT1;
-  while (ln && *ln) {
-    if ((nln = strchr(ln, '\n')))
-      *nln++ = 0;
-
-    tmp = encrypt_string(salt1, ln);
-    res = fprintf(stream, "%s\n", tmp);
-    free(tmp);
-    if (res == EOF)
-      return EOF;
-    ln = nln;
-  }
-  return 0;
-}
-
 void Encrypt_File(char *infile, char *outfile)
 {
   const char salt1[] = SALT1;
