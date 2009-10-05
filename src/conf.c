@@ -22,6 +22,8 @@
 #include "botnet.h"
 #include "userrec.h"
 #include <errno.h>
+#include "EncryptedStream.h"
+#include <bdlib/src/String.h>
 #ifdef HAVE_PATHS_H
 #  include <paths.h>
 #endif /* HAVE_PATHS_H */
@@ -443,7 +445,7 @@ checkpid(const char *nick, conf_bot *bot)
 }
 
 void
-conf_addbot(char *nick, char *ip, char *host, char *ip6)
+conf_addbot(const char *nick, const char *ip, const char *host, const char *ip6)
 {
   conf_bot *bot = (conf_bot *) my_calloc(1, sizeof(conf_bot));
 
@@ -492,7 +494,7 @@ conf_addbot(char *nick, char *ip, char *host, char *ip6)
 #endif /* USE_IPV6 */
 
   if (userlist)
-    bot->u = get_user_by_handle(userlist, nick);
+    bot->u = get_user_by_handle(userlist, (char*)nick);
   else
     bot->u = NULL;
 
@@ -636,150 +638,124 @@ parseconf(bool error)
 int
 readconf(const char *fname, int bits)
 {
-  FILE *f = NULL;
-  int i = 0, enc = (bits & CONF_ENC) ? 1 : 0;
-  char *inbuf = NULL;
-  const char salt1[] = SALT1;
+  int enc = (bits & CONF_ENC) ? 1 : 0;
+  bd::Stream stream;
+
+  if (enc & CONF_ENC) {
+    const char salt1[] = SALT1;
+    stream = EncryptedStream(salt1);
+  }
 
   sdprintf(STR("readconf(%s, %d)"), fname, enc);
-  Context;
-  if (!(f = fopen(fname, "r")))
+
+  if (stream.loadFile(fname))
     fatal(STR("Cannot read config"), 0);
 
   free_conf_bots(conf.bots);
-  inbuf = (char *) my_calloc(1, 201);
-  while (fgets(inbuf, 201, f) != NULL) {
-    char *line = NULL, *temp_ptr = NULL;
 
-    remove_crlf(inbuf);
-    if (enc)
-      line = temp_ptr = decrypt_string(salt1, inbuf);
-    else
-      line = inbuf;
+  bd::String line, option;
 
-    if ((line && !line[0]) || line[0] == '\n') {
-      if (enc)
-        free(line);
+  while (stream.tell() < stream.length()) {
+    line = stream.getline().chomp().trim();
+
+    // Skip blank lines
+    if (!line)
       continue;
-    }
 
-    i++;
-
-    rmspace(line);
-
-    sdprintf(STR("CONF LINE: %s"), line);
+    sdprintf(STR("CONF LINE: %s"), line.c_str());
 // !strchr("_`|}][{*/#-+!abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOPWRSTUVWXYZ", line[0])) {
-    if (enc && line[0] > '~') {
-      sdprintf(STR("line %d, char %c "), i, line[0]);
-      fatal(STR("Bad encryption"), 0);
-    } else {                    /* line is good to parse */
-      /* - uid */
-      if (line[0] == '-') {
-        newsplit(&line);
-        if (conf.uid == -1)
-          conf.uid = atoi(line);
+    /* - uid */
+    if (line[0] == '-') {
+      if (conf.uid == -1)
+        conf.uid = atoi(newsplit(line).c_str());
 
-        /* + uname */
-      } else if (line[0] == '+') {
-        newsplit(&line);
-        if (!conf.uname)
-          conf.uname = strdup(line);
+      /* + uname */
+    } else if (line[0] == '+') {
+      if (!conf.uname)
+        conf.uname = strdup(newsplit(line).c_str());
 
-        /* ! is misc options */
-      } else if (line[0] == '!') {
-        char *option = NULL;
+      /* ! is misc options */
+    } else if (line[0] == '!') {
+      ++line;
+      line.trim();
 
-        /* Only newplit if they did '! option' */
-        if (line[1] == ' ')
-          newsplit(&line);
-        else
-          ++line;
+      option.clear();
+      if (line.length())
+        option = newsplit(line);
 
-        if (line[0])
-          option = newsplit(&line);
+      if (!option || !line)
+        continue;
 
-        if (!option || !line[0])
-          continue;
+//      option.toLower();
 
-        if (!strcasecmp(option, STR("autocron"))) {      /* automatically check/create crontab? */
-          if (egg_isdigit(line[0]))
-            conf.autocron = atoi(line);
+      if (option == STR("autocron")) {      /* automatically check/create crontab? */
+        if (egg_isdigit(line[0]))
+          conf.autocron = atoi(line.c_str());
 
-        } else if (!strcasecmp(option, STR("autouname"))) {      /* auto update uname contents? */
-          if (egg_isdigit(line[0]))
-            conf.autouname = atoi(line);
+      } else if (option == STR("autouname")) {      /* auto update uname contents? */
+        if (egg_isdigit(line[0]))
+          conf.autouname = atoi(line.c_str());
 
-        } else if (!strcasecmp(option, STR("username"))) {       /* shell username */
-          str_redup(&conf.username, line);
+      } else if (option == STR("username")) {       /* shell username */
+        str_redup(&conf.username, line.c_str());
 
-        } else if (!strcasecmp(option, STR("homedir"))) {        /* homedir */
-          str_redup(&conf.homedir, line);
+      } else if (option == STR("homedir")) {        /* homedir */
+        str_redup(&conf.homedir, line.c_str());
 
-        } else if (!strcasecmp(option, STR("datadir"))) {        /* datadir */
-          str_redup(&conf.datadir, line);
+      } else if (option == STR("datadir")) {        /* datadir */
+        str_redup(&conf.datadir, line.c_str());
 
-        } else if (!strcasecmp(option, STR("binpath"))) {        /* path that the binary should move to? */
-          str_redup(&conf.binpath, line);
+      } else if (option == STR("binpath")) {        /* path that the binary should move to? */
+        str_redup(&conf.binpath, line.c_str());
 
-        } else if (!strcasecmp(option, STR("binname"))) {        /* filename of the binary? */
-          str_redup(&conf.binname, line);
+      } else if (option == STR("binname")) {        /* filename of the binary? */
+        str_redup(&conf.binname, line.c_str());
 
-        } else if (!strcasecmp(option, STR("portmin"))) {
-          if (egg_isdigit(line[0]))
-            conf.portmin = atoi(line);
+      } else if (option == STR("portmin")) {
+        if (egg_isdigit(line[0]))
+          conf.portmin = atoi(line.c_str());
 
-        } else if (!strcasecmp(option, STR("portmax"))) {
-          if (egg_isdigit(line[0]))
-            conf.portmax = atoi(line);
+      } else if (option == STR("portmax")) {
+        if (egg_isdigit(line[0]))
+          conf.portmax = atoi(line.c_str());
 
-        } else if (!strcasecmp(option, STR("uid"))) {    /* new method uid */
-          if (str_isdigit(line))
-            conf.uid = atoi(line);
+      } else if (option == STR("uid")) {    /* new method uid */
+        if (str_isdigit(line.c_str()))
+          conf.uid = atoi(line.c_str());
 
-        } else if (!strcasecmp(option, STR("uname"))) {  /* new method uname */
-          str_redup(&conf.uname, line);
+      } else if (option == STR("uname")) {  /* new method uname */
+        str_redup(&conf.uname, line.c_str());
 
-        } else if (!strcasecmp(option, STR("watcher"))) {
-          if (egg_isdigit(line[0]))
-            conf.watcher = atoi(line);
+      } else if (option == STR("watcher")) {
+        if (egg_isdigit(line[0]))
+          conf.watcher = atoi(line.c_str());
 
-        } else {
-          putlog(LOG_MISC, "*", STR("Unrecognized config option '%s'"), option);
+      } else {
+        putlog(LOG_MISC, "*", STR("Unrecognized config option '%s'"), option.c_str());
 
-        }
-        /* read in portmin */
-      } else if (line[0] == '>') {
-        newsplit(&line);
-        conf.portmin = atoi(line);
-
-      } else if (line[0] == '<') {
-        newsplit(&line);
-        conf.portmax = atoi(line);
-
-        /* now to parse nick/hosts */
-      } else if (line[0] != '#') {
-        char *nick = NULL, *host = NULL, *ip = NULL, *ipsix = NULL;
-
-        nick = newsplit(&line);
-        if (!nick || (nick && !nick[0]))
-          werr(ERR_BADCONF);
-
-        if (line[0])
-          ip = newsplit(&line);
-        if (line[0])
-          host = newsplit(&line);
-        if (line[0])
-          ipsix = newsplit(&line);
-
-        conf_addbot(nick, ip, host, ipsix);
       }
+      /* read in portmin */
+    } else if (line[0] == '>') {
+      conf.portmin = atoi(newsplit(line).c_str());
+
+    } else if (line[0] == '<') {
+      conf.portmax = atoi(newsplit(line).c_str());
+
+      /* now to parse nick/hosts */
+    } else if (line[0] != '#') {
+      bd::String nick, host, ip, ipsix;
+
+      nick = newsplit(line);
+      if (!nick)
+        werr(ERR_BADCONF);
+
+      ip = newsplit(line);
+      host = newsplit(line);
+      ipsix = newsplit(line);
+
+      conf_addbot(nick.c_str(), ip.c_str(), host.c_str(), ipsix.c_str());
     }
-    inbuf[0] = 0;
-    if (enc)
-      free(temp_ptr);
   }                             /* while(fgets()) */
-  fclose(f);
-  free(inbuf);
 
   return 0;
 }

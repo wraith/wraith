@@ -58,7 +58,7 @@ void spawnbot(const char *);
 void spawnbots(conf_bot *bots, bool rehashed = 0);
 int conf_killbot(conf_bot *, const char *, conf_bot *, int, bool = 0);
 void confedit() __attribute__((noreturn));
-void conf_addbot(char *, char *, char *, char *);
+void conf_addbot(const char*, const char*, const char*, const char*);
 int conf_delbot(char *, bool kill = 1);
 pid_t checkpid(const char *, conf_bot *);
 void init_conf();
