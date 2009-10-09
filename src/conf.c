@@ -639,24 +639,27 @@ int
 readconf(const char *fname, int bits)
 {
   int enc = (bits & CONF_ENC) ? 1 : 0;
-  bd::Stream stream;
+  bd::Stream* stream;
 
-  if (enc & CONF_ENC) {
+  if (enc) {
     const char salt1[] = SALT1;
-    stream = EncryptedStream(salt1);
-  }
+    stream = new EncryptedStream(salt1);
+  } else
+    stream = new bd::Stream;
 
   sdprintf(STR("readconf(%s, %d)"), fname, enc);
 
-  if (stream.loadFile(fname))
+  if (stream->loadFile(fname)) {
+    delete stream;
     fatal(STR("Cannot read config"), 0);
+  }
 
   free_conf_bots(conf.bots);
 
   bd::String line, option;
 
-  while (stream.tell() < stream.length()) {
-    line = stream.getline().chomp().trim();
+  while (stream->tell() < stream->length()) {
+    line = stream->getline().chomp().trim();
 
     // Skip blank lines
     if (!line)
@@ -757,6 +760,7 @@ readconf(const char *fname, int bits)
     }
   }                             /* while(fgets()) */
 
+  delete stream;
   return 0;
 }
 
