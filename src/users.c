@@ -589,7 +589,8 @@ int readuserfile(const char *file, struct userrec **ret)
 {
   const char salt1[] = SALT1;
   EncryptedStream stream(salt1);
-  stream.loadFile(file);
+  if (stream.loadFile(file))
+    return 1;
   return stream_readuserfile(stream, ret);
 }
 
