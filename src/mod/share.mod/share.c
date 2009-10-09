@@ -1244,25 +1244,6 @@ check_expired_tbufs()
   }
 }
 
-static bool
-write_tmp_userfile(char *fn, const struct userrec *bu, int idx)
-{
-  FILE *f = NULL;
-  int ok = 1;
-
-  if ((f = fopen(fn, "wb"))) {
-    if (real_writeuserfile(idx, bu, f, 1)) {
-      unlink(fn);
-      ok = 0;
-    }
-    fclose(f);
-    fixmod(fn);
-  }
-  if (!ok)
-    putlog(LOG_MISC, "*", "ERROR writing user file to transfer.");
-  return ok;
-}
-
 /* Erase old user list, switch to new one.
  */
 void
@@ -1492,7 +1473,20 @@ start_sending_users(int idx)
   simple_snprintf(share_file, sizeof(share_file), "%s.share.%s", tempdir, rand);
   //mktemp(share_file); //Although safe here, g++ complains too much.
 
-  write_tmp_userfile(share_file, userlist, idx);
+/* FIXME: REMOVE AFTER 1.2.14 */
+  bool old = 0;
+
+  tand_t* bot = idx != -1 ? findbot(dcc[idx].nick) : NULL;
+  if (bot && bot->buildts < 1175102242) /* flood-* hacks */
+    old = 1;
+
+  const char salt1[] = SALT1;
+  EncryptedStream stream(salt1);
+  stream_writeuserfile(stream, userlist, idx, old);
+  if (stream.writeFile(share_file, (ENC_KEEP_NEWLINES|ENC_AES_256_ECB|ENC_BASE64_BROKEN))) {
+    putlog(LOG_MISC, "*", "ERROR writing user file to transfer.");
+    unlink(share_file);
+  }
 
 /* compress.mod
   if (!compress_file(share_file, compress_level)) {

@@ -728,7 +728,7 @@ restart(int idx)
   stream << buf.printf(STR("+ip6 %s\n"), myipstr(AF_INET6));
   replay_cache(-1, &stream);
 
-  stream.writeFile(fileno(socks->f));
+  stream.writeFile(socks->fd);
 
   socks->my_close();
 
@@ -862,7 +862,7 @@ int updatebin(int idx, char *par, int secs)
 
   Tempfile *conffile = new Tempfile("conf");
 
-  if (writeconf(NULL, conffile->f, CONF_ENC)) {
+  if (writeconf(NULL, conffile->fd, CONF_ENC)) {
     putlog(LOG_MISC, "*", STR("Failed to write temporary config file for update."));
     delete conffile;
     return 1;

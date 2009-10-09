@@ -67,7 +67,7 @@ void free_conf_bots(conf_bot *);
 void free_bot(conf_bot *bot);
 int readconf(const char *, int);
 int parseconf(bool);
-int writeconf(char *, FILE *, int);
+int writeconf(char *, int, int);
 void fill_conf_bot(bool fatal = 1);
 void bin_to_conf(bool error = 0);
 void conf_checkpids(conf_bot *bots, bool all = 1);

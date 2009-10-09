@@ -203,7 +203,7 @@ confedit()
 
   um = umask(077);
 
-  autowrote = writeconf(NULL, tmpconf.f, CONF_COMMENT);
+  autowrote = writeconf(NULL, tmpconf.fd, CONF_COMMENT);
   fstat(tmpconf.fd, &st);		/* for file modification compares */
 //  tmpconf.my_close();
 
@@ -767,7 +767,7 @@ readconf(const char *fname, int bits)
 char s1_9[3] = "",s1_5[3] = "",s1_1[3] = "";
 
 int
-writeconf(char *filename, FILE *f, int bits)
+writeconf(char *filename, int fd, int bits)
 {
   conf_bot *bot = NULL;
   int autowrote = 0;
@@ -913,8 +913,8 @@ writeconf(char *filename, FILE *f, int bits)
              bot->net.host ? bot->net.host : (bot->net.host6 ? bot->net.host6 : "*"), bot->net.ip6 ? bot->net.ip6 : "");
   }
 
-  if (f)
-    stream.writeFile(fileno(f));
+  if (fd != -1)
+    stream.writeFile(fd);
   else
     stream.writeFile(filename);
 
