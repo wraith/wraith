@@ -626,7 +626,7 @@ int stream_readuserfile(bd::Stream& stream, struct userrec **ret)
   while (stream.tell() < stream.length()) {
     s = buf;
     str = stream.getline(sizeof(buf));
-    strlcpy(s, str.c_str(), std::min(str.length(), sizeof(buf)));
+    strlcpy(s, str.c_str(), std::min(str.length() + 1, sizeof(buf)));
     remove_crlf(s);
     if (1) {
       line++;
