@@ -538,9 +538,7 @@ int real_writeuserfile(int idx, const struct userrec *bu, FILE *f, bool compat) 
   const char salt1[] = SALT1;
   EncryptedStream stream(salt1);
   stream_writeuserfile(stream, bu, idx, old);
-  if (stream.writeFile(fileno(f)), compat ? ENC_DEFAULT : (ENC_KEEP_NEWLINES|ENC_AES_256_ECB|ENC_BASE64_BROKEN))
-    return 1;
-  return 0;
+  return stream.writeFile(fileno(f), compat ? ENC_DEFAULT : (ENC_KEEP_NEWLINES|ENC_AES_256_ECB|ENC_BASE64_BROKEN));
 }
 
 int change_handle(struct userrec *u, char *newh)
