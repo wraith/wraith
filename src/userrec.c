@@ -513,6 +513,7 @@ int write_userfile(int idx)
 
   if (real_writeuserfile(idx, userlist, f)) {
     putlog(LOG_MISC, "*", "ERROR writing user file. (%s)", strerror(ferror(f)));
+    unlink(new_userfile);
     fclose(f);
     free(new_userfile);
     return 3;

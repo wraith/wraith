@@ -1251,8 +1251,10 @@ write_tmp_userfile(char *fn, const struct userrec *bu, int idx)
   int ok = 1;
 
   if ((f = fopen(fn, "wb"))) {
-    if (real_writeuserfile(idx, bu, f, 1))
+    if (real_writeuserfile(idx, bu, f, 1)) {
+      unlink(fn);
       ok = 0;
+    }
     fclose(f);
     fixmod(fn);
   }
