@@ -772,17 +772,18 @@ writeconf(char *filename, int fd, int bits)
   conf_bot *bot = NULL;
   int autowrote = 0;
 
-  bd::Stream stream;
+  bd::Stream* stream;
   bd::String buf;
 
   if (bits & CONF_ENC) {
     const char salt1[] = SALT1;
-    stream = EncryptedStream(salt1);
-  }
+    stream = new EncryptedStream(salt1);
+  } else
+    stream = new bd::Stream;
 
 #define comment(text)	do {		\
 	if (bits & CONF_COMMENT)	\
-	  stream << buf.printf(STR("%s\n"), text);	\
+	  *stream << buf.printf(STR("%s\n"), text);	\
 } while(0)
 
 #ifndef CYGWIN_HACKS
@@ -802,10 +803,10 @@ writeconf(char *filename, int fd, int bits)
 
   if ((bits & CONF_COMMENT) && conf.uid != (signed) myuid) {
     conf_com();
-    stream << buf.printf(STR("%s! uid %d\n"), do_confedit == CONF_AUTO ? "" : "#", myuid);
-    stream << buf.printf(STR("%s! uid %d\n"), do_confedit == CONF_STATIC ? "" : "#", conf.uid);
+    *stream << buf.printf(STR("%s! uid %d\n"), do_confedit == CONF_AUTO ? "" : "#", myuid);
+    *stream << buf.printf(STR("%s! uid %d\n"), do_confedit == CONF_STATIC ? "" : "#", conf.uid);
   } else
-    stream << buf.printf(STR("! uid %d\n"), conf.uid);
+    *stream << buf.printf(STR("! uid %d\n"), conf.uid);
 
   if (!conf.uname || (conf.uname && conf.autouname && strcmp(conf.uname, my_uname()))) {
     autowrote = 1;
@@ -814,45 +815,45 @@ writeconf(char *filename, int fd, int bits)
     else
       comment("# Automatically updated empty uname");
 
-    stream << buf.printf(STR("! uname %s\n"), my_uname());
+    *stream << buf.printf(STR("! uname %s\n"), my_uname());
     if (conf.uname)
-      stream << buf.printf(STR("#! uname %s\n"), conf.uname);
+      *stream << buf.printf(STR("#! uname %s\n"), conf.uname);
   } else if (conf.uname && !conf.autouname && strcmp(conf.uname, my_uname())) {
     conf_com();
-    stream << buf.printf(STR("%s! uname %s\n"), do_confedit == CONF_AUTO ? "" : "#", my_uname());
-    stream << buf.printf(STR("%s! uname %s\n"), do_confedit == CONF_STATIC ? "" : "#", conf.uname);
+    *stream << buf.printf(STR("%s! uname %s\n"), do_confedit == CONF_AUTO ? "" : "#", my_uname());
+    *stream << buf.printf(STR("%s! uname %s\n"), do_confedit == CONF_STATIC ? "" : "#", conf.uname);
   } else
-    stream << buf.printf(STR("! uname %s\n"), conf.uname);
+    *stream << buf.printf(STR("! uname %s\n"), conf.uname);
 
   comment("");
 
   if (conf.username && my_username() && strcmp(conf.username, my_username())) {
     conf_com();
-    stream << buf.printf(STR("%s! username %s\n"), do_confedit == CONF_AUTO ? "" : "#", my_username());
-    stream << buf.printf(STR("%s! username %s\n"), do_confedit == CONF_STATIC ? "" : "#", conf.username);
+    *stream << buf.printf(STR("%s! username %s\n"), do_confedit == CONF_AUTO ? "" : "#", my_username());
+    *stream << buf.printf(STR("%s! username %s\n"), do_confedit == CONF_STATIC ? "" : "#", conf.username);
   } else
-    stream << buf.printf(STR("! username %s\n"), conf.username ? conf.username : my_username() ? my_username() : "");
+    *stream << buf.printf(STR("! username %s\n"), conf.username ? conf.username : my_username() ? my_username() : "");
 
   if (conf.homedir && homedir(0) && strcmp(conf.homedir, homedir(0))) {
     conf_com();
-    stream << buf.printf(STR("%s! homedir %s\n"), do_confedit == CONF_AUTO ? "" : "#", homedir(0));
-    stream << buf.printf(STR("%s! homedir %s\n"), do_confedit == CONF_STATIC ? "" : "#", conf.homedir);
+    *stream << buf.printf(STR("%s! homedir %s\n"), do_confedit == CONF_AUTO ? "" : "#", homedir(0));
+    *stream << buf.printf(STR("%s! homedir %s\n"), do_confedit == CONF_STATIC ? "" : "#", conf.homedir);
   } else 
-    stream << buf.printf(STR("! homedir %s\n"), conf.homedir ? conf.homedir : homedir(0) ? homedir(0) : "");
+    *stream << buf.printf(STR("! homedir %s\n"), conf.homedir ? conf.homedir : homedir(0) ? homedir(0) : "");
 
   comment("\n# binpath needs to be full path unless it begins with '~', which uses 'homedir', ie, '~/'");
 
   if (homedir() && strstr(conf.binpath, homedir())) {
     p = replace(conf.binpath, homedir(), "~");
-    stream << buf.printf(STR("! binpath %s\n"), p);
+    *stream << buf.printf(STR("! binpath %s\n"), p);
   } else if (conf.homedir && strstr(conf.binpath, conf.homedir)) { /* Could be an older homedir */
     p = replace(conf.binpath, conf.homedir, "~");
-    stream << buf.printf(STR("! binpath %s\n"), p);
+    *stream << buf.printf(STR("! binpath %s\n"), p);
   } else
-    stream << buf.printf(STR("! binpath %s\n"), conf.binpath);
+    *stream << buf.printf(STR("! binpath %s\n"), conf.binpath);
 
   comment("# binname is relative to binpath, if you change this, you'll need to manually remove the old one from crontab.");
-  stream << buf.printf(STR("! binname %s\n"), conf.binname);
+  *stream << buf.printf(STR("! binname %s\n"), conf.binname);
 
   comment("");
 
@@ -861,20 +862,20 @@ writeconf(char *filename, int fd, int bits)
 
     if (homedir() && strstr(conf.datadir, homedir())) {
       p = replace(conf.datadir, homedir(), "~");
-      stream << buf.printf(STR("! datadir %s\n"), p);
+      *stream << buf.printf(STR("! datadir %s\n"), p);
     } else if (conf.homedir && strstr(conf.datadir, conf.homedir)) { /* Could be an older homedir */
       p = replace(conf.datadir, conf.homedir, "~");
-      stream << buf.printf(STR("! datadir %s\n"), p);
+      *stream << buf.printf(STR("! datadir %s\n"), p);
     } else
-      stream << buf.printf(STR("! datadir %s\n"), conf.datadir);
+      *stream << buf.printf(STR("! datadir %s\n"), conf.datadir);
 
     comment("");
   }
 
   if (conf.portmin || conf.portmax) {
     comment("# portmin/max are for incoming connections (DCC) [0 for any] (These only make sense for HUBS)");
-    stream << buf.printf(STR("! portmin %d\n"), conf.portmin);
-    stream << buf.printf(STR("! portmax %d\n"), conf.portmax);
+    *stream << buf.printf(STR("! portmin %d\n"), conf.portmin);
+    *stream << buf.printf(STR("! portmax %d\n"), conf.portmax);
 
     comment("");
   }
@@ -882,14 +883,14 @@ writeconf(char *filename, int fd, int bits)
 
   if (conf.autocron == 0) {
     comment("# Automatically add the bot to crontab?");
-    stream << buf.printf(STR("! autocron %d\n"), conf.autocron);
+    *stream << buf.printf(STR("! autocron %d\n"), conf.autocron);
 
     comment("");
   }
 
   if (conf.autouname) {
     comment("# Automatically update 'uname' if it changes? (DANGEROUS)");
-    stream << buf.printf(STR("! autouname %d\n"), conf.autouname);
+    *stream << buf.printf(STR("! autouname %d\n"), conf.autouname);
 
     comment("");
   }
@@ -907,17 +908,18 @@ writeconf(char *filename, int fd, int bits)
 
 #endif /* CYGWIN_HACKS */
   for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
-    stream << buf.printf(STR("%s%s %s %s%s %s\n"),
+    *stream << buf.printf(STR("%s%s %s %s%s %s\n"),
              bot->disabled ? "/" : "", bot->nick,
              bot->net.ip ? bot->net.ip : "*", bot->net.host6 ? "+" : "",
              bot->net.host ? bot->net.host : (bot->net.host6 ? bot->net.host6 : "*"), bot->net.ip6 ? bot->net.ip6 : "");
   }
 
   if (fd != -1)
-    stream.writeFile(fd);
+    stream->writeFile(fd);
   else
-    stream.writeFile(filename);
+    stream->writeFile(filename);
 
+  delete stream;
   return autowrote;
 }
 
