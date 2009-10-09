@@ -28,9 +28,10 @@ int EncryptedStream::loadFile (const int fd) {
       enc_flags |= (ENC_KEEP_NEWLINES|ENC_AES_256_ECB|ENC_BASE64_BROKEN);
       in_buf = str(5, str.length() - 5);
     } else {
-      /* Peak at the first block to see if it matches a userfile */
-      if (decrypt_string(key, broken_base64Decode(str(0, 32)))(0, 4) == "#4v:")
-        enc_flags |= (ENC_KEEP_NEWLINES|ENC_AES_256_ECB|ENC_BASE64_BROKEN|ENC_NO_HEADER);
+      /* Peak at the first block to see if it matches a userfile or an old conf file */
+      bd::String peek(decrypt_string(key, broken_base64Decode(str(0, 32))));
+      if (peek(0, 4) == "#4v:" || peek(0, 2) == "! ")
+        enc_flags |= (ENC_KEEP_NEWLINES|ENC_AES_256_ECB|ENC_BASE64_BROKEN);
       in_buf = str;
     }
   }
