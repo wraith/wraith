@@ -23,21 +23,23 @@ namespace bd {
 class EncryptedStream : public bd::Stream {
   private:
         bd::String key;
-        void apply_filters(bd::String& buf, const char enc_flags) const;
-        void unapply_filters(bd::String& buf, const char enc_flags) const;
+        mutable char enc_flags;
+        void apply_filters(bd::String& buf) const;
+        void unapply_filters(bd::String& buf) const;
 
   protected:
 
   public:
-        EncryptedStream(const char* keyStr) : Stream(), key(bd::String(keyStr)) {};
-        EncryptedStream(bd::String& keyStr) : Stream(), key(keyStr) {};
-        EncryptedStream(EncryptedStream& stream) : Stream(stream), key(stream.key) {};
+        EncryptedStream(const char* keyStr) : Stream(), key(bd::String(keyStr)), enc_flags(0) {};
+        EncryptedStream(bd::String& keyStr) : Stream(), key(keyStr), enc_flags(0) {};
+        EncryptedStream(EncryptedStream& stream) : Stream(stream), key(stream.key), enc_flags(0) {};
 
+        void setFlags(const char _enc_flags) const { enc_flags = _enc_flags; }
         virtual int loadFile(const int fd);
-        virtual int loadFile(const char* fname) { return bd::Stream::loadFile(fname); }
+        virtual int writeFile(const int fd) const;
 
-        virtual int writeFile(const int fd, const char enc_flags) const;
-        virtual int writeFile(const int fd) const { return writeFile(fd, ENC_DEFAULT); }
-        int writeFile(const char* fname, mode_t mode = (S_IRUSR|S_IWUSR)) const { return bd::Stream::writeFile(fname, mode); }
+        // Overloaded virtuals need to be called to prevent 'hiding' ... good job compiler.
+        virtual int loadFile(const char* fname) { return bd::Stream::loadFile(fname); }
+        virtual int writeFile(const char* fname, mode_t mode = (S_IRUSR|S_IWUSR)) const { return bd::Stream::writeFile(fname, mode); }
 };
 #endif

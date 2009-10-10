@@ -14,7 +14,6 @@ int EncryptedStream::loadFile (const int fd) {
     return 1;
 
   bd::String in_buf;
-  char enc_flags = 0;
 
   /* Peak at the first few bytes to determine the algorithm used */
   if (str[0] == 0x7F && str[2] == 0x7F) {
@@ -40,20 +39,20 @@ int EncryptedStream::loadFile (const int fd) {
     bd::String buf(in_buf), line, out_buf;
     while (buf.length()) {
       line = newsplit(buf, '\n');
-      unapply_filters(line, enc_flags);
+      unapply_filters(line);
       line += '\n';
       out_buf += line;
     }
     in_buf = out_buf;
   } else {
-    unapply_filters(in_buf, enc_flags);
+    unapply_filters(in_buf);
   }
 
   str = in_buf;
   return 0;
 }
 
-void EncryptedStream::apply_filters(bd::String& buf, const char enc_flags) const {
+void EncryptedStream::apply_filters(bd::String& buf) const {
 #ifdef unimplemented
   if (enc_flags & ENC_AES_256_CBC)
     buf = encrypt_string_cbc(key, buf);
@@ -66,7 +65,7 @@ void EncryptedStream::apply_filters(bd::String& buf, const char enc_flags) const
     buf = bd::base64Encode(buf);
 }
 
-void EncryptedStream::unapply_filters(bd::String& buf, const char enc_flags) const {
+void EncryptedStream::unapply_filters(bd::String& buf) const {
   if (enc_flags & ENC_BASE64_BROKEN)
     buf = broken_base64Decode(buf);
   if (enc_flags & ENC_BASE64)
@@ -79,7 +78,7 @@ void EncryptedStream::unapply_filters(bd::String& buf, const char enc_flags) con
     buf = decrypt_string(key, buf);
 }
 
-int EncryptedStream::writeFile (const int fd, const char enc_flags) const {
+int EncryptedStream::writeFile (const int fd) const {
   if (!key.length()) return bd::Stream::writeFile(fd);
 
   /* Encrypt the stream before writing it out */
@@ -89,14 +88,14 @@ int EncryptedStream::writeFile (const int fd, const char enc_flags) const {
     bd::String buf(str), line;
     while (buf.length()) {
       line = newsplit(buf, '\n');
-      apply_filters(line, enc_flags);
+      apply_filters(line);
       line += '\n';
       out_buf += line;
     }
 
   } else {
     out_buf = str;
-    apply_filters(out_buf, enc_flags);
+    apply_filters(out_buf);
   }
 
   if (enc_flags & ENC_NO_HEADER)
