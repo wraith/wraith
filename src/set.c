@@ -27,6 +27,7 @@ static bool parsing_botset = 0;
 
 char altchars[50] = "";
 char alias[1024] = "";
+char rbl_servers[1024] = "";
 bool auth_chan;
 char auth_key[51] = "";
 char auth_prefix[2] = "";
@@ -104,6 +105,7 @@ static variable_t vars[] = {
  VAR("op-requests",	&op_requests,		VAR_RATE|VAR_NOLOC,				0, 0, "2:5"),
  VAR("promisc",		&promisc,		VAR_INT|VAR_DETECTED,				0, 4, "warn"),
  VAR("realname",	botrealname,		VAR_STRING|VAR_NOLHUB,				0, 0, "* I'm too lame to read BitchX.doc *"),
+ VAR("rbl-servers",	rbl_servers,		VAR_STRING|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB,	0, 0, DEFAULT_RBL),
  VAR("server-port",	&default_port,		VAR_INT|VAR_SHORT|VAR_NOLHUB,			0, 65535, "6667"),
  VAR("servers",		&serverlist,		VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB|VAR_NOLDEF,	0, 0, DEFAULT_SERVERS),
  VAR("servers6",	&serverlist,		VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB|VAR_NOLDEF,	0, 0, DEFAULT_SERVERS6),

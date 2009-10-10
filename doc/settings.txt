@@ -62,4 +62,14 @@ irc.ipv6.homelien.no
 irc.ipv6.inter.net.il
 irc.paraphysics.net
 
+:rbl
+cbl.abuseat.org
+dnsbl.ahbl.org
+dnsbl.proxybl.org
+rbl.efnetrbl.org
+tor.efnet.org
+dnsbl.swiftbl.net
+xbl.spamhaus.org
+rbl.efnetpro.com
+
 :end

@@ -1530,12 +1530,12 @@ See also: reload, backup
    $uB$u:    Boolean (0/1/true/on/false/off)
    $uS$u:    String
    $uN$u:    Number
-   $uL$u:    List capable
+   $uL$u:    List
    $uR$u:    Rate. Set as 'number:interval', ie, '1:5'
    $uD$u:    Detected vars have the folloing options: $bignore$b/0, $bwarn$b/1, $breject$b/2, 
                                                       $bdie$b/3, $bsuicide$b/4
  
-[SL] $balias$b           List of dcc aliases in format '<alias> <cmd> [parms]'. First
+[L] $balias$b            List of dcc aliases in format '<alias> <cmd> [parms]'. First
                           matching alias is used. Normal flag checking is done
                           after the alias is expanded. 
                           $bAliases may not reference other aliases.$b
@@ -1571,8 +1571,10 @@ See also: reload, backup
 [D]  $bpromisc$b         How to handle when an interface is set to promiscuous mode.
 [D]  $bhijack$b          How to handle when a commonly used hijack method attempt is detected. 
  
-[SL] $bservers$b         Comma-separated list of servers the bot will use.
-[SL] $bservers6$b        Comma-separated list of servers the bot will use (FOR IPv6).
+[L]  $bservers$b         Comma-separated list of servers the bot will use.
+[L]  $bservers6$b        Comma-separated list of servers the bot will use (FOR IPv6).
+
+[L]  $brbl-servers$b     Servers to use for RBL checking in channels that are +rbl.
  
 [S]  $brealname$b        The bot's "real name" when connecting. (supports '$n' expansion)
 [S]  $busermode$b        The bot's usermode on IRC. (Set on connect/rehash)
