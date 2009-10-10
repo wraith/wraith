@@ -1483,7 +1483,7 @@ start_sending_users(int idx)
   const char salt1[] = SALT1;
   EncryptedStream stream(salt1);
   stream_writeuserfile(stream, userlist, idx, old);
-  stream.setFlags(ENC_KEEP_NEWLINES|ENC_AES_256_ECB|ENC_BASE64_BROKEN);
+  stream.setFlags(ENC_KEEP_NEWLINES|ENC_AES_256_ECB|ENC_BASE64_BROKEN|ENC_NO_HEADER);
   if (stream.writeFile(share_file)) {
     putlog(LOG_MISC, "*", "ERROR writing user file to transfer.");
     unlink(share_file);
