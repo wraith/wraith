@@ -112,7 +112,6 @@ static void resolve_rbl_callback(int id, void *client_data, const char *host, ch
     if (!chan_sentkick(m) && m->userhost[0]) {
       pe = strchr(m->userhost, '@');
       if (pe && !strcmp(pe + 1, r->host)) {
-        m->flags |= SENTKICK;
         sdprintf("ips: %s", ips[0]);
 
         char *s1 = NULL, s[UHOSTLEN] = "";
@@ -122,9 +121,12 @@ static void resolve_rbl_callback(int id, void *client_data, const char *host, ch
         s1[0] = '*';
         s1[1] = '!';
         s1[2] = '*';
-        do_mask(r->chan, r->chan->channel.ban, s1, 'b');
-        dprintf(DP_MODE, "KICK %s %s :%s%s\n", r->chan->name, m->nick, bankickprefix, "listed in rbl");
-        u_addmask('b', r->chan, s1, "rbl", "listed in rbl", now + (60 * r->chan->ban_time), 0);
+        if (me_op(r->chan)) {
+          do_mask(r->chan, r->chan->channel.ban, s1, 'b');
+          m->flags |= SENTKICK;
+          dprintf(DP_MODE, "KICK %s %s :%s%s\n", r->chan->name, m->nick, bankickprefix, "listed in rbl");
+        }
+        u_addmask('b', r->chan, s1, conf.bot->nick, "listed in rbl", now + (60 * (r->chan->ban_time ? r->chan->ban_time : 300)), 0);
       }
     }
   }
