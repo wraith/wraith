@@ -189,9 +189,6 @@ void fatal(const char *s, int recoverable)
     putlog(LOG_MISC, "*", STR("!*! %s"), s);
 
 /*  flushlogs(); */
-#ifdef HAVE_SSL
-    ssl_cleanup();
-#endif /* HAVE_SSL */
 
   if (my_port)
     listen_all(my_port, 1); /* close the listening port... */

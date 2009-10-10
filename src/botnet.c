@@ -1062,16 +1062,7 @@ static void botlink_dns_callback(int id, void *client_data, const char *host, ch
   if (dcc[i].sock < 0 || open_telnet_raw(dcc[i].sock, ips[0], dcc[i].port, 0, 1) < 0)
     failed_link(i);
   else { /* let's attempt to initiate SSL before ANYTHING else... */
-#ifdef HAVE_SSL
-/*    if (!ssl_link(dcc[i].sock, CONNECT_SSL)) {
-      debug2("back from ssl_link(%d, %d) for botlink (failed)", dcc[i].sock, CONNECT_SSL);
-      dcc[i].ssl = 0;
-      putlog(LOG_BOTS, "*", "SSL link for '%s' failed", dcc[i].nick);
-    } else */
-      dcc[i].ssl = 1;
-#else
-      dcc[i].ssl = 0;
-#endif /* HAVE_SSL */
+    dcc[i].ssl = 0;
   }
 
   /* wait for async reply */

@@ -949,9 +949,6 @@ static void dcc_chat_hostresolved(int i)
     lostdcc(i);
   } else {
     bool ok = 1;
-#ifdef HAVE_SSL
-    ssl_link(dcc[i].sock, CONNECT_SSL);
-#endif /* HAVE_SSL */
 
     dcc[i].status = STAT_ECHO;
     get_user_flagrec(dcc[i].user, &fr, NULL);

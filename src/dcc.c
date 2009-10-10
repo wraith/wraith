@@ -349,8 +349,6 @@ cont_link(int idx, char *buf, int ii)
     }
   }
 
-/*.    ssl_link(dcc[idx].sock, CONNECT_SSL); */
-
   dcc[idx].type = &DCC_BOT_NEW;
   dcc[idx].u.bot->numver = 0;
 
@@ -1372,7 +1370,6 @@ dcc_telnet(int idx, char *buf, int ii)
 
   while ((sock == -1) && (errno == EAGAIN))
     sock = answer(dcc[idx].sock, s, &ip, &port, 0);
-/*. ssl_link ACCEPT_SSL should go here!!!! */
   if (sock < 0) {
     putlog(LOG_MISC, "*", "Failed TELNET incoming (%s)", strerror(errno));
 //    killsock(dcc[idx].sock);
@@ -1472,8 +1469,6 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, c
       return;
     }
   }
-
-/* .  ssl_link(dcc[i].sock, ACCEPT_SSL); */
 
   changeover_dcc(i, &DCC_IDENTWAIT, 0);
   dcc[i].timeval = now;
@@ -2010,7 +2005,6 @@ dcc_telnet_got_ident(int i, char *host)
   /* This is so we dont tell someone doing a portscan anything
    * about ourselves. <cybah>
    */
-/* n  ssl_link(dcc[i].sock, ACCEPT_SSL); */
   if (conf.bot->hub)
     dprintf(i, " \n");			/* represents hub that support new linking scheme */
   else

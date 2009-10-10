@@ -14,16 +14,6 @@
 #define ENC_KEY_LEN 32
 
 
-#ifdef HAVE_OPENSSL_SSL_H
-# ifdef USE_SSL
-#  include <openssl/ssl.h>
-#  include <openssl/rand.h>
-#  include <openssl/err.h>
-#  undef HAVE_SSL
-# endif /* USE_SSL */
-/* #define HAVE_SSL 1 */
-#endif /* HAVE_OPENSSL_SSL_H */
-
 #define SGRAB 2010         /* How much data to allow through sockets. */
 
 enum {
@@ -55,9 +45,6 @@ enum {
 
 #define iptolong(a)             (0xffffffff &                           \
                                  (long) (htonl((unsigned long) a)))
-#define CONNECT_SSL 1
-#define ACCEPT_SSL 2
-
 #ifdef USE_IPV6
 #define SIZEOF_SOCKADDR(so) ((so).sa.sa_family == AF_INET6 ? sizeof(so.sin6) : sizeof(so.sin))
 #else
@@ -93,9 +80,6 @@ typedef struct {
   int iseed;                            /* botlink in seed */
   int gz; /* gzip compression */
   int enclink;				/* new encrypted botlink */
-#ifdef HAVE_SSL
-  SSL           *ssl;
-#endif /* HAVE_SSL */
   char *inbuf;
   char *outbuf;
   char *host;
@@ -109,10 +93,6 @@ typedef struct {
 # define killsock(x)     	real_killsock((x),__FILE__,__LINE__)
 
 unsigned long my_atoul(char *);
-#ifdef HAVE_SSL
-int ssl_cleanup();
-int ssl_link(int, int);
-#endif /* HAVE_SSL */
 char *myipstr(int);
 in_addr_t getmyip();
 void cache_my_ip();
