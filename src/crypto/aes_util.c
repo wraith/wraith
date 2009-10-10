@@ -2,7 +2,7 @@
  *
  */
 
-#include "aes.h"
+#include "crypto.h"
 #include "src/compat/compat.h"
 
 #define CRYPT_BLOCKSIZE AES_BLOCK_SIZE
