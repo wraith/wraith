@@ -40,6 +40,7 @@
 * Fix (+|-)(ban|exempt|invite) commands to properly handle if the channel is given first so that a #chan!*@* ban is not created.
 * Fix chanint 'flood-exempt' not exempting ops when set to 'voice'
 * Userfile transfer is now made over botlink (no extra ports needed) (works behind NAT/firewall)
+* Cleanup all string parsing to trim excess whitespaces (fixes #268)
 
 1.2.16 - http://wraith.botpack.net/milestone/1.2.16
 * Add 'set altchars' so that alternative characters used for nicks can be changed. (fixes #418)

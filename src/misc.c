@@ -187,12 +187,17 @@ char *newsplit(char **rest)
   register char *o = *rest, *r = NULL;
 
   while (*o == ' ')
-    o++;
+    ++o;
   r = o;
   while (*o && (*o != ' '))
-    o++;
+    ++o;
   if (*o)
     *o++ = 0;
+
+  /* Trim whitespace */
+  while (*o == ' ')
+    ++o;
+
   *rest = o;
   return r;
 }
