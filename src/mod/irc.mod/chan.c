@@ -1533,7 +1533,7 @@ static int got710(char *from, char *msg)
   chname = newsplit(&msg);
   chan = findchan(chname);
 
-  if (!channel_knock(chan) || !dovoice(chan))
+  if (!chan->knock_flags || !dovoice(chan))
     return 0;
 
   char buf[UHOSTLEN] = "", *uhost = buf, *nick;
@@ -1552,8 +1552,13 @@ static int got710(char *from, char *msg)
 
   get_user_flagrec(u, &fr, chan->dname, chan);
 
-  if (chan_kick(fr) || glob_kick(fr))
+  // PASSING: +o and op || +v and op/voice || user
+  if (!((chan->knock_flags == FLOOD_EXEMPT_OP && chk_op(fr, chan)) ||
+       (chan->knock_flags == FLOOD_EXEMPT_VOICE && (chk_op(fr, chan) || chk_voice(fr, chan))) ||
+       (chan->knock_flags == FLOOD_EXEMPT_USER)) ||
+      chan_kick(fr) || glob_kick(fr)) {
     return 0;
+  }
 
 //  dprintf(DP_HELP, "PRIVMSG %s :%s knocked, inviting.. (%s)\n", chname, nick, u ? u->handle : "");
   cache_invite(chan, nick, uhost, u ? u->handle : NULL, 0, 0);

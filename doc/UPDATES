@@ -43,6 +43,7 @@
 * Cleanup all string parsing to trim excess whitespaces (fixes #268)
 * No longer bundling Openssl code; It is now required to be installed to compile.
 * Cleanup cmd_botcmd restrictions.
+* Removed 'chanset +knock' and replaced with 'chanset knock (Op|Voice|User)', see 'help chaninfo'
 
 1.2.16 - http://wraith.botpack.net/milestone/1.2.16
 * Add 'set altchars' so that alternative characters used for nicks can be changed. (fixes #418)

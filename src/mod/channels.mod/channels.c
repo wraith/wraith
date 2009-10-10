@@ -882,8 +882,6 @@ void channels_report(int idx, int details)
           i += my_strcpy(s + i, "voice ");
         if (channel_autoop(chan))
           i += my_strcpy(s + i, "autoop ");
-        if (channel_knock(chan))
-          i += my_strcpy(s + i, "knock ");
         if (channel_meankicks(chan))
           i += my_strcpy(s + i, "meankicks ");
 /* Chanflag template

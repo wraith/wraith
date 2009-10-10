@@ -731,11 +731,11 @@ flood-chan %d:%d flood-ctcp %d:%d flood-join %d:%d \
 flood-kick %d:%d flood-deop %d:%d flood-nick %d:%d flood-mjoin %d:%d \
 closed-ban %d closed-invite %d closed-private %d ban-time %d \
 exempt-time %d invite-time %d voice-non-ident %d auto-delay %d \
-flood-exempt %d flood-lock-time %d \
+flood-exempt %d flood-lock-time %d knock %d \
 %cmeankicks %cenforcebans %cdynamicbans %cuserbans %cbitch \
 %cprivate %ccycle %cinactive %cdynamicexempts %cuserexempts \
 %cdynamicinvites %cuserinvites %cnodesynch %cclosed %cvoice \
-%cfastop %cautoop %cbotbitch %cbackup %cnomassjoin %cknock %c%s}\n",
+%cfastop %cautoop %cbotbitch %cbackup %cnomassjoin %c%s}\n",
 	chan->dname,
 	w,
         chan->added_by,
@@ -770,6 +770,7 @@ flood-exempt %d flood-lock-time %d \
         chan->auto_delay,
         chan->flood_exempt_mode,
         chan->flood_lock_time,
+        chan->knock_flags,
  	PLSMNS(channel_meankicks(chan)),
  	PLSMNS(channel_enforcebans(chan)),
 	PLSMNS(channel_dynamicbans(chan)),
@@ -790,7 +791,6 @@ flood-exempt %d flood-lock-time %d \
         PLSMNS(channel_botbitch(chan)),
         PLSMNS(channel_backup(chan)),
         PLSMNS(channel_nomassjoin(chan)),
-        PLSMNS(channel_knock(chan)),
 	HAVE_TAKE ? PLSMNS(channel_take(chan)) : ' ',
         HAVE_TAKE ? "take " : " "
 /* Chanflag template
@@ -837,15 +837,11 @@ exempt-time %d invite-time %d voice-non-ident %d auto-delay %d \
 %cenforcebans %cdynamicbans %cuserbans %cbitch \
 %cprivate %ccycle %cinactive %cdynamicexempts %cuserexempts \
 %cdynamicinvites %cuserinvites %cnodesynch %cclosed %cvoice \
-%cfastop %cautoop %cbotbitch %cbackup %cnomassjoin %cknock %c%s}\n",
+%cfastop %cautoop %cbotbitch %cbackup %cnomassjoin %c%s}\n",
 	chan->dname,
 	w,
         chan->added_by,
         (long)chan->added_ts,
-/* Chanchar template
- *      temp,
- * also include temp %s in dprintf.
- */
 	chan->bad_cookie,
 	chan->manop,
 	chan->mdop,
@@ -858,10 +854,6 @@ exempt-time %d invite-time %d voice-non-ident %d auto-delay %d \
         chan->flood_deop_thr, chan->flood_deop_time,
 	chan->flood_nick_thr, chan->flood_nick_time,
         chan->closed_ban,
-/* Chanint template
- *      chan->temp,
- * also include temp %d in dprintf
- */
         chan->closed_invite,
         chan->closed_private,
         chan->ban_time,
@@ -888,13 +880,8 @@ exempt-time %d invite-time %d voice-non-ident %d auto-delay %d \
         PLSMNS(channel_botbitch(chan)),
         PLSMNS(channel_backup(chan)),
         PLSMNS(channel_nomassjoin(chan)),
-        PLSMNS(channel_knock(chan)),
 	HAVE_TAKE ? PLSMNS(channel_take(chan)) : ' ',
         HAVE_TAKE ? "take " : " "
-/* Chanflag template
- * also include a %ctemp above.
- *      PLSMNS(channel_temp(chan)),
- */
     );
   }
 }
