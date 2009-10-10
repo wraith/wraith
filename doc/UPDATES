@@ -1,3 +1,5 @@
+* Add 'chanset +rbl' which uses list of servers from 'set rbl-servers'. Only +r bots will enforce this.
+
 1.2.17 - http://wraith.botpack.net/milestone/1.2.17
 * Binary pass prompt has been changed to be more clear.
 * Fix uname checking on NetBSD and OpenBSD
