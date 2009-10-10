@@ -109,7 +109,7 @@ static void resolve_rbl_callback(int id, void *client_data, const char *host, ch
 
   /* Apply lookup results to all matching members by host */
   for (m = r->chan->channel.member; m && m->nick[0]; m = m->next) {
-    if (!chan_sentkick(m) && !m->userip[0] && m->userhost[0]) {
+    if (!chan_sentkick(m) && m->userhost[0]) {
       pe = strchr(m->userhost, '@');
       if (pe && !strcmp(pe + 1, r->host)) {
         m->flags |= SENTKICK;
