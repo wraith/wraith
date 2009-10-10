@@ -467,6 +467,8 @@ See also: link
                        Users who lose access to a channel because of this setting
                        will see no reference to it over the botnet in any place.
                        The +o restriction goes for +v as well.
+        $brbl$b             Do RBL lookups on clients and ban on matches.
+                       Uses 'rbl-servers'. See also '%dhelp set'
         $btake$b           Once a bot is opped, it will mass op all other bots
                        in the channel. After that, they will all attempt to 
                        mass deop in hopes 'taking' the channel. :)
