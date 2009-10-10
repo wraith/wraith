@@ -444,12 +444,6 @@ privchan(struct flag_record fr, struct chanset_t *chan, int type)
 }
 
 int
-chk_op(struct flag_record fr, struct chanset_t *chan)
-{
-  return real_chk_op(fr, chan, 1);
-}
-
-int
 real_chk_op(struct flag_record fr, struct chanset_t *chan, bool botbitch)
 {
   if (!chan && glob_op(fr))
@@ -476,11 +470,6 @@ chk_autoop(struct flag_record fr, struct chanset_t *chan)
   return 0;
 }
 
-int chk_deop(struct flag_record fr, struct chanset_t *chan)
-{
-  return real_chk_deop(fr, chan, 1);
-}
-
 int
 real_chk_deop(struct flag_record fr, struct chanset_t *chan, bool botbitch)
 {
@@ -488,49 +477,6 @@ real_chk_deop(struct flag_record fr, struct chanset_t *chan, bool botbitch)
     return 1;
 
   if (chan_deop(fr) || (glob_deop(fr) && !chan_op(fr)))
-    return 1;
-  else
-    return 0;
-}
-
-int
-chk_voice(struct flag_record fr, struct chanset_t *chan)
-{
-  if (!chan || (!privchan(fr, chan, PRIV_VOICE) && !chk_devoice(fr))) {
-    if (chan_voice(fr) || (glob_voice(fr) && !chan_quiet(fr)))
-      return 1;
-  }
-  return 0;
-}
-
-int
-chk_devoice(struct flag_record fr)
-{
-  if (chan_quiet(fr) || (glob_quiet(fr) && !chan_voice(fr)))
-    return 1;
-  else
-    return 0;
-}
-
-int
-chk_noflood(struct flag_record fr)
-{
-  return (chan_noflood(fr) || glob_noflood(fr));
-}
-
-int
-isupdatehub()
-{
-  if (conf.bot->hub && conf.bot->u && (conf.bot->u->flags & BOT_UPDATEHUB))
-    return 1;
-  else
-    return 0;
-}
-
-int
-ischanhub()
-{
-  if (!conf.bot->hub && conf.bot->u && (conf.bot->u->flags & BOT_CHANHUB))
     return 1;
   else
     return 0;

@@ -152,16 +152,20 @@ flag_t sanity_check(flag_t, int);
 flag_t chan_sanity_check(flag_t, int);
 char geticon(int);
 int privchan(struct flag_record, struct chanset_t *, int);
-int chk_op(struct flag_record, struct chanset_t *);
+#define chk_op(fr, chan) real_chk_op(fr, chan, 1)
 int real_chk_op(struct flag_record, struct chanset_t *, bool);
 int chk_autoop(struct flag_record, struct chanset_t *);
-int chk_deop(struct flag_record, struct chanset_t *);
+#define chk_deop(fr, chan) real_chk_deop(fr, chan, 1)
 int real_chk_deop(struct flag_record, struct chanset_t *, bool);
-int chk_voice(struct flag_record, struct chanset_t *);
-int chk_devoice(struct flag_record);
-int chk_noflood(struct flag_record);
-int ischanhub(void);
-int isupdatehub(void);
+#define chk_voice(fr, chan) (\
+    (\
+     (!chan || (!privchan(fr, chan, PRIV_VOICE) && !chk_devoice(fr))) \
+     && (chan_voice(fr) || (glob_voice(fr) && !chan_quiet(fr))) \
+    ) ? 1 : 0)
+#define chk_noflood(fr) (chan_noflood(fr) || glob_noflood(fr))
+#define chk_devoice(fr) ((chan_quiet(fr) || (glob_quiet(fr) && !chan_voice(fr))) ? 1 : 0)
+#define isupdatehub() ((conf.bot->hub && conf.bot->u && (conf.bot->u->flags & BOT_UPDATEHUB)) ? 1 : 0)
+#define ischanhub() ((!conf.bot->hub && conf.bot->u && (conf.bot->u->flags & BOT_CHANHUB)) ? 1 : 0)
 int doresolv(struct chanset_t *);
 int dovoice(struct chanset_t *);
 int doflood(struct chanset_t *);
