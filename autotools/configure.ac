@@ -3,10 +3,10 @@ dnl
 dnl
 
 AC_PREREQ(2.59)
-AC_INIT([wraith],[],[wraith@shatow.net])
+AC_INIT([wraith],[],[wraith@botpack.net])
 AC_CONFIG_SRCDIR(src/eggdrop.h)
 AC_CONFIG_HEADER(config.h)
-AC_COPYRIGHT([Copyright (c) 2003, 2004 Bryan Drewery])
+AC_COPYRIGHT([Copyright (c) 2003 - 2009 Bryan Drewery])
 AC_REVISION($Revision$)
 
 EGG_SAVE_PARAMETERS
@@ -84,11 +84,10 @@ AC_CACHE_SAVE
 #AC_CHECK_HEADERS(openssl/ssl.h openssl/crypto.h)
 #AC_CHECK_HEADERS(zlib.h)
 #EGG_CHECK_ZLIB
-#EGG_CHECK_SSL
+CHECK_SSL
 
 
 #AC_SUBST(ZLIB)dnl
-#AC_SUBST(SSL)dnl
 
 # Checks for typedefs, structures, and compiler characteristics
 AC_TYPE_PID_T

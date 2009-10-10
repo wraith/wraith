@@ -388,8 +388,6 @@ AC_DEFUN([EGG_CHECK_LIBS],
 #  AC_CHECK_LIB(dns, gethostbyname)
 
 #  AC_CHECK_LIB(z, gzopen, ZLIB="-lz")
-#  AC_CHECK_LIB(ssl, SSL_accept, SSL="-lssl -lcrypto", SSL="", -lcrypto) 
-#  AC_CHECK_LIB(ssl, SSL_accept, SSL="-lcrypto", SSL="", -lcrypto) 
   # This is needed for Tcl libraries compiled with thread support
 #  AC_CHECK_LIB(pthread, pthread_mutex_init, [dnl
 #  ac_cv_lib_pthread_pthread_mutex_init=yes
@@ -477,31 +475,95 @@ fi
 ])
 
 
-dnl  EGG_CHECK_SSL()
+dnl  CHECK_SSL()
 dnl
-AC_DEFUN([EGG_CHECK_SSL], 
+AC_DEFUN([CHECK_SSL],
 [
-if test "x${SSL}" = x; then
-  cat >&2 <<EOF
-configure: error:
+dnl Adapted from Ratbox configure.ac
+dnl OpenSSL support
+AC_MSG_CHECKING(for path to OpenSSL)
+AC_ARG_WITH(openssl,
+[AS_HELP_STRING([--with-openssl=DIR],[Path to OpenSSL])],
+[cf_with_openssl=$withval],
+[cf_with_openssl="auto"]
+)
 
-  Your system does not provide a working ssl library. 
-  It is required. Download openssl at www.openssl.org
-
-EOF
-  exit 1
+cf_openssl_basedir=""
+if test "$cf_with_openssl" != "auto"; then
+  dnl Support for --with-openssl=/some/place
+  cf_openssl_basedir="`echo ${cf_with_openssl} | sed 's/\/$//'`"
 else
-  if test "${ac_cv_header_openssl_ssl_h}" != yes; then
-    cat >&2 <<EOF
-configure: error:
-
-  Your system does not provide the necessary ssl header file. 
-  It is required. Download openssl at www.openssl.org
-
-EOF
-    exit 1
+  dnl Do the auto-probe here.  Check some common directory paths.
+  for dirs in /usr/local/ssl /usr/pkg /usr/local /usr/local/openssl; do
+    if test -f "${dirs}/include/openssl/opensslv.h" ; then
+      cf_openssl_basedir="${dirs}"
+      break
+    fi
+  done
+  unset dirs
+fi
+dnl Now check cf_openssl_found to see if we found anything.
+if test ! -z "$cf_openssl_basedir"; then
+  if test -f "${cf_openssl_basedir}/include/openssl/opensslv.h" ; then
+    SSL_INCLUDES="-I${cf_openssl_basedir}/include"
+    SSL_LIBS="-L${cf_openssl_basedir}/lib"
+  else
+    dnl OpenSSL wasn't found in the directory specified.
+    cf_openssl_basedir=""
+  fi
+else
+  dnl See if present in system base (in which case, no need to change the include path)
+  if test -f "/usr/include/openssl/opensslv.h" ; then
+    cf_openssl_basedir="/usr"
   fi
 fi
+
+dnl Has it been found by now?
+if test ! -z "$cf_openssl_basedir"; then
+  AC_MSG_RESULT($cf_openssl_basedir)
+else
+  AC_MSG_RESULT([not found])
+  AC_MSG_ERROR([OpenSSL is required.], 1)
+fi
+unset cf_openssl_basedir
+
+save_CXX="$CXX"
+CXX="$CXX $SSL_INCLUDES"
+save_LIBS="$LIBS"
+LIBS="$LIBS $SSL_LIBS"
+
+dnl Check OpenSSL version
+AC_MSG_CHECKING(for OpenSSL version)
+
+AC_TRY_COMPILE([#include <openssl/opensslv.h>],[
+#if !defined(OPENSSL_VERSION_NUMBER)
+#error "Missing openssl version"
+#endif
+#if  (OPENSSL_VERSION_NUMBER < 0x009060af) \
+ || ((OPENSSL_VERSION_NUMBER > 0x00907000) && (OPENSSL_VERSION_NUMBER < 0x0090702f))
+#error "Insecure openssl version " OPENSSL_VERSION_TEXT
+#endif],
+[AC_MSG_RESULT(OK)],
+[
+  AC_MSG_RESULT([too old.])
+  AC_MSG_ERROR([OpenSSL version is too old.], 1)
+]
+)
+
+CXX="$CXX $SSL_LIBS"
+AC_CHECK_LIB(crypto, AES_encrypt,
+[SSL_LIBS="$SSL_LIBS -lcrypto"],
+[
+  AC_MSG_RESULT([not found.])
+  AC_MSG_ERROR([Libcrypto/openssl is required.], 1)
+]
+)
+
+CXX="$save_CXX"
+LIBS="$save_LIBS"
+
+AC_SUBST(SSL_INCLUDES)
+AC_SUBST(SSL_LIBS)
 ])
 
 dnl  EGG_HEADER_STDC()

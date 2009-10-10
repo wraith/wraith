@@ -8,7 +8,7 @@
 # This configure script is free software; the Free Software Foundation
 # gives unlimited permission to copy, distribute and modify it.
 #
-# Copyright (c) 2003, 2004 Bryan Drewery
+# Copyright (c) 2003 - 2009 Bryan Drewery
 ## --------------------- ##
 ## M4sh Initialization.  ##
 ## --------------------- ##
@@ -646,6 +646,8 @@ MOD_UPDIR
 NUMVER
 VERSION
 LIBOBJS
+SSL_LIBS
+SSL_INCLUDES
 CCDEBUG
 BUILDARCH
 BUILDOS
@@ -715,6 +717,7 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 enable_ipv6
+with_openssl
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1347,6 +1350,11 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --disable-ipv6           disable IPv6 support
 
+Optional Packages:
+  --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
+  --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+  --with-openssl=DIR      Path to OpenSSL
+
 Some influential environment variables:
   CXX         C++ compiler command
   CXXFLAGS    C++ compiler flags
@@ -1430,7 +1438,7 @@ Copyright (C) 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001,
 This configure script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it.
 
-Copyright (c) 2003, 2004 Bryan Drewery
+Copyright (c) 2003 - 2009 Bryan Drewery
 _ACEOF
   exit
 fi
@@ -4999,8 +5007,6 @@ fi
 #  AC_CHECK_LIB(dns, gethostbyname)
 
 #  AC_CHECK_LIB(z, gzopen, ZLIB="-lz")
-#  AC_CHECK_LIB(ssl, SSL_accept, SSL="-lssl -lcrypto", SSL="", -lcrypto)
-#  AC_CHECK_LIB(ssl, SSL_accept, SSL="-lcrypto", SSL="", -lcrypto)
   # This is needed for Tcl libraries compiled with thread support
 #  AC_CHECK_LIB(pthread, pthread_mutex_init, [dnl
 #  ac_cv_lib_pthread_pthread_mutex_init=yes
@@ -6140,11 +6146,211 @@ rm -f confcache
 #AC_CHECK_HEADERS(openssl/ssl.h openssl/crypto.h)
 #AC_CHECK_HEADERS(zlib.h)
 #EGG_CHECK_ZLIB
-#EGG_CHECK_SSL
+
+{ $as_echo "$as_me:$LINENO: checking for path to OpenSSL" >&5
+$as_echo_n "checking for path to OpenSSL... " >&6; }
+
+# Check whether --with-openssl was given.
+if test "${with_openssl+set}" = set; then
+  withval=$with_openssl; cf_with_openssl=$withval
+else
+  cf_with_openssl="auto"
+
+fi
+
+
+cf_openssl_basedir=""
+if test "$cf_with_openssl" != "auto"; then
+    cf_openssl_basedir="`echo ${cf_with_openssl} | sed 's/\/$//'`"
+else
+    for dirs in /usr/local/ssl /usr/pkg /usr/local /usr/local/openssl; do
+    if test -f "${dirs}/include/openssl/opensslv.h" ; then
+      cf_openssl_basedir="${dirs}"
+      break
+    fi
+  done
+  unset dirs
+fi
+if test ! -z "$cf_openssl_basedir"; then
+  if test -f "${cf_openssl_basedir}/include/openssl/opensslv.h" ; then
+    SSL_INCLUDES="-I${cf_openssl_basedir}/include"
+    SSL_LIBS="-L${cf_openssl_basedir}/lib"
+  else
+        cf_openssl_basedir=""
+  fi
+else
+    if test -f "/usr/include/openssl/opensslv.h" ; then
+    cf_openssl_basedir="/usr"
+  fi
+fi
+
+if test ! -z "$cf_openssl_basedir"; then
+  { $as_echo "$as_me:$LINENO: result: $cf_openssl_basedir" >&5
+$as_echo "$cf_openssl_basedir" >&6; }
+else
+  { $as_echo "$as_me:$LINENO: result: not found" >&5
+$as_echo "not found" >&6; }
+  { { $as_echo "$as_me:$LINENO: error: OpenSSL is required." >&5
+$as_echo "$as_me: error: OpenSSL is required." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+unset cf_openssl_basedir
+
+save_CXX="$CXX"
+CXX="$CXX $SSL_INCLUDES"
+save_LIBS="$LIBS"
+LIBS="$LIBS $SSL_LIBS"
+
+{ $as_echo "$as_me:$LINENO: checking for OpenSSL version" >&5
+$as_echo_n "checking for OpenSSL version... " >&6; }
+
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <openssl/opensslv.h>
+int
+main ()
+{
+
+#if !defined(OPENSSL_VERSION_NUMBER)
+#error "Missing openssl version"
+#endif
+#if  (OPENSSL_VERSION_NUMBER < 0x009060af) \
+ || ((OPENSSL_VERSION_NUMBER > 0x00907000) && (OPENSSL_VERSION_NUMBER < 0x0090702f))
+#error "Insecure openssl version " OPENSSL_VERSION_TEXT
+#endif
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_cxx_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  { $as_echo "$as_me:$LINENO: result: OK" >&5
+$as_echo "OK" >&6; }
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+  { $as_echo "$as_me:$LINENO: result: too old." >&5
+$as_echo "too old." >&6; }
+  { { $as_echo "$as_me:$LINENO: error: OpenSSL version is too old." >&5
+$as_echo "$as_me: error: OpenSSL version is too old." >&2;}
+   { (exit 1); exit 1; }; }
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+CXX="$CXX $SSL_LIBS"
+{ $as_echo "$as_me:$LINENO: checking for AES_encrypt in -lcrypto" >&5
+$as_echo_n "checking for AES_encrypt in -lcrypto... " >&6; }
+if test "${ac_cv_lib_crypto_AES_encrypt+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lcrypto  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char AES_encrypt ();
+int
+main ()
+{
+return AES_encrypt ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_cxx_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  ac_cv_lib_crypto_AES_encrypt=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_lib_crypto_AES_encrypt=no
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_lib_crypto_AES_encrypt" >&5
+$as_echo "$ac_cv_lib_crypto_AES_encrypt" >&6; }
+if test "x$ac_cv_lib_crypto_AES_encrypt" = x""yes; then
+  SSL_LIBS="$SSL_LIBS -lcrypto"
+else
+
+  { $as_echo "$as_me:$LINENO: result: not found." >&5
+$as_echo "not found." >&6; }
+  { { $as_echo "$as_me:$LINENO: error: Libcrypto/openssl is required." >&5
+$as_echo "$as_me: error: Libcrypto/openssl is required." >&2;}
+   { (exit 1); exit 1; }; }
+
+
+fi
+
+
+CXX="$save_CXX"
+LIBS="$save_LIBS"
+
+
+
+
 
 
 #AC_SUBST(ZLIB)dnl
-#AC_SUBST(SSL)dnl
 
 # Checks for typedefs, structures, and compiler characteristics
 { $as_echo "$as_me:$LINENO: checking for pid_t" >&5
