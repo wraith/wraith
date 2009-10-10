@@ -101,7 +101,7 @@ stringfix: stringfix.c common.h ../config.h eggdrop.h
 	@echo ""
 	@echo "Linking wraith... $(EGGBUILD)"
 	@echo ""
-	$(LD) -o ../$(EGGEXEC) $(OBJS) $(MODOBJS) $(LIBS) compat/*.o crypto/*.o ../lib/bdlib/src/libbdlib.a
+	$(LD) -o ../$(EGGEXEC) $(OBJS) $(MODOBJS) compat/*.o crypto/*.o ../lib/bdlib/src/libbdlib.a $(LIBS)
 #	$(LD) -o ../$(EGGEXEC) $(OBJS) $(MODOBJS) $(LIBS) compat/*.o crypto/*.o
 	@$(STRIP) ../$(EGGEXEC)
 	@$(OBJCOPY) ../$(EGGEXEC)

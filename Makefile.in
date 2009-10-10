@@ -37,11 +37,11 @@ LDDEBUG = @CCDEBUG@
 STRIP = @STRIP@
 DIFF = @DIFF@
 
-#LIBS = @LIBS@ @ZLIB@ @SSL@ 
-LIBS = @LIBS@
+#LIBS = @LIBS@ @ZLIB@
+LIBS = @LIBS@ @SSL_LIBS@
 
 DEBCXXFLAGS = -DDEBUG -fno-inline -g3 -ggdb3 -O0 -Wshadow -Wpointer-arith -Wcast-align @GCC3DEB@ @GCC4DEB@
-CFLGS = @GCC3@
+CFLGS = @GCC3@ @SSL_INCLUDES@
 _CFLGS = -fno-strict-aliasing -W -Wformat \
 #-Wshadow -Wnested-externs -Wno-format-y2k \
 #-Wlarger-than-6608 -Wpointer-arith -Wcast-align \

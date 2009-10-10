@@ -12,11 +12,7 @@ depcomp = /bin/sh $(top_srcdir)/autotools/depcomp
 
 @SET_MAKE@
 
-OBJS = aes.o \
-	aes_util.o \
-	cleanse.o \
-	md5.o \
-	sha.o
+OBJS = aes_util.o
 
 doofus:
 	@echo ""

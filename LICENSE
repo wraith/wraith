@@ -18,9 +18,6 @@ This package includes a mix of licenses:
   * GPL v2
   * BSD-style
 
- * This product includes software developed by the OpenSSL Project
- *    for use in the OpenSSL Toolkit (http://www.openssl.org/)"
-
  * This product includes unlicensed code (mostly GPL) by Erik Johansen (einride) from the ghost botpack (http://ghost.botpack.net)
 
  snprintf.c:

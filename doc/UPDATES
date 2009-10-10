@@ -41,6 +41,7 @@
 * Fix chanint 'flood-exempt' not exempting ops when set to 'voice'
 * Userfile transfer is now made over botlink (no extra ports needed) (works behind NAT/firewall)
 * Cleanup all string parsing to trim excess whitespaces (fixes #268)
+* No longer bundling Openssl code; It is now required to be installed to compile.
 
 1.2.16 - http://wraith.botpack.net/milestone/1.2.16
 * Add 'set altchars' so that alternative characters used for nicks can be changed. (fixes #418)
