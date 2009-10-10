@@ -1336,7 +1336,7 @@ static void cmd_botcmd(int idx, char *par)
   // Restrict dangerous mass commands ('botcmd *' (any *) or 'botcmd &')
   if ((strchr(botm, '*') && !findbot(botm)) || !strcmp(botm, "&")) {
     if (!strncasecmp(cmd, "di", 2) || (!strncasecmp(cmd, "res", 3) && strncasecmp(cmd, "reset", 5)) || !strncasecmp(cmd, "sui", 3) ||
-        !strncasecmp(cmd, "j", 1) || (!strncasecmp(cmd, "dump", 4) && (!strncasecmp(par, "privmsg", 7) || !strncasecmp(par, "notice", 6)))) {
+        !strncasecmp(cmd, "j", 1) || (!strncasecmp(cmd, "dump", 4) && (!strncasecmp(par, "privmsg", 7) || !strncasecmp(par, "notice", 6) || !strncasecmp(par, "quit", 4)))) {
       dprintf(idx, "Not a good idea.\n");
       return;
     } else if (strchr(botm, '*') && !(dcc[idx].user->flags & USER_OWNER)) {
