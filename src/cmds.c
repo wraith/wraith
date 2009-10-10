@@ -1333,12 +1333,13 @@ static void cmd_botcmd(int idx, char *par)
   if (strcmp(botm, "?"))
     putlog(LOG_CMDS, "*", "#%s# botcmd %s %s ...", dcc[idx].nick, botm, cmd);
 
-  if (!strcmp(botm, "*")) {
+  // Restrict dangerous mass commands ('botcmd *' (any *) or 'botcmd &')
+  if ((strchr(botm, '*') && !findbot(botm)) || !strcmp(botm, "&")) {
     if (!strncasecmp(cmd, "di", 2) || (!strncasecmp(cmd, "res", 3) && strncasecmp(cmd, "reset", 5)) || !strncasecmp(cmd, "sui", 3) ||
-        !strncasecmp(cmd, "j", 1)) {
+        !strncasecmp(cmd, "j", 1) || (!strncasecmp(cmd, "dump", 4) && (!strncasecmp(par, "privmsg", 7) || !strncasecmp(par, "notice", 6)))) {
       dprintf(idx, "Not a good idea.\n");
       return;
-    } else if (!(dcc[idx].user->flags & USER_OWNER)) {
+    } else if (strchr(botm, '*') && !(dcc[idx].user->flags & USER_OWNER)) {
       dprintf(idx, "'botcmd *' is limited to +n only.\n");
       return;
     }
@@ -1357,6 +1358,10 @@ static void cmd_botcmd(int idx, char *par)
 
   /* localhubs */
   if (!strcmp(botm, "&")) {
+    if (!(dcc[idx].user->flags & USER_OWNER)) {
+      dprintf(idx, "'botcmd &' is limited to +n only.\n");
+      return;
+    }
     all_localhub = 1;
     for (tbot = tandbot; tbot; tbot = tbot->next) {
       if (bot_hublevel(get_user_by_handle(userlist, tbot->bot)) == 999 && tbot->localhub)

@@ -42,6 +42,7 @@
 * Userfile transfer is now made over botlink (no extra ports needed) (works behind NAT/firewall)
 * Cleanup all string parsing to trim excess whitespaces (fixes #268)
 * No longer bundling Openssl code; It is now required to be installed to compile.
+* Cleanup cmd_botcmd restrictions.
 
 1.2.16 - http://wraith.botpack.net/milestone/1.2.16
 * Add 'set altchars' so that alternative characters used for nicks can be changed. (fixes #418)
