@@ -1430,7 +1430,9 @@ void tputs(register int z, char *s, size_t len)
     return;			
 
   if (((z == STDOUT) || (z == STDERR)) && (!backgrd || use_stderr)) {
-    write(z, s, len);
+    if (write(z, s, len) == -1) {
+      ;
+    }
     return;
   }
 

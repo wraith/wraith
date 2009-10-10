@@ -112,22 +112,32 @@ strip_telnet(int sock, char *buf, int *len)
         /* WILL X -> response: DONT X */
         /* except WILL ECHO which we just smile and ignore */
         if (*(p + 1) != TLN_ECHO) {
-          write(sock, TLN_IAC_C TLN_DONT_C, 2);
-          write(sock, p + 1, 1);
+          if (write(sock, TLN_IAC_C TLN_DONT_C, 2) == -1) {
+            ;
+          }
+          if (write(sock, p + 1, 1) == -1) {
+            ;
+          }
         }
       }
       if (*p == TLN_DO) {
         /* DO X -> response: WONT X */
         /* except DO ECHO which we just smile and ignore */
         if (*(p + 1) != TLN_ECHO) {
-          write(sock, TLN_IAC_C TLN_WONT_C, 2);
-          write(sock, p + 1, 1);
+          if (write(sock, TLN_IAC_C TLN_WONT_C, 2) == -1) {
+            ;
+          }
+          if (write(sock, p + 1, 1) == -1) {
+            ;
+          }
         }
       }
       if (*p == TLN_AYT) {
         /* "are you there?" */
         /* response is: "hell yes!" */
-        write(sock, "\r\nHell, yes!\r\n", 14);
+        if (write(sock, "\r\nHell, yes!\r\n", 14) == -1) {
+          ;
+        }
       }
       /* Anything else can probably be ignored */
       p += mark - 1;

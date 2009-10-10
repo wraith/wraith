@@ -414,7 +414,10 @@ checkpid(const char *nick, conf_bot *bot)
   if ((f = fopen(buf, "r"))) {
     char *bufp = NULL, *pids = NULL;
 
-    fgets(buf, sizeof(buf), f);
+    if (!fgets(buf, sizeof(buf), f)) {
+      fclose(f);
+      return 0;
+    }
     fclose(f);
     remove_crlf(buf);
 
@@ -1108,7 +1111,9 @@ bin_to_conf(bool error)
   }
 
   char datadir[PATH_MAX] = "";
-  realpath(conf.datadir, datadir);
+  if (!realpath(conf.datadir, datadir))
+    werr(ERR_DATADIR);
+
   str_redup(&conf.datadir, datadir);
   if (!mkdir_p(conf.datadir) && error)
     werr(ERR_DATADIR);

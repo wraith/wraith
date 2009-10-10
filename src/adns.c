@@ -378,7 +378,9 @@ void egg_dns_send(char *query, int len)
           sdprintf("SETTING TIMEOUT to %d", async_server_timeout);
           dcc[dns_idx].timeval = now;
         }
-        write(dcc[dns_idx].sock, query, len);
+        if (write(dcc[dns_idx].sock, query, len) == -1) {
+	  ;
+	}
 //	sockbuf_write(dns_idx, query, len);
 }
 

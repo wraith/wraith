@@ -416,7 +416,8 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
       } else {
         buf = (char *) my_calloc(1, fs + 1);
         fseek(err->f, 0, SEEK_SET);
-        fread(buf, 1, fs, err->f);
+        if (!fread(buf, 1, fs, err->f))
+          fs = 0;
         buf[fs] = 0;
         (*erroutput) = buf;
       }
@@ -432,7 +433,8 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
       } else {
         buf = (char *) my_calloc(1, fs + 1);
         fseek(out->f, 0, SEEK_SET);
-        fread(buf, 1, fs, out->f);
+        if (!fread(buf, 1, fs, out->f))
+          fs = 0;
         buf[fs] = 0;
         (*output) = buf;
       }
@@ -726,7 +728,7 @@ void baduname(char *confhas, char *myuname) {
 
 char *homedir(bool useconf)
 {
-  static char homedir_buf[DIRMAX] = "";
+  static char homedir_buf[PATH_MAX] = "";
 
   if (!homedir_buf[0]) {
     char tmp[DIRMAX] = "";
@@ -747,8 +749,13 @@ char *homedir(bool useconf)
 #endif /* CYGWIN_HACKS */
     }
     ContextNote(STR("realpath()"));
-    if (tmp[0])
-      realpath(tmp, homedir_buf); /* this will convert lame home dirs of /home/blah->/usr/home/blah */
+    if (tmp[0]) {
+      if (!realpath(tmp, homedir_buf)) { /* this will convert lame home dirs of /home/blah->/usr/home/blah */
+        homedir_buf[0] = 0;
+        return NULL;
+      }
+      homedir_buf[DIRMAX < PATH_MAX ? DIRMAX - 1 : PATH_MAX - 1] = 0;
+    }
     ContextNote(STR("realpath(): Success"));
   }
   return homedir_buf[0] ? homedir_buf : NULL;
@@ -858,12 +865,14 @@ char *move_bin(const char *ipath, const char *file, bool run)
 
   /* move the binary to the correct place */
   static char newbin[DIRMAX] = "";
-  char real[DIRMAX] = "";
+  char real[PATH_MAX] = "";
 
   simple_snprintf(newbin, sizeof newbin, "%s%s%s", path, path[strlen(path) - 1] == '/' ? "" : "/", file);
 
   ContextNote(STR("realpath()"));
-  realpath(binname, real);            /* get the realpath of binname */
+  if (!realpath(binname, real))            /* get the realpath of binname */
+    fatal(STR("Unable to determine binary path."), 0);
+  real[(DIRMAX < PATH_MAX ? DIRMAX : PATH_MAX) - 1] = 0;
   ContextNote(STR("realpath(): Success"));
   /* running from wrong dir, or wrong bin name.. lets try to fix that :) */
   sdprintf(STR("binname: %s"), binname);
@@ -894,7 +903,10 @@ char *move_bin(const char *ipath, const char *file, bool run)
       if (run) {
         simple_snprintf(newbin, sizeof newbin, "%s%s%s", 
                         path, path[strlen(path) - 1] == '/' ? "" : "/", shell_escape(file));
-        system(newbin);
+        if (system(newbin) == -1) {
+          printf("Unable to automatically start new binary.\n");
+          exit(1);
+        }
         sdprintf(STR("exiting to let new binary run..."));
         exit(0);
       }

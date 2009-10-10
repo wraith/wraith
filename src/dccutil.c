@@ -1031,12 +1031,16 @@ identd_open(const char *sourceIp, const char *destIp)
         free(p);
       }
 
-      ftruncate(fileno(f), 0);
-      fwrite(outbuf, 1, strlen(outbuf), f);
+      if (ftruncate(fileno(f), 0))
+        goto failure;
+
+      if (!fwrite(outbuf, 1, strlen(outbuf), f))
+        goto failure;
 
       //And make a record in the oidentd.conf to spoof the ident request from this port->dest-prot
       fprintf(f, "to %s from %s { reply \"%s\" }\n", destIp, sourceIp, origbotname);
       
+failure:
       fflush(f);
       flock(fileno(f), LOCK_UN);
       fclose(f);

@@ -62,7 +62,7 @@ int close_tty()
   return 0;
 }
 
-static int my_daemon(int nochdir, int noclose)
+static int my_daemon()
 {
   switch (fork()) {
     case -1:
@@ -76,11 +76,6 @@ static int my_daemon(int nochdir, int noclose)
   if (setsid() == -1)
     return (-1);
 
-  if (!nochdir)
-    (void) chdir("/");
-
-  if (!noclose)
-    close_tty();
   return (0);
 }
 
@@ -88,7 +83,7 @@ static int my_daemon(int nochdir, int noclose)
 pid_t
 do_fork()
 {
-  if (my_daemon(1, 1))
+  if (my_daemon())
     fatal(strerror(errno), 0);
 
   pid_t pid = getpid();

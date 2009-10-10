@@ -95,9 +95,10 @@ static unsigned long pump_file_to_sock(FILE *file, long sock,
   if (bf) {
     do {
       actual_size = pending_data >= buf_len ? buf_len : pending_data;
-      fread(bf, actual_size, 1, file);
-      tputs(sock, bf, actual_size);
-      pending_data -= actual_size;
+      if (fread(bf, actual_size, 1, file)) {
+        tputs(sock, bf, actual_size);
+        pending_data -= actual_size;
+      }
     } while (!sock_has_data(SOCK_DATA_OUTGOING, sock) && pending_data != 0);
     free(bf);
   }
@@ -462,7 +463,19 @@ void dcc_send(int idx, char *buf, int len)
   size_t siz = 0;
   unsigned long sent;
 
-  fwrite(buf, len, 1, dcc[idx].u.xfer->f);
+  if (!fwrite(buf, len, 1, dcc[idx].u.xfer->f)) {
+    putlog(LOG_FILES, "*", "Problem writing file");
+    fclose(dcc[idx].u.xfer->f);
+    siz = strlen(tempdir) + strlen(dcc[idx].u.xfer->filename) + 1;
+    b = (char *) my_calloc(1, siz);
+    strlcpy(b, tempdir, siz);
+    strlcat(b, dcc[idx].u.xfer->filename, siz);
+    unlink(b);
+    free(b);
+    killsock(dcc[idx].sock);
+    lostdcc(idx);
+    return;
+  }
 
   fflush(dcc[idx].u.xfer->f);
   fsync(fileno(dcc[idx].u.xfer->f));
