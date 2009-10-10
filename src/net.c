@@ -37,6 +37,9 @@
 #include "egg_timer.h"
 #include "traffic.h"
 #include "adns.h"
+#include <bdlib/src/String.h>
+#include <bdlib/src/Stream.h>
+
 #include <limits.h>
 #include <string.h>
 #include <netdb.h>
@@ -83,14 +86,14 @@ port_t firewallport = 1080;    /* Default port of Sock4/5 firewalls        */
 
 /* I need an UNSIGNED long for dcc type stuff
  */
-unsigned long my_atoul(char *s)
+unsigned long my_atoul(const char *s)
 {
   unsigned long ret = 0;
 
   while ((*s >= '0') && (*s <= '9')) {
     ret *= 10;
     ret += ((*s) - '0');
-    s++;
+    ++s;
   }
   return ret;
 }
@@ -290,63 +293,54 @@ int sockoptions(int sock, int operation, int sock_options)
 }
 
 int
-sock_read(FILE *f, bool enc)
+sock_read(bd::Stream& stream)
 {
-  char inbuf[1024] = "", *type = NULL, *buf = NULL, *buf_ptr = NULL;
   int fd = -1;
-  const char salt1[] = SALT1;
+  bd::String buf, type;
 
-  while (fgets(inbuf, sizeof(inbuf), f) != NULL) {
-    remove_crlf(inbuf);
+  while (stream.tell() < stream.length()) {
+    buf = stream.getline().chomp();
 
-    if (enc)
-      buf = buf_ptr = decrypt_string(salt1, inbuf);
-    else
-      buf = inbuf;
-
-    if (!strcmp(buf, "+sock")) {
-      if (enc)
-        free(buf_ptr);
+    if (buf == STR("+sock"))
       return fd;
-    }
 
-    type = newsplit(&buf);
-    if (!strcmp(type, "sock")) {
-      int sock = atoi(newsplit(&buf)), options = atoi(newsplit(&buf));
+    type = newsplit(buf);
+    if (type == STR("sock")) {
+      int sock = atoi(newsplit(buf).c_str()), options = atoi(newsplit(buf).c_str());
 
       fd = allocsock(sock, options);
     }
 
     if (fd >= 0) {
 #ifdef USE_IPV6
-      if (!strcmp(type, "af"))
-        socklist[fd].af = atoi(buf);
+      if (type == STR("af"))
+        socklist[fd].af = atoi(buf.c_str());
 #endif
-      if (!strcmp(type, "host"))
-        socklist[fd].host = strdup(buf);
-      if (!strcmp(type, "port"))
-        socklist[fd].port = atoi(buf);
+      if (type == STR("host"))
+        socklist[fd].host = strdup(buf.c_str());
+      if (type == STR("port"))
+        socklist[fd].port = atoi(buf.c_str());
     }
-    if (enc)
-      free(buf_ptr);
   }
   return -1;
 }
 
 void 
-sock_write(FILE *f, int fd)
+sock_write(bd::Stream &stream, int fd)
 {
   if (socklist[fd].sock > 0) {
-    lfprintf(f, "-sock\n");
-    lfprintf(f, "sock %d %d\n", socklist[fd].sock, socklist[fd].flags);
+    bd::String buf;
+
+    stream << buf.printf(STR("-sock\n"));
+    stream << buf.printf(STR("sock %d %d\n"), socklist[fd].sock, socklist[fd].flags);
 #ifdef USE_IPV6
-    lfprintf(f, "af %u\n", socklist[fd].af);
+    stream << buf.printf(STR("af %u\n"), socklist[fd].af);
 #endif
     if (socklist[fd].host)
-      lfprintf(f, "host %s\n", socklist[fd].host);
+      stream << buf.printf(STR("host %s\n"), socklist[fd].host);
     if (socklist[fd].port)
-      lfprintf(f, "port %d\n", socklist[fd].port);
-    lfprintf(f, "+sock\n");
+      stream << buf.printf(STR("port %d\n"), socklist[fd].port);
+    stream << buf.printf(STR("+sock\n"));
   }    
 }
 

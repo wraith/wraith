@@ -7,19 +7,39 @@ namespace bd {
 #include <iostream>
 #include <bdlib/src/Stream.h>
 #include <bdlib/src/String.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#define ENC_AES_256_ECB 	1
+#define ENC_AES_256_CBC		2
+#define ENC_BASE64_BROKEN	4
+#define ENC_BASE64		8
+#define ENC_KEEP_NEWLINES	16
+#define ENC_NO_HEADER		32
+
+#define ENC_DEFAULT 		(ENC_AES_256_ECB)
 
 class EncryptedStream : public bd::Stream {
   private:
         bd::String key;
+        mutable char enc_flags;
+        void apply_filters(bd::String& buf) const;
+        void unapply_filters(bd::String& buf) const;
 
   protected:
 
   public:
-        EncryptedStream(const char* keyStr) : Stream(), key(bd::String(keyStr)) {};
-        EncryptedStream(bd::String& keyStr) : Stream(), key(keyStr) {};
-        EncryptedStream(EncryptedStream& stream) : Stream(stream), key(stream.key) {};
+        EncryptedStream(const char* keyStr) : Stream(), key(bd::String(keyStr)), enc_flags(0) {};
+        EncryptedStream(bd::String& keyStr) : Stream(), key(keyStr), enc_flags(0) {};
+        EncryptedStream(EncryptedStream& stream) : Stream(stream), key(stream.key), enc_flags(0) {};
 
-        virtual bd::String gets(size_t, char delim = 0);
-        virtual void puts (const bd::String& string);
+        void setFlags(const char _enc_flags) const { enc_flags = _enc_flags; }
+        virtual int loadFile(const int fd);
+        virtual int writeFile(const int fd) const;
+
+        // Overloaded virtuals need to be called to prevent 'hiding' ... good job compiler.
+        virtual int loadFile(const char* fname) { return bd::Stream::loadFile(fname); }
+        virtual int writeFile(const char* fname, mode_t mode = (S_IRUSR|S_IWUSR)) const { return bd::Stream::writeFile(fname, mode); }
 };
 #endif

@@ -22,6 +22,8 @@
 #include "botnet.h"
 #include "userrec.h"
 #include <errno.h>
+#include "EncryptedStream.h"
+#include <bdlib/src/String.h>
 #ifdef HAVE_PATHS_H
 #  include <paths.h>
 #endif /* HAVE_PATHS_H */
@@ -201,7 +203,7 @@ confedit()
 
   um = umask(077);
 
-  autowrote = writeconf(NULL, tmpconf.f, CONF_COMMENT);
+  autowrote = writeconf(NULL, tmpconf.fd, CONF_COMMENT);
   fstat(tmpconf.fd, &st);		/* for file modification compares */
 //  tmpconf.my_close();
 
@@ -446,7 +448,7 @@ checkpid(const char *nick, conf_bot *bot)
 }
 
 void
-conf_addbot(char *nick, char *ip, char *host, char *ip6)
+conf_addbot(const char *nick, const char *ip, const char *host, const char *ip6)
 {
   conf_bot *bot = (conf_bot *) my_calloc(1, sizeof(conf_bot));
 
@@ -495,7 +497,7 @@ conf_addbot(char *nick, char *ip, char *host, char *ip6)
 #endif /* USE_IPV6 */
 
   if (userlist)
-    bot->u = get_user_by_handle(userlist, nick);
+    bot->u = get_user_by_handle(userlist, (char*)nick);
   else
     bot->u = NULL;
 
@@ -639,180 +641,154 @@ parseconf(bool error)
 int
 readconf(const char *fname, int bits)
 {
-  FILE *f = NULL;
-  int i = 0, enc = (bits & CONF_ENC) ? 1 : 0;
-  char *inbuf = NULL;
-  const char salt1[] = SALT1;
+  int enc = (bits & CONF_ENC) ? 1 : 0;
+  bd::Stream* stream;
+
+  if (enc) {
+    const char salt1[] = SALT1;
+    stream = new EncryptedStream(salt1);
+  } else
+    stream = new bd::Stream;
 
   sdprintf(STR("readconf(%s, %d)"), fname, enc);
-  Context;
-  if (!(f = fopen(fname, "r")))
+
+  if (stream->loadFile(fname)) {
+    delete stream;
     fatal(STR("Cannot read config"), 0);
+  }
 
   free_conf_bots(conf.bots);
-  inbuf = (char *) my_calloc(1, 201);
-  while (fgets(inbuf, 201, f) != NULL) {
-    char *line = NULL, *temp_ptr = NULL;
 
-    remove_crlf(inbuf);
-    if (enc)
-      line = temp_ptr = decrypt_string(salt1, inbuf);
-    else
-      line = inbuf;
+  bd::String line, option;
 
-    if ((line && !line[0]) || line[0] == '\n') {
-      if (enc)
-        free(line);
+  while (stream->tell() < stream->length()) {
+    line = stream->getline().chomp().trim();
+
+    // Skip blank lines
+    if (!line)
       continue;
-    }
 
-    i++;
-
-    rmspace(line);
-
-    sdprintf(STR("CONF LINE: %s"), line);
+    sdprintf(STR("CONF LINE: %s"), line.c_str());
 // !strchr("_`|}][{*/#-+!abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOPWRSTUVWXYZ", line[0])) {
-    if (enc && line[0] > '~') {
-      sdprintf(STR("line %d, char %c "), i, line[0]);
-      fatal(STR("Bad encryption"), 0);
-    } else {                    /* line is good to parse */
-      /* - uid */
-      if (line[0] == '-') {
-        newsplit(&line);
-        if (conf.uid == -1)
-          conf.uid = atoi(line);
+    /* - uid */
+    if (line[0] == '-') {
+      if (conf.uid == -1)
+        conf.uid = atoi(newsplit(line).c_str());
 
-        /* + uname */
-      } else if (line[0] == '+') {
-        newsplit(&line);
-        if (!conf.uname)
-          conf.uname = strdup(line);
+      /* + uname */
+    } else if (line[0] == '+') {
+      if (!conf.uname)
+        conf.uname = strdup(newsplit(line).c_str());
 
-        /* ! is misc options */
-      } else if (line[0] == '!') {
-        char *option = NULL;
+      /* ! is misc options */
+    } else if (line[0] == '!') {
+      ++line;
+      line.trim();
 
-        /* Only newplit if they did '! option' */
-        if (line[1] == ' ')
-          newsplit(&line);
-        else
-          ++line;
+      option.clear();
+      if (line.length())
+        option = newsplit(line);
 
-        if (line[0])
-          option = newsplit(&line);
+      if (!option || !line)
+        continue;
 
-        if (!option || !line[0])
-          continue;
+//      option.toLower();
 
-        if (!strcasecmp(option, STR("autocron"))) {      /* automatically check/create crontab? */
-          if (egg_isdigit(line[0]))
-            conf.autocron = atoi(line);
+      if (option == STR("autocron")) {      /* automatically check/create crontab? */
+        if (egg_isdigit(line[0]))
+          conf.autocron = atoi(line.c_str());
 
-        } else if (!strcasecmp(option, STR("autouname"))) {      /* auto update uname contents? */
-          if (egg_isdigit(line[0]))
-            conf.autouname = atoi(line);
+      } else if (option == STR("autouname")) {      /* auto update uname contents? */
+        if (egg_isdigit(line[0]))
+          conf.autouname = atoi(line.c_str());
 
-        } else if (!strcasecmp(option, STR("username"))) {       /* shell username */
-          str_redup(&conf.username, line);
+      } else if (option == STR("username")) {       /* shell username */
+        str_redup(&conf.username, line.c_str());
 
-        } else if (!strcasecmp(option, STR("homedir"))) {        /* homedir */
-          str_redup(&conf.homedir, line);
+      } else if (option == STR("homedir")) {        /* homedir */
+        str_redup(&conf.homedir, line.c_str());
 
-        } else if (!strcasecmp(option, STR("datadir"))) {        /* datadir */
-          str_redup(&conf.datadir, line);
+      } else if (option == STR("datadir")) {        /* datadir */
+        str_redup(&conf.datadir, line.c_str());
 
-        } else if (!strcasecmp(option, STR("binpath"))) {        /* path that the binary should move to? */
-          str_redup(&conf.binpath, line);
+      } else if (option == STR("binpath")) {        /* path that the binary should move to? */
+        str_redup(&conf.binpath, line.c_str());
 
-        } else if (!strcasecmp(option, STR("binname"))) {        /* filename of the binary? */
-          str_redup(&conf.binname, line);
+      } else if (option == STR("binname")) {        /* filename of the binary? */
+        str_redup(&conf.binname, line.c_str());
 
-        } else if (!strcasecmp(option, STR("portmin"))) {
-          if (egg_isdigit(line[0]))
-            conf.portmin = atoi(line);
+      } else if (option == STR("portmin")) {
+        if (egg_isdigit(line[0]))
+          conf.portmin = atoi(line.c_str());
 
-        } else if (!strcasecmp(option, STR("portmax"))) {
-          if (egg_isdigit(line[0]))
-            conf.portmax = atoi(line);
+      } else if (option == STR("portmax")) {
+        if (egg_isdigit(line[0]))
+          conf.portmax = atoi(line.c_str());
 
-        } else if (!strcasecmp(option, STR("uid"))) {    /* new method uid */
-          if (str_isdigit(line))
-            conf.uid = atoi(line);
+      } else if (option == STR("uid")) {    /* new method uid */
+        if (str_isdigit(line.c_str()))
+          conf.uid = atoi(line.c_str());
 
-        } else if (!strcasecmp(option, STR("uname"))) {  /* new method uname */
-          str_redup(&conf.uname, line);
+      } else if (option == STR("uname")) {  /* new method uname */
+        str_redup(&conf.uname, line.c_str());
 
-        } else if (!strcasecmp(option, STR("watcher"))) {
-          if (egg_isdigit(line[0]))
-            conf.watcher = atoi(line);
+      } else if (option == STR("watcher")) {
+        if (egg_isdigit(line[0]))
+          conf.watcher = atoi(line.c_str());
 
-        } else {
-          putlog(LOG_MISC, "*", STR("Unrecognized config option '%s'"), option);
+      } else {
+        putlog(LOG_MISC, "*", STR("Unrecognized config option '%s'"), option.c_str());
 
-        }
-        /* read in portmin */
-      } else if (line[0] == '>') {
-        newsplit(&line);
-        conf.portmin = atoi(line);
-
-      } else if (line[0] == '<') {
-        newsplit(&line);
-        conf.portmax = atoi(line);
-
-        /* now to parse nick/hosts */
-      } else if (line[0] != '#') {
-        char *nick = NULL, *host = NULL, *ip = NULL, *ipsix = NULL;
-
-        nick = newsplit(&line);
-        if (!nick || (nick && !nick[0]))
-          werr(ERR_BADCONF);
-
-        if (line[0])
-          ip = newsplit(&line);
-        if (line[0])
-          host = newsplit(&line);
-        if (line[0])
-          ipsix = newsplit(&line);
-
-        conf_addbot(nick, ip, host, ipsix);
       }
-    }
-    inbuf[0] = 0;
-    if (enc)
-      free(temp_ptr);
-  }                             /* while(fgets()) */
-  fclose(f);
-  free(inbuf);
+      /* read in portmin */
+    } else if (line[0] == '>') {
+      conf.portmin = atoi(newsplit(line).c_str());
 
+    } else if (line[0] == '<') {
+      conf.portmax = atoi(newsplit(line).c_str());
+
+      /* now to parse nick/hosts */
+    } else if (line[0] != '#') {
+      bd::String nick, host, ip, ipsix;
+
+      nick = newsplit(line);
+      if (!nick)
+        werr(ERR_BADCONF);
+
+      ip = newsplit(line);
+      host = newsplit(line);
+      ipsix = newsplit(line);
+
+      conf_addbot(nick.c_str(), ip.c_str(), host.c_str(), ipsix.c_str());
+    }
+  }                             /* while(fgets()) */
+
+  delete stream;
   return 0;
 }
 
 char s1_9[3] = "",s1_5[3] = "",s1_1[3] = "";
 
 int
-writeconf(char *filename, FILE * stream, int bits)
+writeconf(char *filename, int fd, int bits)
 {
-  FILE *f = NULL;
   conf_bot *bot = NULL;
-  int (*my_write) (FILE *, const char *, ... ) = NULL;
   int autowrote = 0;
 
-  if (bits & CONF_ENC)
-    my_write = lfprintf;
-  else if (!(bits & CONF_ENC))
-    my_write = fprintf;
+  bd::Stream* stream;
+  bd::String buf;
+
+  if (bits & CONF_ENC) {
+    const char salt1[] = SALT1;
+    stream = new EncryptedStream(salt1);
+  } else
+    stream = new bd::Stream;
 
 #define comment(text)	do {		\
 	if (bits & CONF_COMMENT)	\
-	  my_write(f, STR("%s\n"), text);	\
+	  *stream << buf.printf(STR("%s\n"), text);	\
 } while(0)
 
-  if (stream) {
-    f = stream;
-  } else if (filename) {
-    if (!(f = fopen(filename, "w")))
-      return 1;
-  }
 #ifndef CYGWIN_HACKS
   char *p = NULL;
 
@@ -830,10 +806,10 @@ writeconf(char *filename, FILE * stream, int bits)
 
   if ((bits & CONF_COMMENT) && conf.uid != (signed) myuid) {
     conf_com();
-    my_write(f, STR("%s! uid %d\n"), do_confedit == CONF_AUTO ? "" : "#", myuid);
-    my_write(f, STR("%s! uid %d\n"), do_confedit == CONF_STATIC ? "" : "#", conf.uid);
+    *stream << buf.printf(STR("%s! uid %d\n"), do_confedit == CONF_AUTO ? "" : "#", myuid);
+    *stream << buf.printf(STR("%s! uid %d\n"), do_confedit == CONF_STATIC ? "" : "#", conf.uid);
   } else
-    my_write(f, STR("! uid %d\n"), conf.uid);
+    *stream << buf.printf(STR("! uid %d\n"), conf.uid);
 
   if (!conf.uname || (conf.uname && conf.autouname && strcmp(conf.uname, my_uname()))) {
     autowrote = 1;
@@ -842,45 +818,45 @@ writeconf(char *filename, FILE * stream, int bits)
     else
       comment("# Automatically updated empty uname");
 
-    my_write(f, STR("! uname %s\n"), my_uname());
+    *stream << buf.printf(STR("! uname %s\n"), my_uname());
     if (conf.uname)
-      my_write(f, STR("#! uname %s\n"), conf.uname);
+      *stream << buf.printf(STR("#! uname %s\n"), conf.uname);
   } else if (conf.uname && !conf.autouname && strcmp(conf.uname, my_uname())) {
     conf_com();
-    my_write(f, STR("%s! uname %s\n"), do_confedit == CONF_AUTO ? "" : "#", my_uname());
-    my_write(f, STR("%s! uname %s\n"), do_confedit == CONF_STATIC ? "" : "#", conf.uname);
+    *stream << buf.printf(STR("%s! uname %s\n"), do_confedit == CONF_AUTO ? "" : "#", my_uname());
+    *stream << buf.printf(STR("%s! uname %s\n"), do_confedit == CONF_STATIC ? "" : "#", conf.uname);
   } else
-    my_write(f, STR("! uname %s\n"), conf.uname);
+    *stream << buf.printf(STR("! uname %s\n"), conf.uname);
 
   comment("");
 
   if (conf.username && my_username() && strcmp(conf.username, my_username())) {
     conf_com();
-    my_write(f, STR("%s! username %s\n"), do_confedit == CONF_AUTO ? "" : "#", my_username());
-    my_write(f, STR("%s! username %s\n"), do_confedit == CONF_STATIC ? "" : "#", conf.username);
+    *stream << buf.printf(STR("%s! username %s\n"), do_confedit == CONF_AUTO ? "" : "#", my_username());
+    *stream << buf.printf(STR("%s! username %s\n"), do_confedit == CONF_STATIC ? "" : "#", conf.username);
   } else
-    my_write(f, STR("! username %s\n"), conf.username ? conf.username : my_username() ? my_username() : "");
+    *stream << buf.printf(STR("! username %s\n"), conf.username ? conf.username : my_username() ? my_username() : "");
 
   if (conf.homedir && homedir(0) && strcmp(conf.homedir, homedir(0))) {
     conf_com();
-    my_write(f, STR("%s! homedir %s\n"), do_confedit == CONF_AUTO ? "" : "#", homedir(0));
-    my_write(f, STR("%s! homedir %s\n"), do_confedit == CONF_STATIC ? "" : "#", conf.homedir);
+    *stream << buf.printf(STR("%s! homedir %s\n"), do_confedit == CONF_AUTO ? "" : "#", homedir(0));
+    *stream << buf.printf(STR("%s! homedir %s\n"), do_confedit == CONF_STATIC ? "" : "#", conf.homedir);
   } else 
-    my_write(f, STR("! homedir %s\n"), conf.homedir ? conf.homedir : homedir(0) ? homedir(0) : "");
+    *stream << buf.printf(STR("! homedir %s\n"), conf.homedir ? conf.homedir : homedir(0) ? homedir(0) : "");
 
   comment("\n# binpath needs to be full path unless it begins with '~', which uses 'homedir', ie, '~/'");
 
   if (homedir() && strstr(conf.binpath, homedir())) {
     p = replace(conf.binpath, homedir(), "~");
-    my_write(f, STR("! binpath %s\n"), p);
+    *stream << buf.printf(STR("! binpath %s\n"), p);
   } else if (conf.homedir && strstr(conf.binpath, conf.homedir)) { /* Could be an older homedir */
     p = replace(conf.binpath, conf.homedir, "~");
-    my_write(f, STR("! binpath %s\n"), p);
+    *stream << buf.printf(STR("! binpath %s\n"), p);
   } else
-    my_write(f, STR("! binpath %s\n"), conf.binpath);
+    *stream << buf.printf(STR("! binpath %s\n"), conf.binpath);
 
   comment("# binname is relative to binpath, if you change this, you'll need to manually remove the old one from crontab.");
-  my_write(f, STR("! binname %s\n"), conf.binname);
+  *stream << buf.printf(STR("! binname %s\n"), conf.binname);
 
   comment("");
 
@@ -889,20 +865,20 @@ writeconf(char *filename, FILE * stream, int bits)
 
     if (homedir() && strstr(conf.datadir, homedir())) {
       p = replace(conf.datadir, homedir(), "~");
-      my_write(f, STR("! datadir %s\n"), p);
+      *stream << buf.printf(STR("! datadir %s\n"), p);
     } else if (conf.homedir && strstr(conf.datadir, conf.homedir)) { /* Could be an older homedir */
       p = replace(conf.datadir, conf.homedir, "~");
-      my_write(f, STR("! datadir %s\n"), p);
+      *stream << buf.printf(STR("! datadir %s\n"), p);
     } else
-      my_write(f, STR("! datadir %s\n"), conf.datadir);
+      *stream << buf.printf(STR("! datadir %s\n"), conf.datadir);
 
     comment("");
   }
 
   if (conf.portmin || conf.portmax) {
     comment("# portmin/max are for incoming connections (DCC) [0 for any] (These only make sense for HUBS)");
-    my_write(f, STR("! portmin %d\n"), conf.portmin);
-    my_write(f, STR("! portmax %d\n"), conf.portmax);
+    *stream << buf.printf(STR("! portmin %d\n"), conf.portmin);
+    *stream << buf.printf(STR("! portmax %d\n"), conf.portmax);
 
     comment("");
   }
@@ -910,14 +886,14 @@ writeconf(char *filename, FILE * stream, int bits)
 
   if (conf.autocron == 0) {
     comment("# Automatically add the bot to crontab?");
-    my_write(f, STR("! autocron %d\n"), conf.autocron);
+    *stream << buf.printf(STR("! autocron %d\n"), conf.autocron);
 
     comment("");
   }
 
   if (conf.autouname) {
     comment("# Automatically update 'uname' if it changes? (DANGEROUS)");
-    my_write(f, STR("! autouname %d\n"), conf.autouname);
+    *stream << buf.printf(STR("! autouname %d\n"), conf.autouname);
 
     comment("");
   }
@@ -935,17 +911,18 @@ writeconf(char *filename, FILE * stream, int bits)
 
 #endif /* CYGWIN_HACKS */
   for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
-    my_write(f, STR("%s%s %s %s%s %s\n"), 
+    *stream << buf.printf(STR("%s%s %s %s%s %s\n"),
              bot->disabled ? "/" : "", bot->nick,
              bot->net.ip ? bot->net.ip : "*", bot->net.host6 ? "+" : "",
              bot->net.host ? bot->net.host : (bot->net.host6 ? bot->net.host6 : "*"), bot->net.ip6 ? bot->net.ip6 : "");
   }
 
-  fflush(f);
+  if (fd != -1)
+    stream->writeFile(fd);
+  else
+    stream->writeFile(filename);
 
-  if (!stream)
-    fclose(f);
-
+  delete stream;
   return autowrote;
 }
 

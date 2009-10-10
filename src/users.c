@@ -589,7 +589,8 @@ int readuserfile(const char *file, struct userrec **ret)
 {
   const char salt1[] = SALT1;
   EncryptedStream stream(salt1);
-  stream.loadFile(file);
+  if (stream.loadFile(file))
+    return 1;
   return stream_readuserfile(stream, ret);
 }
 
@@ -625,9 +626,8 @@ int stream_readuserfile(bd::Stream& stream, struct userrec **ret)
   }
   while (stream.tell() < stream.length()) {
     s = buf;
-    str = stream.getline(sizeof(buf));
+    str = stream.getline(sizeof(buf)).chomp();
     strlcpy(s, str.c_str(), std::min(str.length() + 1, sizeof(buf)));
-    remove_crlf(s);
     if (1) {
       line++;
       if (s[0] != '#' && s[0] != ';' && s[0]) {

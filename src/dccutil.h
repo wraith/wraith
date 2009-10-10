@@ -14,6 +14,10 @@ struct portmap {
   struct portmap *next;
 };
 
+namespace bd {
+  class Stream;
+}
+
 /* Fake idx's for dprintf - these should be ridiculously large +ve nums
  */
 #define DP_STDOUT       0x7FF1
@@ -55,8 +59,8 @@ void identd_open(const char * = NULL, const char * = NULL);
 void identd_close();
 int listen_all(port_t, bool);
 bool valid_idx(int);
-int dcc_read(FILE *, bool);
-void dcc_write(FILE *, int);
+int dcc_read(bd::Stream&);
+void dcc_write(bd::Stream&, int);
 int check_cmd_pass(const char *, char *);
 int has_cmd_pass(const char *);
 void set_cmd_pass(char *, int);

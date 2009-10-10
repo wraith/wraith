@@ -485,49 +485,15 @@ int write_userfile(int idx)
   if (userlist == NULL || !conf.bot->hub)
     return 1;			/* No point in saving userfile */
 
-  FILE *f = NULL;
-  char *new_userfile = NULL;
-  size_t siz = strlen(userfile) + 4 + 1;
-
-  new_userfile = (char *) my_calloc(1, siz);
-  simple_snprintf(new_userfile, siz, "%s~new", userfile);
-
-  f = fopen(new_userfile, "w");
-  if (f == NULL) {
-    putlog(LOG_MISC, "*", "ERROR writing user file.");
-    free(new_userfile);
-    return 2;
-  }
-  fchmod(fileno(f), S_IRUSR | S_IWUSR);
-
-  char backup[DIRMAX] = "";
-
   if (idx >= 0)
     dprintf(idx, "Saving userfile...\n");
 
   if (sort_users)
     sort_userlist();
 
-
   putlog(LOG_DEBUG, "@", "Writing user entries.");
 
-  if (real_writeuserfile(idx, userlist, f)) {
-    putlog(LOG_MISC, "*", "ERROR writing user file. (%s)", strerror(ferror(f)));
-    fclose(f);
-    free(new_userfile);
-    return 3;
-  }
-  fclose(f);
-  putlog(LOG_DEBUG, "@", "Done writing userfile.");
-  simple_snprintf(backup, sizeof backup, "%s/%s~", conf.datadir, userfile);
-  copyfile(userfile, backup);
-  movefile(new_userfile, userfile);
-  free(new_userfile);
-  return 0;
-}
-
-/* Used by writeuserfile() and write_tmp_userfile() in share.c */
-int real_writeuserfile(int idx, const struct userrec *bu, FILE *f) {
+  Tempfile *new_userfile = new Tempfile("userfile");
 /* FIXME: REMOVE AFTER 1.2.14 */
   bool old = 0;
 
@@ -537,9 +503,21 @@ int real_writeuserfile(int idx, const struct userrec *bu, FILE *f) {
 
   const char salt1[] = SALT1;
   EncryptedStream stream(salt1);
-  stream_writeuserfile(stream, bu, idx, old);
-  if ((fwrite(bd::String(stream).data(), 1, stream.length(), f) != stream.length()) || (fflush(f)))
-    return 1;
+  stream_writeuserfile(stream, userlist, idx, old);
+  if (stream.writeFile(new_userfile->fd)) {
+    putlog(LOG_MISC, "*", "ERROR writing user file. (%s)", strerror(errno));
+    delete new_userfile;
+    return 3;
+  }
+  new_userfile->my_close();
+  putlog(LOG_DEBUG, "@", "Done writing userfile.");
+
+  char backup[DIRMAX] = "";
+
+  simple_snprintf(backup, sizeof backup, "%s/%s~", conf.datadir, userfile);
+  copyfile(userfile, backup);
+  movefile(new_userfile->file, userfile);
+  delete new_userfile;
   return 0;
 }
 

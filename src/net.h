@@ -10,6 +10,9 @@
 #include <sys/socket.h>
 #include <setjmp.h>
 
+namespace bd {
+  class Stream;
+}
 
 #define ENC_KEY_LEN 32
 
@@ -92,7 +95,7 @@ typedef struct {
 
 # define killsock(x)     	real_killsock((x),__FILE__,__LINE__)
 
-unsigned long my_atoul(char *);
+unsigned long my_atoul(const char *);
 char *myipstr(int);
 in_addr_t getmyip();
 void cache_my_ip();
@@ -130,8 +133,8 @@ char *iptostr(in_addr_t);
 bool sock_has_data(int, int);
 int sockoptions(int sock, int operation, int sock_options);
 void init_net(void);
-int sock_read(FILE *, bool);
-void sock_write(FILE *, int);
+int sock_read(bd::Stream&);
+void sock_write(bd::Stream&, int);
 
 extern union sockaddr_union 		cached_myip4_so;
 #ifdef USE_IPV6

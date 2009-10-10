@@ -46,6 +46,8 @@
 #include "src/mod/channels.mod/channels.h"
 #include "src/mod/ctcp.mod/ctcp.h"
 #include "src/mod/irc.mod/irc.h"
+#include <bdlib/src/Stream.h>
+#include <bdlib/src/String.h>
 #include "server.h"
 #include <stdarg.h>
 
@@ -372,7 +374,7 @@ char *splitnicks(char **rest)
   return r;
 }
 
-void replay_cache(int idx, FILE *f) {
+void replay_cache(int idx, bd::Stream* stream) {
   if (!cacheq.head) return;
 
   struct msgq *r = NULL;
@@ -381,9 +383,10 @@ void replay_cache(int idx, FILE *f) {
   replaying_cache = 1;
 
   for (r = cacheq.head; r; r = r->next) {
-    if (f)
-      lfprintf(f, STR("+serv_cache %s\n"), r->msg);
-    else {
+    if (stream) {
+      bd::String buf;
+      *stream << buf.printf(STR("+serv_cache %s\n"), r->msg);
+    } else {
       //Create temporary buffer since server_activity may squash the buffer
       p_ptr = p = strdup(r->msg);
       server_activity(idx, p, r->len);

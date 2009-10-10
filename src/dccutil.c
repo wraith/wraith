@@ -51,6 +51,8 @@
 #include "egg_timer.h"
 #include "src/mod/server.mod/server.h"
 #include <stdarg.h>
+#include <bdlib/src/String.h>
+#include <bdlib/src/Stream.h>
 
 static struct portmap *root = NULL;
 
@@ -451,38 +453,30 @@ dcc_chatter(int idx)
 }
 
 int
-dcc_read(FILE *f, bool enc)
+dcc_read(bd::Stream& stream)
 {
-  char inbuf[1024] = "", *type = NULL, *buf = NULL, *buf_ptr = NULL;
   int idx = -1;
   bool isserv = 0;
-  const char salt1[] = SALT1;
+  bd::String buf, type;
 
-  while (fgets(inbuf, sizeof(inbuf), f) != NULL) {
-    remove_crlf(inbuf);
-    if (enc)
-      buf = buf_ptr = decrypt_string(salt1, inbuf);
-    else
-      buf = inbuf;
+  while (stream.tell() < stream.length()) {
+    buf = stream.getline().chomp();
 
-    if (!strcmp(buf, "+dcc")) {
-      if (enc)
-        free(buf_ptr);
+    if (buf == STR("+dcc"))
       return idx;
-    }
     
-    type = newsplit(&buf);
-    if (!strcmp(type, "type")) {
+    type = newsplit(buf);
+    if (type == STR("type")) {
       struct dcc_table *dcc_type = NULL;
       size_t dcc_size = 0;
 
-//      if (!strcmp(buf, "CHAT"))
+//      if (buf == STR("CHAT"))
 //        dcc_type = &DCC_CHAT;
-      if (!strcmp(buf, "SERVER")) {
+      if (buf == STR("SERVER")) {
         dcc_type = &SERVER_SOCKET;
         isserv = 1;
       }
-//      if (!strcmp(buf, "BOT"))
+//      if (buf == STR("BOT"))
 //        dcc_type = &DCC_BOT;
     
       if (dcc_type) {
@@ -493,49 +487,48 @@ dcc_read(FILE *f, bool enc)
     }
 
     if (idx >= 0) {
-      if (!strcmp(type, "addr"))
-        dcc[idx].addr = my_atoul(buf);
-      if (!strcmp(type, "sock")) {
-        dcc[idx].sock = atoi(buf);
+      if (type == STR("addr"))
+        dcc[idx].addr = my_atoul(buf.c_str());
+      if (type == STR("sock")) {
+        dcc[idx].sock = atoi(buf.c_str());
         if (isserv)
           serv = dcc[idx].sock;
       }
-      if (!strcmp(type, "port"))
-        dcc[idx].port = atoi(buf);
-      if (!strcmp(type, "nick"))
-        strlcpy(dcc[idx].nick, buf, NICKLEN);
-      if (!strcmp(type, "host")) {
-        strlcpy(dcc[idx].host, buf, UHOSTLEN);
-      }
+      if (type == STR("port"))
+        dcc[idx].port = atoi(buf.c_str());
+      if (type == STR("nick"))
+        strlcpy(dcc[idx].nick, buf.c_str(), NICKLEN);
+      if (type == STR("host"))
+        strlcpy(dcc[idx].host, buf.c_str(), UHOSTLEN);
     }
-    if (enc)
-      free(buf_ptr);
   }
   return -1;
 }
 
 void 
-dcc_write(FILE *f, int idx)
+dcc_write(bd::Stream &stream, int idx)
 {
   if (dcc[idx].sock > 0) {
-    lfprintf(f, "-dcc\n");
+    bd::String buf;
+
+    stream << buf.printf(STR("-dcc\n"));
     if (dcc[idx].type)
-      lfprintf(f, "type %s\n", dcc[idx].type->name);
+      stream << buf.printf(STR("type %s\n"), dcc[idx].type->name);
 //  if (user)
-//  lfprintf(f, "user %s\n", dcc[idx].user->handle);
+//  stream << buf.printf(STR("user %s\n"), dcc[idx].user->handle);
     if (dcc[idx].addr)
-      lfprintf(f, "addr %u\n", dcc[idx].addr);
+      stream << buf.printf(STR("addr %u\n"), dcc[idx].addr);
     if (dcc[idx].status)
-      lfprintf(f, "status %lu\n", dcc[idx].status);
-    lfprintf(f, "sock %d\n", dcc[idx].sock);
-//  lfprintf(f, "simul %d\n", dcc[idx].simul);
+      stream << buf.printf(STR("status %lu\n"), dcc[idx].status);
+    stream << buf.printf(STR("sock %d\n"), dcc[idx].sock);
+//  stream << buf.printf(STR("simul %d\n"), dcc[idx].simul);
     if (dcc[idx].port)
-      lfprintf(f, "port %d\n", dcc[idx].port);  
+      stream << buf.printf(STR("port %d\n"), dcc[idx].port);
     if (dcc[idx].nick[0])
-      lfprintf(f, "nick %s\n", dcc[idx].nick);
+      stream << buf.printf(STR("nick %s\n"), dcc[idx].nick);
     if (dcc[idx].host[0])
-      lfprintf(f, "host %s\n", dcc[idx].host);
-    lfprintf(f, "+dcc\n");
+      stream << buf.printf(STR("host %s\n"), dcc[idx].host);
+    stream << buf.printf(STR("+dcc\n"));
   }
 }
 
