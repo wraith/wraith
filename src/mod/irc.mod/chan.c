@@ -29,6 +29,7 @@
  *
  */
 
+#include <bdlib/src/String.h>
 
 static time_t last_ctcp = (time_t) 0L;
 static int    count_ctcp = 0;
@@ -38,6 +39,7 @@ static char   last_invchan[300] = "";
 typedef struct resolvstruct {
   struct chanset_t *chan;
   char *host;
+  bd::String* servers;
 } resolv_member;
 
 static void resolv_member_callback(int id, void *client_data, const char *host, char **ips)
@@ -45,7 +47,7 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
   resolv_member *r = (resolv_member *) client_data;
 
   if (!r || !r->chan || !r->host || !ips || !ips[0]) {
-    if (r->host) free(r->host);
+    if (r && r->host) free(r->host);
     return;
   }
 
@@ -60,7 +62,7 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
         strlcpy(user, m->userhost, pe - m->userhost + 1);
         simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, ips[0]);
         if (channel_rbl(r->chan))
-          resolve_to_rbl(r->chan, m->nick, ips[0]);
+          resolve_to_rbl(r->chan, ips[0]);
         if (!m->user) {
           simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
           m->user = get_user_by_host(s);
@@ -94,7 +96,11 @@ static void resolve_rbl_callback(int id, void *client_data, const char *host, ch
   resolv_member *r = (resolv_member *) client_data;
 
   if (!r || !r->chan || !r->host || !ips || (ips && !ips[0])) {
-    if (r->host) free(r->host);
+    if (r && r->chan && r->host) {
+      // Lookup from the next RBL
+      resolve_to_rbl(r->chan, r->host, r->servers);
+    }
+    if (r && r->host) free(r->host);
     return;
   }
 
@@ -127,19 +133,29 @@ static void resolve_rbl_callback(int id, void *client_data, const char *host, ch
 }
 
 
-void resolve_to_rbl(struct chanset_t *chan, char *nick, char *host)
+void resolve_to_rbl(struct chanset_t *chan, char *host, bd::String* rservers)
 {
+  if (!rservers)
+    rservers = new bd::String(rbl_servers);
+
+  bd::String rbl_server = newsplit((*rservers), ',');
+
+  if (rbl_server == "") {
+    delete rservers;
+    return; //No more servers
+  }
+
   resolv_member *r = (resolv_member *) my_calloc(1, sizeof(resolv_member));
 
   r->chan = chan;
   r->host = strdup(host);
+  r->servers = rservers;
 
-  const char *rbl_domain = "rbl.efnet.org";
-  size_t iplen = strlen(host) + 1 + strlen(rbl_domain) + 1;
+  size_t iplen = strlen(host) + 1 + rbl_server.length() + 1;
   char *ip = (char *) my_calloc(1, iplen);
   reverse_ip(host, ip);
   strlcat(ip, ".", iplen);
-  strlcat(ip, rbl_domain, iplen);
+  strlcat(ip, rbl_server.c_str(), iplen);
 
   egg_dns_lookup(ip, 20, resolve_rbl_callback, (void *) r, DNS_A);
 
@@ -1835,7 +1851,7 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
   if (!m->userip[0] && doresolv(chan))
     resolve_to_member(chan, nick, host);
   else if (m->userip[0] && doresolv(chan) && channel_rbl(chan))
-    resolve_to_rbl(chan, nick, host);
+    resolve_to_rbl(chan, host);
 
 
   get_user_flagrec(m->user, &fr, chan->dname, chan);
@@ -2533,7 +2549,7 @@ static int gotjoin(char *from, char *chname)
             if (is_dotted_ip(host)) {
               strlcpy(m->userip, uhost, sizeof(m->userip));
               if (channel_rbl(chan))
-                resolve_to_rbl(chan, nick, host);
+                resolve_to_rbl(chan, host);
             } else
               resolve_to_member(chan, nick, host);
           }
@@ -2556,7 +2572,7 @@ static int gotjoin(char *from, char *chname)
         if (!m->userip[0] && doresolv(chan))
           resolve_to_member(chan, nick, host);
         else if (m->userip[0] && doresolv(chan) && channel_rbl(chan))
-          resolve_to_rbl(chan, nick, host);
+          resolve_to_rbl(chan, host);
 
 //	m->flags |= STOPWHO;
 
