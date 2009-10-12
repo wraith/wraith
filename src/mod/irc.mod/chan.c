@@ -133,6 +133,7 @@ static void resolve_rbl_callback(int id, void *client_data, const char *host, ch
     }
   }
   free(r->host);
+  delete r->servers;
   return;
 }
 
