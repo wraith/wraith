@@ -231,7 +231,7 @@ struct chanset_t {
 #define CHAN_BOTBITCH       BIT7        /* only let bots be opped? */
 #define CHAN_BACKUP         BIT8	/* Join the BOT_BACKUP bots when set */
 #define CHAN_SECRET         BIT9	/* don't advertise channel on botnet  */
-#undef  CHAN_10		    /* BIT10        not used */
+#define CHAN_RBL            BIT10	/* Lookup users in RBL (requires +r) */
 #define CHAN_CYCLE          BIT11	/* cycle the channel if possible      */
 #define CHAN_INACTIVE       BIT12	/* no irc support for this channel */
 #define CHAN_VOICE          BIT13	/* a bot +y|y will voice *, except +q */
@@ -302,6 +302,7 @@ struct chanset_t *findchan_by_dname(const char *name);
 #define channel_nomassjoin(chan) (chan->status & CHAN_NOMASSJOIN)
 #define channel_knock(chan) (chan->status & CHAN_KNOCK)
 #define channel_meankicks(chan) (chan->status & CHAN_MEANKICKS)
+#define channel_rbl(chan) (chan->status & CHAN_RBL)
 /* Chanflag template
  *#define channel_temp(chan) (chan->status & CHAN_PRIVATE)
  */

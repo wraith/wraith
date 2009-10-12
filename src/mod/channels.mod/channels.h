@@ -43,7 +43,7 @@ void write_invites(bd::Stream&, int);
 bool expired_mask(struct chanset_t *, char *);
 void set_handle_laston(char *, struct userrec *, time_t);
 int u_delmask(char type, struct chanset_t *c, char *who, int doit);
-bool u_addmask(char type, struct chanset_t *, char *, char *, char *, time_t, int);
+bool u_addmask(char type, struct chanset_t *, char *, const char *, const char *, time_t, int);
 int u_sticky_mask(maskrec *, char *);
 int u_setsticky_mask(struct chanset_t *, maskrec *, char *, int, const char);
 int SplitList(char *, const char *, int *, const char ***);

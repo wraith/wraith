@@ -309,7 +309,7 @@ int u_delmask(char type, struct chanset_t *c, char *who, int doit)
 
 /* Note: If first char of note is '*' it's a sticky mask.
  */
-bool u_addmask(char type, struct chanset_t *chan, char *who, char *from, char *note, time_t expire_time, int flags)
+bool u_addmask(char type, struct chanset_t *chan, char *who, const char *from, const char *note, time_t expire_time, int flags)
 {
   char host[UHOSTLEN] = "", s[UHOSTLEN] = "";
   maskrec *p = NULL, *l = NULL, **u = NULL;
@@ -735,7 +735,7 @@ flood-exempt %d flood-lock-time %d \
 %cmeankicks %cenforcebans %cdynamicbans %cuserbans %cbitch \
 %cprivate %ccycle %cinactive %cdynamicexempts %cuserexempts \
 %cdynamicinvites %cuserinvites %cnodesynch %cclosed %cvoice \
-%cfastop %cautoop %cbotbitch %cbackup %cnomassjoin %cknock %c%s}\n",
+%cfastop %cautoop %cbotbitch %cbackup %cnomassjoin %cknock %crbl %c%s}\n",
 	chan->dname,
 	w,
         chan->added_by,
@@ -791,6 +791,7 @@ flood-exempt %d flood-lock-time %d \
         PLSMNS(channel_backup(chan)),
         PLSMNS(channel_nomassjoin(chan)),
         PLSMNS(channel_knock(chan)),
+        PLSMNS(channel_rbl(chan)),
 	HAVE_TAKE ? PLSMNS(channel_take(chan)) : ' ',
         HAVE_TAKE ? "take " : " "
 /* Chanflag template

@@ -29,6 +29,7 @@ static bool parsing_botset = 0;
 
 char altchars[50] = "";
 char alias[1024] = "";
+char rbl_servers[1024] = "";
 bool auth_chan;
 char auth_key[51] = "";
 char auth_prefix[2] = "";
@@ -64,6 +65,7 @@ bool manop_warn;
 char homechan[51] = "";
 char usermode[15] = "";
 
+////// THIS MUST REMAIN SORTED
 // VAR("bad-process",	&badprocess,		VAR_INT|VAR_DETECTED,				0, 4, "ignore"),
 // VAR("process-list",	process_list,		VAR_STRING|VAR_LIST,				0, 0, NULL),
 static variable_t vars[] = {
@@ -105,6 +107,7 @@ static variable_t vars[] = {
  VAR("op-bots",		&op_bots,		VAR_INT|VAR_NOLOC,				1, MAX_BOTS, "1"),
  VAR("op-requests",	&op_requests,		VAR_RATE|VAR_NOLOC,				0, 0, "2:5"),
  VAR("promisc",		&promisc,		VAR_INT|VAR_DETECTED,				0, 4, "warn"),
+ VAR("rbl-servers",	rbl_servers,		VAR_STRING|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB,	0, 0, DEFAULT_RBL),
  VAR("realname",	botrealname,		VAR_STRING|VAR_NOLHUB,				0, 0, "* I'm too lame to read BitchX.doc *"),
  VAR("server-port",	&default_port,		VAR_INT|VAR_SHORT|VAR_NOLHUB,			0, 65535, "6667"),
  VAR("servers",		&serverlist,		VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB|VAR_NOLDEF,	0, 0, DEFAULT_SERVERS),

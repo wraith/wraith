@@ -29,6 +29,7 @@
  *
  */
 
+#include <bdlib/src/String.h>
 
 static time_t last_ctcp = (time_t) 0L;
 static int    count_ctcp = 0;
@@ -37,49 +38,50 @@ static char   last_invchan[300] = "";
 
 typedef struct resolvstruct {
   struct chanset_t *chan;
-  char *nick;
+  char *host;
+  bd::String* servers;
+  bd::String* server;
 } resolv_member;
 
 static void resolv_member_callback(int id, void *client_data, const char *host, char **ips)
 {
   resolv_member *r = (resolv_member *) client_data;
 
-  if (!r || !r->chan || !r->nick) {
-    if (r->nick) free(r->nick);
+  if (!r || !r->chan || !r->host || !ips || !ips[0]) {
+    if (r) {
+      if (r->host) free(r->host);
+      free(r);
+    }
     return;
   }
 
   memberlist *m = NULL;
-  char *ps = NULL, *pe = NULL, s[UHOSTLEN + 1];
+  char *pe = NULL, s[UHOSTLEN + 1], user[15] = "";
 
-  if (ips && ips[0]) {
-    for (m = r->chan->channel.member; m && m->nick[0]; m = m->next) {
-      if (!rfc_casecmp(m->nick, r->nick)) {
-        if (!m->userip[0] && m->userhost[0]) {
-          ps = m->userhost;
-          pe = strchr(ps, '@');
-          if (pe) {
-            char user[15] = "";
+  /* Apply lookup results to all matching members by host */
+  for (m = r->chan->channel.member; m && m->nick[0]; m = m->next) {
+    if (!m->userip[0] && m->userhost[0]) {
+      pe = strchr(m->userhost, '@');
+      if (pe && !strcmp(pe + 1, r->host)) {
+        strlcpy(user, m->userhost, pe - m->userhost + 1);
+        simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, ips[0]);
+        if (!m->user) {
+          simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
+          m->user = get_user_by_host(s);
 
-            strlcpy(user, m->userhost, pe - ps + 1);
-            simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, ips[0]);
-            if (!m->user) {
-              simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
-              m->user = get_user_by_host(s);
-
-              /* Act on this lookup */
-              if (m->user)
-                check_this_user(m->user->handle, 0, NULL);
-            }
-            free(r->nick);
-            return;
-          }
+          /* Act on this lookup */
+          if (m->user)
+            check_this_user(m->user->handle, 0, NULL);
         }
       }
     }
   }
 
-  free(r->nick);
+  if (channel_rbl(r->chan))
+    resolve_to_rbl(r->chan, ips[0]);
+
+  free(r->host);
+  free(r);
   return;
 }
 
@@ -89,9 +91,100 @@ void resolve_to_member(struct chanset_t *chan, char *nick, char *host)
   resolv_member *r = (resolv_member *) my_calloc(1, sizeof(resolv_member));
 
   r->chan = chan;
-  r->nick = strdup(nick);
+  r->host = strdup(host);
 
   egg_dns_lookup(host, 20, resolv_member_callback, (void *) r);
+}
+
+/* RBL */
+static void resolve_rbl_callback(int id, void *client_data, const char *host, char **ips)
+{
+  resolv_member *r = (resolv_member *) client_data;
+
+  if (!r || !r->chan || !r->host || !ips || (ips && !ips[0])) {
+    if (r && r->chan && r->host) {
+      // Lookup from the next RBL
+      resolve_to_rbl(r->chan, r->host, r);
+    }
+    return;
+  }
+
+  sdprintf("RBL match for %s:%s: %s", r->chan->dname, r->host, ips[0]);
+
+  char s1[UHOSTLEN] = "";
+  simple_snprintf(s1, sizeof(s1), "*!*@%s", r->host);
+
+  bd::String reason = "Listed in RBL: " + *(r->server);
+
+  u_addmask('b', r->chan, s1, conf.bot->nick, reason.c_str(), now + (60 * (r->chan->ban_time ? r->chan->ban_time : 300)), 0);
+
+  if (me_op(r->chan)) {
+    do_mask(r->chan, r->chan->channel.ban, s1, 'b');
+
+    memberlist *m = NULL;
+    char *pe = NULL;
+
+    /* Apply lookup results to all matching members by host */
+    for (m = r->chan->channel.member; m && m->nick[0]; m = m->next) {
+      if (!m->user && !chan_sentkick(m) && m->userip[0]) {
+        pe = strchr(m->userip, '@');
+        if (pe && !strcmp(pe + 1, r->host)) {
+          m->flags |= SENTKICK;
+          dprintf(DP_MODE, "KICK %s %s :%s%s\n", r->chan->name, m->nick, bankickprefix, reason.c_str());
+        }
+      }
+    }
+  }
+
+  sdprintf("Done checking rbl (matched) for %s:%s", r->chan->dname, r->host);
+  delete r->servers;
+  delete r->server;
+  free(r->host);
+  free(r);
+  return;
+}
+
+
+void resolve_to_rbl(struct chanset_t *chan, char *host, resolv_member *r)
+{
+  if (!r) {
+    r = (resolv_member *) my_calloc(1, sizeof(resolv_member));
+
+    r->chan = chan;
+    r->host = strdup(host);
+    r->servers = new bd::String(rbl_servers);
+    r->server = new bd::String;
+  }
+
+  bd::String rbl_server = newsplit(*(r->servers), ',');
+
+  if (!rbl_server) {
+    sdprintf("Done checking rbl (no match) for %s:%s", chan->dname, host);
+    delete r->servers;
+    delete r->server;
+    free(r->host);
+    free(r);
+    return; //No more servers
+  }
+
+  *(r->server) = rbl_server;
+
+  size_t iplen = strlen(host) + 1 + rbl_server.length() + 1;
+  char *ip = (char *) my_calloc(1, iplen);
+  reverse_ip(host, ip);
+  strlcat(ip, ".", iplen);
+  strlcat(ip, rbl_server.c_str(), iplen);
+
+  if (egg_dns_lookup(ip, 20, resolve_rbl_callback, (void *) r, DNS_A) == -2) { //Already querying?
+    // Querying on clones will cause the callback to not be called and this nick will be ignored
+    // cleanup memory as this chain is not even starting.
+    delete r->servers;
+    delete r->server;
+    free(r->host);
+    free(r);
+  }
+
+  free(ip);
 }
 
 /* ID length for !channels.
@@ -1782,6 +1875,9 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
   //This bot is set +r, so resolve.
   if (!m->userip[0] && doresolv(chan))
     resolve_to_member(chan, nick, host);
+  else if (!me && !m->user && m->userip[0] && doresolv(chan) && channel_rbl(chan))
+    resolve_to_rbl(chan, host);
+
 
   get_user_flagrec(m->user, &fr, chan->dname, chan);
   
@@ -2475,9 +2571,11 @@ static int gotjoin(char *from, char *chname)
           m->tried_getuser = 1;
  
           if (!m->user && !m->userip[0] && doresolv(chan)) {
-            if (is_dotted_ip(host))
+            if (is_dotted_ip(host)) {
               strlcpy(m->userip, uhost, sizeof(m->userip));
-            else
+              if (channel_rbl(chan))
+                resolve_to_rbl(chan, host);
+            } else
               resolve_to_member(chan, nick, host);
           }
         }
@@ -2498,6 +2596,8 @@ static int gotjoin(char *from, char *chname)
 
         if (!m->userip[0] && doresolv(chan))
           resolve_to_member(chan, nick, host);
+        else if (!m->user && m->userip[0] && doresolv(chan) && channel_rbl(chan))
+          resolve_to_rbl(chan, host);
 
 //	m->flags |= STOPWHO;
 

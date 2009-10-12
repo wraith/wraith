@@ -30,6 +30,9 @@ TXT             16 text strings
 #define DNS_PTR		12
 #define DNS_AAAA	28
 
+#define DNS_LOOKUP_A    1
+#define DNS_LOOKUP_AAAA 2
+
 
 #define DNS_IPV4	1
 #define DNS_IPV6	2
@@ -43,12 +46,13 @@ int egg_dns_init(void);
 //int egg_dns_shutdown(void);
 
 void egg_dns_send(char *query, int len);
-int egg_dns_lookup(const char *host, interval_t timeout, dns_callback_t callback, void *client_data);
+int egg_dns_lookup(const char *host, interval_t timeout, dns_callback_t callback, void *client_data, int type = (DNS_LOOKUP_A|DNS_LOOKUP_AAAA));
 int egg_dns_reverse(const char *ip, interval_t timeout, dns_callback_t callback, void *client_data);
 int egg_dns_cancel(int id, int issue_callback);
 void tell_dnsdebug(int);
 void dns_cache_flush();
 bool valid_dns_id(int, int);
+int reverse_ip(const char *host, char *reverse);
 
 extern int		dns_sock, dns_idx;
 extern const char	*dns_ip;

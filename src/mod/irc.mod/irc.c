@@ -28,6 +28,7 @@
 #include "src/common.h"
 #define MAKING_IRC
 #include "irc.h"
+#include "src/adns.h"
 #include "src/match.h"
 #include "src/settings.h"
 #include "src/tandem.h"
