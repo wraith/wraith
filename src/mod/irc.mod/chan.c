@@ -40,6 +40,7 @@ typedef struct resolvstruct {
   struct chanset_t *chan;
   char *host;
   bd::String* servers;
+  bd::String* server;
 } resolv_member;
 
 static void resolv_member_callback(int id, void *client_data, const char *host, char **ips)
@@ -113,7 +114,9 @@ static void resolve_rbl_callback(int id, void *client_data, const char *host, ch
   char s1[UHOSTLEN] = "";
   simple_snprintf(s1, sizeof(s1), "*!*@%s", r->host);
 
-  u_addmask('b', r->chan, s1, conf.bot->nick, "listed in rbl", now + (60 * (r->chan->ban_time ? r->chan->ban_time : 300)), 0);
+  bd::String reason = "Listed in RBL: " + *(r->server);
+
+  u_addmask('b', r->chan, s1, conf.bot->nick, reason.c_str(), now + (60 * (r->chan->ban_time ? r->chan->ban_time : 300)), 0);
 
   if (me_op(r->chan)) {
     do_mask(r->chan, r->chan->channel.ban, s1, 'b', 0);
@@ -127,7 +130,7 @@ static void resolve_rbl_callback(int id, void *client_data, const char *host, ch
         pe = strchr(m->userip, '@');
         if (pe && !strcmp(pe + 1, r->host)) {
           m->flags |= SENTKICK;
-          dprintf(DP_MODE, "KICK %s %s :%s%s\n", r->chan->name, m->nick, bankickprefix, "listed in rbl");
+          dprintf(DP_MODE, "KICK %s %s :%s%s\n", r->chan->name, m->nick, bankickprefix, reason.c_str());
         }
       }
     }
@@ -135,6 +138,7 @@ static void resolve_rbl_callback(int id, void *client_data, const char *host, ch
 
   sdprintf("Done checking rbl (matched) for %s:%s", r->chan->dname, r->host);
   delete r->servers;
+  delete r->server;
   free(r->host);
   free(r);
   return;
@@ -149,6 +153,7 @@ void resolve_to_rbl(struct chanset_t *chan, char *host, resolv_member *r)
     r->chan = chan;
     r->host = strdup(host);
     r->servers = new bd::String(rbl_servers);
+    r->server = new bd::String;
   }
 
   bd::String rbl_server = newsplit(*(r->servers), ',');
@@ -156,10 +161,13 @@ void resolve_to_rbl(struct chanset_t *chan, char *host, resolv_member *r)
   if (!rbl_server) {
     sdprintf("Done checking rbl (no match) for %s:%s", chan->dname, host);
     delete r->servers;
+    delete r->server;
     free(r->host);
     free(r);
     return; //No more servers
   }
+
+  *(r->server) = rbl_server;
 
   size_t iplen = strlen(host) + 1 + rbl_server.length() + 1;
   char *ip = (char *) my_calloc(1, iplen);
@@ -171,6 +179,7 @@ void resolve_to_rbl(struct chanset_t *chan, char *host, resolv_member *r)
     // Querying on clones will cause the callback to not be called and this nick will be ignored
     // cleanup memory as this chain is not even starting.
     delete r->servers;
+    delete r->server;
     free(r->host);
     free(r);
   }
