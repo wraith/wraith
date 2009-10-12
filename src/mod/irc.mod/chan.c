@@ -51,6 +51,9 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
     return;
   }
 
+  if (channel_rbl(r->chan))
+    resolve_to_rbl(r->chan, ips[0]);
+
   memberlist *m = NULL;
   char *pe = NULL, s[UHOSTLEN + 1], user[15] = "";
 
@@ -69,8 +72,6 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
           if (m->user)
             check_this_user(m->user->handle, 0, NULL);
         }
-        if (channel_rbl(r->chan) && !m->user)
-          resolve_to_rbl(r->chan, ips[0]);
       }
     }
   }
@@ -109,7 +110,7 @@ static void resolve_rbl_callback(int id, void *client_data, const char *host, ch
 
   /* Apply lookup results to all matching members by host */
   for (m = r->chan->channel.member; m && m->nick[0]; m = m->next) {
-    if (!chan_sentkick(m) && m->userhost[0]) {
+    if (!m->user && !chan_sentkick(m) && m->userhost[0]) {
       pe = strchr(m->userhost, '@');
       if (pe && !strcmp(pe + 1, r->host)) {
         sdprintf("ips: %s", ips[0]);
@@ -142,7 +143,8 @@ void resolve_to_rbl(struct chanset_t *chan, char *host, bd::String* rservers)
 
   bd::String rbl_server = newsplit((*rservers), ',');
 
-  if (rbl_server == "") {
+  if (!rbl_server) {
+    sdprintf("Done checking rbl for %s:%s", chan->dname, host);
     delete rservers;
     return; //No more servers
   }
