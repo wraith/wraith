@@ -141,7 +141,7 @@ static char *getfullbinname(const char *argv_zero)
   if (!getcwd(cwd, PATH_MAX))
     fatal(STR("getcwd() failed"), 0);
 
-  if (cwd[strlen(cwd) - 1] == '/')
+  if (cwd[0] && cwd[strlen(cwd) - 1] == '/')
     cwd[strlen(cwd) - 1] = 0;
 
   p = bin;

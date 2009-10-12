@@ -1065,7 +1065,7 @@ int sockgets(char *s, int *len)
 	    socklist[i].inbuf = NULL;
 	  }
 	  /* Strip CR if this was CR/LF combo */
-	  if (s[strlen(s) - 1] == '\r')
+	  if (strlen(s) && s[strlen(s) - 1] == '\r')
 	    s[strlen(s) - 1] = 0;
 
           if (s[0] && socklist[i].encstatus)
@@ -1179,7 +1179,7 @@ int sockgets(char *s, int *len)
     memmove(xx, p + 1, strlen(p + 1) + 1);
 
 /*    if (s[0] && strlen(s) && (s[strlen(s) - 1] == '\r')) */
-    if (s[strlen(s) - 1] == '\r')
+    if (strlen(s) && s[strlen(s) - 1] == '\r')
       s[strlen(s) - 1] = 0;
     data = 1;			/* DCC_CHAT may now need to process a blank line */
 /* NO! */
