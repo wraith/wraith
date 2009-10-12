@@ -107,28 +107,25 @@ static void resolve_rbl_callback(int id, void *client_data, const char *host, ch
 
   sdprintf("RBL match for %s:%s: %s", r->chan->dname, r->host, ips[0]);
 
-  memberlist *m = NULL;
-  char *pe = NULL;
+  char s1[UHOSTLEN] = "";
+  simple_snprintf(s1, sizeof(s1), "*!*@%s", r->host);
 
-  /* Apply lookup results to all matching members by host */
-  for (m = r->chan->channel.member; m && m->nick[0]; m = m->next) {
-    if (!m->user && !chan_sentkick(m) && m->userhost[0]) {
-      pe = strchr(m->userhost, '@');
-      if (pe && !strcmp(pe + 1, r->host)) {
+  u_addmask('b', r->chan, s1, conf.bot->nick, "listed in rbl", now + (60 * (r->chan->ban_time ? r->chan->ban_time : 300)), 0);
 
-        char *s1 = NULL, s[UHOSTLEN] = "";
-        simple_snprintf(s, sizeof s, "%s!%s", m->nick, m->userhost);
-        s1 = strchr(s, '@');
-        s1 -= 3;
-        s1[0] = '*';
-        s1[1] = '!';
-        s1[2] = '*';
-        if (me_op(r->chan)) {
-          do_mask(r->chan, r->chan->channel.ban, s1, 'b');
+  if (me_op(r->chan)) {
+    do_mask(r->chan, r->chan->channel.ban, s1, 'b', 0);
+
+    memberlist *m = NULL;
+    char *pe = NULL;
+
+    /* Apply lookup results to all matching members by host */
+    for (m = r->chan->channel.member; m && m->nick[0]; m = m->next) {
+      if (!m->user && !chan_sentkick(m) && m->userip[0]) {
+        pe = strchr(m->userip, '@');
+        if (pe && !strcmp(pe + 1, r->host)) {
           m->flags |= SENTKICK;
           dprintf(DP_MODE, "KICK %s %s :%s%s\n", r->chan->name, m->nick, bankickprefix, "listed in rbl");
         }
-        u_addmask('b', r->chan, s1, conf.bot->nick, "listed in rbl", now + (60 * (r->chan->ban_time ? r->chan->ban_time : 300)), 0);
       }
     }
   }
