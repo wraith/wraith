@@ -119,7 +119,7 @@ static void resolve_rbl_callback(int id, void *client_data, const char *host, ch
   u_addmask('b', r->chan, s1, conf.bot->nick, reason.c_str(), now + (60 * (r->chan->ban_time ? r->chan->ban_time : 300)), 0);
 
   if (me_op(r->chan)) {
-    do_mask(r->chan, r->chan->channel.ban, s1, 'b', 0);
+    do_mask(r->chan, r->chan->channel.ban, s1, 'b');
 
     memberlist *m = NULL;
     char *pe = NULL;
