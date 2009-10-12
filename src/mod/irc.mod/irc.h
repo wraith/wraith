@@ -99,8 +99,10 @@ static void send_chan_who(int queue, struct chanset_t* chan);
 #define newexempt(chan, mask, who)      new_mask((chan)->channel.exempt, mask, who)
 #define newinvite(chan, mask, who)      new_mask((chan)->channel.invite, mask, who)
 void resolve_to_member(struct chanset_t *chan, char *nick, char *host);
-void resolve_to_rbl(struct chanset_t *chan, char *host, bd::String* = NULL);
-static void do_mask(struct chanset_t *chan, masklist *m, char *mask, char Mode);
+
+typedef struct resolvstruct resolv_member;
+void resolve_to_rbl(struct chanset_t *chan, char *host, struct resolvstruct *r = NULL);
+static void do_mask(struct chanset_t *chan, masklist *m, char *mask, char Mode, bool flush = 1);
 
 #endif /* MAKING_IRC */
 

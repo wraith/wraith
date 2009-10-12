@@ -47,7 +47,10 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
   resolv_member *r = (resolv_member *) client_data;
 
   if (!r || !r->chan || !r->host || !ips || !ips[0]) {
-    if (r && r->host) free(r->host);
+    if (r) {
+      if (r->host) free(r->host);
+      free(r);
+    }
     return;
   }
 
@@ -77,6 +80,7 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
   }
 
   free(r->host);
+  free(r);
   return;
 }
 
@@ -99,9 +103,8 @@ static void resolve_rbl_callback(int id, void *client_data, const char *host, ch
   if (!r || !r->chan || !r->host || !ips || (ips && !ips[0])) {
     if (r && r->chan && r->host) {
       // Lookup from the next RBL
-      resolve_to_rbl(r->chan, r->host, r->servers);
+      resolve_to_rbl(r->chan, r->host, r);
     }
-    if (r && r->host) free(r->host);
     return;
   }
 
@@ -129,30 +132,34 @@ static void resolve_rbl_callback(int id, void *client_data, const char *host, ch
       }
     }
   }
-  free(r->host);
+
+  sdprintf("Done checking rbl (matched) for %s:%s", r->chan->dname, r->host);
   delete r->servers;
+  free(r->host);
+  free(r);
   return;
 }
 
 
-void resolve_to_rbl(struct chanset_t *chan, char *host, bd::String* rservers)
+void resolve_to_rbl(struct chanset_t *chan, char *host, resolv_member *r)
 {
-  if (!rservers)
-    rservers = new bd::String(rbl_servers);
+  if (!r) {
+    r = (resolv_member *) my_calloc(1, sizeof(resolv_member));
 
-  bd::String rbl_server = newsplit((*rservers), ',');
-
-  if (!rbl_server) {
-    sdprintf("Done checking rbl for %s:%s", chan->dname, host);
-    delete rservers;
-    return; //No more servers
+    r->chan = chan;
+    r->host = strdup(host);
+    r->servers = new bd::String(rbl_servers);
   }
 
-  resolv_member *r = (resolv_member *) my_calloc(1, sizeof(resolv_member));
+  bd::String rbl_server = newsplit(*(r->servers), ',');
 
-  r->chan = chan;
-  r->host = strdup(host);
-  r->servers = rservers;
+  if (!rbl_server) {
+    sdprintf("Done checking rbl (no match) for %s:%s", chan->dname, host);
+    delete r->servers;
+    free(r->host);
+    free(r);
+    return; //No more servers
+  }
 
   size_t iplen = strlen(host) + 1 + rbl_server.length() + 1;
   char *ip = (char *) my_calloc(1, iplen);
@@ -160,7 +167,13 @@ void resolve_to_rbl(struct chanset_t *chan, char *host, bd::String* rservers)
   strlcat(ip, ".", iplen);
   strlcat(ip, rbl_server.c_str(), iplen);
 
-  egg_dns_lookup(ip, 20, resolve_rbl_callback, (void *) r, DNS_A);
+  if (egg_dns_lookup(ip, 20, resolve_rbl_callback, (void *) r, DNS_A) == -2) { //Already querying?
+    // Querying on clones will cause the callback to not be called and this nick will be ignored
+    // cleanup memory as this chain is not even starting.
+    delete r->servers;
+    free(r->host);
+    free(r);
+  }
 
   free(ip);
 }
