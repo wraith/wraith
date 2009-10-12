@@ -105,6 +105,8 @@ static void resolve_rbl_callback(int id, void *client_data, const char *host, ch
     return;
   }
 
+  sdprintf("RBL match for %s:%s: %s", r->chan->dname, r->host, ips[0]);
+
   memberlist *m = NULL;
   char *pe = NULL;
 
@@ -113,7 +115,6 @@ static void resolve_rbl_callback(int id, void *client_data, const char *host, ch
     if (!m->user && !chan_sentkick(m) && m->userhost[0]) {
       pe = strchr(m->userhost, '@');
       if (pe && !strcmp(pe + 1, r->host)) {
-        sdprintf("ips: %s", ips[0]);
 
         char *s1 = NULL, s[UHOSTLEN] = "";
         simple_snprintf(s, sizeof s, "%s!%s", m->nick, m->userhost);
