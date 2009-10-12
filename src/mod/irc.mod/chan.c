@@ -55,9 +55,6 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
     return;
   }
 
-  if (channel_rbl(r->chan))
-    resolve_to_rbl(r->chan, ips[0]);
-
   memberlist *m = NULL;
   char *pe = NULL, s[UHOSTLEN + 1], user[15] = "";
 
@@ -79,6 +76,9 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
       }
     }
   }
+
+  if (channel_rbl(r->chan))
+    resolve_to_rbl(r->chan, ips[0]);
 
   free(r->host);
   free(r);
