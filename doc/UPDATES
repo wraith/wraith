@@ -45,6 +45,9 @@
 * Cleanup cmd_botcmd restrictions.
 * Add 'chanset +rbl' which uses list of servers from 'set rbl-servers'. Only +r bots will enforce this.
 
+1.2.16.1
+* Fix linux compile errors
+
 1.2.16 - http://wraith.botpack.net/milestone/1.2.16
 * Add 'set altchars' so that alternative characters used for nicks can be changed. (fixes #418)
 * Fix channels added by cmd_slowjoin not having the user who added them associated with the channel.
