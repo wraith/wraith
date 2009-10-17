@@ -461,7 +461,7 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
       kill(parent, SIGCHLD);
       exit(1);
     }
-    argv[0] = "sh";
+    argv[0] = "/bin/sh";
     argv[1] = "-c";
     argv[2] = cmdline;
     argv[3] = NULL;
