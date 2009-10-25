@@ -146,6 +146,12 @@ static void cmd_nick(int idx, char *par)
 
 static void cmd_say(int idx, char *par)
 {
+  if (dcc[idx].simul >= 0) {
+    dprintf(idx, "Sorry, that cmd isn't available over botcmd.\n");
+    dprintf(idx, "Instead try: %sbotmsg %s %s\n", settings.dcc_prefix, conf.bot->nick, par);
+    return;
+  }
+
   if (!par[0]) {
     dprintf(idx, "Usage: say [channel] <message>\n");
     return;
