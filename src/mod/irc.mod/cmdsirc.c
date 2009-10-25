@@ -677,7 +677,7 @@ static void cmd_mmode(int idx, char *par)
     return;
   }
 
-  if (mode[0] == '+' && mode[1] == 'o' && !channel_fastop(chan)) {
+  if (mode[0] == '+' && mode[1] == 'o' && !channel_fastop(chan) && !cookies_disabled) {
     dprintf(idx, STR("Error: This channel is currently set -fastop.\n"));
     dprintf(idx, STR("Mass opping would result in missing op cookies.\n"));
     dprintf(idx, STR("Please chanset the channel +fastop first.\n"));
