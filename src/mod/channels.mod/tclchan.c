@@ -492,6 +492,11 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
           chan->knock_flags = FLOOD_EXEMPT_USER;
         else if (!strcasecmp("None", item[i]))
           chan->knock_flags = 0;
+        else {
+          if (result)
+            strlcpy(result, "channel knock only accepts Op|Voice|User|None", RESULT_LEN);
+          return ERROR;
+        }
       } else
         chan->knock_flags = atoi(item[i]);
     } else if (!strcmp(item[i], "flood-exempt")) {
@@ -508,6 +513,11 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
           chan->flood_exempt_mode = FLOOD_EXEMPT_VOICE;
         else if (!strcasecmp("None", item[i]))
           chan->flood_exempt_mode = 0;
+        else {
+          if (result)
+            strlcpy(result, "channel flood-exempt only accepts Op|Voice|None", RESULT_LEN);
+          return ERROR;
+        }
       } else
         chan->flood_exempt_mode = atoi(item[i]);
     } else if (!strcmp(item[i], "flood-lock-time")) {
