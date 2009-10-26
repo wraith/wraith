@@ -1616,23 +1616,39 @@ static int got341(char *from, char *msg)
 
 /* got 710: knock
  * <server> 710 <to> <channel> <from> :<reason?>
- * :irc.umich.edu 710 #wraith #wraith bryand!bryan@oper.blessed.net :has asked for an invite.
+ * ratbox :irc.umich.edu 710 #wraith #wraith bryand!bryan@oper.blessed.net :has asked for an invite.
+ * csircd :irc.nac.net 710 * bryan_!bryan@pluto.xzibition.com has knocked on channel #wraith for an invite
+ *
  */
 static int got710(char *from, char *msg)
 {
   char *chname = NULL;
   struct chanset_t *chan = NULL;
+  char buf[UHOSTLEN] = "", *uhost = buf, *nick;
 
   chname = newsplit(&msg);
+  if (!strcmp(chname, "*")) {
+    //csircd
+    uhost = newsplit(&msg);
+    //has knocked on channel #CHAN for an invite
+    newsplit(&msg); //has
+    newsplit(&msg); //knocked
+    newsplit(&msg); //on
+    newsplit(&msg); //channel
+    chname = newsplit(&msg);
+  } else {
+    //Hybrid/ratbox
+    newsplit(&msg); //not used
+    uhost = newsplit(&msg);
+  }
+
+  if (!strchr(CHANMETA, chname[0]) || !strchr(uhost, '!'))
+    return 0;
+
   chan = findchan(chname);
 
   if (!channel_knock(chan) || !dovoice(chan))
     return 0;
-
-  char buf[UHOSTLEN] = "", *uhost = buf, *nick;
-
-  newsplit(&msg); //not used
-  uhost = newsplit(&msg);
 
   struct userrec *u = get_user_by_host(uhost);
 
