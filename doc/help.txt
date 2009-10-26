@@ -452,9 +452,6 @@ See also: link
                        can be useful to make the bot leave a channel without
                        losing its settings, channel-specific user flags,
                        channel bans, and without affecting sharing.
-        $bknock$b          Bots which are +y will auto-invite any user who
-                       does a /knock on the channel.
-                       This will invite any user who is not set to auto-kick.
         $bmeankicks$b      Use mean/offensive kicks/bans in the channel.
         $bnodesynch$b      Allow non-ops to perform channel modes? This can stop
                        the bot from fighting with services such as ChanServ, or
