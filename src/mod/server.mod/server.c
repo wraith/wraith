@@ -69,7 +69,7 @@ char botuserhost[UHOSTLEN] = "";	/* bot's user@host (refreshed whenever the bot 
 					/* may not be correct user@host BUT it's how the server sees it */
 char botuserip[UHOSTLEN] = "";		/* bot's user@host with the ip. */
 
-static bool keepnick = 1;		/* keep trying to regain my intended
+bool keepnick = 1;		/* keep trying to regain my intended
 				   nickname? */
 static bool nick_juped = 0;	/* True if origbotname is juped(RPL437) (dw) */
 static bool jnick_juped = 0;    /* True if jupenick is juped */

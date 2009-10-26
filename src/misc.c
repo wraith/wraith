@@ -659,6 +659,7 @@ readsocks(const char *fname)
       simple_snprintf(nserv, sizeof(nserv), "%s:%d", dcc[servidx].host, dcc[servidx].port);
       add_server(nserv);
       curserv = 0;
+      keepnick = 0; /* Wait to change nicks until relinking, fixes nick/jupenick switching issues during restart */
       rehash_server(dcc[servidx].host, nick);
       if (cached_005)
         replay_cache(servidx, NULL);

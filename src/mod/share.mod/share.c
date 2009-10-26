@@ -1423,6 +1423,9 @@ static void share_read_stream(int idx, bd::Stream& stream) {
   updatebot(-1, dcc[idx].nick, '+', 0, 0, 0, NULL);
   send_sysinfo();
 
+  if (restarting && !keepnick)
+    keepnick = 1;
+
   /* Prevents the server connect from dumping JOIN #chan */
   restarting = 0;
 

@@ -82,7 +82,6 @@ bool use_354 = 0;                /* Use ircu's short 354 /who
                                  * responses. */
 static bool kick_fun = 0;
 static bool ban_fun = 1;
-static bool keepnick = 1;        /* Keep nick */
 static bool prevent_mixing = 1;  /* To prevent mixing old/new modes */
 static bool include_lk = 1;      /* For correct calculation
                                  * in real_add_mode. */
