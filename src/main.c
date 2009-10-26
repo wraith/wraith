@@ -334,7 +334,7 @@ static void dtx_arg(int& argc, char *argv[])
   int i = 0, checked_pass = 0;
   char *p = NULL;
 #ifdef DEBUG
-//  checked_pass = 1;
+  checked_pass = 1;
 #endif
   opterr = 0;
   while ((i = getopt(argc, argv, PARSE_FLAGS)) != EOF) {
