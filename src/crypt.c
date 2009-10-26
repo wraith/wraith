@@ -84,6 +84,13 @@ bd::String decrypt_string(const bd::String& key, const bd::String& data) {
   return decrypted;
 }
 
+int salted_sha1cmp(const char *salted_hash, const char *string) {
+  char* cmp = salted_sha1(string, &salted_hash[1]); //Pass in the salt from the given hash
+  int n = strcmp(salted_hash, cmp);
+  free(cmp);
+  return n;
+}
+
 char *salted_sha1(const char *in, const char* saltin)
 {
   char *tmp = NULL, buf[101] = "", *ret = NULL;

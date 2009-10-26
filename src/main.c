@@ -242,11 +242,14 @@ static int checkedpass = 0;
 static void checkpass() 
 {
   int (*hash_cmp) (const char *, const char *) = NULL;
+  size_t hashlen = strlen(settings.shellhash);
 
-  if (strlen(settings.shellhash) == 32)
+  if (hashlen == 32)
     hash_cmp = md5cmp;
-  else
+  else if (hashlen == 40)
     hash_cmp = sha1cmp;
+  else if (hashlen == 47)
+    hash_cmp = salted_sha1cmp;
 
 #define SHELL_PROMPT STR("Enter your binary password: ")
 #ifdef HAVE_GETPASSPHRASE

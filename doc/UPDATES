@@ -45,6 +45,7 @@
 * Cleanup cmd_botcmd restrictions.
 * Add 'chanset +rbl' which uses list of servers from 'set rbl-servers'. Only +r bots will enforce this.
 * Fix segfault with /KNOCK on csircd
+* SHELLHASH and Owner passwords in the PackConfig can now be salted-sha1. '+' + RAND(5) + '$' + SHA1(RAND(5) + 'password')
 
 1.2.16.1
 * Fix linux compile errors

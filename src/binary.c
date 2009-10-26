@@ -351,11 +351,12 @@ readcfg(const char *cfgfile, bool read_stdin)
       while (p && (strchr(LISTSEPERATORS, p[0])))
         *p++ = 0;
       if (p) {
+        size_t p_len = strlen(trim(p));
         if (!strcasecmp(buffer, STR("packname"))) {
           strlcpy(settings.packname, trim(p), sizeof settings.packname);
         } else if (!strcasecmp(buffer, STR("shellhash"))) {
-          if (strlen(trim(p)) != 40) {
-            fprintf(stderr, STR("\nSHELLHASH should be a SHA1 hash.\n"));
+          if (p_len != 40 && p_len != 47) {
+            fprintf(stderr, STR("\nSHELLHASH should be a SHA1 hash or salted-SHA1 hash.\n"));
             ADD_ERROR
           }
           strlcpy(settings.shellhash, trim(p), sizeof settings.shellhash);
