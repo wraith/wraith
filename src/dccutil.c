@@ -1092,12 +1092,8 @@ int check_cmd_pass(const char *cmd, char *pass)
         return 1;
       }
 
-      epass = salted_sha1(pass, &(cp->pass)[1]);
-      if (!strcmp(epass, cp->pass)) {
-        free(epass);
+      if (!salted_sha1cmp(cp->pass, pass))
         return 1;
-      }
-      free(epass);
       return 0;
     }
   return 0;

@@ -345,13 +345,10 @@ int u_pass_match(struct userrec *u, char *in)
     strlcpy(pass, in, sizeof(pass));
 
     /* Pass the salted pass in so the same salt can be used */
-    char* newpass = salted_sha1(pass, &cmp[1]);
+    int n = salted_sha1cmp(cmp, pass);
     OPENSSL_cleanse(pass, sizeof(pass));
-    if (!strcmp(cmp, newpass)) {
-      free(newpass);
+    if (!n)
       return 1;
-    }
-    free(newpass);
   }
   return 0;
 }
