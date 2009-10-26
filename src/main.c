@@ -611,8 +611,12 @@ static void core_hourly()
 
 static void core_halfhourly()
 {
-  if (conf.bot->hub)
+  if (conf.bot->hub) {
     write_userfile(-1);
+
+    if (link_cleartext)
+      putlog(LOG_WARN, "*", STR("'link_cleartext' currently enabled. This is a security risk. Disable with '%sset link_cleartext 0'"), settings.dcc_prefix);
+  }
 }
 
 static void startup_checks(int hack) {
