@@ -313,7 +313,7 @@ bool Tempfile::FindDir()
   /* The dirs we WANT to use aren't accessible, try a random one instead to get the job done. */
   clear_tmpdir = 0;
 
-  char *dirs[] = {
+  const char *dirs[] = {
     "/tmp/",
     "/usr/tmp/",
     "/var/tmp/",

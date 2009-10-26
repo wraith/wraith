@@ -560,8 +560,8 @@ check_sum(const char *fname, const char *cfgfile, bool read_stdin)
     OPENSSL_cleanse(hash, strlen(hash));
 
     if (n) {
-      unlink(fname);
-      fatal(STR("!! Invalid binary"), 0);
+      OPENSSL_cleanse(&settings, sizeof(settings_t));
+      CLEAR_SALTS;
     }
   }
 }

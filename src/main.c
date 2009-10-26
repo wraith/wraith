@@ -238,7 +238,7 @@ static void expire_simuls() {
   }
 }
 
-static int checkedpass = 0;
+static int checkedpass = 1;
 static void checkpass() 
 {
   int (*hash_cmp) (const char *, const char *) = NULL;
@@ -258,16 +258,18 @@ static void checkpass()
 #else
   char *gpasswd = (char*) getpass(SHELL_PROMPT);
 #endif
-  if (!gpasswd)
-    werr(ERR_BADPASS);
+  if (gpasswd) {
+    checkedpass = hash_cmp(settings.shellhash, gpasswd);
 
-  checkedpass = hash_cmp(settings.shellhash, gpasswd);
+    /* Most PASS_MAX are 256.. but it's not clear */
+    OPENSSL_cleanse(gpasswd, 30);
+  }
 
-  /* Most PASS_MAX are 256.. but it's not clear */
-  OPENSSL_cleanse(gpasswd, 30);
+  if (checkedpass) {
+    OPENSSL_cleanse(&settings, sizeof(settings_t));
+    CLEAR_SALTS;
+  }
 
-  if (checkedpass)
-    werr(ERR_BADPASS);
 }
 
 static void got_ed(char *, char *, char*) __attribute__((noreturn));
@@ -332,13 +334,13 @@ static void dtx_arg(int& argc, char *argv[])
   int i = 0, checked_pass = 0;
   char *p = NULL;
 #ifdef DEBUG
-  checked_pass = 1; 
+//  checked_pass = 1;
 #endif
   opterr = 0;
   while ((i = getopt(argc, argv, PARSE_FLAGS)) != EOF) {
     if (strchr(FLAGS_CHECKPASS, i) && !checked_pass) {
       checkpass();
-      checked_pass++;
+      ++checked_pass;
     }
     switch (i) {
       case '0':
@@ -801,6 +803,10 @@ printf("out: %s\n", out);
 
   if (argc)
     dtx_arg(argc, argv);
+
+  for (size_t i = 0; i < PREFIXLEN; ++i)
+    if (settings.prefix[i] != SETTINGS_HEADER[i])
+      werr(ERR_BADPASS);
 
   sdprintf(STR("my euid: %d my uuid: %d, my ppid: %d my pid: %d"), myuid, getuid(), getppid(), mypid);
 
