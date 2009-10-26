@@ -476,6 +476,29 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
         return ERROR;
       }
       chan->mop = deflag_translate(item[i]);
+    } else if (!strcmp(item[i], "knock")) {
+      i++;
+      if (i >= items) {
+        if (result)
+          strlcpy(result, "channel knock needs argument", RESULT_LEN);
+        return ERROR;
+      }
+      if (!str_isdigit(item[i])) {
+        if (!strcasecmp("Op",  item[i]))
+          chan->knock_flags = FLOOD_EXEMPT_OP;
+        else if (!strcasecmp("Voice", item[i]))
+          chan->knock_flags = FLOOD_EXEMPT_VOICE;
+        else if (!strcasecmp("User", item[i]))
+          chan->knock_flags = FLOOD_EXEMPT_USER;
+        else if (!strcasecmp("None", item[i]))
+          chan->knock_flags = 0;
+        else {
+          if (result)
+            strlcpy(result, "channel knock only accepts Op|Voice|User|None", RESULT_LEN);
+          return ERROR;
+        }
+      } else
+        chan->knock_flags = atoi(item[i]);
     } else if (!strcmp(item[i], "flood-exempt")) {
       i++;
       if (i >= items) {
@@ -490,6 +513,11 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
           chan->flood_exempt_mode = FLOOD_EXEMPT_VOICE;
         else if (!strcasecmp("None", item[i]))
           chan->flood_exempt_mode = 0;
+        else {
+          if (result)
+            strlcpy(result, "channel flood-exempt only accepts Op|Voice|None", RESULT_LEN);
+          return ERROR;
+        }
       } else
         chan->flood_exempt_mode = atoi(item[i]);
     } else if (!strcmp(item[i], "flood-lock-time")) {
@@ -599,10 +627,6 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
       chan->status |= CHAN_NOMASSJOIN;
     else if (!strcmp(item[i], "-nomassjoin"))
       chan->status &= ~CHAN_NOMASSJOIN;
-    else if (!strcmp(item[i], "+knock"))
-      chan->status |= CHAN_KNOCK;
-    else if (!strcmp(item[i], "-knock"))
-      chan->status &= ~CHAN_KNOCK;
     else if (!strcmp(item[i], "+meankicks"))
       chan->status |= CHAN_MEANKICKS;
     else if (!strcmp(item[i], "-meankicks"))
@@ -925,6 +949,7 @@ int channel_add(char *result, char *newname, char *options)
 /* Chanint template
  *  chan->temp = 0;
  */
+    chan->knock_flags = 0;
     chan->flood_lock_time = 120;
     chan->flood_exempt_mode = 0;
     chan->flood_pub_thr = gfld_chan_thr;

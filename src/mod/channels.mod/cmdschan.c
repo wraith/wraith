@@ -1182,7 +1182,7 @@ static void show_int(int idx, char *work, int *cnt, const char *desc, int state,
 #define SHOW_FLAG(name, state) show_flag(idx, work, &cnt, name, state, sizeof(work))
 #define SHOW_INT(desc, state, yes, no) show_int(idx, work, &cnt, desc, state, yes, no, sizeof(work))
 #define P_STR deflag == P_KICK ? "Kick" : (deflag == P_DEOP ? "Deop" : (deflag == P_DELETE ? "Remove" : NULL))
-#define F_STR chan->flood_exempt_mode == FLOOD_EXEMPT_OP ? "Op" : (chan->flood_exempt_mode == FLOOD_EXEMPT_VOICE ? "Voice" : NULL)
+#define F_STR(x) x == FLOOD_EXEMPT_OP ? "Op" : (x == FLOOD_EXEMPT_VOICE ? "Voice" : (x == FLOOD_EXEMPT_USER ? "User" : NULL))
 static void cmd_chaninfo(int idx, char *par)
 {
   char *chname = NULL, work[512] = "";
@@ -1242,7 +1242,6 @@ static void cmd_chaninfo(int idx, char *par)
     SHOW_FLAG("enforcebans", 	channel_enforcebans(chan));
     SHOW_FLAG("fastop",		channel_fastop(chan));
     SHOW_FLAG("inactive",	channel_inactive(chan));
-    SHOW_FLAG("knock",          channel_knock(chan));
     SHOW_FLAG("meankicks",	channel_meankicks(chan));
     SHOW_FLAG("nodesynch",	channel_nodesynch(chan));
     SHOW_FLAG("nomassjoin",	channel_nomassjoin(chan));
@@ -1281,9 +1280,10 @@ static void cmd_chaninfo(int idx, char *par)
     SHOW_INT("Closed-invite:", chan->closed_invite, NULL, "Don't!");
     SHOW_INT("Closed-Private:", chan->closed_private, NULL, "Don't!");
     SHOW_INT("Exempt-time: ", chan->exempt_time, NULL, "Forever");
-    SHOW_INT("Flood-exempt: ", chan->flood_exempt_mode, F_STR, "None");
+    SHOW_INT("Flood-exempt: ", chan->flood_exempt_mode, F_STR(chan->flood_exempt_mode), "None");
     SHOW_INT("Flood-lock-time: ", chan->flood_lock_time, NULL, "Don't");
     SHOW_INT("Invite-time: ", chan->invite_time, NULL, "Forever");
+    SHOW_INT("Knock: ", chan->knock_flags, F_STR(chan->knock_flags), "None");
     SHOW_INT("Limit raise (limit): ", chan->limitraise, NULL, "Disabled");
     deflag = chan->manop;
     SHOW_INT("Manop: ", chan->manop, P_STR, "Ignore");

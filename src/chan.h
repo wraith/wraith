@@ -25,6 +25,7 @@ typedef struct memstruct {
 
 #define FLOOD_EXEMPT_OP	1
 #define FLOOD_EXEMPT_VOICE 2
+#define FLOOD_EXEMPT_USER 3
 
 #define CHANMETA "#&!+"
 #define NICKVALID "[{}]^`|\\_-"
@@ -176,6 +177,7 @@ struct chanset_t {
   int mop;
   int voice_non_ident;
   interval_t auto_delay;
+  int knock_flags;
 /* Chanint template 
  *int temp;
  */
@@ -227,7 +229,7 @@ struct chanset_t {
 #define CHAN_CLOSED         BIT3	/* Only users +o can join */
 #define CHAN_BITCH          BIT4	/* be a tightwad with ops             */
 #define CHAN_TAKE 	    BIT5	/* When a bot gets opped, take the chan */
-#define CHAN_KNOCK 	    BIT6	/* Auto invite qualifying people when they knock */
+//#define CHAN_KNOCK 	    BIT6	/* Auto invite qualifying people when they knock */
 #define CHAN_BOTBITCH       BIT7        /* only let bots be opped? */
 #define CHAN_BACKUP         BIT8	/* Join the BOT_BACKUP bots when set */
 #define CHAN_SECRET         BIT9	/* don't advertise channel on botnet  */
@@ -300,7 +302,6 @@ struct chanset_t *findchan_by_dname(const char *name);
 #define channel_privchan(chan) (chan->status & CHAN_PRIVATE)
 #define channel_autoop(chan) (chan->status & CHAN_AUTOOP)
 #define channel_nomassjoin(chan) (chan->status & CHAN_NOMASSJOIN)
-#define channel_knock(chan) (chan->status & CHAN_KNOCK)
 #define channel_meankicks(chan) (chan->status & CHAN_MEANKICKS)
 #define channel_rbl(chan) (chan->status & CHAN_RBL)
 /* Chanflag template
