@@ -28,7 +28,7 @@
 #include <termios.h>
 
 settings_t settings = {
-  "\200\200\200\200\200\200\200\200\200\200\200\200\200\200\200",
+  SETTINGS_HEADER,
   /* -- STATIC -- */
   "", "", "", "", "", "", "", "", "", "",
   /* -- DYNAMIC -- */
