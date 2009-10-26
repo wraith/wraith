@@ -30,9 +30,9 @@ class EncryptedStream : public bd::Stream {
   protected:
 
   public:
-        EncryptedStream(const char* keyStr) : Stream(), key(bd::String(keyStr)), enc_flags(0) {};
-        EncryptedStream(bd::String& keyStr) : Stream(), key(keyStr), enc_flags(0) {};
-        EncryptedStream(EncryptedStream& stream) : Stream(stream), key(stream.key), enc_flags(0) {};
+        EncryptedStream(const char* keyStr) : Stream(), key(bd::String(keyStr)), enc_flags(ENC_DEFAULT) {};
+        EncryptedStream(bd::String& keyStr) : Stream(), key(keyStr), enc_flags(ENC_DEFAULT) {};
+        EncryptedStream(EncryptedStream& stream) : Stream(stream), key(stream.key), enc_flags(ENC_DEFAULT) {};
 
         void setFlags(const char _enc_flags) const { enc_flags = _enc_flags; }
         virtual int loadFile(const int fd);
