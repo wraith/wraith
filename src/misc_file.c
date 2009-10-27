@@ -303,7 +303,7 @@ bool Tempfile::FindDir()
 
   /* If this is a hub, use, "./tmp/" */
   if (conf.bots && conf.bots->nick && conf.bots->hub) {
-    simple_snprintf(tempdir, DIRMAX, "%s/tmp/", conf.binpath);
+    simple_snprintf(tempdir, DIRMAX, "%s/tmp/", dirname(binname));
     if (check_tempdir(0)) {
       looking = 0;
       return OK;

@@ -52,8 +52,6 @@ tellconf()
   sdprintf(STR("uid: %d\n"), conf.uid);
   sdprintf(STR("homedir: %s\n"), conf.homedir);
   sdprintf(STR("username: %s\n"), conf.username);
-  sdprintf(STR("binpath: %s\n"), replace(conf.binpath, conf.homedir, "~"));
-  sdprintf(STR("binname: %s\n"), conf.binname);
   sdprintf(STR("datadir: %s\n"), replace(conf.datadir, conf.homedir, "~"));
   sdprintf(STR("portmin: %d\n"), conf.portmin);
   sdprintf(STR("portmax: %d\n"), conf.portmax);
@@ -313,7 +311,6 @@ confedit()
   free_conf();
 
   readconf((const char *) tmpconf.file, 0);               /* read cleartext conf tmp into &settings */
-  expand_tilde(&conf.binpath);
   expand_tilde(&conf.datadir);
   unlink(tmpconf.file);
   conf_to_bin(&conf, 0, -1);
@@ -350,20 +347,6 @@ init_conf()
 #else
   conf.autocron = 1;
 #endif /* !CYGWIN_HACKS */
-#ifdef CYGWIN_HACKS
-  if (homedir())
-    conf.binpath = strdup(homedir());
-#else /* !CYGWIN_HACKS */
-  conf.binpath = strdup(dirname(binname));
-#endif /* CYGWIN_HACKS */
-  char *p = strrchr(binname, '/');
-
-  p++;
-
-  if (!strncmp(p, STR("wraith."), 7) && strchr(p, '-'))
-    conf.binname = strdup(STR("wraith"));
-  else
-    conf.binname = strdup(p);
 
   conf.features = 0;
   conf.portmin = 0;
@@ -566,10 +549,6 @@ free_conf()
     free(conf.datadir);
   if (conf.homedir)
     free(conf.homedir);
-  if (conf.binname)
-   free(conf.binname);
-  if (conf.binpath)
-    free(conf.binpath);
   init_conf();
 }
 
@@ -678,12 +657,6 @@ readconf(const char *fname, int bits)
       } else if (option == STR("datadir")) {        /* datadir */
         str_redup(&conf.datadir, line.c_str());
 
-      } else if (option == STR("binpath")) {        /* path that the binary should move to? */
-        str_redup(&conf.binpath, line.c_str());
-
-      } else if (option == STR("binname")) {        /* filename of the binary? */
-        str_redup(&conf.binname, line.c_str());
-
       } else if (option == STR("portmin")) {
         if (egg_isdigit(line[0]))
           conf.portmin = atoi(line.c_str());
@@ -786,20 +759,6 @@ writeconf(char *filename, int fd, int bits)
     *stream << buf.printf(STR("%s! homedir %s\n"), do_confedit == CONF_STATIC ? "" : "#", conf.homedir);
   } else 
     *stream << buf.printf(STR("! homedir %s\n"), conf.homedir ? conf.homedir : homedir(0) ? homedir(0) : "");
-
-  comment("\n# binpath needs to be full path unless it begins with '~', which uses 'homedir', ie, '~/'");
-
-  if (homedir() && strstr(conf.binpath, homedir())) {
-    p = replace(conf.binpath, homedir(), "~");
-    *stream << buf.printf(STR("! binpath %s\n"), p);
-  } else if (conf.homedir && strstr(conf.binpath, conf.homedir)) { /* Could be an older homedir */
-    p = replace(conf.binpath, conf.homedir, "~");
-    *stream << buf.printf(STR("! binpath %s\n"), p);
-  } else
-    *stream << buf.printf(STR("! binpath %s\n"), conf.binpath);
-
-  comment("# binname is relative to binpath, if you change this, you'll need to manually remove the old one from crontab.");
-  *stream << buf.printf(STR("! binname %s\n"), conf.binname);
 
   comment("");
 
@@ -980,8 +939,6 @@ bin_to_conf(bool error)
   str_redup(&conf.datadir, settings.datadir);
   if (settings.homedir[0])
     str_redup(&conf.homedir, settings.homedir);
-  str_redup(&conf.binpath, settings.binpath);
-  str_redup(&conf.binname, settings.binname);
   conf.portmin = atol(settings.portmin);
   conf.portmax = atol(settings.portmax);
   conf.autocron = atoi(settings.autocron);
@@ -989,7 +946,6 @@ bin_to_conf(bool error)
 
   prep_homedir(error);
   expand_tilde(&conf.datadir);
-  expand_tilde(&conf.binpath);
 
   /* PARSE/ADD BOTS */
   {
@@ -1028,7 +984,7 @@ bin_to_conf(bool error)
   if (!mkdir_p(conf.datadir) && error)
     werr(ERR_DATADIR);
 
-  str_redup(&conf.datadir, replace(datadir, conf.binpath, "."));
+  str_redup(&conf.datadir, replace(datadir, dirname(binname), "."));
 
   if (Tempfile::FindDir() == ERROR)
     werr(ERR_TMPSTAT);

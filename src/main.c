@@ -349,7 +349,6 @@ static void dtx_arg(int& argc, char *argv[])
         exit(2);
       case '4':
         readconf(optarg, CONF_ENC);
-        expand_tilde(&conf.binpath);
         expand_tilde(&conf.datadir);
         parseconf(0);
         conf_to_bin(&conf, 0, 6);		/* this will exit() in write_settings() */

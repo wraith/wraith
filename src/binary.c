@@ -32,7 +32,7 @@ settings_t settings = {
   /* -- STATIC -- */
   "", "", "", "", "", "", "", "", "", "",
   /* -- DYNAMIC -- */
-  "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "",
   /* -- PADDING */
   ""
 };
@@ -480,8 +480,6 @@ static void edpack(settings_t *incfg, const char *in_hash, int what)
   dofield(incfg->username);
   dofield(incfg->datadir);
   dofield(incfg->homedir);
-  dofield(incfg->binpath);
-  dofield(incfg->binname);
   dofield(incfg->portmin);
   dofield(incfg->portmax);
 
@@ -515,8 +513,6 @@ tellconfig(settings_t *incfg)
   dofield(incfg->username);
   dofield(incfg->datadir);
   dofield(incfg->homedir);
-  dofield(incfg->binpath);
-  dofield(incfg->binname);
   dofield(incfg->portmin);
   dofield(incfg->portmax);
 #undef dofield
@@ -669,13 +665,11 @@ void conf_to_bin(conf_t *in, bool move, int die)
   simple_snprintf(settings.portmin, sizeof(settings.portmin), "%d", in->portmin);
   simple_snprintf(settings.portmax, sizeof(settings.portmax), "%d", in->portmax);
 
-  strlcpy(settings.binname, in->binname, sizeof(settings.binname));
   if (in->username)
     strlcpy(settings.username, in->username, sizeof(settings.username));
   strlcpy(settings.datadir, in->datadir, sizeof(settings.datadir));
   if (in->homedir)
     strlcpy(settings.homedir, in->homedir, sizeof(settings.homedir));
-  strlcpy(settings.binpath, in->binpath, sizeof(settings.binpath));
   for (bot = in->bots; bot && bot->nick; bot = bot->next) {
     simple_snprintf(settings.bots, sizeof(settings.bots), STR("%s%s%s %s %s%s %s,"), 
                            settings.bots && settings.bots[0] ? settings.bots : "",

@@ -37,8 +37,6 @@ typedef struct conf_b {
   char *datadir;
   char *username;       /* shell username */
   char *homedir;        /* homedir */
-  char *binpath;        /* path to binary, ie: ~/ */
-  char *binname;        /* binary name, ie: .sshrc */
   port_t portmin;       /* for hubs, the reserved port range for incoming connections */
   port_t portmax;       /* for hubs, the reserved port range for incoming connections */
 } conf_t;
