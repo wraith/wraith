@@ -677,55 +677,6 @@ int email(char *subject, char *msg, int who)
   return 0;
 }
 
-void baduname(char *confhas, char *myuname) {
-  char *tmpFile = NULL;
-  int tosend = 0, make = 0;
-  size_t siz = strlen(tempdir) + 3 + 1;
-
-  tmpFile = (char *) my_calloc(1, siz);
-
-  simple_snprintf(tmpFile, siz, STR("%s/.un"), conf.datadir);
-  if (is_file(tmpFile)) {
-    struct stat ss;
-    time_t diff;
-
-    stat(tmpFile, &ss);
-    diff = now - ss.st_mtime;
-    if (diff >= 86400) {
-      tosend++;          		/* only send once a day */
-      unlink(tmpFile);		/* remove file */
-      make++;			/* make a new one at thie time. */
-    }
-  } else {
-    make++;
-  }
-
-  if (make) {
-    FILE *fp = NULL;
-    if ((fp = fopen(tmpFile, "w"))) {
-      fprintf(fp, "\n");
-      fflush(fp);
-      fclose(fp);
-      tosend++;           /* only send if we could write the file. */
-    }
-  }
-
-  if (tosend) {
-    struct utsname un;
-    char msg[1024] = "", subject[31] = "";
-
-    uname(&un);
-    simple_snprintf(subject, sizeof subject, STR("CONF/UNAME() mismatch notice"));
-    simple_snprintf(msg, sizeof msg, STR("This is an auto email from a wraith bot which has you in it's OWNER_EMAIL list..\n \nThe uname() output on this box has changed, probably due to a kernel upgrade...\nMy login is: %s\nMy binary is: %s\nLocalhub: %s\nConf   : %s\nUname(): %s\n \nThis email will only be sent once a day while this error is present.\nYou need to login to my shell (%s) and fix my local config.\n"), 
-                                  conf.username ? conf.username : "unknown", 
-                                  binname,
-                                  conf.bots && conf.bots->nick ? conf.bots->nick : origbotname,
-                                  confhas, myuname, un.nodename);
-    email(subject, msg, EMAIL_OWNERS);
-  }
-  free(tmpFile);
-}
-
 char *homedir(bool useconf)
 {
   static char homedir_buf[PATH_MAX] = "";
@@ -828,32 +779,6 @@ void expand_tilde(char **ptr)
     else
       fatal("Unforseen error expanding '~'", 0);
   }
-}
-
-char *my_uname()
-{
-  static char os_uname[250] = "";
-
-  if (!os_uname[0]) {
-    char *unix_n = NULL, *vers_n = NULL;
-    struct utsname un;
-
-    if (uname(&un) < 0) {
-      unix_n = "*unkown*";
-      vers_n = "";
-    } else {
-      unix_n = un.nodename;
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
-      vers_n = un.release;
-#elif defined(__linux__)
-      vers_n = un.version;
-#else
-# error "Don't know how to handle uname for this system!"
-#endif
-    }
-    simple_snprintf(os_uname, sizeof os_uname, "%s %s", unix_n, vers_n);
-  }
-  return os_uname;
 }
 
 #ifndef CYGWIN_HACKS

@@ -32,7 +32,7 @@ settings_t settings = {
   /* -- STATIC -- */
   "", "", "", "", "", "", "", "", "", "",
   /* -- DYNAMIC -- */
-  "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "",
   /* -- PADDING */
   ""
 };
@@ -476,10 +476,8 @@ static void edpack(settings_t *incfg, const char *in_hash, int what)
   /* -- DYNAMIC -- */
   dofield(incfg->bots);
   dofield(incfg->uid);
-  dofield(incfg->autouname);
   dofield(incfg->autocron);
   dofield(incfg->watcher);
-  dofield(incfg->uname);
   dofield(incfg->username);
   dofield(incfg->datadir);
   dofield(incfg->homedir);
@@ -514,10 +512,8 @@ tellconfig(settings_t *incfg)
   // -- DYNAMIC --
   dofield(incfg->bots);
   dofield(incfg->uid);
-  dofield(incfg->autouname);
   dofield(incfg->autocron);
   dofield(incfg->watcher);
-  dofield(incfg->uname);
   dofield(incfg->username);
   dofield(incfg->datadir);
   dofield(incfg->homedir);
@@ -673,15 +669,12 @@ void conf_to_bin(conf_t *in, bool move, int die)
   simple_snprintf(settings.uid, sizeof(settings.uid), "%d", in->uid);
   simple_snprintf(settings.watcher, sizeof(settings.watcher), "%d", in->watcher);
   simple_snprintf(settings.autocron, sizeof(settings.autocron), "%d", in->autocron);
-  simple_snprintf(settings.autouname, sizeof(settings.autouname), "%d", in->autouname);
   simple_snprintf(settings.portmin, sizeof(settings.portmin), "%d", in->portmin);
   simple_snprintf(settings.portmax, sizeof(settings.portmax), "%d", in->portmax);
 
   strlcpy(settings.binname, in->binname, sizeof(settings.binname));
   if (in->username)
     strlcpy(settings.username, in->username, sizeof(settings.username));
-  if (in->uname)
-    strlcpy(settings.uname, in->uname, sizeof(settings.uname));
   strlcpy(settings.datadir, in->datadir, sizeof(settings.datadir));
   if (in->homedir)
     strlcpy(settings.homedir, in->homedir, sizeof(settings.homedir));

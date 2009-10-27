@@ -24,10 +24,8 @@ typedef struct settings_struct {
   /* -- DYNAMIC -- */
   char bots[1025];
   char uid[17];
-  char autouname[17];        /* should we just auto update any changed in uname output? */
   char autocron[17];         /* should the bot auto crontab itself? */
   char watcher[17];          /* spawn a watcher pid to block ptrace? */
-  char uname[113];
   char username[49];       /* shell username */
   char datadir[1025];
   char homedir[1025];        /* homedir */
@@ -51,8 +49,8 @@ extern char s1_3[3],s1_2[3],s1_1[3],s2_7[3],s1_9[3],s1_13[3],s1_14[3],s2_2[3],s1
 sizeof(settings.owners) + sizeof(settings.hubs) + sizeof(settings.owneremail) + \
 sizeof(settings.salt1) + sizeof(settings.salt2) + sizeof(settings.dcc_prefix) + sizeof(settings.features)
 
-#define SIZE_CONF sizeof(settings.bots) + sizeof(settings.uid) + sizeof(settings.autouname) + \
-sizeof(settings.autocron) + sizeof(settings.watcher) + sizeof(settings.uname) + \
+#define SIZE_CONF sizeof(settings.bots) + sizeof(settings.uid) + \
+sizeof(settings.autocron) + sizeof(settings.watcher) + \
 sizeof(settings.username) + sizeof(settings.homedir) + sizeof(settings.binpath) + sizeof(settings.binname) + \
 sizeof(settings.portmin) + sizeof(settings.portmin) + sizeof(settings.datadir)
 

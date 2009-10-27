@@ -50,7 +50,6 @@ tellconf()
   sdprintf(STR("tempdir: %s\n"), replace(tempdir, conf.homedir, "~"));
   sdprintf(STR("features: %d\n"), conf.features);
   sdprintf(STR("uid: %d\n"), conf.uid);
-  sdprintf(STR("uname: %s\n"), conf.uname);
   sdprintf(STR("homedir: %s\n"), conf.homedir);
   sdprintf(STR("username: %s\n"), conf.username);
   sdprintf(STR("binpath: %s\n"), replace(conf.binpath, conf.homedir, "~"));
@@ -59,7 +58,6 @@ tellconf()
   sdprintf(STR("portmin: %d\n"), conf.portmin);
   sdprintf(STR("portmax: %d\n"), conf.portmax);
   sdprintf(STR("autocron: %d\n"), conf.autocron);
-  sdprintf(STR("autouname: %d\n"), conf.autouname);
   sdprintf(STR("watcher: %d\n"), conf.watcher);
   sdprintf(STR("bots:\n"));
   for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
@@ -354,7 +352,6 @@ init_conf()
 #else
   conf.autocron = 1;
 #endif /* !CYGWIN_HACKS */
-  conf.autouname = 0;
 #ifdef CYGWIN_HACKS
   if (homedir())
     conf.binpath = strdup(homedir());
@@ -374,7 +371,6 @@ init_conf()
   conf.portmin = 0;
   conf.portmax = 0;
   conf.uid = -1;
-  conf.uname = NULL;
   conf.username = NULL;
   conf.homedir = NULL;
   conf.datadir = strdup(STR("./..."));
@@ -566,8 +562,6 @@ free_conf()
   conf.bot = NULL;
   if (conf.localhub)
     free(conf.localhub);
-  if (conf.uname)
-    free(conf.uname);
   if (conf.username)
     free(conf.username);
   if (conf.datadir)
@@ -607,7 +601,7 @@ void prep_homedir(bool error)
 int
 parseconf(bool error)
 {
-  if (error && conf.uid == -1 && !conf.uname)
+  if (error && conf.uid == -1 && !conf.datadir)
     werr(ERR_NOTINIT);
 
   if (!conf.username)
@@ -623,17 +617,6 @@ parseconf(bool error)
   } else if (!conf.uid)
     conf.uid = myuid;
 
-  if (conf.uname && strcmp(conf.uname, my_uname()) && !conf.autouname) {
-    baduname(conf.uname, my_uname());       /* its not auto, and its not RIGHT, bail out. */
-    sdprintf(("wrong uname, conf: %s :: %s"), conf.uname, my_uname());
-    if (error)
-      werr(ERR_WRONGUNAME);
-  } else if (conf.uname && conf.autouname) {    /* if autouname, dont bother comparing, just set uname to output */
-    str_redup(&conf.uname, my_uname());
-  } else if (!conf.uname) { /* if not set, then just set it, wont happen again next time... */
-    conf.uname = strdup(my_uname());
-  }
-  
 #endif /* !CYGWIN_HACKS */
   return 0;
 }
@@ -671,17 +654,7 @@ readconf(const char *fname, int bits)
     sdprintf(STR("CONF LINE: %s"), line.c_str());
 // !strchr("_`|}][{*/#-+!abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOPWRSTUVWXYZ", line[0])) {
     /* - uid */
-    if (line[0] == '-') {
-      if (conf.uid == -1)
-        conf.uid = atoi(newsplit(line).c_str());
-
-      /* + uname */
-    } else if (line[0] == '+') {
-      if (!conf.uname)
-        conf.uname = strdup(newsplit(line).c_str());
-
-      /* ! is misc options */
-    } else if (line[0] == '!') {
+    if (line[0] == '!') {
       ++line;
       line.trim();
 
@@ -697,10 +670,6 @@ readconf(const char *fname, int bits)
       if (option == STR("autocron")) {      /* automatically check/create crontab? */
         if (egg_isdigit(line[0]))
           conf.autocron = atoi(line.c_str());
-
-      } else if (option == STR("autouname")) {      /* auto update uname contents? */
-        if (egg_isdigit(line[0]))
-          conf.autouname = atoi(line.c_str());
 
       } else if (option == STR("username")) {       /* shell username */
         str_redup(&conf.username, line.c_str());
@@ -728,9 +697,6 @@ readconf(const char *fname, int bits)
       } else if (option == STR("uid")) {    /* new method uid */
         if (str_isdigit(line.c_str()))
           conf.uid = atoi(line.c_str());
-
-      } else if (option == STR("uname")) {  /* new method uname */
-        str_redup(&conf.uname, line.c_str());
 
       } else if (option == STR("watcher")) {
         if (egg_isdigit(line[0]))
@@ -811,23 +777,6 @@ writeconf(char *filename, int fd, int bits)
   } else
     *stream << buf.printf(STR("! uid %d\n"), conf.uid);
 
-  if (!conf.uname || (conf.uname && conf.autouname && strcmp(conf.uname, my_uname()))) {
-    autowrote = 1;
-    if (conf.uname)
-      comment("# autouname is ON");
-    else
-      comment("# Automatically updated empty uname");
-
-    *stream << buf.printf(STR("! uname %s\n"), my_uname());
-    if (conf.uname)
-      *stream << buf.printf(STR("#! uname %s\n"), conf.uname);
-  } else if (conf.uname && !conf.autouname && strcmp(conf.uname, my_uname())) {
-    conf_com();
-    *stream << buf.printf(STR("%s! uname %s\n"), do_confedit == CONF_AUTO ? "" : "#", my_uname());
-    *stream << buf.printf(STR("%s! uname %s\n"), do_confedit == CONF_STATIC ? "" : "#", conf.uname);
-  } else
-    *stream << buf.printf(STR("! uname %s\n"), conf.uname);
-
   comment("");
 
   if (conf.username && my_username() && strcmp(conf.username, my_username())) {
@@ -887,13 +836,6 @@ writeconf(char *filename, int fd, int bits)
   if (conf.autocron == 0) {
     comment("# Automatically add the bot to crontab?");
     *stream << buf.printf(STR("! autocron %d\n"), conf.autocron);
-
-    comment("");
-  }
-
-  if (conf.autouname) {
-    comment("# Automatically update 'uname' if it changes? (DANGEROUS)");
-    *stream << buf.printf(STR("! autouname %d\n"), conf.autouname);
 
     comment("");
   }
@@ -1041,7 +983,6 @@ bin_to_conf(bool error)
   conf.uid = atol(settings.uid);
   if (settings.username[0])
     str_redup(&conf.username, settings.username);
-  str_redup(&conf.uname, settings.uname); 
   str_redup(&conf.datadir, settings.datadir);
   if (settings.homedir[0])
     str_redup(&conf.homedir, settings.homedir);
@@ -1049,7 +990,6 @@ bin_to_conf(bool error)
   str_redup(&conf.binname, settings.binname);
   conf.portmin = atol(settings.portmin);
   conf.portmax = atol(settings.portmax);
-  conf.autouname = atoi(settings.autouname);
   conf.autocron = atoi(settings.autocron);
   conf.watcher = atoi(settings.watcher);
 

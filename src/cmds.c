@@ -1745,7 +1745,6 @@ static void cmd_conf(int idx, char *par)
         set++;
         save = 1;
 /*        if (!strcasecmp(what, "uid"))            conf.uid = atoi(par);
-        else if (!strcasecmp(what, "uname"))     str_redup(&conf.uname, par);
         else if (!strcasecmp(what, "username"))  str_redup(&conf.username, par);
 */
         if (!strcasecmp(what, "homedir"))   str_redup(&conf.homedir, par);
@@ -1755,7 +1754,6 @@ static void cmd_conf(int idx, char *par)
         else if (!strcasecmp(what, "portmin"))   conf.portmin = atoi(par);
         else if (!strcasecmp(what, "portmax"))   conf.portmax = atoi(par);
         else if (!strcasecmp(what, "autocron"))  conf.autocron = atoi(par);
-        else if (!strcasecmp(what, "autouname")) conf.autouname = atoi(par);
         else if (!strcasecmp(what, "watcher"))  conf.watcher = atoi(par);
         else { 
           set--;
@@ -1768,7 +1766,6 @@ static void cmd_conf(int idx, char *par)
       const char *ss = set ? "Set: " : "";
       
 /*      if (!what || !strcasecmp(what, "uid"))        dprintf(idx, "%suid: %d\n", ss, conf.uid);
-      if (!what || !strcasecmp(what, "uname"))      dprintf(idx, "%suname: %s\n", ss, conf.uname);
       if (!what || !strcasecmp(what, "username"))   dprintf(idx, "%susername: %s\n", ss, conf.username);
 */
       if (!what || !strcasecmp(what, "homedir"))    dprintf(idx, "%shomedir: %s\n", ss, conf.homedir);
@@ -1778,7 +1775,6 @@ static void cmd_conf(int idx, char *par)
       if (!what || !strcasecmp(what, "portmin"))    dprintf(idx, "%sportmin: %d\n", ss, conf.portmin);
       if (!what || !strcasecmp(what, "portmax"))    dprintf(idx, "%sportmax: %d\n", ss, conf.portmax);
       if (!what || !strcasecmp(what, "autocron"))   dprintf(idx, "%sautocron: %d\n", ss, conf.autocron);
-      if (!what || !strcasecmp(what, "autouname"))  dprintf(idx, "%sautouname: %d\n", ss, conf.autouname);
       if (!what || !strcasecmp(what, "watcher"))    dprintf(idx, "%swatcher: %d\n", ss, conf.watcher);
     }
   }

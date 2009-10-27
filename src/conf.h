@@ -32,11 +32,9 @@ typedef struct conf_b {
   conf_bot *bot;        /* single bot (me) */
   int features;		/* Pack features (take, mdop, beta... etc..) */
   int uid;
-  int autouname;        /* should we just auto update any changed in uname output? */
   int autocron;         /* should the bot auto crontab itself? */
   int watcher;		/* spawn a watcher pid to block ptrace? */
   char *localhub;	/* my localhub */
-  char *uname;
   char *datadir;
   char *username;       /* shell username */
   char *homedir;        /* homedir */
