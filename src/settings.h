@@ -33,7 +33,7 @@ typedef struct settings_struct {
   char portmin[17];       /* for hubs, the reserved port range for incoming connections */
   char portmax[17];       /* for hubs, the reserved port range for incoming connections */
   /* -- PADDING -- */
-  char padding[9];        // (16 - (sizeof(settings_t) % 16)) % 16]
+  char padding[12];        // (16 - (sizeof(settings_t) % 16)) % 16]
 } settings_t;
 
 #define SALT1 {s1_1[0],s1_1[1],s1_5[0],s1_5[1],s1_8[0],s1_8[1],s1_4[0],s1_9[1],s1_2[0],s1_13[0],s1_6[0],s1_6[1],s1_7[0],s1_7[1],s1_3[0],s1_13[1],s1_16[1],s1_4[1],s1_15[0],s1_10[1],s1_14[0],s1_14[1],s1_12[0],s1_12[1],s1_2[1],s1_3[1],s1_11[0],s1_11[1],s1_10[0],s1_15[1],s1_16[0],s1_9[0],'\0'}
