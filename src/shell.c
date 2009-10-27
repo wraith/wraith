@@ -682,32 +682,17 @@ char *homedir(bool useconf)
   static char homedir_buf[PATH_MAX] = "";
 
   if (!homedir_buf[0]) {
-    char tmp[DIRMAX] = "";
-
     if (conf.homedir && useconf)
-      simple_snprintf(tmp, sizeof tmp, "%s", conf.homedir);
+      simple_snprintf(homedir_buf, sizeof homedir_buf, "%s", conf.homedir);
     else {
 #ifdef CYGWIN_HACKS
-      simple_snprintf(tmp, sizeof tmp, "%s", dirname(binname));
+      simple_snprintf(homedir_buf, sizeof homedir_buf, "%s", dirname(binname));
 #else /* !CYGWIN_HACKS */
-      struct passwd *pw = NULL;
- 
-      ContextNote(STR("getpwuid()"));
-      pw = getpwuid(myuid);
-      if (pw)
-        simple_snprintf(tmp, sizeof tmp, "%s", pw->pw_dir);
-      ContextNote(STR("getpwuid(): Success"));
+    char *home = getenv("HOME");
+    if (home && strlen(home))
+      strlcpy(homedir_buf, home, sizeof(homedir_buf));
 #endif /* CYGWIN_HACKS */
     }
-    ContextNote(STR("realpath()"));
-    if (tmp[0]) {
-      if (!realpath(tmp, homedir_buf)) { /* this will convert lame home dirs of /home/blah->/usr/home/blah */
-        homedir_buf[0] = 0;
-        return NULL;
-      }
-      homedir_buf[DIRMAX < PATH_MAX ? DIRMAX - 1 : PATH_MAX - 1] = 0;
-    }
-    ContextNote(STR("realpath(): Success"));
   }
   return homedir_buf[0] ? homedir_buf : NULL;
 }
