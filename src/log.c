@@ -292,7 +292,8 @@ void putlog(int type, const char *chname, const char *format, ...)
 
   if (conf.bot && conf.bot->hub) {
     char stamp[34] = "";
-    struct tm *t = gmtime(&now);
+    time_t synced = now + timesync;
+    struct tm *t = gmtime(&synced);
 
     strftime(stamp, sizeof(stamp), LOG_TS, t);
     /* Place the timestamp in the string to be printed */
