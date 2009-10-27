@@ -762,70 +762,6 @@ void expand_tilde(char **ptr)
   }
 }
 
-#ifndef CYGWIN_HACKS
-char *move_bin(const char *ipath, const char *file, bool run)
-{
-  char *path = strdup(ipath);
-
-  expand_tilde(&path);
-
-  /* move the binary to the correct place */
-  static char newbin[DIRMAX] = "";
-  char real[PATH_MAX] = "";
-
-  simple_snprintf(newbin, sizeof newbin, "%s%s%s", path, path[strlen(path) - 1] == '/' ? "" : "/", file);
-
-  ContextNote(STR("realpath()"));
-  if (!realpath(binname, real))            /* get the realpath of binname */
-    fatal(STR("Unable to determine binary path."), 0);
-  real[(DIRMAX < PATH_MAX ? DIRMAX : PATH_MAX) - 1] = 0;
-  ContextNote(STR("realpath(): Success"));
-  /* running from wrong dir, or wrong bin name.. lets try to fix that :) */
-  sdprintf(STR("binname: %s"), binname);
-  sdprintf(STR("newbin: %s"), newbin);
-  sdprintf(STR("real: %s"), real);
-  if (strcmp(binname, newbin) && strcmp(newbin, real)) {              /* if wrong path and new path != current */
-    bool ok = 1;
-
-    sdprintf(STR("wrong dir, is: %s :: %s"), binname, newbin);
-
-    unlink(newbin);
-    if (copyfile(binname, newbin))
-      ok = 0;
-
-    if (ok && !can_stat(newbin)) {
-       unlink(newbin);
-       ok = 0;
-    }
-
-    if (ok && fixmod(newbin)) {
-        unlink(newbin);
-        ok = 0;
-    }
-
-    if (ok) {
-      sdprintf(STR("Binary successfully moved to: %s"), newbin);
-      unlink(binname);
-      if (run) {
-        simple_snprintf(newbin, sizeof newbin, "%s%s%s", 
-                        path, path[strlen(path) - 1] == '/' ? "" : "/", shell_escape(file));
-        if (system(newbin) == -1) {
-          printf("Unable to automatically start new binary.\n");
-          exit(1);
-        }
-        sdprintf(STR("exiting to let new binary run..."));
-        exit(0);
-      }
-    } else {
-      if (run)
-        werr(ERR_WRONGBINDIR);
-      sdprintf(STR("Binary move failed to: %s"), newbin);
-      return binname;
-    }
-  }
-  return newbin;
-}
-
 void check_crontab()
 {
   int i = 0;
@@ -858,6 +794,7 @@ void crontab_del() {
   unlink(tmpFile);
 }
 
+#ifndef CYGWIN_HACKS
 int crontab_exists() {
   char buf[2048] = "", *out = NULL;
 

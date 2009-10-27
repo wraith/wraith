@@ -652,10 +652,6 @@ static void startup_checks(int hack) {
   if (!can_stat(binname))
    werr(ERR_BINSTAT);
 
-#ifndef CYGWIN_HACKS
-  move_bin(conf.binpath, conf.binname, 1);
-#endif /* !CYGWIN_HACKS */
-
   fill_conf_bot();
 //  if (((!conf.bot || !conf.bot->nick) || (!conf.bot->hub && conf.bot->localhub)) && !used_B) {
   if (!used_B) {

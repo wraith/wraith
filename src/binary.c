@@ -687,12 +687,7 @@ void conf_to_bin(conf_t *in, bool move, int die)
                            bot->net.ip6 ? bot->net.ip6 : "");
     }
 
-#ifndef CYGWIN_HACKS
-  if (move)
-    newbin = move_bin(in->binpath, in->binname, 0);
-  else
-#endif /* !CYGWIN_HACKS */
-    newbin = binname;
+  newbin = binname;
 //  tellconfig(&settings); 
   write_settings(newbin, -1, 1);
 

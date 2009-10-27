@@ -45,9 +45,6 @@ void check_mypid();
 void clear_tmp();
 char *homedir(bool = 1);
 char *my_username();
-#ifndef CYGWIN_HACKS
-char *move_bin(const char *, const char *, bool);
-#endif /* !CYGWIN_HACKS */
 void expand_tilde(char **);
 int email(char *, char *, int);
 int shell_exec(char *, char *, char **, char **);
