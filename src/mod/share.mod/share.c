@@ -1463,6 +1463,7 @@ stream_send_users(int idx)
     ulsend(idx, buf.c_str(), buf.length());
   }
   dprintf(idx, "s le\n");
+  putlog(LOG_BOTS, "*", "Completed userfile transfer to %s.", dcc[idx].nick);
 }
 
 static void
