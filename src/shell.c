@@ -720,13 +720,9 @@ char *my_username()
 #ifdef CYGWIN_HACKS
     simple_snprintf(username, sizeof username, "cygwin");
 #else /* !CYGWIN_HACKS */
-    struct passwd *pw = NULL;
-
-    ContextNote(STR("getpwuid()"));
-    pw = getpwuid(myuid);
-    ContextNote(STR("getpwuid(): Success"));
-    if (pw)
-      strlcpy(username, pw->pw_name, sizeof(username));
+    char *user = getenv("USER");
+    if (user && strlen(user))
+      strlcpy(username, user, sizeof(username));
 #endif /* CYGWIN_HACKS */
   }
   return username[0] ? username : NULL;
