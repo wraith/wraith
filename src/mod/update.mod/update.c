@@ -78,7 +78,8 @@ static void update_ufno(int idx, char *par)
 static void update_ufyes(int idx, char *par)
 {
   if (dcc[idx].status & STAT_OFFEREDU) {
-    if (strstr(par, "stream")) {
+    // Disable update streaming until it is deemed necesary - way too slow currently
+    if (0 && strstr(par, "stream")) {
       start_sending_binary(idx, 1);
     } else {
       start_sending_binary(idx, 0);
