@@ -433,7 +433,7 @@ static void dtx_arg(int& argc, char *argv[])
 #ifdef DEBUG
 	printf(STR("pack: %d conf: %d settings_t: %d prefix: %d pad: %d needed padding: %d\n"), SIZE_PACK, SIZE_CONF, sizeof(settings_t), PREFIXLEN, SIZE_PAD, (16 - ((sizeof(settings_t) - sizeof(settings.padding)) % 16)) % 16);
 #endif
-        if (settings.datadir[0]) {
+        if (settings.homedir[0]) {
           ++sdebug;
           bin_to_conf();
         }
@@ -622,8 +622,8 @@ static void core_halfhourly()
 
 static void startup_checks(int hack) {
   /* for compatability with old conf files 
-   * only check/use conf file if it exists and settings.datadir is empty.
-   * if settings.datadir is NOT empty, just erase the conf file if it exists
+   * only check/use conf file if it exists and settings.homedir is empty.
+   * if settings.homedir is NOT empty, just erase the conf file if it exists
    * otherwise, assume we're working only with the struct */
 
 #ifdef CYGWIN_HACKS
@@ -636,7 +636,7 @@ static void startup_checks(int hack) {
 
 #ifndef CYGWIN_HACKS
   /* Only error out with missing homedir when we aren't editing the binary */
-  if (settings.datadir[0])
+  if (settings.homedir[0])
     bin_to_conf(do_confedit ? 0 : 1);		/* read our memory from settings[] into conf[] */
 
   if (do_confedit)

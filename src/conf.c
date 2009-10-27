@@ -578,7 +578,7 @@ void prep_homedir(bool error)
 int
 parseconf(bool error)
 {
-  if (error && conf.uid == -1 && !conf.datadir)
+  if (error && conf.uid == -1 && !conf.homedir)
     werr(ERR_NOTINIT);
 
   if (!conf.username)
