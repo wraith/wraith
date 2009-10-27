@@ -48,6 +48,7 @@
 * SHELLHASH and Owner passwords in the PackConfig can now be salted-sha1. '+' + RAND(5) + '$' + SHA1(RAND(5) + 'password')
 * Fix restart causing bot to change nick (this was a regression in jupenick)
 * Removed 'chanset +knock' and replaced with 'chanset knock (Op|Voice|User)', see 'help chaninfo'
+* Default log timestamp now includes seconds
 
 1.2.16.1
 * Fix linux compile errors

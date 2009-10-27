@@ -9,7 +9,7 @@
  * Popular times might be "[%H:%M]" (hour, min), or "[%H:%M:%S]" (hour, min, sec)
  * Read `man strftime' for more formatting options.  Keep it below 32 chars.
  */
-#define LOG_TS "[%H:%M]"
+#define LOG_TS "[%H:%M:%S]"
 
 
 void restart(int);
