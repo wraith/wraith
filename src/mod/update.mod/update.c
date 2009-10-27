@@ -37,6 +37,9 @@
 #include "src/binds.h"
 #include "src/egg_timer.h"
 #include "src/misc.h"
+#include "src/EncryptedStream.h"
+#include <bdlib/src/String.h>
+#include <bdlib/src/base64.h>
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -49,13 +52,15 @@
 
 
 /* Prototypes */
-static void start_sending_binary(int);
+static void start_sending_binary(int, bool);
+void finish_update_stream(int idx, bd::Stream& stream);
 
 #include "update.h"
 
 extern struct dcc_table DCC_FORK_SEND, DCC_GET;
 
 
+static bd::Stream stream_in;
 int bupdating = 0;
 int updated = 0;
 
@@ -73,7 +78,11 @@ static void update_ufno(int idx, char *par)
 static void update_ufyes(int idx, char *par)
 {
   if (dcc[idx].status & STAT_OFFEREDU) {
-    start_sending_binary(idx);
+    if (strstr(par, "stream")) {
+      start_sending_binary(idx, 1);
+    } else {
+      start_sending_binary(idx, 0);
+    }
   }
 }
 
@@ -92,7 +101,7 @@ static void update_fileq(int idx, char *par)
     }
   }
 
-  dprintf(idx, "sb uy\n");
+  dprintf(idx, "sb uy stream\n");
 }
 
 /* us <ip> <port> <length>
@@ -145,9 +154,29 @@ static void update_ufsend(int idx, char *par)
   }
 }
 
+static void update_stream_line(int idx, char *par) {
+  char *size = newsplit(&par);
+
+  stream_in << bd::base64Decode(bd::String(par, atoi(size)));
+}
+
+static void update_stream_start(int idx, char *par) {
+  putlog(LOG_BOTS, "*", "Downloading updated binary from %s", dcc[idx].nick);
+  dcc[idx].status |= STAT_GETTINGU;
+  stream_in.clear();
+}
+
+static void update_stream_end(int idx, char *par) {
+  stream_in.seek(0, SEEK_SET);
+  finish_update_stream(idx, stream_in);
+}
+
 /* Note: these MUST be sorted. */
 static botcmd_t C_update[] =
 {
+  {"l", 	update_stream_line, 0},
+  {"le", 	update_stream_end, 0},
+  {"ls", 	update_stream_start, 0},
   {"u?",	update_fileq, 0},
   {"un",	update_ufno, 0},
   {"us",	update_ufsend, 0},
@@ -203,47 +232,20 @@ void updatein(int idx, char *msg)
   }
 }
 
-
-void finish_update(int idx)
+void finish_update_stream(int idx, bd::Stream& stream)
 {
   char buf[1024] = "", *buf2 = NULL;
 
-/* NO
-  ic = 0;
-  next:;
-  ic++;
-  if (ic > 5) {
-    putlog(LOG_MISC, "*", "COULD NOT UNCOMPRESS BINARY");
-    return;
-  }
-  result = 0;
-  result = is_compressedfile(dcc[idx].u.xfer->filename);
-  if (result == COMPF_COMPRESSED) {
-    uncompress_file(dcc[idx].u.xfer->filename);
-    usleep(1000 * 500);
-    result = is_compressedfile(dcc[idx].u.xfer->filename);
-    if (result == COMPF_COMPRESSED)
-      goto next;
-  }
-*/
-  {
-    FILE *f = NULL;
-    f = fopen(dcc[idx].u.xfer->filename, "rb");
-    fseek(f, 0, SEEK_END);
-    putlog(LOG_DEBUG, "*", "Update binary is %li bytes and its length: %lu status: %lu", ftell(f), dcc[idx].u.xfer->length, dcc[idx].u.xfer->length);
-    fclose(f);
-  }
+  char rand[7] = "";
+  make_rand_str(rand, sizeof(rand) - 1, 0);
+  simple_snprintf(buf, sizeof(buf), "%s/.update-%s", conf.binpath, rand);
 
-  strlcpy(buf, conf.binpath, sizeof(buf));
-  strlcat(buf, strrchr(dcc[idx].u.xfer->filename, '/'), sizeof(buf));
-
-  movefile(dcc[idx].u.xfer->filename, buf); 
+  stream.writeFile(buf);
   fixmod(buf);
 
-  strlcpy(buf, strrchr(buf, '/'), sizeof(buf));
-  buf2 = buf;
-  buf2++;
+  buf2 = strrchr(buf, '/') + 1;
 
+  putlog(LOG_DEBUG, "*", "Update binary is %zu bytes.", stream.length());
   putlog(LOG_MISC, "*", "Updating with binary: %s", buf2);
   
   if (updatebin(0, buf2, 120))
@@ -252,7 +254,23 @@ void finish_update(int idx)
     updated = 1;
 }
 
-static void start_sending_binary(int idx)
+static void
+ulsend(int idx, const char* data, size_t datalen)
+{
+  char buf[1400] = "";
+
+  size_t len = simple_snprintf(buf, sizeof(buf), "sb l %d %s", datalen-1, data);/* -1 for newline */
+  tputs(dcc[idx].sock, buf, len);
+}
+
+void finish_update(int idx) {
+  bd::Stream stream;
+  stream.loadFile(dcc[idx].u.xfer->filename);
+  unlink(dcc[idx].u.xfer->filename);
+  finish_update_stream(idx, stream);
+}
+
+static void start_sending_binary(int idx, bool streamable)
 {
   /* module_entry *me; */
   char update_file[51] = "", update_fpath[DIRMAX] = "", *sysname = NULL;
@@ -288,45 +306,33 @@ static void start_sending_binary(int idx)
     return;
   }
 
-#ifdef old
-  /* copy the binary to our tempdir and send that one. */
-  //simple_snprintf(tmpFile, sizeof(tmpFile), "%s.%s", tempdir, update_file);
-  unlink(tmpFile);
-  copyfile(update_fpath, tmpFile);
-#endif
-
-/* NO
-  ic = 0;
-  next:;
-  ic++;
-  if (ic > 5) {
-    putlog(LOG_MISC, "*", "COULD NOT COMPRESS BINARY");
-    goto end;
-  }
-  result = 0;
-  result = is_compressedfile(tmpFile);
-  if (result == COMPF_UNCOMPRESSED) {
-    compress_file(buf3, 9);
-    usleep(1000 * 500);
-  }
-  result = is_compressedfile(buf3);
-  if (result == COMPF_UNCOMPRESSED)
-    goto next;
-  end:;
-*/
-
-  if ((i = raw_dcc_send(update_fpath, "*binary", "(binary)", &j)) > 0) {
-    putlog(LOG_BOTS, "*", "%s -- can't send new binary",
-	   i == DCCSEND_FULL   ? "NO MORE DCC CONNECTIONS" :
-	   i == DCCSEND_NOSOCK ? "CAN'T OPEN A LISTENING SOCKET" :
-	   i == DCCSEND_BADFN  ? "BAD FILE" :
-	   i == DCCSEND_FEMPTY ? "EMPTY FILE" : "UNKNOWN REASON!");
-    dcc[idx].status &= ~(STAT_SENDINGU);
-    bupdating = 0;
-  } else {
+  if (streamable) {
     dcc[idx].status |= STAT_SENDINGU;
-    strlcpy(dcc[j].host, dcc[idx].nick, UHOSTLEN);		/* Store bot's nick */
-    dprintf(idx, "sb us %lu %hd %lu\n", iptolong(getmyip()), dcc[j].port, dcc[j].u.xfer->length);
+
+    bd::Stream stream;
+    stream.loadFile(update_fpath);
+    dprintf(idx, "sb ls\n");
+    bd::String buf;
+    while (stream.tell() < stream.length()) {
+      buf = bd::base64Encode(stream.gets(1024));
+      ulsend(idx, buf.c_str(), buf.length());
+    }
+    dprintf(idx, "sb le\n");
+    putlog(LOG_BOTS, "*", "Completed binary file send to %s", dcc[idx].nick);
+  } else {
+    if ((i = raw_dcc_send(update_fpath, "*binary", "(binary)", &j)) > 0) {
+      putlog(LOG_BOTS, "*", "%s -- can't send new binary",
+             i == DCCSEND_FULL   ? "NO MORE DCC CONNECTIONS" :
+             i == DCCSEND_NOSOCK ? "CAN'T OPEN A LISTENING SOCKET" :
+             i == DCCSEND_BADFN  ? "BAD FILE" :
+             i == DCCSEND_FEMPTY ? "EMPTY FILE" : "UNKNOWN REASON!");
+      dcc[idx].status &= ~(STAT_SENDINGU);
+      bupdating = 0;
+    } else {
+      dcc[idx].status |= STAT_SENDINGU;
+      strlcpy(dcc[j].host, dcc[idx].nick, UHOSTLEN);		/* Store bot's nick */
+      dprintf(idx, "sb us %lu %hd %lu\n", iptolong(getmyip()), dcc[j].port, dcc[j].u.xfer->length);
+    }
   }
 }
 
