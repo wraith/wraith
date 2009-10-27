@@ -25,7 +25,6 @@ typedef struct settings_struct {
   char bots[1025];
   char uid[17];
   char autocron[17];         /* should the bot auto crontab itself? */
-  char watcher[17];          /* spawn a watcher pid to block ptrace? */
   char username[49];       /* shell username */
   char datadir[1025];
   char homedir[1025];        /* homedir */
@@ -50,7 +49,7 @@ sizeof(settings.owners) + sizeof(settings.hubs) + sizeof(settings.owneremail) + 
 sizeof(settings.salt1) + sizeof(settings.salt2) + sizeof(settings.dcc_prefix) + sizeof(settings.features)
 
 #define SIZE_CONF sizeof(settings.bots) + sizeof(settings.uid) + \
-sizeof(settings.autocron) + sizeof(settings.watcher) + \
+sizeof(settings.autocron) + \
 sizeof(settings.username) + sizeof(settings.homedir) + sizeof(settings.binpath) + sizeof(settings.binname) + \
 sizeof(settings.portmin) + sizeof(settings.portmin) + sizeof(settings.datadir)
 

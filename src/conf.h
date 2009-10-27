@@ -33,7 +33,6 @@ typedef struct conf_b {
   int features;		/* Pack features (take, mdop, beta... etc..) */
   int uid;
   int autocron;         /* should the bot auto crontab itself? */
-  int watcher;		/* spawn a watcher pid to block ptrace? */
   char *localhub;	/* my localhub */
   char *datadir;
   char *username;       /* shell username */

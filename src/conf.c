@@ -58,7 +58,6 @@ tellconf()
   sdprintf(STR("portmin: %d\n"), conf.portmin);
   sdprintf(STR("portmax: %d\n"), conf.portmax);
   sdprintf(STR("autocron: %d\n"), conf.autocron);
-  sdprintf(STR("watcher: %d\n"), conf.watcher);
   sdprintf(STR("bots:\n"));
   for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
     i++;
@@ -346,7 +345,6 @@ init_conf()
   conf.bot = NULL;
 
   conf.localhub = NULL;
-  conf.watcher = 0;
 #ifdef CYGWIN_HACKS
   conf.autocron = 0;
 #else
@@ -698,10 +696,6 @@ readconf(const char *fname, int bits)
         if (str_isdigit(line.c_str()))
           conf.uid = atoi(line.c_str());
 
-      } else if (option == STR("watcher")) {
-        if (egg_isdigit(line[0]))
-          conf.watcher = atoi(line.c_str());
-
       } else {
         putlog(LOG_MISC, "*", STR("Unrecognized config option '%s'"), option.c_str());
 
@@ -991,7 +985,6 @@ bin_to_conf(bool error)
   conf.portmin = atol(settings.portmin);
   conf.portmax = atol(settings.portmax);
   conf.autocron = atoi(settings.autocron);
-  conf.watcher = atoi(settings.watcher);
 
 
   prep_homedir(error);

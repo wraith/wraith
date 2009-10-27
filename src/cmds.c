@@ -1754,7 +1754,6 @@ static void cmd_conf(int idx, char *par)
         else if (!strcasecmp(what, "portmin"))   conf.portmin = atoi(par);
         else if (!strcasecmp(what, "portmax"))   conf.portmax = atoi(par);
         else if (!strcasecmp(what, "autocron"))  conf.autocron = atoi(par);
-        else if (!strcasecmp(what, "watcher"))  conf.watcher = atoi(par);
         else { 
           set--;
           save = 0;
@@ -1775,7 +1774,6 @@ static void cmd_conf(int idx, char *par)
       if (!what || !strcasecmp(what, "portmin"))    dprintf(idx, "%sportmin: %d\n", ss, conf.portmin);
       if (!what || !strcasecmp(what, "portmax"))    dprintf(idx, "%sportmax: %d\n", ss, conf.portmax);
       if (!what || !strcasecmp(what, "autocron"))   dprintf(idx, "%sautocron: %d\n", ss, conf.autocron);
-      if (!what || !strcasecmp(what, "watcher"))    dprintf(idx, "%swatcher: %d\n", ss, conf.watcher);
     }
   }
 #endif /* !CYGWIN_HACKS */

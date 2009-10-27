@@ -32,7 +32,7 @@ settings_t settings = {
   /* -- STATIC -- */
   "", "", "", "", "", "", "", "", "", "",
   /* -- DYNAMIC -- */
-  "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "",
   /* -- PADDING */
   ""
 };
@@ -477,7 +477,6 @@ static void edpack(settings_t *incfg, const char *in_hash, int what)
   dofield(incfg->bots);
   dofield(incfg->uid);
   dofield(incfg->autocron);
-  dofield(incfg->watcher);
   dofield(incfg->username);
   dofield(incfg->datadir);
   dofield(incfg->homedir);
@@ -513,7 +512,6 @@ tellconfig(settings_t *incfg)
   dofield(incfg->bots);
   dofield(incfg->uid);
   dofield(incfg->autocron);
-  dofield(incfg->watcher);
   dofield(incfg->username);
   dofield(incfg->datadir);
   dofield(incfg->homedir);
@@ -667,7 +665,6 @@ void conf_to_bin(conf_t *in, bool move, int die)
   clear_settings();
   sdprintf("converting conf to bin\n");
   simple_snprintf(settings.uid, sizeof(settings.uid), "%d", in->uid);
-  simple_snprintf(settings.watcher, sizeof(settings.watcher), "%d", in->watcher);
   simple_snprintf(settings.autocron, sizeof(settings.autocron), "%d", in->autocron);
   simple_snprintf(settings.portmin, sizeof(settings.portmin), "%d", in->portmin);
   simple_snprintf(settings.portmax, sizeof(settings.portmax), "%d", in->portmax);
