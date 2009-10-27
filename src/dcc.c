@@ -1710,6 +1710,35 @@ dcc_telnet_id(int idx, char *buf, int atr)
   } else {
   }
 
+  if (dcc[idx].bot) {
+    char shost[UHOSTLEN + 20] = "", sip[UHOSTLEN + 20] = "", user[30] = "";
+    simple_snprintf(shost, sizeof(shost), "-telnet!%s", dcc[idx].host);
+    char *p = strchr(dcc[idx].host, '@');
+    strlcpy(user, dcc[idx].host, p - dcc[idx].host + 1);
+    simple_snprintf(sip, sizeof(sip), "-telnet!%s@%s", user, iptostr(htonl(dcc[idx].addr)));
+
+    struct userrec *u = NULL;
+    ok = 1;
+
+    if (!u)
+      u = get_user_by_host(sip);			/* Check for -telnet!ident@ip */
+    if (!u)
+      u = get_user_by_host(shost);		/* Check for -telnet!ident@host */
+    if (!u)
+      ok = 0;
+
+    if (u && strcasecmp(nick, u->handle))
+      ok = 0;
+
+    if (!ok) {
+      putlog(LOG_BOTS, "*", "Denied link to '%s': Host not recognized: %s", nick, dcc[idx].host);
+      putlog(LOG_BOTS, "*", "If this host/bot is trusted: %s+host %s %s", settings.dcc_prefix, nick, shost);
+      killsock(dcc[idx].sock);
+      lostdcc(idx);
+      return;
+    }
+  }
+
   dcc_telnet_pass(idx, atr);
 }
 
