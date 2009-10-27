@@ -319,6 +319,9 @@ static void start_sending_binary(int idx, bool streamable)
     }
     dprintf(idx, "sb le\n");
     putlog(LOG_BOTS, "*", "Completed binary file send to %s", dcc[idx].nick);
+    dcc[idx].status &= ~STAT_SENDINGU;
+    dcc[idx].status |= STAT_UPDATED;
+    bupdating = 0;
   } else {
     if ((i = raw_dcc_send(update_fpath, "*binary", "(binary)", &j)) > 0) {
       putlog(LOG_BOTS, "*", "%s -- can't send new binary",
