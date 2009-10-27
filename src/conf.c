@@ -726,8 +726,6 @@ writeconf(char *filename, int fd, int bits)
   char *p = NULL;
 
   comment("");
-  comment("# Lines beginning with # are what the preceeding line SHOULD be");
-  comment("# They are simply comments and are not parsed at all.\n");
 
 #define conf_com() do {							\
 	if (do_confedit == CONF_AUTO) {					\
