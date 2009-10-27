@@ -11,6 +11,9 @@
  */
 #define LOG_TS "[%H:%M:%S]"
 
+// Define this to be the length of the entire timestamp after replacing vars
+#define LOG_TS_LEN 10
+
 
 void restart(int);
 int coloridx(int);

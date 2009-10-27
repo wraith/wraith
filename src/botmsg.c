@@ -319,7 +319,8 @@ void putbot(const char *bot, char *par)
 */
 void botnet_send_log(int idx, const char *from, int type, const char *msg)
 {
-  const size_t len = simple_snprintf(OBUF, sizeof(OBUF), "lo %s %d %s\n", from, type, msg);
+  // Cut out timestamp
+  const size_t len = simple_snprintf(OBUF, sizeof(OBUF), "lo %s %d %s\n", from, type, &msg[LOG_TS_LEN]);
 
   if (conf.bot->hub) {
     send_hubs_but(idx, OBUF, len);
