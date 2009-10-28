@@ -119,10 +119,11 @@ int answer(int, char *, in_addr_t *, port_t *, int);
 int findanysnum(register int);
 int open_listen(port_t *);
 int open_listen_by_af(port_t *, int);
+int open_listen_addr_by_af(const char*, port_t *, int);
 #ifdef USE_IPV6
-int open_address_listen(in_addr_t, int, port_t *);
+int open_address_listen(const char*, int, port_t *);
 #else
-int open_address_listen(in_addr_t, port_t *);
+int open_address_listen(const char*, port_t *);
 #endif /* USE_IPV6 */
 int open_telnet(const char *, port_t, bool proxy = 0, int identd = 0);
 int open_telnet_dcc(int, char *, char *);

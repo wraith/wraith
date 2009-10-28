@@ -577,6 +577,23 @@ void rehash_ip() {
     struct bot_addr *bi = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, conf.bot->u);
     listen_all(bi->telnet_port, 0);
     my_port = bi->telnet_port;
+  } else if (conf.bot->localhub) {
+    // Listen on the unix domain socket
+    port_t port;
+    int i = open_listen_addr_by_af(conf.localhub_socket, &port, AF_UNIX);
+    if (i < 0) {
+      putlog(LOG_ERRORS, "*", "Can't listen on %s - %s", conf.localhub_socket, i == -1 ? "it's taken." : "couldn't assign file.");
+    } else {
+      /* now setup dcc entry */
+      int idx = new_dcc(&DCC_TELNET, 0);
+      dcc[idx].addr = 0L;
+      strlcpy(dcc[idx].host, conf.localhub_socket, sizeof(dcc[idx].host));
+      dcc[idx].port = 0;
+      dcc[idx].sock = i;
+      dcc[idx].timeval = now;
+      strlcpy(dcc[idx].nick, "(unix_domain)", NICKLEN);
+      putlog(LOG_DEBUG, "*", "Listening on telnet %s", conf.localhub_socket);
+    }
   }
 }
 
