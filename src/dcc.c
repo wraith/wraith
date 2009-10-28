@@ -1361,6 +1361,7 @@ detect_telnet_flood(char *floodhost)
 }
 
 static void dcc_telnet_dns_callback(int, void *, const char *, char **);
+static void dcc_telnet_dns_forward_callback(int, void *, const char *, char **);
 
 static void
 dcc_telnet(int idx, char *buf, int ii)
@@ -1407,6 +1408,7 @@ dcc_telnet(int idx, char *buf, int ii)
 
   putlog(LOG_DEBUG, "*", "Telnet connection: %s/%d", s, port);
 
+  // Are they ignored by IP?
   simple_snprintf(x, sizeof(x), "-telnet!telnet@%s", iptostr(htonl(ip)));
 
   if (match_ignore(x) || detect_telnet_flood(x)) {
@@ -1450,28 +1452,70 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, c
   if (!valid_dns_id(i, id))
     return;
 
-  int j = -1, sock, idx = -1;
-  char s2[UHOSTLEN + 20] = "";
-
-  if (valid_idx(i))
-    idx = dcc[i].u.dns->ibuf;
-
-  strlcpy(dcc[i].host, hosts ? hosts[0] : ip, UHOSTLEN);
-
-  simple_snprintf(s2, sizeof(s2), "-telnet!telnet@%s", dcc[i].host);
-
-  if (match_ignore(s2)) {
-    putlog(LOG_DEBUG, "*", "Ignored telnet connection from: %s", s2);
-    killsock(dcc[i].sock);
-    lostdcc(i);
-    return;
-  }
+  int idx = dcc[i].u.dns->ibuf;
 
   if (!valid_idx(idx)) {
     putlog(LOG_BOTS, "*", "Lost listening socket while resolving %s", dcc[i].host);
     killsock(dcc[i].sock);
     lostdcc(i);
     return;
+  }
+
+  //Reset timer
+  dcc[i].timeval = now;
+
+  //Clear the ip (still saved in dcc[i].addr)
+  dcc[i].host[0] = 0;
+  if (hosts && hosts[0])
+    strlcpy(dcc[i].host, hosts[0], UHOSTLEN);
+
+  if (hosts && hosts[0]) {
+    //Check forward
+    int dns_id = egg_dns_lookup(hosts[0], 20, dcc_telnet_dns_forward_callback, (void *) (long) i);
+    if (dns_id >= 0)
+      dcc[i].dns_id = dns_id;
+  } else
+    dcc_telnet_dns_forward_callback(id, client_data, ip, NULL);
+}
+
+static void dcc_telnet_dns_forward_callback(int id, void *client_data, const char *host, char **ips) {
+  // 64bit hacks
+  long data = (long) client_data;
+  int i = (int) data;
+
+  if (!valid_dns_id(i, id))
+    return;
+
+  int j = -1, sock, idx = -1;
+  char s2[UHOSTLEN + 20] = "";
+
+  if (valid_idx(i))
+    idx = dcc[i].u.dns->ibuf;
+
+  if (!valid_idx(idx)) {
+    putlog(LOG_BOTS, "*", "Lost listening socket while resolving %s", iptostr(htonl(dcc[i].addr)));
+    killsock(dcc[i].sock);
+    lostdcc(i);
+    return;
+  }
+
+  bool forward_matched = true;
+  // If the forward did not match, replace the saved host with the ip
+  if (!(ips && ips[0] && !strcmp(ips[0], iptostr(htonl(dcc[i].addr))))) {
+    forward_matched = false;
+    strlcpy(dcc[i].host, iptostr(htonl(dcc[i].addr)), UHOSTLEN);
+  }
+
+  if (forward_matched) {
+    // Are they ignored by host?
+    simple_snprintf(s2, sizeof(s2), "-telnet!telnet@%s", dcc[i].host);
+
+    if (match_ignore(s2)) {
+      putlog(LOG_DEBUG, "*", "Ignored telnet connection from: %s", s2);
+      killsock(dcc[i].sock);
+      lostdcc(i);
+      return;
+    }
   }
 
   if (dcc[idx].host[0] == '@') {
@@ -1491,12 +1535,12 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, c
   if (!dcc[i].user)
     dcc[i].user = get_user_by_host(s2);		/* check for matching -telnet!telnet@host */
   
-  if (hosts)
-    putlog(LOG_MISC, "*", "Telnet connection: %s[%s]/%d", dcc[i].host, ip, dcc[i].port);
+  if (forward_matched)
+    putlog(LOG_MISC, "*", "Telnet connection: %s[%s]/%d", dcc[i].host, iptostr(htonl(dcc[i].addr)), dcc[i].port);
   else
-    putlog(LOG_MISC, "*", "Telnet connection: %s/%d", dcc[i].host, dcc[i].port);
+    putlog(LOG_MISC, "*", "Telnet connection: %s/%d", iptostr(htonl(dcc[i].addr)), dcc[i].port);
 
-  sock = open_telnet((char *) ip, 113, 0);
+  sock = open_telnet((char *) iptostr(htonl(dcc[i].addr)), 113, 0);
 
   char s[UHOSTLEN] = "";
 
