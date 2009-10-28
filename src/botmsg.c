@@ -319,8 +319,12 @@ void putbot(const char *bot, char *par)
 */
 void botnet_send_log(int idx, const char *from, int type, const char *msg)
 {
+  size_t len;
   // Cut out timestamp
-  const size_t len = simple_snprintf(OBUF, sizeof(OBUF), "lo %s %d %s\n", from, type, &msg[LOG_TS_LEN]);
+  if (conf.bot->hub)
+    len = simple_snprintf(OBUF, sizeof(OBUF), "lo %s %d %s\n", from, type, &msg[LOG_TS_LEN]);
+  else
+    len = simple_snprintf(OBUF, sizeof(OBUF), "lo %s %d %s\n", from, type, msg);
 
   if (conf.bot->hub) {
     send_hubs_but(idx, OBUF, len);
