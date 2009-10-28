@@ -1720,8 +1720,8 @@ static void server_dns_callback(int id, void *client_data, const char *host, cha
 
 //  identd_open(idx);
 
-  //No proxy, use identd
-  serv = open_telnet(ip, dcc[idx].port, 0, 1);
+  //No proxy, use identd, 2 = spoof ident
+  serv = open_telnet(ip, dcc[idx].port, 0, 2);
 
   if (serv < 0) {
     putlog(LOG_SERV, "*", "Failed connect to %s (%s)", dcc[idx].host, strerror(errno));

@@ -941,8 +941,9 @@ listen_all(port_t lport, bool off)
   return idx;
 }
 
+// @param identd 2 = use oidentd
 void
-identd_open(const char *sourceIp, const char *destIp)
+identd_open(const char *sourceIp, const char *destIp, int identd)
 {
   int idx;
   int i = -1;
@@ -981,7 +982,7 @@ identd_open(const char *sourceIp, const char *destIp)
   }
 
   /* Only makes sense if we're spoofing by nick */
-  if (conf.homedir && oidentd && ident_botnick) {
+  if (identd == 2 && conf.homedir && oidentd && ident_botnick) {
     char oidentd_conf[1024] = "";
 
     simple_snprintf(oidentd_conf, sizeof(oidentd_conf), "%s/.oidentd.conf", conf.homedir);

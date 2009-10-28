@@ -55,7 +55,7 @@ char *add_cr(char *);
 void changeover_dcc(int, struct dcc_table *, int);
 void do_boot(int, const char *, const char *);
 int detect_dcc_flood(time_t *, struct chat_info *, int);
-void identd_open(const char * = NULL, const char * = NULL);
+void identd_open(const char * = NULL, const char * = NULL, int identd = 1);
 void identd_close();
 int listen_all(port_t, bool);
 bool valid_idx(int);

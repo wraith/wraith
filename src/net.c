@@ -534,7 +534,7 @@ void initialize_sockaddr(int af_type, const char *host, port_t port, union socka
  *   -1  strerror()/errno type error
  *   -2  can't resolve hostname
  */
-int open_telnet_raw(int sock, const char *ipIn, port_t sport, bool proxy_on, bool identd)
+int open_telnet_raw(int sock, const char *ipIn, port_t sport, bool proxy_on, int identd)
 {
   static port_t port = 0;
   union sockaddr_union so;
@@ -594,7 +594,7 @@ int open_telnet_raw(int sock, const char *ipIn, port_t sport, bool proxy_on, boo
   }
 
   if (identd)
-    identd_open(myipstr(is_resolved), ipIn);
+    identd_open(myipstr(is_resolved), ipIn, identd);
 
   int rc = -1;
 
@@ -625,7 +625,7 @@ int open_telnet_raw(int sock, const char *ipIn, port_t sport, bool proxy_on, boo
 }
 
 /* Ordinary non-binary connection attempt */
-int open_telnet(const char *ip, port_t port, bool proxy, bool identd)
+int open_telnet(const char *ip, port_t port, bool proxy, int identd)
 {
   int sock = -1;
   

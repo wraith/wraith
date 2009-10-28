@@ -50,6 +50,7 @@
 * Removed 'chanset +knock' and replaced with 'chanset knock (Op|Voice|User)', see 'help chaninfo'
 * Default log timestamp now includes seconds
 * Hubs no longer include their own timestamp over botnet
+* Only use oident for server connects, not for bot linking.
 
 1.2.16.1
 * Fix linux compile errors
