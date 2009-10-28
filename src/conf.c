@@ -486,6 +486,9 @@ conf_addbot(const char *nick, const char *ip, const char *host, const char *ip6)
     conf.localhub = strdup(bot->nick);
   }
 
+  //Add this bot to the userlist
+  if (!bot->u)
+    userlist = adduser(userlist, bot->nick, "none", "-", USER_OP, 1);
   list_append((struct list_type **) &(conf.bots), (struct list_type *) bot);
 }
 
