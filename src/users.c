@@ -1199,8 +1199,12 @@ void autolink_cycle(char *start)
 {
   if (conf.bot->hub)
     autolink_cycle_hub(start);
-  else
+  else if (conf.bot->localhub)
     autolink_cycle_leaf(start);
+  else { //Connect to the localhub
+    sdprintf("need to link to my localhub: %s\n", conf.localhub);
+    botlink("", -3, conf.localhub);
+  }
 }
 
 

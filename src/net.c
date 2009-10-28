@@ -565,23 +565,31 @@ int open_telnet_raw(int sock, const char *ipIn, port_t sport, bool proxy_on, int
     port = sport;
   }
 
-  /* figure out which ip to bind to locally (v4 or v6) based on what the host ip is .. */
-  if ((is_resolved = is_dotted_ip(ip))) {	/* already resolved */
-  
-    /* bind to our cached ip for v4/v6 depending on what the ip is */
-    initialize_sockaddr(is_resolved, NULL, 0, &so);
+  size_t socklen;
+  if (sport) {
+    /* figure out which ip to bind to locally (v4 or v6) based on what the host ip is .. */
+    if ((is_resolved = is_dotted_ip(ip))) {	/* already resolved */
 
-    if (bind(sock, &so.sa, SIZEOF_SOCKADDR(so)) < 0) {
-      putlog(LOG_DEBUG, "*", "Failed to bind to socket %d: %s", sock, strerror(errno));
-      killsock(sock);
+      /* bind to our cached ip for v4/v6 depending on what the ip is */
+      initialize_sockaddr(is_resolved, NULL, 0, &so);
+
+      if (bind(sock, &so.sa, SIZEOF_SOCKADDR(so)) < 0) {
+        putlog(LOG_DEBUG, "*", "Failed to bind to socket %d: %s", sock, strerror(errno));
+        killsock(sock);
+        return -1;
+      }
+
+      /* initialize so for connect using the host/port */
+      initialize_sockaddr(is_resolved, ip, port, &so);
+    } else {	/* if not resolved, resolve it with blocking calls.. (shouldn't happen ever) */
+      sdprintf("WARNING: open_telnet_raw(%s,%d) was passed an unresolved hostname.", ip, port);
       return -1;
     }
-
-    /* initialize so for connect using the host/port */
-    initialize_sockaddr(is_resolved, ip, port, &so);
-  } else {	/* if not resolved, resolve it with blocking calls.. (shouldn't happen ever) */
-    sdprintf("WARNING: open_telnet_raw(%s,%d) was passed an unresolved hostname.", ip, port);
-    return -1;
+    socklen = SIZEOF_SOCKADDR(so);
+  } else { // Unix domain socket
+    so.sun.sun_family = AF_UNIX;
+    strcpy(so.sun.sun_path, ip);
+    socklen = strlen(so.sun.sun_path) + sizeof(so.sun.sun_family);
   }
 
   for (int i = 0; i < MAXSOCKS; i++) {
@@ -593,13 +601,13 @@ int open_telnet_raw(int sock, const char *ipIn, port_t sport, bool proxy_on, int
     }
   }
 
-  if (identd)
+  if (identd && sport) //Only open identd if not a unix domain socket
     identd_open(myipstr(is_resolved), ipIn, identd);
 
   int rc = -1;
 
   /* make the connect attempt */
-  rc = connect(sock, &so.sa, SIZEOF_SOCKADDR(so));
+  rc = connect(sock, (struct sockaddr *)&so.sa, socklen);
 
   if (rc < 0) {    
     if (errno == EINPROGRESS) {

@@ -948,6 +948,7 @@ int botunlink(int idx, const char *nick, const char *reason)
 }
 
 static void botlink_dns_callback(int, void *, const char *, bd::Array<bd::String>);
+static void botlink_real(int);
 
 /* Link to another bot
  */
@@ -976,10 +977,16 @@ int botlink(char *linker, int idx, char *nick)
 	return 0;
       }
     }
+
+    bool unix_domain = 0;
+
+    if (!conf.bot->hub && !conf.bot->localhub && !strcmp(nick, conf.localhub))
+      unix_domain = 1;
+
     /* Address to connect to is in 'info' */
     struct bot_addr *bi = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, u);
 
-    if (!bi || !strlen(bi->address) || !bi->telnet_port || (bi->telnet_port <= 0)) {
+    if (!unix_domain && (!bi || !strlen(bi->address) || !bi->telnet_port || (bi->telnet_port <= 0))) {
       if (idx >= 0) {
 	dprintf(idx, "Invalid telnet address:port stored for '%s'.\n", nick);
 	dprintf(idx, "Use: %schaddr %s <address>:<port#>[/<relay-port#>]\n", (dcc[idx].u.chat->channel >= 0) ? settings.dcc_prefix : "", nick);
@@ -990,30 +997,47 @@ int botlink(char *linker, int idx, char *nick)
     } else {
       correct_handle(nick);
 
-      if (idx > -2)
-	putlog(LOG_BOTS, "*", "Linking to %s at %s:%d ...", nick,
-	       bi->address, bi->telnet_port);
+      char *address = NULL;
+      port_t port = 0;
+
+      if (unix_domain) {
+        address = conf.localhub_socket;
+      } else if (bi) {
+        address = bi->address;
+        port = bi->telnet_port;
+      }
+
+      if (idx > -2) {
+        if (port)
+          putlog(LOG_BOTS, "*", "Linking to %s at %s:%d ...", nick, address, port);
+        else
+          putlog(LOG_BOTS, "*", "Linking to %s at %s ...", nick, address);
+      }
 
       i = new_dcc(&DCC_DNSWAIT, sizeof(struct dns_info));
 
       dcc[i].timeval = now;
-      dcc[i].port = bi->telnet_port;
+      dcc[i].port = port;
       dcc[i].user = u;
       strlcpy(dcc[i].nick, nick, NICKLEN);
-      strlcpy(dcc[i].host, bi->address, UHOSTLEN);
+      strlcpy(dcc[i].host, address, UHOSTLEN);
       dcc[i].u.dns->cptr = strdup(linker);
       dcc[i].u.dns->ibuf = idx;
       dcc[i].bot = 1;
 
-      int dns_id = egg_dns_lookup(bi->address, 20, botlink_dns_callback, (void *) (long)i);
-       /* dns_id 
-        * -1 means it was cached and the callback already called
-        * -2 means it's already being looked up.. try again later .. */
-      if (dns_id >= 0)
-        dcc[i].dns_id = dns_id;
-      else if (dns_id == -2) {
-        lostdcc(i);
-        return 0;
+      if (unix_domain) {
+        botlink_real(i);
+      } else {
+        int dns_id = egg_dns_lookup(address, 20, botlink_dns_callback, (void *) (long)i);
+         /* dns_id
+          * -1 means it was cached and the callback already called
+          * -2 means it's already being looked up.. try again later .. */
+        if (dns_id >= 0)
+          dcc[i].dns_id = dns_id;
+        else if (dns_id == -2) {
+          lostdcc(i);
+          return 0;
+        }
       }
      
       return 1;
@@ -1031,13 +1055,9 @@ static void botlink_dns_callback(int id, void *client_data, const char *host, bd
   if (!valid_dns_id(i, id))
     return;
 
-  int idx = -1;
-  char *linker = NULL;
-
-  if (valid_idx(i)) {
-    idx = dcc[i].u.dns->ibuf;
-    linker = strdup(dcc[i].u.dns->cptr);
-  }
+//  if (valid_idx(i)) {
+//    idx = dcc[i].u.dns->ibuf;
+//  }
 
   if (!ips.size()) {
     lostdcc(i);
@@ -1045,6 +1065,15 @@ static void botlink_dns_callback(int id, void *client_data, const char *host, bd
   }
 
   dcc[i].addr = inet_addr(bd::String(ips[0]).c_str());
+  strlcpy(dcc[i].host, bd::String(ips[0]).c_str(), UHOSTLEN);
+
+  botlink_real(i);
+}
+
+static void botlink_real(int i)
+{
+  int idx = dcc[i].u.dns->ibuf;
+  char *linker = strdup(dcc[i].u.dns->cptr);
 
   changeover_dcc(i, &DCC_FORK_BOT, sizeof(struct bot_info));
   dcc[i].timeval = now;
@@ -1057,7 +1086,12 @@ static void botlink_dns_callback(int id, void *client_data, const char *host, bd
 
   dcc[i].u.bot->port = dcc[i].port;             /* Remember where i started */
 #ifdef USE_IPV6
-  dcc[i].sock = getsock(SOCK_STRONGCONN, is_dotted_ip(bd::String(ips[0]).c_str()));
+  int af_type;
+  if (dcc[i].port)
+    af_type = is_dotted_ip(dcc[i].host);
+  else
+    af_type = AF_UNIX;
+  dcc[i].sock = getsock(SOCK_STRONGCONN, af_type);
 #else
   dcc[i].sock = getsock(SOCK_STRONGCONN);
 #endif /* USE_IPV6 */
@@ -1065,7 +1099,7 @@ static void botlink_dns_callback(int id, void *client_data, const char *host, bd
 //  if (dcc[i].sock > 0)
 //    identd_open();                      /* will be closed when an ident is replied. */
 
-  if (dcc[i].sock < 0 || open_telnet_raw(dcc[i].sock, bd::String(ips[0]).c_str(), dcc[i].port, 0, 1) < 0)
+  if (dcc[i].sock < 0 || open_telnet_raw(dcc[i].sock, dcc[i].host, dcc[i].port, 0, 1) < 0)
     failed_link(i);
   else { /* let's attempt to initiate SSL before ANYTHING else... */
     dcc[i].ssl = 0;

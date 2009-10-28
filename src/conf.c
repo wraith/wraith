@@ -484,6 +484,7 @@ conf_addbot(const char *nick, const char *ip, const char *host, const char *ip6)
   if (!conf.localhub && !bot->hub && !bot->disabled) {
     bot->localhub = 1;          /* first bot */
     conf.localhub = strdup(bot->nick);
+    conf.localhub_socket = strdup("/tmp/wraith-test");
   }
 
   //Add this bot to the userlist

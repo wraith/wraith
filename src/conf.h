@@ -34,6 +34,7 @@ typedef struct conf_b {
   int uid;
   int autocron;         /* should the bot auto crontab itself? */
   char *localhub;	/* my localhub */
+  char *localhub_socket;	/* my localhub unix socket */
   char *datadir;
   char *username;       /* shell username */
   char *homedir;        /* homedir */

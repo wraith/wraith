@@ -8,6 +8,7 @@
 #include "types.h"
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <sys/un.h>
 #include <setjmp.h>
 
 namespace bd {
@@ -66,6 +67,7 @@ union sockaddr_union {			/* replaced by sockname_t */
 #ifdef USE_IPV6
   struct sockaddr_in6 sin6;
 #endif /* USE_IPV6 */
+  struct sockaddr_un sun;
 };
 
 /* This is used by the net module to keep track of sockets and what's
