@@ -347,7 +347,8 @@ failed_link(int idx)
   }
   strlcpy(s, dcc[idx].nick, sizeof(s));
   lostdcc(idx);
-  autolink_cycle(s);            /* Check for more auto-connections */
+  if (conf.bot->hub || conf.bot->localhub)
+    autolink_cycle(s);            /* Check for more auto-connections */
 }
 
 static void
