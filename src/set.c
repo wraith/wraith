@@ -625,7 +625,7 @@ void var_userfile_share_line(char *line, int idx, bool share)
   set_noshare = 1;
   var_set(var, NULL, line);
   /* leaf bots don't need to bother attempting to share; there are no bots linked to us! */
-  if (share && conf.bot->hub)
+  if (share && (conf.bot->hub || conf.bot->localhub))
     botnet_send_var_broad(idx, var);
   set_noshare = 0;
 }
