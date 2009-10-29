@@ -1142,7 +1142,7 @@ void autolink_cycle_leaf(char *start)
    if (dcc[i].type) {
     if ((dcc[i].type == &DCC_BOT_NEW) || (dcc[i].type == &DCC_FORK_BOT))
       return;
-    if (dcc[i].type == &DCC_BOT) {
+    if (dcc[i].hub && dcc[i].type == &DCC_BOT) {
       strlcpy(curhub, dcc[i].nick, sizeof(curhub));
       break;
     }
