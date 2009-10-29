@@ -300,10 +300,15 @@ bot_version(int idx, char *par)
   if (par[0])
     vversion = newsplit(&par);
 
-  if (conf.bot->hub || (conf.bot->localhub && (dcc[idx].status & STAT_UNIXDOMAIN))) {
+  if (conf.bot->hub) {
     putlog(LOG_BOTS, "*", "Linked to %s.\n", dcc[idx].nick);
     chatout("*** Linked to %s.\n", dcc[idx].nick);
+  } else {
+    putlog(LOG_BOTS, "*", "Linked to botnet.");
+    chatout("*** Linked to botnet.\n");
+  }
 
+  if (conf.bot->hub || conf.bot->localhub) {
     if (bot_hublevel(dcc[idx].user) < 999) {
       if (!bot_aggressive_to(dcc[idx].user))    //not aggressive, so they are technically my uplink.
         uplink_idx = idx;
