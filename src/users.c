@@ -1202,8 +1202,17 @@ void autolink_cycle(char *start)
   else if (conf.bot->localhub)
     autolink_cycle_leaf(start);
   else { //Connect to the localhub
-    sdprintf("need to link to my localhub: %s\n", conf.localhub);
-    botlink("", -3, conf.localhub);
+    if (tands == 0) {
+      // Make sure not already trying for the localhub
+      for (int i = 0; i < dcc_total; i++) {
+       if (dcc[i].type) {
+        if ((dcc[i].type == &DCC_BOT_NEW) || (dcc[i].type == &DCC_FORK_BOT))
+          return;
+       }
+      }
+      sdprintf("need to link to my localhub: %s\n", conf.localhub);
+      botlink("", -3, conf.localhub);
+    }
   }
 }
 
