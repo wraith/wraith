@@ -3131,11 +3131,7 @@ static void cmd_newleaf(int idx, char *par)
     userlist = adduser(userlist, handle, "none", "-", USER_OP, 1);
     u1 = get_user_by_handle(userlist, handle);
     bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
-
-    bi->uplink = (char *) my_calloc(1, strlen(conf.bot->nick) + 1); 
-/*      strcpy(bi->uplink, conf.bot->nick); */
-    bi->uplink[0] = 0;
-
+    bi->uplink = (char *) my_calloc(1, 1);
     bi->address = (char *) my_calloc(1, 1);
     bi->telnet_port = 3333;
     bi->relay_port = 3333;
