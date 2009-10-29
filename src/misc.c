@@ -994,7 +994,7 @@ int bot_aggressive_to(struct userrec *u)
 {
   if (conf.bot->localhub) {
     for (conf_bot* bot = conf.bots; bot && bot->nick; bot = bot->next) {
-      if (!strcmp(u->handle, bot->nick))
+      if (!bot->hub && !strcmp(u->handle, bot->nick))
         return 1;
     }
   }
