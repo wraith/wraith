@@ -1726,7 +1726,7 @@ dcc_telnet_id(int idx, char *buf, int atr)
     if (dcc[idx].user)
       putlog(LOG_BOTS, "*", "%s: %s!%s", ischanhub() ? "Refused DCC chat (no access)" : "Refused DCC chat (I'm not a chathub (+c))", nick, dcc[idx].host);
     else if (dcc[idx].bot)
-      putlog(LOG_BOTS, "*", "Refused %s (invalid bot handle: %s) (Add with '%snewleaf %s')", dcc[idx].host, nick, settings.dcc_prefix, nick);
+      putlog(LOG_BOTS, "*", "Refused %s (invalid bot handle: %s) (Add with '%snewleaf %s -telnet!%s')", dcc[idx].host, nick, settings.dcc_prefix, nick, dcc[idx].host);
     else
       putlog(LOG_BOTS, "*", "Refused %s (invalid handle: %s)", dcc[idx].host, nick);
     killsock(dcc[idx].sock);
