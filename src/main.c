@@ -594,7 +594,7 @@ static void core_minutely()
       fatal(STR("MEMORY HACKED"), 0);
     check_maxfiles();
     check_mypid();
-  } else
+  } else if (conf.bot->hub || conf.bot->localhub)
     send_timesync(-1);
 
   check_bind_time(&nowtm);

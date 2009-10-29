@@ -539,7 +539,7 @@ static void bot_log(int idx, char *par)
   if (egg_isdigit(par[0])) {
     int type = atoi(newsplit(&par));
 
-    if (conf.bot->hub)
+    if (conf.bot->hub || conf.bot->localhub)
       botnet_send_log(idx, from, type, par);
 
     putlog(type, "@", "(%s) %s", from, par);
@@ -812,7 +812,7 @@ static void bot_timesync(int idx, char *par)
 //  putlog(LOG_DEBUG, "@", "Got timesync from %s: %s (%li - %li)", dcc[idx].nick, par, atol(par), now);
   timesync = atol(par) - now;
 
-  if (conf.bot->hub)
+  if (conf.bot->hub || conf.bot->localhub)
     send_timesync(-1);
 }
 

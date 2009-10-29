@@ -222,7 +222,7 @@ greet_new_bot(int idx)
   dcc[idx].u.bot->version[0] = 0;
   dcc[idx].u.bot->sysname[0] = 0;
   dcc[idx].u.bot->numver = 0;
-  if (conf.bot->hub && dcc[idx].user && (!(dcc[idx].user->flags & USER_OP))) {
+  if ((conf.bot->hub || conf.bot->localhub) && dcc[idx].user && (!(dcc[idx].user->flags & USER_OP))) {
     putlog(LOG_BOTS, "*", "Rejecting link from %s", dcc[idx].nick);
     dprintf(idx, "error You are being rejected.\n");
     dprintf(idx, "bye\n");
@@ -300,7 +300,7 @@ bot_version(int idx, char *par)
   if (par[0])
     vversion = newsplit(&par);
 
-  if (conf.bot->hub) {
+  if (conf.bot->hub || (conf.bot->localhub && (dcc[idx].status & STAT_UNIXDOMAIN))) {
     putlog(LOG_BOTS, "*", "Linked to %s.\n", dcc[idx].nick);
     chatout("*** Linked to %s.\n", dcc[idx].nick);
 
@@ -539,6 +539,7 @@ display_dcc_bot(int idx, char *buf, size_t bufsiz)
   buf[i++] = b_status(idx) & STAT_OFFEREDU ? 'B' : 'b';
   buf[i++] = b_status(idx) & STAT_SENDINGU ? 'D' : 'd';
   buf[i++] = b_status(idx) & STAT_GETTINGU ? 'E' : 'e';
+  buf[i++] = b_status(idx) & STAT_UNIXDOMAIN ? 'Z' : 'z';
 #ifdef USE_IPV6
   if (sockprotocol(dcc[idx].sock) == AF_INET6 && dcc[idx].host6[0])
     buf[i++] = '6';
@@ -985,10 +986,13 @@ dcc_chat_pass(int idx, char *buf, int atr)
     } else if (!strcasecmp(pass, STR("neg."))) {		/* we're done, link up! */
       dcc[idx].type = &DCC_BOT_NEW;
       dcc[idx].u.bot = (struct bot_info *) my_calloc(1, sizeof(struct bot_info));
-      dcc[idx].status = STAT_CALLED;
+      if (dcc[idx].status & STAT_UNIXDOMAIN)
+        dcc[idx].status = STAT_UNIXDOMAIN|STAT_CALLED;
+      else
+        dcc[idx].status = STAT_CALLED;
       dprintf(idx, "goodbye!\n");
       greet_new_bot(idx);
-      if (conf.bot->hub)
+      if (conf.bot->hub || conf.bot->localhub)
         send_timesync(idx);
     } else if (!strcasecmp(pass, STR("neg"))) {
       int snum = findanysnum(dcc[idx].sock);

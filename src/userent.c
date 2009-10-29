@@ -299,7 +299,7 @@ static bool set_unpack(struct userrec *u, struct user_entry *e)
   head = curr = e->u.list;
   e->u.extra = NULL;
 
-  if (conf.bot->hub || !strcasecmp(conf.bot->nick, u->handle)) {
+  if (conf.bot->hub || conf.bot->localhub || !strcasecmp(conf.bot->nick, u->handle)) {
     struct xtra_key *t = NULL;
     char *key = NULL, *data = NULL;
 
@@ -351,7 +351,7 @@ static bool set_gotshare(struct userrec *u, struct user_entry *e, char *buf, int
   /* var_set_by_name() called set_user(), no need to do it again... */
   } 
   /* not else if as the hub might have gotten a botset for itself */
-  if (conf.bot->hub) {
+  if (conf.bot->hub || conf.bot->localhub) {
   /* only hubs need to bother saving this stuff, leaf bots just store it in vars[] */
     struct xtra_key *xk = (struct xtra_key *) my_calloc(1, sizeof(struct xtra_key));
 

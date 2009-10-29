@@ -765,7 +765,7 @@ void dump_links(int z)
   register size_t l;
   char x[1024] = "";
 
-  if (conf.bot->hub) {
+  if (conf.bot->hub || conf.bot->localhub) {
     tand_t *bot = NULL;
     char *p = NULL;
 
@@ -1646,9 +1646,12 @@ void check_botnet_pings()
    if (dcc[i].type) {
      top_index = i;
     if (dcc[i].type == &DCC_BOT) {
+      // Hubs only allow localhubs to link, which CAN link bots now, so this isn't so cut and dry now
+#ifdef no
       if (dcc[i].status & STAT_LEAF) {
         tand_t *via = findbot(dcc[i].nick);
 
+        // Check if this leaf has any linked bots
         for (bot = tandbot; bot; bot = bot->next) {
           if ((via == bot->via) && (bot != via)) {
 	    /* Not leaflike behavior */
@@ -1676,6 +1679,7 @@ void check_botnet_pings()
 	    dcc[i].status &= ~STAT_WARNED;
         }
       }
+#endif
 
       if (dcc[i].status & STAT_PINGED) {
         char s[1024] = "";

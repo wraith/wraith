@@ -388,7 +388,7 @@ static void write_user(const struct userrec *u, bd::Stream& stream, int idx)
     } else
 #endif
     if (ue->type)
-      if (conf.bot->hub)
+      if (conf.bot->hub || conf.bot->localhub)
         ue->type->write_userfile(stream, u, ue, idx);
   }
 }
