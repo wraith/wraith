@@ -523,25 +523,40 @@ void load_internal_users()
 
 }
 
-void add_myself_to_userlist() {
-  if (!(conf.bot->u = get_user_by_handle(userlist, conf.bot->nick))) {
+static struct userrec* add_bot_userlist(char* bot) {
+  struct userrec *u = NULL;
+  if (!(u = get_user_by_handle(userlist, bot))) {
     /* I need to be on the userlist... doh. */
-    userlist = adduser(userlist, conf.bot->nick, "none", "-", USER_OP, 1);
-    conf.bot->u = get_user_by_handle(userlist, conf.bot->nick);
+    userlist = adduser(userlist, bot, "none", "-", USER_OP, 1);
+    u = get_user_by_handle(userlist, bot);
 
-    /* Assume hub has a record added from load_internal_users();
-       why would it think it was a hub if it wasn't in the hub list??
-    */
-    if (!conf.bot->hub) {
-      struct bot_addr *bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
-      if (conf.bot->net.ip)
-        bi->address = strdup(conf.bot->net.ip);
-      bi->telnet_port = bi->relay_port = 3333;
-      bi->hublevel = 999;
-      bi->uplink = (char *) my_calloc(1, 1);
-      set_user(&USERENTRY_BOTADDR, conf.bot->u, bi);
+    struct bot_addr *bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
+    bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
+    bi->uplink = (char *) my_calloc(1, 1);
+    bi->address = (char *) my_calloc(1, 1);
+    bi->telnet_port = 3333;
+    bi->relay_port = 3333;
+    bi->hublevel = 999;
+    set_user(&USERENTRY_BOTADDR, u, bi);
+  }
+  return u;
+}
+
+void add_myself_to_userlist() {
+  conf.bot->u = add_bot_userlist(conf.bot->nick);
+}
+
+void add_child_bots() {
+  conf_bot* bot = conf.bots->next; //Skip myself
+  if (bot && bot->nick) {
+    for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
+      add_bot_userlist(conf.bot->nick);
     }
   }
+}
+
+void add_localhub() {
+  add_bot_userlist(conf.localhub);
 }
 
 void rehash_ip() {
@@ -624,6 +639,11 @@ void chanprog()
 
   add_myself_to_userlist();
 
+  if (conf.bot->localhub)
+    add_child_bots();
+  else if (!conf.bot->hub)
+    add_localhub();
+
   rehash_ip();
 
   /* set our shell info */
@@ -665,6 +685,11 @@ void reload()
   load_internal_users();
   /* make sure I am added and conf.bot->u is set */
   add_myself_to_userlist();
+
+  if (conf.bot->localhub)
+    add_child_bots();
+  else if (!conf.bot->hub)
+    add_localhub();
 
   /* Make sure no removed users/bots are still connected. */
   check_stale_dcc_users();
