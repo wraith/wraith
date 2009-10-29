@@ -583,6 +583,7 @@ int open_telnet_raw(int sock, const char *ipIn, port_t sport, bool proxy_on, int
       initialize_sockaddr(is_resolved, ip, port, &so);
     } else {	/* if not resolved, resolve it with blocking calls.. (shouldn't happen ever) */
       sdprintf("WARNING: open_telnet_raw(%s,%d) was passed an unresolved hostname.", ip, port);
+      killsock(sock);
       return -1;
     }
     socklen = SIZEOF_SOCKADDR(so);

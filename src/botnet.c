@@ -1099,9 +1099,12 @@ static void botlink_real(int i)
 //  if (dcc[i].sock > 0)
 //    identd_open();                      /* will be closed when an ident is replied. */
 
-  if (dcc[i].sock < 0 || open_telnet_raw(dcc[i].sock, dcc[i].host, dcc[i].port, 0, 1) < 0)
+  int open_telnet_return;
+  if (dcc[i].sock < 0 || (open_telnet_return = open_telnet_raw(dcc[i].sock, dcc[i].host, dcc[i].port, 0, 1)) < 0) {
+    if (open_telnet_return == -1)
+      dcc[i].sock = -1;
     failed_link(i);
-  else { /* let's attempt to initiate SSL before ANYTHING else... */
+  } else { /* let's attempt to initiate SSL before ANYTHING else... */
     dcc[i].ssl = 0;
   }
 
@@ -1270,8 +1273,10 @@ static void tandem_relay_dns_callback(int id, void *client_data, const char *hos
   dcc[i].u.relay->chat->current_lines = 0;
   dcc[i].timeval = now;
 
-  if (open_telnet_raw(dcc[i].sock, bd::String(ips[0]).c_str(), dcc[i].port, 0) < 0)
+  if (open_telnet_raw(dcc[i].sock, bd::String(ips[0]).c_str(), dcc[i].port, 0) < 0) {
+    dcc[i].sock = -1;
     failed_tandem_relay(i);
+  }
 }
 
 /* Input from user before connect is ready
