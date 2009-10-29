@@ -867,9 +867,19 @@ int answer(int sock, char *caller, in_addr_t *ip, port_t *port, int binary)
       *ip = ntohl(*ip);
     } else {
 #endif /* USE_IPV6 */
-      *ip = from.sin_addr.s_addr;
-      strlcpy(caller, iptostr(*ip), 121);
-      *ip = ntohl(*ip);
+      if (af_ty == AF_UNIX) {
+        struct sockaddr_un sun;
+        size_t socklen = sizeof(sun);
+
+        bzero(&sun, socklen);
+        getsockname(sock, (struct sockaddr*) &sun, &socklen);
+        strcpy(caller, sun.sun_path);
+        *port = 0;
+      } else {
+        *ip = from.sin_addr.s_addr;
+        strlcpy(caller, iptostr(*ip), 121);
+        *ip = ntohl(*ip);
+      }
 #ifdef USE_IPV6 
     }
 #endif /* USE_IPV6 */
@@ -878,7 +888,7 @@ int answer(int sock, char *caller, in_addr_t *ip, port_t *port, int binary)
 #ifdef USE_IPV6
       if (af_ty == AF_INET6)
         *port = ntohs(from6.sin6_port);
-      else
+      else if (af_ty == AF_INET)
 #endif /* USE_IPV6 */
         *port = ntohs(from.sin_port);
     }

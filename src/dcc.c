@@ -1371,6 +1371,8 @@ dcc_telnet(int idx, char *buf, int ii)
   in_addr_t ip;
   port_t port;
   char s[UHOSTLEN + 1] = "";
+  int i;
+  char x[1024] = "";
 
   if (dcc_total + 1 > max_dcc) {
     int j;
@@ -1395,6 +1397,24 @@ dcc_telnet(int idx, char *buf, int ii)
   /* Buffer data received on this socket.  */
   sockoptions(sock, EGG_OPTION_SET, SOCK_BUFFER);
 
+  int af_type = sockprotocol(sock);
+
+  if (af_type == AF_UNIX) {
+
+    //i = new_dcc(&DCC_IDENT, 0);
+    i = new_dcc(&DCC_TELNET_ID, 0);
+
+    simple_snprintf(x, sizeof(x), "UNKNOWN@localhost");
+    dcc[i].sock = sock;
+    dcc[i].uint.ident_sock = dcc[idx].sock;
+    dcc[i].port = 0;
+    dcc[i].timeval = now;
+    strlcpy(dcc[i].nick, "*", NICKLEN);
+    putlog(LOG_BOTS, "*", "Connection over local socket: %s", s);
+    dcc_telnet_got_ident(i, x);
+    return;
+  }
+
 #if SIZEOF_SHORT == 2
   if (port < 1024) {
 #else
@@ -1404,9 +1424,6 @@ dcc_telnet(int idx, char *buf, int ii)
     killsock(sock);
     return;
   }
-
-  char x[1024] = "";
-  int i;
 
   putlog(LOG_DEBUG, "*", "Telnet connection: %s/%d", s, port);
 
@@ -1431,7 +1448,7 @@ dcc_telnet(int idx, char *buf, int ii)
   dcc[i].user = get_user_by_host(x);		/* check for matching -telnet!telnet@ip */
   strlcpy(dcc[i].host, s, UHOSTLEN);
 #ifdef USE_IPV6
-  if (sockprotocol(sock) == AF_INET6)
+  if (af_type == AF_INET6)
     strlcpy(dcc[i].host6, s, sizeof(dcc[i].host6));
 #endif /* USE_IPV6 */
   dcc[i].port = port;
@@ -1738,6 +1755,8 @@ dcc_telnet_id(int idx, char *buf, int atr)
   }
   correct_handle(nick);
   strlcpy(dcc[idx].nick, nick, NICKLEN);
+  if (!strcmp(dcc[idx].host, "UNKNOWN@localhost"))
+    simple_snprintf(dcc[idx].host, sizeof(dcc[idx].host), "%s@localhost", nick);
   if (dcc[idx].user->bot) {
     if (!strcasecmp(conf.bot->nick, dcc[idx].nick)) {
       putlog(LOG_BOTS, "*", "Refused telnet connection from %s (tried using my botnetnick)", dcc[idx].host);
@@ -1825,7 +1844,7 @@ dcc_telnet_pass(int idx, int atr)
     strlcpy(dcc[idx].u.chat->con_chan, chanset ? chanset->dname : "*", sizeof(dummy.con_chan));
   }
 
-  if (conf.bot->hub) {
+  if (conf.bot->hub || (conf.bot->localhub && (dcc[idx].status & STAT_UNIXDOMAIN))) {
     if (dcc[idx].bot) {
       /* negotiate a new linking scheme */
       int i = 0;
@@ -1852,7 +1871,10 @@ dcc_telnet_pass(int idx, int atr)
 static void
 eof_dcc_telnet_id(int idx)
 {
-  putlog(LOG_MISC, "*", "Lost telnet connection to %s/%d", dcc[idx].host, dcc[idx].port);
+  if (dcc[idx].port)
+    putlog(LOG_MISC, "*", "Lost telnet connection to %s/%d", dcc[idx].host, dcc[idx].port);
+  else
+    putlog(LOG_MISC, "*", "Lost local connection for: %s", dcc[idx].host);
   killsock(dcc[idx].sock);
   lostdcc(idx);
 }
@@ -2034,48 +2056,55 @@ dcc_telnet_got_ident(int i, char *host)
 
   strlcpy(dcc[i].host, host, UHOSTLEN);
 
-  char shost[UHOSTLEN + 20] = "", sip[UHOSTLEN + 20] = "";
-  char *p = strchr(host, '@');
-  *p = 0;
+  bool unix_domain = 0;
+  if (!strcmp(host, "UNKNOWN@localhost"))
+    unix_domain = 1;
 
-  simple_snprintf(shost, sizeof(shost), "-telnet!%s", dcc[i].host);
-  simple_snprintf(sip, sizeof(sip), "-telnet!%s@%s", host, iptostr(htonl(dcc[i].addr)));
 
-  if (match_ignore(shost) || match_ignore(sip)) {
-    putlog(LOG_DEBUG, "*", "Ignored telnet connection from: %s[%s]",dcc[i].host, iptostr(htonl(dcc[i].addr)));
-    killsock(dcc[i].sock);
-    lostdcc(i);
-    return;
-  }
-  
-  if (protect_telnet) {
-    struct userrec *u = NULL;
-    bool ok = 1;
+  if (!unix_domain) {
+    char shost[UHOSTLEN + 20] = "", sip[UHOSTLEN + 20] = "";
+    char *p = strchr(host, '@');
+    *p = 0;
 
-    u = dcc[i].user;
-    if (!u)
-      u = get_user_by_host(sip);			/* Check for -telnet!ident@ip */
-    if (!u)
-      u = get_user_by_host(shost);		/* Check for -telnet!ident@host */
-    if (!u)
-      ok = 0;
+    simple_snprintf(shost, sizeof(shost), "-telnet!%s", dcc[i].host);
+    simple_snprintf(sip, sizeof(sip), "-telnet!%s@%s", host, iptostr(htonl(dcc[i].addr)));
 
-    if (ok && u && conf.bot->hub && !(u->flags & USER_HUBA))
-      ok = 0;
-    /* if I am a chanhub and they dont have +c then drop */
-    if (ok && (!conf.bot->hub && ischanhub() && u && !(u->flags & USER_CHUBA)))
-      ok = 0;
-/*    else if (!(u->flags & USER_PARTY))
-    ok = 0; */
-    if (!ok && u && u->bot)
-      ok = 1;
-    if (!ok && (dcc[idx].status & LSTN_PUBLIC))
-      ok = 1;
-    if (!ok) {
-      putlog(LOG_MISC, "*", "Denied telnet: %s, No Access", dcc[i].host);
+    if (match_ignore(shost) || match_ignore(sip)) {
+      putlog(LOG_DEBUG, "*", "Ignored telnet connection from: %s[%s]",dcc[i].host, iptostr(htonl(dcc[i].addr)));
       killsock(dcc[i].sock);
       lostdcc(i);
       return;
+    }
+
+    if (protect_telnet) {
+      struct userrec *u = NULL;
+      bool ok = 1;
+
+      u = dcc[i].user;
+      if (!u)
+        u = get_user_by_host(sip);			/* Check for -telnet!ident@ip */
+      if (!u)
+        u = get_user_by_host(shost);		/* Check for -telnet!ident@host */
+      if (!u)
+        ok = 0;
+
+      if (ok && u && conf.bot->hub && !(u->flags & USER_HUBA))
+        ok = 0;
+      /* if I am a chanhub and they dont have +c then drop */
+      if (ok && (!conf.bot->hub && ischanhub() && u && !(u->flags & USER_CHUBA)))
+        ok = 0;
+  /*    else if (!(u->flags & USER_PARTY))
+      ok = 0; */
+      if (!ok && u && u->bot)
+        ok = 1;
+      if (!ok && (dcc[idx].status & LSTN_PUBLIC))
+        ok = 1;
+      if (!ok) {
+        putlog(LOG_MISC, "*", "Denied telnet: %s, No Access", dcc[i].host);
+        killsock(dcc[i].sock);
+        lostdcc(i);
+        return;
+      }
     }
   }
 
@@ -2088,6 +2117,9 @@ dcc_telnet_got_ident(int i, char *host)
   /* Copy acceptable-nick/host mask */
   dcc[i].status = (STAT_TELNET | STAT_ECHO | STAT_COLOR | STAT_BANNER | STAT_CHANNELS | STAT_BOTS | STAT_WHOM);
 
+  if (unix_domain)
+    dcc[i].status |= STAT_UNIXDOMAIN;
+
   /* Copy acceptable-nick/host mask */
   strlcpy(dcc[i].nick, dcc[idx].host, HANDLEN);
   dcc[i].timeval = now;
@@ -2096,7 +2128,7 @@ dcc_telnet_got_ident(int i, char *host)
   /* This is so we dont tell someone doing a portscan anything
    * about ourselves. <cybah>
    */
-  if (conf.bot->hub)
+  if (conf.bot->hub || (conf.bot->localhub && unix_domain))
     dprintf(i, " \n");			/* represents hub that support new linking scheme */
   else
     dprintf(i, "%s\n", response(RES_USERNAME));

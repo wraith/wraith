@@ -57,7 +57,10 @@ static void ghost_link_case(int idx, direction_t direction)
 
       bzero(&sa, socklen);
       getsockname(socklist[snum].sock, (struct sockaddr *) &sa, &socklen);
-      port = sa.sin_port;
+      if (sa.sin_family == AF_UNIX)
+        port = 0;
+      else
+        port = sa.sin_port;
     }
 
     /* initkey-gen */
