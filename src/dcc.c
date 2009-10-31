@@ -268,6 +268,7 @@ bot_version(int idx, char *par)
 
   size_t l = atol(newsplit(&par));
 
+#ifdef no
   if (l != HANDLEN) {
     putlog(LOG_BOTS, "*", "Non-matching handle lengths with %s, they use %zu characters.", dcc[idx].nick, l);
     dprintf(idx, "error Non-matching handle length: mine %d, yours %zu\n", HANDLEN, l);
@@ -276,6 +277,7 @@ bot_version(int idx, char *par)
     lostdcc(idx);
     return;
   }
+#endif
 
   char x[1024] = "", *vversion = NULL, *vcommit = NULL;
   int vlocalhub = 0;
