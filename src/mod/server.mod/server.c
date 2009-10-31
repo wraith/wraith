@@ -981,7 +981,7 @@ static void dcc_chat_hostresolved(int i)
 static void server_secondly()
 {
   if (cycle_time)
-    cycle_time--;
+    --cycle_time;
   deq_msg();
   if (!resolvserv && serv < 0 && !trying_server)
     connect_server();
