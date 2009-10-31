@@ -17,6 +17,7 @@
 #include "misc_file.h"
 #include "tandem.h"
 #include "botnet.h"
+#include "net.h"
 #include "userrec.h"
 
 #include <sys/wait.h>
@@ -755,8 +756,20 @@ void reload_bin_data() {
     if (oldbots)
       free_conf_bots(oldbots);
 
-    if (!conf.bot->localhub)
+    if (!conf.bot->localhub) {
       free_conf_bots(conf.bots);
+
+      if (was_localhub) {
+        //Close the listening port
+        for (int i = 0; i < dcc_total; i++) {
+          if (dcc[i].type && (dcc[i].type == &DCC_TELNET) && (strchr(dcc[i].host, '/'))) {
+              unlink(dcc[i].host);
+              killsock(dcc[i].sock);
+              lostdcc(i);
+          }
+        }
+      }
+    }
   }
 }
 
