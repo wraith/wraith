@@ -1446,7 +1446,7 @@ ulsend(int idx, const char* data, size_t datalen)
 {
   char buf[1040] = "";
 
-  size_t len = simple_snprintf(buf, sizeof(buf), "s l %d %s", datalen-1, data);/* -1 for newline */
+  size_t len = simple_snprintf(buf, sizeof(buf), "s l %zu %s", datalen-1, data);/* -1 for newline */
   tputs(dcc[idx].sock, buf, len);
 }
 
