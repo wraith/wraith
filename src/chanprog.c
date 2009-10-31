@@ -549,8 +549,8 @@ void add_myself_to_userlist() {
 void add_child_bots() {
   conf_bot* bot = conf.bots->next; //Skip myself
   if (bot && bot->nick) {
-    for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
-      add_bot_userlist(conf.bot->nick);
+    for (; bot && bot->nick; bot = bot->next) {
+      add_bot_userlist(bot->nick);
     }
   }
 }
