@@ -1409,7 +1409,10 @@ static void share_read_stream(int idx, bd::Stream& stream) {
   /* The userfile we received may just be bogus or missing important users */
   load_internal_users();
   add_myself_to_userlist();
-  
+
+  if (conf.bot->localhub)
+    add_child_bots();
+
   /* Make sure no removed users/bots are still connected. */
   check_stale_dcc_users();
 

@@ -28,6 +28,7 @@ bool bot_shouldjoin(struct userrec* , struct flag_record *, struct chanset_t *, 
 bool shouldjoin(struct chanset_t *);
 char *samechans(const char *, const char *);
 void add_myself_to_userlist();
+void add_child_bots();
 bool is_hub(const char*);
 void load_internal_users();
 void setup_HQ(int);
