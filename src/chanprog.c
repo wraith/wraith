@@ -591,21 +591,31 @@ void rehash_ip() {
     listen_all(bi->telnet_port, 0);
     my_port = bi->telnet_port;
   } else if (conf.bot->localhub) {
-    // Listen on the unix domain socket
-    port_t port;
-    int i = open_listen_addr_by_af(conf.localhub_socket, &port, AF_UNIX);
-    if (i < 0) {
-      putlog(LOG_ERRORS, "*", "Can't listen on %s - %s", conf.localhub_socket, i == -1 ? "it's taken." : "couldn't assign file.");
-    } else {
-      /* now setup dcc entry */
-      int idx = new_dcc(&DCC_TELNET, 0);
-      dcc[idx].addr = 0L;
-      strlcpy(dcc[idx].host, conf.localhub_socket, sizeof(dcc[idx].host));
-      dcc[idx].port = 0;
-      dcc[idx].sock = i;
-      dcc[idx].timeval = now;
-      strlcpy(dcc[idx].nick, "(unix_domain)", NICKLEN);
-      putlog(LOG_DEBUG, "*", "Listening on telnet %s", conf.localhub_socket);
+    // If not listening on the domain socket, open it up
+    bool listening = 0;
+    for (int i = 0; i < dcc_total; i++) {
+      if (dcc[i].type && (dcc[i].type == &DCC_TELNET) && (!strcmp(dcc[i].host, conf.localhub_socket))) {
+        listening = 1;
+        break;
+      }
+    }
+    if (!listening) {
+      // Listen on the unix domain socket
+      port_t port;
+      int i = open_listen_addr_by_af(conf.localhub_socket, &port, AF_UNIX);
+      if (i < 0) {
+        putlog(LOG_ERRORS, "*", "Can't listen on %s - %s", conf.localhub_socket, i == -1 ? "it's taken." : "couldn't assign file.");
+      } else {
+        /* now setup dcc entry */
+        int idx = new_dcc(&DCC_TELNET, 0);
+        dcc[idx].addr = 0L;
+        strlcpy(dcc[idx].host, conf.localhub_socket, sizeof(dcc[idx].host));
+        dcc[idx].port = 0;
+        dcc[idx].sock = i;
+        dcc[idx].timeval = now;
+        strlcpy(dcc[idx].nick, "(unix_domain)", NICKLEN);
+        putlog(LOG_DEBUG, "*", "Listening on telnet %s", conf.localhub_socket);
+      }
     }
   }
 }
