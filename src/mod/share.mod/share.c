@@ -1060,9 +1060,10 @@ share_endstartup(int idx, char *par)
 {
   dcc[idx].status &= ~STAT_GETTING;
   /* Send to any other sharebots */
-  if (conf.bot->hub)
+  if (conf.bot->hub || conf.bot->localhub)
     hook_read_userfile();
-  else {
+
+  if (!conf.bot->hub) {
     /* Our hostmask may have been updated on connect, but the new userfile may not have it. */
     check_hostmask();
   }
