@@ -300,7 +300,7 @@ bot_version(int idx, char *par)
   if (par[0])
     vversion = newsplit(&par);
 
-  if (conf.bot->hub) {
+  if (conf.bot->hub || (conf.bot->localhub && (dcc[idx].status & STAT_UNIXDOMAIN))) {
     putlog(LOG_BOTS, "*", "Linked to %s.\n", dcc[idx].nick);
     chatout("*** Linked to %s.\n", dcc[idx].nick);
   } else {
@@ -317,8 +317,6 @@ bot_version(int idx, char *par)
 
     botnet_send_nlinked(idx, dcc[idx].nick, conf.bot->nick, '!', vlocalhub, vbuildts, vcommit, vversion);
   } else {
-    putlog(LOG_BOTS, "*", "Linked to botnet.");
-    chatout("*** Linked to botnet.\n");
     uplink_idx = idx;
     dcc[idx].hub = 1;
   }
