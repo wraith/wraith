@@ -98,6 +98,7 @@ bool	used_B = 0;		/* did we get started with -B? */
 int 	role;
 bool 	loading = 0;
 int	default_flags = 0;	/* Default user flags and */
+bool     have_linked_to_hub = 0;  /* Have we ever been linked to a hub? */
 int	default_uflags = 0;	/* Default userdefinied flags for people
 				   who say 'hello' or for .adduser */
 int     do_restart = 0;

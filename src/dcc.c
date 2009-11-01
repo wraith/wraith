@@ -310,13 +310,16 @@ bot_version(int idx, char *par)
 
   if (conf.bot->hub || conf.bot->localhub) {
     if (bot_hublevel(dcc[idx].user) < 999) {
-      if (!bot_aggressive_to(dcc[idx].user))    //not aggressive, so they are technically my uplink.
+      if (!bot_aggressive_to(dcc[idx].user)) {   //not aggressive, so they are technically my uplink.
         uplink_idx = idx;
+        have_linked_to_hub = 1;
+      }
       dcc[idx].hub = 1;
     }
 
     botnet_send_nlinked(idx, dcc[idx].nick, conf.bot->nick, '!', vlocalhub, vbuildts, vcommit, vversion);
   } else {
+    have_linked_to_hub = 1;
     uplink_idx = idx;
     dcc[idx].hub = 1;
   }
