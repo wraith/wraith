@@ -57,6 +57,7 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
 
   memberlist *m = NULL;
   char *pe = NULL, s[UHOSTLEN + 1], user[15] = "";
+  bool matched_user = 0;
 
   /* Apply lookup results to all matching members by host */
   for (m = r->chan->channel.member; m && m->nick[0]; m = m->next) {
@@ -75,9 +76,11 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
         }
       }
     }
+    if (m->user)
+      matched_user = 1;
   }
 
-  if (channel_rbl(r->chan))
+  if (!matched_user && channel_rbl(r->chan))
     resolve_to_rbl(r->chan, ips[0]);
 
   free(r->host);
