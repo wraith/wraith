@@ -1059,6 +1059,8 @@ static void
 share_endstartup(int idx, char *par)
 {
   dcc[idx].status &= ~STAT_GETTING;
+  // Share any local changes out
+  dump_resync(idx);
   /* Send to any other sharebots */
   if (conf.bot->hub || conf.bot->localhub)
     hook_read_userfile();
@@ -1088,6 +1090,10 @@ static void share_userfile_line(int idx, char *par) {
 
 static void share_userfile_start(int idx, char *par) {
   dcc[idx].status |= STAT_GETTING;
+  /* Start up a tbuf to queue outgoing changes for this bot until the
+   * userlist is done transferring.
+   */
+  new_tbuf(dcc[idx].nick);
   stream_in = new bd::Stream();
 }
 
