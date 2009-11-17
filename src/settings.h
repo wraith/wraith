@@ -1,6 +1,7 @@
 #ifndef _SETTINGS_H
 #define _SETTINGS_H
 
+// If changing this, need to also change the usage in main.c which assumes all of it is \200
 #define SETTINGS_HEADER "\200\200\200\200\200\200\200\200\200\200\200\200\200\200\200"
 #define PREFIXLEN sizeof(SETTINGS_HEADER)
 

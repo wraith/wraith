@@ -811,7 +811,7 @@ printf("out: %s\n", out);
     dtx_arg(argc, argv);
 
   for (size_t i = 0; i < PREFIXLEN; ++i)
-    if (settings.prefix[i] != SETTINGS_HEADER[i])
+    if (settings.prefix[i] != SETTINGS_HEADER[0])
       werr(ERR_BADPASS);
 
   sdprintf(STR("my euid: %d my uuid: %d, my ppid: %d my pid: %d"), myuid, getuid(), getppid(), mypid);
