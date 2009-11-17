@@ -1223,7 +1223,7 @@ void check_stale_dcc_users()
     if (!dcc[i].type || !dcc[i].nick[0]) continue;
     
 
-    if (dcc[i].user == NULL) { /* Removed user */
+    if (dcc[i].user == NULL && !(dcc[i].user = get_user_by_handle(userlist, dcc[i].nick))) { /* Removed user */
       if (dcc[i].type == &DCC_BOT || dcc[i].type == &DCC_FORK_BOT || dcc[i].type == &DCC_BOT_NEW)
         botunlink(i, dcc[i].nick, "No longer a valid bot.");
       else if (dcc[i].type == &DCC_CHAT) {
