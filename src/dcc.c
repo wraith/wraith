@@ -266,9 +266,9 @@ bot_version(int idx, char *par)
 
   dprintf(idx, "tb %s\n", conf.bot->nick);
 
+#ifdef no
   size_t l = atol(newsplit(&par));
 
-#ifdef no
   if (l != HANDLEN) {
     putlog(LOG_BOTS, "*", "Non-matching handle lengths with %s, they use %zu characters.", dcc[idx].nick, l);
     dprintf(idx, "error Non-matching handle length: mine %d, yours %zu\n", HANDLEN, l);
