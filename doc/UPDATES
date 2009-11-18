@@ -51,6 +51,7 @@
 * Default log timestamp now includes seconds
 * Hubs no longer include their own timestamp over botnet
 * Only use oident for server connects, not for bot linking.
+* Fix cmd_slowjoin not working on backup bots correctly.
 
 1.2.16.1
 * Fix linux compile errors

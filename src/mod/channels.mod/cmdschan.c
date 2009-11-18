@@ -586,7 +586,7 @@ static void cmd_slowjoin(int idx, char *par)
 
         get_user_flagrec(bot->u, &fr, chname);
 	/* Only send the 'sj' command if the bot is supposed to be in the channel (backups and such) */
-        if (bot_shouldjoin(bot->u, &fr, chan)) {
+        if (bot_shouldjoin(bot->u, &fr, chan, 1)) {
           /* Variation: 60 secs intvl should be 60 +/- 15 */
           int v = (random() % (intvl / 2)) - (intvl / 4);
 

@@ -767,7 +767,7 @@ chans_delbot(const char *bot, struct chanset_t *chan)
 }
 */
 
-bool bot_shouldjoin(struct userrec* u, struct flag_record* fr, struct chanset_t* chan)
+bool bot_shouldjoin(struct userrec* u, struct flag_record* fr, struct chanset_t* chan, bool ignore_inactive)
 {
   /* If the bot is restarting (and hasn't finished getting the userfile for the first time) DO NOT JOIN channels - breaks +B/+backup */
   if (restarting || loading) return 0;
@@ -783,7 +783,8 @@ bool bot_shouldjoin(struct userrec* u, struct flag_record* fr, struct chanset_t*
       return 0;
   }
 #endif
-  return (!channel_inactive(chan) && (channel_backup(chan) || (!glob_backup(*fr) && !chan_backup(*fr))));
+  // Ignore +inactive during cmd_slowjoin to ensure that +backup bots join
+  return ((ignore_inactive || !channel_inactive(chan)) && (channel_backup(chan) || (!glob_backup(*fr) && !chan_backup(*fr))));
 }
 
 bool shouldjoin(struct chanset_t *chan)
