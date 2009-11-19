@@ -810,7 +810,7 @@ printf("out: %s\n", out);
   if (argc)
     dtx_arg(argc, argv);
 
-  for (size_t i = 0; i < PREFIXLEN; ++i)
+  for (size_t i = 0; i < PREFIXLEN - 1; ++i)
     if (settings.prefix[i] != SETTINGS_HEADER[0])
       werr(ERR_BADPASS);
 
