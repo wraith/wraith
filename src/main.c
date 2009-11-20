@@ -521,7 +521,7 @@ static void core_secondly()
       do_fork();
   ++cnt;
 
-  if ((cnt % 30) == 0) {
+  if (((conf.bot->localhub || conf.bot->hub) && (cnt % 30) == 0) || (cnt % 5) == 0) {
     autolink_cycle(NULL);         /* attempt autolinks */
     cnt = 0;
   }
