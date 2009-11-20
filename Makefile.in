@@ -198,7 +198,23 @@ general: help res set
 
 check:
 
-wraith:	general
+.NOTPARALLEL: checkclean.wraith checkclean.debug
+
+checkclean.wraith:
+	@(if test -f stamp.debug; then \
+	echo "[*] Cleaning up alternate build"; \
+	$(MAKE) MAKEFLAGS=-s clean; \
+	fi)
+	@touch stamp.wraith
+
+checkclean.debug:
+	@(if test -f stamp.wraith; then \
+	echo "[*] Cleaning up alternate build"; \
+	$(MAKE) MAKEFLAGS=-s clean; \
+	fi)
+	@touch stamp.debug
+
+wraith:	checkclean.wraith general
 	@echo ""
 	@echo "Making binary"
 	@echo ""
@@ -210,7 +226,7 @@ wraith:	general
 
 dwraith: debug
 
-debug:  general
+debug: checkclean.debug general
 	@echo ""
 	@echo "Making debug binary"
 	@echo ""
