@@ -433,7 +433,7 @@ static void dtx_arg(int& argc, char *argv[])
 #ifdef DEBUG
 	printf(STR("pack: %d conf: %d settings_t: %d prefix: %d pad: %d needed padding: %d\n"), SIZE_PACK, SIZE_CONF, sizeof(settings_t), PREFIXLEN, SIZE_PAD, (16 - ((sizeof(settings_t) - sizeof(settings.padding)) % 16)) % 16);
 #endif
-        if (settings.homedir[0]) {
+        if (settings.dynamic_initialized[0]) {
           ++sdebug;
           bin_to_conf();
         }
@@ -636,7 +636,7 @@ static void startup_checks(int hack) {
 
 #ifndef CYGWIN_HACKS
   /* Only error out with missing homedir when we aren't editing the binary */
-  if (settings.homedir[0])
+  if (settings.dynamic_initialized[0])
     bin_to_conf(do_confedit ? 0 : 1);		/* read our memory from settings[] into conf[] */
 
   if (do_confedit)
