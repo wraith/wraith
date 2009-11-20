@@ -1771,8 +1771,9 @@ dcc_telnet_id(int idx, char *buf, int atr)
     if (!u)
       ok = 0;
 
-    if (u && strcasecmp(nick, u->handle))
-      ok = 0;
+//    // Restrict connect to matching the user who they claim to be
+//    if (u && strcasecmp(nick, u->handle))
+//      ok = 0;
 
     if (!ok) {
       putlog(LOG_BOTS, "*", "Denied link to '%s': Host not recognized: %s", nick, dcc[idx].host);
