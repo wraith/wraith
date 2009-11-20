@@ -322,7 +322,7 @@ void botnet_send_log(int idx, const char *from, int type, const char *msg, bool 
   size_t len;
   // Cut out timestamp
   if (truncate_ts)
-    len = simple_snprintf(OBUF, sizeof(OBUF), "lo %s %d %s\n", from, type, &msg[LOG_TS_LEN]);
+    len = simple_snprintf(OBUF, sizeof(OBUF), "lo %s %d %s\n", from, type, &msg[LOG_TS_LEN + 1]); //+1 due to excess space
   else
     len = simple_snprintf(OBUF, sizeof(OBUF), "lo %s %d %s\n", from, type, msg);
 
