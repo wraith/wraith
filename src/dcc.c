@@ -266,6 +266,8 @@ bot_version(int idx, char *par)
 
   dprintf(idx, "tb %s\n", conf.bot->nick);
 
+  newsplit(&par); //Ignore handlen
+
 #ifdef no
   size_t l = atol(newsplit(&par));
 
