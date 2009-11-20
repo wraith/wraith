@@ -1795,7 +1795,7 @@ dcc_telnet_id(int idx, char *buf, int atr)
   } else {
   }
 
-  if (dcc[idx].bot) {
+  if (dcc[idx].bot && !(dcc[idx].status & STAT_UNIXDOMAIN)) {
     char shost[UHOSTLEN + 20] = "", sip[UHOSTLEN + 20] = "", user[30] = "";
     simple_snprintf(shost, sizeof(shost), "-telnet!%s", dcc[idx].host);
     char *p = strchr(dcc[idx].host, '@');
