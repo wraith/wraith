@@ -590,7 +590,7 @@ int open_telnet_raw(int sock, const char *ipIn, port_t sport, bool proxy_on, int
   } else { // Unix domain socket
     so.sun.sun_family = AF_UNIX;
     strcpy(so.sun.sun_path, ip);
-    socklen = strlen(so.sun.sun_path) + sizeof(so.sun.sun_family);
+    socklen = SUN_LEN(&so.sun);
   }
 
   for (int i = 0; i < MAXSOCKS; i++) {
@@ -722,7 +722,7 @@ int open_address_listen(const char* ip, port_t *port)
       name.sun.sun_family = AF_UNIX;
       strcpy(name.sun.sun_path, ip);
       unlink(name.sun.sun_path);
-      addrlen = strlen(name.sun.sun_path) + sizeof(name.sun.sun_family);
+      addrlen = SUN_LEN(&name.sun);
     } else {
       name.sin.sin_family = af_def;
       name.sin.sin_port = htons(*port); /* 0 = just assign us a port */
