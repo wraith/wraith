@@ -132,7 +132,7 @@ static void update_ufsend(int idx, char *par)
 #else
     sock = getsock(SOCK_BINARY); /* Don't buffer this -> mark binary. */
 #endif /* USE_IPV6 */
-    int open_telnet_return;
+    int open_telnet_return = 0;
     if (sock < 0 || (open_telnet_return = open_telnet_dcc(sock, ip, port)) < 0) {
       if (open_telnet_return != -1 && sock != -1)
         killsock(sock);

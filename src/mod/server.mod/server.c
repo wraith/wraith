@@ -945,7 +945,7 @@ static void dcc_chat_hostresolved(int i)
 #else
   dcc[i].sock = getsock(0);
 #endif /* USE_IPV6 */
-  int open_telnet_return;
+  int open_telnet_return = 0;
   if (dcc[i].sock < 0 || (open_telnet_return = open_telnet_dcc(dcc[i].sock, ip, buf)) < 0) {
     if (open_telnet_return == -1)
       dcc[i].sock = -1;

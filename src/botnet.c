@@ -1099,7 +1099,7 @@ static void botlink_real(int i)
 //  if (dcc[i].sock > 0)
 //    identd_open();                      /* will be closed when an ident is replied. */
 
-  int open_telnet_return;
+  int open_telnet_return = 0;
   if (dcc[i].sock < 0 || (open_telnet_return = open_telnet_raw(dcc[i].sock, dcc[i].host, dcc[i].port, 0, 1)) < 0) {
     if (open_telnet_return == -1)
       dcc[i].sock = -1;
