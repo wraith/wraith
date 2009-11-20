@@ -335,7 +335,7 @@ static void start_sending_binary(int idx, bool streamable)
     } else {
       dcc[idx].status |= STAT_SENDINGU;
       strlcpy(dcc[j].host, dcc[idx].nick, UHOSTLEN);		/* Store bot's nick */
-      dprintf(idx, "sb us %lu %hd %lu\n", iptolong(getmyip()), dcc[j].port, dcc[j].u.xfer->length);
+      dprintf(idx, "sb us %lu %d %lu\n", iptolong(getmyip()), dcc[j].port, dcc[j].u.xfer->length);
     }
   }
 }
