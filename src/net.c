@@ -727,7 +727,7 @@ int open_address_listen(const char* ip, port_t *port)
       name.sin.sin_family = af_def;
       name.sin.sin_port = htons(*port); /* 0 = just assign us a port */
       name.sin.sin_addr.s_addr = inet_addr(ip);
-      addrlen = sizeof(struct sockaddr_in*);
+      addrlen = sizeof(struct sockaddr_in);
     }
 
     if (bind(sock, (struct sockaddr *) &name, addrlen) < 0) {
