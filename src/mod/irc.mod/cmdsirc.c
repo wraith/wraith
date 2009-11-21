@@ -1318,6 +1318,11 @@ static void cmd_find(int idx, char *par)
             simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
             m->user = get_user_by_host(s);
           }
+
+          /* Managed to get the user for a previously unknown user. Act on it! */
+          if (m->user)
+            check_this_user(m->user->handle, 0, NULL);
+
           m->tried_getuser = 1;
         }
         if ((!lookup_user && wild_match(par, s)) || (lookup_user && m->user == u)) {
@@ -1524,6 +1529,10 @@ static void cmd_channel(int idx, char *par)
             resolve_to_member(chan, m->nick, host);
           }
         }
+
+        /* Managed to get the user for a previously unknown user. Act on it! */
+        if (m->user)
+          check_this_user(m->user->handle, 0, NULL);
 
         m->tried_getuser = 1;
       }
