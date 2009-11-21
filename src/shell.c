@@ -677,86 +677,22 @@ int email(char *subject, char *msg, int who)
   return 0;
 }
 
-void baduname(char *confhas, char *myuname) {
-  char *tmpFile = NULL;
-  int tosend = 0, make = 0;
-  size_t siz = strlen(tempdir) + 3 + 1;
-
-  tmpFile = (char *) my_calloc(1, siz);
-
-  simple_snprintf(tmpFile, siz, STR("%s/.un"), conf.datadir);
-  if (is_file(tmpFile)) {
-    struct stat ss;
-    time_t diff;
-
-    stat(tmpFile, &ss);
-    diff = now - ss.st_mtime;
-    if (diff >= 86400) {
-      tosend++;          		/* only send once a day */
-      unlink(tmpFile);		/* remove file */
-      make++;			/* make a new one at thie time. */
-    }
-  } else {
-    make++;
-  }
-
-  if (make) {
-    FILE *fp = NULL;
-    if ((fp = fopen(tmpFile, "w"))) {
-      fprintf(fp, "\n");
-      fflush(fp);
-      fclose(fp);
-      tosend++;           /* only send if we could write the file. */
-    }
-  }
-
-  if (tosend) {
-    struct utsname un;
-    char msg[1024] = "", subject[31] = "";
-
-    uname(&un);
-    simple_snprintf(subject, sizeof subject, STR("CONF/UNAME() mismatch notice"));
-    simple_snprintf(msg, sizeof msg, STR("This is an auto email from a wraith bot which has you in it's OWNER_EMAIL list..\n \nThe uname() output on this box has changed, probably due to a kernel upgrade...\nMy login is: %s\nMy binary is: %s\nLocalhub: %s\nConf   : %s\nUname(): %s\n \nThis email will only be sent once a day while this error is present.\nYou need to login to my shell (%s) and fix my local config.\n"), 
-                                  conf.username ? conf.username : "unknown", 
-                                  binname,
-                                  conf.bots && conf.bots->nick ? conf.bots->nick : origbotname,
-                                  confhas, myuname, un.nodename);
-    email(subject, msg, EMAIL_OWNERS);
-  }
-  free(tmpFile);
-}
-
 char *homedir(bool useconf)
 {
   static char homedir_buf[PATH_MAX] = "";
 
   if (!homedir_buf[0]) {
-    char tmp[DIRMAX] = "";
-
     if (conf.homedir && useconf)
-      simple_snprintf(tmp, sizeof tmp, "%s", conf.homedir);
+      simple_snprintf(homedir_buf, sizeof homedir_buf, "%s", conf.homedir);
     else {
 #ifdef CYGWIN_HACKS
-      simple_snprintf(tmp, sizeof tmp, "%s", dirname(binname));
+      simple_snprintf(homedir_buf, sizeof homedir_buf, "%s", dirname(binname));
 #else /* !CYGWIN_HACKS */
-      struct passwd *pw = NULL;
- 
-      ContextNote(STR("getpwuid()"));
-      pw = getpwuid(myuid);
-      if (pw)
-        simple_snprintf(tmp, sizeof tmp, "%s", pw->pw_dir);
-      ContextNote(STR("getpwuid(): Success"));
+    char *home = getenv("HOME");
+    if (home && strlen(home))
+      strlcpy(homedir_buf, home, sizeof(homedir_buf));
 #endif /* CYGWIN_HACKS */
     }
-    ContextNote(STR("realpath()"));
-    if (tmp[0]) {
-      if (!realpath(tmp, homedir_buf)) { /* this will convert lame home dirs of /home/blah->/usr/home/blah */
-        homedir_buf[0] = 0;
-        return NULL;
-      }
-      homedir_buf[DIRMAX < PATH_MAX ? DIRMAX - 1 : PATH_MAX - 1] = 0;
-    }
-    ContextNote(STR("realpath(): Success"));
   }
   return homedir_buf[0] ? homedir_buf : NULL;
 }
@@ -769,13 +705,9 @@ char *my_username()
 #ifdef CYGWIN_HACKS
     simple_snprintf(username, sizeof username, "cygwin");
 #else /* !CYGWIN_HACKS */
-    struct passwd *pw = NULL;
-
-    ContextNote(STR("getpwuid()"));
-    pw = getpwuid(myuid);
-    ContextNote(STR("getpwuid(): Success"));
-    if (pw)
-      strlcpy(username, pw->pw_name, sizeof(username));
+    char *user = getenv("USER");
+    if (user && strlen(user))
+      strlcpy(username, user, sizeof(username));
 #endif /* CYGWIN_HACKS */
   }
   return username[0] ? username : NULL;
@@ -830,96 +762,6 @@ void expand_tilde(char **ptr)
   }
 }
 
-char *my_uname()
-{
-  static char os_uname[250] = "";
-
-  if (!os_uname[0]) {
-    char *unix_n = NULL, *vers_n = NULL;
-    struct utsname un;
-
-    if (uname(&un) < 0) {
-      unix_n = "*unkown*";
-      vers_n = "";
-    } else {
-      unix_n = un.nodename;
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
-      vers_n = un.release;
-#elif defined(__linux__)
-      vers_n = un.version;
-#else
-# error "Don't know how to handle uname for this system!"
-#endif
-    }
-    simple_snprintf(os_uname, sizeof os_uname, "%s %s", unix_n, vers_n);
-  }
-  return os_uname;
-}
-
-#ifndef CYGWIN_HACKS
-char *move_bin(const char *ipath, const char *file, bool run)
-{
-  char *path = strdup(ipath);
-
-  expand_tilde(&path);
-
-  /* move the binary to the correct place */
-  static char newbin[DIRMAX] = "";
-  char real[PATH_MAX] = "";
-
-  simple_snprintf(newbin, sizeof newbin, "%s%s%s", path, path[strlen(path) - 1] == '/' ? "" : "/", file);
-
-  ContextNote(STR("realpath()"));
-  if (!realpath(binname, real))            /* get the realpath of binname */
-    fatal(STR("Unable to determine binary path."), 0);
-  real[(DIRMAX < PATH_MAX ? DIRMAX : PATH_MAX) - 1] = 0;
-  ContextNote(STR("realpath(): Success"));
-  /* running from wrong dir, or wrong bin name.. lets try to fix that :) */
-  sdprintf(STR("binname: %s"), binname);
-  sdprintf(STR("newbin: %s"), newbin);
-  sdprintf(STR("real: %s"), real);
-  if (strcmp(binname, newbin) && strcmp(newbin, real)) {              /* if wrong path and new path != current */
-    bool ok = 1;
-
-    sdprintf(STR("wrong dir, is: %s :: %s"), binname, newbin);
-
-    unlink(newbin);
-    if (copyfile(binname, newbin))
-      ok = 0;
-
-    if (ok && !can_stat(newbin)) {
-       unlink(newbin);
-       ok = 0;
-    }
-
-    if (ok && fixmod(newbin)) {
-        unlink(newbin);
-        ok = 0;
-    }
-
-    if (ok) {
-      sdprintf(STR("Binary successfully moved to: %s"), newbin);
-      unlink(binname);
-      if (run) {
-        simple_snprintf(newbin, sizeof newbin, "%s%s%s", 
-                        path, path[strlen(path) - 1] == '/' ? "" : "/", shell_escape(file));
-        if (system(newbin) == -1) {
-          printf("Unable to automatically start new binary.\n");
-          exit(1);
-        }
-        sdprintf(STR("exiting to let new binary run..."));
-        exit(0);
-      }
-    } else {
-      if (run)
-        werr(ERR_WRONGBINDIR);
-      sdprintf(STR("Binary move failed to: %s"), newbin);
-      return binname;
-    }
-  }
-  return newbin;
-}
-
 void check_crontab()
 {
   int i = 0;
@@ -952,6 +794,7 @@ void crontab_del() {
   unlink(tmpFile);
 }
 
+#ifndef CYGWIN_HACKS
 int crontab_exists() {
   char buf[2048] = "", *out = NULL;
 

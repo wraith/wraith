@@ -50,17 +50,12 @@ tellconf()
   sdprintf(STR("tempdir: %s\n"), replace(tempdir, conf.homedir, "~"));
   sdprintf(STR("features: %d\n"), conf.features);
   sdprintf(STR("uid: %d\n"), conf.uid);
-  sdprintf(STR("uname: %s\n"), conf.uname);
   sdprintf(STR("homedir: %s\n"), conf.homedir);
   sdprintf(STR("username: %s\n"), conf.username);
-  sdprintf(STR("binpath: %s\n"), replace(conf.binpath, conf.homedir, "~"));
-  sdprintf(STR("binname: %s\n"), conf.binname);
   sdprintf(STR("datadir: %s\n"), replace(conf.datadir, conf.homedir, "~"));
   sdprintf(STR("portmin: %d\n"), conf.portmin);
   sdprintf(STR("portmax: %d\n"), conf.portmax);
   sdprintf(STR("autocron: %d\n"), conf.autocron);
-  sdprintf(STR("autouname: %d\n"), conf.autouname);
-  sdprintf(STR("watcher: %d\n"), conf.watcher);
   sdprintf(STR("bots:\n"));
   for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
     i++;
@@ -316,7 +311,6 @@ confedit()
   free_conf();
 
   readconf((const char *) tmpconf.file, 0);               /* read cleartext conf tmp into &settings */
-  expand_tilde(&conf.binpath);
   expand_tilde(&conf.datadir);
   unlink(tmpconf.file);
   conf_to_bin(&conf, 0, -1);
@@ -348,33 +342,16 @@ init_conf()
   conf.bot = NULL;
 
   conf.localhub = NULL;
-  conf.watcher = 0;
 #ifdef CYGWIN_HACKS
   conf.autocron = 0;
 #else
   conf.autocron = 1;
 #endif /* !CYGWIN_HACKS */
-  conf.autouname = 0;
-#ifdef CYGWIN_HACKS
-  if (homedir())
-    conf.binpath = strdup(homedir());
-#else /* !CYGWIN_HACKS */
-  conf.binpath = strdup(dirname(binname));
-#endif /* CYGWIN_HACKS */
-  char *p = strrchr(binname, '/');
-
-  p++;
-
-  if (!strncmp(p, STR("wraith."), 7) && strchr(p, '-'))
-    conf.binname = strdup(STR("wraith"));
-  else
-    conf.binname = strdup(p);
 
   conf.features = 0;
   conf.portmin = 0;
   conf.portmax = 0;
   conf.uid = -1;
-  conf.uname = NULL;
   conf.username = NULL;
   conf.homedir = NULL;
   conf.datadir = strdup(STR("./..."));
@@ -566,18 +543,12 @@ free_conf()
   conf.bot = NULL;
   if (conf.localhub)
     free(conf.localhub);
-  if (conf.uname)
-    free(conf.uname);
   if (conf.username)
     free(conf.username);
   if (conf.datadir)
     free(conf.datadir);
   if (conf.homedir)
     free(conf.homedir);
-  if (conf.binname)
-   free(conf.binname);
-  if (conf.binpath)
-    free(conf.binpath);
   init_conf();
 }
 
@@ -607,7 +578,7 @@ void prep_homedir(bool error)
 int
 parseconf(bool error)
 {
-  if (error && conf.uid == -1 && !conf.uname)
+  if (error && conf.uid == -1 && !conf.homedir)
     werr(ERR_NOTINIT);
 
   if (!conf.username)
@@ -623,17 +594,6 @@ parseconf(bool error)
   } else if (!conf.uid)
     conf.uid = myuid;
 
-  if (conf.uname && strcmp(conf.uname, my_uname()) && !conf.autouname) {
-    baduname(conf.uname, my_uname());       /* its not auto, and its not RIGHT, bail out. */
-    sdprintf(("wrong uname, conf: %s :: %s"), conf.uname, my_uname());
-    if (error)
-      werr(ERR_WRONGUNAME);
-  } else if (conf.uname && conf.autouname) {    /* if autouname, dont bother comparing, just set uname to output */
-    str_redup(&conf.uname, my_uname());
-  } else if (!conf.uname) { /* if not set, then just set it, wont happen again next time... */
-    conf.uname = strdup(my_uname());
-  }
-  
 #endif /* !CYGWIN_HACKS */
   return 0;
 }
@@ -671,17 +631,7 @@ readconf(const char *fname, int bits)
     sdprintf(STR("CONF LINE: %s"), line.c_str());
 // !strchr("_`|}][{*/#-+!abcdefghijklmnopqrstuvwxyzABDEFGHIJKLMNOPWRSTUVWXYZ", line[0])) {
     /* - uid */
-    if (line[0] == '-') {
-      if (conf.uid == -1)
-        conf.uid = atoi(newsplit(line).c_str());
-
-      /* + uname */
-    } else if (line[0] == '+') {
-      if (!conf.uname)
-        conf.uname = strdup(newsplit(line).c_str());
-
-      /* ! is misc options */
-    } else if (line[0] == '!') {
+    if (line[0] == '!') {
       ++line;
       line.trim();
 
@@ -698,10 +648,6 @@ readconf(const char *fname, int bits)
         if (egg_isdigit(line[0]))
           conf.autocron = atoi(line.c_str());
 
-      } else if (option == STR("autouname")) {      /* auto update uname contents? */
-        if (egg_isdigit(line[0]))
-          conf.autouname = atoi(line.c_str());
-
       } else if (option == STR("username")) {       /* shell username */
         str_redup(&conf.username, line.c_str());
 
@@ -710,12 +656,6 @@ readconf(const char *fname, int bits)
 
       } else if (option == STR("datadir")) {        /* datadir */
         str_redup(&conf.datadir, line.c_str());
-
-      } else if (option == STR("binpath")) {        /* path that the binary should move to? */
-        str_redup(&conf.binpath, line.c_str());
-
-      } else if (option == STR("binname")) {        /* filename of the binary? */
-        str_redup(&conf.binname, line.c_str());
 
       } else if (option == STR("portmin")) {
         if (egg_isdigit(line[0]))
@@ -728,13 +668,6 @@ readconf(const char *fname, int bits)
       } else if (option == STR("uid")) {    /* new method uid */
         if (str_isdigit(line.c_str()))
           conf.uid = atoi(line.c_str());
-
-      } else if (option == STR("uname")) {  /* new method uname */
-        str_redup(&conf.uname, line.c_str());
-
-      } else if (option == STR("watcher")) {
-        if (egg_isdigit(line[0]))
-          conf.watcher = atoi(line.c_str());
 
       } else {
         putlog(LOG_MISC, "*", STR("Unrecognized config option '%s'"), option.c_str());
@@ -793,8 +726,6 @@ writeconf(char *filename, int fd, int bits)
   char *p = NULL;
 
   comment("");
-  comment("# Lines beginning with # are what the preceeding line SHOULD be");
-  comment("# They are simply comments and are not parsed at all.\n");
 
 #define conf_com() do {							\
 	if (do_confedit == CONF_AUTO) {					\
@@ -811,23 +742,6 @@ writeconf(char *filename, int fd, int bits)
   } else
     *stream << buf.printf(STR("! uid %d\n"), conf.uid);
 
-  if (!conf.uname || (conf.uname && conf.autouname && strcmp(conf.uname, my_uname()))) {
-    autowrote = 1;
-    if (conf.uname)
-      comment("# autouname is ON");
-    else
-      comment("# Automatically updated empty uname");
-
-    *stream << buf.printf(STR("! uname %s\n"), my_uname());
-    if (conf.uname)
-      *stream << buf.printf(STR("#! uname %s\n"), conf.uname);
-  } else if (conf.uname && !conf.autouname && strcmp(conf.uname, my_uname())) {
-    conf_com();
-    *stream << buf.printf(STR("%s! uname %s\n"), do_confedit == CONF_AUTO ? "" : "#", my_uname());
-    *stream << buf.printf(STR("%s! uname %s\n"), do_confedit == CONF_STATIC ? "" : "#", conf.uname);
-  } else
-    *stream << buf.printf(STR("! uname %s\n"), conf.uname);
-
   comment("");
 
   if (conf.username && my_username() && strcmp(conf.username, my_username())) {
@@ -843,20 +757,6 @@ writeconf(char *filename, int fd, int bits)
     *stream << buf.printf(STR("%s! homedir %s\n"), do_confedit == CONF_STATIC ? "" : "#", conf.homedir);
   } else 
     *stream << buf.printf(STR("! homedir %s\n"), conf.homedir ? conf.homedir : homedir(0) ? homedir(0) : "");
-
-  comment("\n# binpath needs to be full path unless it begins with '~', which uses 'homedir', ie, '~/'");
-
-  if (homedir() && strstr(conf.binpath, homedir())) {
-    p = replace(conf.binpath, homedir(), "~");
-    *stream << buf.printf(STR("! binpath %s\n"), p);
-  } else if (conf.homedir && strstr(conf.binpath, conf.homedir)) { /* Could be an older homedir */
-    p = replace(conf.binpath, conf.homedir, "~");
-    *stream << buf.printf(STR("! binpath %s\n"), p);
-  } else
-    *stream << buf.printf(STR("! binpath %s\n"), conf.binpath);
-
-  comment("# binname is relative to binpath, if you change this, you'll need to manually remove the old one from crontab.");
-  *stream << buf.printf(STR("! binname %s\n"), conf.binname);
 
   comment("");
 
@@ -887,13 +787,6 @@ writeconf(char *filename, int fd, int bits)
   if (conf.autocron == 0) {
     comment("# Automatically add the bot to crontab?");
     *stream << buf.printf(STR("! autocron %d\n"), conf.autocron);
-
-    comment("");
-  }
-
-  if (conf.autouname) {
-    comment("# Automatically update 'uname' if it changes? (DANGEROUS)");
-    *stream << buf.printf(STR("! autouname %d\n"), conf.autouname);
 
     comment("");
   }
@@ -1041,22 +934,16 @@ bin_to_conf(bool error)
   conf.uid = atol(settings.uid);
   if (settings.username[0])
     str_redup(&conf.username, settings.username);
-  str_redup(&conf.uname, settings.uname); 
   str_redup(&conf.datadir, settings.datadir);
   if (settings.homedir[0])
     str_redup(&conf.homedir, settings.homedir);
-  str_redup(&conf.binpath, settings.binpath);
-  str_redup(&conf.binname, settings.binname);
   conf.portmin = atol(settings.portmin);
   conf.portmax = atol(settings.portmax);
-  conf.autouname = atoi(settings.autouname);
   conf.autocron = atoi(settings.autocron);
-  conf.watcher = atoi(settings.watcher);
 
 
   prep_homedir(error);
   expand_tilde(&conf.datadir);
-  expand_tilde(&conf.binpath);
 
   /* PARSE/ADD BOTS */
   {
@@ -1096,7 +983,7 @@ bin_to_conf(bool error)
   if (!mkdir_p(conf.datadir) && error)
     werr(ERR_DATADIR);
 
-  str_redup(&conf.datadir, replace(datadir, conf.binpath, "."));
+  str_redup(&conf.datadir, replace(datadir, dirname(binname), "."));
 
   if (Tempfile::FindDir() == ERROR)
     werr(ERR_TMPSTAT);

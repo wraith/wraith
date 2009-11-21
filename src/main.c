@@ -346,7 +346,6 @@ static void dtx_arg(int& argc, char *argv[])
         exit(2);
       case '4':
         readconf(optarg, CONF_ENC);
-        expand_tilde(&conf.binpath);
         expand_tilde(&conf.datadir);
         parseconf(0);
         conf_to_bin(&conf, 0, 6);		/* this will exit() in write_settings() */
@@ -431,7 +430,7 @@ static void dtx_arg(int& argc, char *argv[])
 #ifdef DEBUG
 	printf(STR("pack: %d conf: %d settings_t: %d prefix: %d pad: %d needed padding: %d\n"), SIZE_PACK, SIZE_CONF, sizeof(settings_t), PREFIXLEN, SIZE_PAD, (16 - ((sizeof(settings_t) - sizeof(settings.padding)) % 16)) % 16);
 #endif
-        if (settings.uname[0]) {
+        if (settings.dynamic_initialized[0]) {
           ++sdebug;
           bin_to_conf();
         }
@@ -620,8 +619,8 @@ static void core_halfhourly()
 
 static void startup_checks(int hack) {
   /* for compatability with old conf files 
-   * only check/use conf file if it exists and settings.uname is empty.
-   * if settings.uname is NOT empty, just erase the conf file if it exists
+   * only check/use conf file if it exists and settings.homedir is empty.
+   * if settings.homedir is NOT empty, just erase the conf file if it exists
    * otherwise, assume we're working only with the struct */
 
 #ifdef CYGWIN_HACKS
@@ -634,7 +633,7 @@ static void startup_checks(int hack) {
 
 #ifndef CYGWIN_HACKS
   /* Only error out with missing homedir when we aren't editing the binary */
-  if (settings.uname[0])
+  if (settings.dynamic_initialized[0])
     bin_to_conf(do_confedit ? 0 : 1);		/* read our memory from settings[] into conf[] */
 
   if (do_confedit)
@@ -648,10 +647,6 @@ static void startup_checks(int hack) {
 
   if (!can_stat(binname))
    werr(ERR_BINSTAT);
-
-#ifndef CYGWIN_HACKS
-  move_bin(conf.binpath, conf.binname, 1);
-#endif /* !CYGWIN_HACKS */
 
   fill_conf_bot();
 //  if (((!conf.bot || !conf.bot->nick) || (!conf.bot->hub && conf.bot->localhub)) && !used_B) {

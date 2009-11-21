@@ -1745,18 +1745,13 @@ static void cmd_conf(int idx, char *par)
         set++;
         save = 1;
 /*        if (!strcasecmp(what, "uid"))            conf.uid = atoi(par);
-        else if (!strcasecmp(what, "uname"))     str_redup(&conf.uname, par);
         else if (!strcasecmp(what, "username"))  str_redup(&conf.username, par);
 */
         if (!strcasecmp(what, "homedir"))   str_redup(&conf.homedir, par);
-        else if (!strcasecmp(what, "binpath"))   str_redup(&conf.binpath, par);
-        else if (!strcasecmp(what, "binname"))   str_redup(&conf.binname, par);
         else if (!strcasecmp(what, "datadir"))   str_redup(&conf.datadir, par);
         else if (!strcasecmp(what, "portmin"))   conf.portmin = atoi(par);
         else if (!strcasecmp(what, "portmax"))   conf.portmax = atoi(par);
         else if (!strcasecmp(what, "autocron"))  conf.autocron = atoi(par);
-        else if (!strcasecmp(what, "autouname")) conf.autouname = atoi(par);
-        else if (!strcasecmp(what, "watcher"))  conf.watcher = atoi(par);
         else { 
           set--;
           save = 0;
@@ -1768,18 +1763,13 @@ static void cmd_conf(int idx, char *par)
       const char *ss = set ? "Set: " : "";
       
 /*      if (!what || !strcasecmp(what, "uid"))        dprintf(idx, "%suid: %d\n", ss, conf.uid);
-      if (!what || !strcasecmp(what, "uname"))      dprintf(idx, "%suname: %s\n", ss, conf.uname);
       if (!what || !strcasecmp(what, "username"))   dprintf(idx, "%susername: %s\n", ss, conf.username);
 */
       if (!what || !strcasecmp(what, "homedir"))    dprintf(idx, "%shomedir: %s\n", ss, conf.homedir);
-      if (!what || !strcasecmp(what, "binpath"))    dprintf(idx, "%sbinpath: %s\n", ss, conf.binpath);
-      if (!what || !strcasecmp(what, "binname"))    dprintf(idx, "%sbinname: %s\n", ss, conf.binname);
       if (!what || !strcasecmp(what, "datadir"))    dprintf(idx, "%sdatadir: %s\n", ss, conf.datadir);
       if (!what || !strcasecmp(what, "portmin"))    dprintf(idx, "%sportmin: %d\n", ss, conf.portmin);
       if (!what || !strcasecmp(what, "portmax"))    dprintf(idx, "%sportmax: %d\n", ss, conf.portmax);
       if (!what || !strcasecmp(what, "autocron"))   dprintf(idx, "%sautocron: %d\n", ss, conf.autocron);
-      if (!what || !strcasecmp(what, "autouname"))  dprintf(idx, "%sautouname: %d\n", ss, conf.autouname);
-      if (!what || !strcasecmp(what, "watcher"))    dprintf(idx, "%swatcher: %d\n", ss, conf.watcher);
     }
   }
 #endif /* !CYGWIN_HACKS */

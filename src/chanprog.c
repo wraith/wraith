@@ -582,7 +582,7 @@ void chanprog()
 
   sdprintf("I am: %s", conf.bot->nick);
   if (conf.bot->hub) {
-    simple_snprintf(userfile, 121, "%s/.u", conf.binpath);
+    simple_snprintf(userfile, 121, "%s/.u", dirname(binname));
     loading = 1;
     checkchans(0);
     readuserfile(userfile, &userlist);

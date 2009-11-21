@@ -32,16 +32,11 @@ typedef struct conf_b {
   conf_bot *bot;        /* single bot (me) */
   int features;		/* Pack features (take, mdop, beta... etc..) */
   int uid;
-  int autouname;        /* should we just auto update any changed in uname output? */
   int autocron;         /* should the bot auto crontab itself? */
-  int watcher;		/* spawn a watcher pid to block ptrace? */
   char *localhub;	/* my localhub */
-  char *uname;
   char *datadir;
   char *username;       /* shell username */
   char *homedir;        /* homedir */
-  char *binpath;        /* path to binary, ie: ~/ */
-  char *binname;        /* binary name, ie: .sshrc */
   port_t portmin;       /* for hubs, the reserved port range for incoming connections */
   port_t portmax;       /* for hubs, the reserved port range for incoming connections */
 } conf_t;

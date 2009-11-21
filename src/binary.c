@@ -32,7 +32,7 @@ settings_t settings = {
   /* -- STATIC -- */
   "", "", "", "", "", "", "", "", "", "",
   /* -- DYNAMIC -- */
-  "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "",
   /* -- PADDING */
   ""
 };
@@ -135,7 +135,7 @@ bin_checksum(const char *fname, int todo)
     OPENSSL_cleanse(hash, sizeof(hash));
 
     /* Copy over only the dynamic data, leaving the pack config static */
-    memcpy(&settings.bots, &newsettings.bots, SIZE_CONF);
+    memcpy(&settings.DYNAMIC_HEADER, &newsettings.DYNAMIC_HEADER, SIZE_CONF);
     OPENSSL_cleanse(&newsettings, sizeof(settings_t));
 
     munmap(map, size);
@@ -206,7 +206,7 @@ bin_checksum(const char *fname, int todo)
 
     if (todo & WRITE_CONF) {
       /* Copy in the encrypted conf data */
-      memcpy(&outmap[newpos], &settings.bots, SIZE_CONF);
+      memcpy(&outmap[newpos], &settings.DYNAMIC_HEADER, SIZE_CONF);
 #ifdef DEBUG
       sdprintf(STR("writing conf: %d\n"), SIZE_CONF);
 #endif
@@ -474,17 +474,13 @@ static void edpack(settings_t *incfg, const char *in_hash, int what)
   update_hash();
 
   /* -- DYNAMIC -- */
+  dofield(incfg->dynamic_initialized);
   dofield(incfg->bots);
   dofield(incfg->uid);
-  dofield(incfg->autouname);
   dofield(incfg->autocron);
-  dofield(incfg->watcher);
-  dofield(incfg->uname);
   dofield(incfg->username);
   dofield(incfg->datadir);
   dofield(incfg->homedir);
-  dofield(incfg->binpath);
-  dofield(incfg->binname);
   dofield(incfg->portmin);
   dofield(incfg->portmax);
 
@@ -512,17 +508,13 @@ tellconfig(settings_t *incfg)
 //  dofield(incfg->salt1);
 //  dofield(incfg->salt2);
   // -- DYNAMIC --
+  dofield(incfg->dynamic_initialized);
   dofield(incfg->bots);
   dofield(incfg->uid);
-  dofield(incfg->autouname);
   dofield(incfg->autocron);
-  dofield(incfg->watcher);
-  dofield(incfg->uname);
   dofield(incfg->username);
   dofield(incfg->datadir);
   dofield(incfg->homedir);
-  dofield(incfg->binpath);
-  dofield(incfg->binname);
   dofield(incfg->portmin);
   dofield(incfg->portmax);
 #undef dofield
@@ -660,7 +652,7 @@ static void
 clear_settings(void)
 {
 //  memset(&settings.bots, 0, sizeof(settings_t) - SIZE_PACK - PREFIXLEN);
-  memset(&settings.bots, 0, SIZE_CONF);
+  memset(&settings.DYNAMIC_HEADER, 0, SIZE_CONF);
 }
 
 void conf_to_bin(conf_t *in, bool move, int die)
@@ -671,21 +663,16 @@ void conf_to_bin(conf_t *in, bool move, int die)
   clear_settings();
   sdprintf("converting conf to bin\n");
   simple_snprintf(settings.uid, sizeof(settings.uid), "%d", in->uid);
-  simple_snprintf(settings.watcher, sizeof(settings.watcher), "%d", in->watcher);
+  strlcpy(settings.dynamic_initialized, "1", sizeof(settings.dynamic_initialized));
   simple_snprintf(settings.autocron, sizeof(settings.autocron), "%d", in->autocron);
-  simple_snprintf(settings.autouname, sizeof(settings.autouname), "%d", in->autouname);
   simple_snprintf(settings.portmin, sizeof(settings.portmin), "%d", in->portmin);
   simple_snprintf(settings.portmax, sizeof(settings.portmax), "%d", in->portmax);
 
-  strlcpy(settings.binname, in->binname, sizeof(settings.binname));
   if (in->username)
     strlcpy(settings.username, in->username, sizeof(settings.username));
-  if (in->uname)
-    strlcpy(settings.uname, in->uname, sizeof(settings.uname));
   strlcpy(settings.datadir, in->datadir, sizeof(settings.datadir));
   if (in->homedir)
     strlcpy(settings.homedir, in->homedir, sizeof(settings.homedir));
-  strlcpy(settings.binpath, in->binpath, sizeof(settings.binpath));
   for (bot = in->bots; bot && bot->nick; bot = bot->next) {
     simple_snprintf(settings.bots, sizeof(settings.bots), STR("%s%s%s %s %s%s %s,"), 
                            settings.bots && settings.bots[0] ? settings.bots : "",
@@ -697,12 +684,7 @@ void conf_to_bin(conf_t *in, bool move, int die)
                            bot->net.ip6 ? bot->net.ip6 : "");
     }
 
-#ifndef CYGWIN_HACKS
-  if (move)
-    newbin = move_bin(in->binpath, in->binname, 0);
-  else
-#endif /* !CYGWIN_HACKS */
-    newbin = binname;
+  newbin = binname;
 //  tellconfig(&settings); 
   write_settings(newbin, -1, 1);
 
