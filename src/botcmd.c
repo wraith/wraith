@@ -656,7 +656,7 @@ static void bot_nlinked(int idx, char *par)
   }
   if (!s[0]) {
     for (p = newbot; *p; p++)
-      if ((*p < 32) || (*p == 127) || ((p - newbot) >= HANDLEN))
+      if ((*p < 32) || (*p == 127))
 	bogus = 1;
     i = nextbot(next);
     if (i != idx)
