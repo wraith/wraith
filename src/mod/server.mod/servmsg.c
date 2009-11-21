@@ -234,6 +234,32 @@ static int got001(char *from, char *msg)
   return 0;
 }
 
+/* <server> 004 <to> <servername> <version> <user modes> <channel modes> */
+static int
+got004(char *from, char *msg)
+{
+  char *tmp = NULL;
+
+  newsplit(&msg); /* nick */
+  newsplit(&msg); /* server */
+
+  //Cache the results for later parsing if needed (after a restart)
+  //Sending 'VERSION' does not work on all servers, plus this speeds
+  //up a restart by removing the need to wait for the information
+  if (!replaying_cache)
+    dprintf(DP_CACHE, ":%s 004 . . %s", from, msg);
+
+  tmp = newsplit(&msg);
+
+  /* cookies won't work on ircu or Unreal or snircd */
+  if (strstr(tmp, "u2.") || strstr(tmp, "Unreeal") || strstr(tmp, "snircd")) {
+    putlog(LOG_DEBUG, "*", "Disabling cookies as they are not supported on %s", cursrvname);
+    cookies_disabled = true;
+  }
+
+  return 0;
+}
+
 /* <server> 005 <to> <option> <option> <... option> :are supported by this server */
 static int
 got005(char *from, char *msg)
@@ -1099,6 +1125,7 @@ static void disconnect_server(int idx, int dolost)
   serv = -1;
   servidx = -1;
   server_online = 0;
+  cookies_disabled = false;
   floodless = 0;
   botuserhost[0] = 0;
   botuserip[0] = 0; 
@@ -1565,6 +1592,7 @@ static cmd_t my_raw_binds[] =
   {"PONG",	"",	(Function) gotpong,		NULL, LEAF},
   {"WALLOPS",	"",	(Function) gotwall,		NULL, LEAF},
   {"001",	"",	(Function) got001,		NULL, LEAF},
+  {"004",	"",	(Function) got004,		NULL, LEAF},
   {"005",	"",	(Function) got005,		NULL, LEAF},
   {"303",	"",	(Function) got303,		NULL, LEAF},
   {"432",	"",	(Function) got432,		NULL, LEAF},

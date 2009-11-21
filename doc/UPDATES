@@ -52,6 +52,8 @@
 * Hubs no longer include their own timestamp over botnet
 * Only use oident for server connects, not for bot linking.
 * Fix cmd_slowjoin not working on backup bots correctly.
+* Disable cookies on ircu(undernet) and Unreal servers as they do not allow unbanning nonexistant bans.
+
 
 1.2.16.1
 * Fix linux compile errors

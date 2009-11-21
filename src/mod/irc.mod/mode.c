@@ -103,7 +103,7 @@ do_op(char *nick, struct chanset_t *chan, bool delay, bool force)
     m->flags |= SENTOP;
   }
 
-  if (channel_fastop(chan) || channel_take(chan)) {
+  if (channel_fastop(chan) || channel_take(chan) || cookies_disabled) {
     add_mode(chan, '+', 'o', nick);
   } else {
     add_cookie(chan, nick);
@@ -1117,7 +1117,7 @@ gotmode(char *from, char *msg)
         if (ops) {
           int n = 0;
           /* Check cookies */
-          if (u && m && u->bot && !channel_fastop(chan) && !channel_take(chan)) {
+          if (u && m && u->bot && !channel_fastop(chan) && !channel_take(chan) && !cookies_disabled) {
             int isbadop = 0;
             bool failure = 0;
 
