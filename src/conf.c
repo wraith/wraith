@@ -1088,8 +1088,9 @@ bin_to_conf(bool error)
   }
 
   char datadir[PATH_MAX] = "";
-  if (!realpath(conf.datadir, datadir))
-    werr(ERR_DATADIR);
+  if (!realpath(conf.datadir, datadir)) {
+    ;
+  }
 
   str_redup(&conf.datadir, datadir);
   if (!mkdir_p(conf.datadir) && error)

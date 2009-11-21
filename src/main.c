@@ -169,7 +169,7 @@ have_cwd:
 #endif /* CYGWIN_HACKS */
   /* Fix for symlinked binaries */
   if (!realpath(bin, buf))
-    fatal(STR("realpath() failed"), 0);
+    fatal(STR("realpath() failed on getting current working directory."), 0);
   size_t len = strlen(buf);
   bin = (char *) my_realloc(bin, len + 1);
   strlcpy(bin, buf, len + 1);

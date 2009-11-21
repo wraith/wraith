@@ -322,8 +322,9 @@ bool Tempfile::FindDir()
   };
 
   for (int i = 0; dirs[i]; i++) {
-    if (!realpath(dirs[i], tempdir))
-      continue;
+    if (!realpath(dirs[i], tempdir)) {
+      ;
+    }
     tempdir[(DIRMAX < PATH_MAX ? DIRMAX : PATH_MAX) - 1] = 0;
     size_t len = strlen(tempdir);
     tempdir[len] = '/';
