@@ -101,6 +101,7 @@ distclean: clean
 
 distrib: clean
 	@rm -rf $(DISTRIB)/
+	-+@cd lib && $(MAKE) distclean
 	@mkdir $(DISTRIB) && cp -r $(DISTROFILES) $(DISTRIB)
 	@rm -rf `find $(DISTRIB)/ \( -name '*~' -o -name '*#' -o -name '*.orig' -o -name '*.rej' -o -name '*.bak' -o -name '.gitignore' -o -name '.*.swp' \) -type f -print`
 	@rm -rf `find $(DISTRIB)/ \( -name '.git' -o -name '.deps' \) -type d -print`
