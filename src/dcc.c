@@ -222,9 +222,15 @@ greet_new_bot(int idx)
   dcc[idx].u.bot->version[0] = 0;
   dcc[idx].u.bot->sysname[0] = 0;
   dcc[idx].u.bot->numver = 0;
-  if ((conf.bot->hub || conf.bot->localhub) && dcc[idx].user && (!(dcc[idx].user->flags & USER_OP))) {
-    putlog(LOG_BOTS, "*", "Rejecting link from %s", dcc[idx].nick);
-    dprintf(idx, "error You are being rejected.\n");
+  // Reject -o bots, and if we're a localhub who hasnt linked to hub yet, dont allow links in
+  if ((conf.bot->hub || conf.bot->localhub) && dcc[idx].user && (!(dcc[idx].user->flags & USER_OP) || (conf.bot->localhub && !have_linked_to_hub))) {
+    if (!(dcc[idx].user->flags & USER_OP)) {
+      putlog(LOG_BOTS, "*", "Rejecting link from %s", dcc[idx].nick);
+      dprintf(idx, "error You are being rejected.\n");
+    } else if (conf.bot->localhub && !have_linked_to_hub) {
+      putlog(LOG_BOTS, "*", "Delaying link from %s", dcc[idx].nick);
+      dprintf(idx, "error Delaying your link until I get userfile.\n");
+    }
     dprintf(idx, "bye\n");
     killsock(dcc[idx].sock);
     lostdcc(idx);
