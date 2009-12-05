@@ -83,16 +83,13 @@ tellconf()
 
 void spawnbot(const char *nick)
 {
-  size_t size = strlen(shell_escape(nick)) + strlen(shell_escape(binname)) + 20;
-  char *run = (char *) my_calloc(1, size);
   int status = 0;
 
-  simple_snprintf(run, size, "%s %s", shell_escape(binname), shell_escape(nick));
-  sdprintf("Spawning '%s': %s", nick, run);
-  status = system(run);
+  sdprintf("Spawning '%s'", nick);
+  const char* argv[] = {binname, nick, 0};
+  status = simple_exec(argv);
   if (status == -1 || WEXITSTATUS(status))
     sdprintf("Failed to spawn '%s': %s", nick, strerror(errno));
-  free(run);
 }
 
 /* spawn and kill bots accordingly

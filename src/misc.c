@@ -781,8 +781,6 @@ restart(int idx)
 void 
 hard_restart(int idx)
 {
-  char buf[1024] = "";
-
   write_userfile(idx);
   if (!conf.bot->hub) {
     nuke_server((char *) reason);		/* let's drop the server connection ASAP */
@@ -790,9 +788,8 @@ hard_restart(int idx)
   }
   fatal(idx <= 0x7FF0 ? reason : NULL, 1);
   usleep(2000 * 500);
-  simple_snprintf(buf, sizeof(buf), "%s -B %s\n", shell_escape(binname), shell_escape(conf.bot->nick));
   unlink(conf.bot->pid_file); /* if this fails it is ok, cron will restart the bot, *hopefully* */
-  system(buf); /* start new bot. */
+  simple_exec(binname, conf.bot->nick);
   exit(0);
 }
 #endif
@@ -807,6 +804,7 @@ int updatebin(int idx, char *par, int secs)
   size_t path_siz = strlen(binname) + strlen(par) + 2;
   char *path = (char *) my_calloc(1, path_siz);
   char *newbin = NULL, buf[DIRMAX] = "";
+  const char* argv[5];
 #ifndef CYGWIN_HACKS
   int i;
 #endif /* !CYGWIN_HACKS */
@@ -876,9 +874,11 @@ int updatebin(int idx, char *par, int secs)
 
   /* The binary should return '2' when ran with -2, if not it's probably corrupt. */
 #ifndef CYGWIN_HACKS
-  simple_snprintf(buf, sizeof(buf), STR("%s -2"), shell_escape(path));
-  putlog(LOG_DEBUG, "*", STR("Running for update binary test: %s"), buf);
-  i = system(buf);
+  putlog(LOG_DEBUG, "*", STR("Running for update binary test: %s -2"), path);
+  argv[0] = path;
+  argv[1] = "-2";
+  argv[2] = 0;
+  i = simple_exec(argv);
   if (i == -1 || WEXITSTATUS(i) != 2) {
     dprintf(idx, STR("Couldn't restart new binary (error %d)\n"), i);
     putlog(LOG_MISC, "*", STR("Couldn't restart new binary (error %d)"), i);
@@ -889,9 +889,11 @@ int updatebin(int idx, char *par, int secs)
 
   /* now to send our config to the new binary */
 #ifndef CYGWIN_HACKS
-  simple_snprintf(buf, sizeof(buf), STR("%s -4 %s"), shell_escape(path), conffile->file);
-  putlog(LOG_DEBUG, "*", STR("Running for update conf: %s"), buf);
-  i = system(buf);
+  putlog(LOG_DEBUG, "*", STR("Running for update conf: %s -4 %s"), path, conffile->file);
+  argv[0] = path;
+  argv[1] = "-4";
+  argv[2] = conffile->file;
+  i = simple_exec(argv);
   delete conffile;
   if (i == -1 || WEXITSTATUS(i) != 6) { /* 6 for successfull config read/write */
     dprintf(idx, STR("Couldn't pass config to new binary (error %d)\n"), i);
