@@ -48,6 +48,7 @@ char *my_username();
 void expand_tilde(char **);
 int email(char *, char *, int);
 int shell_exec(char *, char *, char **, char **);
+int simple_exec(const char* argv[]);
 #ifndef CYGWIN_HACKS
 void check_last();
 void check_promisc();

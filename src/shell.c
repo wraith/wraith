@@ -471,6 +471,26 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
   }
 }
 
+int simple_exec(const char* argv[]) {
+  pid_t pid, savedpid;
+  int status;
+
+  switch ((pid = fork())) {
+    case -1:
+      break;
+    case 0:		//child
+      execv(argv[0], (char* const*) &argv[0]);
+      _exit(127);
+    default:		//parent
+      savedpid = pid;
+      do {
+        pid = wait4(savedpid, &status, 0, (struct rusage *)0);
+      } while (pid == -1 && errno == EINTR);
+      break;
+  }
+  return(pid == -1 ? -1 : status);
+}
+
 void suicide(const char *msg)
 {
   char tmp[512] = "";
