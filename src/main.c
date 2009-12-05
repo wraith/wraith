@@ -724,12 +724,6 @@ int main(int argc, char **argv)
 
   srandom(now % (mypid + getppid()) * randint(1000));
 
-/*
-  char *out = NULL;
-printf("ret: %d\n", system("c:/wraith/leaf.exe"));
-  shell_exec("c:\\windows\\notepad.exe", NULL, &out, &out);
-printf("out: %s\n", out);
-*/
   setlimits();
   init_debug();
   init_signals();

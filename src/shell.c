@@ -51,36 +51,6 @@
 
 bool clear_tmpdir = 0;
 
-int my_system(const char *run)
-{
-#ifdef WIN32NOFUCK
-  int ret = -1;
-
-  PROCESS_INFORMATION pinfo;
-  STARTUPINFO sinfo;
-
-  memset(&sinfo, 0, sizeof(STARTUPINFO));
-  sinfo.cb = sizeof(sinfo);
-
-  sinfo.wShowWindow = SW_HIDE;
-  sinfo.dwFlags |= STARTF_USESTDHANDLES;
-  sinfo.hStdInput =
-  sinfo.hStdOutput =
-  sinfo.hStdError =
-
-  ret =
-    CreateProcess(NULL, (char *) run, NULL, NULL, TRUE, NORMAL_PRIORITY_CLASS | DETACHED_PROCESS, NULL, NULL,
-                  (STARTUPINFO *) &sinfo, (PROCESS_INFORMATION *) &pinfo);
-
-  if (ret == 0)
-    return -1;
-  else
-    return 0;
-#else
-  return system(run);
-#endif /* WIN32 */
-}
-
 void clear_tmp()
 {
   if (!clear_tmpdir)
