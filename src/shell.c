@@ -312,7 +312,7 @@ void check_trace(int start)
 }
 #endif /* !CYGWIN_HACKS */
 
-int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
+int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool simple)
 {
   if (!cmdline)
     return 0;
@@ -414,11 +414,10 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
   } else {
     /* Child: make fd's and set them up as std* */
 //    int ind, outd, errd;
-    char *argv[4] = { NULL, NULL, NULL, NULL };
-
 //    ind = fileno(inpFile);
 //    outd = fileno(outFile);
 //    errd = fileno(errFile);
+
     if (dup2(in->fd, STDIN_FILENO) == (-1)) {
       kill(parent, SIGCHLD);
       exit(1);
@@ -431,10 +430,23 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput)
       kill(parent, SIGCHLD);
       exit(1);
     }
-    argv[0] = "/bin/sh";
-    argv[1] = "-c";
-    argv[2] = cmdline;
-    argv[3] = NULL;
+
+    char *argv[15];
+    if (simple) {
+      char *p = NULL;
+      int n = 0;
+      char *mycmdline = strdup(cmdline);
+
+      while (mycmdline[0] && (p = newsplit(&mycmdline)))
+        argv[n++] = p;
+      argv[n] = NULL;
+    } else {
+      argv[0] = "/bin/sh";
+      argv[1] = "-c";
+      argv[2] = cmdline;
+      argv[3] = NULL;
+    }
+
     execvp(argv[0], &argv[0]);
     kill(parent, SIGCHLD);
     exit(1);

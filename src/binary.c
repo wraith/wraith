@@ -576,7 +576,7 @@ bool check_bin_compat(const char *fname)
   char *out = NULL;
 
   simple_snprintf(path, len, STR("%s -3"), shell_escape(fname));
-  if (shell_exec(path, NULL, &out, NULL)) {
+  if (shell_exec(path, NULL, &out, NULL, 1)) {
     if (out) {
       char *buf = out;
       size_t settings_ver = atoi(newsplit(&buf)), settings_len = atoi(newsplit(&buf));

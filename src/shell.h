@@ -47,7 +47,7 @@ char *homedir(bool = 1);
 char *my_username();
 void expand_tilde(char **);
 int email(char *, char *, int);
-int shell_exec(char *, char *, char **, char **);
+int shell_exec(char *, char *, char **, char **, bool = 0);
 int simple_exec(const char* argv[]);
 #ifndef CYGWIN_HACKS
 void check_last();
