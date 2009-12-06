@@ -751,16 +751,16 @@ restart(int idx)
   /* replace image now */
   char *argv[4] = { NULL, NULL, NULL, NULL };
 
-  argv[0] = strdup(shell_escape(binname));
+  argv[0] = strdup(binname);
 
   if (!backgrd || term_z || sdebug) {
     char shit[7] = "";
 
     simple_snprintf(shit, sizeof(shit), STR("-%s%s%s"), !backgrd ? "n" : "", term_z ? "t" : "", sdebug ? "D" : "");
     argv[1] = strdup(shit);
-    argv[2] = strdup(shell_escape(conf.bot->nick));
+    argv[2] = strdup(conf.bot->nick);
   } else {
-    argv[1] = strdup(shell_escape(conf.bot->nick));
+    argv[1] = strdup(conf.bot->nick);
   }
 
   unlink(conf.bot->pid_file);
