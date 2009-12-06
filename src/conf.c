@@ -231,13 +231,8 @@ confedit()
       fatal(STR("Cannot fork"), 0);
     case 0:
     {
-      char *run = NULL;
-      size_t size = tmpconf.len + strlen(editor) + 5;
-
-      run = (char *) my_calloc(1, size);
       /* child */
-      simple_snprintf(run, size, "%s %s", editor, tmpconf.file);
-      execlp("/bin/sh", "/bin/sh", "-c", run, (char*)NULL);
+      execlp(editor, editor, tmpconf.file, (char*)NULL);
       perror(editor);
       exit(1);
      /*NOTREACHED*/}
