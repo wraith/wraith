@@ -440,6 +440,9 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool
       while (mycmdline[0] && (p = newsplit(&mycmdline)))
         argv[n++] = p;
       argv[n] = NULL;
+
+      // Close all sockets
+      for (int fd = 3; fd < MAX_SOCKETS; ++fd) close(fd);
     } else {
       argv[0] = "/bin/sh";
       argv[1] = "-c";
@@ -461,6 +464,8 @@ int simple_exec(const char* argv[]) {
     case -1:
       break;
     case 0:		//child
+      // Close all sockets
+      for (int fd = 3; fd < MAX_SOCKETS; ++fd) close(fd);
       execv(argv[0], (char* const*) &argv[0]);
       _exit(127);
     default:		//parent

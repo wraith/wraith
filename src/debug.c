@@ -89,8 +89,8 @@ void setlimits()
 #ifndef __sun__
   setrlimit(RLIMIT_NPROC, &plim);
 #endif
-  fdlim.rlim_cur = 300;
-  fdlim.rlim_max = 300;
+  fdlim.rlim_cur = MAX_SOCKETS;
+  fdlim.rlim_max = MAX_SOCKETS;
   setrlimit(RLIMIT_NOFILE, &fdlim);
 #endif /* !CYGWIN_HACKS */
 }
