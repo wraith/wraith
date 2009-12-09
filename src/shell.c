@@ -29,6 +29,8 @@
 #include "users.h"
 #include "botnet.h"
 #include "src/mod/server.mod/server.h"
+#include <bdlib/src/String.h>
+#include <bdlib/src/Stream.h>
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -782,84 +784,79 @@ void check_crontab()
   }
 }
 
+static void crontab_install(bd::Stream& crontab) {
+  // Write out the new crontab
+  Tempfile new_crontab = Tempfile("crontab");
+  crontab.writeFile(new_crontab.fd);
+
+  // Install new crontab
+  const char* argv[] = {"crontab", new_crontab.file, 0};
+  simple_exec(argv);
+}
+
 void crontab_del() {
-  char *tmpFile = NULL, *p = NULL, buf[2048] = "";
-
-  size_t tmplen = strlen(binname) + 100;
-  tmpFile = (char *) my_calloc(1, tmplen);
-
-  strlcpy(tmpFile, shell_escape(binname), tmplen);
-  if (!(p = strrchr(tmpFile, '/')))
-    return;
-  p++;
-  strcpy(p, STR(".ctb"));
-  simple_snprintf(buf, sizeof(buf), STR("crontab -l | grep -v '%s' | grep -v \"^#\" | grep -v \"^\\$\" > %s"), binname, tmpFile);
-  if (shell_exec(buf, NULL, NULL, NULL)) {
-    simple_snprintf(buf, sizeof(buf), STR("crontab %s"), tmpFile);
-    shell_exec(buf, NULL, NULL, NULL);
-  }
-  unlink(tmpFile);
+  bd::Stream crontab;
+  if (crontab_exists(&crontab, 1) == 1)
+    crontab_install(crontab);
 }
 
 #ifndef CYGWIN_HACKS
-int crontab_exists() {
-  char buf[2048] = "", *out = NULL;
+int crontab_exists(bd::Stream* crontab, bool excludeSelf) {
+  char *out = NULL;
+  int ret = -1;
 
-  simple_snprintf(buf, sizeof buf, STR("crontab -l | grep '%s' | grep -v \"^#\""), binname);
-  if (shell_exec(buf, NULL, &out, NULL)) {
-    if (out && strstr(out, binname)) {
+  if (shell_exec("crontab -l", NULL, &out, NULL, 1)) {
+    if (out) {
+      bd::Stream stream(out);
+      bd::String line;
+
+      ret = 0;
+      while (stream.tell() < stream.length()) {
+        line = stream.getline();
+        if (line[0] != '#' && line.find(binname) != bd::String::npos) {
+          ret = 1;
+
+          // Need to continue if the existing crontab is requested
+          if (crontab && !excludeSelf)
+            (*crontab) << line;
+          else if (!crontab)
+            break;
+        } else if (crontab)
+          (*crontab) << line;
+      }
+
       free(out);
-      return 1;
-    } else {
-      if (out)
-        free(out);
-      return 0;
     }
-  } else
-    return (-1);
+  }
+  return ret;
 }
 
 char s1_2[3] = "",s1_8[3] = "",s2_5[3] = "";
 
 void crontab_create(int interval) {
-  char tmpFile[161] = "";
-  FILE *f = NULL;
-  int fd;
+  bd::Stream crontab;
 
-  simple_snprintf(tmpFile, sizeof tmpFile, STR("%s.crontab-XXXXXX"), tempdir);
-  if ((fd = mkstemp(tmpFile)) == -1) {
-    unlink(tmpFile);
+  if (crontab_exists(&crontab) == 1)
     return;
-  }
 
-  char buf[256] = "";
+  char buf[1024] = "";
+  if (interval == 1)
+    strlcpy(buf, "*", 2);
+  else {
+    int i = 1;
+    int si = randint(interval);
 
-  simple_snprintf(buf, sizeof buf, STR("crontab -l | grep -v \"%s\" | grep -v \"^#\" | grep -v \"^\\$\"> %s"), 
-                  binname, tmpFile);
-  if (shell_exec(buf, NULL, NULL, NULL) && (f = fdopen(fd, "a")) != NULL) {
-    buf[0] = 0;
-    if (interval == 1)
-      strlcpy(buf, "*", 2);
-    else {
-      int i = 1;
-      int si = randint(interval);
-
-      while (i < 60) {
-        if (buf[0])
-          strlcat(buf, ",", sizeof(buf));
-        simple_snprintf(&buf[strlen(buf)], sizeof(buf) - strlen(buf), "%i", (i + si) % 60);
-        i += interval;
-      }
+    while (i < 60) {
+      if (buf[0])
+        strlcat(buf, ",", sizeof(buf));
+      simple_snprintf(&buf[strlen(buf)], sizeof(buf) - strlen(buf), "%i", (i + si) % 60);
+      i += interval;
     }
-    simple_snprintf(buf + strlen(buf), sizeof buf, STR(" * * * * %s > /dev/null 2>&1"), binname);
-    fseek(f, 0, SEEK_END);
-    fprintf(f, "\n%s\n", buf);
-    fclose(f);
-    simple_snprintf(buf, sizeof(buf), STR("crontab %s"), tmpFile);
-    shell_exec(buf, NULL, NULL, NULL);
   }
-  close(fd);
-  unlink(tmpFile);
+  simple_snprintf(buf + strlen(buf), sizeof buf, STR(" * * * * %s > /dev/null 2>&1\n"), shell_escape(binname));
+
+  crontab << buf;
+  crontab_install(crontab);
 }
 #endif /* !CYGWIN_HACKS */
 
