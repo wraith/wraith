@@ -162,7 +162,7 @@ void check_last() {
     char *out = NULL, buf[50] = "";
 
     simple_snprintf(buf, sizeof(buf), STR("last -10 %s"), conf.username);
-    if (shell_exec(buf, NULL, &out, NULL)) {
+    if (shell_exec(buf, NULL, &out, NULL, 1)) {
       if (out) {
         char *p = NULL;
 
