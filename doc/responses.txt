@@ -1,6 +1,5 @@
 :banned
  bye
- baned
  b&
  go away
  unwanted!
@@ -19,6 +18,7 @@
  fucking whore
  slut.
  suck my cock
+ s my d
  sit on a penis.
  eat some anal lube
  too bad you won't see the hot titties now.
@@ -42,6 +42,8 @@
  if you wanna bump lets go nig-ga
  UJAH IF YOU GOT COCONUTS ATTACK ME
  AHH CMON FUCK A GUY
+ FUCK YOU. ID QUIT IRC BUT I STILL HAVE A SCORE TO SETTLE WITH YOU BOYO.
+ Have a nice life.
 :kickban
  not wanted
  something tells me you're annoying
@@ -192,7 +194,10 @@
  .
  hey..checkout this cool video http://www.youtube.com/watch?v=oHg5SJYRHA0
  SSH-2.0-OpenSSH_4.3p2 Debian-10
+ SSH-2.0-OpenSSH_4.3
  SSH-2.0-OpenSSH_4.6p1 FreeBSD-openssh-portable-overwrite-base-4.6.p1,1
+ SSH-2.0-OpenSSH_5.1p1 FreeBSD-20080901
+ SSH-2.0-OpenSSH_5.2p1 FreeBSD-openssh-portable-overwrite-base-5.2.p1_2,1
  sup g00n
  lol
  whats happenin pimpin?
@@ -265,6 +270,10 @@
  6.21
  6.3
  6.31
+ 6.32
+ 6.33
+ 6.34
+ 6.35
 :mIRCscript
  12( NoNameScript 4.03 12:: \037www.nnscript.com\037 12:: \037www.XLhost.de\037 12)
  12( NoNameScript 4.2 12:: \037www.nnscript.com\037 12:: \037www.regroup-esports.com\037 12)
@@ -293,14 +302,21 @@
  xchat 2.8.4 Linux 2.6.23.15-80.fc7 [i686/2.01GHz]
  Snak for Macintosh 5.3.3 English Intel
  xchat 2.8.4 Linux 2.6.23.14-64.fc7 [x86_64/2.61GHz/SMP]
+ xchat 2.8.6 FreeBSD 7.2-RELEASE [i386/2.70GHz/SMP]
  amnesiac1.0a cvs/14 epic4/2.8.0[759]-1 I get my kicks on channel six
  irssi v0.8.12
  xchat 2.8.5e Windows 6.0 [i686/3.01GHz]
+ irssi v0.8.11 - running on FreeBSD amd64
  irssi v0.8.11 - running on FreeBSD i386
  irssi v0.8.11 - running on Linux i686
+ irssi v0.8.14 - running on FreeBSD i386
+ irssi v0.8.14 - running on Linux i686
+ irssi v0.8.14 - running on FreeBSD amd64
+ eggdrop v1.6.19+ctcpfix
  eggdrop 1.6.18
  eggdrop 1.6.17
  eggdrop 1.6.16
+ ZNC 0.074 - http://znc.sourceforge.net
  X-Chat Aqua 0.16.0 (xchat 2.6.1) Darwin 9.2.0 [i386/2.93GHz]
  irssi v0.8.11
  JedIrc v3.1 on (j2me)
