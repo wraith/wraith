@@ -466,7 +466,7 @@ int simple_exec(const char* argv[]) {
     case 0:		//child
       // Close all sockets
       for (int fd = 3; fd < MAX_SOCKETS; ++fd) close(fd);
-      execv(argv[0], (char* const*) &argv[0]);
+      execvp(argv[0], (char* const*) &argv[0]);
       _exit(127);
     default:		//parent
       savedpid = pid;
