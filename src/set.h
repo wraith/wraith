@@ -28,7 +28,7 @@
 #define VAR_PERM	BIT13
 /* Don't set the var data from the mem as default (NICK) */
 #define VAR_NODEF	BIT14
-#define VAR_CHANSET	BIT15
+//#define VAR_UNUSED	BIT15
 /* Don't set the default on startup of a leaf (servers) */
 #define VAR_NOLDEF	BIT16
 /* Don't set global on hub */
@@ -67,7 +67,7 @@ typedef struct rate_b {
  interval_t time;
 } rate_t;
 
-extern char		auth_key[], auth_prefix[2], motd[], *def_chanset, alias[], rbl_servers[1024],
+extern char		auth_key[], auth_prefix[2], motd[], alias[], rbl_servers[1024],
 			msgident[], msginvite[], msgop[], msgpass[],
                         homechan[], altchars[];
 extern bool		dccauth, auth_obscure, manop_warn, auth_chan, oidentd, ident_botnick, irc_autoaway, link_cleartext;

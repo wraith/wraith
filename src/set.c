@@ -40,7 +40,6 @@ int dcc_autoaway;
 bool irc_autoaway;
 bool link_cleartext;
 bool dccauth = 0;
-char *def_chanset = "+enforcebans +dynamicbans +userbans -bitch +cycle -inactive +userexempts -dynamicexempts +userinvites -dynamicinvites -nodesynch -closed -take -voice -private -fastop +meankicks ban-type 3";
 int cloak_script = 0;
 rate_t close_threshold;
 int fight_threshold;
@@ -75,7 +74,7 @@ static variable_t vars[] = {
  VAR("auth-key",	auth_key,		VAR_STRING|VAR_PERM,				0, 0, NULL),
  VAR("auth-obscure",	&auth_obscure,		VAR_INT|VAR_BOOL,				0, 1, "0"),
  VAR("auth-prefix",	auth_prefix,		VAR_WORD|VAR_NOLHUB|VAR_PERM,			0, 0, "+"),
- VAR("chanset",		glob_chanset,		VAR_STRING|VAR_CHANSET|VAR_NOLHUB,		0, 0, NULL),
+ VAR("chanset",		glob_chanset,		VAR_STRING|VAR_NOLHUB|VAR_NOLOC|VAR_HIDE,	0, 0, NULL),
  VAR("cloak-script",	&cloak_script,		VAR_INT|VAR_CLOAK|VAR_NOLHUB,			0, 10, "0"),
  VAR("close-threshold",	&close_threshold,	VAR_RATE|VAR_NOLOC,				0, 0, "0:0"),
  VAR("dcc-autoaway",	&dcc_autoaway,		VAR_INT|VAR_NOLOC,				0, (5*60*60), "1800"),
@@ -532,12 +531,8 @@ sdprintf("var: %s (local): %s", var->name, data ? data : "(NULL)");
 sdprintf("var: %s (global): %s", var->name, data ? data : "(NULL)");
     if (data && !clear)
       var->gdata = strdup(data);
-    else {
-      if (var->flags & VAR_CHANSET)
-        var->gdata = strdup(def_chanset);
-      else 
-        var->gdata = var->def ? strdup(var->def) : NULL;
-    }
+    else
+      var->gdata = var->def ? strdup(var->def) : NULL;
 
     if (domem && var->mem)
       var_set_mem(var, var->gdata);
@@ -611,7 +606,6 @@ void init_vars()
     if (!vars[i].gdata && !vars[i].ldata && !(!conf.bot->hub && (vars[i].flags & VAR_NOLDEF)))
       var_set(&vars[i], NULL, NULL);		//empty out and set to defaults
   }
-  var_set_by_name(NULL, "chanset", def_chanset);
 #ifdef DEBUG
   if (!strncmp(conf.bot->nick, "wtest", 5))
     var_set_by_name(NULL, "homechan", "#bryan");

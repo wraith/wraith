@@ -121,7 +121,7 @@ static void got_cset(char *botnick, char *code, char *par)
   if (!par || !par[0])
    return;
 
-  bool all = 0;
+  bool all = 0, isdefault = 0;
   char *chname = NULL;
   struct chanset_t *chan = NULL;
 
@@ -129,26 +129,22 @@ static void got_cset(char *botnick, char *code, char *par)
     all = 1;
     newsplit(&par);
    } else {
-    if (!strchr(CHANMETA, par[0])) {
-      putlog(LOG_ERROR, "*", "Got bad cset: bot: %s code: %s par: %s", botnick, code, par);
-      return;
-    }
-    chname = newsplit(&par);
-    if (!(chan = findchan_by_dname(chname)))
-      return;
+     chname = newsplit(&par);
+     if (!strcasecmp(chname, "default"))
+       isdefault = 1;
+     else if (!strchr(CHANMETA, chname[0])) {
+       putlog(LOG_ERROR, "*", "Got bad cset: bot: %s code: %s par: %s %s", botnick, code, chname, par);
+       return;
+     }
+     if (isdefault)
+       chan = chanset_default;
+     else if (!(chan = findchan_by_dname(chname)))
+       return;
    }
 
   if (all)
-   chan = chanset;
-
-  while (chan) {
-    chname = chan->dname;
-    do_chanset(NULL, chan, par, DO_LOCAL);
-    if (!all)
-      chan = NULL;
-    else
-      chan = chan->next;
-  }
+   chan = NULL;
+  do_chanset(NULL, chan, par, DO_LOCAL);
 }
 
 /* returns 1 if botn is in bots */

@@ -909,6 +909,9 @@ share_ufyes(int idx, char *par)
 
     lower_bot_linked(idx);
 
+    if (strstr(par, "chdefault"))
+        dcc[idx].u.bot->uff_flags |= UFF_CHDEFAULT;
+
     if (strstr(par, "stream")) {
       updatebot(-1, dcc[idx].nick, '+', 0, 0, 0, NULL);
       /* Start up a tbuf to queue outgoing changes for this bot until the
@@ -950,7 +953,7 @@ share_userfileq(int idx, char *par)
       dprintf(idx, "s un Already sharing.\n");
     else {
       dcc[idx].u.bot->uff_flags |= (UFF_OVERRIDE | UFF_INVITE | UFF_EXEMPT);
-      dprintf(idx, "s uy overbots invites exempts stream\n");
+      dprintf(idx, "s uy overbots invites exempts stream chdefault\n");
       /* Set stat-getting to astatic void race condition (robey 23jun1996) */
       dcc[idx].status |= STAT_SHARE | STAT_GETTING | STAT_AGGRESSIVE;
       if (conf.bot->hub)

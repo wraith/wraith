@@ -701,30 +701,24 @@ void write_invites(bd::Stream& stream, int idx)
 
 /* Write the channels to the userfile
  */
-void write_chans(bd::Stream& stream, int idx)
+static void write_chan(bd::Stream& stream, int idx, struct chanset_t* chan)
 {
   bd::String buf;
-
-  putlog(LOG_DEBUG, "*", "Writing channels..");
-
-  stream << buf.printf(CHANS_NAME " - -\n");
-
   char w[1024] = "";
 
-  for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
-    char inactive = 0;
+  char inactive = 0;
 
-    putlog(LOG_DEBUG, "*", "writing channel %s to userfile..", chan->dname);
-    get_mode_protect(chan, w, sizeof(w));
+  putlog(LOG_DEBUG, "*", "writing channel %s to userfile..", chan->dname);
+  get_mode_protect(chan, w, sizeof(w));
 
-    /* if a bot should explicitly NOT join, just set it +inactive ... */
-    if (idx >= 0 && !botshouldjoin(dcc[idx].user, chan))
-      inactive = '+';
-    /* ... otherwise give the bot the *actual* setting */
-    else
-      inactive = PLSMNS(channel_inactive(chan));
+  /* if a bot should explicitly NOT join, just set it +inactive ... */
+  if (idx >= 0 && !botshouldjoin(dcc[idx].user, chan))
+    inactive = '+';
+  /* ... otherwise give the bot the *actual* setting */
+  else
+    inactive = PLSMNS(channel_inactive(chan));
 
-    stream << buf.printf("\
+  stream << buf.printf("\
 + channel add %s { chanmode { %s } addedby %s addedts %li \
 bad-cookie %d manop %d mdop %d mop %d limit %d ban-type %d \
 flood-chan %d:%d flood-ctcp %d:%d flood-join %d:%d \
@@ -799,8 +793,24 @@ flood-exempt %d flood-lock-time %d knock %d \
  * also include a %ctemp above.
  *      PLSMNS(channel_temp(chan)),
  */
-    );
-  }
+  );
+}
+
+/* Write the channels to the userfile
+ */
+void write_chans(bd::Stream& stream, int idx, bool old)
+{
+  bd::String buf;
+
+  putlog(LOG_DEBUG, "*", "Writing channels..");
+
+  stream << buf.printf(CHANS_NAME " - -\n");
+
+  /* FIXME: Remove after 1.2.15 */
+  if (!old)
+    write_chan(stream, idx, chanset_default);
+  for (struct chanset_t *chan = chanset; chan; chan = chan->next)
+    write_chan(stream, idx, chan);
 }
 
 /* FIXME: remove after 1.2.14 */
@@ -888,12 +898,12 @@ exempt-time %d invite-time %d voice-non-ident %d auto-delay %d \
   }
 }
 
-void channels_writeuserfile(bd::Stream& stream, bool old)
+void channels_writeuserfile(bd::Stream& stream, int old)
 {
   putlog(LOG_DEBUG, "@", "Writing channel/ban/exempt/invite entries.");
-  if (!old)
-    write_chans(stream, -1);
-  else
+  if (old != 1)
+    write_chans(stream, -1, old == 0 ? 0 : 1);
+  else /* flood-* hacks */
     write_chans_compat(stream, -1);
   write_vars_and_cmdpass(stream, -1);
   write_bans(stream, -1);

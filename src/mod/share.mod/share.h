@@ -9,6 +9,7 @@
 #define	UFF_OVERRIDE	BIT0	/* Override existing bot entries    */
 #define UFF_INVITE	BIT1	/* Send invites in user file	    */
 #define UFF_EXEMPT	BIT2	/* Send exempts in user file	    */
+#define UFF_CHDEFAULT	BIT3
 
 #include "src/users.h"
 

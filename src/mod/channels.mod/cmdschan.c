@@ -1203,7 +1203,10 @@ static void cmd_chaninfo(int idx, char *par)
       return;
     }
   }
-  chan = findchan_by_dname(chname);
+  if (!strcasecmp(chname, "default"))
+    chan = chanset_default;
+  else
+    chan = findchan_by_dname(chname);
   if (!chan || (chan && privchan(user, chan, PRIV_OP))) {
     dprintf(idx, "No such channel.\n");
     return;
@@ -1314,10 +1317,11 @@ static void cmd_chanset(int idx, char *par)
   char *chname = NULL, result[RESULT_LEN] = "";
   struct chanset_t *chan = NULL;
   int all = 0;
+  bool isdefault = 0;
 
   if (!par[0]) {
     putlog(LOG_CMDS, "*", "#%s# chanset %s", dcc[idx].nick, par);
-    dprintf(idx, "Usage: chanset [%schannel|*] <settings>\n", CHANMETA);
+    dprintf(idx, "Usage: chanset [%schannel|*|default] <settings>\n", CHANMETA);
     return;
   }
 
@@ -1330,10 +1334,17 @@ static void cmd_chanset(int idx, char *par)
     }
     newsplit(&par);
   } else {
-    if (strchr(CHANMETA, par[0])) {
+    if (par && par[0]) {
       chname = newsplit(&par);
+      if (!strcasecmp(chname, "default"))
+        isdefault = 1;
+    }
+    if ((chname[0] && strchr(CHANMETA, chname[0])) || isdefault) {
       get_user_flagrec(dcc[idx].user, &user, chname);
-      chan = findchan_by_dname(chname);
+      if (isdefault)
+        chan = chanset_default;
+      else
+        chan = findchan_by_dname(chname);
 
       if (!glob_master(user) && !chan_master(user)) {
         dprintf(idx, "You don't have access to %s. \n", chname);
@@ -1357,8 +1368,8 @@ static void cmd_chanset(int idx, char *par)
 	par = chname;
       }
     }
-    if (!par[0] || par[0] == '*') {
-      dprintf(idx, "Usage: chanset [%schannel] <settings>\n", CHANMETA);
+    if (!chname[0] || chname[0] == '*') {
+      dprintf(idx, "Usage: chanset [%schannel|*|default] <settings>\n", CHANMETA);
       return;
     }
     if (!chan && !(chan = findchan_by_dname(chname = dcc[idx].u.chat->con_chan))) {
@@ -1373,8 +1384,9 @@ static void cmd_chanset(int idx, char *par)
     dprintf(idx, "Error trying to set { %s } on %s: %s\n", par, all ? "all channels" : chan->dname, result);
     return;
   }
+
   if (all)
-    dprintf(idx, "Successfully set modes { %s } on all channels.\n", par);
+    dprintf(idx, "Successfully set modes { %s } on all channels (Including the default).\n", par);
   else
     dprintf(idx, "Successfully set modes { %s } on %s\n", par, chan->dname);
 
