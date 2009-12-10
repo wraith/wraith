@@ -53,7 +53,7 @@
 * Only use oident for server connects, not for bot linking.
 * Fix cmd_slowjoin not working on backup bots correctly.
 * Disable cookies on ircu(undernet) and Unreal servers as they do not allow unbanning nonexistant bans.
-* Add Google DNS servers as backups: 8.8.8.8, 8.8.4.4 9http://code.google.com/speed/public-dns/)
+* Add Google DNS servers as backups: 8.8.8.8, 8.8.4.4 (http://code.google.com/speed/public-dns/)
 
 
 1.2.16.1
