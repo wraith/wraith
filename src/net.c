@@ -565,7 +565,7 @@ int open_telnet_raw(int sock, const char *ipIn, port_t sport, bool proxy_on, int
     port = sport;
   }
 
-  size_t socklen;
+  socklen_t socklen;
   if (sport) {
     /* figure out which ip to bind to locally (v4 or v6) based on what the host ip is .. */
     if ((is_resolved = is_dotted_ip(ip))) {	/* already resolved */
@@ -870,7 +870,7 @@ int answer(int sock, char *caller, in_addr_t *ip, port_t *port, int binary)
 #endif /* USE_IPV6 */
       if (af_ty == AF_UNIX) {
         struct sockaddr_un sun;
-        size_t socklen = sizeof(sun);
+        socklen_t socklen = sizeof(sun);
 
         bzero(&sun, socklen);
         getsockname(sock, (struct sockaddr*) &sun, &socklen);
