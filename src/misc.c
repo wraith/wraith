@@ -893,6 +893,7 @@ int updatebin(int idx, char *par, int secs)
   argv[0] = path;
   argv[1] = "-4";
   argv[2] = conffile->file;
+  argv[3] = 0;
   i = simple_exec(argv);
   delete conffile;
   if (i == -1 || WEXITSTATUS(i) != 6) { /* 6 for successfull config read/write */
