@@ -198,7 +198,9 @@ static void got_nu(char *botnick, char *code, char *par)
     if (!conf.bot->u || !userlist || !get_user_by_handle(userlist, botnick))	/* probably still getting userfile */
       return;
 
-    if (tandbot && tandbot->bot && !strcmp(tandbot->bot, botnick)) /* dont listen to our uplink.. use normal upate system.. */
+    if (uplink_idx == -1) return; // No uplink?
+
+    if (!strcmp(dcc[uplink_idx].nick, botnick)) /* dont listen to our uplink.. use normal upate system.. */
       return;
   }
 
@@ -211,7 +213,7 @@ static void got_nu(char *botnick, char *code, char *par)
      if (!conf.bot->hub) {
        dont_restructure = 1;
        putlog(LOG_MISC, "*", "Linking to %s for binary update.", botnick);
-       botunlink(-2, tandbot->bot, "Restructure for update.");
+       botunlink(-2, dcc[uplink_idx].nick, "Restructure for update.");
        usleep(1000 * 500);
        botlink("", -3, botnick);
      } else 
