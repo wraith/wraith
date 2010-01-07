@@ -1,60 +1,68 @@
 1.2.17 - http://wraith.botpack.net/milestone/1.2.17
-* Binary pass prompt has been changed to be more clear.
-* Fix uname checking on NetBSD and OpenBSD
-* EFnet server list updates (To update yours: .set -YES servers - | .set -YES servers6 -)
-* Make errors non-obscure. (Compile with OBSCURE_ERRORS to re-enable)
-* PackConfig can now be securely read over STDIN. Use ./wraith -Q, then paste it in.
-* Binary will no longer generate SALTS if missing from the PackConfig. This was causing too much confusion.
-* Sanitize cmd_set input locally as well as remotely (fixes #273)
-* Ensure that some set variables are only 1 word long.
-* More DNS errors are now handled which fixes some misc DNS issues.
-* Give localhubs credit for adding their child bots in 'whois'
-* New userfile pass algorithm (salted-sha1)
-* New userfile cmdpass algorithm (salted-sha1)
-* Cleanup +r implementation a bit to lookup users more often than only on join. (fixes #127)
-* If a user does not have a console setting, they will be given default settings on login.
-* Fix a case where the temporary file was not cleaned up when exiting config editor (-C) (fixes #428)
-* Fix cmd_slowpart issues
-* Remove pscloak feature, it was too malicious, pointless and stupid.
-* Fix cmd_botset not setting default/global value on leaf bots when clearing a var (fixes #389)
-* Fix cmd_pls_chan causing bots to reset a channels settings when it already existed.
-* Fix password length discrepencies / off-by-1 problems in cmd_chpass and cmd_nopass (fixes #436)
-* Compiling fixes
-* SHELLHASH must now be a SHA1 hash
-* build.sh cleanups
-* Now including bdlib
-* Ident lookup timeout is now 5 seconds (will speed up linking / partyline connecting)
-* If a .resolv.conf exists, only use the nameservers listed in it
-* Remove all backup nameservers except for 4.2.2.2
-* Prefer g++ 4.4.1 when compiling.
-* Enable SSP for debug binary/testing.
-* DNS now works on servers which tend to only return partial results (fixes #424)
-* Lower DNS lookup timeout from 40 seconds to 10 seconds
-* Use random query ids for DNS lookups
-* Fix problem of bots never reconnecting to hub after being up for long periods.
-* Fix problem of upgrading with uninitialized binaries causing corruption (will kick in on future upgrades)
-* Fix botcmd to make sure that results are delivered only to the requester (fixes #208)
-* Fix issues with server-port not being updated to the current server list (fixes #176)
-* Fix aliases not properly indicating bad command on leaf bots (fixes #297)
-* Fix botlink problems when hub and leaf nicks are long
-* Fix (+|-)(ban|exempt|invite) commands to properly handle if the channel is given first so that a #chan!*@* ban is not created.
-* Fix chanint 'flood-exempt' not exempting ops when set to 'voice'
-* Userfile transfer is now made over botlink (no extra ports needed) (works behind NAT/firewall)
-* Cleanup all string parsing to trim excess whitespaces (fixes #268)
-* No longer bundling Openssl code; It is now required to be installed to compile.
-* Cleanup cmd_botcmd restrictions.
-* Add 'chanset +rbl' which uses list of servers from 'set rbl-servers'. Only +r bots will enforce this.
-* Fix segfault with /KNOCK on csircd
-* SHELLHASH and Owner passwords in the PackConfig can now be salted-sha1. '+' + RAND(5) + '$' + SHA1(RAND(5) + 'password')
-* Fix restart causing bot to change nick (this was a regression in jupenick)
-* Removed 'chanset +knock' and replaced with 'chanset knock (Op|Voice|User)', see 'help chaninfo'
-* Default log timestamp now includes seconds
-* Hubs no longer include their own timestamp over botnet
-* Only use oident for server connects, not for bot linking.
-* Fix cmd_slowjoin not working on backup bots correctly.
-* Disable cookies on ircu(undernet) and Unreal servers as they do not allow unbanning nonexistant bans.
-* Add Google DNS servers as backups: 8.8.8.8, 8.8.4.4 (http://code.google.com/speed/public-dns/)
-
+* Binary / shell / startup changes
+  * Binary error messages are no longer obscure numbers or fake segfaults. (Compile with OBSCURE_ERRORS to re-enable)
+  * Binary pass prompt has been changed to not be an obscure 'bash$' prompt anymore.
+  * Removed pscloak feature, it was too malicious, pointless and stupid.
+  * Fix problem of upgrading with uninitialized binaries causing corruption (will kick in on future upgrades)
+  * Optimized how some shell operations are executed.
+* DNS changes
+  * More DNS errors are now handled which fixes some misc DNS issues.
+  * DNS now works on servers which tend to only return partial results (fixes #424)
+  * Lower DNS lookup timeout from 40 seconds to 10 seconds.
+  * Use random query ids for DNS lookups.
+  * Remove cox.net nameservers from backup list.
+  * Add Google DNS servers as backups: 8.8.8.8, 8.8.4.4 (http://code.google.com/speed/public-dns/)
+  * If a .resolv.conf exists, only use the nameservers listed in it.
+  * Fix problem of bots never reconnecting to hub after being up for long periods. (Was a DNS issue)
+* Compiling changes
+  * Prefer g++ 4.4.1 when compiling.
+  * No longer bundling Openssl code; It is now required to be installed to compile.
+  * build.sh cleanups.
+  * Now including bdlib.
+  * Enable SSP for debug binary/testing.
+* PackConfig changes
+  * All existing compile errors fixed.
+  * PackConfig can now be securely read over STDIN. Use ./wraith -Q, then paste it in.
+  * Binary will no longer generate SALTS if missing from the PackConfig. This was causing too much confusion.
+  * SHELLHASH and Owner passwords in the PackConfig can now be salted-sha1. '+' + RAND(5) + '$' + SHA1(RAND(5) + 'password')
+  * SHELLHASH may no longer be an MD5 Hash.
+* Userfile / sharing changes
+  * Userfile transfer is now made over botlink (no extra ports needed) (works behind NAT/firewall)
+  * New userfile pass algorithm (salted-sha1)
+  * New userfile cmdpass algorithm (salted-sha1)
+  * New userfile storage format.
+* cmd_set fixes
+  * Sanitize cmd_set input locally as well as remotely (fixes #273)
+  * Ensure that some set variables are only 1 word long.
+  * Fix cmd_botset not setting default/global value on leaf bots when clearing a var (fixes #389)
+* Misc fixes
+  * Cleanup +r implementation a bit to lookup users more often than only on join. (fixes #127)
+  * If a user does not have a console setting, they will be given default settings on login.
+  * Fix a case where the temporary file was not cleaned up when exiting config editor (-C) (fixes #428)
+  * Fix cmd_slowpart issues.
+  * Fix cmd_pls_chan causing bots to reset a channels settings when it already existed.
+  * Fix password length discrepencies / off-by-1 problems in cmd_chpass and cmd_nopass (fixes #436)
+  * Fix botcmd to make sure that results are delivered only to the requester (fixes #208)
+  * Fix issues with server-port not being updated to the current server list (fixes #176)
+  * Fix aliases not properly indicating bad command on leaf bots (fixes #297)
+  * Fix botlink problems when hub and leaf nicks are long.
+  * Fix (+|-)(ban|exempt|invite) commands to properly handle if the channel is given first so that a #chan!*@* ban is not created.
+  * Fix chanint 'flood-exempt' not exempting ops when set to 'voice'.
+  * Fix segfault with /KNOCK on csircd.
+  * Fix restart causing bot to change nick (this was a regression in jupenick)
+  * Fix cmd_slowjoin not working on backup bots correctly.
+  * Auto disable cookies on ircu(undernet) and Unreal servers as they do not allow unbanning nonexistant bans.
+* Misc changes
+  * EFnet server list updates (To update yours: .set -YES servers - | .set -YES servers6 -)
+  * Give localhubs credit for adding their child bots in 'whois'.
+  * Ident lookup timeout is now 5 seconds (will speed up linking / partyline connecting)
+  * Cleanup all string parsing to trim excess whitespaces (fixes #268)
+  * Cleanup cmd_botcmd restrictions/sanity checks.
+  * RBL Checking: Add 'chanset +rbl' which uses list of servers from 'set rbl-servers'. Only +r bots will enforce this.
+  * Removed 'chanset +knock' and replaced with 'chanset knock (Op|Voice|User)', see 'help chaninfo'.
+  * Default log timestamp now includes seconds.
+  * Hubs no longer include their own timestamp over botnet.
+  * Only use oident for server connects, not for bot linking.
 
 1.2.16.1
 * Fix linux compile errors
