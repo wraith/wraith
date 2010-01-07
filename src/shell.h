@@ -40,6 +40,10 @@
 
 #define DETECTED_LEN	8		/* 'suicide' is longest word */
 
+namespace bd {
+  class Stream;
+}
+
 void check_maxfiles();
 void check_mypid();
 void clear_tmp();
@@ -47,14 +51,15 @@ char *homedir(bool = 1);
 char *my_username();
 void expand_tilde(char **);
 int email(char *, char *, int);
-int shell_exec(char *, char *, char **, char **);
+int shell_exec(char *, char *, char **, char **, bool = 0);
+int simple_exec(const char* argv[]);
 #ifndef CYGWIN_HACKS
 void check_last();
 void check_promisc();
 void check_trace(int);
 void check_crontab();
 void crontab_del();
-int crontab_exists();
+int crontab_exists(bd::Stream* = NULL, bool = 0);
 void crontab_create(int);
 void detected(int, const char *);
 #endif /* !CYGWIN_HACKS */

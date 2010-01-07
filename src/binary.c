@@ -560,14 +560,8 @@ check_sum(const char *fname, const char *cfgfile, bool read_stdin)
 
 bool check_bin_initialized(const char *fname)
 {
-  int i = 0;
-  size_t len = strlen(shell_escape(fname)) + 3 + 1;
-  char *path = (char *) my_calloc(1, len);
-
-  simple_snprintf(path, len, STR("%s -p"), shell_escape(fname));
-
-  i = system(path);
-  free(path);
+  const char* argv[] = {fname, "-p", 0};
+  int i = simple_exec(argv);
   if (i != -1 && WEXITSTATUS(i) == 4)
     return 1;
 
@@ -582,7 +576,7 @@ bool check_bin_compat(const char *fname)
   char *out = NULL;
 
   simple_snprintf(path, len, STR("%s -3"), shell_escape(fname));
-  if (shell_exec(path, NULL, &out, NULL)) {
+  if (shell_exec(path, NULL, &out, NULL, 1)) {
     if (out) {
       char *buf = out;
       size_t settings_ver = atoi(newsplit(&buf)), settings_len = atoi(newsplit(&buf));

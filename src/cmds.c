@@ -63,6 +63,8 @@
 #include "src/mod/update.mod/update.h"
 #include "src/mod/channels.mod/channels.h"
 #include "src/mod/share.mod/share.h"
+#include <bdlib/src/String.h>
+#include <bdlib/src/Stream.h>
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -3990,8 +3992,14 @@ static void cmd_netlast(int idx, char * par) {
 void crontab_show(struct userrec *u, int idx) {
   dprintf(idx, "Showing current crontab:\n");
 #ifndef CYGWIN_HACKS
-  if (!exec_str(idx, "crontab -l | grep -v \"^#\""))
-    dprintf(idx, "Exec failed");
+  bd::Stream crontab;
+  bd::String line;
+  crontab_exists(&crontab);
+  crontab.seek(0, SEEK_SET);
+  while (crontab.tell() < crontab.length()) {
+    line = crontab.getline();
+    dprintf(idx, "%s\n", line.c_str());
+  }
 #endif /* !CYGWIN_HACKS */
 }
 
@@ -4128,7 +4136,7 @@ static void rcmd_exec(char * frombot, char * fromhand, char * fromidx, char * pa
     char *code = newsplit(&par);
 
     if (!strcmp(code, "show")) {
-      strlcpy(scmd, "crontab -l | grep -v \"^#\"", sizeof(scmd));
+      strlcpy(scmd, "crontab -l", sizeof(scmd));
     } else if (!strcmp(code, "delete")) {
       crontab_del();
     } else if (!strcmp(code, "new")) {
@@ -4153,7 +4161,7 @@ static void rcmd_exec(char * frombot, char * fromhand, char * fromidx, char * pa
   }
   if (!scmd[0])
     return;
-  if (shell_exec(scmd, NULL, &out, &err)) {
+  if (shell_exec(scmd, NULL, &out, &err, 1)) {
     if (out) {
       char *p = NULL, *np = NULL;
 
