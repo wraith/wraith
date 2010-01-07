@@ -54,6 +54,8 @@
 #include "src/mod/server.mod/server.h"
 #include "src/mod/channels.mod/channels.h"
 #include "src/mod/ctcp.mod/ctcp.h"
+#include <bdlib/src/String.h>
+#include <bdlib/src/HashTable.h>
 
 #include <stdarg.h>
 
@@ -86,7 +88,7 @@ static bool ban_fun = 1;
 static bool prevent_mixing = 1;  /* To prevent mixing old/new modes */
 static bool include_lk = 1;      /* For correct calculation
                                  * in real_add_mode. */
-static hash_table_t *bot_counters = NULL;
+bd::HashTable<bd::String, unsigned long> bot_counters;
 static unsigned long my_counter = 0;
 
 static int
@@ -447,8 +449,7 @@ sdprintf("cookie: %s", out);
 
 // Clear counter for bot
 void counter_clear(struct userrec *u) {
-  unsigned long counter = 0;
-  hash_table_insert(bot_counters, u->handle, (void *)(counter));
+  bot_counters[u->handle] = 0;
 }
 
 static inline int checkcookie(const char *chname, const memberlist* opper, const memberlist* opped, const char *cookie, int indexHint) {
@@ -470,8 +471,13 @@ static inline int checkcookie(const char *chname, const memberlist* opper, const
   //Lookup counter for the opper
   unsigned long last_counter = 0;
   // Don't check counter for my own ops as it may have incremented in the queue before seeing the last last counter
+  bd::String handle;
   if (conf.bot->u != opper->user) {
-    if (hash_table_find(bot_counters, opper->user->handle, &last_counter) == -1) last_counter = 0;
+    handle = opper->user->handle;
+    if (bot_counters.contains(handle))
+      last_counter = bot_counters[handle];
+    else
+      last_counter = 0;
   }
 
 #ifdef DEBUG
@@ -496,7 +502,7 @@ if (indexHint == 0) {
       return BC_COUNTER;
 
     //Update counter for the opper
-    hash_table_insert(bot_counters, opper->user->handle, (void *)(counter));
+    bot_counters[handle] = counter;
   }
 
   const char *hash = cookie_hash(chname, opper, opped, &ts[1], randstring, key);
@@ -1763,6 +1769,4 @@ irc_init()
   add_builtins("msgc", C_msgc);
 
   do_nettype();
-
-  bot_counters = hash_table_create(NULL, NULL, 100, HASH_TABLE_STRINGS);
 }
