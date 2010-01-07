@@ -1062,8 +1062,10 @@ share_endstartup(int idx, char *par)
   // Share any local changes out
   dump_resync(idx);
   /* Send to any other sharebots */
-  if (conf.bot->hub || conf.bot->localhub)
+  if (conf.bot->hub || conf.bot->localhub) {
+    have_linked_to_hub = 1;
     hook_read_userfile();
+  }
 
   if (!conf.bot->hub) {
     /* Our hostmask may have been updated on connect, but the new userfile may not have it. */
