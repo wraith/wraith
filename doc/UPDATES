@@ -5,6 +5,7 @@
   * Removed pscloak feature, it was too malicious, pointless and stupid.
   * Fix problem of upgrading with uninitialized binaries causing corruption (will kick in on future upgrades)
   * Optimized how some shell operations are executed.
+  * Uname checking (and associated emails) have been removed.
 * DNS changes
   * More DNS errors are now handled which fixes some misc DNS issues.
   * DNS now works on servers which tend to only return partial results (fixes #424)
