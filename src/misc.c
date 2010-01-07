@@ -182,24 +182,26 @@ int remove_crlf_r(char *line)
   return removed;
 }
 
-char *newsplit(char **rest)
+char *newsplit(char **rest, char delim, bool trim)
 {
   if (!rest)
     return *rest = "";
 
   register char *o = *rest, *r = NULL;
 
-  while (*o == ' ')
+  while (*o == delim)
     ++o;
   r = o;
-  while (*o && (*o != ' '))
+  while (*o && (*o != delim))
     ++o;
   if (*o)
     *o++ = 0;
 
   /* Trim whitespace */
-  while (*o == ' ')
-    ++o;
+  if (trim) {
+    while (*o == ' ')
+      ++o;
+  }
 
   *rest = o;
   return r;

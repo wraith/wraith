@@ -1326,8 +1326,8 @@ static void bot_rsimr(char *botnick, char *code, char *msg)
 {
   if (msg[0]) {
     char * par = strdup(msg), *parp = par, *prefix = NULL;
-    int idx = atoi(newsplit(&par));
-    char *nick = newsplit(&par);
+    int idx = atoi(newsplit(&par, ' ', 0));
+    char *nick = newsplit(&par, ' ', 0);
     size_t size = strlen(botnick) + 4;
 
     if (dcc[idx].type && (dcc[idx].type == &DCC_CHAT) && dcc[idx].user && !strcmp(dcc[idx].user->handle, nick)) {

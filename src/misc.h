@@ -34,7 +34,7 @@ void splitc(char *, char *, char);
 void splitcn(char *, char *, char, size_t);
 int remove_crlf(char *);
 int remove_crlf_r(char *);
-char *newsplit(char **);
+char *newsplit(char **, char delim = ' ', bool trim = 1);
 char *splitnick(char **);
 void stridx(char *, char *, int);
 void daysago(time_t, time_t, char *, size_t);
