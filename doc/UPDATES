@@ -1,5 +1,6 @@
 * Cookie op algorithm changed again, they can no longer be easily reused (fixes #402) Thank you mulder.
 * Cookies no longer fail if the opping bot changes nick after queueing the mode.
+* Cookie time window increased, false-positives from lag/netsplits should be completely eliminated now.
 
 1.2.17 - http://wraith.botpack.net/milestone/1.2.17
 * Binary pass prompt has been changed to be more clear.
