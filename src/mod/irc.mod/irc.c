@@ -448,8 +448,8 @@ sdprintf("cookie: %s", out);
 }
 
 // Clear counter for bot
-void counter_clear(struct userrec *u) {
-  bot_counters[u->handle] = 0;
+void counter_clear(const char* botnick) {
+  bot_counters[botnick] = 0;
 }
 
 static inline int checkcookie(const char *chname, const memberlist* opper, const memberlist* opped, const char *cookie, int indexHint) {

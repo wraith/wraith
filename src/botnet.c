@@ -72,7 +72,7 @@ tand_t *findbot(const char *who)
   return NULL;
 }
 
-extern void counter_clear(struct userrec*);
+extern void counter_clear(const char* botnick);
 
 /* Add a tandem bot to our chain list
  */
@@ -108,8 +108,7 @@ void addbot(char *who, char *from, char *next, char flag, int vlocalhub, time_t 
     ptr2->uplink = findbot(next);
   tands++;
 
-  if (ptr2->u)
-    counter_clear(ptr2->u);
+  counter_clear(who);
 }
 
 #ifdef G_BACKUP
