@@ -56,6 +56,7 @@
 #include "src/mod/ctcp.mod/ctcp.h"
 #include <bdlib/src/String.h>
 #include <bdlib/src/HashTable.h>
+#include <bdlib/src/base64.h>
 
 #include <stdarg.h>
 
@@ -402,7 +403,8 @@ void makecookie(char *out, size_t len, const char *chname, const memberlist* opp
   const char* hash1 = cookie_hash(chname, opper, m1, &ts[4], randstring, key);
   const char* hash2 = m2 ? cookie_hash(chname, opper, m2, &ts[4], randstring, key) : NULL;
   const char* hash3 = m3 ? cookie_hash(chname, opper, m3, &ts[4], randstring, key) : NULL;
-  const char* cookie = encrypt_string(MD5(key), cookie_clear);
+  bd::String cookie = encrypt_string(MD5(key), bd::String(cookie_clear));
+  cookie = bd::base64Encode(cookie);
 #ifdef DEBUG
 sdprintf("key: %s", key);
 sdprintf("cookie_clear: %s", cookie_clear);
@@ -423,7 +425,7 @@ if (hash3) sdprintf("hash3: %s", hash3);
                          hash3[HASH_INDEX2(2)], 
                          hash3[HASH_INDEX3(2)], 
                          randstring, 
-                         cookie);
+                         cookie.c_str());
   else if (m2)
     simple_snprintf(out, len + 1, STR("%c%c%c%c%c%c!%s@%s"), 
                          hash1[HASH_INDEX1(0)], 
@@ -433,18 +435,17 @@ if (hash3) sdprintf("hash3: %s", hash3);
                          hash2[HASH_INDEX2(1)], 
                          hash2[HASH_INDEX3(1)], 
                          randstring, 
-                         cookie);
+                         cookie.c_str());
   else
     simple_snprintf(out, len + 1, STR("%c%c%c!%s@%s"), 
                          hash1[HASH_INDEX1(0)], 
                          hash1[HASH_INDEX2(0)], 
                          hash1[HASH_INDEX3(0)], 
                          randstring, 
-                         cookie);
+                         cookie.c_str());
 #ifdef DEBUG
 sdprintf("cookie: %s", out);
 #endif
-  free((char*)cookie);
 }
 
 // Clear counter for bot
@@ -463,10 +464,11 @@ static inline int checkcookie(const char *chname, const memberlist* opper, const
 
   cookie_key(key, sizeof(key), randstring, opper, chname);
 
-  char* cleartext = decrypt_string(MD5(key), (char*) &cookie[HOST(0)]);
+  bd::String ciphertext = bd::base64Decode((char*) &cookie[HOST(0)]);
+  bd::String cleartext = decrypt_string(MD5(key), ciphertext);
   char ts[8] = "";
-  strlcpy(ts, cleartext + 4, sizeof(ts));
-  unsigned long counter = base64_to_int(cleartext + 4 + 7);
+  strlcpy(ts, cleartext.c_str() + 4, sizeof(ts));
+  unsigned long counter = base64_to_int(cleartext.c_str() + 4 + 7);
 
   //Lookup counter for the opper
   unsigned long last_counter = 0;
@@ -482,15 +484,13 @@ static inline int checkcookie(const char *chname, const memberlist* opper, const
 
 #ifdef DEBUG
 sdprintf("key: %s", key);
-sdprintf("plaintext from cookie: %s", cleartext);
+sdprintf("plaintext from cookie: %s", cleartext.c_str());
 sdprintf("ts from cookie: %s", ts);
 if (indexHint == 0) {
   sdprintf("last counter from %s: %lu", opper->user->handle, last_counter);
   sdprintf("counter from cookie: %lu", counter);
 }
 #endif
-
-  free(cleartext);
 
   const time_t optime = atol(ts);
   if ((((now + timesync) % 10000000) - optime) > 3900)
