@@ -180,7 +180,7 @@ bin_checksum(const char *fname, int todo)
       OPENSSL_cleanse(hash, sizeof(hash));
 
     /* Copy everything up to this point into the new binary (including the settings header/prefix) */
-    outmap = (unsigned char*) mmap(0, size, PROT_WRITE, MAP_SHARED, newbin->fd, 0);
+    outmap = (unsigned char*) mmap(0, size, PROT_READ|PROT_WRITE, MAP_SHARED, newbin->fd, 0);
     if ((void*)outmap == MAP_FAILED) goto fatal;
 
     if (lseek(newbin->fd, size - 1, SEEK_SET) == -1) goto fatal;
