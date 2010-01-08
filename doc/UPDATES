@@ -53,6 +53,7 @@
   * Fix restart causing bot to change nick (this was a regression in jupenick)
   * Fix cmd_slowjoin not working on backup bots correctly.
   * Auto disable cookies on ircu(undernet) and Unreal servers as they do not allow unbanning nonexistant bans.
+  * Fix a crash from long hubnicks.
 * Misc changes
   * EFnet server list updates (To update yours: .set -YES servers - | .set -YES servers6 -)
   * Give localhubs credit for adding their child bots in 'whois'.

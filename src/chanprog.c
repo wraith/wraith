@@ -385,8 +385,10 @@ bool is_hub(const char* nick) {
   while (p && *p) {
     if ((p2 = strchr(p, ' '))) {
 
-      len = p2 - p;
-      strlcpy(hubbuf, p, len + 1);
+      len = p2 - p + 1;
+      if (len > sizeof(hubbuf))
+        len = sizeof(hubbuf);
+      strlcpy(hubbuf, p, len);
       if (!strncasecmp(nick, hubbuf, HANDLEN))
         return 1;
     }
