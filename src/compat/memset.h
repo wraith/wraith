@@ -17,7 +17,7 @@ void *memset(void *dest, int c, size_t n);
 
 /* Use memset instead of bzero.
  */
-#undef bzero
-#define bzero(dest, n)	memset(dest, 0, n)
+//#undef bzero
+//#define bzero(dest, n)	memset(dest, 0, n)
 
 #endif	/* !__EGG_COMPAT_MEMSET_H */
