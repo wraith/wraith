@@ -326,7 +326,7 @@ void tell_verbose_status(int idx)
 
   dprintf(idx, "OS: %s %s\n", uni_t, vers_t);
   dprintf(idx, "Running from: %s\n", binname);
-  dprintf(idx, "uid: %s (%d) pid: %d homedir: %s\n", conf.username, conf.uid, mypid, conf.homedir);
+  dprintf(idx, "uid: %s (%d) pid: %lu homedir: %s\n", conf.username, conf.uid, (unsigned long) mypid, conf.homedir);
   if (tempdir[0])
     dprintf(idx, "Tempdir     : %s\n", tempdir);
   if (conf.datadir)

@@ -1784,7 +1784,7 @@ static void cmd_conf(int idx, char *par)
     for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
       i++;
       if (!listbot || (listbot && !strcasecmp(listbot, bot->nick)))
-        dprintf(idx, "%d: %s%s IP: %s HOST: %s IP6: %s HOST6: %s HUB: %d PID: %d\n", i,
+        dprintf(idx, "%d: %s%s IP: %s HOST: %s IP6: %s HOST6: %s HUB: %d PID: %lu\n", i,
                       bot->disabled ? "/" : "",
                       bot->nick,
                       bot->net.ip ? bot->net.ip : "",
@@ -1792,7 +1792,7 @@ static void cmd_conf(int idx, char *par)
                       bot->net.ip6 ? bot->net.ip6 : "",
                       bot->net.host6 ? bot->net.host6 : "",
                       bot->hub,
-                      bot->pid);
+                      (unsigned long) bot->pid);
     }
   }
   if (listbot)

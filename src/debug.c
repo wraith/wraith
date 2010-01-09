@@ -124,9 +124,9 @@ void sdprintf (const char *format, ...)
     if (sdebug) {
 #endif
       if (!backgrd)
-        dprintf(DP_STDOUT, "[D:%d] %s%s%s\n", mypid, BOLD(-1), s, BOLD_END(-1));
+        dprintf(DP_STDOUT, "[D:%lu] %s%s%s\n", (unsigned long) mypid, BOLD(-1), s, BOLD_END(-1));
       else
-        printf("[D:%d] %s%s%s\n", mypid, BOLD(-1), s, BOLD_END(-1));
+        printf("[D:%lu] %s%s%s\n", (unsigned long) mypid, BOLD(-1), s, BOLD_END(-1));
 #ifdef DEBUG
     }
     logfile(LOG_DEBUG, s);
