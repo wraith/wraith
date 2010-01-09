@@ -157,7 +157,7 @@ void logidx(int idx, const char *format, ...)
 
 #ifdef DEBUG
 /* CURRENTLY SPAWNS TONS OF FILES */
-FILE *logf;
+FILE *log_f;
 bool flush_log = 1;
 bool init_log_exit = 0;
 char log_last[LOGLINEMAX + 1] = "";
@@ -165,15 +165,15 @@ int repeats = 0;
 
 void logfile_close(void)
 {
-  if (!logf)
+  if (!log_f)
     return;
 
   char date[50] = "";
 
   strftime(date, sizeof date, "%c %Z", gmtime(&now));
-  fprintf(logf, "--- Log session end: %s ---\n", date);
-  fclose(logf);
-  logf = NULL;  
+  fprintf(log_f, "--- Log session end: %s ---\n", date);
+  fclose(log_f);
+  log_f = NULL;
 }
 
 bool logfile_open()
@@ -183,7 +183,7 @@ bool logfile_open()
   char filename[20] = "";
   simple_snprintf(filename, sizeof(filename), ".l-%s", conf.bot->nick);
 
-  if (!(logf = fopen(filename, "w")))
+  if (!(log_f = fopen(filename, "w")))
     return 0;
 
   if (!init_log_exit) {
@@ -194,7 +194,7 @@ bool logfile_open()
   char date[50] = "";
 
   strftime(date, sizeof date, "%c %Z", gmtime(&now));
-  fprintf(logf, "--- Log session begin: %s ---\n", date);
+  fprintf(log_f, "--- Log session begin: %s ---\n", date);
   return 1;
 }
 
@@ -206,8 +206,8 @@ bool logfile_stat(const char *fname)
   if (fd == -1 || fstat(fd, &st) < 0) {
     if (fd != -1)
       close(fd);
-    fclose(logf);
-    logf = NULL;
+    fclose(log_f);
+    log_f = NULL;
     if (!logfile_open())
       return 0;
   }
@@ -216,7 +216,7 @@ bool logfile_stat(const char *fname)
 
 void logfile(int type, const char *msg)
 {
-  if (!logf && !logfile_open())
+  if (!log_f && !logfile_open())
     return;
 
 //  if (!logfile_stat(".l"))
@@ -227,15 +227,15 @@ void logfile(int type, const char *msg)
     return;
   }
   if (repeats) {
-    fprintf(logf, "Last message repeated %d times.\n", repeats);
+    fprintf(log_f, "Last message repeated %d times.\n", repeats);
     repeats = 0;
   }
 
   strlcpy(log_last, msg, sizeof(log_last));
 
-  fprintf(logf, "%s\n", msg);
+  fprintf(log_f, "%s\n", msg);
   if (flush_log)
-    fflush(logf);
+    fflush(log_f);
 }
 #endif
 
