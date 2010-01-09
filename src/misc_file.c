@@ -30,6 +30,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <limits.h>
 #include "stat.h"
 #include "misc_file.h"
 #include "main.h"
