@@ -995,7 +995,9 @@ identd_open(const char *sourceIp, const char *destIp, int identd)
       ;
 
     if (f) {
+#ifdef LOCK_EX
       flock(fileno(f), LOCK_EX);
+#endif
       fseek(f, 0, SEEK_SET);
 
       char inbuf[100] = "", outbuf[2048] = "";
@@ -1037,7 +1039,9 @@ identd_open(const char *sourceIp, const char *destIp, int identd)
       
 failure:
       fflush(f);
+#ifdef LOCK_EX
       flock(fileno(f), LOCK_UN);
+#endif
       fclose(f);
     }
   }
