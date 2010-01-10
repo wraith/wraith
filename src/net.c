@@ -588,9 +588,9 @@ int open_telnet_raw(int sock, const char *ipIn, port_t sport, bool proxy_on, int
     }
     socklen = SIZEOF_SOCKADDR(so);
   } else { // Unix domain socket
-    so.sun.sun_family = AF_UNIX;
-    strcpy(so.sun.sun_path, ip);
-    socklen = SUN_LEN(&so.sun);
+    so.sock_un.sun_family = AF_UNIX;
+    strcpy(so.sock_un.sun_path, ip);
+    socklen = SUN_LEN(&so.sock_un);
   }
 
   for (int i = 0; i < MAXSOCKS; i++) {
@@ -719,10 +719,10 @@ int open_address_listen(const char* ip, port_t *port)
 
     bzero((char *) &name, sizeof(struct sockaddr *));
     if (af_def == AF_UNIX) {
-      name.sun.sun_family = AF_UNIX;
-      strcpy(name.sun.sun_path, ip);
-      unlink(name.sun.sun_path);
-      addrlen = SUN_LEN(&name.sun);
+      name.sock_un.sun_family = AF_UNIX;
+      strcpy(name.sock_un.sun_path, ip);
+      unlink(name.sock_un.sun_path);
+      addrlen = SUN_LEN(&name.sock_un);
     } else {
       name.sin.sin_family = af_def;
       name.sin.sin_port = htons(*port); /* 0 = just assign us a port */
@@ -869,12 +869,12 @@ int answer(int sock, char *caller, in_addr_t *ip, port_t *port, int binary)
     } else {
 #endif /* USE_IPV6 */
       if (af_ty == AF_UNIX) {
-        struct sockaddr_un sun;
-        socklen_t socklen = sizeof(sun);
+        struct sockaddr_un sock_un;
+        socklen_t socklen = sizeof(sock_un);
 
-        bzero(&sun, socklen);
-        getsockname(sock, (struct sockaddr*) &sun, &socklen);
-        strcpy(caller, sun.sun_path);
+        bzero(&sock_un, socklen);
+        getsockname(sock, (struct sockaddr*) &sock_un, &socklen);
+        strcpy(caller, sock_un.sun_path);
         *port = 0;
       } else {
         *ip = from.sin_addr.s_addr;

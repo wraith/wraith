@@ -67,7 +67,7 @@ union sockaddr_union {			/* replaced by sockname_t */
 #ifdef USE_IPV6
   struct sockaddr_in6 sin6;
 #endif /* USE_IPV6 */
-  struct sockaddr_un sun;
+  struct sockaddr_un sock_un;
 };
 
 /* This is used by the net module to keep track of sockets and what's
