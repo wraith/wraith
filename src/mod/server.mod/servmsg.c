@@ -1623,7 +1623,7 @@ static cmd_t my_raw_binds[] =
   {NULL,	NULL,	NULL,				NULL, 0}
 };
 
-static void server_dns_callback(int, void *, const char *, char **);
+static void server_dns_callback(int, void *, const char *, bd::Array<bd::String>);
 
 /* Hook up to a server
  */
@@ -1695,7 +1695,7 @@ static void connect_server(void)
   }
 }
 
-static void server_dns_callback(int id, void *client_data, const char *host, char **ips)
+static void server_dns_callback(int id, void *client_data, const char *host, bd::Array<bd::String> ips)
 {
   //64bit hacks
   long data = (long) client_data;
@@ -1706,7 +1706,7 @@ static void server_dns_callback(int id, void *client_data, const char *host, cha
   if (!valid_dns_id(idx, id))
     return;
 
-  if (!ips) {
+  if (!ips.size()) {
     putlog(LOG_SERV, "*", "Failed connect to %s (DNS lookup failed)", host);
     trying_server = 0;
     lostdcc(idx);
@@ -1721,10 +1721,10 @@ static void server_dns_callback(int id, void *client_data, const char *host, cha
    */
 #ifdef USE_IPV6
   if (conf.bot->net.v6) {
-    int i = 0;
-    for (i = 0; ips[i]; i++) {
-      if (is_dotted_ip(ips[i]) == AF_INET6) {
-        ip = ips[i];
+    size_t i = 0;
+    for (i = 0; i < ips.size(); ++i) {
+      if (is_dotted_ip(bd::String(ips[i]).c_str()) == AF_INET6) {
+        ip = strdup(bd::String(ips[i]).c_str());
         break;
       }
     }
@@ -1736,7 +1736,7 @@ static void server_dns_callback(int id, void *client_data, const char *host, cha
     }
   } else
 #endif /* USE_IPV6 */
-    ip = ips[0];
+    ip = strdup(bd::String(ips[0]).c_str());
 
   get_addr(ip, &addr);
  
@@ -1782,4 +1782,5 @@ static void server_dns_callback(int id, void *client_data, const char *host, cha
     dprintf(DP_MODE, "USER %s localhost %s :%s\n", botuser, dcc[idx].host, replace_vars(botrealname));
     /* Wait for async result now */
   }
+  free(ip);
 }

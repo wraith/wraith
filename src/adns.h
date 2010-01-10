@@ -40,7 +40,10 @@ TXT             16 text strings
 
 #define DNS_PORT 53
 
-typedef void (*dns_callback_t)(int, void *client_data, const char *query, char **result);
+#include <bdlib/src/String.h>
+#include <bdlib/src/Array.h>
+
+typedef void (*dns_callback_t)(int, void *client_data, const char *query, bd::Array<bd::String> answers);
 
 int egg_dns_init(void);
 //int egg_dns_shutdown(void);

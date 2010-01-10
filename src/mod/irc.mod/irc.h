@@ -102,7 +102,7 @@ static void send_chan_who(int queue, struct chanset_t* chan);
 void resolve_to_member(struct chanset_t *chan, char *nick, char *host);
 
 typedef struct resolvstruct resolv_member;
-void resolve_to_rbl(struct chanset_t *chan, char *host, struct resolvstruct *r = NULL);
+void resolve_to_rbl(struct chanset_t *chan, const char *host, struct resolvstruct *r = NULL);
 static void do_mask(struct chanset_t *chan, masklist *m, char *mask, char Mode);
 
 #endif /* MAKING_IRC */

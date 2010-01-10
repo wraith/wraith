@@ -30,6 +30,7 @@
  */
 
 #include <bdlib/src/String.h>
+#include <bdlib/src/Array.h>
 
 static time_t last_ctcp = (time_t) 0L;
 static int    count_ctcp = 0;
@@ -43,11 +44,11 @@ typedef struct resolvstruct {
   bd::String* server;
 } resolv_member;
 
-static void resolv_member_callback(int id, void *client_data, const char *host, char **ips)
+static void resolv_member_callback(int id, void *client_data, const char *host, bd::Array<bd::String> ips)
 {
   resolv_member *r = (resolv_member *) client_data;
 
-  if (!r || !r->chan || !r->host || !ips || !ips[0]) {
+  if (!r || !r->chan || !r->host || !ips.size()) {
     if (r) {
       if (r->host) free(r->host);
       free(r);
@@ -65,7 +66,7 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
       pe = strchr(m->userhost, '@');
       if (pe && !strcmp(pe + 1, r->host)) {
         strlcpy(user, m->userhost, pe - m->userhost + 1);
-        simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, ips[0]);
+        simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, bd::String(ips[0]).c_str());
         if (!m->user) {
           simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
           m->user = get_user_by_host(s);
@@ -81,7 +82,7 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
   }
 
   if (!matched_user && channel_rbl(r->chan))
-    resolve_to_rbl(r->chan, ips[0]);
+    resolve_to_rbl(r->chan, bd::String(ips[0]).c_str());
 
   free(r->host);
   free(r);
@@ -100,11 +101,11 @@ void resolve_to_member(struct chanset_t *chan, char *nick, char *host)
 }
 
 /* RBL */
-static void resolve_rbl_callback(int id, void *client_data, const char *host, char **ips)
+static void resolve_rbl_callback(int id, void *client_data, const char *host, bd::Array<bd::String> ips)
 {
   resolv_member *r = (resolv_member *) client_data;
 
-  if (!r || !r->chan || !r->host || !ips || (ips && !ips[0])) {
+  if (!r || !r->chan || !r->host || !ips.size()) {
     if (r && r->chan && r->host) {
       // Lookup from the next RBL
       resolve_to_rbl(r->chan, r->host, r);
@@ -112,7 +113,7 @@ static void resolve_rbl_callback(int id, void *client_data, const char *host, ch
     return;
   }
 
-  sdprintf("RBL match for %s:%s: %s", r->chan->dname, r->host, ips[0]);
+  sdprintf("RBL match for %s:%s: %s", r->chan->dname, r->host, bd::String(ips[0]).c_str());
 
   char s1[UHOSTLEN] = "";
   simple_snprintf(s1, sizeof(s1), "*!*@%s", r->host);
@@ -148,7 +149,7 @@ static void resolve_rbl_callback(int id, void *client_data, const char *host, ch
 }
 
 
-void resolve_to_rbl(struct chanset_t *chan, char *host, resolv_member *r)
+void resolve_to_rbl(struct chanset_t *chan, const char *host, resolv_member *r)
 {
   if (!r) {
     r = (resolv_member *) my_calloc(1, sizeof(resolv_member));

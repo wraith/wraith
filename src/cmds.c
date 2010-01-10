@@ -65,6 +65,7 @@
 #include "src/mod/share.mod/share.h"
 #include <bdlib/src/String.h>
 #include <bdlib/src/Stream.h>
+#include <bdlib/src/Array.h>
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -4052,7 +4053,7 @@ static void cmd_crontab(int idx, char *par) {
 }
 #endif /* !CYGWIN_HACKS */
 
-static void my_dns_callback(int id, void *client_data, const char *host, char **ips)
+static void my_dns_callback(int id, void *client_data, const char *host, bd::Array<bd::String> ips)
 {
   //64bit hacks
   long data = (long) client_data;
@@ -4061,9 +4062,9 @@ static void my_dns_callback(int id, void *client_data, const char *host, char **
   if (!valid_idx(idx))
     return;
 
-  if (ips)
-    for (int i = 0; ips[i]; i++)
-      dprintf(idx, "Resolved %s using (%s) to: %s\n", host, dns_ip, ips[i]);
+  if (ips.size())
+    for (size_t i = 0; i < ips.size(); ++i)
+      dprintf(idx, "Resolved %s using (%s) to: %s\n", host, dns_ip, bd::String(ips[i]).c_str());
   else
     dprintf(idx, "Failed to lookup via (%s): %s\n", dns_ip, host);
 

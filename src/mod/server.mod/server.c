@@ -48,6 +48,7 @@
 #include "src/mod/irc.mod/irc.h"
 #include <bdlib/src/Stream.h>
 #include <bdlib/src/String.h>
+#include <bdlib/src/Array.h>
 #include "server.h"
 #include <stdarg.h>
 

@@ -47,6 +47,8 @@
 #include "botmsg.h"
 #include "tandem.h"
 #include "core_binds.h"
+#include <bdlib/src/String.h>
+#include <bdlib/src/Array.h>
 
 tand_t			*tandbot = NULL;		/* Keep track of tandem bots on the
 							   botnet */
@@ -945,7 +947,7 @@ int botunlink(int idx, const char *nick, const char *reason)
   return 0;
 }
 
-static void botlink_dns_callback(int, void *, const char *, char **);
+static void botlink_dns_callback(int, void *, const char *, bd::Array<bd::String>);
 
 /* Link to another bot
  */
@@ -1021,7 +1023,7 @@ int botlink(char *linker, int idx, char *nick)
   return 0;
 }
 
-static void botlink_dns_callback(int id, void *client_data, const char *host, char **ips)
+static void botlink_dns_callback(int id, void *client_data, const char *host, bd::Array<bd::String> ips)
 {
   long data = (long) client_data;
   int i = (int) data;
@@ -1037,12 +1039,12 @@ static void botlink_dns_callback(int id, void *client_data, const char *host, ch
     linker = strdup(dcc[i].u.dns->cptr);
   }
 
-  if (!ips) {
+  if (!ips.size()) {
     lostdcc(i);
     return;
   }
 
-  dcc[i].addr = inet_addr(ips[0]);
+  dcc[i].addr = inet_addr(bd::String(ips[0]).c_str());
 
   changeover_dcc(i, &DCC_FORK_BOT, sizeof(struct bot_info));
   dcc[i].timeval = now;
@@ -1055,7 +1057,7 @@ static void botlink_dns_callback(int id, void *client_data, const char *host, ch
 
   dcc[i].u.bot->port = dcc[i].port;             /* Remember where i started */
 #ifdef USE_IPV6
-  dcc[i].sock = getsock(SOCK_STRONGCONN, is_dotted_ip(ips[0]));
+  dcc[i].sock = getsock(SOCK_STRONGCONN, is_dotted_ip(bd::String(ips[0]).c_str()));
 #else
   dcc[i].sock = getsock(SOCK_STRONGCONN);
 #endif /* USE_IPV6 */
@@ -1063,7 +1065,7 @@ static void botlink_dns_callback(int id, void *client_data, const char *host, ch
 //  if (dcc[i].sock > 0)
 //    identd_open();                      /* will be closed when an ident is replied. */
 
-  if (dcc[i].sock < 0 || open_telnet_raw(dcc[i].sock, ips[0], dcc[i].port, 0, 1) < 0)
+  if (dcc[i].sock < 0 || open_telnet_raw(dcc[i].sock, bd::String(ips[0]).c_str(), dcc[i].port, 0, 1) < 0)
     failed_link(i);
   else { /* let's attempt to initiate SSL before ANYTHING else... */
     dcc[i].ssl = 0;
@@ -1106,7 +1108,7 @@ static void failed_tandem_relay(int idx)
   return;
 }
 
-static void tandem_relay_dns_callback(int, void *, const char *, char **);
+static void tandem_relay_dns_callback(int, void *, const char *, bd::Array<bd::String>);
 
 /* Relay to another tandembot
  */
@@ -1170,7 +1172,7 @@ void tandem_relay(int idx, char *nick, register int i)
   /* wait for async reply */
 }
 
-static void tandem_relay_dns_callback(int id, void *client_data, const char *host, char **ips)
+static void tandem_relay_dns_callback(int id, void *client_data, const char *host, bd::Array<bd::String> ips)
 {
   //64bit hacks
   long data = (long) client_data;
@@ -1188,7 +1190,7 @@ static void tandem_relay_dns_callback(int id, void *client_data, const char *hos
     return;
   }
 
-  if (!ips) {
+  if (!ips.size()) {
     struct chat_info *ci = dcc[idx].u.relay->chat;
 
     dprintf(idx, "Could not relay to %s.\n", dcc[i].nick);
@@ -1201,7 +1203,7 @@ static void tandem_relay_dns_callback(int id, void *client_data, const char *hos
   }
 
 #ifdef USE_IPV6
-  int af = is_dotted_ip(ips[0]);
+  int af = is_dotted_ip(bd::String(ips[0]).c_str());
 
   dcc[i].sock = getsock(SOCK_STRONGCONN | SOCK_VIRTUAL, af);
 #else
@@ -1217,7 +1219,7 @@ static void tandem_relay_dns_callback(int id, void *client_data, const char *hos
 
   changeover_dcc(i, &DCC_FORK_RELAY, sizeof(struct relay_info));
 
-  dcc[i].addr = inet_addr(ips[0]);
+  dcc[i].addr = inet_addr(bd::String(ips[0]).c_str());
 
   dcc[i].u.relay->chat = (struct chat_info *) my_calloc(1, sizeof(struct chat_info));
   dcc[i].u.relay->sock = dcc[idx].sock;
@@ -1234,7 +1236,7 @@ static void tandem_relay_dns_callback(int id, void *client_data, const char *hos
   dcc[i].u.relay->chat->current_lines = 0;
   dcc[i].timeval = now;
 
-  if (open_telnet_raw(dcc[i].sock, ips[0], dcc[i].port, 0) < 0) 
+  if (open_telnet_raw(dcc[i].sock, bd::String(ips[0]).c_str(), dcc[i].port, 0) < 0)
     failed_tandem_relay(i);
 }
 

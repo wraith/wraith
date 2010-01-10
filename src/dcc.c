@@ -60,6 +60,8 @@
 #include "tandem.h"
 #include "core_binds.h"
 #include "src/mod/console.mod/console.h"
+#include <bdlib/src/String.h>
+#include <bdlib/src/Array.h>
 
 
 struct cmd_pass *cmdpass = NULL;
@@ -1360,7 +1362,7 @@ detect_telnet_flood(char *floodhost)
   return 0;
 }
 
-static void dcc_telnet_dns_callback(int, void *, const char *, char **);
+static void dcc_telnet_dns_callback(int, void *, const char *, bd::Array<bd::String>);
 
 static void
 dcc_telnet(int idx, char *buf, int ii)
@@ -1441,7 +1443,7 @@ dcc_telnet(int idx, char *buf, int ii)
     dcc[i].dns_id = dns_id;
 }
 
-static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, char **hosts)
+static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, bd::Array<bd::String> hosts)
 {
   // 64bit hacks
   long data = (long) client_data;
@@ -1456,7 +1458,7 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, c
   if (valid_idx(i))
     idx = dcc[i].u.dns->ibuf;
 
-  strlcpy(dcc[i].host, hosts ? hosts[0] : ip, UHOSTLEN);
+  strlcpy(dcc[i].host, hosts.size() ? bd::String(hosts[0]).c_str() : ip, UHOSTLEN);
 
   simple_snprintf(s2, sizeof(s2), "-telnet!telnet@%s", dcc[i].host);
 
@@ -1491,7 +1493,7 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, c
   if (!dcc[i].user)
     dcc[i].user = get_user_by_host(s2);		/* check for matching -telnet!telnet@host */
   
-  if (hosts)
+  if (hosts.size())
     putlog(LOG_MISC, "*", "Telnet connection: %s[%s]/%d", dcc[i].host, ip, dcc[i].port);
   else
     putlog(LOG_MISC, "*", "Telnet connection: %s/%d", dcc[i].host, dcc[i].port);

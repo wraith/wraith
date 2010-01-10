@@ -33,16 +33,12 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-
-typedef struct {
-	char **list;
-	time_t ttl;
-	int len;
-} dns_answer_t;
+#include <bdlib/src/Array.h>
+#include <bdlib/src/String.h>
 
 typedef struct dns_query {
 	struct dns_query *next;
-	dns_answer_t answer;
+	bd::Array<bd::String>* answer;
 	dns_callback_t callback;
 	void *client_data;
 	time_t expiretime;
@@ -52,6 +48,7 @@ typedef struct dns_query {
 //	int timer_id;
 	int answers;
 	int remaining;
+        int lowest_ttl;
 } dns_query_t;
 
 /* RFC1035
@@ -142,7 +139,7 @@ typedef struct {
 } dns_host_t;
 
 typedef struct {
-	dns_answer_t answer;
+	bd::Array<bd::String>* answer;
 	char *query;
 	time_t expiretime;
 } dns_cache_t;
@@ -280,27 +277,7 @@ static void async_timeout(void *client_data)
 }
 */
 
-static void answer_init(dns_answer_t *answer)
-{
-	memset(answer, 0, sizeof(*answer));
-}
-
 char s1_7[3] = "",s2_3[3] = "",s2_2[3] = "";
-
-static void answer_add(dns_answer_t *answer, const char *what)
-{
-	answer->list = (char **) my_realloc(answer->list, sizeof(*answer->list) * (answer->len+2));
-	answer->list[answer->len] = strdup(what);
-	answer->len++;
-	answer->list[answer->len] = NULL;
-}
-
-static void answer_free(dns_answer_t *answer)
-{
-	int i;
-	for (i = 0; i < answer->len; i++) free(answer->list[i]);
-	if (answer->list) free(answer->list);
-}
 
 static dns_query_t *alloc_query(void *client_data, dns_callback_t callback, const char *query)
 {
@@ -309,6 +286,8 @@ static dns_query_t *alloc_query(void *client_data, dns_callback_t callback, cons
 	q->id = randint(65534);
 	q->query = strdup(query);
 	q->answers = 0;
+        q->answer = new bd::Array<bd::String>;
+        q->lowest_ttl = 0;
 	q->callback = callback;
 	q->client_data = client_data;
 	q->expiretime = now + async_lookup_timeout;
@@ -472,35 +451,31 @@ int egg_dns_lookup(const char *host, interval_t timeout, dns_callback_t callback
 
 	if (is_dotted_ip(host)) {
 		/* If it's already an ip, we're done. */
-		dns_answer_t answer;
+                bd::Array<bd::String> answer;
 		sdprintf("egg_dns_lookup(%s, %d): Already an ip.", host, timeout);
 
-		answer_init(&answer);
-		answer_add(&answer, host);
-		callback(-1, client_data, host, answer.list);
-		answer_free(&answer);
+                answer << host;
+		callback(-1, client_data, host, answer);
 		return(-1);
 	}
 
 	/* Ok, now see if it's in our host cache. */
 	for (i = 0; i < nhosts; i++) {
 		if (!strcasecmp(host, hosts[i].host)) {
-			dns_answer_t answer;
+			bd::Array<bd::String> answer;
 
 			sdprintf("egg_dns_lookup(%s, %d): Found in hosts -> %s", host, timeout, hosts[i].ip);
-			answer_init(&answer);
-			answer_add(&answer, hosts[i].ip);
-			callback(-1, client_data, host, answer.list);
-			answer_free(&answer);
+                        answer << hosts[i].ip;
+			callback(-1, client_data, host, answer);
 			return(-1);
 		}
 	}
 
 	cache_id = cache_find(host);
 	if (cache_id >= 0) {
-		shuffleArray(cache[cache_id].answer.list, cache[cache_id].answer.len);
-		sdprintf("egg_dns_lookup(%s, %d): Found in cache -> %s", host, timeout, cache[cache_id].answer.list[0]);
-		callback(-1, client_data, host, cache[cache_id].answer.list);
+//		cache[cache_id].answer->shuffle();
+		sdprintf("egg_dns_lookup(%s, %d): Found in cache -> %s", host, timeout, cache[cache_id].answer->join(',').c_str());
+		callback(-1, client_data, host, *(cache[cache_id].answer));
 		return(-1);
 	}
 
@@ -542,22 +517,20 @@ int egg_dns_reverse(const char *ip, interval_t timeout, dns_callback_t callback,
 	/* Ok, see if we have it in our host cache. */
 	for (i = 0; i < nhosts; i++) {
 		if (!strcasecmp(hosts[i].ip, ip)) {
-			dns_answer_t answer;
+			bd::Array<bd::String> answer;
 
 			sdprintf("egg_dns_reverse(%s, %d): Found in hosts -> %s", ip, timeout, hosts[i].host);
-			answer_init(&answer);
-			answer_add(&answer, hosts[i].host);
-			callback(-1, client_data, ip, answer.list);
-			answer_free(&answer);
+			answer << hosts[i].host;
+			callback(-1, client_data, ip, answer);
 			return(-1);
 		}
 	}
 
 	cache_id = cache_find(ip);
         if (cache_id >= 0) {
-		shuffleArray(cache[cache_id].answer.list, cache[cache_id].answer.len);
-		sdprintf("egg_dns_reverse(%s, %d): Found in cache -> %s", ip, timeout, cache[cache_id].answer.list[0]);
-		callback(-1, client_data, ip, cache[cache_id].answer.list);
+//		cache[cache_id].answer->shuffle();
+		sdprintf("egg_dns_reverse(%s, %d): Found in cache -> %s", ip, timeout, cache[cache_id].answer->join(',').c_str());
+		callback(-1, client_data, ip, *(cache[cache_id].answer));
 		return(-1);
 	}
 
@@ -692,7 +665,7 @@ static int cache_expired(int id)
 
 static void cache_del(int id)
 {
-	answer_free(&cache[id].answer);
+	delete cache[id].answer;
 	free(cache[id].query);
 	cache[id].expiretime = 0;
 
@@ -704,17 +677,14 @@ static void cache_del(int id)
 	cache = (dns_cache_t *) my_realloc(cache, (ncache+1)*sizeof(*cache));
 }
 
-static void cache_add(const char *query, dns_answer_t *answer)
+static void cache_add(const char *query, bd::Array<bd::String> answer, int ttl)
 {
-	int i;
-
 	cache = (dns_cache_t *) my_realloc(cache, (ncache+1)*sizeof(*cache));
 	bzero(&cache[ncache], sizeof(cache[ncache]));
 	cache[ncache].query = strdup(query);
-	answer_init(&cache[ncache].answer);
-        for (i = 0; i < answer->len; i++)
-		answer_add(&cache[ncache].answer, answer->list[i]);
-	cache[ncache].expiretime = now + answer->ttl;
+        cache[ncache].answer = new bd::Array<bd::String>;
+        *(cache[ncache].answer) = answer;
+	cache[ncache].expiretime = now + ttl;
 	ncache++;
 }
 
@@ -860,13 +830,13 @@ int egg_dns_cancel(int id, int issue_callback)
 	else query_head = q->next;
 	sdprintf("Cancelling query: %s", q->query);
 	if (issue_callback) {
-		if (q->answer.len > 0) {
-			cache_add(q->query, &q->answer);
+		if (q->answer->size() > 0) {
+			cache_add(q->query, *(q->answer), q->lowest_ttl);
 
-			q->callback(q->id, q->client_data, q->query, q->answer.list);
-			answer_free(&q->answer);
+			q->callback(q->id, q->client_data, q->query, *(q->answer));
 		} else {
-			q->callback(q->id, q->client_data, q->query, NULL);
+			bd::Array<bd::String> empty;
+			q->callback(q->id, q->client_data, q->query, empty);
 		}
 	}
 	if (q->ip)
@@ -1032,20 +1002,20 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip)
 		reply.rdlength = ntohs(reply.rdlength);
 		reply.ttl = ntohl(reply.ttl);
 		/* Save the lowest ttl */
-		if (reply.ttl && ((!q->answer.ttl) || (q->answer.ttl > reply.ttl))) q->answer.ttl = reply.ttl;
+		if (reply.ttl && ((!q->lowest_ttl) || (q->lowest_ttl >  reply.ttl))) q->lowest_ttl = reply.ttl;
 
 //		print_reply(reply);
 
 		switch (reply.type) {
 		case DNS_A:
 			inet_ntop(AF_INET, ptr, result, 512);
-			answer_add(&q->answer, result);
+			*(q->answer) << result;
 			sdprintf("Reply(%d): %s. \t %d \t IN A \t %s", header.id, q->query, reply.ttl, result);
 			break;
 		case DNS_AAAA:
 #ifdef USE_IPV6
 			inet_ntop(AF_INET6, ptr, result, 512);
-			answer_add(&q->answer, result);
+			*(q->answer) << result;
 			sdprintf("Reply(%d): %s. \t %d \t IN AAAA \t %s", header.id, q->query, reply.ttl, result);
 #endif /* USE_IPV6 */
 			break;
@@ -1053,7 +1023,7 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip)
 			r = my_dn_expand((const unsigned char *) response, eop, ptr, result, sizeof(result));
 
 			if (r != -1 && result[0]) {
-				answer_add(&q->answer, result);
+				*(q->answer) << result;
 				sdprintf("Reply(%d): %s. \t %d \t IN PTR \t %s", header.id, q->query, reply.ttl, result);
 			}
 			break;
@@ -1078,13 +1048,13 @@ callback:
 	if (prev) prev->next = q->next;
 	else query_head = q->next;
 
-        if (q->answer.len > 0) {
-		cache_add(q->query, &q->answer);
+        if (q->answer->size() > 0) {
+		cache_add(q->query, *(q->answer), q->lowest_ttl);
 
-		q->callback(q->id, q->client_data, q->query, q->answer.list);
-		answer_free(&q->answer);
+		q->callback(q->id, q->client_data, q->query, *(q->answer));
         } else {
-		q->callback(q->id, q->client_data, q->query, NULL);
+		bd::Array<bd::String> empty;
+		q->callback(q->id, q->client_data, q->query, empty);
         }
 
 	free(q->query);
@@ -1099,10 +1069,8 @@ callback:
 void tell_dnsdebug(int idx)
 {
 	dns_query_t *q = NULL;
-	int i, n = 0;
 
 	dprintf(idx, "NS: %s\n", dns_ip);
-
 
 	for (q = query_head; q; q = q->next)
 		dprintf(idx, "DNS (%d) (%ds): %s\n", q->id, (int) (q->expiretime - now), q->query);
@@ -1110,10 +1078,10 @@ void tell_dnsdebug(int idx)
 //	for (i = 0; i < nhosts; i++)
 //           dprintf(idx, "HOST #%d: %s/%s\n", i, hosts[i].host, hosts[i].ip);
 
-	for (i = 0; i < ncache; i++) {
+	for (int i = 0; i < ncache; i++) {
 		dprintf(idx, "cache(%d) %s expires in %ds\n", i, cache[i].query, (int) (cache[i].expiretime - now));
-    		for (n = 0; n < cache[i].answer.len; n++)
-			dprintf(idx, "%d: %s\n", n, cache[i].answer.list[n]);
+		for (size_t n = 0; n < cache[i].answer->size(); n++)
+			dprintf(idx, "%d: %s\n", n, cache[i].answer->join(',').c_str());
 	}
 }
 
