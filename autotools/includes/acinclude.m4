@@ -148,17 +148,10 @@ then
   if test -n "$GXX"
   then
     AC_CACHE_CHECK(whether the compiler understands -static, egg_cv_var_ccstatic, [dnl
-      ac_old_CXX="$CXX"
-      CXX="$CXX -static"
       AC_TRY_COMPILE(,, egg_cv_var_ccstatic="yes", egg_cv_var_ccstatic="no")
-      CXX="$ac_old_CXX"
-      
     ])
-    if test "$egg_cv_var_ccstatic" = "yes"
+    if ! test "$egg_cv_var_ccstatic" = "yes"
     then
-      CCDEBUG="$CXX"
-#      CXX="$CXX -static"
-    else
       cat << 'EOF' >&2
 configure: error:
 
@@ -166,9 +159,9 @@ configure: error:
   This compile flag is required for the botpack on this OS.
 
 EOF
-  exit 1
-    fi
+    exit 1
   fi
+fi
 
   STATIC="-static"
 else

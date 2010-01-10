@@ -4784,9 +4784,7 @@ $as_echo_n "checking whether the compiler understands -static... " >&6; }
 if test "${egg_cv_var_ccstatic+set}" = set; then
   $as_echo_n "(cached) " >&6
 else
-        ac_old_CXX="$CXX"
-      CXX="$CXX -static"
-      cat >conftest.$ac_ext <<_ACEOF
+        cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
@@ -4828,17 +4826,12 @@ sed 's/^/| /' conftest.$ac_ext >&5
 fi
 
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-      CXX="$ac_old_CXX"
-
 
 fi
 { $as_echo "$as_me:$LINENO: result: $egg_cv_var_ccstatic" >&5
 $as_echo "$egg_cv_var_ccstatic" >&6; }
-    if test "$egg_cv_var_ccstatic" = "yes"
+    if ! test "$egg_cv_var_ccstatic" = "yes"
     then
-      CCDEBUG="$CXX"
-#      CXX="$CXX -static"
-    else
       cat << 'EOF' >&2
 configure: error:
 
@@ -4846,9 +4839,9 @@ configure: error:
   This compile flag is required for the botpack on this OS.
 
 EOF
-  exit 1
-    fi
+    exit 1
   fi
+fi
 
   STATIC="-static"
 else
