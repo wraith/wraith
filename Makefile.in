@@ -30,8 +30,8 @@ SETTINGSFILE = doc/settings.txt
 RESPONSESFILE = doc/responses.txt
 
 # defaults
-CXX = @CCACHE@ @DISTCC@ @CXX@ -static
-LD = @CXX@ -static
+CXX = @CCACHE@ @DISTCC@ @CXX@ @STATIC@
+LD = @CXX@ @STATIC@
 CCDEBUG = @CCACHE@ @DISTCC@ @CCDEBUG@ 
 LDDEBUG = @CCDEBUG@
 STRIP = @STRIP@

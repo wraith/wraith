@@ -143,7 +143,7 @@ dnl
 dnl  Checks whether the compiler supports the `-static' flag.
 AC_DEFUN([EGG_CHECK_CCSTATIC],
 [
-if test -z "$no_static"
+if test "$USE_STATIC" = "yes"
 then
   if test -n "$GXX"
   then
@@ -162,14 +162,19 @@ then
       cat << 'EOF' >&2
 configure: error:
 
-  Your C compiler does not support -static.
-  This compile flag is required for the botpack.
+  Your OS or C++ compiler does not support -static.
+  This compile flag is required for the botpack on this OS.
 
 EOF
   exit 1
     fi
   fi
+
+  STATIC="-static"
+else
+  STATIC=""
 fi
+AC_SUBST(STATIC)dnl
 ])
 
 dnl EGG_PROG_HEAD_1()
@@ -264,6 +269,7 @@ dnl
 AC_DEFUN([EGG_CHECK_OS],
 [
 EGG_CYGWIN=no
+USE_STATIC=yes
 AC_CACHE_CHECK(system type, egg_cv_var_system_type, egg_cv_var_system_type=`$UNAME -s`)
 AC_CACHE_CHECK(system release, egg_cv_var_system_release, egg_cv_var_system_release=`$UNAME -r`)
 AC_CACHE_CHECK(system machine, egg_cv_var_system_machine, egg_cv_var_system_machine=`$UNAME -m`)
@@ -331,6 +337,10 @@ case "$egg_cv_var_system_type" in
   ;;
   SunOS)
     SUNOS="yes"
+    USE_STATIC="no"
+  ;;
+  Darwin)
+    USE_STATIC="no"
   ;;
   *BSD)
     # FreeBSD/OpenBSD/NetBSD
@@ -350,7 +360,6 @@ case "$egg_cv_var_system_type" in
       else
         AC_MSG_RESULT(no)
         AC_MSG_RESULT(Something unknown!)
-        AC_MSG_RESULT([If you get dynamic modules to work, be sure to let the devel team know HOW :)])
       fi
     fi
   ;;
