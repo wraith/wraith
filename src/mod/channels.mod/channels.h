@@ -58,7 +58,6 @@ void channels_report(int, int);
 void channels_writeuserfile(bd::Stream&, int = 0);
 void rcmd_chans(char *, char *, char *);
 
-extern char		glob_chanset[512];
 
 /* Macro's here because their functions were replaced by something more
  * generic. <cybah>

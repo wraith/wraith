@@ -74,7 +74,6 @@ static variable_t vars[] = {
  VAR("auth-key",	auth_key,		VAR_STRING|VAR_PERM,				0, 0, NULL),
  VAR("auth-obscure",	&auth_obscure,		VAR_INT|VAR_BOOL,				0, 1, "0"),
  VAR("auth-prefix",	auth_prefix,		VAR_WORD|VAR_NOLHUB|VAR_PERM,			0, 0, "+"),
- VAR("chanset",		glob_chanset,		VAR_STRING|VAR_NOLHUB|VAR_NOLOC|VAR_HIDE,	0, 0, NULL),
  VAR("cloak-script",	&cloak_script,		VAR_INT|VAR_CLOAK|VAR_NOLHUB,			0, 10, "0"),
  VAR("close-threshold",	&close_threshold,	VAR_RATE|VAR_NOLOC,				0, 0, "0:0"),
  VAR("dcc-autoaway",	&dcc_autoaway,		VAR_INT|VAR_NOLOC,				0, (5*60*60), "1800"),

@@ -932,8 +932,6 @@ int channel_add(char *result, char *newname, char *options, bool isdefault)
 
   simple_snprintf(buf, sizeof(buf), "chanmode { %s } ", glob_chanmode);
   strlcat(buf, def_chanset, sizeof(buf));
-  strlcat(buf, " ", sizeof(buf));
-  strlcat(buf, glob_chanset, sizeof(buf));
   if (options && options[0]) {
     strlcat(buf, " ", sizeof(buf));
     strlcat(buf, options, sizeof(buf));

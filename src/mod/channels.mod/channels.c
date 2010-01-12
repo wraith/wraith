@@ -59,8 +59,6 @@ static interval_t			global_exempt_time;
 static interval_t 			global_invite_time;
 
 
-/* Global channel settings (drummer/dw) */
-char glob_chanset[512];
 static char *lastdeletedmask = NULL;
 
 /* Global flood settings */
