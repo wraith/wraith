@@ -1487,6 +1487,10 @@ start_sending_users(int idx)
   if (bot && bot->buildts < 1175102242) /* flood-* hacks */
     old = 1;
 
+  /* FIXME: Remove after 1.2.15 */
+  if (idx != -1 && !(dcc[idx].u.bot->uff_flags & UFF_CHDEFAULT)) /* channel 'default' */
+    old = 2;
+
   const char salt1[] = SALT1;
   EncryptedStream stream(salt1);
   stream_writeuserfile(stream, userlist, old);
