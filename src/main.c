@@ -275,7 +275,7 @@ static void got_ed(char *which, char *in, char *out)
 {
   sdprintf(STR("got_Ed called: -%s i: %s o: %s"), which, in, out);
   if (!in || !out)
-    fatal(STR("Wrong number of arguments: -e/-d <infile> <outfile/STDOUT>"),0);
+    fatal(STR("Wrong number of arguments: -e/-d <infile> <outfile>"),0);
   if (!strcmp(in, out))
     fatal(STR("<infile> should NOT be the same name as <outfile>"), 0);
   if (!strcmp(which, "e")) {
