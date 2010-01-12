@@ -1454,7 +1454,7 @@ static void
 stream_send_users(int idx)
 {
   bd::Stream stream;
-  stream_writeuserfile(stream, userlist, idx);
+  stream_writeuserfile(stream, userlist);
   stream.seek(0, SEEK_SET);
   dprintf(idx, "s ls\n");
   bd::String buf;
@@ -1486,7 +1486,7 @@ start_sending_users(int idx)
 
   const char salt1[] = SALT1;
   EncryptedStream stream(salt1);
-  stream_writeuserfile(stream, userlist, idx, old);
+  stream_writeuserfile(stream, userlist, old);
   stream.setFlags(ENC_KEEP_NEWLINES|ENC_AES_256_ECB|ENC_BASE64_BROKEN|ENC_NO_HEADER);
   if (stream.writeFile(share_file)) {
     putlog(LOG_MISC, "*", "ERROR writing user file to transfer.");

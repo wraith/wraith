@@ -460,7 +460,7 @@ static void sort_userlist()
   }
 }
 
-void stream_writeuserfile(bd::Stream& stream, const struct userrec *bu, int idx, bool old) {
+void stream_writeuserfile(bd::Stream& stream, const struct userrec *bu, bool old) {
   time_t tt = now;
   char s1[81] = "";
   bd::String buf;
@@ -500,7 +500,7 @@ int write_userfile(int idx)
 
   const char salt1[] = SALT1;
   EncryptedStream stream(salt1);
-  stream_writeuserfile(stream, userlist, idx, old);
+  stream_writeuserfile(stream, userlist, old);
   if (stream.writeFile(new_userfile->fd)) {
     putlog(LOG_MISC, "*", "ERROR writing user file. (%s)", strerror(errno));
     delete new_userfile;
