@@ -8,7 +8,7 @@
 
 #include "src/auth.h"
 
-enum { BC_NOCOOKIE = 1, BC_SLACK, BC_HASH };
+enum { BC_NOCOOKIE = 1, BC_SLACK, BC_HASH, BC_COUNTER };
 
 //#define REVENGE_KICK 1		/* Kicked victim	*/
 //#define REVENGE_DEOP 2		/* Took op		*/
@@ -65,6 +65,7 @@ static void cache_invite(struct chanset_t *, char *, char *, char *, bool, bool)
 //static char *makecookie(const char *, const memberlist*, const memberlist*, const memberlist* = NULL, const memberlist* = NULL);
 void makecookie(char*, size_t, const char *, const memberlist*, const memberlist*, const memberlist* = NULL, const memberlist* = NULL);
 static int checkcookie(const char*, const memberlist*, const memberlist*, const char*, int);
+extern void counter_clear(const char*);
 static bool me_voice(struct chanset_t *);
 static bool any_ops(struct chanset_t *);
 static char *getchanmode(struct chanset_t *);

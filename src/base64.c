@@ -73,7 +73,7 @@ static char base64to[256] =
 };
 
 
-int base64_to_int(char *buf)
+int base64_to_int(const char *buf)
 {
   int i = 0;
 

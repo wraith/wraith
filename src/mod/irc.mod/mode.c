@@ -150,8 +150,16 @@ flush_cookies(struct chanset_t *chan, int pri)
 
   if (post[0]) {
     memberlist* me = ismember(chan, botname);
+
+    if (me && !me->user && !me->tried_getuser) {
+      char uhost[UHOSTLEN] = "";
+      simple_snprintf(uhost, sizeof(uhost), "%s!%s", me->nick, me->userhost);
+      me->user = get_user_by_host(uhost);
+      me->tried_getuser = 1;
+    }
+
     /* Am I even on the channel? */
-    if (!me)
+    if (!me || !me->user)
       return;
 
     /* remove the trailing space... */
@@ -170,7 +178,8 @@ flush_cookies(struct chanset_t *chan, int pri)
     makecookie(&out[myindex], sizeof(out) - myindex, chan->dname, me, nicks[0], nicks[1], nicks[2]);
   }
   if (out[0]) {
-    if (pri == QUICK) {
+    // Enabling this creates a queued cookie and a dumped cookie, resulting in out-of-order counters.
+    if (pri == QUICK && 0) {
       char outbuf[201] = "";
 
       const size_t len = simple_snprintf(outbuf, sizeof(outbuf), "MODE %s %s\r\n", chan->name, out);
@@ -1178,6 +1187,9 @@ gotmode(char *from, char *msg)
                     m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
               else if (isbadop == BC_SLACK)
                 putlog(LOG_WARN, "*", "Invalid cookie (bad time): %s!%s MODE %s %s", 
+                    m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
+              else if (isbadop == BC_COUNTER)
+                putlog(LOG_WARN, "*", "Invalid cookie (bad count): %s!%s MODE %s %s",
                     m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
             } 
 #ifdef DEBUG

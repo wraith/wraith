@@ -7,6 +7,11 @@
   * Optimized how some shell operations are executed.
   * Uname checking (and associated emails) have been removed.
   * Fix crash on OpenBSD due to mmap(2) bug.
+* Cookie op changes
+  * Cookie op algorithm changed again, they can no longer be easily reused (fixes #402) Thank you mulder.
+  * Cookies no longer fail if the opping bot changes nick after queueing the mode.
+  * Cookie time window increased, false-positives from lag/netsplits should be completely eliminated now.
+  * Auto disable cookies on ircu(undernet) and Unreal servers as they do not support unbanning nonexistant bans.
 * DNS changes
   * More DNS errors are now handled which fixes some misc DNS issues.
   * DNS now works on servers which tend to only return partial results (fixes #424)
@@ -53,7 +58,6 @@
   * Fix segfault with /KNOCK on csircd.
   * Fix restart causing bot to change nick (this was a regression in jupenick)
   * Fix cmd_slowjoin not working on backup bots correctly.
-  * Auto disable cookies on ircu(undernet) and Unreal servers as they do not allow unbanning nonexistant bans.
   * Fix a crash from long hubnicks.
 * Misc changes
   * EFnet server list updates (To update yours: .set -YES servers - | .set -YES servers6 -)
