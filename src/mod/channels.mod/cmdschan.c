@@ -1276,6 +1276,7 @@ static void cmd_chaninfo(int idx, char *par)
     SHOW_INT("Auto-delay: ", chan->auto_delay, NULL, "None");
     SHOW_INT("Bad-cookie:" , chan->bad_cookie, P_STR, "Ignore");
     SHOW_INT("Ban-time: ", chan->ban_time, NULL, "Forever");
+    SHOW_INT("Ban-type: ", chan->ban_type, NULL, "3");
     SHOW_INT("Closed-ban: ", chan->closed_ban, NULL, "Don't!");
     SHOW_INT("Closed-invite:", chan->closed_invite, NULL, "Don't!");
     SHOW_INT("Closed-Private:", chan->closed_private, NULL, "Don't!");

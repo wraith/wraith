@@ -176,6 +176,7 @@ struct chanset_t {
   int mdop;
   int mop;
   int voice_non_ident;
+  int ban_type;
   interval_t auto_delay;
   int knock_flags;
 /* Chanint template 

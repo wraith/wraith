@@ -536,6 +536,14 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
         return ERROR;
       }
       chan->auto_delay = atoi(item[i]);
+    } else if (!strcmp(item[i], "ban-type")) {
+      i++;
+      if (i >= items) {
+        if (result)
+          strlcpy(result, "channel ban-type needs argument", RESULT_LEN);
+        return ERROR;
+      }
+      chan->ban_type = atoi(item[i]);
      
 
 /* Chanint template
@@ -946,6 +954,7 @@ int channel_add(char *result, char *newname, char *options)
     chan->closed_invite = 1;
     chan->voice_non_ident = 1;
     chan->auto_delay = 5;
+    chan->ban_type = 3;
 /* Chanint template
  *  chan->temp = 0;
  */

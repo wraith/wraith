@@ -28,7 +28,9 @@ int bot_aggressive_to(struct userrec *);
 void readsocks(const char *);
 int updatebin(int, char *, int);
 size_t my_strcpy(char *, const char *);
-void maskhost(const char *, char *);
+void maskaddr(const char *, char *, int);
+#define maskhost(a,b) maskaddr((a),(b),3)
+#define maskban(a,b)  maskaddr((a),(b),3)
 char *stristr(char *, char *);
 void splitc(char *, char *, char);
 void splitcn(char *, char *, char, size_t);
