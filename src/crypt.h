@@ -28,10 +28,12 @@ int sha1cmp(const char *, const char*);
 
 char *encrypt_string(const char *, char *);
 bd::String encrypt_string(const bd::String&, const bd::String&);
+bd::String encrypt_string_cbc(const bd::String&, const bd::String&, unsigned char *);
 char *decrypt_string(const char *, char *);
 char *salted_sha1(const char *, const char* = NULL);
 int salted_sha1cmp(const char *, const char*);
 bd::String decrypt_string(const bd::String&, const bd::String&);
+bd::String decrypt_string_cbc(const bd::String&, const bd::String&, unsigned char *);
 char *cryptit (char *);
 char *decryptit (char *);
 void Encrypt_File(char *, char *);
