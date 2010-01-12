@@ -37,6 +37,7 @@
 #include "dccutil.h"
 #include "crypt.h"
 #include "botmsg.h"
+#include "botnet.h"
 #include <bdlib/src/Stream.h>
 #include <bdlib/src/String.h>
 
@@ -95,8 +96,9 @@ bool def_kill(struct user_entry *e)
 
 void write_userfile_protected(bd::Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
 {
-  /* only write if saving local, or if sending to hub, or if sending to same user as entry */
-  if (idx == -1 || dcc[idx].hub || dcc[idx].user == u) {
+  int localhub = nextbot(u->handle);
+  /* only write if saving local, or if sending to hub, or if sending to same user as entry, or the localhub in the chain */
+  if (idx == -1 || dcc[idx].hub || dcc[idx].user == u || (localhub != -1 && idx == localhub)) {
     bd::String buf;
     stream << buf.printf("--%s %s\n", e->type->name, e->u.string);
   }
@@ -364,8 +366,9 @@ static bool set_gotshare(struct userrec *u, struct user_entry *e, char *buf, int
 
 static void set_write_userfile(bd::Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
 {
-  /* only write if saving local, or if sending to hub, or if sending to same user as entry */
-  if (idx == -1 || dcc[idx].hub || dcc[idx].user == u) {
+  int localhub = nextbot(u->handle);
+  /* only write if saving local, or if sending to hub, or if sending to same user as entry, or the localhub in the chain */
+  if (idx == -1 || dcc[idx].hub || dcc[idx].user == u || (localhub != -1 && idx == localhub)) {
     struct xtra_key *x = (struct xtra_key *) e->u.extra;
     bd::String buf;
 
