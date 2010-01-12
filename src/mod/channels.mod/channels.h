@@ -26,6 +26,7 @@ static int count_mask(maskrec *);
 
 namespace bd {
   class Stream;
+  class String;
 }
 
 void remove_channel(struct chanset_t *);
@@ -39,6 +40,7 @@ void write_bans(bd::Stream&, int);
 void write_exempts(bd::Stream&, int);
 void write_chans(bd::Stream&, int, bool = 0);
 void write_chans_compat(bd::Stream&, int);
+bd::String channel_to_string(struct chanset_t* chan, bool force_inactive = 0);
 void write_invites(bd::Stream&, int);
 bool expired_mask(struct chanset_t *, char *);
 void set_handle_laston(char *, struct userrec *, time_t);

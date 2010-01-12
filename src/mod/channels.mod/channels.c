@@ -47,6 +47,7 @@
 #include "src/net.h"
 #include "src/binds.h"
 #include "src/cmds.h"
+#include <bdlib/src/String.h>
 
 
 #include <sys/stat.h>
