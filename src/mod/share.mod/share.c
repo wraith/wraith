@@ -1457,7 +1457,11 @@ static void
 stream_send_users(int idx)
 {
   bd::Stream stream;
-  stream_writeuserfile(stream, userlist);
+  bool old = 0;
+  /* FIXME: Remove after 1.2.15 */
+  if (idx != -1 && !(dcc[idx].u.bot->uff_flags & UFF_CHDEFAULT)) /* channel 'default' */
+    old = 2;
+  stream_writeuserfile(stream, userlist, old);
   stream.seek(0, SEEK_SET);
   dprintf(idx, "s ls\n");
   bd::String buf;
