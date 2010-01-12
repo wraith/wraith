@@ -1,4 +1,5 @@
-* Remove 'set chanset' as it has been replaced by 'chanset default'
+* Added pseudo-channel 'default' which can be modified with 'chanset' and 'chaninfo' to modify what the default channel options will be for new channels.
+* Removed 'set chanset' as it has been replaced by 'chanset default'
 
 1.2.17 - http://wraith.botpack.net/milestone/1.2.17
 * Binary / shell / startup changes
