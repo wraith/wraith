@@ -909,6 +909,9 @@ share_ufyes(int idx, char *par)
 
     lower_bot_linked(idx);
 
+    if (strstr(par, "chdefault"))
+        dcc[idx].u.bot->uff_flags |= UFF_CHDEFAULT;
+
     if (strstr(par, "stream")) {
       updatebot(-1, dcc[idx].nick, '+', 0, 0, 0, NULL);
       /* Start up a tbuf to queue outgoing changes for this bot until the
@@ -950,7 +953,7 @@ share_userfileq(int idx, char *par)
       dprintf(idx, "s un Already sharing.\n");
     else {
       dcc[idx].u.bot->uff_flags |= (UFF_OVERRIDE | UFF_INVITE | UFF_EXEMPT);
-      dprintf(idx, "s uy overbots invites exempts stream\n");
+      dprintf(idx, "s uy overbots invites exempts stream chdefault\n");
       /* Set stat-getting to astatic void race condition (robey 23jun1996) */
       dcc[idx].status |= STAT_SHARE | STAT_GETTING | STAT_AGGRESSIVE;
       if (conf.bot->hub)
@@ -1454,7 +1457,11 @@ static void
 stream_send_users(int idx)
 {
   bd::Stream stream;
-  stream_writeuserfile(stream, userlist);
+  bool old = 0;
+  /* FIXME: Remove after 1.2.15 */
+  if (idx != -1 && !(dcc[idx].u.bot->uff_flags & UFF_CHDEFAULT)) /* channel 'default' */
+    old = 2;
+  stream_writeuserfile(stream, userlist, old);
   stream.seek(0, SEEK_SET);
   dprintf(idx, "s ls\n");
   bd::String buf;
@@ -1483,6 +1490,10 @@ start_sending_users(int idx)
   tand_t* bot = idx != -1 ? findbot(dcc[idx].nick) : NULL;
   if (bot && bot->buildts < 1175102242) /* flood-* hacks */
     old = 1;
+
+  /* FIXME: Remove after 1.2.15 */
+  if (idx != -1 && !(dcc[idx].u.bot->uff_flags & UFF_CHDEFAULT)) /* channel 'default' */
+    old = 2;
 
   const char salt1[] = SALT1;
   EncryptedStream stream(salt1);

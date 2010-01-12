@@ -589,12 +589,13 @@ See also: status, whois
             flags grant them access to.%{-}
 See also: whois%{+m}, chattr, chaninfo%{-}
 ::chanset
-###  $bchanset$b <channel> <settings>
+###  $bchanset$b [#&!+channel|*|default] <settings>
    Allows you to change the channel settings (see $b'chaninfo'$b for the
    settings) for one specific channel or all channels. Use '*' to to apply the
    change to all channels.
    Changes are used until the next restart, and are saved
    whenever the userfile is saved.
+   Modifying 'default' will change what new channels get when they are created.
  
 See also: %{+n}+chan, -chan%{-}, chaninfo
 ::chat

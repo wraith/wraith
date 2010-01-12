@@ -798,7 +798,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
   if ((chan->status ^ old_status) & CHAN_TAKE)
     chan->status |= (CHAN_FASTOP|CHAN_BITCH);		// to avoid bots still mass opping from +take from not using cookies
 
-  if (!conf.bot->hub) {
+  if (!conf.bot->hub && (chan != chanset_default)) {
     if ((old_status ^ chan->status) & (CHAN_INACTIVE | CHAN_BACKUP)) {
       if (!shouldjoin(chan) && (chan->status & (CHAN_ACTIVE | CHAN_PEND)))
         dprintf(DP_SERVER, "PART %s\n", chan->name);
@@ -908,9 +908,13 @@ void clear_channel(struct chanset_t *chan, bool reset)
 
 /* Create new channel and parse commands.
  */
-int channel_add(char *result, char *newname, char *options)
+int channel_add(char *result, char *newname, char *options, bool isdefault)
 {
-  if (!newname || !newname[0] || !strchr(CHANMETA, newname[0])) {
+  /* When loading userfile */
+  if (newname && newname[0] && loading && !strcmp(newname, "default"))
+    isdefault = 1;
+
+  if (!newname || !newname[0] || (!isdefault && !strchr(CHANMETA, newname[0]))) {
     if (result)
       strlcpy(result, "invalid channel prefix", RESULT_LEN);
     return ERROR;
@@ -928,10 +932,16 @@ int channel_add(char *result, char *newname, char *options)
 
   simple_snprintf(buf, sizeof(buf), "chanmode { %s } ", glob_chanmode);
   strlcat(buf, def_chanset, sizeof(buf));
-  strlcat(buf, " ", sizeof(buf));
-  strlcat(buf, glob_chanset, sizeof(buf));
-  strlcat(buf, " ", sizeof(buf));
-  strlcat(buf, options, sizeof(buf));
+  // Add in 'default' channel options
+  if (!isdefault && chanset_default) {
+    bd::String default_chan_options = channel_to_string(chanset_default);
+    strlcat(buf, " ", sizeof(buf));
+    strlcat(buf, default_chan_options.c_str(), sizeof(buf));
+  }
+  if (options && options[0]) {
+    strlcat(buf, " ", sizeof(buf));
+    strlcat(buf, options, sizeof(buf));
+  }
 
   if (SplitList(result, buf, &items, &item) != OK)
     return ERROR;
@@ -980,7 +990,6 @@ int channel_add(char *result, char *newname, char *options)
     chan->ban_time = global_ban_time;
     chan->exempt_time = global_exempt_time;
     chan->invite_time = global_invite_time;
-    /* let's initialize this stuff for shits & giggles */
     chan->channel.jointime = 0;
     chan->channel.parttime = 0;
     chan->channel.fighting = 0;
@@ -997,10 +1006,14 @@ int channel_add(char *result, char *newname, char *options)
 
     /* Initialize chan->channel info */
     init_channel(chan, 0);
-    list_append((struct list_type **) &chanset, (struct list_type *) chan);
-    /* Channel name is stored in xtra field for sharebot stuff */
-    if (!conf.bot->hub)
-      join = 1;
+    if (isdefault)
+      chanset_default = chan;
+    else {
+      list_append((struct list_type **) &chanset, (struct list_type *) chan);
+      /* Channel name is stored in xtra field for sharebot stuff */
+      if (!conf.bot->hub && !isdefault)
+        join = 1;
+    }
   }
   /* If loading is set, we're loading the userfile. Ignore errors while
    * reading userfile and just return OK. This is for compatability

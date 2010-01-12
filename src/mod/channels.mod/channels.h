@@ -26,6 +26,7 @@ static int count_mask(maskrec *);
 
 namespace bd {
   class Stream;
+  class String;
 }
 
 void remove_channel(struct chanset_t *);
@@ -37,8 +38,9 @@ struct chanuserrec *add_chanrec(struct userrec *u, char *);
 void del_chanrec(struct userrec *, char *);
 void write_bans(bd::Stream&, int);
 void write_exempts(bd::Stream&, int);
-void write_chans(bd::Stream&, int);
+void write_chans(bd::Stream&, int, bool = 0);
 void write_chans_compat(bd::Stream&, int);
+bd::String channel_to_string(struct chanset_t* chan, bool force_inactive = 0);
 void write_invites(bd::Stream&, int);
 bool expired_mask(struct chanset_t *, char *);
 void set_handle_laston(char *, struct userrec *, time_t);
@@ -48,17 +50,16 @@ int u_sticky_mask(maskrec *, char *);
 int u_setsticky_mask(struct chanset_t *, maskrec *, char *, int, const char);
 int SplitList(char *, const char *, int *, const char ***);
 int channel_modify(char *, struct chanset_t *, int, char **, bool);
-int channel_add(char *, char *, char *);
+int channel_add(char *, char *, char *, bool = 0);
 void clear_channel(struct chanset_t *, bool);
 int u_equals_mask(maskrec *, char *);
 bool u_match_mask(struct maskrec *, char *);
 bool ismasked(masklist *, const char *);
 bool ismodeline(masklist *, const char *);
 void channels_report(int, int);
-void channels_writeuserfile(bd::Stream&, bool = 0);
+void channels_writeuserfile(bd::Stream&, int = 0);
 void rcmd_chans(char *, char *, char *);
 
-extern char		glob_chanset[512];
 
 /* Macro's here because their functions were replaced by something more
  * generic. <cybah>

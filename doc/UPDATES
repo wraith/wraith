@@ -60,6 +60,9 @@
   * Fix cmd_slowjoin not working on backup bots correctly.
   * Fix a crash from long hubnicks.
 * Misc changes
+  * Added pseudo-channel 'default' which can be modified with 'chanset' and 'chaninfo'.
+    This is used to modify what the default channel options will be for new channels.
+  * Removed 'set chanset' as it has been replaced by 'chanset default'
   * Add new channel setting 'ban-type' which support mIRC style ban types (adapted from recent eggdrop patch)
   * EFnet server list updates (To update yours: .set -YES servers - | .set -YES servers6 -)
   * Give localhubs credit for adding their child bots in 'whois'.

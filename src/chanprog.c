@@ -54,7 +54,9 @@
 #endif
 #include <sys/utsname.h>
 
+char *def_chanset = "+enforcebans +dynamicbans +userbans -bitch +cycle -inactive +userexempts -dynamicexempts +userinvites -dynamicinvites -nodesynch -closed -take -voice -private -fastop +meankicks ban-type 3";
 struct chanset_t 	*chanset = NULL;	/* Channel list			*/
+struct chanset_t	*chanset_default = NULL;	/* Default channel list */
 char 			admin[121] = "";	/* Admin info			*/
 char			origbotnick[NICKLEN + 1] = "";	/* from -B (placed into conf.bot->nick .. for backup when conf is cleared */
 char 			origbotname[NICKLEN + 1] = "";	/* Nick to regain */
@@ -584,6 +586,15 @@ void chanprog()
 
 
   sdprintf("I am: %s", conf.bot->nick);
+
+  /* Add the 'default' virtual channel.
+     The flags will be overwritten when the userfile is loaded,
+     but if there is no userfile yet, or no 'default' channel,
+     then it will take on the properties of 'def_chanset',
+     and then later save this to the userfile.
+   */
+  channel_add(NULL, "default", def_chanset, 1);
+
   if (conf.bot->hub) {
     simple_snprintf(userfile, 121, "%s/.u", dirname(binname));
     loading = 1;
@@ -803,11 +814,11 @@ bool shouldjoin(struct chanset_t *chan)
 /* do_chanset() set (options) on (chan)
  * USES DO_LOCAL|DO_NET bits.
  */
-int do_chanset(char *result, struct chanset_t *chan, const char *options, int local)
+int do_chanset(char *result, struct chanset_t *chan, const char *options, int flags)
 {
   int ret = OK;
 
-  if (local & DO_NET) {
+  if (flags & DO_NET) {
     size_t bufsiz = 0;
          /* malloc(options,chan,'cset ',' ',+ 1) */
     if (chan)
@@ -829,15 +840,15 @@ int do_chanset(char *result, struct chanset_t *chan, const char *options, int lo
     free(buf);
   }
 
-  if (local & DO_LOCAL) {
-    bool cmd = (local & CMD);
+  if (flags & DO_LOCAL) {
+    bool cmd = (flags & CMD);
     struct chanset_t *ch = NULL;
     int all = chan ? 0 : 1;
 
     if (chan)
       ch = chan;
     else
-      ch = chanset;
+      ch = chanset_default; //First iteration changes default, then move on to all chans
 
     while (ch) {
       const char **item = NULL;
@@ -855,7 +866,10 @@ int do_chanset(char *result, struct chanset_t *chan, const char *options, int lo
         if (ret == ERROR) /* just bail if there was an error, no sense in trying more */
           return ret;
 
-        ch = ch->next;
+        if (ch == chanset_default)
+          ch = chanset;
+        else
+          ch = ch->next;
       } else {
         ch = NULL;
       }
