@@ -548,7 +548,10 @@ static int gotmsg(char *from, char *msg)
       *p = 0;
       strlcpy(ctcpbuf, p1, sizeof(ctcpbuf));
       ctcp = ctcpbuf;
-      strcpy(p1 - 1, p + 1);
+
+      /* remove the ctcp in msg */
+      memmove(p1 - 1, p + 1, strlen(p + 1) + 1);
+
       if (!ignoring)
         detect_flood(nick, uhost, from, strncmp(ctcp, "ACTION ", 7) ? FLOOD_CTCP : FLOOD_PRIVMSG);
       /* Respond to the first answer_ctcp */
