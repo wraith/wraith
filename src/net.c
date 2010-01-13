@@ -351,8 +351,9 @@ int allocsock(int sock, int options)
   for (int i = 0; i < MAXSOCKS; i++) {
     if (socklist[i].flags & SOCK_UNUSED) {
       /* yay!  there is table space */
-      socklist[i].inbuf = socklist[i].outbuf = NULL;
-      socklist[i].inbuflen = socklist[i].outbuflen = 0;
+      socklist[i].inbuf = NULL;
+      socklist[i].outbuf = NULL;
+      socklist[i].inbuflen = 0;
       socklist[i].flags = options;
       socklist[i].sock = sock;
       socklist[i].encstatus = 0;
@@ -432,9 +433,8 @@ void real_killsock(register int sock, const char *file, int line)
 	socklist[i].inbuf = NULL;
       }
       if (socklist[i].outbuf != NULL) {
-	free(socklist[i].outbuf);
+	delete socklist[i].outbuf;
 	socklist[i].outbuf = NULL;
-	socklist[i].outbuflen = 0;
       }
       if (socklist[i].host)
         free(socklist[i].host);
@@ -1294,7 +1294,6 @@ void tputs(register int z, const char *s, size_t len)
   }
 
   register int x, idx;
-  char *p = NULL;
 
   for (register int i = 0; i < MAXSOCKS; i++) {
     if (!(socklist[i].flags & SOCK_UNUSED) && (socklist[i].sock == z)) {
@@ -1323,12 +1322,7 @@ void tputs(register int z, const char *s, size_t len)
       
       if (socklist[i].outbuf != NULL) {
 	/* Already queueing: just add it */
-	p = (char *) my_realloc(socklist[i].outbuf, socklist[i].outbuflen + len);
-	memcpy(p + socklist[i].outbuflen, s, len);
-	socklist[i].outbuf = p;
-	socklist[i].outbuflen += len;
-//        if (socklist[i].encstatus && s)
-//          free(s);
+        *(socklist[i].outbuf) += bd::String(s, len);
 	return;
       }
       /* Try. */
@@ -1347,9 +1341,7 @@ void tputs(register int z, const char *s, size_t len)
 	x = 0;
       if ((size_t) x < len) {
 	/* Socket is full, queue it */
-	socklist[i].outbuf = (char *) my_calloc(1, len - x);
-	memcpy(socklist[i].outbuf, &s[x], len - x);
-	socklist[i].outbuflen = len - x;
+	socklist[i].outbuf = new bd::String(&s[x], len - x);
       }
 //      if (socklist[i].encstatus && s)
 //        free(s);
@@ -1436,7 +1428,7 @@ void dequeue_sockets()
 	(socklist[i].outbuf != NULL) && (FD_ISSET(socklist[i].sock, &wfds))) {
       /* Trick tputs into doing the work */
       errno = 0;
-      x = write(socklist[i].sock, socklist[i].outbuf, socklist[i].outbuflen);
+      x = write(socklist[i].sock, socklist[i].outbuf->data(), socklist[i].outbuf->length());
       if ((x < 0) && (errno != EAGAIN)
 #ifdef EBADSLT
 	  && (errno != EBADSLT)
@@ -1448,19 +1440,12 @@ void dequeue_sockets()
 	/* This detects an EOF during writing */
 	debug3("net: eof!(write) socket %d (%s,%d)", socklist[i].sock, strerror(errno), errno);
 	socklist[i].flags |= SOCK_EOFD;
-      } else if ((size_t) x == socklist[i].outbuflen) {
+      } else if ((size_t) x == socklist[i].outbuf->length()) {
 	/* If the whole buffer was sent, nuke it */
-	free(socklist[i].outbuf);
+	delete socklist[i].outbuf;
 	socklist[i].outbuf = NULL;
-	socklist[i].outbuflen = 0;
       } else if (x > 0) {
-	char *p = socklist[i].outbuf;
-
-	/* This removes any sent bytes from the beginning of the buffer */
-	socklist[i].outbuf = (char *) my_calloc(1, socklist[i].outbuflen - x);
-	memcpy(socklist[i].outbuf, p + x, socklist[i].outbuflen - x);
-	socklist[i].outbuflen -= x;
-	free(p);
+        *(socklist[i].outbuf) += x;
       } else {
 	debug3("dequeue_sockets(): errno = %d (%s) on %d", errno, strerror(errno), socklist[i].sock);
       }
@@ -1505,7 +1490,7 @@ void tell_netdebug(int idx)
       if (socklist[i].inbuf != NULL)
 	simple_sprintf(&s[strlen(s)], " (inbuf: %zu)", strlen(socklist[i].inbuf));
       if (socklist[i].outbuf != NULL)
-	simple_sprintf(&s[strlen(s)], " (outbuf: %zu)", socklist[i].outbuflen);
+	simple_sprintf(&s[strlen(s)], " (outbuf: %zu)", socklist[i].outbuf ? socklist[i].outbuf->length() : 0);
       if (socklist[i].host)
         simple_sprintf(&s[strlen(s)], " (%s:%d)", socklist[i].host, socklist[i].port);
       strlcat(s, ",", sizeof(s));
