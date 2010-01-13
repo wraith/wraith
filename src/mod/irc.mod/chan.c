@@ -1958,6 +1958,7 @@ static int got352(char *from, char *msg)
   chan = findchan(chname);	/* See if I'm on channel */
   if (chan) {			/* Am I? */
     char *nick = NULL, *user = NULL, *host = NULL, *flags = NULL, *hops = NULL, *realname = NULL;
+    int real_hops = 1;
 
     user = newsplit(&msg);	/* Grab the user */
     host = newsplit(&msg);	/* Grab the host */
@@ -1965,9 +1966,12 @@ static int got352(char *from, char *msg)
     nick = newsplit(&msg);	/* Grab the nick */
     flags = newsplit(&msg);	/* Grab the flags */
     hops = newsplit(&msg);	/* grab server hops */
-    ++hops;			/* Skip the : */
+    if (hops[0] == ':') {
+      ++hops;			/* Skip the : */
+      real_hops = atoi(hops);
+    }
     realname = newsplit(&msg);	/* realname/gecos */
-    got352or4(chan, user, host, nick, flags, atoi(hops), realname, NULL);
+    got352or4(chan, user, host, nick, flags, real_hops, realname, NULL);
   }
   return 0;
 }
@@ -1984,6 +1988,7 @@ static int got354(char *from, char *msg)
 
       if (chan) {		/* Am I? */
         char *nick = NULL, *user = NULL, *host = NULL, *flags = NULL, *hops = NULL, *realname = NULL, *ip = NULL;
+        int real_hops = 1;
 
 	user = newsplit(&msg);	/* Grab the user */
         ip = newsplit(&msg);    /** Get the numeric IP :) */
@@ -1991,9 +1996,12 @@ static int got354(char *from, char *msg)
 	nick = newsplit(&msg);	/* Grab the nick */
 	flags = newsplit(&msg);	/* Grab the flags */
         hops = newsplit(&msg);  /* server hops */
-        ++hops;			/* Skip the : */
+        if (hops[0] == ':') {
+          ++hops;			/* Skip the : */
+          real_hops = atoi(hops);
+        }
         realname = newsplit(&msg); /* realname/gecos */
-	got352or4(chan, user, host, nick, flags, atoi(hops), realname, ip);
+	got352or4(chan, user, host, nick, flags, real_hops, realname, ip);
       }
     }
   }
