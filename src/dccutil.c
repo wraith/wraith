@@ -261,21 +261,24 @@ void
 dprintf(int idx, const char *format, ...)
 {
   char buf[1024] = "";
-  size_t len;
+  size_t len = 0;
   va_list va;
 
   va_start(va, format);
-  egg_vsnprintf(buf, sizeof(buf), format, va);
+  int vlen = egg_vsnprintf(buf, sizeof(buf), format, va);
   va_end(va);
-  /* We can not use the return value vsnprintf() to determine where
-   * to null terminate. The C99 standard specifies that vsnprintf()
-   * shall return the number of bytes that would be written if the
-   * buffer had been large enough, rather then -1.
-   */
-  /* We actually can, since if it's < 0 or >= sizeof(buf), we know it wrote
-   * sizeof(buf) bytes. But we're not doing that anyway.
-   */
-  len = strlen(buf);
+
+  if (vlen < 0) {
+    // Error parsing format..
+    return;
+  }
+
+  if (size_t(vlen) > (sizeof(buf) - 1)) {
+    len = sizeof(buf) - 1;
+    buf[len] = 0;
+  } else {
+    len = size_t(vlen);
+  }
 
 /* this is for color on dcc :P */
 
