@@ -1704,6 +1704,9 @@ static int got324(char *from, char *msg)
     return 0;
   }
 
+  // Sanity check, there may not be a mode returned if the server is sending bad data.
+  if (!msg[0]) return 0;
+
   int i = 1;
   bool ok = 0;
   char *p = NULL, *q = NULL;
