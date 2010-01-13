@@ -9,4 +9,6 @@
 
 unsigned char *aes_encrypt_ecb_binary(const char *, unsigned char *, size_t *);
 unsigned char *aes_decrypt_ecb_binary(const char *, unsigned char *, size_t *);
+unsigned char *aes_encrypt_cbc_binary(const char *, unsigned char *, size_t *, unsigned char *);
+unsigned char *aes_decrypt_cbc_binary(const char *, unsigned char *, size_t *, unsigned char *);
 #endif

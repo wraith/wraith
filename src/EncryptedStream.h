@@ -18,14 +18,14 @@ namespace bd {
 #define ENC_KEEP_NEWLINES	16
 #define ENC_NO_HEADER		32
 
-#define ENC_DEFAULT 		(ENC_AES_256_ECB)
+#define ENC_DEFAULT 		(ENC_AES_256_CBC)
 
 class EncryptedStream : public bd::Stream {
   private:
         bd::String key;
         mutable char enc_flags;
-        void apply_filters(bd::String& buf) const;
-        void unapply_filters(bd::String& buf) const;
+        void apply_filters(bd::String& buf, const bd::String& IV) const;
+        void unapply_filters(bd::String& buf, const bd::String& IV) const;
 
   protected:
 

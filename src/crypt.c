@@ -36,7 +36,7 @@ char *encrypt_string(const char *keydata, char *in)
 }
 
 /**
- * @brief Encrypt a string
+ * @brief Encrypt a string with AES 256 ECB
  * @param key The key to encrypt with
  * @param data The string to encrypt
  * @return A new, encrypted string
@@ -45,6 +45,22 @@ bd::String encrypt_string(const bd::String& key, const bd::String& data) {
   if (!key) return data;
   size_t len = data.length();
   char *bdata = (char*) aes_encrypt_ecb_binary(key.c_str(), (unsigned char*) data.c_str(), &len);
+  bd::String encrypted(bdata, len);
+  free(bdata);
+  return encrypted;
+}
+
+/**
+ * @brief Encrypt a string with AES 256 CBC
+ * @param key The key to encrypt with
+ * @param data The string to encrypt
+ * @param IV The IV to use (WARNING: This is modified inplace)
+ * @return A new, encrypted string
+ */
+bd::String encrypt_string_cbc(const bd::String& key, const bd::String& data, unsigned char* IV) {
+  if (!key) return data;
+  size_t len = data.length();
+  char *bdata = (char*) aes_encrypt_cbc_binary(key.c_str(), (unsigned char*) data.c_str(), &len, IV);
   bd::String encrypted(bdata, len);
   free(bdata);
   return encrypted;
@@ -69,7 +85,7 @@ char *decrypt_string(const char *keydata, char *in)
 }
 
 /**
- * @brief Decrypt a string
+ * @brief Decrypt an AES 256 ECB ciphered string
  * @param key The key to decrypt with
  * @param data The string to decrypt
  * @return A new, decrypted string
@@ -78,6 +94,23 @@ bd::String decrypt_string(const bd::String& key, const bd::String& data) {
   if (!key) return data;
   size_t len = data.length();
   char *bdata = (char*) aes_decrypt_ecb_binary(key.c_str(), (unsigned char*) data.c_str(), &len);
+  bd::String decrypted(bdata, len);
+  OPENSSL_cleanse(bdata, len);
+  free(bdata);
+  return decrypted;
+}
+
+/**
+ * @brief Decrypt anAES 256 CBC ciphered string
+ * @param key The key to decrypt with
+ * @param data The string to decrypt
+ * @param IV The IV to use (WARNING: This is modified inplace)
+ * @return A new, decrypted string
+ */
+bd::String decrypt_string_cbc(const bd::String& key, const bd::String& data, unsigned char* IV) {
+  if (!key) return data;
+  size_t len = data.length();
+  char *bdata = (char*) aes_decrypt_cbc_binary(key.c_str(), (unsigned char*) data.c_str(), &len, IV);
   bd::String decrypted(bdata, len);
   OPENSSL_cleanse(bdata, len);
   free(bdata);
