@@ -28,7 +28,6 @@
   * Now including bdlib.
   * Enable SSP for debug binary/testing.
 * PackConfig changes
-  * All existing compile errors fixed.
   * PackConfig can now be securely read over STDIN. Use ./wraith -Q, then paste it in.
   * Binary will no longer generate SALTS if missing from the PackConfig. This was causing too much confusion.
   * SHELLHASH and Owner passwords in the PackConfig can now be salted-sha1. '+' + RAND(5) + '$' + SHA1(RAND(5) + 'password')
@@ -43,6 +42,7 @@
   * Ensure that some set variables are only 1 word long.
   * Fix cmd_botset not setting default/global value on leaf bots when clearing a var (fixes #389)
 * Misc fixes
+  * All existing compile errors fixed.
   * Cleanup +r implementation a bit to lookup users more often than only on join. (fixes #127)
   * If a user does not have a console setting, they will be given default settings on login.
   * Fix a case where the temporary file was not cleaned up when exiting config editor (-C) (fixes #428)
