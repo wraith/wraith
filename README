@@ -19,16 +19,7 @@ All official sites, documentation, support venues, repositories and source urls 
 
 For official release announcements send an email to: wraith-announce-subscribe@botpack.net
 
-Source URL scheme: http://botpack.net/wraith-BRANCH.tar.gz
-Pre-compiled Binary URL scheme: http://botpack.net/wraith.SYSTEM-BRANCH.tar.gz
-  Binaries are 32bit i486.
-  SYSTEM is either Linux or FreeBSD (case sensitive)
-  BRANCH is one of:
-    release - current release
-    stable  - git:master - changes ready for the next release
-    devel   - git:next - unstable changes being tested potentially for next release.
-  These binaries will not work on Linux 2.4,<2.6.20 or FreeBSD 4.
-  Example: http://botpack.net/wraith.FreeBSD-release.tar.gz
+Download: http://wraith.botpack.net/wiki/Download
 
 Official Git repositories:
   git://git.shatow.net/wraith.git
