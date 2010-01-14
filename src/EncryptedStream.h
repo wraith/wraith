@@ -36,10 +36,9 @@ class EncryptedStream : public bd::Stream {
 
         void setFlags(const char _enc_flags) const { enc_flags = _enc_flags; }
         virtual int loadFile(const int fd);
-        virtual int writeFile(const int fd) const;
+        using bd::Stream::loadFile;
 
-        // Overloaded virtuals need to be called to prevent 'hiding' ... good job compiler.
-        virtual int loadFile(const char* fname) { return bd::Stream::loadFile(fname); }
-        virtual int writeFile(const char* fname, mode_t mode = (S_IRUSR|S_IWUSR)) const { return bd::Stream::writeFile(fname, mode); }
+        virtual int writeFile(const int fd) const;
+        using bd::Stream::writeFile;
 };
 #endif
