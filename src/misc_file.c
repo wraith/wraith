@@ -256,6 +256,8 @@ void Tempfile::my_close()
 
 Tempfile::~Tempfile()
 {
+  if (this->prefix)
+    delete[] this->prefix;
   unlink(file);
   my_close();
   delete[] file;
@@ -275,8 +277,11 @@ static bool check_tempdir(bool do_mod)
   Tempfile *testdir = new Tempfile("test");
 
   /* There was an error creating a file in this directory, return to move on in list of dirs */
-  if (!testdir || testdir->error)
+  if (!testdir || testdir->error) {
+    if (testdir)
+      delete testdir;
     return 0;
+  }
 
   fprintf(testdir->f, "\n");
   int result = fflush(testdir->f);
