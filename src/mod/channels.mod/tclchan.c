@@ -930,8 +930,11 @@ int channel_add(char *result, char *newname, char *options, bool isdefault)
   int items = 0;
   char buf[3001] = "";
 
-  simple_snprintf(buf, sizeof(buf), "chanmode { %s } ", glob_chanmode);
-  strlcat(buf, def_chanset, sizeof(buf));
+  simple_snprintf(buf, sizeof(buf), "chanmode { %s }", glob_chanmode);
+  if (!isdefault) { // These are passed in in 'options'
+    strlcat(buf, " ", sizeof(buf));
+    strlcat(buf, def_chanset, sizeof(buf));
+  }
   // Add in 'default' channel options
   if (!isdefault && chanset_default) {
     bd::String default_chan_options = channel_to_string(chanset_default);
