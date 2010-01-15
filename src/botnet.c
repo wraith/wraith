@@ -1035,6 +1035,8 @@ static void botlink_dns_callback(int id, void *client_data, const char *host, ch
   if (valid_idx(i)) {
     idx = dcc[i].u.dns->ibuf;
     linker = strdup(dcc[i].u.dns->cptr);
+    free(dcc[i].u.dns->cptr);
+    dcc[i].u.dns->cptr = NULL;
   }
 
   if (!ips) {

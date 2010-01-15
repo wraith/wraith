@@ -253,6 +253,12 @@ static void kill_dcc_dnswait(int idx, void *x)
   if (p) {
     if (p->cbuf)
       free(p->cbuf);
+
+    if (p->cptr)
+      free(p->cptr);
+    // free(p) is same thing here.
+    free(dcc[idx].u.other);
+    dcc[idx].u.other = NULL;
   }
 }
 
