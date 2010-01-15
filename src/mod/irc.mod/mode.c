@@ -985,20 +985,20 @@ gotmode(char *from, char *msg)
     /* let's pre-emptively check for mass op/deop, manual ops and cookieops */
 
     if ((channel_active(chan) || channel_pending(chan))) {
-      char *isserver = NULL;
+      char isserver[100] = "";
       size_t z = strlen(msg);
       struct userrec *u = NULL;
       memberlist *m = NULL;
       char *nick = NULL;
 
       if (!strchr(from, '!'))
-        isserver = strdup(from);
+        strlcpy(isserver, from, sizeof(isserver));
 
       if (msg[--z] == ' ')      /* I hate cosmetic bugs :P -poptix */
         msg[z] = 0;
 
       /* Split up from */
-      if (!isserver) {
+      if (!isserver[0]) {
         u = get_user_by_host(from);
         nick = splitnick(&from);
         if ((m = ismember(chan, nick))) {
@@ -1263,77 +1263,77 @@ gotmode(char *from, char *msg)
       for (i = 0; i < modecnt; i++) {
         int todo = 0;
 
-        if (isserver && bounce_modes)
+        if (isserver[0] && bounce_modes)
           reversing = 1;
 
         switch (mmode) {		/* parse mode */
           case 'i':
             todo = CHANINV;
-            if (isserver && (bounce_modes))
+            if (isserver[0] && (bounce_modes))
               reversing = 1;
             break;
           case 'p':
             todo = CHANPRIV;
-            if (isserver && (bounce_modes))
+            if (isserver[0] && (bounce_modes))
               reversing = 1;
             break;
           case 's':
             todo = CHANSEC;
-            if (isserver && (bounce_modes))
+            if (isserver[0] && (bounce_modes))
               reversing = 1;
             break;
           case 'm':
             todo = CHANMODER;
-            if (isserver && (bounce_modes))
+            if (isserver[0] && (bounce_modes))
               reversing = 1;
             break;
           case 'c':
             todo = CHANNOCLR;
-            if (isserver && (bounce_modes))
+            if (isserver[0] && (bounce_modes))
               reversing = 1;
             break;
           case 'C':
             todo = CHANNOCTCP;
-            if (isserver && (bounce_modes))
+            if (isserver[0] && (bounce_modes))
               reversing = 1;
             break;
           case 'R':
             todo = CHANREGON;
-            if (isserver && (bounce_modes))
+            if (isserver[0] && (bounce_modes))
               reversing = 1;
             break;
           case 'M':
             todo = CHANMODR;
-            if (isserver && (bounce_modes))
+            if (isserver[0] && (bounce_modes))
               reversing = 1;
             break;
           case 'r':
             todo = CHANLONLY;
-            if (isserver && (bounce_modes))
+            if (isserver[0] && (bounce_modes))
               reversing = 1;
             break;
           case 't':
             todo = CHANTOPIC;
-            if (isserver && (bounce_modes))
+            if (isserver[0] && (bounce_modes))
               reversing = 1;
             break;
           case 'n':
             todo = CHANNOMSG;
-            if (isserver && (bounce_modes))
+            if (isserver[0] && (bounce_modes))
               reversing = 1;
             break;
           case 'a':
             todo = CHANANON;
-            if (isserver && (bounce_modes))
+            if (isserver[0] && (bounce_modes))
               reversing = 1;
             break;
           case 'q':
             todo = CHANQUIET;
-            if (isserver && (bounce_modes))
+            if (isserver[0] && (bounce_modes))
               reversing = 1;
             break;
           case 'l':
-            if (isserver && (bounce_modes))
+            if (isserver[0] && (bounce_modes))
               reversing = 1;
             if (msign == '-') {
               if (channel_active(chan)) {
@@ -1501,7 +1501,7 @@ gotmode(char *from, char *msg)
 
       if (chan->channel.do_opreq)
         request_op(chan);
-      if (!me_op(chan) && isserver)		/* FIXME, WTF IS THIS? */
+      if (!me_op(chan) && isserver[0])		/* FIXME, WTF IS THIS? */
         chan->status |= CHAN_ASKEDMODES;
     }
   }
