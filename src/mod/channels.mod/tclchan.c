@@ -1008,10 +1008,12 @@ int channel_add(char *result, char *newname, char *options, bool isdefault)
     strlcpy(chan->dname, newname, 81);
 
     /* Initialize chan->channel info */
-    init_channel(chan, 0);
-    if (isdefault)
+    if (isdefault) {
+      if (chanset_default)
+        remove_channel(chanset_default);
       chanset_default = chan;
-    else {
+    } else {
+      init_channel(chan, 0);
       list_append((struct list_type **) &chanset, (struct list_type *) chan);
       /* Channel name is stored in xtra field for sharebot stuff */
       if (!conf.bot->hub && !isdefault)

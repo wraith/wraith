@@ -698,30 +698,32 @@ static inline bool chanset_unlink(struct chanset_t *chan)
 void remove_channel(struct chanset_t *chan)
 {
    int i;
-   
-   irc_log(chan, "Parting");
-   /* Remove the channel from the list, so that noone can pull it
-      away from under our feet during the check_part() call. */
-   chanset_unlink(chan);
 
-  /* Using chan->name is important here, especially for !chans <cybah> */
-  if (!conf.bot->hub && shouldjoin(chan) && chan->name[0])
-    dprintf(DP_SERVER, "PART %s\n", chan->name);
+   if (chan != chanset_default) {
+     irc_log(chan, "Parting");
+     /* Remove the channel from the list, so that noone can pull it
+        away from under our feet during the check_part() call. */
+     chanset_unlink(chan);
 
-   clear_channel(chan, 0);
-   noshare = 1;
-   /* Remove channel-bans */
-   while (chan->bans)
-     u_delmask('b', chan, chan->bans->mask, 1);
-   /* Remove channel-exempts */
-   while (chan->exempts)
-     u_delmask('e', chan, chan->exempts->mask, 1);
-   /* Remove channel-invites */
-   while (chan->invites)
-     u_delmask('I', chan, chan->invites->mask, 1);
-   /* Remove channel specific user flags */
-   user_del_chan(chan->dname);
-   noshare = 0;
+    /* Using chan->name is important here, especially for !chans <cybah> */
+    if (!conf.bot->hub && shouldjoin(chan) && chan->name[0])
+      dprintf(DP_SERVER, "PART %s\n", chan->name);
+
+     clear_channel(chan, 0);
+     noshare = 1;
+     /* Remove channel-bans */
+     while (chan->bans)
+       u_delmask('b', chan, chan->bans->mask, 1);
+     /* Remove channel-exempts */
+     while (chan->exempts)
+       u_delmask('e', chan, chan->exempts->mask, 1);
+     /* Remove channel-invites */
+     while (chan->invites)
+       u_delmask('I', chan, chan->invites->mask, 1);
+     /* Remove channel specific user flags */
+     user_del_chan(chan->dname);
+     noshare = 0;
+   }
    free(chan->channel.key);
    for (i = 0; i < MODES_PER_LINE_MAX && chan->cmode[i].op; i++)
      free(chan->cmode[i].op);
