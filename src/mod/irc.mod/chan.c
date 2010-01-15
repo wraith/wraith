@@ -96,7 +96,12 @@ void resolve_to_member(struct chanset_t *chan, char *nick, char *host)
   r->chan = chan;
   r->host = strdup(host);
 
-  egg_dns_lookup(host, 20, resolv_member_callback, (void *) r);
+  if (egg_dns_lookup(host, 20, resolv_member_callback, (void *) r) == -2) { //Already querying?
+    // Querying on clones will cause the callback to not be called and this nick will be ignored
+    // cleanup memory as this chain is not even starting.
+    free(r->host);
+    free(r);
+  }
 }
 
 /* RBL */
