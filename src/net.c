@@ -160,7 +160,11 @@ int seed_PRNG(void)
      */
     if ((fh = fopen("/dev/urandom", "r"))) {
 	fclose(fh);
-	return 0;
+        // Try /dev/random if urandom is unavailable
+        if ((fh = fopen("/dev/random", "r"))) {
+          fclose(fh);
+          return 0;
+        }
     }
     if (RAND_file_name(rand_file, sizeof(rand_file)))
 	tls_rand_file = rand_file;
