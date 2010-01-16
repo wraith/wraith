@@ -315,6 +315,29 @@ static dns_query_t *alloc_query(void *client_data, dns_callback_t callback, cons
 	return q;
 }
 
+static void query_transform_ip(dns_query_t* q, const char* ip) {
+	/* We need to transform the ip address into the proper form
+	 * for reverse lookup. */
+	if (strchr(ip, ':')) {
+		char temp[128] = "";
+
+		socket_ipv6_to_dots(ip, temp);
+		sdprintf("dots: %s", temp);
+		size_t iplen = strlen(temp) + 9 + 1;
+		q->ip = (char *) my_calloc(1, iplen);
+		//		reverse_ip(temp, q->ip);
+		strlcat(q->ip, temp, iplen);
+		strlcat(q->ip, "ip6.arpa", iplen);
+		sdprintf("reversed ipv6 ip: %s", q->ip);
+	}
+	else {
+		size_t iplen = strlen(ip) + 13 + 1;
+		q->ip = (char *) my_calloc(1, iplen);
+		reverse_ip(ip, q->ip);
+		strlcat(q->ip, ".in-addr.arpa", iplen);
+	}
+}
+
 static int get_dns_idx()
 {
 	int i, sock;
@@ -638,26 +661,7 @@ int egg_dns_reverse(const char *ip, interval_t timeout, dns_callback_t callback,
 	q = alloc_query(client_data, callback, ip);
 	sdprintf("egg_dns_reverse(%s, %d) -> %d", ip, timeout, q->id);
 
-	/* We need to transform the ip address into the proper form
-	 * for reverse lookup. */
-	if (strchr(ip, ':')) {
-		char temp[128] = "";
-
-		socket_ipv6_to_dots(ip, temp);
-sdprintf("dots: %s", temp);
-		size_t iplen = strlen(temp) + 9 + 1;
-		q->ip = (char *) my_calloc(1, iplen);
-//		reverse_ip(temp, q->ip);
-		strlcat(q->ip, temp, iplen);
-		strlcat(q->ip, "ip6.arpa", iplen);
-sdprintf("reversed ipv6 ip: %s", q->ip);
-	}
-	else {
-		size_t iplen = strlen(ip) + 13 + 1;
-		q->ip = (char *) my_calloc(1, iplen);
-		reverse_ip(ip, q->ip);
-		strlcat(q->ip, ".in-addr.arpa", iplen);
-	}
+	query_transform_ip(q, ip);
 
         dns_send_query(q);
 
