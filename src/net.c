@@ -120,41 +120,23 @@ static int get_ip(char *hostname, union sockaddr_union *so)
   memset(so, 0, sizeof(union sockaddr_union));
   debug1("get_ip(%s)", hostname);
 
-#ifdef USE_IPV6
-  struct addrinfo hints, *ai = NULL, *res = NULL;
-  int error = 0;
-
-  memset(&hints, 0, sizeof(struct addrinfo));
-  hints.ai_socktype = SOCK_STREAM;
-
-  if ((error = getaddrinfo(hostname, NULL, &hints, &res))) {
-    if (res)
-      freeaddrinfo(res);
-    return error;
-  }
-
-  error = 1;
-  for (ai = res; ai != NULL; ai = ai->ai_next) {
-    if ((ai->ai_family == AF_INET6) || (ai->ai_family == AF_INET)) {
-      memcpy(so, ai->ai_addr, ai->ai_addrlen);
-      error = 0;
-      break;
-    }
-  }
-
-  if (res)
-    freeaddrinfo(res);
-  return error;
-#else
-  struct hostent *hp = NULL;
-
-  if (!(hp = gethostbyname(hostname)))
+  bd::Array<bd::String> hosts = dns_lookup_block(hostname, 20);
+  if (hosts.length() == 0)
     return -1;
 
-  memcpy(&so->sin.sin_addr, hp->h_addr, 4);
-  so->sin.sin_family = AF_INET;
+  my_addr_t addr;
+  get_addr(bd::String(hosts[0]).c_str(), &addr);
+
+  if (addr.family == AF_INET) {
+    so->sin.sin_family = AF_INET;
+    memcpy(&so->sin.sin_addr, &addr.u.addr, sizeof(addr.u.addr));
+#ifdef USE_IPV6
+  } else if (addr.family == AF_INET6) {
+    so->sin6.sin6_family = AF_INET6;
+    memcpy(&so->sin6.sin6_addr, &addr.u.addr6, sizeof(addr.u.addr6));
+#endif
+  }
   return 0;
-#endif /* USE_IPV6 */
 }
 
 /* Initialize the socklist
