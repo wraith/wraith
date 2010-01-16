@@ -1363,6 +1363,7 @@ detect_telnet_flood(char *floodhost)
 }
 
 static void dcc_telnet_dns_callback(int, void *, const char *, bd::Array<bd::String>);
+static void dcc_telnet_dns_forward_callback(int, void *, const char *, bd::Array<bd::String>);
 
 static void
 dcc_telnet(int idx, char *buf, int ii)
@@ -1409,6 +1410,7 @@ dcc_telnet(int idx, char *buf, int ii)
 
   putlog(LOG_DEBUG, "*", "Telnet connection: %s/%d", s, port);
 
+  // Are they ignored by IP?
   simple_snprintf(x, sizeof(x), "-telnet!telnet@%s", iptostr(htonl(ip)));
 
   if (match_ignore(x) || detect_telnet_flood(x)) {
@@ -1452,28 +1454,71 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, b
   if (!valid_dns_id(i, id))
     return;
 
-  int j = -1, sock, idx = -1;
-  char s2[UHOSTLEN + 20] = "";
-
-  if (valid_idx(i))
-    idx = dcc[i].u.dns->ibuf;
-
-  strlcpy(dcc[i].host, hosts.size() ? bd::String(hosts[0]).c_str() : ip, UHOSTLEN);
-
-  simple_snprintf(s2, sizeof(s2), "-telnet!telnet@%s", dcc[i].host);
-
-  if (match_ignore(s2)) {
-    putlog(LOG_DEBUG, "*", "Ignored telnet connection from: %s", s2);
-    killsock(dcc[i].sock);
-    lostdcc(i);
-    return;
-  }
+  int idx = dcc[i].u.dns->ibuf;
 
   if (!valid_idx(idx)) {
     putlog(LOG_BOTS, "*", "Lost listening socket while resolving %s", dcc[i].host);
     killsock(dcc[i].sock);
     lostdcc(i);
     return;
+  }
+
+  //Reset timer
+  dcc[i].timeval = now;
+
+  //Clear the ip (still saved in dcc[i].addr)
+  dcc[i].host[0] = 0;
+  if (hosts.size()) {
+    strlcpy(dcc[i].host, bd::String(hosts[0]).c_str(), UHOSTLEN);
+
+    //Check forward
+    int dns_id = egg_dns_lookup(bd::String(hosts[0]).c_str(), 20, dcc_telnet_dns_forward_callback, (void *) (long) i);
+    if (dns_id >= 0)
+      dcc[i].dns_id = dns_id;
+  } else {
+    bd::Array<bd::String> empty;
+    dcc_telnet_dns_forward_callback(id, client_data, ip, empty);
+  }
+}
+
+static void dcc_telnet_dns_forward_callback(int id, void *client_data, const char *host, bd::Array<bd::String> ips) {
+  // 64bit hacks
+  long data = (long) client_data;
+  int i = (int) data;
+
+  if (!valid_dns_id(i, id))
+    return;
+
+  int j = -1, sock, idx = -1;
+  char s2[UHOSTLEN + 20] = "";
+
+  if (valid_idx(i))
+    idx = dcc[i].u.dns->ibuf;
+
+  if (!valid_idx(idx)) {
+    putlog(LOG_BOTS, "*", "Lost listening socket while resolving %s", iptostr(htonl(dcc[i].addr)));
+    killsock(dcc[i].sock);
+    lostdcc(i);
+    return;
+  }
+
+  bool forward_matched = true;
+  // If the forward did not match, replace the saved host with the ip
+  if (!(ips.size() && !strcmp(bd::String(ips[0]).c_str(), iptostr(htonl(dcc[i].addr))))) {
+    forward_matched = false;
+    strlcpy(dcc[i].host, iptostr(htonl(dcc[i].addr)), UHOSTLEN);
+  }
+
+  if (forward_matched) {
+    // Are they ignored by host?
+    simple_snprintf(s2, sizeof(s2), "-telnet!telnet@%s", dcc[i].host);
+
+    if (match_ignore(s2)) {
+      putlog(LOG_DEBUG, "*", "Ignored telnet connection from: %s", s2);
+      killsock(dcc[i].sock);
+      lostdcc(i);
+      return;
+    }
   }
 
   if (dcc[idx].host[0] == '@') {
@@ -1493,12 +1538,12 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, b
   if (!dcc[i].user)
     dcc[i].user = get_user_by_host(s2);		/* check for matching -telnet!telnet@host */
   
-  if (hosts.size())
-    putlog(LOG_MISC, "*", "Telnet connection: %s[%s]/%d", dcc[i].host, ip, dcc[i].port);
+  if (forward_matched)
+    putlog(LOG_MISC, "*", "Telnet connection: %s[%s]/%d", dcc[i].host, iptostr(htonl(dcc[i].addr)), dcc[i].port);
   else
-    putlog(LOG_MISC, "*", "Telnet connection: %s/%d", dcc[i].host, dcc[i].port);
+    putlog(LOG_MISC, "*", "Telnet connection: %s/%d", iptostr(htonl(dcc[i].addr)), dcc[i].port);
 
-  sock = open_telnet((char *) ip, 113, 0);
+  sock = open_telnet((char *) iptostr(htonl(dcc[i].addr)), 113, 0);
 
   char s[UHOSTLEN] = "";
 
@@ -1684,7 +1729,7 @@ dcc_telnet_id(int idx, char *buf, int atr)
     if (dcc[idx].user)
       putlog(LOG_BOTS, "*", "%s: %s!%s", ischanhub() ? "Refused DCC chat (no access)" : "Refused DCC chat (I'm not a chathub (+c))", nick, dcc[idx].host);
     else if (dcc[idx].bot)
-      putlog(LOG_BOTS, "*", "Refused %s (invalid bot handle: %s) (Add with '%snewleaf %s')", dcc[idx].host, nick, settings.dcc_prefix, nick);
+      putlog(LOG_BOTS, "*", "Refused %s (invalid bot handle: %s) (Add with '%snewleaf %s -telnet!%s')", dcc[idx].host, nick, settings.dcc_prefix, nick, dcc[idx].host);
     else
       putlog(LOG_BOTS, "*", "Refused %s (invalid handle: %s)", dcc[idx].host, nick);
     killsock(dcc[idx].sock);
@@ -1710,6 +1755,36 @@ dcc_telnet_id(int idx, char *buf, int atr)
 //    dcc[idx].u.enc->method_number = 0;
 //    link_get_method(idx);
   } else {
+  }
+
+  if (dcc[idx].bot) {
+    char shost[UHOSTLEN + 20] = "", sip[UHOSTLEN + 20] = "", user[30] = "";
+    simple_snprintf(shost, sizeof(shost), "-telnet!%s", dcc[idx].host);
+    char *p = strchr(dcc[idx].host, '@');
+    strlcpy(user, dcc[idx].host, p - dcc[idx].host + 1);
+    simple_snprintf(sip, sizeof(sip), "-telnet!%s@%s", user, iptostr(htonl(dcc[idx].addr)));
+
+    struct userrec *u = NULL;
+    ok = 1;
+
+    if (!u)
+      u = get_user_by_host(sip);			/* Check for -telnet!ident@ip */
+    if (!u)
+      u = get_user_by_host(shost);		/* Check for -telnet!ident@host */
+    if (!u)
+      ok = 0;
+
+//    // Restrict connect to matching the user who they claim to be
+//    if (u && strcasecmp(nick, u->handle))
+//      ok = 0;
+
+    if (!ok) {
+      putlog(LOG_BOTS, "*", "Denied link to '%s': Host not recognized: %s", nick, dcc[idx].host);
+      putlog(LOG_BOTS, "*", "If this host/bot is trusted: %s+host %s %s", settings.dcc_prefix, nick, shost);
+      killsock(dcc[idx].sock);
+      lostdcc(idx);
+      return;
+    }
   }
 
   dcc_telnet_pass(idx, atr);

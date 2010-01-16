@@ -60,6 +60,8 @@
   * Fix cmd_slowjoin not working on backup bots correctly.
   * Fix a crash from long hubnicks.
 * Misc changes
+  * Bots must have a matching host to be able to link now.
+  * Telnet/DCC now checks both forward/reverse to ensure they match. (fixes #19)
   * Added pseudo-channel 'default' which can be modified with 'chanset' and 'chaninfo'.
     This is used to modify what the default channel options will be for new channels.
   * Removed 'set chanset' as it has been replaced by 'chanset default'
