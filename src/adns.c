@@ -1202,3 +1202,4 @@ bool valid_dns_id(int idx, int id)
   sdprintf("dns_id: %d is not associated with dead idx: %d", id, idx);
   return 0;
 }
+/* vim: set sts=4 sw=4 ts=4 noet: */

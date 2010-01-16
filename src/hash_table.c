@@ -289,3 +289,4 @@ static unsigned int my_mixed_hash (const void *key)
 	}
 	return(hash);
 }
+/* vim: set sts=4 sw=4 ts=4 noet: */

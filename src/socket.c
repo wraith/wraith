@@ -303,4 +303,4 @@ int get_addr(const char *ip, my_addr_t *addr)
 
   return 0;
 }
-
+/* vim: set sts=4 sw=4 ts=4 noet: */
