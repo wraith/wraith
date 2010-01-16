@@ -549,42 +549,13 @@ int egg_dns_lookup(const char *host, interval_t timeout, dns_callback_t callback
 	return(q->id);
 }
 
-bd::Array<bd::String> dns_lookup_block(const char *host, interval_t timeout, int type)
-{
+bd::Array<bd::String> dns_send_blocking(dns_query_t* q, interval_t timeout) {
 	bd::Array<bd::String> answer;
-
-	if (is_dotted_ip(host)) {
-		/* If it's already an ip, we're done. */
-		sdprintf("egg_dns_lookup(%s, %d): Already an ip.", host, timeout);
-                answer << host;
-		return answer;
-	}
-
-	/* Ok, now see if it's in our host cache. */
-	for (int i = 0; i < nhosts; i++) {
-		if (!strcasecmp(host, hosts[i].host)) {
-			sdprintf("egg_dns_lookup(%s, %d): Found in hosts -> %s", host, timeout, hosts[i].ip);
-                        answer << hosts[i].ip;
-                        return answer;
-		}
-	}
-
-	int cache_id = cache_find(host);
-	if (cache_id >= 0) {
-//		cache[cache_id].answer->shuffle();
-		sdprintf("egg_dns_lookup(%s, %d): Found in cache -> %s", host, timeout, cache[cache_id].answer->join(',').c_str());
-		return *(cache[cache_id].answer);
-	}
-	/* Allocate our query struct. */
-	dns_query_t *q = alloc_query(NULL, NULL, host);
-
-	sdprintf("dns_lookup_block(%s, %d) -> %d", host, timeout, q->id);
-	dns_send_query_blocking(q, type);
+	dns_send_query_blocking(q);
 
 	char buf[512] = "";
 	int atr;
 	bool read_error = 0;
-
 
 	/* Now the key difference, call read() on the socket to block until it returns */
 	if (!setjmp(alarmret)) {
@@ -615,6 +586,81 @@ read_more:
 	socket_set_nonblock(dcc[dns_idx].sock, 1);
 
 	return answer;
+}
+
+bd::Array<bd::String> dns_lookup_block(const char *host, interval_t timeout, int type)
+{
+	if (is_dotted_ip(host)) {
+		bd::Array<bd::String> answer;
+		/* If it's already an ip, we're done. */
+		sdprintf("dns_lookup_block(%s, %d): Already an ip.", host, timeout);
+                answer << host;
+		return answer;
+	}
+
+	/* Ok, now see if it's in our host cache. */
+	for (int i = 0; i < nhosts; i++) {
+		if (!strcasecmp(host, hosts[i].host)) {
+			bd::Array<bd::String> answer;
+			sdprintf("dns_lookup_block(%s, %d): Found in hosts -> %s", host, timeout, hosts[i].ip);
+                        answer << hosts[i].ip;
+                        return answer;
+		}
+	}
+
+	int cache_id = cache_find(host);
+	if (cache_id >= 0) {
+//		cache[cache_id].answer->shuffle();
+		sdprintf("dns_lookup_block(%s, %d): Found in cache -> %s", host, timeout, cache[cache_id].answer->join(',').c_str());
+		return *(cache[cache_id].answer);
+	}
+	/* Allocate our query struct. */
+	dns_query_t *q = alloc_query(NULL, NULL, host);
+
+	sdprintf("dns_lookup_block(%s, %d) -> %d", host, timeout, q->id);
+	return dns_send_blocking(q, timeout);
+}
+
+/* Perform a blocking dns reverse lookup. This does ip -> host. For host -> ip
+ * use egg_dns_lookup(). */
+bd::Array<bd::String> dns_reverse_block(const char *ip, interval_t timeout)
+{
+
+	if (!is_dotted_ip(ip)) {
+		bd::Array<bd::String> answer;
+		/* If it's not a valid ip, don't even make the request. */
+		sdprintf("dns_reverse_block(%s, %d): Not an ip.", ip, timeout);
+		answer << ip;
+		return answer;
+	}
+
+	/* Ok, see if we have it in our host cache. */
+	for (int i = 0; i < nhosts; i++) {
+		if (!strcasecmp(hosts[i].ip, ip)) {
+			bd::Array<bd::String> answer;
+			sdprintf("dns_reverse_block(%s, %d): Found in hosts -> %s", ip, timeout, hosts[i].host);
+			answer << hosts[i].host;
+			return answer;
+		}
+	}
+
+	int cache_id = cache_find(ip);
+        if (cache_id >= 0) {
+//		cache[cache_id].answer->shuffle();
+		sdprintf("dns_reverse_block(%s, %d): Found in cache -> %s", ip, timeout, cache[cache_id].answer->join(',').c_str());
+		return *(cache[cache_id].answer);
+	}
+
+
+
+	/* Allocate our query struct. */
+	dns_query_t *q = alloc_query(NULL, NULL, ip);
+
+	query_transform_ip(q, ip);
+
+	sdprintf("dns_reverse_block(%s, %d) -> %d", ip, timeout, q->id);
+
+	return dns_send_blocking(q, timeout);
 }
 
 /* Perform an async dns reverse lookup. This does ip -> host. For host -> ip
