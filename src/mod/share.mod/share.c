@@ -56,7 +56,7 @@
 
 static struct flag_record fr = { 0, 0, 0, 0 };
 
-static bd::Stream stream_in;
+static bd::Stream* stream_in;
 
 struct delay_mode {
   struct delay_mode *next;
@@ -1080,18 +1080,19 @@ share_end(int idx, char *par)
 static void share_userfile_line(int idx, char *par) {
   char *size = newsplit(&par);
 
-  stream_in << bd::String(par, atoi(size));
-  stream_in << '\n';
+  (*stream_in) << bd::String(par, atoi(size));
+  (*stream_in) << '\n';
 }
 
 static void share_userfile_start(int idx, char *par) {
   dcc[idx].status |= STAT_GETTING;
-  stream_in.clear();
+  stream_in = new bd::Stream();
 }
 
 static void share_userfile_end(int idx, char *par) {
-  stream_in.seek(0, SEEK_SET);
-  share_read_stream(idx, stream_in);
+  stream_in->seek(0, SEEK_SET);
+  share_read_stream(idx, *stream_in);
+  delete stream_in;
 }
 
 /* Note: these MUST be sorted. */
