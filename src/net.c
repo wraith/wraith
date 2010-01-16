@@ -693,6 +693,7 @@ int net_switch_to_ssl(int sock) {
   int i = 0;
 
   debug0("net_switch_to_ssl()");
+  sleep(3); // Give some time to let the connect() go through.
   for (i = 0; i < MAXSOCKS; ++i) {
     if (socklist[i].sock == sock && !(socklist[i].flags & SOCK_UNUSED)) {
       break;
@@ -715,8 +716,13 @@ int net_switch_to_ssl(int sock) {
 
   SSL_set_fd(socklist[i].ssl, socklist[i].sock);
   int err = SSL_connect(socklist[i].ssl);
+  int timeout = 0;
 
   while (err <= 0) {
+    if (timeout++ > 500) {
+      err = 0;
+      break;
+    }
     int errs = SSL_get_error(socklist[i].ssl,err);
     if ((errs != SSL_ERROR_WANT_READ) && (errs != SSL_ERROR_WANT_WRITE) && (errs != SSL_ERROR_WANT_X509_LOOKUP)) {
       putlog(LOG_DEBUG, "*", "SSL_connect() = %d, %s", err, (char *)ERR_error_string(ERR_get_error(), NULL));
