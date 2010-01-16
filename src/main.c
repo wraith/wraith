@@ -98,6 +98,7 @@ bool	used_B = 0;		/* did we get started with -B? */
 int 	role;
 bool 	loading = 0;
 int	default_flags = 0;	/* Default user flags and */
+bool     have_linked_to_hub = 0;  /* Have we ever been linked to a hub? */
 int	default_uflags = 0;	/* Default userdefinied flags for people
 				   who say 'hello' or for .adduser */
 int     do_restart = 0;
@@ -190,6 +191,9 @@ void fatal(const char *s, int recoverable)
 
   if (my_port)
     listen_all(my_port, 1); /* close the listening port... */
+
+  if (conf.bot && conf.bot->localhub)
+    unlink(conf.localhub_socket);
 
   sdprintf(STR("Closing %d sockets"), dcc_total);
   for (int i = 0; i < dcc_total; i++) {
@@ -517,7 +521,7 @@ static void core_secondly()
       do_fork();
   ++cnt;
 
-  if ((cnt % 30) == 0) {
+  if (((conf.bot->localhub || conf.bot->hub) && (cnt % 30) == 0) || (cnt % 5) == 0) {
     autolink_cycle(NULL);         /* attempt autolinks */
     cnt = 0;
   }
@@ -591,7 +595,7 @@ static void core_minutely()
       fatal(STR("MEMORY HACKED"), 0);
     check_maxfiles();
     check_mypid();
-  } else
+  } else if (conf.bot->hub || conf.bot->localhub)
     send_timesync(-1);
 
   check_bind_time(&nowtm);

@@ -539,7 +539,7 @@ static void bot_log(int idx, char *par)
   if (egg_isdigit(par[0])) {
     int type = atoi(newsplit(&par));
 
-    if (conf.bot->hub)
+    if (conf.bot->hub || conf.bot->localhub)
       botnet_send_log(idx, from, type, par);
 
     putlog(type, "@", "(%s) %s", from, par);
@@ -812,7 +812,7 @@ static void bot_timesync(int idx, char *par)
 //  putlog(LOG_DEBUG, "@", "Got timesync from %s: %s (%li - %li)", dcc[idx].nick, par, atol(par), now);
   timesync = atol(par) - now;
 
-  if (conf.bot->hub)
+  if (conf.bot->hub || conf.bot->localhub)
     send_timesync(-1);
 }
 
@@ -836,31 +836,52 @@ static void bot_reject(int idx, char *par)
     return;
   }
   who = newsplit(&par);
-  destbot = strchr(who, '@');
-  *destbot++ = 0;
-  if (!strcasecmp(destbot, conf.bot->nick)) {
-    /* Kick someone here! */
-    int ok = 0;
+  if (!(destbot = strchr(who, '@'))) {
+    /* Rejecting a bot */
+    i = nextbot(who);
+    if (i < 0) {
+      botnet_send_priv(idx, conf.bot->nick, from, NULL, "Can't unlink %s (doesn't exist)", who);
+    } else if (!strcasecmp(dcc[i].nick, who)) {
+      char s[1024];
 
-    for (i = 0; i < dcc_total; i++) {
-      if (dcc[i].type && dcc[i].simul == -1 && !strcasecmp(who, dcc[i].nick) && (dcc[i].type->flags & DCT_CHAT)) {
-        u = get_user_by_handle(userlist, from);
-        if (u) {
-          if (!whois_access(u, dcc[idx].user)) {
-            add_note(from, conf.bot->nick, "Sorry, you cannot boot them.", -1, 0);
-            return;
+      /* I'm the connection to the rejected bot */
+      putlog(LOG_BOTS, "*", "%s rejected %s", from, dcc[i].nick);
+      dprintf(i, "bye %s\n", par[0] ? par : "rejected");
+      simple_sprintf(s, "Disconnected %s (%s: %s)", dcc[i].nick, from, par[0] ? par : "rejected");
+      chatout("*** %s\n", s);
+      botnet_send_unlinked(i, dcc[i].nick, s);
+      killsock(dcc[i].sock);
+      lostdcc(i);
+    } else {
+      if (i >= 0)
+        botnet_send_reject(i, from, NULL, who, NULL, par);
+    }
+  } else {                      /* Rejecting user */
+    *destbot++ = 0;
+    if (!strcasecmp(destbot, conf.bot->nick)) {
+      /* Kick someone here! */
+      int ok = 0;
+
+      for (i = 0; i < dcc_total; i++) {
+        if (dcc[i].type && dcc[i].simul == -1 && !strcasecmp(who, dcc[i].nick) && (dcc[i].type->flags & DCT_CHAT)) {
+          u = get_user_by_handle(userlist, from);
+          if (u) {
+            if (!whois_access(u, dcc[idx].user)) {
+              add_note(from, conf.bot->nick, "Sorry, you cannot boot them.", -1, 0);
+              return;
+            }
+            do_boot(i, from, par);
+            putlog(LOG_CMDS, "*", "#%s# boot %s (%s)", from, who, par[0] ? par : "No reason");
+            ok = 1;
           }
-          do_boot(i, from, par);
-          putlog(LOG_CMDS, "*", "#%s# boot %s (%s)", from, who, par[0] ? par : "No reason");
-          ok = 1;
         }
       }
+    } else {
+      i = nextbot(destbot);
+      *--destbot = '@';
+      if (i >= 0)
+        botnet_send_reject(i, from, NULL, who, NULL, par);
     }
-  } else {
-    i = nextbot(destbot);
-    *--destbot = '@';
-    if (i >= 0)
-      botnet_send_reject(i, from, NULL, who, NULL, par);
   }
 }
 

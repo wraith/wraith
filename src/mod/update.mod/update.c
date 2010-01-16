@@ -132,8 +132,10 @@ static void update_ufsend(int idx, char *par)
 #else
     sock = getsock(SOCK_BINARY); /* Don't buffer this -> mark binary. */
 #endif /* USE_IPV6 */
-    if (sock < 0 || open_telnet_dcc(sock, ip, port) < 0) {
-      killsock(sock);
+    int open_telnet_return = 0;
+    if (sock < 0 || (open_telnet_return = open_telnet_dcc(sock, ip, port)) < 0) {
+      if (open_telnet_return != -1 && sock != -1)
+        killsock(sock);
       putlog(LOG_BOTS, "*", "Asynchronous connection failed!");
       dprintf(idx, "sb e Can't connect to you!\n");
       zapfbot(idx);
@@ -196,7 +198,9 @@ static void got_nu(char *botnick, char *code, char *par)
     if (!conf.bot->u || !userlist || !get_user_by_handle(userlist, botnick))	/* probably still getting userfile */
       return;
 
-    if (tandbot && tandbot->bot && !strcmp(tandbot->bot, botnick)) /* dont listen to our uplink.. use normal upate system.. */
+    if (uplink_idx == -1) return; // No uplink?
+
+    if (!strcmp(dcc[uplink_idx].nick, botnick)) /* dont listen to our uplink.. use normal upate system.. */
       return;
   }
 
@@ -209,7 +213,7 @@ static void got_nu(char *botnick, char *code, char *par)
      if (!conf.bot->hub) {
        dont_restructure = 1;
        putlog(LOG_MISC, "*", "Linking to %s for binary update.", botnick);
-       botunlink(-2, tandbot->bot, "Restructure for update.");
+       botunlink(-2, dcc[uplink_idx].nick, "Restructure for update.");
        usleep(1000 * 500);
        botlink("", -3, botnick);
      } else 

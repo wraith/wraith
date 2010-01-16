@@ -565,23 +565,32 @@ int open_telnet_raw(int sock, const char *ipIn, port_t sport, bool proxy_on, int
     port = sport;
   }
 
-  /* figure out which ip to bind to locally (v4 or v6) based on what the host ip is .. */
-  if ((is_resolved = is_dotted_ip(ip))) {	/* already resolved */
-  
-    /* bind to our cached ip for v4/v6 depending on what the ip is */
-    initialize_sockaddr(is_resolved, NULL, 0, &so);
+  socklen_t socklen;
+  if (sport) {
+    /* figure out which ip to bind to locally (v4 or v6) based on what the host ip is .. */
+    if ((is_resolved = is_dotted_ip(ip))) {	/* already resolved */
 
-    if (bind(sock, &so.sa, SIZEOF_SOCKADDR(so)) < 0) {
-      putlog(LOG_DEBUG, "*", "Failed to bind to socket %d: %s", sock, strerror(errno));
+      /* bind to our cached ip for v4/v6 depending on what the ip is */
+      initialize_sockaddr(is_resolved, NULL, 0, &so);
+
+      if (bind(sock, &so.sa, SIZEOF_SOCKADDR(so)) < 0) {
+        putlog(LOG_DEBUG, "*", "Failed to bind to socket %d: %s", sock, strerror(errno));
+        killsock(sock);
+        return -1;
+      }
+
+      /* initialize so for connect using the host/port */
+      initialize_sockaddr(is_resolved, ip, port, &so);
+    } else {	/* if not resolved, resolve it with blocking calls.. (shouldn't happen ever) */
+      sdprintf("WARNING: open_telnet_raw(%s,%d) was passed an unresolved hostname.", ip, port);
       killsock(sock);
       return -1;
     }
-
-    /* initialize so for connect using the host/port */
-    initialize_sockaddr(is_resolved, ip, port, &so);
-  } else {	/* if not resolved, resolve it with blocking calls.. (shouldn't happen ever) */
-    sdprintf("WARNING: open_telnet_raw(%s,%d) was passed an unresolved hostname.", ip, port);
-    return -1;
+    socklen = SIZEOF_SOCKADDR(so);
+  } else { // Unix domain socket
+    so.sock_un.sun_family = AF_UNIX;
+    strcpy(so.sock_un.sun_path, ip);
+    socklen = SUN_LEN(&so.sock_un);
   }
 
   for (int i = 0; i < MAXSOCKS; i++) {
@@ -593,13 +602,13 @@ int open_telnet_raw(int sock, const char *ipIn, port_t sport, bool proxy_on, int
     }
   }
 
-  if (identd)
+  if (identd && sport) //Only open identd if not a unix domain socket
     identd_open(myipstr(is_resolved), ipIn, identd);
 
   int rc = -1;
 
   /* make the connect attempt */
-  rc = connect(sock, &so.sa, SIZEOF_SOCKADDR(so));
+  rc = connect(sock, (struct sockaddr *)&so.sa, socklen);
 
   if (rc < 0) {    
     if (errno == EINPROGRESS) {
@@ -645,9 +654,9 @@ int open_telnet(const char *ip, port_t port, bool proxy, int identd)
  * 'addr' is ignored if af_def is AF_INET6 -poptix (02/03/03)
  */
 #ifdef USE_IPV6
-int open_address_listen(in_addr_t addr, int af_def, port_t *port)
+int open_address_listen(const char* ip, int af_def, port_t *port)
 #else
-int open_address_listen(in_addr_t addr, port_t *port)
+int open_address_listen(const char* ip, port_t *port)
 #endif /* USE_IPV6 */
  {
 //  if (firewall[0]) {
@@ -658,7 +667,7 @@ int open_address_listen(in_addr_t addr, port_t *port)
 
   int sock = 0;
   socklen_t addrlen;
-  struct sockaddr_in name;
+  union sockaddr_union name;
 
 #ifdef USE_IPV6
   if (af_def == AF_INET6) {
@@ -695,7 +704,7 @@ int open_address_listen(in_addr_t addr, port_t *port)
       return -1;
     }
   } else {
-    sock = getsock(SOCK_LISTEN, AF_INET);
+    sock = getsock(SOCK_LISTEN, af_def);
 #else
     sock = getsock(SOCK_LISTEN);
 #endif /* USE_IPV6 */
@@ -703,28 +712,48 @@ int open_address_listen(in_addr_t addr, port_t *port)
     if (sock < 0)
       return -1;
 
-    debug2("Opening listen socket on port %d with AF_INET, sock: %d", *port, sock);
-    bzero((char *) &name, sizeof(struct sockaddr_in));
-    name.sin_family = AF_INET;
-    name.sin_port = htons(*port); /* 0 = just assign us a port */
-    name.sin_addr.s_addr = addr;
-    if (bind(sock, (struct sockaddr *) &name, sizeof(name)) < 0) {
-      if (!(identd_hack && *port == 113))
-        putlog(LOG_DEBUG, "*", "Failed to bind to socket %d for listen on port %d: %s", sock, *port, strerror(errno));
+    if (af_def == AF_UNIX)
+      debug2("Opening listen socket on %s, sock: %d", ip, sock);
+    else
+      debug3("Opening listen socket on %s:%d with AF_INET, sock: %d", ip, *port, sock);
+
+    bzero((char *) &name, sizeof(struct sockaddr *));
+    if (af_def == AF_UNIX) {
+      name.sock_un.sun_family = AF_UNIX;
+      strcpy(name.sock_un.sun_path, ip);
+      unlink(name.sock_un.sun_path);
+      addrlen = SUN_LEN(&name.sock_un);
+    } else {
+      name.sin.sin_family = af_def;
+      name.sin.sin_port = htons(*port); /* 0 = just assign us a port */
+      name.sin.sin_addr.s_addr = inet_addr(ip);
+      addrlen = sizeof(struct sockaddr_in);
+    }
+
+    if (bind(sock, (struct sockaddr *) &name, addrlen) < 0) {
+      if (!(identd_hack && *port == 113)) {
+        if (af_def == AF_UNIX)
+          putlog(LOG_DEBUG, "*", "Failed to bind to socket %d for listen on %s: %s", sock, ip, strerror(errno));
+        else
+          putlog(LOG_DEBUG, "*", "Failed to bind to socket %d for listen on %s:%d: %s", sock, ip, *port, strerror(errno));
+      }
       killsock(sock);
       return -1;
     }
-    /* what port are we on? */
-    addrlen = sizeof(name);
-    if (getsockname(sock, (struct sockaddr *) &name, &addrlen) < 0) {
-      if (!(identd_hack && *port == 113))
-        putlog(LOG_DEBUG, "*", "Failed to getsockname on socket %d for listen on port %d: %s", sock, *port, strerror(errno));
-      killsock(sock);
-      return -1;
+
+    if (af_def != AF_UNIX) {
+      /* what port are we on? */
+      if (getsockname(sock, (struct sockaddr *) &name, &addrlen) < 0) {
+        if (!(identd_hack && *port == 113))
+          putlog(LOG_DEBUG, "*", "Failed to getsockname on socket %d for listen on port %d: %s", sock, *port, strerror(errno));
+        killsock(sock);
+        return -1;
+      }
+      *port = ntohs(name.sin.sin_port);
     }
-    *port = ntohs(name.sin_port);
+
     if (listen(sock, 1) < 0) {
-      if (!(identd_hack && *port == 113))
+      if (!(identd_hack && *port == 113) && af_def != AF_UNIX)
         putlog(LOG_DEBUG, "*", "Failed to listen on socket %d for on port %d: %s", sock, *port, strerror(errno));
       killsock(sock);
       return -1;
@@ -733,7 +762,10 @@ int open_address_listen(in_addr_t addr, port_t *port)
   }
 #endif /* USE_IPV6 */
 
-  debug2("Opened listen socket on port %d with AF_INET, sock: %d", *port, sock);
+  if (af_def == AF_UNIX)
+    debug2("Opened listen socket on %s, sock: %d", ip, sock);
+  else
+    debug3("Opened listen socket on %s:%d with AF_INET, sock: %d", ip, *port, sock);
 
   return sock;
 }
@@ -744,9 +776,9 @@ int open_address_listen(in_addr_t addr, port_t *port)
 int open_listen(port_t *port)
 {
 #ifdef USE_IPV6
-  return open_address_listen(getmyip(), AF_INET, port);
+  return open_address_listen(iptostr(getmyip()), AF_INET, port);
 #else
-  return open_address_listen(getmyip(), port);
+  return open_address_listen(iptostr(getmyip()), port);
 #endif /* USE_IPV6 */
 }
 
@@ -757,7 +789,18 @@ int open_listen(port_t *port)
 int open_listen_by_af(port_t *port, int af_def)
 {
 #ifdef USE_IPV6
-  return open_address_listen(getmyip(), af_def, port);
+  return open_address_listen(iptostr(getmyip()), af_def, port);
+#else
+  return -1;
+#endif /* USE_IPV6 */
+}
+
+int open_listen_addr_by_af(const char *ip, port_t *port, int af_def)
+{
+  if (!ip)
+    ip = iptostr(getmyip());
+#ifdef USE_IPV6
+  return open_address_listen(ip, af_def, port);
 #else
   return -1;
 #endif /* USE_IPV6 */
@@ -825,9 +868,19 @@ int answer(int sock, char *caller, in_addr_t *ip, port_t *port, int binary)
       *ip = ntohl(*ip);
     } else {
 #endif /* USE_IPV6 */
-      *ip = from.sin_addr.s_addr;
-      strlcpy(caller, iptostr(*ip), 121);
-      *ip = ntohl(*ip);
+      if (af_ty == AF_UNIX) {
+        struct sockaddr_un sock_un;
+        socklen_t socklen = sizeof(sock_un);
+
+        bzero(&sock_un, socklen);
+        getsockname(sock, (struct sockaddr*) &sock_un, &socklen);
+        strcpy(caller, sock_un.sun_path);
+        *port = 0;
+      } else {
+        *ip = from.sin_addr.s_addr;
+        strlcpy(caller, iptostr(*ip), 121);
+        *ip = ntohl(*ip);
+      }
 #ifdef USE_IPV6 
     }
 #endif /* USE_IPV6 */
@@ -836,7 +889,7 @@ int answer(int sock, char *caller, in_addr_t *ip, port_t *port, int binary)
 #ifdef USE_IPV6
       if (af_ty == AF_INET6)
         *port = ntohs(from6.sin6_port);
-      else
+      else if (af_ty == AF_INET)
 #endif /* USE_IPV6 */
         *port = ntohs(from.sin_port);
     }

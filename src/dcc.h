@@ -174,6 +174,7 @@ struct dupwait_info {
 #define STAT_CHANNELS BIT10  /* show channels on login? */
 #define STAT_BOTS    BIT11   /* Show bots linked on login? */
 #define STAT_WHOM    BIT12   /* show .whom on login? */
+#define STAT_UNIXDOMAIN  BIT13	  /* This dcc is over a unix domain */
 
 /* For stripping out mIRC codes
  */

@@ -92,6 +92,9 @@ struct userrec *host_conflicts(char *host)
 
   for (u = userlist; u; u = u->next) {
     for (q = (struct list_type *) get_user(&USERENTRY_HOSTS, u); q; q = q->next) {
+      // Ignore -telnet!*@* hosts for this check, as this is for irc.
+      if (!strncmp(q->extra, "-telnet!", 8))
+        continue;
       if (wild_match(host, q->extra) || wild_match(q->extra, host))
         return u;
     }
@@ -388,7 +391,7 @@ static void write_user(const struct userrec *u, bd::Stream& stream, int idx)
     } else
 #endif
     if (ue->type)
-      if (conf.bot->hub)
+      if (conf.bot->hub || conf.bot->localhub)
         ue->type->write_userfile(stream, u, ue, idx);
   }
 }

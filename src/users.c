@@ -1142,7 +1142,7 @@ void autolink_cycle_leaf(char *start)
    if (dcc[i].type) {
     if ((dcc[i].type == &DCC_BOT_NEW) || (dcc[i].type == &DCC_FORK_BOT))
       return;
-    if (dcc[i].type == &DCC_BOT) {
+    if (dcc[i].hub && dcc[i].type == &DCC_BOT) {
       strlcpy(curhub, dcc[i].nick, sizeof(curhub));
       break;
     }
@@ -1199,8 +1199,21 @@ void autolink_cycle(char *start)
 {
   if (conf.bot->hub)
     autolink_cycle_hub(start);
-  else
+  else if (conf.bot->localhub)
     autolink_cycle_leaf(start);
+  else { //Connect to the localhub
+    if (tands == 0) {
+      // Make sure not already trying for the localhub
+      for (int i = 0; i < dcc_total; i++) {
+       if (dcc[i].type) {
+        if ((dcc[i].type == &DCC_BOT_NEW) || (dcc[i].type == &DCC_FORK_BOT))
+          return;
+       }
+      }
+      sdprintf("need to link to my localhub: %s\n", conf.localhub);
+      botlink("", -3, conf.localhub);
+    }
+  }
 }
 
 
@@ -1210,7 +1223,7 @@ void check_stale_dcc_users()
     if (!dcc[i].type || !dcc[i].nick[0]) continue;
     
 
-    if (dcc[i].user == NULL) { /* Removed user */
+    if (dcc[i].user == NULL && !(dcc[i].user = get_user_by_handle(userlist, dcc[i].nick))) { /* Removed user */
       if (dcc[i].type == &DCC_BOT || dcc[i].type == &DCC_FORK_BOT || dcc[i].type == &DCC_BOT_NEW)
         botunlink(i, dcc[i].nick, "No longer a valid bot.");
       else if (dcc[i].type == &DCC_CHAT) {

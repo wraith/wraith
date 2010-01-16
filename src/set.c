@@ -625,7 +625,7 @@ void var_userfile_share_line(char *line, int idx, bool share)
   set_noshare = 1;
   var_set(var, NULL, line);
   /* leaf bots don't need to bother attempting to share; there are no bots linked to us! */
-  if (share && conf.bot->hub)
+  if (share && (conf.bot->hub || conf.bot->localhub))
     botnet_send_var_broad(idx, var);
   set_noshare = 0;
 }
@@ -831,8 +831,17 @@ void write_vars_and_cmdpass(bd::Stream& stream, int idx)
   int i = 0;
 
   for (i = 0; vars[i].name; i++) {
-    /* send blanks if our variable isn't set, theirs MIGHT be set and needs to be UNSET */
-    stream << buf.printf("@ %s %s\n", vars[i].name, vars[i].gdata ? vars[i].gdata : "");
+    // If we're a localhub, dont share variables set to not leaf default unless we're linked to a hub.
+    // Otherwise, we share out servers, and the child bots connect to the default list,
+    // before ever receiving the actual list from the hub. (Along with stuff like realname)
+    if (conf.bot->hub ||
+        (conf.bot->localhub &&
+         (!(vars[i].flags & VAR_NOLDEF) ||
+          ((vars[i].flags & VAR_NOLDEF) && have_linked_to_hub))
+         )) {
+      /* send blanks if our variable isn't set, theirs MIGHT be set and needs to be UNSET */
+      stream << buf.printf("@ %s %s\n", vars[i].name, vars[i].gdata ? vars[i].gdata : "");
+    }
   }
 
   for (struct cmd_pass *cp = cmdpass; cp; cp = cp->next)

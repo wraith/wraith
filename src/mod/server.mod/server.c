@@ -945,11 +945,15 @@ static void dcc_chat_hostresolved(int i)
 #else
   dcc[i].sock = getsock(0);
 #endif /* USE_IPV6 */
-  if (dcc[i].sock < 0 || open_telnet_dcc(dcc[i].sock, ip, buf) < 0) {
+  int open_telnet_return = 0;
+  if (dcc[i].sock < 0 || (open_telnet_return = open_telnet_dcc(dcc[i].sock, ip, buf)) < 0) {
+    if (open_telnet_return == -1)
+      dcc[i].sock = -1;
     strlcpy(buf, strerror(errno), sizeof(buf));
     putlog(LOG_MISC, "*", "%s: CHAT (%s!%s)", "DCC connection failed", dcc[i].nick, dcc[i].host);
     putlog(LOG_MISC, "*", "    (%s)", buf);
-    killsock(dcc[i].sock);
+    if (dcc[i].sock != -1)
+      killsock(dcc[i].sock);
     lostdcc(i);
   } else {
     bool ok = 1;
@@ -977,7 +981,7 @@ static void dcc_chat_hostresolved(int i)
 static void server_secondly()
 {
   if (cycle_time)
-    cycle_time--;
+    --cycle_time;
   deq_msg();
   if (!resolvserv && serv < 0 && !trying_server)
     connect_server();

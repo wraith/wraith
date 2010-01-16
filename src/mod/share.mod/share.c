@@ -998,9 +998,10 @@ share_ufsend(int idx, char *par)
 #else
     sock = getsock(SOCK_BINARY);        /* Don't buffer this -> mark binary. */
 #endif /* USE_IPV6 */
-    if (sock < 0 || open_telnet_dcc(sock, ip, port) < 0) {
+    int open_telnet_return = 0;
+    if (sock < 0 || (open_telnet_return = open_telnet_dcc(sock, ip, port)) < 0) {
       fclose(f);
-      if (sock != -1)
+      if (open_telnet_return != -1 && sock != -1)
         killsock(sock);
       putlog(LOG_BOTS, "@", "Asynchronous connection failed!");
       dprintf(idx, "s e Can't connect to you!\n");
@@ -1058,10 +1059,15 @@ static void
 share_endstartup(int idx, char *par)
 {
   dcc[idx].status &= ~STAT_GETTING;
+  // Share any local changes out
+  dump_resync(idx);
   /* Send to any other sharebots */
-  if (conf.bot->hub)
+  if (conf.bot->hub || conf.bot->localhub) {
+    have_linked_to_hub = 1;
     hook_read_userfile();
-  else {
+  }
+
+  if (!conf.bot->hub) {
     /* Our hostmask may have been updated on connect, but the new userfile may not have it. */
     check_hostmask();
   }
@@ -1086,6 +1092,10 @@ static void share_userfile_line(int idx, char *par) {
 
 static void share_userfile_start(int idx, char *par) {
   dcc[idx].status |= STAT_GETTING;
+  /* Start up a tbuf to queue outgoing changes for this bot until the
+   * userlist is done transferring.
+   */
+  new_tbuf(dcc[idx].nick);
   stream_in = new bd::Stream();
 }
 
@@ -1178,11 +1188,13 @@ shareout_prot(struct userrec *u, const char *format, ...)
     s[2 + (l = 509)] = 0;
   va_end(va);
 
+  int localhub = nextbot(u->handle);
+
   for (int i = 0; i < dcc_total; i++) {
     if (dcc[i].type && (dcc[i].type->flags & DCT_BOT) && 
        (dcc[i].status & STAT_SHARE) && !(dcc[i].status & (STAT_GETTING | STAT_SENDING)) &&
-       /* only send to hubs and to the same user */
-       (dcc[i].hub || dcc[i].user == u)) {
+       /* only send to hubs, the bot itself, or the localhub in the chain */
+       (dcc[i].hub || dcc[i].user == u || (localhub != -1 && i == localhub))) {
       tputs(dcc[i].sock, s, l + 2);
     }
   }
@@ -1406,7 +1418,10 @@ static void share_read_stream(int idx, bd::Stream& stream) {
   /* The userfile we received may just be bogus or missing important users */
   load_internal_users();
   add_myself_to_userlist();
-  
+
+  if (conf.bot->localhub)
+    add_child_bots();
+
   /* Make sure no removed users/bots are still connected. */
   check_stale_dcc_users();
 

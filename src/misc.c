@@ -992,6 +992,13 @@ int updatebin(int idx, char *par, int secs)
 
 int bot_aggressive_to(struct userrec *u)
 {
+  if (conf.bot->localhub) {
+    for (conf_bot* bot = conf.bots; bot && bot->nick; bot = bot->next) {
+      if (!bot->hub && !strcmp(u->handle, bot->nick))
+        return 1;
+    }
+  }
+
   char mypval[HANDLEN + 4] = "", botpval[HANDLEN + 4] = "";
 
   link_pref_val(u, botpval);

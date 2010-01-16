@@ -523,27 +523,40 @@ void load_internal_users()
 
 }
 
-void add_myself_to_userlist() {
-  struct bot_addr *bi = NULL;
-
-  if (!(conf.bot->u = get_user_by_handle(userlist, conf.bot->nick))) {
+static struct userrec* add_bot_userlist(char* bot) {
+  struct userrec *u = NULL;
+  if (!(u = get_user_by_handle(userlist, bot))) {
     /* I need to be on the userlist... doh. */
-    userlist = adduser(userlist, conf.bot->nick, "none", "-", USER_OP, 1);
-    conf.bot->u = get_user_by_handle(userlist, conf.bot->nick);
-    bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
+    userlist = adduser(userlist, bot, "none", "-", USER_OP, 1);
+    u = get_user_by_handle(userlist, bot);
 
-    /* Assume hub has a record added from load_internal_users();
-       why would it think it was a hub if it wasn't in the hub list??
-    */
-    if (!conf.bot->hub) {
-      if (conf.bot->net.ip)
-        bi->address = strdup(conf.bot->net.ip);
-      bi->telnet_port = bi->relay_port = 3333;
-      bi->hublevel = 999;
-      bi->uplink = (char *) my_calloc(1, 1);
-      set_user(&USERENTRY_BOTADDR, conf.bot->u, bi);
+    struct bot_addr *bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
+    bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
+    bi->uplink = (char *) my_calloc(1, 1);
+    bi->address = (char *) my_calloc(1, 1);
+    bi->telnet_port = 3333;
+    bi->relay_port = 3333;
+    bi->hublevel = 999;
+    set_user(&USERENTRY_BOTADDR, u, bi);
+  }
+  return u;
+}
+
+void add_myself_to_userlist() {
+  conf.bot->u = add_bot_userlist(conf.bot->nick);
+}
+
+void add_child_bots() {
+  conf_bot* bot = conf.bots->next; //Skip myself
+  if (bot && bot->nick) {
+    for (; bot && bot->nick; bot = bot->next) {
+      add_bot_userlist(bot->nick);
     }
   }
+}
+
+void add_localhub() {
+  add_bot_userlist(conf.localhub);
 }
 
 void rehash_ip() {
@@ -577,6 +590,33 @@ void rehash_ip() {
     struct bot_addr *bi = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, conf.bot->u);
     listen_all(bi->telnet_port, 0);
     my_port = bi->telnet_port;
+  } else if (conf.bot->localhub) {
+    // If not listening on the domain socket, open it up
+    bool listening = 0;
+    for (int i = 0; i < dcc_total; i++) {
+      if (dcc[i].type && (dcc[i].type == &DCC_TELNET) && (!strcmp(dcc[i].host, conf.localhub_socket))) {
+        listening = 1;
+        break;
+      }
+    }
+    if (!listening) {
+      // Listen on the unix domain socket
+      port_t port;
+      int i = open_listen_addr_by_af(conf.localhub_socket, &port, AF_UNIX);
+      if (i < 0) {
+        putlog(LOG_ERRORS, "*", "Can't listen on %s - %s", conf.localhub_socket, i == -1 ? "it's taken." : "couldn't assign file.");
+      } else {
+        /* now setup dcc entry */
+        int idx = new_dcc(&DCC_TELNET, 0);
+        dcc[idx].addr = 0L;
+        strlcpy(dcc[idx].host, conf.localhub_socket, sizeof(dcc[idx].host));
+        dcc[idx].port = 0;
+        dcc[idx].sock = i;
+        dcc[idx].timeval = now;
+        strlcpy(dcc[idx].nick, "(unix_domain)", NICKLEN);
+        putlog(LOG_DEBUG, "*", "Listening on telnet %s", conf.localhub_socket);
+      }
+    }
   }
 }
 
@@ -608,6 +648,11 @@ void chanprog()
   load_internal_users();
 
   add_myself_to_userlist();
+
+  if (conf.bot->localhub)
+    add_child_bots();
+  else if (!conf.bot->hub)
+    add_localhub();
 
   rehash_ip();
 
@@ -650,6 +695,11 @@ void reload()
   load_internal_users();
   /* make sure I am added and conf.bot->u is set */
   add_myself_to_userlist();
+
+  if (conf.bot->localhub)
+    add_child_bots();
+  else if (!conf.bot->hub)
+    add_localhub();
 
   /* Make sure no removed users/bots are still connected. */
   check_stale_dcc_users();

@@ -359,6 +359,17 @@ void conf_checkpids(conf_bot *bots, bool all)
       bot->pid = checkpid(bot->nick, bot);
 }
 
+static char* datafile(const char* prefix, const char* nick) {
+  static char buf[DIRMAX] = "";
+  char *tmpnick = NULL, *tmp_ptr = NULL;
+
+  tmpnick = tmp_ptr = strdup(nick);
+  strtolower(tmpnick);
+  simple_snprintf(buf, sizeof buf, STR("%s/.%s.%s"), conf.datadir, prefix, tmpnick);
+  free(tmp_ptr);
+  return buf;
+}
+
 /*
  * Return the PID of a bot if it is running, otherwise return 0
  */
@@ -367,23 +378,19 @@ pid_t
 checkpid(const char *nick, conf_bot *bot)
 {
   FILE *f = NULL;
-  char buf[DIRMAX] = "", *tmpnick = NULL, *tmp_ptr = NULL;
   pid_t pid = 0;
 
-  tmpnick = tmp_ptr = strdup(nick);
 
-  strtolower(tmpnick);
-
-  simple_snprintf(buf, sizeof buf, STR("%s/.pid.%s"), conf.datadir, tmpnick);
-  free(tmp_ptr);
+  char buf[DIRMAX] = "";
+  char *bufp = datafile("pid", nick);
 
   if (bot && !(bot->pid_file))
-    bot->pid_file = strdup(buf);
-  else if (bot && strcasecmp(bot->pid_file, buf))
-    str_redup(&bot->pid_file, buf);
+    bot->pid_file = strdup(bufp);
+  else if (bot && strcasecmp(bot->pid_file, bufp))
+    str_redup(&bot->pid_file, bufp);
 
-  if ((f = fopen(buf, "r"))) {
-    char *bufp = NULL, *pids = NULL;
+  if ((f = fopen(bufp, "r"))) {
+    char *pids = NULL;
 
     if (!fgets(buf, sizeof(buf), f)) {
       fclose(f);
@@ -484,6 +491,8 @@ conf_addbot(const char *nick, const char *ip, const char *host, const char *ip6)
   if (!conf.localhub && !bot->hub && !bot->disabled) {
     bot->localhub = 1;          /* first bot */
     conf.localhub = strdup(bot->nick);
+
+    conf.localhub_socket = strdup(datafile("sock", conf.localhub));
   }
 
   list_append((struct list_type **) &(conf.bots), (struct list_type *) bot);
