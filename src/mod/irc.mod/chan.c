@@ -3079,12 +3079,8 @@ static int gotquit(char *from, char *msg)
   }
   /* Our nick quit? if so, grab it.
    */
-  if (keepnick && !match_my_nick(nick)) {
-    if (!rfc_casecmp(nick, origbotname)) {
-      putlog(LOG_MISC, "*", "Switching back to nick %s", origbotname);
-      dprintf(DP_SERVER, "NICK %s\n", origbotname);
-    }
-  }
+  if (keepnick && !match_my_nick(nick))
+    nicks_available(nick);
 #ifdef CACHE
   /* see if they were in our cache at all */
   cache_t *cache = cache_find(nick);

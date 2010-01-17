@@ -822,27 +822,27 @@ static int gotpong(char *from, char *msg)
   return 0;
 }
 
-static int nick_which(const char* nick, bool& ison_orig, bool& ison_jupe) {
+static int nick_which(const char* nick, bool& is_jupe, bool& is_orig) {
   if (jupenick[0] && !rfc_casecmp(nick, jupenick)) {
-    ison_jupe = 1;
+    is_jupe = 1;
     // If some stupid reason they have the same jupenick/nick, make sure to mark it as on
     if (!rfc_casecmp(nick, origbotname))
-      ison_orig = 1;
+      is_orig = 1;
     return 1;
   } else if (!rfc_casecmp(nick, origbotname)) {
-    ison_orig = 1;
+    is_orig = 1;
   }
   return 0;
 }
 
-static void nick_available(bool ison_orig, bool ison_jupe) {
-  if (jupenick[0] && !ison_jupe && rfc_casecmp(botname, jupenick)) {
+static void nick_available(bool is_jupe, bool is_orig) {
+  if (jupenick[0] && is_jupe && rfc_casecmp(botname, jupenick) && !match_my_nick((jupenick))) {
     if (!jnick_juped)
       putlog(LOG_MISC, "*", "Switching back to jupenick '%s'", jupenick);
     tried_jupenick = 1;
     dprintf(DP_SERVER, "NICK %s\n", jupenick);
     // Don't switch to the nick if already on jupenick
-  } else if (!ison_orig && rfc_casecmp(botname, origbotname) && (!jupenick[0] || !match_my_nick(jupenick))) {
+  } else if (is_orig && rfc_casecmp(botname, origbotname) && !match_my_nick(origbotname) && (!jupenick[0] || !match_my_nick(jupenick))) {
     if (!nick_juped)
       putlog(LOG_MISC, "*", "Switching back to nick '%s'", origbotname);
     altnick_char = rolls = 0;
@@ -850,22 +850,27 @@ static void nick_available(bool ison_orig, bool ison_jupe) {
   }
 }
 
-static void nicks_available(char* buf, char delim, bool buf_is_ison) {
-  if (!buf[0]) return;
-  bool ison_jupe = 0, ison_orig = 0;
+void nicks_available(char* buf, char delim, bool buf_contains_available) {
+  if (!buf[0] || !keepnick) return;
+  bool is_jupe = 0, is_orig = 0;
 
   char *nick = NULL;
-  while ((nick = newsplit(&buf, delim))[0]) {
-    if (nick_which(nick, ison_orig, ison_jupe))
-      break;
+  if (delim) {
+    while ((nick = newsplit(&buf, delim))[0]) {
+      if (nick_which(nick, is_jupe, is_orig))
+        break;
+    }
+  } else {
+    nick = buf;
+    nick_which(nick, is_jupe, is_orig);
   }
 
-  if (buf_is_ison == 0) {
-    ison_jupe = !ison_jupe;
-    ison_orig = !ison_orig;
+  if (buf_contains_available == 0) {
+    is_jupe = !is_jupe;
+    is_orig = !is_orig;
   }
 
-  nick_available(ison_orig, ison_jupe);
+  nick_available(is_jupe, is_orig);
 }
 
 /* This is a reply to MONITOR: Offline
@@ -874,30 +879,24 @@ static void nicks_available(char* buf, char delim, bool buf_is_ison) {
  */
 static void got731(char* from, char* msg)
 {
-  if (!keepnick)
-    return;
-
   char *tmp = newsplit(&msg);
   fixcolon(msg);
 
   //msg now contains the nick(s) available
   if (tmp[0] && (!strcmp(tmp, "*") || match_my_nick(tmp)))
-    nicks_available(msg, ',', 0);
+    nicks_available(msg, ',');
 }
 
 /* This is a reply on ISON :<orig> [<jupenick>]
 */
 static void got303(char *from, char *msg)
 {
-  if (!keepnick)
-    return;
-
   char *tmp = NULL;
 
   tmp = newsplit(&msg);
   fixcolon(msg);
   if (tmp[0] && match_my_nick(tmp))
-    nicks_available(tmp, ' ', 1);
+    nicks_available(tmp, ' ', 0);
 }
 
 /* 432 : Bad nickname (RESV)

@@ -44,8 +44,6 @@ enum {
 	NETT_HYBRID_EFNET	= 4	/* new +e/+I Efnet hybrid.	  */
 };
 
-#endif		/* _EGG_MOD_SERVER_SERVER_H */
-
 extern bind_table_t	*BT_ctcp, *BT_ctcr, *BT_msgc;
 extern size_t		nick_len;
 extern bool		trigger_on_ignore, floodless, tried_jupenick, keepnick;
@@ -61,6 +59,7 @@ extern struct dcc_table SERVER_SOCKET;
 extern rate_t		flood_msg, flood_ctcp, flood_g;
 
 int check_bind_ctcpr(char *, char *, struct userrec *, char *, char *, char *, bind_table_t *);
+void nicks_available(char* buf, char delim = 0, bool buf_contains_available = 1);
 
 #define check_bind_ctcp(a, b, c, d, e, f) check_bind_ctcpr(a, b, c, d, e, f, BT_ctcp)
 #define check_bind_ctcr(a, b, c, d, e, f) check_bind_ctcpr(a, b, c, d, e, f, BT_ctcr)
@@ -80,3 +79,5 @@ void join_chans();
 void check_hostmask();
 void next_server(int *, char *, port_t *, char *);
 void server_send_ison();
+
+#endif		/* _EGG_MOD_SERVER_SERVER_H */
