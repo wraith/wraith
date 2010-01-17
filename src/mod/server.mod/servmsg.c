@@ -768,7 +768,7 @@ static int gotwall(char *from, char *msg)
 
 void server_send_ison()
 {
-  if (server_online && keepnick) {
+  if (server_online && keepnick && !use_monitor) {
     // Only check if we're not on jupenick, or there is no jupenick and we're not on the preferred nick
     bool have_jupenick = jupenick[0] ? match_my_nick(jupenick) : 0;
     if (!have_jupenick) {
