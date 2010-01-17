@@ -986,6 +986,19 @@ static void server_secondly()
   deq_msg();
   if (!resolvserv && serv < 0 && !trying_server)
     connect_server();
+
+  if (!conf.bot->hub) {
+    static int ison_cnt = 0;
+
+    if (ison_time == 0) //If someone sets this to 0, all hell will break loose!
+      ison_time = 10;
+    if (ison_cnt >= ison_time) {
+      server_send_ison();
+      ison_cnt = 0;
+    } else
+      ++ison_cnt;
+  }
+
 }
 
 static void server_check_lag()

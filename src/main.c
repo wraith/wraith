@@ -514,7 +514,7 @@ static void event_resettraffic()
 
 static void core_secondly()
 {
-  static int cnt = 0, ison_cnt = 0;
+  static int cnt = 0;
   time_t miltime;
 
   if (fork_interval && backgrd && ((now - lastfork) > fork_interval))
@@ -524,16 +524,6 @@ static void core_secondly()
   if (((conf.bot->localhub || conf.bot->hub) && (cnt % 30) == 0) || (cnt % 5) == 0) {
     autolink_cycle(NULL);         /* attempt autolinks */
     cnt = 0;
-  }
-
-  if (!conf.bot->hub) {
-    if (ison_time == 0) //If someone sets this to 0, all hell will break loose!
-      ison_time = 10;
-    if (ison_cnt >= ison_time) {
-      server_send_ison();
-      ison_cnt = 0;
-    } else
-      ++ison_cnt;
   }
 
   memcpy(&nowtm, gmtime(&now), sizeof(struct tm));
