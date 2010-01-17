@@ -288,6 +288,8 @@ got005(char *from, char *msg)
         modesperline = MODES_PER_LINE_MAX;
     } else if (!strcasecmp(tmp, "NICKLEN"))
       nick_len = atoi(p);
+    else if (!strcasecmp(tmp, "MONITOR"))
+      use_monitor = 1;
     else if (!strcasecmp(tmp, "NETWORK"))
       strlcpy(curnetwork, p, 120);
     else if (!strcasecmp(tmp, "PENALTY"))
@@ -1675,6 +1677,7 @@ static void connect_server(void)
     tried_jupenick = 0;
     rolls = 0;
     altnick_char = 0;
+    use_monitor = 0;
 
     for (chan = chanset; chan; chan = chan->next)
       chan->status &= ~CHAN_JUPED;
