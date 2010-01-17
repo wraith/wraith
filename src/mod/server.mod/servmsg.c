@@ -822,8 +822,71 @@ static int gotpong(char *from, char *msg)
   return 0;
 }
 
-/* This is a reply on ISON :<orig> [<jupenick>]
+static int nick_which(const char* nick, bool& ison_orig, bool& ison_jupe) {
+  if (jupenick[0] && !rfc_casecmp(nick, jupenick)) {
+    ison_jupe = 1;
+    // If some stupid reason they have the same jupenick/nick, make sure to mark it as on
+    if (!rfc_casecmp(nick, origbotname))
+      ison_orig = 1;
+    return 1;
+  } else if (!rfc_casecmp(nick, origbotname)) {
+    ison_orig = 1;
+  }
+  return 0;
+}
+
+static void nick_available(bool ison_orig, bool ison_jupe) {
+  if (jupenick[0] && !ison_jupe && rfc_casecmp(botname, jupenick)) {
+    if (!jnick_juped)
+      putlog(LOG_MISC, "*", "Switching back to jupenick '%s'", jupenick);
+    tried_jupenick = 1;
+    dprintf(DP_SERVER, "NICK %s\n", jupenick);
+    // Don't switch to the nick if already on jupenick
+  } else if (!ison_orig && rfc_casecmp(botname, origbotname) && (!jupenick[0] || !match_my_nick(jupenick))) {
+    if (!nick_juped)
+      putlog(LOG_MISC, "*", "Switching back to nick '%s'", origbotname);
+    altnick_char = rolls = 0;
+    dprintf(DP_SERVER, "NICK %s\n", origbotname);
+  }
+}
+
+static void nicks_available(char* buf, char delim, bool buf_is_ison) {
+  if (!buf[0]) return;
+  bool ison_jupe = 0, ison_orig = 0;
+
+  char *nick = NULL;
+  while ((nick = newsplit(&buf, delim))[0]) {
+    if (nick_which(nick, ison_orig, ison_jupe))
+      break;
+  }
+
+  if (buf_is_ison == 0) {
+    ison_jupe = !ison_jupe;
+    ison_orig = !ison_orig;
+  }
+
+  nick_available(ison_orig, ison_jupe);
+}
+
+/* This is a reply to MONITOR: Offline
+ * RPL_MONOFFLINE
+ * :<server> 731 <nick> :nick[,nick1]*
  */
+static void got731(char* from, char* msg)
+{
+  if (!keepnick)
+    return;
+
+  char *tmp = newsplit(&msg);
+  fixcolon(msg);
+
+  //msg now contains the nick(s) available
+  if (tmp[0] && (!strcmp(tmp, "*") || match_my_nick(tmp)))
+    nicks_available(msg, ',', 0);
+}
+
+/* This is a reply on ISON :<orig> [<jupenick>]
+*/
 static void got303(char *from, char *msg)
 {
   if (!keepnick)
@@ -833,35 +896,8 @@ static void got303(char *from, char *msg)
 
   tmp = newsplit(&msg);
   fixcolon(msg);
-  if (tmp[0] && match_my_nick(tmp)) {
-    bool ison_jupe = 0, ison_orig = 0;
-
-    while ((tmp = newsplit(&msg))[0]) {
-      if (jupenick[0] && !rfc_casecmp(tmp, jupenick)) {
-        ison_jupe = 1;
-        // If some stupid reason they have the same jupenick/nick, make sure to mark it as on
-        if (!rfc_casecmp(tmp, origbotname)) {
-          ison_orig = 1;
-          break;
-        }
-      } else if (!rfc_casecmp(tmp, origbotname)) {
-        ison_orig = 1;
-      }
-    }
-
-    if (jupenick[0] && !ison_jupe && rfc_casecmp(botname, jupenick)) {
-      if (!jnick_juped)
-        putlog(LOG_MISC, "*", "Switching back to jupenick %s", jupenick);
-      tried_jupenick = 1;
-      dprintf(DP_SERVER, "NICK %s\n", jupenick);
-    // Don't switch to the nick if already on jupenick
-    } else if (!ison_orig && rfc_casecmp(botname, origbotname) && (!jupenick[0] || !match_my_nick(jupenick))) {
-      if (!nick_juped)
-        putlog(LOG_MISC, "*", "Switching back to nick %s", origbotname);
-      altnick_char = rolls = 0;
-      dprintf(DP_SERVER, "NICK %s\n", origbotname);
-    }
-  }
+  if (tmp[0] && match_my_nick(tmp))
+    nicks_available(tmp, ' ', 1);
 }
 
 /* 432 : Bad nickname (RESV)
@@ -1066,11 +1102,11 @@ static int gotnick(char *from, char *msg)
         putlog(LOG_SERV | LOG_MISC, "*", "Nickname changed to '%s'???", msg);
     
         if (jupenick[0] && !rfc_casecmp(nick, jupenick)) {
-          putlog(LOG_MISC, "*", "Switching back to jupenick %s", jupenick);
+          putlog(LOG_MISC, "*", "Switching back to jupenick '%s'", jupenick);
           tried_jupenick = 1;
           dprintf(DP_SERVER, "NICK %s\n", jupenick);
         } else if (!rfc_casecmp(nick, origbotname)) {
-          putlog(LOG_MISC, "*", "Switching back to nick %s", origbotname);
+          putlog(LOG_MISC, "*", "Switching back to nick '%s'", origbotname);
           dprintf(DP_SERVER, "NICK %s\n", origbotname);
           altnick_char = rolls = 0;
         }
@@ -1080,11 +1116,11 @@ static int gotnick(char *from, char *msg)
   } else if ((keepnick) && (rfc_casecmp(nick, msg))) { //Ignore case changes
     //Another client changed nick
     if (jupenick[0] && !rfc_casecmp(nick, jupenick)) {
-      putlog(LOG_MISC, "*", "Switching back to jupenick %s", jupenick);
+      putlog(LOG_MISC, "*", "Switching back to jupenick '%s'", jupenick);
       tried_jupenick = 1;
       dprintf(DP_SERVER, "NICK %s\n", jupenick);
     } else if (!rfc_casecmp(nick, origbotname)) {
-      putlog(LOG_MISC, "*", "Switching back to nick %s", origbotname);
+      putlog(LOG_MISC, "*", "Switching back to nick '%s'", origbotname);
       dprintf(DP_SERVER, "NICK %s\n", origbotname);
       altnick_char = rolls = 0;
     }
@@ -1622,6 +1658,7 @@ static cmd_t my_raw_binds[] =
   {"318",	"",	(Function) whoispenalty,	NULL, LEAF},	/* :End of /WHOIS */
   {"369",	"",	(Function) got369,		NULL, LEAF},	/* :End of /WHOWAS */
   {"718",	"",	(Function) got718,		NULL, LEAF},
+  {"731",	"",	(Function) got731,		NULL, LEAF},	/* RPL_MONOFFLINE */
   {NULL,	NULL,	NULL,				NULL, 0}
 };
 
