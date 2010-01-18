@@ -674,9 +674,8 @@ void queue_server(int which, char *buf, int len)
     }
   }
 
-  if (which == DP_MODE || which == DP_MODE_NEXT)
-    deq_msg();		/* DP_MODE needs to be sent ASAP, flush if
-			   possible. */
+  /* Try flushing immediately */
+  deq_msg();
 }
 
 /* Add a new server to the server_list.
