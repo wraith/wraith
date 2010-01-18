@@ -446,7 +446,7 @@ void tell_user_ident(int idx, char *id)
     u = get_user_by_host(id);
 
   if (u == NULL || (u && !whois_access(dcc[idx].user, u))) {
-    dprintf(idx, "Can't find anyone matching that.\n");
+    dprintf(idx, "Can't find anyone matching that, or you have no access to view them.\n");
     return;
   }
 
