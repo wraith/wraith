@@ -280,6 +280,8 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
       ((char *) var->mem)[0] = 0;
 
     if (!conf.bot->hub) {
+      bool should_reset_monitor = 0;
+
       if (var->flags & VAR_JUPENICK) {
         //Don't allow setting to the same as origbotname
         if (data && !rfc_casecmp(jupenick, origbotname)) {
@@ -297,6 +299,7 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
             if (!match_my_nick(jupenick)) {
               tried_jupenick = 1;
               dprintf(DP_SERVER, "NICK %s\n", jupenick);
+              should_reset_monitor = 1;
             }
           // Unset and there was an old value
           } else if (!data && olddata) { 
@@ -304,6 +307,7 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
             if (match_my_nick(olddata)) {
               altnick_char = rolls = 0;
               dprintf(DP_SERVER, "NICK %s\n", origbotname);
+              should_reset_monitor = 1;
             }
           }
         }
@@ -322,9 +326,12 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
             // Unset the rolls/altnick stuff as we're starting over from scratch.
             altnick_char = rolls = 0;
             dprintf(DP_SERVER, "NICK %s\n", (char *) var->mem);
+            should_reset_monitor = 1;
           }
         }
       }
+      if (server_online && should_reset_monitor)
+        rehash_monitor_list();
     }
     if (olddata)
       free(olddata);

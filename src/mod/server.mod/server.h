@@ -74,6 +74,7 @@ void clearq(struct server_list *);
 void nuke_server(const char *);
 bool match_my_nick(char *);
 void rehash_server(const char *, const char *);
+void rehash_monitor_list();
 void replay_cache(int, bd::Stream*);
 void join_chans();
 void check_hostmask();

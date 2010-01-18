@@ -174,6 +174,15 @@ bool match_my_nick(char *nick)
   return (!rfc_casecmp(nick, botname));
 }
 
+void rehash_monitor_list() {
+  if (!use_monitor) return;
+  dprintf(DP_SERVER, "MONITOR C\n");
+  if (jupenick[0])
+    dprintf(DP_SERVER, "MONITOR + %s,%s\n", jupenick, origbotname);
+  else
+    dprintf(DP_SERVER, "MONITOR + %s", origbotname);
+}
+
 void rehash_server(const char *servname, const char *nick)
 {
   server_online = now;
@@ -188,6 +197,7 @@ void rehash_server(const char *servname, const char *nick)
     dprintf(DP_SERVER, "WHOIS %s\n", botname); /* get user@host */
     dprintf(DP_SERVER, "USERHOST %s\n", botname); /* get user@ip */
     dprintf(DP_SERVER, "MODE %s %s\n", botname, var_get_str_by_name("usermode"));
+    rehash_monitor_list();
   }
 }
 
@@ -288,8 +298,14 @@ got005(char *from, char *msg)
         modesperline = MODES_PER_LINE_MAX;
     } else if (!strcasecmp(tmp, "NICKLEN"))
       nick_len = atoi(p);
-    else if (!strcasecmp(tmp, "MONITOR"))
+    else if (!strcasecmp(tmp, "MONITOR")) {
+      bool need_to_rehash_monitor = 0;
+      if (!use_monitor && !replaying_cache) // Don't rehash if restarting. No need.
+        need_to_rehash_monitor = 1;
       use_monitor = 1;
+      if (need_to_rehash_monitor)
+        rehash_monitor_list();
+    }
     else if (!strcasecmp(tmp, "NETWORK"))
       strlcpy(curnetwork, p, 120);
     else if (!strcasecmp(tmp, "PENALTY"))
