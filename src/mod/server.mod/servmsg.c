@@ -853,16 +853,16 @@ static int nick_which(const char* nick, bool& is_jupe, bool& is_orig) {
 
 static void nick_available(bool is_jupe, bool is_orig) {
   if (jupenick[0] && is_jupe && !match_my_nick((jupenick))) {
-    if (!jnick_juped)
-      putlog(LOG_MISC, "*", "Switching back to jupenick '%s'", jupenick);
     tried_jupenick = 1;
     dprintf(DP_SERVER, "NICK %s\n", jupenick);
+    if (!jnick_juped)
+      putlog(LOG_MISC, "*", "Switching back to jupenick '%s'", jupenick);
     // Don't switch to the nick if already on jupenick
   } else if (is_orig && !match_my_nick(origbotname) && (!jupenick[0] || !match_my_nick(jupenick))) {
-    if (!nick_juped)
-      putlog(LOG_MISC, "*", "Switching back to nick '%s'", origbotname);
     altnick_char = rolls = 0;
     dprintf(DP_SERVER, "NICK %s\n", origbotname);
+    if (!nick_juped)
+      putlog(LOG_MISC, "*", "Switching back to nick '%s'", origbotname);
   }
 }
 
