@@ -531,7 +531,6 @@ static struct userrec* add_bot_userlist(char* bot) {
     u = get_user_by_handle(userlist, bot);
 
     struct bot_addr *bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
-    bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
     bi->uplink = (char *) my_calloc(1, 1);
     bi->address = (char *) my_calloc(1, 1);
     bi->telnet_port = 3333;
