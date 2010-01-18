@@ -118,12 +118,6 @@ bind_table_t *BT_ctcr = NULL, *BT_ctcp = NULL, *BT_msgc = NULL;
 
 #define MAXPENALTY 10
 
-/* Number of seconds to wait between transmitting queued lines to the server
- * lower this value at your own risk.  ircd is known to start flood control
- * at 512 bytes/2 seconds.
- */
-#define msgrate 2
-
 /* Maximum messages to store in each queue. */
 static int maxqmsg = 300;
 static struct msgq_head mq, hq, modeq, cacheq;

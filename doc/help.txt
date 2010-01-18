@@ -1595,6 +1595,7 @@ See also: reload, backup
  
 [L]  $bservers$b         Comma-separated list of servers the bot will use.
 [L]  $bservers6$b        Comma-separated list of servers the bot will use (FOR IPv6).
+[N]  $bmsgrate$b         How often (seconds) to dequeue msgs to the server. (1 or 2 is good)
 
 [L]  $brbl-servers$b     Servers to use for RBL checking in channels that are +rbl.
  

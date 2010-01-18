@@ -73,7 +73,7 @@ extern char		auth_key[], auth_prefix[2], motd[], alias[], rbl_servers[1024],
 extern bool		dccauth, auth_obscure, manop_warn, auth_chan, oidentd, ident_botnick, irc_autoaway, link_cleartext;
 extern int		cloak_script, fight_threshold, fork_interval, in_bots, set_noshare, dcc_autoaway,
 			kill_threshold, lag_threshold, op_bots, hijack, login, promisc, trace,
-                        ison_time;
+                        ison_time, msgrate;
 extern rate_t		op_requests, close_threshold;
 
 namespace bd {
