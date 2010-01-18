@@ -1,3 +1,5 @@
+* Add MONITOR support. This speeds up NICK grabbing. (fixes #320)
+
 1.2.17 - http://wraith.botpack.net/milestone/1.2.17
 * Binary / shell / startup changes
   * Binary error messages are no longer obscure numbers or fake segfaults. (Compile with OBSCURE_ERRORS to re-enable)
