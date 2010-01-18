@@ -402,6 +402,7 @@ void show_banner(int idx)
   dprintf(-dcc[idx].sock, STR(" -------------------------------------------------------- \n"));
   dprintf(-dcc[idx].sock, STR("|             - http://wraith.botpack.net/ -             |\n"));
   dprintf(-dcc[idx].sock, STR("|  Get Shell/Irc/Web hosting @ http://www.xzibition.com  |\n"));
+  dprintf(-dcc[idx].sock, STR("|     Help support wraith development by signing up.     |\n"));
   dprintf(-dcc[idx].sock, STR("|  Use coupon code 'wraith' for 30%% off lifetime         |\n"));
   dprintf(-dcc[idx].sock, STR(" -------------------------------------------------------- \n"));
   dprintf(idx, " \n");
