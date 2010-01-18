@@ -232,6 +232,12 @@ static memberlist *newmember(struct chanset_t *chan, char *nick)
   n->delay = 0L;
   n->hops = -1;
   if (!lx) {
+    // Free the pseudo-member created in init_channel()
+    if (!chan->channel.member->nick[0]) {
+      free(chan->channel.member);
+      chan->channel.member = NULL;
+    }
+
     n->next = chan->channel.member;
     chan->channel.member = n;
   } else {
