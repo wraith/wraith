@@ -1099,16 +1099,7 @@ static int gotnick(char *from, char *msg)
         putlog(LOG_MISC, "*", "Nickname changed to '%s'", msg);
       } else {
         putlog(LOG_SERV | LOG_MISC, "*", "Nickname changed to '%s'???", msg);
-    
-        if (jupenick[0] && !rfc_casecmp(nick, jupenick)) {
-          putlog(LOG_MISC, "*", "Switching back to jupenick '%s'", jupenick);
-          tried_jupenick = 1;
-          dprintf(DP_SERVER, "NICK %s\n", jupenick);
-        } else if (!rfc_casecmp(nick, origbotname)) {
-          putlog(LOG_MISC, "*", "Switching back to nick '%s'", origbotname);
-          dprintf(DP_SERVER, "NICK %s\n", origbotname);
-          altnick_char = rolls = 0;
-        }
+        nicks_available(nick);
       }
     } else
       putlog(LOG_SERV | LOG_MISC, "*", "Nickname changed to '%s'???", msg);
