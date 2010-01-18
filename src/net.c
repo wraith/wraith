@@ -1122,6 +1122,8 @@ int sockgets(char *s, int *len)
 	  return socklist[i].sock;
 	}
       } else {
+        if (!socklist[i].inbuf)
+          socklist[i].inbuf = new bd::String();
         /* i dont think any of this is *ever* called */
 	/* Handling buffered binary data (must have been SOCK_BUFFER before). */
 	if (socklist[i].inbuf->length() <= SGRAB) {
@@ -1171,7 +1173,10 @@ int sockgets(char *s, int *len)
   if ((socklist[ret].flags & SOCK_LISTEN) || (socklist[ret].flags & SOCK_PASS))
     return socklist[ret].sock;
   if (socklist[ret].flags & SOCK_BUFFER) {
-    *(socklist[ret].inbuf) += bd::String(xx, *len);
+    if (!socklist[ret].inbuf)
+      socklist[ret].inbuf = new bd::String(xx, *len);
+    else
+      *(socklist[ret].inbuf) += bd::String(xx, *len);
     return -4;			/* Ignore this one. */
   }
   /* Might be necessary to prepend stored-up data! */
@@ -1282,13 +1287,7 @@ void tputs(register int z, const char *s, size_t len)
 
       if (len && socklist[i].encstatus)
         s = link_write(i, s, &len);
-      
-      if (socklist[i].outbuf != NULL) {
-	/* Already queueing: just add it */
-        *(socklist[i].outbuf) += bd::String(s, len);
-	return;
-      }
-      /* Try. */
+
 #ifdef HAVE_ZLIB_H
 /*
       if (socklist[i].gz) { 		
@@ -1299,6 +1298,13 @@ void tputs(register int z, const char *s, size_t len)
       } else
 */
 #endif /* HAVE_ZLIB_H */
+
+      if (socklist[i].outbuf != NULL) {
+	/* Already queueing: just add it */
+        *(socklist[i].outbuf) += bd::String(s, len);
+	return;
+      }
+      /* Try. */
         x = write(z, s, len);
       if (x == -1)
 	x = 0;
