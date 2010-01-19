@@ -1969,10 +1969,9 @@ static int got352(char *from, char *msg)
     nick = newsplit(&msg);	/* Grab the nick */
     flags = newsplit(&msg);	/* Grab the flags */
     hops = newsplit(&msg);	/* grab server hops */
-    if (hops[0] == ':') {
+    if (hops[0] == ':')
       ++hops;			/* Skip the : */
-      real_hops = atoi(hops);
-    }
+    real_hops = atoi(hops);
     realname = newsplit(&msg);	/* realname/gecos */
     got352or4(chan, user, host, nick, flags, real_hops, realname, NULL);
   }
@@ -1999,10 +1998,9 @@ static int got354(char *from, char *msg)
 	nick = newsplit(&msg);	/* Grab the nick */
 	flags = newsplit(&msg);	/* Grab the flags */
         hops = newsplit(&msg);  /* server hops */
-        if (hops[0] == ':') {
+        if (hops[0] == ':')
           ++hops;			/* Skip the : */
-          real_hops = atoi(hops);
-        }
+        real_hops = atoi(hops);
         realname = newsplit(&msg); /* realname/gecos */
 	got352or4(chan, user, host, nick, flags, real_hops, realname, ip);
       }
