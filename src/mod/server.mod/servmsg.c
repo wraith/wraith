@@ -294,6 +294,8 @@ got005(char *from, char *msg)
       use_penalties = 1;
     else if (!strcasecmp(tmp, "WHOX"))
       use_354 = 1;
+    else if (!strcasecmp(tmp, "DEAF"))
+      deaf_char = p[0]
     else if (!strcasecmp(tmp, "EXCEPTS"))
       use_exempts = 1;
     else if (!strcasecmp(tmp, "INVEX"))
@@ -1129,6 +1131,7 @@ static void disconnect_server(int idx, int dolost)
   floodless = 0;
   botuserhost[0] = 0;
   botuserip[0] = 0; 
+  deaf_char = 0;
   if (dolost) {
     Auth::DeleteAll();
     trying_server = 0;

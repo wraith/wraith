@@ -95,6 +95,7 @@ static time_t last_time;
 static bool use_penalties;
 static int use_fastdeq;
 size_t nick_len = 9;			/* Maximal nick length allowed on the network. */
+char deaf_char = 0;
 
 static bool double_mode = 0;		/* allow a msgs to be twice in a queue? */
 static bool double_server = 0;
