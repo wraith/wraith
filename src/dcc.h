@@ -52,7 +52,7 @@ struct dcc_t {
   unsigned long status;         /* A LOT of dcc types have status
                                    thingos, this makes it more avaliabe */
   int sock;
-  int ssl;                      /* use ssl on this dcc? */
+  int encrypt;			/* 1 = should encrypt, 2 = encrypted */
   int simul;                    /* this will hold the idx on the remote bot to return result. */
   bool irc;			/* forward the output back to irc? */
   bool hub;			// is this bot a hub?

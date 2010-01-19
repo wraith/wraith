@@ -50,5 +50,6 @@ extern void link_send(int, const char *, ...) __attribute__((format(printf, 2, 3
 extern void link_done(int);
 extern void link_parse(int, char *);
 extern void link_get_method(int);
+extern void link_challenge_to(int idx, char *buf);
 
 #endif /* !_ENCLINK_H */
