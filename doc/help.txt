@@ -1586,7 +1586,8 @@ See also: reload, backup
                           (Resets PID/CPU)
 [R]  $bflood-msg$b       Msgs:Secs until a host is ignored. (0:0 to disable) 
 [R]  $bflood-ctcp$b      Ctcps:Secs until a host is ignored. (0:0 to disable) 
-[R]  $bflood-g$b         Msgs:Secs until triggering to set +g for 60 seconds (0:0 to disable)
+[R]  $bflood-callerid$b  Msgs:Secs until triggering to set CALLERID for
+                          60 seconds (0:0 to disable)
  
 [D]  $blogin$b           How to handle someone logging in to the shell.
 [D]  $btrace$b           How to handle someone tracing/debugging the bot.

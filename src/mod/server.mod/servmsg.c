@@ -389,15 +389,15 @@ static char lastmsghost[FLOOD_GLOBAL_MAX][128];
 static time_t lastmsgtime[FLOOD_GLOBAL_MAX];
 static int dronemsgs;
 static time_t dronemsgtime;
-static bool set_pls_g;
-static interval_t flood_g_time = 60;
+static bool in_callerid = 0;
+static interval_t flood_callerid_time = 60;
 
-rate_t flood_g = { 6, 2 };
+rate_t flood_callerid = { 6, 2 };
 
-void unset_g(int data)
+void unset_callerid(int data)
 {
-  dprintf(DP_MODE, "MODE %s :-g\n", botname);
-  set_pls_g = 0;
+  dprintf(DP_MODE, "MODE %s :-%c\n", botname, callerid_char);
+  in_callerid = 0;
 }
 
 /* Do on NICK, PRIVMSG, NOTICE and JOIN.
@@ -436,9 +436,7 @@ static bool detect_flood(char *floodnick, char *floodhost, char *from, int which
   if (!strcasecmp(floodhost, botuserhost))
     return 0;			/* My user@host (?) */
 
-  //FIXME: hack for +g 
-
-  if (dronemsgtime < now - flood_g.time) {	//expired, reset counter
+  if (dronemsgtime < now - flood_callerid.time) {	//expired, reset counter
     dronemsgs = 0;
 //    dronemsgtime = now;
   }
@@ -446,17 +444,17 @@ static bool detect_flood(char *floodnick, char *floodhost, char *from, int which
   dronemsgs++;
   dronemsgtime = now;
 
-  if (!set_pls_g && dronemsgs >= flood_g.count) {  //flood from dronenet, let's attempt to set +g
+  if (!in_callerid && dronemsgs >= flood_callerid.count && callerid_char) {  //flood from dronenet, let's attempt to set +g
     egg_timeval_t howlong;
 
-    set_pls_g = 1;
+    in_callerid = 1;
     dronemsgs = 0;
     dronemsgtime = 0;
-    dprintf(DP_DUMP, "MODE %s :+g\n", botname);
-    howlong.sec = flood_g_time;
+    dprintf(DP_DUMP, "MODE %s :+%c\n", botname, callerid_char);
+    howlong.sec = flood_callerid_time;
     howlong.usec = 0;
-    timer_create(&howlong, "Unset umode +g", (Function) unset_g);
-    putlog(LOG_MISC, "*", "Drone flood detected! Setting +g for %d seconds.", flood_g_time);
+    timer_create(&howlong, "Unset CALLERID", (Function) unset_callerid);
+    putlog(LOG_MISC, "*", "Drone flood detected! Setting CALLERID for %d seconds.", flood_callerid_time);
     return 1;	//ignore the current msg
   }
 
@@ -1141,6 +1139,7 @@ static void disconnect_server(int idx, int dolost)
   use_354 = 0;
   deaf_char = 0;
   callerid_char = 0;
+  in_callerid = 0;
   use_exempts = 0;
   use_invites = 0;
   if (dolost) {
@@ -1592,7 +1591,7 @@ static int got718(char *from, char *msg)
   uhost = newsplit(&msg);
   fixcolon(msg);
 
-  putlog(LOG_WALL, "*", "(+g) !%s!%s! %s", nick, uhost, msg);
+  putlog(LOG_WALL, "*", "(CALLERID) !%s!%s! %s", nick, uhost, msg);
 
   return 0;
 }

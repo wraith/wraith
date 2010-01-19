@@ -1,5 +1,6 @@
 * Add set 'deaf' to run bot in DEAF mode on supporting IRCDs. This prevents channel conversations coming to the bot. On by default.
 * Add set 'callerid' to run bot in CALLERID mode (+g). +c bots will automatically accept messages from known users. (fixes #45)
+* Rename set 'flood-g' to 'flood-callerid', which only takes affect if the server supports CALLERID.
 
 1.2.17 - http://wraith.botpack.net/milestone/1.2.17
 * Binary / shell / startup changes

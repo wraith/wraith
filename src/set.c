@@ -84,7 +84,7 @@ static variable_t vars[] = {
  VAR("deaf",		&use_deaf,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "1"),
  VAR("fight-threshold",	&fight_threshold,	VAR_INT|VAR_NOLOC,				0, 0, "0"),
  VAR("flood-ctcp",	&flood_ctcp,		VAR_RATE|VAR_NOLHUB,				0, 0, "3:60"),
- VAR("flood-g",		&flood_g,		VAR_RATE|VAR_NOLHUB,				0, 0, "6:2"),
+ VAR("flood-callerid",	&flood_callerid,	VAR_RATE|VAR_NOLHUB,				0, 0, "6:2"),
  VAR("flood-msg",	&flood_msg,		VAR_RATE|VAR_NOLHUB,				0, 0, "5:60"),
  VAR("fork-interval",	&fork_interval,		VAR_INT,					10, 0, "0"),
  VAR("hijack",		&hijack,		VAR_INT|VAR_DETECTED|VAR_PERM,			0, 4, "die"),
