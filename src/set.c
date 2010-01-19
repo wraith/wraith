@@ -263,6 +263,7 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
 #endif
     *(int *) (var->mem) = number;
   } else if (var->flags & VAR_BOOL) {
+    bool olddata = *(bool*)(var->mem);
     bool num = 0;
     if (data[0] == '0')
       num = 0;
@@ -273,6 +274,18 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
 
     if (!strcmp(var->name, "ident-botnick"))
       strlcpy(botuser, conf.username && !num ? conf.username : origbotname, 21);
+    else if (!strcmp(var->name, "deaf")) {
+      if (server_online && deaf_char) {
+        char which = 0;
+        if (num == 1 && olddata == 0)
+          which = '+';
+        else if (num == 0 && olddata == 1)
+          which = '-';
+        if (which)
+          dprintf(DP_SERVER, "MODE %s %c%c\n", botname, which, deaf_char);
+
+      }
+    }
   } else if (var->flags & (VAR_STRING|VAR_WORD)) {
     char *olddata = ((char*) var->mem) ? strdup((char*) var->mem) : NULL;
 

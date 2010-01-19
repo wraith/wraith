@@ -294,9 +294,11 @@ got005(char *from, char *msg)
       use_penalties = 1;
     else if (!strcasecmp(tmp, "WHOX"))
       use_354 = 1;
-    else if (!strcasecmp(tmp, "DEAF"))
-      deaf_char = p[0]
-    else if (!strcasecmp(tmp, "EXCEPTS"))
+    else if (!strcasecmp(tmp, "DEAF")) {
+      deaf_char = p[0];
+      if (use_deaf)
+        dprintf(DP_SERVER, "MODE %s +%c\n", botname, deaf_char);
+    } else if (!strcasecmp(tmp, "EXCEPTS"))
       use_exempts = 1;
     else if (!strcasecmp(tmp, "INVEX"))
       use_invites = 1;
