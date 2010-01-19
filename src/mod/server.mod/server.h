@@ -46,11 +46,11 @@ enum {
 
 extern bind_table_t	*BT_ctcp, *BT_ctcr, *BT_msgc;
 extern size_t		nick_len;
-extern bool		trigger_on_ignore, floodless, tried_jupenick, keepnick;
+extern bool		trigger_on_ignore, floodless, keepnick;
 extern int 		servidx, ctcp_mode, answer_ctcp, serv, curserv, default_alines;
 extern unsigned int     rolls;
 extern port_t		default_port, newserverport, curservport;
-extern time_t		server_online;
+extern time_t		server_online, tried_jupenick, tried_nick;
 extern interval_t	cycle_time;
 extern char		cursrvname[], botrealname[121], botuserhost[], ctcp_reply[1024],
 			newserver[], newserverpass[], curnetwork[], botuserip[], altnick_char;

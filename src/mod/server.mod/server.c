@@ -74,7 +74,8 @@ bool keepnick = 1;		/* keep trying to regain my intended
 				   nickname? */
 static bool nick_juped = 0;	/* True if origbotname is juped(RPL437) (dw) */
 static bool jnick_juped = 0;    /* True if jupenick is juped */
-bool tried_jupenick = 0;
+time_t tried_jupenick = 0;
+time_t tried_nick = 0;
 bool use_monitor = 0;
 static bool waiting_for_awake;	/* set when i unidle myself, cleared when I get the response */
 time_t server_online;	/* server connection time */

@@ -297,7 +297,7 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
           if (data && (!olddata || (olddata && strcmp(olddata, jupenick)))) {
             // If not on the new nick, jump to it
             if (!match_my_nick(jupenick)) {
-              tried_jupenick = 1;
+              tried_jupenick = now;
               dprintf(DP_SERVER, "NICK %s\n", jupenick);
               should_reset_monitor = 1;
             }
@@ -306,6 +306,7 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
             // Unset jupenick, try for 'nick' now if we were on jupenick
             if (match_my_nick(olddata)) {
               altnick_char = rolls = 0;
+              tried_nick = now;
               dprintf(DP_SERVER, "NICK %s\n", origbotname);
               should_reset_monitor = 1;
             }

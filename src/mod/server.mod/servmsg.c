@@ -853,16 +853,22 @@ static int nick_which(const char* nick, bool& is_jupe, bool& is_orig) {
 
 static void nick_available(bool is_jupe, bool is_orig) {
   if (jupenick[0] && is_jupe && !match_my_nick((jupenick))) {
-    tried_jupenick = 1;
-    dprintf(DP_SERVER, "NICK %s\n", jupenick);
-    if (!jnick_juped)
-      putlog(LOG_MISC, "*", "Switching back to jupenick '%s'", jupenick);
+    /* Ensure we aren't processing a QUIT/NICK and a MONITOR, or just some screw up */
+    if (!tried_jupenick || ((now - tried_jupenick) > 1)) {
+      tried_jupenick = now;
+      dprintf(DP_DUMP, "NICK %s\n", jupenick);
+      if (!jnick_juped)
+        putlog(LOG_MISC, "*", "Switching back to jupenick '%s'", jupenick);
+    }
     // Don't switch to the nick if already on jupenick
   } else if (is_orig && !match_my_nick(origbotname) && (!jupenick[0] || !match_my_nick(jupenick))) {
-    altnick_char = rolls = 0;
-    dprintf(DP_SERVER, "NICK %s\n", origbotname);
-    if (!nick_juped)
-      putlog(LOG_MISC, "*", "Switching back to nick '%s'", origbotname);
+    if (!tried_nick || ((now - tried_nick) > 1)) {
+      altnick_char = rolls = 0;
+      tried_nick = now;
+      dprintf(DP_DUMP, "NICK %s\n", origbotname);
+      if (!nick_juped)
+        putlog(LOG_MISC, "*", "Switching back to nick '%s'", origbotname);
+    }
   }
 }
 
@@ -967,7 +973,9 @@ static int got433(char *from, char *msg)
     else if (!rfc_casecmp(tmp, origbotname))
       nick_juped = 0;
 
-    sdprintf("433: botname: %s tmp: %s rolls: %d altnick_char: %c tried_jupenick: %d", botname, tmp, rolls, altnick_char, tried_jupenick);
+    tried_nick = 0;
+
+    sdprintf("433: botname: %s tmp: %s rolls: %d altnick_char: %c tried_jupenick: %lu", botname, tmp, rolls, altnick_char, tried_jupenick);
     // Tried jupenick, but already on origbotname (or a rolled nick), stay on it.
     if (tried_jupenick && (match_my_nick(origbotname) || rolls || altnick_char != 0)) {
       putlog(LOG_MISC, "*", "%sNICK IN USE: '%s' (keeping '%s').", tried_jupenick ? "JUPE" : "", tmp, botname);
@@ -1097,6 +1105,7 @@ static int gotnick(char *from, char *msg)
     strlcpy(botname, msg, NICKLEN);
 
     tried_jupenick = 0;
+    tried_nick = 0;
 
     if (jupenick[0] && !rfc_casecmp(msg, jupenick)) {
       altnick_char = rolls = 0;
@@ -1708,6 +1717,7 @@ static void connect_server(void)
     nick_juped = 0;
     jnick_juped = 0;
     tried_jupenick = 0;
+    tried_nick = 0;
     rolls = 0;
     altnick_char = 0;
     use_monitor = 0;
