@@ -1591,7 +1591,29 @@ static int got718(char *from, char *msg)
   uhost = newsplit(&msg);
   fixcolon(msg);
 
-  putlog(LOG_WALL, "*", "(CALLERID) !%s!%s! %s", nick, uhost, msg);
+  if (ischanhub()) {
+    char s[UHOSTLEN + 2] = "";
+    struct userrec *u = NULL;
+
+    simple_snprintf(s, sizeof(s), "%s!%s", nick, uhost);
+    u = get_user_by_host(s);
+    if (u) {
+      struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
+
+      get_user_flagrec(u, &fr, NULL);
+      if (glob_op(fr) || chan_op(fr) || glob_voice(fr) || chan_voice(fr)) {
+        putlog(LOG_WALL, "*", "(CALLERID) !%s! (%s!%s) %s (Accepting user)", u->handle, nick, uhost, msg);
+        dprintf(DP_HELP, "ACCEPT %s\n", nick);
+        dprintf(DP_HELP, "PRIVMSG %s :You have been accepted. Please send your message again.\n", nick);
+      } else {
+        putlog(LOG_WALL, "*", "(CALLERID) !%s! (%s!%s) %s (User is not +o or +v)", u->handle, nick, uhost, msg);
+      }
+    } else {
+      putlog(LOG_WALL, "*", "(CALLERID) !*! (%s!%s) %s (User unknown)", nick, uhost, msg);
+    }
+  } else {
+    putlog(LOG_WALL, "*", "(CALLERID) (%s!%s) %s (I'm not a chathub (+c))", nick, uhost, msg);
+  }
 
   return 0;
 }
