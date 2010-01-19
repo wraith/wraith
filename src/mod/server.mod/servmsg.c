@@ -907,12 +907,10 @@ static void got731(char* from, char* msg)
 */
 static void got303(char *from, char *msg)
 {
-  char *tmp = NULL;
-
-  tmp = newsplit(&msg);
+  char *tmp = newsplit(&msg);
   fixcolon(msg);
   if (tmp[0] && match_my_nick(tmp))
-    nicks_available(tmp, ' ', 0);
+    nicks_available(msg, ' ', 0);
 }
 
 /* 432 : Bad nickname (RESV)
