@@ -1160,6 +1160,7 @@ static void disconnect_server(int idx, int dolost)
   serv = -1;
   servidx = -1;
   server_online = 0;
+  use_monitor = 0;
   cookies_disabled = false;
   floodless = 0;
   botuserhost[0] = 0;
