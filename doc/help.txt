@@ -1604,6 +1604,9 @@ See also: reload, backup
                            the IRCD from sending any channel conversations to the bot.
                            This will decrease bandwidth/CPU used, as well as prevent
                            sniffing of channels.
+[B]  $bcallerid$b        Run bot in CALLERID mode. This is commonly known as +g on most
+                           servers. +c bots will automatically accept messages from
+                           known users. Note that this will break msg-ident.
  
 [S]  $baltchars$b        Define string of characters to cycle when generating alternative
                           nicks when nick is taken. Ie: _-`[].

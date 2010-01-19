@@ -41,6 +41,7 @@ bool irc_autoaway;
 bool link_cleartext;
 bool dccauth = 0;
 bool use_deaf = 0;
+bool use_callerid = 0;
 int cloak_script = 0;
 rate_t close_threshold;
 int fight_threshold;
@@ -75,6 +76,7 @@ static variable_t vars[] = {
  VAR("auth-key",	auth_key,		VAR_STRING|VAR_PERM,				0, 0, NULL),
  VAR("auth-obscure",	&auth_obscure,		VAR_INT|VAR_BOOL,				0, 1, "0"),
  VAR("auth-prefix",	auth_prefix,		VAR_WORD|VAR_NOLHUB|VAR_PERM,			0, 0, "+"),
+ VAR("callerid",	&use_callerid,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "1"),
  VAR("cloak-script",	&cloak_script,		VAR_INT|VAR_CLOAK|VAR_NOLHUB,			0, 10, "0"),
  VAR("close-threshold",	&close_threshold,	VAR_RATE|VAR_NOLOC,				0, 0, "0:0"),
  VAR("dcc-autoaway",	&dcc_autoaway,		VAR_INT|VAR_NOLOC,				0, (5*60*60), "1800"),
@@ -274,16 +276,17 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
 
     if (!strcmp(var->name, "ident-botnick"))
       strlcpy(botuser, conf.username && !num ? conf.username : origbotname, 21);
-    else if (!strcmp(var->name, "deaf")) {
-      if (server_online && deaf_char) {
+    else if ((!strcmp(var->name, "deaf") && deaf_char) || (!strcmp(var->name, "callerid") && callerid_char)) {
+      if (server_online) {
         char which = 0;
         if (num == 1 && olddata == 0)
           which = '+';
         else if (num == 0 && olddata == 1)
           which = '-';
-        if (which)
-          dprintf(DP_SERVER, "MODE %s %c%c\n", botname, which, deaf_char);
-
+        if (which) {
+          char mode_char = strcmp(var->name, "deaf") == 0 ? deaf_char : callerid_char;
+          dprintf(DP_SERVER, "MODE %s %c%c\n", botname, which, mode_char);
+        }
       }
     }
   } else if (var->flags & (VAR_STRING|VAR_WORD)) {

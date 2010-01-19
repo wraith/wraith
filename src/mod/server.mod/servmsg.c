@@ -298,6 +298,10 @@ got005(char *from, char *msg)
       deaf_char = p[0];
       if (use_deaf)
         dprintf(DP_SERVER, "MODE %s +%c\n", botname, deaf_char);
+    } else if (!strcasecmp(tmp, "CALLERID")) {
+      callerid_char = p[0];
+      if (use_callerid)
+        dprintf(DP_SERVER, "MODE %s +%c\n", botname, callerid_char);
     } else if (!strcasecmp(tmp, "EXCEPTS"))
       use_exempts = 1;
     else if (!strcasecmp(tmp, "INVEX"))
@@ -1136,6 +1140,7 @@ static void disconnect_server(int idx, int dolost)
   use_penalties = 0;
   use_354 = 0;
   deaf_char = 0;
+  callerid_char = 0;
   use_exempts = 0;
   use_invites = 0;
   if (dolost) {
