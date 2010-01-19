@@ -1600,6 +1600,10 @@ See also: reload, backup
  
 [S]  $brealname$b        The bot's "real name" when connecting. (supports '$n' expansion)
 [S]  $busermode$b        The bot's usermode on IRC. (Set on connect/rehash)
+[B]  $bdeaf$b            Runs bot in DEAF mode if the IRCD supports it. This will stop
+                           the IRCD from sending any channel conversations to the bot.
+                           This will decrease bandwidth/CPU used, as well as prevent
+                           sniffing of channels.
  
 [S]  $baltchars$b        Define string of characters to cycle when generating alternative
                           nicks when nick is taken. Ie: _-`[].

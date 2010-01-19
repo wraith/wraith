@@ -40,6 +40,7 @@ int dcc_autoaway;
 bool irc_autoaway;
 bool link_cleartext;
 bool dccauth = 0;
+bool use_deaf = 0;
 int cloak_script = 0;
 rate_t close_threshold;
 int fight_threshold;
@@ -78,6 +79,7 @@ static variable_t vars[] = {
  VAR("close-threshold",	&close_threshold,	VAR_RATE|VAR_NOLOC,				0, 0, "0:0"),
  VAR("dcc-autoaway",	&dcc_autoaway,		VAR_INT|VAR_NOLOC,				0, (5*60*60), "1800"),
  VAR("dccauth",		&dccauth,		VAR_INT|VAR_BOOL,				0, 1, "0"),
+ VAR("deaf",		&use_deaf,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "1"),
  VAR("fight-threshold",	&fight_threshold,	VAR_INT|VAR_NOLOC,				0, 0, "0"),
  VAR("flood-ctcp",	&flood_ctcp,		VAR_RATE|VAR_NOLHUB,				0, 0, "3:60"),
  VAR("flood-g",		&flood_g,		VAR_RATE|VAR_NOLHUB,				0, 0, "6:2"),
