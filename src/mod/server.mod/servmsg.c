@@ -1131,7 +1131,11 @@ static void disconnect_server(int idx, int dolost)
   floodless = 0;
   botuserhost[0] = 0;
   botuserip[0] = 0; 
+  use_penalties = 0;
+  use_354 = 0;
   deaf_char = 0;
+  use_exempts = 0;
+  use_invites = 0;
   if (dolost) {
     Auth::DeleteAll();
     trying_server = 0;

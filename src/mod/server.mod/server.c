@@ -92,7 +92,7 @@ static time_t lastpingtime;	/* IRCNet LAGmeter support -- drummer */
 static char stackablecmds[511] = "";
 static char stackable2cmds[511] = "";
 static time_t last_time;
-static bool use_penalties;
+static bool use_penalties = 0;
 static int use_fastdeq;
 size_t nick_len = 9;			/* Maximal nick length allowed on the network. */
 char deaf_char = 0;
