@@ -399,7 +399,7 @@ void priority_do(struct chanset_t * chan, bool opsonly, int action)
               ++actions;
               ++sent;
               add_mode(chan, '-', 'o', m->nick);
-              if (actions >= ct || (n == 1 && sent > 20)) {
+              if (!floodless && (actions >= ct || (n == 1 && sent > 20))) {
                 flush_mode(chan, QUICK);
                 return;
               }
@@ -410,7 +410,7 @@ void priority_do(struct chanset_t * chan, bool opsonly, int action)
                 do_closed_kick(chan, m);
               dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, response(RES_CLOSED));
               m->flags |= SENTKICK;
-              if (actions >= ct || (n == 1 && sent > 5))
+              if (!floodless && (actions >= ct || (n == 1 && sent > 5)))
                 return;
             }
           }
