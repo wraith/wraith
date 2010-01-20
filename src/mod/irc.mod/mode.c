@@ -1092,7 +1092,7 @@ gotmode(char *from, char *msg)
               if (role <= 2)
                 tputs(serv, tmp, len);
               else
-                dprintf(DP_SERVER, "%s", tmp);
+                dprintf(DP_MODE, "%s", tmp);
             } else {
               if (u) {
                 simple_snprintf(tmp, sizeof(tmp), "Mass deop on %s by %s", chan->dname, m->nick);
@@ -1111,7 +1111,7 @@ gotmode(char *from, char *msg)
                   if (role <= 2)
                     tputs(serv, tmp, len);
                   else
-                    dprintf(DP_SERVER, "%s", tmp);
+                    dprintf(DP_MODE, "%s", tmp);
                 } else { 
                   if (u) {
                     simple_snprintf(tmp, sizeof(tmp), "Mass op on %s by %s", chan->dname, m->nick);
