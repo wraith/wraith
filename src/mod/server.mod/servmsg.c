@@ -295,11 +295,11 @@ got005(char *from, char *msg)
     else if (!strcasecmp(tmp, "WHOX"))
       use_354 = 1;
     else if (!strcasecmp(tmp, "DEAF")) {
-      deaf_char = p[0];
+      deaf_char = p ? p[0] : 'D';
       if (use_deaf)
         dprintf(DP_SERVER, "MODE %s +%c\n", botname, deaf_char);
     } else if (!strcasecmp(tmp, "CALLERID")) {
-      callerid_char = p[0];
+      callerid_char = p ? p[0] : 'g';
       if (use_callerid)
         dprintf(DP_SERVER, "MODE %s +%c\n", botname, callerid_char);
     } else if (!strcasecmp(tmp, "EXCEPTS"))
