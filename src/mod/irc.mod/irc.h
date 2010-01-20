@@ -70,6 +70,7 @@ static bool me_voice(struct chanset_t *);
 static bool any_ops(struct chanset_t *);
 static char *getchanmode(struct chanset_t *);
 static void flush_mode(struct chanset_t *, int);
+static void do_protect(struct chanset_t* chan, const char* reason);
 
 /* reset(bans|exempts|invites) are now just macros that call resetmasks
  * in order to reduce the code duplication. <cybah>

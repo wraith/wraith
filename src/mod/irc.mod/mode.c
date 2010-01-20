@@ -1085,20 +1085,24 @@ gotmode(char *from, char *msg)
         char tmp[1024] = "";
 
         if (role && u && !u->bot) {
-          if (m && !chan_sentkick(m) && deops >= 3 && chan->mdop) {
-            if (role < 5) {
-              m->flags |= SENTKICK;
-              const size_t len = simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MASSDEOP));
-              if (role <= 2)
-                tputs(serv, tmp, len);
-              else
-                dprintf(DP_SERVER, "%s", tmp);
-            } else {
-              if (u) {
-                simple_snprintf(tmp, sizeof(tmp), "Mass deop on %s by %s", chan->dname, m->nick);
-                deflag_user(u, DEFLAG_MDOP, tmp, chan);
+          if (m && deops >= 3) {
+            if (chan->mdop) {
+              if (role < 5 && !chan_sentkick(m)) {
+                m->flags |= SENTKICK;
+                const size_t len = simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MASSDEOP));
+                if (role <= 2)
+                  tputs(serv, tmp, len);
+                else
+                  dprintf(DP_SERVER, "%s", tmp);
+              } else {
+                if (u) {
+                  simple_snprintf(tmp, sizeof(tmp), "Mass deop on %s by %s", chan->dname, m->nick);
+                  deflag_user(u, DEFLAG_MDOP, tmp, chan);
+                }
               }
             }
+            if (channel_protect(chan))
+              do_protect(chan, "Mass Deop");
           }
 
           /* check for mop */
@@ -1119,8 +1123,12 @@ gotmode(char *from, char *msg)
                   }
                 }
               }
-              enforce_bitch(chan);        /* deop quick! */
+              // Don't mass deop if protect is set, it'll happen anyway below
+              if (!channel_protect(chan))
+                enforce_bitch(chan);        /* deop quick! */
             }
+            if (channel_protect(chan))
+              do_protect(chan, "Mass OP");
           }
         }
         if (ops) {

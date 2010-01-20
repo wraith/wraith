@@ -704,6 +704,8 @@ static bool detect_chan_flood(char *floodnick, char *floodhost, char *from,
         dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, floodnick, kickprefix, response(RES_KICKFLOOD));
 	m->flags |= SENTKICK;
       }
+      if (channel_protect(chan))
+        do_protect(chan, "Mass Kick");
     return 1;
     case FLOOD_DEOP:
       if (me_op(chan) && !chan_sentkick(m)) {
@@ -718,6 +720,8 @@ static bool detect_chan_flood(char *floodnick, char *floodhost, char *from,
         simple_snprintf(s, sizeof(s), "Mass deop on %s by %s", chan->dname, from);
         deflag_user(u, DEFLAG_MDOP, s, chan);
       }
+      if (channel_protect(chan))
+        do_protect(chan, "Mass Deop");
       return 1;
     }
   }
