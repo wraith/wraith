@@ -1439,8 +1439,13 @@ check_servers(struct chanset_t *chan)
 static void do_protect(struct chanset_t* chan, const char* reason) {
   // Don't bother with these if already botbitch, already processed it, or it's a hacked bot and +botbitch won't help.
   if (!channel_botbitch(chan)) {
-    putlog(LOG_MISC, "*", "%s detected in %s: Setting +botbitch/+backup to protect the channel.", reason, chan->dname);
-    do_chanset(NULL, chan, "+botbitch +bitch +backup", DO_LOCAL | DO_NET);
+    if (chan->protect_backup) {
+      putlog(LOG_MISC, "*", "%s detected in %s: Setting +botbitch/+backup to protect the channel.", reason, chan->dname);
+      do_chanset(NULL, chan, "+botbitch +bitch +backup", DO_LOCAL | DO_NET);
+    } else {
+      putlog(LOG_MISC, "*", "%s detected in %s: Setting +botbitch to protect the channel.", reason, chan->dname);
+      do_chanset(NULL, chan, "+botbitch +bitch", DO_LOCAL | DO_NET);
+    }
     enforce_bitch(chan);
   }
 }
