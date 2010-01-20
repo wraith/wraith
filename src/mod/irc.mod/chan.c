@@ -357,11 +357,8 @@ void priority_do(struct chanset_t * chan, bool opsonly, int action)
         if (m->user)
           get_user_flagrec(m->user, &fr, chan->dname, chan);
 
-        if (((glob_deop(fr) && !chan_op(fr)) || chan_deop(fr)) || /* +d */
-           ((!channel_privchan(chan) && !chan_op(fr) && !glob_op(fr)) || /* simply no +o flag. */
-           (channel_privchan(chan) && !glob_bot(fr) && !glob_owner(fr) && !chan_op(fr)))) { /* private? */
+        if (!chk_op(fr, chan))
           ++targets;
-        }
     }
   }
 
@@ -396,10 +393,7 @@ void priority_do(struct chanset_t * chan, bool opsonly, int action)
         if (m->user)
           get_user_flagrec(m->user, &fr, chan->dname, chan);
 
-        if (((glob_deop(fr) && !chan_op(fr)) || chan_deop(fr)) ||
-            ((!channel_privchan(chan) && !chan_op(fr) && !glob_op(fr)) ||
-             (channel_privchan(chan) && !glob_bot(fr) && !glob_owner(fr) && !chan_op(fr)))) {
-
+        if (!chk_op(fr, chan)) {
           if (tpos >= ft) {
             if ((action == PRIO_DEOP) && !chan_sentdeop(m)) {
               ++actions;
