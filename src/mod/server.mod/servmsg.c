@@ -975,7 +975,7 @@ static int got433(char *from, char *msg)
 
     tried_nick = 0;
 
-    sdprintf("433: botname: %s tmp: %s rolls: %d altnick_char: %c tried_jupenick: %lu", botname, tmp, rolls, altnick_char, tried_jupenick);
+    sdprintf("433: botname: %s tmp: %s rolls: %d altnick_char: %c tried_jupenick: %li", botname, tmp, rolls, altnick_char, (long)tried_jupenick);
     // Tried jupenick, but already on origbotname (or a rolled nick), stay on it.
     if (tried_jupenick && (match_my_nick(origbotname) || rolls || altnick_char != 0)) {
       putlog(LOG_MISC, "*", "%sNICK IN USE: '%s' (keeping '%s').", tried_jupenick ? "JUPE" : "", tmp, botname);
