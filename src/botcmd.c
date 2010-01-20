@@ -542,7 +542,8 @@ static void bot_log(int idx, char *par)
     if (conf.bot->hub || conf.bot->localhub)
       botnet_send_log(idx, from, type, par);
 
-    putlog(type, "@", "(%s) %s", from, par);
+    if (conf.bot->hub)
+      putlog(type, "@", "(%s) %s", from, par);
 
   } else {
     putlog(LOG_ERRORS, "*", "Malformed HL line from %s: %s", from, par);
