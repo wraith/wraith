@@ -151,12 +151,8 @@ flush_cookies(struct chanset_t *chan, int pri)
   if (post[0]) {
     memberlist* me = ismember(chan, botname);
 
-    if (me && !me->user && !me->tried_getuser) {
-      char uhost[UHOSTLEN] = "";
-      simple_snprintf(uhost, sizeof(uhost), "%s!%s", me->nick, me->userhost);
-      me->user = get_user_by_host(uhost);
-      me->tried_getuser = 1;
-    }
+    if (me)
+      member_getuser(me);
 
     /* Am I even on the channel? */
     if (!me || !me->user)
@@ -939,17 +935,7 @@ static memberlist *assert_ismember(struct chanset_t *chan, const char *nick)
   memberlist *m = ismember(chan, nick);
 
   if (m) {
-    if (!m->user) {
-      char s[UHOSTLEN] = "";
-
-      simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
-      m->user = get_user_by_host(s);
-      if (!m->user && m->userip[0]) {
-        simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
-        m->user = get_user_by_host(s);
-      }
-      m->tried_getuser = 1;
-    }
+    member_getuser(m);
   } else {
     if (channel_pending(chan))
       return NULL;
