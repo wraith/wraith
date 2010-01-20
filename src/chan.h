@@ -179,6 +179,7 @@ struct chanset_t {
   int ban_type;
   interval_t auto_delay;
   int knock_flags;
+  int protect_backup;
 /* Chanint template 
  *int temp;
  */

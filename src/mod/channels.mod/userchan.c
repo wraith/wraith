@@ -734,7 +734,7 @@ flood-exempt %d flood-lock-time %d knock %d \
 %cmeankicks %cenforcebans %cdynamicbans %cuserbans %cbitch \
 %cprivate %ccycle %cinactive %cdynamicexempts %cuserexempts \
 %cdynamicinvites %cuserinvites %cnodesynch %cclosed %cvoice \
-%cfastop %cautoop %cbotbitch %cbackup %cnomassjoin %crbl %cprotect %c%s",
+%cfastop %cautoop %cbotbitch %cbackup %cnomassjoin %crbl %cprotect protect-backup %d %c%s",
 	w,
 /* Chanchar template
  *      temp,
@@ -790,6 +790,7 @@ flood-exempt %d flood-lock-time %d knock %d \
         PLSMNS(channel_nomassjoin(chan)),
         PLSMNS(channel_rbl(chan)),
         PLSMNS(channel_protect(chan)),
+        chan->protect_backup,
 	HAVE_TAKE ? PLSMNS(channel_take(chan)) : ' ',
         HAVE_TAKE ? "take " : " "
 /* Chanflag template
