@@ -1186,7 +1186,7 @@ void tandem_relay(int idx, char *nick, register int i)
   dcc[i].user = u;
   strlcpy(dcc[i].host, bi->address, UHOSTLEN);
   if (conf.bot->hub) 
-    dprintf(idx, "%s %s @ %s:%d ...\n", "Connecting to", nick, bi->address, bi->relay_port);
+    dprintf(idx, "%s %s @ %s:%d ...\n", "Establishing encrypted connection to", nick, bi->address, bi->relay_port);
   dprintf(idx, "(Type *BYE* on a line by itself to abort.)\n");
   dcc[idx].type = &DCC_PRE_RELAY;
 
