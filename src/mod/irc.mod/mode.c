@@ -656,7 +656,7 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
       do_op(mv->nick, chan, 0, 0);
   }
 
-  if (isserver)		/* !m */
+  if (isserver[0])		/* !m */
     putlog(LOG_MODES, chan->dname, "TS resync (%s): %s deopped by %s", chan->dname, mv->nick, isserver);
   /* Check for mass deop */
   else if (m)
