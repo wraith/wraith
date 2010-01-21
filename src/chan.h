@@ -23,9 +23,9 @@ typedef struct memstruct {
   char userip[UHOSTLEN];
 } memberlist;
 
-#define FLOOD_EXEMPT_OP	1
-#define FLOOD_EXEMPT_VOICE 2
-#define FLOOD_EXEMPT_USER 3
+#define CHAN_FLAG_OP	1
+#define CHAN_FLAG_VOICE 2
+#define CHAN_FLAG_USER 3
 
 #define CHANMETA "#&!+"
 #define NICKVALID "[{}]^`|\\_-"

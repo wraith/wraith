@@ -484,11 +484,11 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
       }
       if (!str_isdigit(item[i])) {
         if (!strcasecmp("Op",  item[i]))
-          chan->knock_flags = FLOOD_EXEMPT_OP;
+          chan->knock_flags = CHAN_FLAG_OP;
         else if (!strcasecmp("Voice", item[i]))
-          chan->knock_flags = FLOOD_EXEMPT_VOICE;
+          chan->knock_flags = CHAN_FLAG_VOICE;
         else if (!strcasecmp("User", item[i]))
-          chan->knock_flags = FLOOD_EXEMPT_USER;
+          chan->knock_flags = CHAN_FLAG_USER;
         else if (!strcasecmp("None", item[i]))
           chan->knock_flags = 0;
         else {
@@ -507,9 +507,9 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
       }
       if (!str_isdigit(item[i])) {
         if (!strcasecmp("Op",  item[i]))
-          chan->flood_exempt_mode = FLOOD_EXEMPT_OP;
+          chan->flood_exempt_mode = CHAN_FLAG_OP;
         else if (!strcasecmp("Voice", item[i]))
-          chan->flood_exempt_mode = FLOOD_EXEMPT_VOICE;
+          chan->flood_exempt_mode = CHAN_FLAG_VOICE;
         else if (!strcasecmp("None", item[i]))
           chan->flood_exempt_mode = 0;
         else {

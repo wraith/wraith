@@ -1182,7 +1182,7 @@ static void show_int(int idx, char *work, int *cnt, const char *desc, int state,
 #define SHOW_FLAG(name, state) show_flag(idx, work, &cnt, name, state, sizeof(work))
 #define SHOW_INT(desc, state, yes, no) show_int(idx, work, &cnt, desc, state, yes, no, sizeof(work))
 #define P_STR deflag == P_KICK ? "Kick" : (deflag == P_DEOP ? "Deop" : (deflag == P_DELETE ? "Remove" : NULL))
-#define F_STR(x) x == FLOOD_EXEMPT_OP ? "Op" : (x == FLOOD_EXEMPT_VOICE ? "Voice" : (x == FLOOD_EXEMPT_USER ? "User" : NULL))
+#define F_STR(x) x == CHAN_FLAG_OP ? "Op" : (x == CHAN_FLAG_VOICE ? "Voice" : (x == CHAN_FLAG_USER ? "User" : NULL))
 static void cmd_chaninfo(int idx, char *par)
 {
   char *chname = NULL, work[512] = "";

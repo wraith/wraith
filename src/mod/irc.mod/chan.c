@@ -527,8 +527,8 @@ static bool detect_chan_flood(char *floodnick, char *floodhost, char *from,
        (glob_master(fr) || chan_master(fr))) ||
       ((which != FLOOD_DEOP) && (which != FLOOD_KICK) && 
        ( (chk_noflood(fr) || 
-         (m && chan->flood_exempt_mode == FLOOD_EXEMPT_OP && chan_hasop(m)) || 
-         (m && chan->flood_exempt_mode == FLOOD_EXEMPT_VOICE && (chan_hasvoice(m) || chan_hasop(m))) )
+         (m && chan->flood_exempt_mode == CHAN_FLAG_OP && chan_hasop(m)) ||
+         (m && chan->flood_exempt_mode == CHAN_FLAG_VOICE && (chan_hasvoice(m) || chan_hasop(m))) )
       )))
     return 0;
 
@@ -1642,9 +1642,9 @@ static int got710(char *from, char *msg)
   get_user_flagrec(u, &fr, chan->dname, chan);
 
   // PASSING: +o and op || +v and op/voice || user
-  if (!((chan->knock_flags == FLOOD_EXEMPT_OP && chk_op(fr, chan)) ||
-       (chan->knock_flags == FLOOD_EXEMPT_VOICE && (chk_op(fr, chan) || chk_voice(fr, chan))) ||
-       (chan->knock_flags == FLOOD_EXEMPT_USER)) ||
+  if (!((chan->knock_flags == CHAN_FLAG_OP && chk_op(fr, chan)) ||
+       (chan->knock_flags == CHAN_FLAG_VOICE && (chk_op(fr, chan) || chk_voice(fr, chan))) ||
+       (chan->knock_flags == CHAN_FLAG_USER)) ||
       chan_kick(fr) || glob_kick(fr)) {
     return 0;
   }
