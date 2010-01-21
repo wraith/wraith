@@ -19,7 +19,6 @@ typedef struct settings_struct {
   char shellhash[65];
   char owners[513];
   char hubs[513];
-  char owneremail[385];
   char salt1[33];
   char salt2[17];
   char dcc_prefix[17];
@@ -35,7 +34,7 @@ typedef struct settings_struct {
   char portmin[17];       /* for hubs, the reserved port range for incoming connections */
   char portmax[17];       /* for hubs, the reserved port range for incoming connections */
   /* -- PADDING -- */
-  char padding[13];        // (16 - (sizeof(settings_t) % 16)) % 16]
+  char padding[14];        // (16 - (sizeof(settings_t) % 16)) % 16]
 } settings_t;
 
 #define SALT1 {s1_1[0],s1_1[1],s1_5[0],s1_5[1],s1_8[0],s1_8[1],s1_4[0],s1_9[1],s1_2[0],s1_13[0],s1_6[0],s1_6[1],s1_7[0],s1_7[1],s1_3[0],s1_13[1],s1_16[1],s1_4[1],s1_15[0],s1_10[1],s1_14[0],s1_14[1],s1_12[0],s1_12[1],s1_2[1],s1_3[1],s1_11[0],s1_11[1],s1_10[0],s1_15[1],s1_16[0],s1_9[0],'\0'}
@@ -47,7 +46,7 @@ typedef struct settings_struct {
 extern char s1_3[3],s1_2[3],s1_1[3],s2_7[3],s1_9[3],s1_13[3],s1_14[3],s2_2[3],s1_10[3],s2_4[3],s1_4[3],s2_3[3],s2_1[3],s2_6[3],s1_7[3],s1_12[3],s2_5[3],s1_5[3],s1_6[3],s1_11[3],s2_8[3],s1_8[3],s1_16[3],s1_15[3];
 
 #define SIZE_PACK sizeof(settings.hash) + sizeof(settings.packname) + sizeof(settings.shellhash) + \
-sizeof(settings.owners) + sizeof(settings.hubs) + sizeof(settings.owneremail) + \
+sizeof(settings.owners) + sizeof(settings.hubs) + \
 sizeof(settings.salt1) + sizeof(settings.salt2) + sizeof(settings.dcc_prefix) + sizeof(settings.features)
 
 #define SIZE_CONF sizeof(settings.dynamic_initialized) + sizeof(settings.bots) + sizeof(settings.uid) + \

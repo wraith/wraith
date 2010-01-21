@@ -6,6 +6,7 @@
   * Fix problem of upgrading with uninitialized binaries causing corruption (will kick in on future upgrades)
   * Optimized how some shell operations are executed.
   * Uname checking (and associated emails) have been removed.
+  * Email functionality has been removed.
   * Fix crash on OpenBSD due to mmap(2) bug.
 * Cookie op changes
   * Cookie op algorithm changed again, they can no longer be easily reused (fixes #402) Thank you mulder.

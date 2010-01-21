@@ -24,8 +24,6 @@
 #define ERR_NOTINIT	22
 #define ERR_MAX         23
 
-#define EMAIL_OWNERS    BIT0
-
 #define DETECT_LOGIN 	1
 #define DETECT_TRACE 	2
 #define DETECT_PROMISC 	3
@@ -50,7 +48,6 @@ void clear_tmp();
 char *homedir(bool = 1);
 char *my_username();
 void expand_tilde(char **);
-int email(char *, char *, int);
 int shell_exec(char *, char *, char **, char **, bool = 0);
 int simple_exec(const char* argv[]);
 #ifndef CYGWIN_HACKS

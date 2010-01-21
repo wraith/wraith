@@ -644,48 +644,6 @@ void werr(int errnum)
   exit(0);				//gcc is stupid :)
 }
 
-int email(char *subject, char *msg, int who)
-{
-  struct utsname un;
-  char run[2048] = "", addrs[100] = "";
-  bool mail = 0, sendmail = 0;
-  FILE *f = NULL;
-
-  uname(&un);
-  if (is_file(STR("/usr/sbin/sendmail")))
-    sendmail = 1;
-  else if (is_file(STR("/usr/bin/mail")))
-    mail = 1;
-  else {
-    putlog(LOG_WARN, "*", STR("I Have no usable mail client."));
-    return 1;
-  }
-
-  if (who & EMAIL_OWNERS)
-    strlcpy(addrs, replace(settings.owneremail, ",", " "), sizeof(addrs));
-
-  if (sendmail)
-    strlcpy(run, STR("/usr/sbin/sendmail -t"), sizeof(run));
-  else if (mail)
-    simple_snprintf(run, sizeof(run), STR("/usr/bin/mail %s -a \"From: %s@%s\" -s \"%s\" -a \"Content-Type: text/plain\""), addrs, conf.bot->nick ? conf.bot->nick : "none", un.nodename, subject);
-
-  if ((f = popen(run, "w"))) {
-    if (sendmail) {
-      fprintf(f, STR("To: %s\n"), addrs);
-      fprintf(f, STR("From: %s@%s\n"), origbotname[0] ? origbotname : (conf.username ? conf.username : "WRAITH"), un.nodename);
-      fprintf(f, STR("Subject: %s\n"), subject);
-      fprintf(f, STR("Content-Type: text/plain\n"));
-    }
-    fprintf(f, "%s\n", msg);
-    if (fflush(f))
-      return 1;
-    if (pclose(f))
-      return 1;
-  } else
-    return 1;
-  return 0;
-}
-
 char *homedir(bool useconf)
 {
   static char homedir_buf[PATH_MAX] = "";

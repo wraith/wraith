@@ -31,7 +31,7 @@
 settings_t settings = {
   SETTINGS_HEADER,
   /* -- STATIC -- */
-  "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "",
   /* -- DYNAMIC -- */
   "", "", "", "", "", "", "", "", "",
   /* -- PADDING */
@@ -366,9 +366,6 @@ readcfg(const char *cfgfile, bool read_stdin)
         } else if (!strcasecmp(buffer, STR("owner"))) {
           strlcat(settings.owners, trim(p), sizeof(settings.owners));
           strlcat(settings.owners, ",", sizeof(settings.owners));
-        } else if (!strcasecmp(buffer, STR("owneremail"))) {
-          strlcat(settings.owneremail, trim(p), sizeof(settings.owneremail));
-          strlcat(settings.owneremail, ",", sizeof(settings.owneremail));
         } else if (!strcasecmp(buffer, STR("hub"))) {
           strlcat(settings.hubs, trim(p), sizeof(settings.hubs));
           strlcat(settings.hubs, ",", sizeof(settings.hubs));
@@ -467,7 +464,6 @@ static void edpack(settings_t *incfg, const char *in_hash, int what)
   dofield(incfg->dcc_prefix);
   dofield(incfg->features);
   dofield(incfg->owners);
-  dofield(incfg->owneremail);
   dofield(incfg->hubs);
 
   dohash(incfg->salt1);
@@ -504,7 +500,6 @@ tellconfig(settings_t *incfg)
   dofield(incfg->dcc_prefix);
   dofield(incfg->features);
   dofield(incfg->owners);
-  dofield(incfg->owneremail);
   dofield(incfg->hubs);
 //  dofield(incfg->salt1);
 //  dofield(incfg->salt2);
