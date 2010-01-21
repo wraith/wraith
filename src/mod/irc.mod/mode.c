@@ -1423,7 +1423,7 @@ gotmode(char *from, char *msg)
                 mv->flags &= ~SENTVOICE;
                 mv->flags |= CHANVOICE;
                 if (channel_active(chan) && dovoice(chan)) {
-                  if (dv || chk_devoice(victim)) {
+                  if (dv || chk_devoice(victim) || (channel_voicebitch(chan) && !chk_voice(victim, chan))) {
                     add_mode(chan, '-', 'v', mparam);
                   } else if (reversing) {
                     add_mode(chan, '-', 'v', mparam);

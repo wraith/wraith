@@ -1100,7 +1100,7 @@ static void check_this_member(struct chanset_t *chan, char *nick, struct flag_re
   if (dovoice(chan)) {
     if (chan_hasvoice(m) && !chan_hasop(m)) {
       /* devoice +q users .. */
-      if (chk_devoice(*fr))
+      if (chk_devoice(*fr) || (channel_voicebitch(chan) && !chk_voice(*fr, chan)))
         add_mode(chan, '-', 'v', m->nick);
     } else if (!chan_hasvoice(m) && !chan_hasop(m)) {
       /* voice +v users */
