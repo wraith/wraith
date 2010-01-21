@@ -1588,7 +1588,7 @@ check_expired_chanstuff(struct chanset_t *chan)
                   add_mode(chan, '+', 'v', m->nick);
                 }
               }
-            } else if (!m->user && channel_voice(chan) && voice_ok(m, chan)) {
+            } else if (!m->user && channel_voice(chan) && !channel_voicebitch(chan) && voice_ok(m, chan)) {
               add_mode(chan, '+', 'v', m->nick);
             }
           }

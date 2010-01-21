@@ -2725,7 +2725,7 @@ static int gotjoin(char *from, char *chname)
                 m->delay = now + chan->auto_delay;
                 m->flags |= SENTVOICE;
               }
-            } else if (!m->user && channel_voice(chan) && voice_ok(m, chan)) {
+            } else if (!m->user && channel_voice(chan) && !channel_voicebitch(chan) && voice_ok(m, chan)) {
               m->delay = now + chan->auto_delay;
               m->flags |= SENTVOICE;
             }
