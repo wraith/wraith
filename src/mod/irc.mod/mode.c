@@ -1441,8 +1441,8 @@ gotmode(char *from, char *msg)
                     /* if they arent +v|v and VOICER is m+ then EVOICE them */
                   } else {
                     /* FIXME: same thing here */
-                    if (!match_my_nick(nick) && channel_voice(chan) && 
-                        (glob_master(user) || chan_master(user) || glob_bot(user)) && 
+                    if (!match_my_nick(nick) && channel_voice(chan) && !glob_bot(user) &&
+                        (glob_master(user) || chan_master(user)) &&
                         rfc_casecmp(nick, mparam)) {
                       /* if the user is not +q set them norEVOICE. */
                       if (!chan_quiet(victim) && !(mv->flags & EVOICE)) {
