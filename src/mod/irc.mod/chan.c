@@ -2716,7 +2716,9 @@ static int gotjoin(char *from, char *chname)
             if (m->user) {
               if (!(m->flags & EVOICE) &&
                   (
-                   (channel_voice(chan) && !chk_devoice(fr)) ||
+                   /* +voice: Voice all clients who are not flag:+q. If the chan is +voicebitch, only op flag:+v clients */
+                   (channel_voice(chan) && !chk_devoice(fr) && (!channel_voicebitch(chan) || (channel_voicebitch(chan) && chk_voice(fr, chan)))) ||
+                   /* Or, if the channel is -voice but they still qualify to be voiced */
                    (!channel_voice(chan) && !privchan(fr, chan, PRIV_VOICE) && chk_voice(fr, chan))
                   )
                  ) {
