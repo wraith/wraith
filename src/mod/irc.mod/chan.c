@@ -348,8 +348,8 @@ void priority_do(struct chanset_t * chan, bool opsonly, int action)
     }
 
     if (m->user && m->user->bot && (m->user->flags & USER_OP)) {
-      ops++;
-      if (!strcmp(m->nick, botname))
+      ++ops;
+      if (match_my_nick(m->nick))
         bpos = (ops - 1);
 
     } else if (!opsonly || chan_hasop(m)) {
@@ -357,101 +357,66 @@ void priority_do(struct chanset_t * chan, bool opsonly, int action)
         if (m->user)
           get_user_flagrec(m->user, &fr, chan->dname, chan);
 
-        if (((glob_deop(fr) && !chan_op(fr)) || chan_deop(fr)) || /* +d */
-           ((!channel_privchan(chan) && !chan_op(fr) && !glob_op(fr)) || /* simply no +o flag. */
-           (channel_privchan(chan) && !glob_bot(fr) && !glob_owner(fr) && !chan_op(fr)))) { /* private? */
-          targets++;
-        }
+        if (!chk_op(fr, chan))
+          ++targets;
     }
   }
 
   if (!targets || !ops)
     return;
 
-  ft = (bpos * targets) / ops;
-  ct = ((bpos + 2) * targets + (ops - 1)) / ops;
-  ct = (ct - ft + 1);
-  if (ct > 20)
-    ct = 20;
-  while (ft >= targets)
-    ft -= targets;
-  actions = 0;
-  sent = 0;
-  for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-    if (!opsonly || chan_hasop(m)) {
-      struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
-
-      if (m->user)
-        get_user_flagrec(m->user, &fr, chan->dname, chan);
- 
-      if (((glob_deop(fr) && !chan_op(fr)) || chan_deop(fr)) ||
-          ((!channel_privchan(chan) && !chan_op(fr) && !glob_op(fr)) ||
-           (channel_privchan(chan) && !glob_bot(fr) && !glob_owner(fr) && !chan_op(fr)))) {
-
-        if (tpos >= ft) {
-          if ((action == PRIO_DEOP) && !chan_sentdeop(m)) {
-            actions++;
-            sent++;
-            add_mode(chan, '-', 'o', m->nick);
-            if (actions >= ct) {
-              flush_mode(chan, QUICK);
-              return;
-            }
-          } else if ((action == PRIO_KICK) && !chan_sentkick(m)) {
-            actions++;
-            sent++;
-            if (chan->closed_ban)
-              do_closed_kick(chan, m);
-            dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, response(RES_CLOSED));
-            m->flags |= SENTKICK;
-            if (actions >= ct)
-              return;
-          }
-        }
-        tpos++;
-      
-      }
+  for (int n = 0; n < 2; ++n) {
+    // First pass - Handle my priority targets
+    if (n == 0) {
+      ft = (bpos * targets) / ops;
+      ct = ((bpos + 2) * targets + (ops - 1)) / ops;
+      ct = (ct - ft + 1);
+      if (ct > 20)
+        ct = 20;
+      while (ft >= targets)
+        ft -= targets;
+      actions = 0;
+      sent = 0;
+    } else {
+      // Second pass - Handle all remaining if I am able to
+      ct = ct - actions;
+      if (ct > ft)
+        ct = ft;
+      ft = 0;
+      actions = 0;
+      tpos = 0;
     }
-  }
+    for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
+      if (!opsonly || chan_hasop(m)) {
+        struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
-  ct = ct - actions;
-  if (ct > ft)
-    ct = ft;
-  ft = 0;
-  actions = 0;
-  tpos = 0;
-  for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-    if (!opsonly || chan_hasop(m)) {
-      struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
+        if (m->user)
+          get_user_flagrec(m->user, &fr, chan->dname, chan);
 
-      if (m->user)
-        get_user_flagrec(m->user, &fr, chan->dname, chan);
-
-      if (((glob_deop(fr) && !chan_op(fr)) || chan_deop(fr)) ||
-          ((!channel_privchan(chan) && !chan_op(fr) && !glob_op(fr)) || 
-           (channel_privchan(chan) && !glob_bot(fr) && !glob_owner(fr) && !chan_op(fr)))) {
-
-        if (tpos >= ft) {
-          if ((action == PRIO_DEOP) && !chan_sentdeop(m)) {
-            actions++;
-            sent++;
-            add_mode(chan, '-', 'o', m->nick);
-            if ((actions >= ct) || (sent > 20)) {
-              flush_mode(chan, QUICK);
-              return;
+        if (!chk_op(fr, chan)) {
+          if (tpos >= ft) {
+            if ((action == PRIO_DEOP) && !chan_sentdeop(m)) {
+              ++actions;
+              ++sent;
+              add_mode(chan, '-', 'o', m->nick);
+              if (!floodless && (actions >= ct || (n == 1 && sent > 20))) {
+                flush_mode(chan, QUICK);
+                return;
+              }
+            } else if ((action == PRIO_KICK) && !chan_sentkick(m)) {
+              ++actions;
+              ++sent;
+              if (chan->closed_ban)
+                do_closed_kick(chan, m);
+              dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, response(RES_CLOSED));
+              m->flags |= SENTKICK;
+              if (!floodless && (actions >= ct || (n == 1 && sent > 5)))
+                return;
             }
-          } else if ((action == PRIO_KICK) && !chan_sentkick(m)) {
-            actions++;
-            if (chan->closed_ban)
-              do_closed_kick(chan, m);
-            dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, response(RES_CLOSED));
-            m->flags |= SENTKICK;
-            if ((actions >= ct) || (sent > 5))
-              return;
           }
-        }
-        tpos++;
+          ++tpos;
         
+        }
       }
     }
   }
