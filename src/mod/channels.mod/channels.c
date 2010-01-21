@@ -883,6 +883,8 @@ void channels_report(int idx, int details)
           i += my_strcpy(s + i, "meankicks ");
         if (channel_rbl(chan))
           i += my_strcpy(s + i, "rbl ");
+        if (channel_voicebitch(chan))
+          i += my_strcpy(s + i, "voicebitch ");
 /* Chanflag template
  *	if (channel_temp(chan))
  *	  i += my_strcpy(s + i, "temp ");

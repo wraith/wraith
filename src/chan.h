@@ -249,6 +249,7 @@ struct chanset_t {
 #define CHAN_FLAGGED        BIT22	/* flagged during rehash for delete   */
 #define CHAN_AUTOOP         BIT23
 #define CHAN_MEANKICKS      BIT24	/* use mean/offensive kicks/bans */
+#define CHAN_VOICEBITCH     BIT25
 
 #define CHAN_ASKED_EXEMPTS  BIT0
 #define CHAN_ASKED_INVITES  BIT1
@@ -308,6 +309,7 @@ struct chanset_t *findchan_by_dname(const char *name);
 #define channel_nomassjoin(chan) (chan->status & CHAN_NOMASSJOIN)
 #define channel_meankicks(chan) (chan->status & CHAN_MEANKICKS)
 #define channel_rbl(chan) (chan->status & CHAN_RBL)
+#define channel_voicebitch(chan) (chan->status & CHAN_VOICEBITCH)
 /* Chanflag template
  *#define channel_temp(chan) (chan->status & CHAN_PRIVATE)
  */

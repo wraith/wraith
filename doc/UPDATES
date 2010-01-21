@@ -1,4 +1,5 @@
 * Fix case where bot would not get the +e and +I lists when getting opped.
+* Add chanset '+/-voicebitch' for a +bitch style enforcement over voices.
 
 1.3 - http://wraith.botpack.net/milestone/1.3
 * Binary / shell / startup changes

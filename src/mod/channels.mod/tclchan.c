@@ -642,6 +642,10 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
       chan->status |= CHAN_RBL;
     else if (!strcmp(item[i], "-rbl"))
       chan->status &= ~CHAN_RBL;
+    else if (!strcmp(item[i], "+voicebitch"))
+      chan->status |= CHAN_VOICEBITCH;
+    else if (!strcmp(item[i], "-voicebitch"))
+      chan->status &= ~CHAN_VOICEBITCH;
 /* Chanflag template
  *  else if (!strcmp(item[i], "+temp"))
  *    chan->status |= CHAN_TEMP;
