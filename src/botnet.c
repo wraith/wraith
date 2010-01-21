@@ -1106,8 +1106,6 @@ static void botlink_real(int i)
     if (open_telnet_return == -1)
       dcc[i].sock = -1;
     failed_link(i);
-  } else { /* let's attempt to initiate SSL before ANYTHING else... */
-    dcc[i].ssl = 0;
   }
 
   /* wait for async reply */
@@ -1188,7 +1186,7 @@ void tandem_relay(int idx, char *nick, register int i)
   dcc[i].user = u;
   strlcpy(dcc[i].host, bi->address, UHOSTLEN);
   if (conf.bot->hub) 
-    dprintf(idx, "%s %s @ %s:%d ...\n", "Connecting to", nick, bi->address, bi->relay_port);
+    dprintf(idx, "%s %s @ %s:%d ...\n", "Establishing encrypted connection to", nick, bi->address, bi->relay_port);
   dprintf(idx, "(Type *BYE* on a line by itself to abort.)\n");
   dcc[idx].type = &DCC_PRE_RELAY;
 
@@ -1409,6 +1407,8 @@ static void cont_tandem_relay(int idx, char *buf, register int len)
   check_bind_chof(dcc[uidx].nick, uidx);
   dcc[uidx].type = &DCC_RELAYING;
   dcc[uidx].u.relay = ri;
+
+  dprintf(idx, "+%s\n", dcc[uidx].nick);
 }
 
 static void eof_dcc_relay(int idx)
@@ -1473,6 +1473,16 @@ static void dcc_relay(int idx, char *buf, int j)
   for (j = 0; j < dcc_total; j++)
    if (dcc[j].type && dcc[j].sock == dcc[idx].u.relay->sock && dcc[j].type == &DCC_RELAYING)
      break;
+
+  if (!strncasecmp(buf, STR("neg!"), 4)) {	/* something to parse in enclink.c */
+    newsplit(&buf);
+    link_parse(idx, buf);
+    return;
+  } else if (!strncasecmp(buf, STR("neg?"), 4)) {	/* we're connecting to THEM */
+    newsplit(&buf);
+    link_challenge_to(idx, buf);
+    return;
+  }
 
   /* If redirecting to a non-telnet user, swallow telnet codes and
      escape sequences. */

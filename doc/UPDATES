@@ -67,6 +67,7 @@
   * Fix +botbitch being very slow and inefficient
   * Better +bitch/+botbitch/+closed handling when in floodless mode.
 * Misc changes
+  * Relays are now encrypted between bots. Username is sent automatically. Just enter in pass now.
   * Added pseudo-channel 'default' which can be modified with 'chanset' and 'chaninfo'.
     This is used to modify what the default channel options will be for new channels.
   * Removed 'set chanset' as it has been replaced by 'chanset default'

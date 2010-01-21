@@ -45,7 +45,14 @@ static void ghost_link_case(int idx, direction_t direction)
     if (direction == TO) {
       keyp = socklist[snum].ikey;
       nick1 = strdup(dcc[idx].nick);
-      nick2 = strdup(conf.bot->nick);
+      for (int j = 0; j < dcc_total; j++) {
+       if (dcc[j].type && dcc[j].sock == dcc[idx].u.relay->sock && dcc[j].type == &DCC_RELAYING) {
+         nick2 = strdup(dcc[j].nick);
+         break;
+       }
+      }
+      if (!nick2)
+        nick2 = strdup(conf.bot->nick);
       port = htons(dcc[idx].port);
     } else if (direction == FROM) {
       keyp = socklist[snum].okey;
@@ -276,6 +283,34 @@ const char *link_write(int snum, const char *buf, size_t *len)
     return ((enclink[i].write) (snum, buf, len));
 
   return buf;
+}
+
+void link_challenge_to(int idx, char *buf) {
+  int snum = findanysnum(dcc[idx].sock);
+
+  if (snum >= 0) {
+    char *rand = newsplit(&buf), *tmp = strdup(buf), *tmpp = tmp, *p = NULL;
+    int i = -1;
+
+    while ((p = newsplit(&tmp))[0]) {
+      if (str_isdigit(p)) {
+        int type = atoi(p);
+
+        /* pick the first (lowest num) one that we share */
+        i = link_find_by_type(type);
+
+        if (i != -1)
+          break;
+      }
+    }
+    free(tmpp);
+
+    sdprintf(STR("Choosing '%s' (%d/%d) for link"), enclink[i].name, enclink[i].type, i);
+    link_hash(idx, rand);
+    dprintf(-dcc[idx].sock, STR("neg %s %d %s\n"), dcc[idx].shahash, enclink[i].type, dcc[idx].nick);
+    socklist[snum].enclink = i;
+    link_link(idx, -1, i, TO);
+  }
 }
 
 void link_hash(int idx, char *rand)

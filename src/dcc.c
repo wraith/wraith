@@ -406,31 +406,7 @@ dcc_bot_new(int idx, char *buf, int x)
   } else if (!strcasecmp(code, STR("neg!"))) {	/* something to parse in enclink.c */
     link_parse(idx, buf);
   } else if (!strcasecmp(code, STR("neg?"))) {	/* we're connecting to THEM */
-    int snum = findanysnum(dcc[idx].sock);
-
-    if (snum >= 0) {
-      char *rand = newsplit(&buf), *tmp = strdup(buf), *tmpp = tmp, *p = NULL;
-      int i = -1;
-
-      while ((p = newsplit(&tmp))[0]) {
-        if (str_isdigit(p)) {
-          int type = atoi(p);
-
-          /* pick the first (lowest num) one that we share */
-          i = link_find_by_type(type);
-
-          if (i != -1)
-            break;
-        }
-      }
-      free(tmpp);
-
-      sdprintf(STR("Choosing '%s' (%d/%d) for link"), enclink[i].name, enclink[i].type, i);
-      link_hash(idx, rand);
-      dprintf(-dcc[idx].sock, STR("neg %s %d %s\n"), dcc[idx].shahash, enclink[i].type, dcc[idx].nick);
-      socklist[snum].enclink = i;
-      link_link(idx, -1, i, TO);
-    }
+    link_challenge_to(idx, buf);
   } else if (!strcasecmp(code, "error")) {
     putlog(LOG_MISC, "*", "ERROR linking %s: %s", dcc[idx].nick, buf);
     killsock(dcc[idx].sock);
@@ -994,21 +970,29 @@ dcc_chat_pass(int idx, char *buf, int atr)
 
   pass = newsplit(&buf);
 
-  if (dcc[idx].user->bot) {
+  if (dcc[idx].encrypt == 1) {
     if (!strcasecmp(pass, STR("neg!"))) {		/* we're the hub */
       link_parse(idx, buf);
     } else if (!strcasecmp(pass, STR("neg."))) {		/* we're done, link up! */
-      dcc[idx].type = &DCC_BOT_NEW;
-      dcc[idx].u.bot = (struct bot_info *) my_calloc(1, sizeof(struct bot_info));
-      if (dcc[idx].status & STAT_UNIXDOMAIN)
-        dcc[idx].status = STAT_UNIXDOMAIN|STAT_CALLED;
-      else
-        dcc[idx].status = STAT_CALLED;
-      dprintf(idx, "goodbye!\n");
-      greet_new_bot(idx);
-      if (conf.bot->hub || conf.bot->localhub)
-        send_timesync(idx);
+      dcc[idx].encrypt = 2;
+      if (dcc[idx].bot) {
+        dcc[idx].type = &DCC_BOT_NEW;
+        dcc[idx].u.bot = (struct bot_info *) my_calloc(1, sizeof(struct bot_info));
+        if (dcc[idx].status & STAT_UNIXDOMAIN)
+          dcc[idx].status = STAT_UNIXDOMAIN|STAT_CALLED;
+        else
+          dcc[idx].status = STAT_CALLED;
+        dprintf(idx, "goodbye!\n");
+        greet_new_bot(idx);
+        if (conf.bot->hub || conf.bot->localhub)
+          send_timesync(idx);
+      } else {
+        // User encrypted over relay
+        /* Turn off remote telnet echo (send IAC WILL ECHO). */
+        dprintf(idx, "\n%s" TLN_IAC_C TLN_WILL_C TLN_ECHO_C "\n", "Enter your password");
+      }
     } else if (!strcasecmp(pass, STR("neg"))) {
+      //link_challenge_from()
       int snum = findanysnum(dcc[idx].sock);
 
       if (snum >= 0) {
@@ -1726,6 +1710,10 @@ dcc_telnet_id(int idx, char *buf, int atr)
   if (nick[0] == '-') {
     nick++;
     dcc[idx].bot = 1;
+    dcc[idx].encrypt = 1;
+  } else if (nick[0] == '+') {
+    nick++;
+    dcc[idx].encrypt = 1;
   }
 
   nick[HANDLEN] = 0;
@@ -1864,7 +1852,7 @@ dcc_telnet_pass(int idx, int atr)
   }
 
   if (conf.bot->hub || (conf.bot->localhub && (dcc[idx].status & STAT_UNIXDOMAIN))) {
-    if (dcc[idx].bot) {
+    if (dcc[idx].encrypt) {
       /* negotiate a new linking scheme */
       int i = 0;
       char buf[1024] = "", rand[51] = "";
