@@ -1563,7 +1563,7 @@ check_expired_chanstuff(struct chanset_t *chan)
 
       if (me_op(chan)) {
         if (dovoice(chan) && !loading) {      /* autovoice of +v users if bot is +y */
-          if (!chan_hasop(m) && !chan_hasvoice(m)) {
+          if (!chan_hasop(m) && !chan_hasvoice(m) && !chan_sentvoice(m)) {
             if (!m->user && !m->tried_getuser) {
               simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
               m->user = get_user_by_host(s);
@@ -1577,7 +1577,7 @@ check_expired_chanstuff(struct chanset_t *chan)
             if (m->user) {
               get_user_flagrec(m->user, &fr, chan->dname, chan);
               if (!glob_bot(fr)) {
-                if (!chan_sentvoice(m) && !(m->flags & EVOICE) && 
+                if (!(m->flags & EVOICE) &&
                     (
                      /* +voice: Voice all clients who are not flag:+q. If the chan is +voicebitch, only op flag:+v clients */
                      (channel_voice(chan) && !chk_devoice(fr) && (!channel_voicebitch(chan) || (channel_voicebitch(chan) && chk_voice(fr, chan)))) ||
@@ -1586,11 +1586,9 @@ check_expired_chanstuff(struct chanset_t *chan)
                     )
                    ) {
                   add_mode(chan, '+', 'v', m->nick);
-                } else if ((chk_devoice(fr) || (m->flags & EVOICE))) {
-                  add_mode(chan, '-', 'v', m->nick);
                 }
               }
-            } else if (!chan_sentvoice(m) && !m->user && channel_voice(chan) && voice_ok(m, chan)) {
+            } else if (!m->user && channel_voice(chan) && voice_ok(m, chan)) {
               add_mode(chan, '+', 'v', m->nick);
             }
           }
