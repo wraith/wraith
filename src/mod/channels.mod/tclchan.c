@@ -308,7 +308,6 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
 {
   bool error = 0;
   int old_status = chan->status,
-      old_ircnet_status = chan->ircnet_status,
       old_mode_mns_prot = chan->mode_mns_prot,
       old_mode_pls_prot = chan->mode_pls_prot;
   char s[121] = "", result_extra[RESULT_LEN / 2] = "";
@@ -592,21 +591,21 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
     else if (!strcmp(item[i], "-cycle"))
       chan->status &= ~CHAN_CYCLE;
     else if (!strcmp(item[i], "+dynamicexempts"))
-      chan->ircnet_status|= CHAN_DYNAMICEXEMPTS;
+      chan->status |= CHAN_DYNAMICEXEMPTS;
     else if (!strcmp(item[i], "-dynamicexempts"))
-      chan->ircnet_status&= ~CHAN_DYNAMICEXEMPTS;
+      chan->status &= ~CHAN_DYNAMICEXEMPTS;
     else if (!strcmp(item[i], "-userexempts"))
-      chan->ircnet_status|= CHAN_NOUSEREXEMPTS;
+      chan->status |= CHAN_NOUSEREXEMPTS;
     else if (!strcmp(item[i], "+userexempts"))
-      chan->ircnet_status&= ~CHAN_NOUSEREXEMPTS;
+      chan->status &= ~CHAN_NOUSEREXEMPTS;
     else if (!strcmp(item[i], "+dynamicinvites"))
-      chan->ircnet_status|= CHAN_DYNAMICINVITES;
+      chan->status |= CHAN_DYNAMICINVITES;
     else if (!strcmp(item[i], "-dynamicinvites"))
-      chan->ircnet_status&= ~CHAN_DYNAMICINVITES;
+      chan->status &= ~CHAN_DYNAMICINVITES;
     else if (!strcmp(item[i], "-userinvites"))
-      chan->ircnet_status|= CHAN_NOUSERINVITES;
+      chan->status |= CHAN_NOUSERINVITES;
     else if (!strcmp(item[i], "+userinvites"))
-      chan->ircnet_status&= ~CHAN_NOUSERINVITES;
+      chan->status &= ~CHAN_NOUSERINVITES;
     else if (!strcmp(item[i], "+closed"))
       chan->status |= CHAN_CLOSED;
     else if (!strcmp(item[i], "-closed"))
@@ -800,18 +799,18 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
 
   if (!conf.bot->hub && (chan != chanset_default)) {
     if ((old_status ^ chan->status) & (CHAN_INACTIVE | CHAN_BACKUP)) {
-      if (!shouldjoin(chan) && (chan->status & (CHAN_ACTIVE | CHAN_PEND)))
+      if (!shouldjoin(chan) && (chan->ircnet_status & (CHAN_ACTIVE | CHAN_PEND)))
         dprintf(DP_SERVER, "PART %s\n", chan->name);
-      if (shouldjoin(chan) && !(chan->status & (CHAN_ACTIVE | CHAN_PEND | CHAN_JOINING))) {
+      if (shouldjoin(chan) && !(chan->ircnet_status & (CHAN_ACTIVE | CHAN_PEND | CHAN_JOINING))) {
         dprintf(DP_SERVER, "JOIN %s %s\n", (chan->name[0]) ?
   			   chan->name : chan->dname,
   			   chan->channel.key[0] ?
     			   chan->channel.key : chan->key_prot);
-        chan->status |= CHAN_JOINING;
+        chan->ircnet_status |= CHAN_JOINING;
       }
     }
     if (me_op(chan)) {
-      if ((old_status ^ chan->status) & (CHAN_ENFORCEBANS|CHAN_NOUSERBANS|CHAN_DYNAMICBANS) || (old_ircnet_status ^ chan->ircnet_status) & (CHAN_NOUSEREXEMPTS|CHAN_NOUSERINVITES|CHAN_DYNAMICEXEMPTS|CHAN_DYNAMICINVITES)) {
+      if ((old_status ^ chan->status) & (CHAN_ENFORCEBANS|CHAN_NOUSERBANS|CHAN_DYNAMICBANS|CHAN_NOUSEREXEMPTS|CHAN_NOUSERINVITES|CHAN_DYNAMICEXEMPTS|CHAN_DYNAMICINVITES)) {
         recheck_channel(chan, 1);
       /* if we -take, recheck the chan for modes and shit */
       /* also -[bot]bitch/-private might allow for auto-opping users */
@@ -900,7 +899,7 @@ void clear_channel(struct chanset_t *chan, bool reset)
   clear_masklist(chan->channel.invite);
   chan->channel.invite = NULL;
 
-  chan->status &= ~CHAN_HAVEBANS;
+  chan->ircnet_status &= ~CHAN_HAVEBANS;
 
   if (reset)
     init_channel(chan, 1);

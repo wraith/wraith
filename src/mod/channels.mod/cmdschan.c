@@ -607,7 +607,7 @@ static void cmd_slowjoin(int idx, char *par)
 
   if (!conf.bot->hub && shouldjoin(chan) && !channel_joining(chan)) {
     dprintf(DP_MODE, "JOIN %s %s\n", chan->name, chan->key_prot);
-    chan->status |= CHAN_JOINING;
+    chan->ircnet_status |= CHAN_JOINING;
   }
 }
 

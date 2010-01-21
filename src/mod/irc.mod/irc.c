@@ -604,7 +604,7 @@ getin_request(char *botnick, char *code, char *par)
 
         putlog(LOG_GETIN, "*", "Got key for %s from %s (%s) - Joining", chan->dname, botnick, chan->channel.key);
         dprintf(DP_MODE, "JOIN %s %s\n", chan->name[0] ? chan->name : chan->dname, chan->channel.key);
-        chan->status |= CHAN_JOINING;
+        chan->ircnet_status |= CHAN_JOINING;
       } else {
         putlog(LOG_GETIN, "*", "Got key for %s from %s - I'm already in the channel", chan->dname, botnick);
       }
@@ -1306,13 +1306,13 @@ reset_chan_info(struct chanset_t *chan)
     free(chan->channel.key);
     chan->channel.key = (char *) my_calloc(1, 1);
     clear_channel(chan, 1);
-    chan->status |= CHAN_PEND;
-    chan->status &= ~(CHAN_ACTIVE | CHAN_ASKEDMODES | CHAN_JOINING);
+    chan->ircnet_status |= CHAN_PEND;
+    chan->ircnet_status &= ~(CHAN_ACTIVE | CHAN_ASKEDMODES | CHAN_JOINING);
     /* don't bother checking bans if it's +take */
     if (!channel_take(chan)) {
       if (opped) {
-        if (!(chan->status & CHAN_ASKEDBANS)) {
-          chan->status |= CHAN_ASKEDBANS;
+        if (!(chan->ircnet_status & CHAN_ASKEDBANS)) {
+          chan->ircnet_status |= CHAN_ASKEDBANS;
           dprintf(DP_MODE, "MODE %s +b\n", chan->name);
         }
 
@@ -1370,7 +1370,7 @@ check_lonely_channel(struct chanset_t *chan)
       dprintf(DP_MODE, "PART %s\n", chan->name);
       /* If it's a !chan, we need to recreate the channel with !!chan <cybah> */
       dprintf(DP_MODE, "JOIN %s%s %s\n", (chan->dname[0] == '!') ? "!" : "", chan->dname, chan->key_prot);
-      chan->status |= CHAN_JOINING;
+      chan->ircnet_status |= CHAN_JOINING;
       whined = 0;
     }
   } else if (any_ops(chan)) {
@@ -1601,7 +1601,7 @@ check_expired_chanstuff(struct chanset_t *chan)
     dprintf(DP_MODE, "JOIN %s %s\n",
             (chan->name[0]) ? chan->name : chan->dname,
             chan->channel.key[0] ? chan->channel.key : chan->key_prot);
-    chan->status |= CHAN_JOINING;
+    chan->ircnet_status |= CHAN_JOINING;
   }
 }
 
@@ -1687,13 +1687,13 @@ irc_report(int idx, int details)
     if (!privchan(fr, chan, PRIV_OP) && (idx == DP_STDOUT || glob_master(fr) || chan_master(fr))) {
       p = NULL;
       if (shouldjoin(chan)) {
-        if (chan->status & CHAN_JUPED)
+        if (chan->ircnet_status & CHAN_JUPED)
           p = "juped";
         else if (channel_joining(chan))
           p = "joining";
-        else if (!(chan->status & CHAN_ACTIVE))
+        else if (!(chan->ircnet_status & CHAN_ACTIVE))
           p = "trying";
-        else if (chan->status & CHAN_PEND)
+        else if (chan->ircnet_status & CHAN_PEND)
           p = "pending";
         else if ((chan->dname[0] != '+') && !me_op(chan))
           p = "want ops!";

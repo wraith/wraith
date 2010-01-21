@@ -1502,7 +1502,7 @@ gotmode(char *from, char *msg)
       if (chan->channel.do_opreq)
         request_op(chan);
       if (!me_op(chan) && isserver[0])		/* FIXME, WTF IS THIS? */
-        chan->status |= CHAN_ASKEDMODES;
+        chan->ircnet_status |= CHAN_ASKEDMODES;
     }
   }
   return 0;

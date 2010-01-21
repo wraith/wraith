@@ -196,10 +196,10 @@ join_chans()
 {
   for (register struct chanset_t *chan = chanset; chan; chan = chan->next) {
     if (shouldjoin(chan)) {
-      chan->status &= ~(CHAN_ACTIVE | CHAN_PEND | CHAN_JOINING);
+      chan->ircnet_status &= ~(CHAN_ACTIVE | CHAN_PEND | CHAN_JOINING);
       dprintf(DP_SERVER, "JOIN %s %s\n", (chan->name[0]) ? chan->name : chan->dname,
                                          chan->channel.key[0] ? chan->channel.key : chan->key_prot);
-      chan->status |= CHAN_JOINING;
+      chan->ircnet_status |= CHAN_JOINING;
     }
   }
 }
@@ -352,8 +352,8 @@ static int got442(char *from, char *msg)
     if (shouldjoin(chan) && !channel_joining(chan)) {
       putlog(LOG_MISC, chname, "Server says I'm not on channel: %s", chname);
       clear_channel(chan, 1);
-      chan->status &= ~CHAN_ACTIVE;
-      chan->status |= CHAN_JOINING;
+      chan->ircnet_status &= ~CHAN_ACTIVE;
+      chan->ircnet_status |= CHAN_JOINING;
       dprintf(DP_MODE, "JOIN %s %s\n", chan->name,
 	      chan->channel.key[0] ? chan->channel.key : chan->key_prot);
     }
@@ -962,13 +962,13 @@ static int got437(char *from, char *msg)
   if (s[0] && (strchr(CHANMETA, s[0]) != NULL)) {
     chan = findchan(s);
     if (chan) {
-      chan->status &= ~(CHAN_JOINING);
-      if (chan->status & CHAN_ACTIVE) {
+      chan->ircnet_status &= ~(CHAN_JOINING);
+      if (chan->ircnet_status & CHAN_ACTIVE) {
 	putlog(LOG_MISC, "*", "Can't change nickname on %s.  Is my nickname banned?", s);
       } else {
 	if (!channel_juped(chan)) {
 	  putlog(LOG_MISC, "*", "Channel %s is juped. :(", s);
-	  chan->status |= CHAN_JUPED;
+	  chan->ircnet_status |= CHAN_JUPED;
 	}
       }
     }
@@ -1677,7 +1677,7 @@ static void connect_server(void)
     altnick_char = 0;
 
     for (chan = chanset; chan; chan = chan->next)
-      chan->status &= ~CHAN_JUPED;
+      chan->ircnet_status &= ~CHAN_JUPED;
 
     dcc[newidx].timeval = now;
     dcc[newidx].sock = -1;

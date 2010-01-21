@@ -390,7 +390,7 @@ check_slowjoinpart(struct chanset_t *chan)
       chan->channel.jointime = 0;
     if (shouldjoin(chan) && !channel_active(chan) && !channel_joining(chan)) {
       dprintf(DP_MODE, "JOIN %s %s\n", chan->dname, chan->key_prot);
-      chan->status |= CHAN_JOINING;
+      chan->ircnet_status |= CHAN_JOINING;
     }
   } else if (channel_closed(chan)) {
     enforce_closed(chan);
@@ -485,7 +485,7 @@ static void got_jn(int idx, char *code, char *par)
     chan->channel.jointime = 0;
     if (!conf.bot->hub && shouldjoin(chan) && !channel_active(chan) && !channel_joining(chan)) {
       dprintf(DP_MODE, "JOIN %s %s\n", chan->name, chan->key_prot);
-      chan->status |= CHAN_JOINING;
+      chan->ircnet_status |= CHAN_JOINING;
     }
   }
 }

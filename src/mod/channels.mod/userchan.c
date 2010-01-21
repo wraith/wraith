@@ -525,7 +525,7 @@ static void tell_masks(const char type, int idx, bool show_inact, char *match, b
       } else
 	display_mask(type, idx, k++, mr, chan, show_inact);
     }
-    if (chan->status & CHAN_ACTIVE) {
+    if (chan->ircnet_status & CHAN_ACTIVE) {
       masklist *ml = NULL;
       masklist *channel_list = (type == 'b' ? chan->channel.ban : type == 'e' ? chan->channel.exempt : chan->channel.invite);
 
