@@ -899,6 +899,8 @@ void clear_channel(struct chanset_t *chan, bool reset)
   clear_masklist(chan->channel.invite);
   chan->channel.invite = NULL;
 
+  chan->channel.last_eI = 0;
+
   chan->ircnet_status &= ~CHAN_HAVEBANS;
 
   if (reset)
