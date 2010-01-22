@@ -816,9 +816,8 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
     if (me_op(chan)) {
       if ((old_status ^ chan->status) & (CHAN_ENFORCEBANS|CHAN_NOUSERBANS|CHAN_DYNAMICBANS|CHAN_NOUSEREXEMPTS|CHAN_NOUSERINVITES|CHAN_DYNAMICEXEMPTS|CHAN_DYNAMICINVITES)) {
         recheck_channel(chan, 1);
-      /* if we -take, recheck the chan for modes and shit */
-      /* also -[bot]bitch/-private might allow for auto-opping users */
-      } else if ((chan->status ^ old_status) & (CHAN_BITCH | CHAN_BOTBITCH | CHAN_PRIVATE | CHAN_CLOSED)) {
+        /* Does a change in channel flag affect client status in the channel? */
+      } else if ((chan->status ^ old_status) & (CHAN_BITCH | CHAN_BOTBITCH | CHAN_PRIVATE | CHAN_CLOSED | CHAN_VOICE | CHAN_VOICEBITCH )) {
         recheck_channel(chan, 0);
       } else if ((old_status & CHAN_TAKE) && !(chan->status & CHAN_TAKE)) {
         //Set -take, fetch bans/exempts/invites
