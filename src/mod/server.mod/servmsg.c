@@ -790,16 +790,14 @@ static int gotwall(char *from, char *msg)
 
 void server_send_ison()
 {
-  if (server_online && keepnick && !use_monitor) {
-    // Only check if we're not on jupenick, or there is no jupenick and we're not on the preferred nick
-    bool have_jupenick = jupenick[0] ? match_my_nick(jupenick) : 0;
-    if (!have_jupenick) {
-      /* See if my nickname is in use and if if my nick is right.  */
-      if (jupenick[0] && !have_jupenick)
-        dprintf(DP_SERVER, "ISON %s %s\n", origbotname, jupenick);
-      else if (!match_my_nick(origbotname)) 
-        dprintf(DP_SERVER, "ISON %s\n", origbotname);
-    }
+  // Only check if we're not on jupenick, or there is no jupenick and we're not on the preferred nick
+  bool have_jupenick = jupenick[0] ? match_my_nick(jupenick) : 0;
+  if (!have_jupenick) {
+    /* See if my nickname is in use and if if my nick is right.  */
+    if (jupenick[0] && !have_jupenick)
+      dprintf(DP_SERVER, "ISON %s %s\n", origbotname, jupenick);
+    else if (!match_my_nick(origbotname))
+      dprintf(DP_SERVER, "ISON %s\n", origbotname);
   }
 }
 /* Called once a minute... but if we're the only one on the

@@ -990,8 +990,18 @@ static void server_secondly()
   if (!resolvserv && serv < 0 && !trying_server)
     connect_server();
 
-  if (!conf.bot->hub) {
-    static int ison_cnt = 0;
+  if (server_online) {
+    if (keepnick && !use_monitor) {
+      static int ison_cnt = 0;
+
+      if (ison_time == 0) //If someone sets this to 0, all hell will break loose!
+        ison_time = 10;
+      if (ison_cnt >= ison_time) {
+        server_send_ison();
+        ison_cnt = 0;
+      } else
+        ++ison_cnt;
+    }
 
     if (ison_time == 0) //If someone sets this to 0, all hell will break loose!
       ison_time = 10;
