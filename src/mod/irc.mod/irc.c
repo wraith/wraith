@@ -109,6 +109,7 @@ voice_ok(memberlist *m, struct chanset_t *chan)
 #include "cmdsirc.c"
 #include "msgcmds.c"
 
+#ifdef unfinished
 static void
 detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
 {
@@ -140,6 +141,7 @@ dprintf(DP_HELP, "PRIVMSG %s :cap flood.\n", chan->dname);
   }
 */
 }
+#endif
 
 void unlock_chan(struct chanset_t *chan)
 {
