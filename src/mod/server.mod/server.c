@@ -98,6 +98,7 @@ static bool use_penalties = 0;
 static int use_fastdeq;
 size_t nick_len = 9;			/* Maximal nick length allowed on the network. */
 char deaf_char = 0;
+bool deaf_set = 0;
 char callerid_char = 0;
 
 static bool double_mode = 0;		/* allow a msgs to be twice in a queue? */
@@ -1003,15 +1004,26 @@ static void server_secondly()
         ++ison_cnt;
     }
 
-    if (ison_time == 0) //If someone sets this to 0, all hell will break loose!
-      ison_time = 10;
-    if (ison_cnt >= ison_time) {
-      server_send_ison();
-      ison_cnt = 0;
-    } else
-      ++ison_cnt;
-  }
+    if (!loading) {
+      static int cnt_10 = 0;
 
+      // Every 10 seconds
+      if (cnt_10 == 9) {
+        // Ensure that +D/+f are not conflicting
+
+        // In +D but am +f, need to -D
+        if (deaf_set && doflood(NULL)) {
+          dprintf(DP_SERVER, "MODE %s -%c\n", botname, deaf_char);
+        } else if (!deaf_set && use_deaf && deaf_char) {
+          // Not +D but should be, probably had +f removed.
+          dprintf(DP_SERVER, "MODE %s +%c\n", botname, deaf_char);
+        }
+
+        cnt_10 = 0;
+      } else
+        ++cnt_10;
+    }
+  }
 }
 
 static void server_check_lag()

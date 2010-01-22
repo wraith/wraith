@@ -285,6 +285,8 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
           which = '-';
         if (which) {
           char mode_char = strcmp(var->name, "deaf") == 0 ? deaf_char : callerid_char;
+          if (mode_char == deaf_char)
+            deaf_set = num;
           dprintf(DP_SERVER, "MODE %s %c%c\n", botname, which, mode_char);
         }
       }

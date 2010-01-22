@@ -513,12 +513,11 @@ dovoice(struct chanset_t *chan)
 int
 doflood(struct chanset_t *chan)
 {
-  if (!chan)
-    return 0;
-
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_BOT, 0, 0, 0 };
+  if (!chan)
+    fr.match |= FR_ANYWH;
 
-  get_user_flagrec(conf.bot->u, &fr, chan->dname);
+  get_user_flagrec(conf.bot->u, &fr, chan ? chan->dname : NULL);
   if (glob_doflood(fr) || chan_doflood(fr))
     return 1;
   return 0;

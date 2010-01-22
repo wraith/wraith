@@ -314,8 +314,10 @@ got005(char *from, char *msg)
       use_354 = 1;
     else if (!strcasecmp(tmp, "DEAF")) {
       deaf_char = p ? p[0] : 'D';
-      if (use_deaf)
+      if (use_deaf) {
         dprintf(DP_SERVER, "MODE %s +%c\n", botname, deaf_char);
+        deaf_set = 1;
+      }
     } else if (!strcasecmp(tmp, "CALLERID")) {
       callerid_char = p ? p[0] : 'g';
       if (use_callerid)
@@ -1179,6 +1181,7 @@ static void disconnect_server(int idx, int dolost)
   use_penalties = 0;
   use_354 = 0;
   deaf_char = 0;
+  deaf_set = 0;
   callerid_char = 0;
   in_callerid = 0;
   use_exempts = 0;
