@@ -2,7 +2,8 @@
 #  define _AUTH_H
 
 #  include "crypt.h"
-#  include "hash_table.h"
+#include <bdlib/src/String.h>
+#include <bdlib/src/HashTable.h>
 
 #define AUTHED	    1
 #define AUTHING     2
@@ -42,10 +43,11 @@ class Auth {
   char host[UHOSTLEN];
   char handle[HANDLEN + 1];
 
+  static bd::HashTable<bd::String, Auth*> ht_handle;
+  static bd::HashTable<bd::String, Auth*> ht_host;
+
   private:
   int status;
-  static hash_table_t *ht_host;
-  static hash_table_t *ht_handle;
 };
 
 void makehash(struct userrec *u, const char *randstring, char *out, size_t out_size);
