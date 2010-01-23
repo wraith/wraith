@@ -3,8 +3,10 @@
  */
 
 
-#include "common.h"
+#include "memcpy.h"
 #include <sys/socket.h>
+#include <errno.h>
+#include <stdlib.h>
 
 /*
  * Define constants based on RFC 883, RFC 1034, RFC 1035

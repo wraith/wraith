@@ -4,7 +4,6 @@
  */
 
 
-#include "common.h"
 #include "memcpy.h"
 
 #ifndef HAVE_STRCASECMP

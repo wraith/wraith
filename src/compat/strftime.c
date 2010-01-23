@@ -4,7 +4,6 @@
  *
  */
 
-#include "src/common.h"
 #include "strftime.h"
 
 #ifndef HAVE_STRFTIME
