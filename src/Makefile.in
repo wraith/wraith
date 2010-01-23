@@ -34,7 +34,6 @@ OBJS = auth.o \
 	EncryptedStream.o \
 	flags.o \
 	garble.o \
-	hash_table.o \
 	log.o \
 	main.o \
 	match.o \
