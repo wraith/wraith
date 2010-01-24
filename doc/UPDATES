@@ -89,6 +89,7 @@
   * Floodbots (+f) are now listed in cmd_userlist
   * Floodbots (+f) will automatically unDEAF themselves to they can monitor the channel for floods (namely flood-chan).
     Note that this is done about 10 seconds after adding +f to a bot. Removing +f will set DEAF again.
+  * This auto DEAF/UNDEAF works if you auth with the bot and it supports channel cmds
 
 1.2.16.1
 * Fix linux compile errors

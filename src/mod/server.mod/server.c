@@ -1012,7 +1012,7 @@ static void server_secondly()
         // Ensure that +D/+f are not conflicting
 
         // In +D but am +f, need to -D
-        if (deaf_set && doflood(NULL)) {
+        if (deaf_set && (doflood(NULL) || (Auth::ht_host.size() && auth_chan && strlen(auth_prefix)))) {
           dprintf(DP_SERVER, "MODE %s -%c\n", botname, deaf_char);
           deaf_set = 0;
         } else if (!deaf_set && use_deaf && deaf_char) {
