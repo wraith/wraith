@@ -16,6 +16,7 @@ namespace bd {
 };
 
 #define SHA_HASH_LENGTH (SHA_DIGEST_LENGTH << 1)
+#define SHA256_HASH_LENGTH (SHA256_DIGEST_LENGTH << 1)
 #define MD5_HASH_LENGTH (MD5_DIGEST_LENGTH << 1)
 
 #define SHA1_SALT_LEN 5
@@ -25,6 +26,8 @@ char *MD5(const char *);
 int md5cmp(const char *, const char*);
 char *SHA1(const char *);
 int sha1cmp(const char *, const char*);
+char *SHA256(const char *);
+int sha256cmp(const char *, const char*);
 
 char *encrypt_string(const char *, char *);
 bd::String encrypt_string(const bd::String&, const bd::String&);

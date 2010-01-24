@@ -236,6 +236,36 @@ int sha1cmp(const char *hash, const char *string) {
   return n;
 }
 
+char *SHA256(const char *string)
+{
+  static int n = 0;
+  static char ret[5][SHA256_HASH_LENGTH + 1];
+  //Cleanse the current buffer
+  if (!string) {
+    OPENSSL_cleanse(ret[n], SHA256_HASH_LENGTH + 1);
+    return NULL;
+  }
+  char* sha256string = ret[n++];
+  unsigned char   sha256out[SHA256_HASH_LENGTH + 1] = "";
+  SHA256_CTX ctx;
+
+  SHA256_Init(&ctx);
+  SHA256_Update(&ctx, string, strlen(string));
+  SHA256_Final(sha256out, &ctx);
+  btoh(sha256out, SHA256_DIGEST_LENGTH, sha256string, SHA256_HASH_LENGTH + 1);
+  OPENSSL_cleanse(&ctx, sizeof(ctx));
+
+  if (n == 5) n = 0;
+
+  return sha256string;
+}
+
+int sha256cmp(const char *hash, const char *string) {
+  int n = strcmp(hash, SHA256(string));
+  SHA256(NULL);
+  return n;
+}
+
 void btoh(const unsigned char *md, size_t md_len, char *buf, const size_t buf_len)
 {
 #define doblock(n) simple_snprintf(&(buf[(i + n) << 1]), buf_len - ((i + n) << 1), "%02x", md[i + n]);

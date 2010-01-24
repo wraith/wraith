@@ -1634,6 +1634,17 @@ static void cmd_sha1(int idx, char *par)
   dprintf(idx, "SHA1(%s) = %s\n", par, SHA1(par));
 }
 
+static void cmd_sha256(int idx, char *par)
+{
+  if (!par[0]) {
+    dprintf(idx, "Usage: sha256 <string>\n");
+    return;
+  }
+
+  putlog(LOG_CMDS, "*", "#%s# sha256 ...", dcc[idx].nick);
+  dprintf(idx, "SHA256(%s) = %s\n", par, SHA256(par));
+}
+
 static void cmd_conf(int idx, char *par)
 {
   if (!conf.bot->localhub && !conf.bot->hub) {
@@ -4569,6 +4580,7 @@ cmd_t C_dcc[] =
   {"randstring", 	"", 	(Function) cmd_randstring, 	NULL, AUTH_ALL},
   {"md5",		"",	(Function) cmd_md5,		NULL, AUTH_ALL},
   {"sha1",		"",	(Function) cmd_sha1,		NULL, AUTH_ALL},
+  {"sha256",		"",	(Function) cmd_sha256,		NULL, AUTH_ALL},
   {"conf",		"a",	(Function) cmd_conf,		NULL, 0},
   {"encrypt",		"",	(Function) cmd_encrypt,		NULL, AUTH_ALL},
   {"decrypt",		"",	(Function) cmd_decrypt,		NULL, AUTH_ALL},

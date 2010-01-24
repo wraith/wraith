@@ -901,7 +901,7 @@ See also: down
 ###  $bdecrypt$b <key> <string>
    Decrypts the string using the specified key.
  
-See also: encrypt, randstring, md5, sha1
+See also: encrypt, randstring, md5, sha1, sha256
 :leaf:deluser
 ###  $bdeluser$b <nickname>
    Deletes a user record for a user on the channel, using their
@@ -968,7 +968,7 @@ See also: color, console, login, page, strip
 ###  $bencrypt$b <key> <string>
    Encrypts the string using the specified key.
  
-See also: decrypt, randstring, md5, sha1
+See also: decrypt, randstring, md5, sha1, sha256
 ::exec:
 ###  $bexec$b <params>
    The bot will execute the specified program with each param specified,
@@ -1271,7 +1271,7 @@ See also: match
 ###  $bmd5$b <string>
    Returns the MD5 hash of the specified string.
  
-See also: randstring, sha1, encrypt, decrypt
+See also: randstring, sha1, sha256, encrypt, decrypt
 ::me
 ###  $bme$b <text>
    Performs an action on the party line. This appears as "* bryan is leaving",
@@ -1450,7 +1450,7 @@ See also: color, console, echo, login, strip
 ###  $brandstring$b <len>
    Displays a random string of length 'len' up to 300 chars.
  
-See also: md5, sha1, encrypt, decrypt
+See also: md5, sha1, sha256, encrypt, decrypt
 ::rehash
 ###  $brehash$b 
    Don't use this cmd, it doesn't do what you think it does, and can result
@@ -1662,7 +1662,12 @@ See also: botset
 ###  $bsha1$b <string>
    Returns the SHA1 hash of the specified string.
  
-See also: randstring, md5, encrypt, decrypt
+See also: randstring, md5, sha256, encrypt, decrypt
+::sha256
+###  $bsha256$b <string>
+   Returns the SHA256 hash of the specified string.
+
+See also: randstring, md5, sha1, encrypt, decrypt
 ::simul
 ###  $bsimul$b <handle> <text>
    This allows you to simulate the specified handle typing the given text.
