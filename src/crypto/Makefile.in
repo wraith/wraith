@@ -3,7 +3,7 @@ top_srcdir = @top_srcdir@
 srcdir = @srcdir@
 
 SHELL = @SHELL@
-CXXFLAGS = @CXXFLAGS@ -I.. -I$(top_srcdir) -I$(top_srcdir)/pack @DEFS@ $(CFLGS)
+CXXFLAGS = @CXXFLAGS@ -I.. -I$(top_srcdir) -I$(top_srcdir)/lib @DEFS@ $(CFLGS)
 CPPFLAGS = @CPPFLAGS@
 STRIP = @STRIP@
 

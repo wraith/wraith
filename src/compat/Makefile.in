@@ -9,7 +9,7 @@ depcomp = /bin/sh $(top_srcdir)/autotools/depcomp
 @SET_MAKE@
 
 STRIP = @STRIP@
-CXXFLAGS = @CXXFLAGS@ -I../.. -I$(top_srcdir) -I$(top_srcdir)/src @DEFS@ $(CFLGS)
+CXXFLAGS = @CXXFLAGS@ -I../.. -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/src @DEFS@ $(CFLGS)
 CPPFLAGS = @CPPFLAGS@
 
 OBJS = dirname.o \
