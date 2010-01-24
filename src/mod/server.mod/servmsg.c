@@ -314,8 +314,10 @@ got005(char *from, char *msg)
       use_354 = 1;
     else if (!strcasecmp(tmp, "DEAF")) {
       deaf_char = p ? p[0] : 'D';
-      if (use_deaf)
+      if (use_deaf) {
         dprintf(DP_SERVER, "MODE %s +%c\n", botname, deaf_char);
+        deaf_set = 1;
+      }
     } else if (!strcasecmp(tmp, "CALLERID")) {
       callerid_char = p ? p[0] : 'g';
       if (use_callerid)
@@ -790,16 +792,14 @@ static int gotwall(char *from, char *msg)
 
 void server_send_ison()
 {
-  if (server_online && keepnick && !use_monitor) {
-    // Only check if we're not on jupenick, or there is no jupenick and we're not on the preferred nick
-    bool have_jupenick = jupenick[0] ? match_my_nick(jupenick) : 0;
-    if (!have_jupenick) {
-      /* See if my nickname is in use and if if my nick is right.  */
-      if (jupenick[0] && !have_jupenick)
-        dprintf(DP_SERVER, "ISON %s %s\n", origbotname, jupenick);
-      else if (!match_my_nick(origbotname)) 
-        dprintf(DP_SERVER, "ISON %s\n", origbotname);
-    }
+  // Only check if we're not on jupenick, or there is no jupenick and we're not on the preferred nick
+  bool have_jupenick = jupenick[0] ? match_my_nick(jupenick) : 0;
+  if (!have_jupenick) {
+    /* See if my nickname is in use and if if my nick is right.  */
+    if (jupenick[0] && !have_jupenick)
+      dprintf(DP_SERVER, "ISON %s %s\n", origbotname, jupenick);
+    else if (!match_my_nick(origbotname))
+      dprintf(DP_SERVER, "ISON %s\n", origbotname);
   }
 }
 /* Called once a minute... but if we're the only one on the
@@ -1181,6 +1181,7 @@ static void disconnect_server(int idx, int dolost)
   use_penalties = 0;
   use_354 = 0;
   deaf_char = 0;
+  deaf_set = 0;
   callerid_char = 0;
   in_callerid = 0;
   use_exempts = 0;

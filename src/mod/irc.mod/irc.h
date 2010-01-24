@@ -78,7 +78,7 @@ static void flush_mode(struct chanset_t *, int);
 #define resetexempts(chan)  resetmasks((chan), (chan)->channel.exempt, (chan)->exempts, global_exempts, 'e')
 #define resetinvites(chan)  resetmasks((chan), (chan)->channel.invite, (chan)->invites, global_invites, 'I')
 
-static void detect_offense(memberlist*, struct chanset_t *, char *);
+//static void detect_offense(memberlist*, struct chanset_t *, char *);
 /* static int target_priority(struct chanset_t *, memberlist *, int); */
 static bool do_op(char *, struct chanset_t *, bool, bool);
 static void request_op(struct chanset_t *);
