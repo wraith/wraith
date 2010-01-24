@@ -31,6 +31,9 @@ int sha256cmp(const char *, const char*);
 
 char *encrypt_string(const char *, char *);
 bd::String encrypt_string(const bd::String&, const bd::String&);
+#ifdef not_needed
+bd::String encrypt_string_bf(const bd::String&, const bd::String&);
+#endif
 bd::String encrypt_string_cbc(const bd::String&, const bd::String&, unsigned char *);
 char *decrypt_string(const char *, char *);
 char *salted_sha1(const char *, const char* = NULL);

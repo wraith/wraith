@@ -50,6 +50,23 @@ bd::String encrypt_string(const bd::String& key, const bd::String& data) {
   return encrypted;
 }
 
+#ifdef not_needed
+/**
+ * @brief Encrypt a string with Blowfish ECB
+ * @param key The key to encrypt with
+ * @param data The string to encrypt
+ * @return A new, encrypted string
+ */
+bd::String encrypt_string_bf(const bd::String& key, const bd::String& data) {
+  if (!key) return data;
+  size_t len = data.length();
+  char *bdata = (char*) bf_encrypt_ecb_binary(key.c_str(), (unsigned char*) data.c_str(), &len);
+  bd::String encrypted(bdata, len);
+  free(bdata);
+  return encrypted;
+}
+#endif
+
 /**
  * @brief Encrypt a string with AES 256 CBC
  * @param key The key to encrypt with
