@@ -25,6 +25,8 @@ This package includes a mix of licenses:
  * It may be used for any purpose as long as this notice remains intact
  * on all source code distributions
 
+ This contains code derived from dirtirc (which is mostly derived from eggdrop): http://dirtirc.sf.net/
+
 /*
  * Copyright (C) 1997 Robey Pointer
  * Copyright (C) 1999 - 2008 Eggheads Development Team (http://www.eggheads.org)
