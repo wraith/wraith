@@ -1014,9 +1014,11 @@ static void server_secondly()
         // In +D but am +f, need to -D
         if (deaf_set && doflood(NULL)) {
           dprintf(DP_SERVER, "MODE %s -%c\n", botname, deaf_char);
+          deaf_set = 0;
         } else if (!deaf_set && use_deaf && deaf_char) {
           // Not +D but should be, probably had +f removed.
           dprintf(DP_SERVER, "MODE %s +%c\n", botname, deaf_char);
+          deaf_set = 1;
         }
 
         cnt_10 = 0;
