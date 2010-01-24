@@ -1,7 +1,3 @@
-* Floodbots (+f) are now listed in cmd_userlist
-* Floodbots (+f) will automatically unDEAF themselves to they can monitor the channel for floods (namely flood-chan).
-  Note that this is done about 10 seconds after adding +f to a bot. Removing +f will set DEAF again.
-
 1.3 - http://wraith.botpack.net/milestone/1.3
 * Binary / shell / startup changes
   * Binary error messages are no longer obscure numbers or fake segfaults. (Compile with OBSCURE_ERRORS to re-enable)
@@ -90,6 +86,9 @@
   * Removed 'chanset +knock' and replaced with 'chanset knock (Op|Voice|User)', see 'help chaninfo'.
   * Default log timestamp now includes seconds.
   * Hubs no longer include their own timestamp over botnet.
+  * Floodbots (+f) are now listed in cmd_userlist
+  * Floodbots (+f) will automatically unDEAF themselves to they can monitor the channel for floods (namely flood-chan).
+    Note that this is done about 10 seconds after adding +f to a bot. Removing +f will set DEAF again.
 
 1.2.16.1
 * Fix linux compile errors
