@@ -1331,10 +1331,10 @@ static int whoispenalty(char *from, char *msg)
   return 0;
 }
 
-static void irc_whois(char *, const char *, ...) __attribute__((format(printf, 2, 3)));
+static void irc_whois(char *, const char*, const char *, ...) __attribute__((format(printf, 3, 4)));
 
 static void
-irc_whois(char *nick, const char *format, ...)
+irc_whois(char *nick, const char* prefix, const char *format, ...)
 {
   char va_out[2001] = "";
   va_list va;
@@ -1345,7 +1345,10 @@ irc_whois(char *nick, const char *format, ...)
 
   for (int idx = 0; idx < dcc_total; idx++) {
     if (dcc[idx].type && dcc[idx].whois[0] && !rfc_casecmp(nick, dcc[idx].whois)) {
-      dprintf(idx, "%s\n", va_out);
+      if (prefix)
+        dumplots(idx, prefix, va_out);
+      else
+        dprintf(idx, "%s\n", va_out);
       break;
     }
   }
@@ -1393,7 +1396,7 @@ static int got311(char *from, char *msg)
     check_hostmask();
   }
 
-  irc_whois(nick, "$b%s$b [%s@%s]", nick, username, address);
+  irc_whois(nick, NULL, "$b%s$b [%s@%s]", nick, username, address);
 
   // FIXME: This should incorporate userip and member/client lookups - and should ACT on discovering a user.
   // FIXME: This should also use whois_actually to cache userip
@@ -1403,14 +1406,14 @@ static int got311(char *from, char *msg)
     for (idx = 0; idx < dcc_total; idx++) {
       if (dcc[idx].type && dcc[idx].whois[0] && !rfc_casecmp(nick, dcc[idx].whois)) {
         if (whois_access(dcc[idx].user, u)) {
-          irc_whois(nick, " username : $u%s$u", u->handle);
+          irc_whois(nick, " username : ", "$u%s$u", u->handle);
         }
         break;
       }
     }
   }
 
-  irc_whois(nick, " ircname  : %s", msg);
+  irc_whois(nick, " ircname  : ", "%s", msg);
   
   return 0;
 }
@@ -1470,13 +1473,13 @@ static int got319(char *from, char *msg)
       char *chans = NULL;
       /* Show every channel the user has access to view */
       if ((chans = hide_chans(nick, dcc[idx].user, msg, 0))) {
-        irc_whois(nick, " channels : %s", chans);
+        irc_whois(nick, " channels : ", "%s", chans);
         free(chans);
       }
       chans = NULL;
       /* Show all of the 'public' channels */
       if ((chans = hide_chans(nick, dcc[idx].user, msg, 1))) {
-        irc_whois(nick, " public   : %s", chans);
+        irc_whois(nick, " public   : ", "%s", chans);
         free(chans);
       }
       break;
@@ -1496,7 +1499,7 @@ static int got312(char *from, char *msg)
   server = newsplit(&msg);
   fixcolon(msg);
 
-  irc_whois(nick, " server   : %s [%s]", server, msg);
+  irc_whois(nick, " server   : ", "%s [%s]", server, msg);
   return 0;
 }
 
@@ -1509,7 +1512,7 @@ static int got301(char *from, char *msg)
   nick = newsplit(&msg);
   fixcolon(msg);
 
-  irc_whois(nick, " away     : %s", msg);
+  irc_whois(nick, " away     : ", "%s", msg);
 
   return 0;
 }
@@ -1523,7 +1526,7 @@ static int got313(char *from, char *msg)
   nick = newsplit(&msg);
   fixcolon(msg);
  
-  irc_whois(nick, "          : $b%s$b", msg);
+  irc_whois(nick, "          : ", "$b%s$b", msg);
 
   return 0;
 }
@@ -1550,7 +1553,7 @@ static int got317(char *from, char *msg)
   mymins = idle / 60;
   idle = idle % 60;
   mysecs = idle;
-  irc_whois(nick, " idle     : %d days %d hours %d mins %d secs [signon: %s]", mydays, myhours, mymins, mysecs, date);
+  irc_whois(nick, " idle     : " , "%d days %d hours %d mins %d secs [signon: %s]", mydays, myhours, mymins, mysecs, date);
 
   return 0;
 }
@@ -1569,7 +1572,7 @@ static int got318_369(char *from, char *msg, int whowas)
   nick = newsplit(&msg);
   fixcolon(msg);
 
-  irc_whois(nick, "%s", msg);
+  irc_whois(nick, NULL, "%s", msg);
   for (int idx = 0; idx < dcc_total; idx++) {
     if (dcc[idx].type && dcc[idx].whois[0] && !rfc_casecmp(dcc[idx].whois, nick) &&
        ((!whowas && !dcc[idx].whowas) || (whowas && dcc[idx].whowas))) {
@@ -1589,7 +1592,7 @@ static int got401(char *from, char *msg)
   newsplit(&msg);
   nick = newsplit(&msg);
   fixcolon(msg);
-  irc_whois(nick, "%s", msg);
+  irc_whois(nick, NULL, "%s", msg);
   for (int idx = 0; idx < dcc_total; idx++)
     if (dcc[idx].type && dcc[idx].whois[0] && !rfc_casecmp(dcc[idx].whois, nick))
       dcc[idx].whowas = 1;
@@ -1607,7 +1610,7 @@ static int got406(char *from, char *msg)
   newsplit(&msg);
   nick = newsplit(&msg);
   fixcolon(msg);
-  irc_whois(nick, "%s", msg);
+  irc_whois(nick, NULL, "%s", msg);
  
   return 0;
 }
