@@ -1,7 +1,9 @@
-#include "common.h"
+#include "dirname.h"
+
 #include <errno.h>
 #include <string.h>
 #include <sys/param.h>
+#include "strlcpy.h"
 
 
 char *

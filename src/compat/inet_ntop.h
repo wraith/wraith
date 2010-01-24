@@ -7,7 +7,10 @@
 #ifndef _EGG_COMPAT_INET_NTOP_H
 #define _EGG_COMPAT_INET_NTOP_H
 
-#include "src/common.h"
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>

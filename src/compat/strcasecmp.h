@@ -7,7 +7,10 @@
 #ifndef _EGG_COMPAT_STRCASECMP_H
 #define _EGG_COMPAT_STRCASECMP_H
 
-#include "src/common.h"
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
+
 #include <ctype.h>
 
 

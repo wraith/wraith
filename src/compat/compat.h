@@ -7,6 +7,10 @@
 #ifndef _EGG_COMPAT_COMPAT_H
 #define _EGG_COMPAT_COMPAT_H
 
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
+
 #include "dirname.h"
 #include "dn_expand.h"
 #include "inet_ntop.h"

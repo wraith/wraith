@@ -18,7 +18,6 @@
 #include "egg_timer.h"
 #include "users.h"
 #include "crypt.h"
-#include "hash_table.h"
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -27,6 +26,8 @@
 #include "chan.h"
 #include "tandem.h"
 #include "src/mod/server.mod/server.h"
+#include <bdlib/src/String.h>
+#include <bdlib/src/HashTable.h>
 #include <pwd.h>
 #include <errno.h>
 
@@ -38,7 +39,8 @@
 
 #include "stat.h"
 
-hash_table_t *Auth::ht_handle = NULL, *Auth::ht_host = NULL;
+bd::HashTable<bd::String, Auth*> Auth::ht_handle(10);
+bd::HashTable<bd::String, Auth*> Auth::ht_host(10);
 
 Auth::Auth(const char *_nick, const char *_host, struct userrec *u)
 {
@@ -54,14 +56,10 @@ Auth::Auth(const char *_nick, const char *_host, struct userrec *u)
     handle[1] = 0;
   }
 
-  if (!ht_host)
-    ht_host = hash_table_create(NULL, NULL, 50, HASH_TABLE_STRINGS);
-  if (!ht_handle)
-    ht_handle = hash_table_create(NULL, NULL, 50, HASH_TABLE_STRINGS);
 
-  hash_table_insert(ht_host, host, this);
+  ht_host[host] = this;
   if (user)
-    hash_table_insert(ht_handle, handle, this);
+    ht_handle[handle] = this;
 
   sdprintf(STR("New auth created! (%s!%s) [%s]"), nick, host, handle);
   authtime = atime = now;
@@ -72,8 +70,8 @@ Auth::~Auth()
 {
   sdprintf(STR("Removing auth: (%s!%s) [%s]"), nick, host, handle);
   if (user)
-    hash_table_remove(ht_handle, handle, this);
-  hash_table_remove(ht_host, host, this);
+    ht_handle.remove(handle);
+  ht_host.remove(host);
 }
 
 void Auth::MakeHash()
@@ -95,12 +93,10 @@ void Auth::NewNick(const char *newnick) {
 
 Auth *Auth::Find(const char *_host)
 {
-  if (ht_host) {
-    Auth *auth = NULL;
 
-    hash_table_find(ht_host, _host, &auth);
-    if (auth)
-      sdprintf(STR("Found auth: (%s!%s) [%s]"), auth->nick, auth->host, auth->handle);
+  if (ht_host.contains(_host)) {
+    Auth *auth = ht_host[_host];
+    sdprintf(STR("Found auth: (%s!%s) [%s]"), auth->nick, auth->host, auth->handle);
     return auth;
   }
   return NULL;
@@ -108,59 +104,48 @@ Auth *Auth::Find(const char *_host)
 
 Auth *Auth::Find(const char *handle, bool _hand)
 {
-  if (ht_handle) {
-    Auth *auth = NULL;
-
-    hash_table_find(ht_handle, handle, &auth);
-    if (auth)
-      sdprintf(STR("Found auth (by handle): %s (%s!%s)"), handle, auth->nick, auth->host);
+  if (ht_handle.contains(handle)) {
+    Auth *auth = ht_handle[handle];
+    sdprintf(STR("Found auth (by handle): %s (%s!%s)"), handle, auth->nick, auth->host);
     return auth;
   }
   return NULL;
 }
 
-static int auth_clear_users_walk(const void *key, void *data, void *param)
+static void auth_clear_users_block(const bd::String key, Auth* auth, void *param)
 {
-  Auth *auth = *(Auth **)data;
-
   if (auth->user) {
     sdprintf(STR("Clearing USER for auth: (%s!%s) [%s]"), auth->nick, auth->host, auth->handle);
     auth->user = NULL;
   }
-  return 0;
 }
 
 void Auth::NullUsers()
 {
-  hash_table_walk(ht_host, auth_clear_users_walk, NULL);
+  ht_host.each(auth_clear_users_block);
 }
 
-static int auth_fill_users_walk(const void *key, void *data, void *param)
+static void auth_fill_users_block(const bd::String key, Auth* auth, void* param)
 {
-  Auth *auth = *(Auth **)data;
-  
   if (strcmp(auth->handle, "*")) {
     sdprintf(STR("Filling USER for auth: (%s!%s) [%s]"), auth->nick, auth->host, auth->handle);
     auth->user = get_user_by_handle(userlist, auth->handle);
   }
-
-  return 0;
 }
 
 void Auth::FillUsers()
 {
-  hash_table_walk(ht_host, auth_fill_users_walk, NULL);
+  ht_host.each(auth_fill_users_block);
 }
 
 
-static int auth_expire_walk(const void *key, void *data, void *param)
+static void auth_expire_block(const bd::String key, Auth* auth, void* param)
 {
-  Auth *auth = *(Auth **)data;
-
-  if (auth->Authed() && ((now - auth->atime) >= (60 * 60)))
+  if (auth->Authed() && ((now - auth->atime) >= (60 * 60))) {
+    Auth::ht_host.remove(key);
+    Auth::ht_handle.remove(key);
     delete auth;
-
-  return 0;
+  }
 }
 
 void Auth::ExpireAuths()
@@ -168,24 +153,22 @@ void Auth::ExpireAuths()
   if (!ischanhub())
     return;
 
-  hash_table_walk(ht_host, auth_expire_walk, NULL);
+  ht_host.each(auth_expire_block);
 }
 
-static int auth_delete_all_walk(const void *key, void *data, void *param)
+static void auth_delete_all_block(const bd::String, Auth* auth, void* param)
 {
-  Auth *auth = *(Auth **)data;
-
   putlog(LOG_DEBUG, "*", STR("Removing (%s!%s) [%s], from auth list."), auth->nick, auth->host, auth->handle);
   delete auth;
-
-  return 0;
 }
 
 void Auth::DeleteAll()
 {
   if (ischanhub()) {
     putlog(LOG_DEBUG, "*", STR("Removing auth entries."));
-    hash_table_walk(ht_host, auth_delete_all_walk, NULL);
+    ht_host.each(auth_delete_all_block);
+    ht_host.clear();
+    ht_handle.clear();
   }
 }
 
@@ -247,21 +230,18 @@ sdprintf(STR("GETIDX: auth: %s, idx: %d"), nick, idx);
   return 0;
 }
 
-static int auth_tell_walk(const void *key, void *data, void *param)
+static void auth_tell_block(const bd::String key, Auth* auth, void* param)
 {
-  Auth *auth = *(Auth **)data;
   long lparam = (long) param;
   int idx = (int) lparam;
 
   dprintf(idx, "(%s!%s) [%s] authtime: %li, atime: %li, Status: %d\n", auth->nick, 
         auth->host, auth->handle, (long)auth->authtime, (long)auth->atime, auth->Status());
-  
-  return 0;
 }
 
 void Auth::TellAuthed(int idx)
 {
-  hash_table_walk(ht_host, auth_tell_walk, (void *) (long) idx);
+  ht_host.each(auth_tell_block, (void *) (long) idx);
 }
 
 void makehash(struct userrec *u, const char *randstring, char *out, size_t out_size)

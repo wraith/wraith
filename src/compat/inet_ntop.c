@@ -5,8 +5,8 @@
  */
 
 
-#include "common.h"
 #include "inet_ntop.h"
+#include "sprintf.h"
 
 #ifndef HAVE_INET_NTOP
 

@@ -34,7 +34,6 @@ OBJS = auth.o \
 	EncryptedStream.o \
 	flags.o \
 	garble.o \
-	hash_table.o \
 	log.o \
 	main.o \
 	match.o \
@@ -42,7 +41,6 @@ OBJS = auth.o \
 	misc_file.o \
 	net.o \
 	adns.o \
-	profile.o \
 	response.o \
 	rfc1459.o \
 	set.o \

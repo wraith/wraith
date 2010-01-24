@@ -1,5 +1,6 @@
 #include <string.h>
 #include "memcpy.h"
+#include "memutil.h"
 #include "src/main.h"
 #include <stdlib.h>
 
