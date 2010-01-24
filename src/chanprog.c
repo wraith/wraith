@@ -593,7 +593,7 @@ void rehash_ip() {
     // If not listening on the domain socket, open it up
     bool listening = 0;
     for (int i = 0; i < dcc_total; i++) {
-      if (dcc[i].type && (dcc[i].type == &DCC_TELNET) && (!strcmp(dcc[i].host, conf.localhub_socket))) {
+      if (dcc[i].type && (dcc[i].type == &DCC_TELNET) && (!strcmp(dcc[i].host, conf.localhub_socket)) && (!strcmp(dcc[i].nick, "(unix_domain"))) {
         listening = 1;
         break;
       }

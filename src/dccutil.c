@@ -847,7 +847,8 @@ listen_all(port_t lport, bool off)
     }
 
   for (ii = 0; ii < dcc_total; ii++) {
-    if (dcc[ii].type && (dcc[ii].type == &DCC_TELNET) && (dcc[ii].port == port)) {
+    if (dcc[ii].type && (dcc[ii].type == &DCC_TELNET) && (dcc[ii].port == port) &&
+           (!strcmp(dcc[i].nick, "(telnet)") || !strcmp(dcc[i].nick, "(telnet6)"))) {
       idx = ii;
 
       if (off) {
