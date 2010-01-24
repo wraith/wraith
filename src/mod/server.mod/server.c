@@ -72,8 +72,8 @@ char botuserip[UHOSTLEN] = "";		/* bot's user@host with the ip. */
 
 bool keepnick = 1;		/* keep trying to regain my intended
 				   nickname? */
-static bool nick_juped = 0;	/* True if origbotname is juped(RPL437) (dw) */
-static bool jnick_juped = 0;    /* True if jupenick is juped */
+static int nick_juped = 0;	/* True if origbotname is juped(RPL437) (dw) (1 = RESV, 2 = NETSPLIT) */
+static int jnick_juped = 0;    /* True if jupenick is juped (1 = RESV, 2 = NETSPLIT) */
 time_t tried_jupenick = 0;
 time_t tried_nick = 0;
 bool use_monitor = 0;
@@ -992,7 +992,7 @@ static void server_secondly()
     connect_server();
 
   if (server_online) {
-    if (keepnick && !use_monitor) {
+    if (keepnick && (!use_monitor || (use_monitor && (jnick_juped == 2 || nick_juped == 2)))) {
       static int ison_cnt = 0;
 
       if (ison_time == 0) //If someone sets this to 0, all hell will break loose!

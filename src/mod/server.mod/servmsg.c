@@ -796,10 +796,17 @@ void server_send_ison()
   bool have_jupenick = jupenick[0] ? match_my_nick(jupenick) : 0;
   if (!have_jupenick) {
     /* See if my nickname is in use and if if my nick is right.  */
-    if (jupenick[0] && !have_jupenick)
-      dprintf(DP_SERVER, "ISON %s %s\n", origbotname, jupenick);
-    else if (!match_my_nick(origbotname))
-      dprintf(DP_SERVER, "ISON %s\n", origbotname);
+    if (jupenick[0] && !have_jupenick) {
+      if (use_monitor) // If our nick is juped due to split, we will NOT get a RPL_MONOFFLINE when it is available. So check periodically.
+        dprintf(DP_SERVER, "MONITOR S\n");
+      else
+        dprintf(DP_SERVER, "ISON %s %s\n", origbotname, jupenick);
+    } else if (!match_my_nick(origbotname)) {
+      if (use_monitor) // If our nick is juped due to split, we will NOT get a RPL_MONOFFLINE when it is available. So check periodically.
+        dprintf(DP_SERVER, "MONITOR S\n");
+      else
+        dprintf(DP_SERVER, "ISON %s\n", origbotname);
+    }
   }
 }
 /* Called once a minute... but if we're the only one on the
@@ -860,7 +867,7 @@ static int nick_which(const char* nick, bool& is_jupe, bool& is_orig) {
 static void nick_available(bool is_jupe, bool is_orig) {
   if (jupenick[0] && is_jupe && !match_my_nick((jupenick))) {
     /* Ensure we aren't processing a QUIT/NICK and a MONITOR, or just some screw up */
-    if (!tried_jupenick || ((now - tried_jupenick) > 1)) {
+    if (!tried_jupenick || ((now - tried_jupenick) > 2)) {
       tried_jupenick = now;
       dprintf(DP_DUMP, "NICK %s\n", jupenick);
       if (!jnick_juped)
@@ -868,7 +875,7 @@ static void nick_available(bool is_jupe, bool is_orig) {
     }
     // Don't switch to the nick if already on jupenick
   } else if (is_orig && !match_my_nick(origbotname) && (!jupenick[0] || !match_my_nick(jupenick))) {
-    if (!tried_nick || ((now - tried_nick) > 1)) {
+    if (!tried_nick || ((now - tried_nick) > 2)) {
       altnick_char = rolls = 0;
       tried_nick = now;
       dprintf(DP_DUMP, "NICK %s\n", origbotname);
@@ -938,7 +945,8 @@ static int got432(char *from, char *msg)
 
   if (jupenick[0] && !strcmp(erroneus, jupenick)) {
     was_juped = jnick_juped;
-    is_jnick = jnick_juped = 1;
+    is_jnick = 1;
+    jnick_juped = 1;
   } else {
     was_juped = nick_juped;
     nick_juped = 1;
@@ -1041,11 +1049,11 @@ static int got437(char *from, char *msg)
     if (!rfc_casecmp(s, origbotname)) {
       if (!nick_juped)
         putlog(LOG_MISC, "*", "NICK IS TEMPORARILY UNAVAILABLE: '%s' (keeping '%s').", s, botname);
-      nick_juped = 1;
+      nick_juped = 2;
     } else if (jupenick[0] && !rfc_casecmp(s, jupenick)) {
       if (!jnick_juped)
         putlog(LOG_MISC, "*", "JUPENICK IS TEMPORARILY UNAVAILABLE: '%s' (keeping '%s').", s, botname);
-      jnick_juped = 1;
+      jnick_juped = 2;
     }
   } else {
     putlog(LOG_MISC, "*", "%s: %s", "Nickname has been juped", s);
@@ -1117,6 +1125,7 @@ static int gotnick(char *from, char *msg)
       altnick_char = rolls = 0;
       putlog(LOG_SERV | LOG_MISC, "*", "Regained jupenick '%s'.", msg);
       jnick_juped = 0;
+      nick_juped = 0; // Unset this, no reason for it now.
     } else if (!strcmp(msg, origbotname)) {
       altnick_char = rolls = 0;
       putlog(LOG_SERV | LOG_MISC, "*", "Regained nickname '%s'.", msg);
