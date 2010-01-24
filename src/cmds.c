@@ -66,6 +66,7 @@
 #include <bdlib/src/String.h>
 #include <bdlib/src/Stream.h>
 #include <bdlib/src/Array.h>
+#include <bdlib/src/base64.h>
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -1856,6 +1857,50 @@ static void cmd_encrypt(int idx, char *par)
 
   dprintf(idx, "encrypt(%s) = %s\n", par, buf);
   free(buf);
+}
+
+static void cmd_encrypt_fish(int idx, char *par)
+{
+  if (!par[0]) {
+    dprintf(idx, "Usage: encrypt_fish <key> <string>\n");
+    return;
+  }
+
+  putlog(LOG_CMDS, "*", "#%s# encrypt_fish ...", dcc[idx].nick);
+
+  char *key = newsplit(&par);
+
+  if (!par[0]) {
+    dprintf(idx, "Usage: encrypt_fish <key> <string>\n");
+    return;
+  }
+
+  const char salt2[] = SALT2;
+
+  bd::String bf_crypt = egg_bf_encrypt(bd::String(par), bd::String(key ? key : salt2));
+  dprintf(idx, "encrypt_fish(%s) = %s\n", par, bf_crypt.c_str());
+}
+
+static void cmd_decrypt_fish(int idx, char *par)
+{
+  if (!par[0]) {
+    dprintf(idx, "Usage: decrypt_fish <key> <string>\n");
+    return;
+  }
+
+  putlog(LOG_CMDS, "*", "#%s# decrypt_fish ...", dcc[idx].nick);
+
+  char *key = newsplit(&par);
+
+  if (!par[0]) {
+    dprintf(idx, "Usage: decrypt_fish <key> <string>\n");
+    return;
+  }
+
+  const char salt2[] = SALT2;
+
+  bd::String bf_decrypt = egg_bf_decrypt(bd::String(par), bd::String(key ? key : salt2));
+  dprintf(idx, "decrypt_fish(%s) = %s\n", par, bf_decrypt.c_str());
 }
 
 static void cmd_decrypt(int idx, char *par)
@@ -4583,7 +4628,9 @@ cmd_t C_dcc[] =
   {"sha256",		"",	(Function) cmd_sha256,		NULL, AUTH_ALL},
   {"conf",		"a",	(Function) cmd_conf,		NULL, 0},
   {"encrypt",		"",	(Function) cmd_encrypt,		NULL, AUTH_ALL},
+  {"encrypt_fish",	"",	(Function) cmd_encrypt_fish,	NULL, AUTH_ALL},
   {"decrypt",		"",	(Function) cmd_decrypt,		NULL, AUTH_ALL},
+  {"decrypt_fish",	"",	(Function) cmd_decrypt_fish,	NULL, AUTH_ALL},
   {"botcmd",		"i",	(Function) cmd_botcmd, 		NULL, HUB},
   {"hublevel", 		"a", 	(Function) cmd_hublevel, 	NULL, HUB},
   {"lagged", 		"m", 	(Function) cmd_lagged, 		NULL, HUB},
