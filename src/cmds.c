@@ -1613,6 +1613,19 @@ static void cmd_randstring(int idx, char *par)
     dprintf(idx, "Too long, must be <= 300\n");
 }
 
+static void cmd_hash(int idx, char *par)
+{
+  if (!par[0]) {
+    dprintf(idx, "Usage: hash <string>\n");
+    return;
+  }
+
+  putlog(LOG_CMDS, "*", "#%s# hash ...", dcc[idx].nick);
+  dprintf(idx, "MD5(%s) = %s\n", par, MD5(par));
+  dprintf(idx, "SHA1(%s) = %s\n", par, SHA1(par));
+  dprintf(idx, "SHA256(%s) = %s\n", par, SHA256(par));
+}
+
 static void cmd_md5(int idx, char *par)
 {
   if (!par[0]) {
@@ -4623,6 +4636,7 @@ cmd_t C_dcc[] =
   {"test",		"",	(Function) cmd_test,		NULL, 0},
   {"botlink",		"a",	(Function) cmd_botlink,		NULL, 0},
   {"randstring", 	"", 	(Function) cmd_randstring, 	NULL, AUTH_ALL},
+  {"hash",		"",	(Function) cmd_hash,		NULL, AUTH_ALL},
   {"md5",		"",	(Function) cmd_md5,		NULL, AUTH_ALL},
   {"sha1",		"",	(Function) cmd_sha1,		NULL, AUTH_ALL},
   {"sha256",		"",	(Function) cmd_sha256,		NULL, AUTH_ALL},

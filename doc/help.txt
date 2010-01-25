@@ -901,14 +901,14 @@ See also: down
 ###  $bdecrypt$b <key> <string>
    Decrypts the string using the specified key.
  
-See also: decrypt_fish, encrypt, encrypt_fish, randstring, md5, sha1, sha256
+See also: decrypt_fish, encrypt, encrypt_fish, randstring, md5, sha1, sha256, hash
 ::decrypt_fish
 ###  $bdecrypt_fish$b <key> <string>
    Decrypts the string using the specified key.
  
    This algorithm is eggdrop's blowfish, same as FiSH.
  
-See also: decrypt, encrypt, encrypt_fish, randstring, md5, sha1, sha256
+See also: decrypt, encrypt, encrypt_fish, randstring, md5, sha1, sha256, hash
 :leaf:deluser
 ###  $bdeluser$b <nickname>
    Deletes a user record for a user on the channel, using their
@@ -975,14 +975,14 @@ See also: color, console, login, page, strip
 ###  $bencrypt$b <key> <string>
    Encrypts the string using the specified key.
  
-See also: encrypt_fish, decrypt, decrypt_fish, randstring, md5, sha1, sha256
+See also: encrypt_fish, decrypt, decrypt_fish, randstring, md5, sha1, sha256, hash
 ::encrypt_fish
 ###  $bencrypt_fish$b <key> <string>
    Encrypts the string using the specified key.
  
    This algorithm is eggdrop's blowfish, same as FiSH.
  
-See also: encrypt, decrypt, decrypt_fish, randstring, md5, sha1, sha256
+See also: encrypt, decrypt, decrypt_fish, randstring, md5, sha1, sha256, hash
 ::exec:
 ###  $bexec$b <params>
    The bot will execute the specified program with each param specified,
@@ -1059,6 +1059,11 @@ See also: console, channels%{+m}, status%{-}
    Perm owners may not change their handle without recompiling binaries first. 
  
 See also: newpass%{+mi}, chhandle, chpass%{-}%{+n}, chsecpass%{-}
+::hash
+###  $bhash$b <string>
+   Returns the MD5, SHA1, and SHA256 hash of the specified string.
+ 
+See also: randstring, md5, sha1, sha256, encrypt, encrypt_fish, decrypt, decrypt_fish
 ::help:
 ###  $bhelp$b [cmd]
    Alone, will show all cmds that match your flags. With a cmd it will show
@@ -1285,7 +1290,7 @@ See also: match
 ###  $bmd5$b <string>
    Returns the MD5 hash of the specified string.
  
-See also: randstring, sha1, sha256, encrypt, encrypt_fish, decrypt, decrypt_fish
+See also: randstring, sha1, sha256, hash, encrypt, encrypt_fish, decrypt, decrypt_fish
 ::me
 ###  $bme$b <text>
    Performs an action on the party line. This appears as "* bryan is leaving",
@@ -1464,7 +1469,7 @@ See also: color, console, echo, login, strip
 ###  $brandstring$b <len>
    Displays a random string of length 'len' up to 300 chars.
  
-See also: md5, sha1, sha256, encrypt, encrypt_fish, decrypt, decrypt_fish
+See also: md5, sha1, sha256, hash, encrypt, encrypt_fish, decrypt, decrypt_fish
 ::rehash
 ###  $brehash$b 
    Don't use this cmd, it doesn't do what you think it does, and can result
@@ -1676,12 +1681,12 @@ See also: botset
 ###  $bsha1$b <string>
    Returns the SHA1 hash of the specified string.
  
-See also: randstring, md5, sha256, encrypt, encrypt_fish, decrypt, decrypt_fish
+See also: randstring, md5, sha256, hash, encrypt, encrypt_fish, decrypt, decrypt_fish
 ::sha256
 ###  $bsha256$b <string>
    Returns the SHA256 hash of the specified string.
  
-See also: randstring, md5, sha1, encrypt, encrypt_fish, decrypt, decrypt_fish
+See also: randstring, md5, sha1, hash, encrypt, encrypt_fish, decrypt, decrypt_fish
 ::simul
 ###  $bsimul$b <handle> <text>
    This allows you to simulate the specified handle typing the given text.

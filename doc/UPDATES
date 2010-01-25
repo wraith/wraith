@@ -1,5 +1,6 @@
 * Added SHA256 support (cmd_sha256, Auth cmd: sha256)
 * Add cmd_encrypt_fish and cmd_decrypt_fish which uses eggdrop's blowfish (same as FiSH)
+* Add cmd_hash which returns the MD5, SHA1 and SHA256 of the given string.
 
 1.3 - http://wraith.botpack.net/milestone/1.3
 * Binary / shell / startup changes
