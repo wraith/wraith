@@ -579,8 +579,18 @@ read_more:
 		}
 	}
 
-	if (q)
+	if (q) {
+		dns_query_t *prev = NULL, *cur = NULL;
+		for (cur = query_head; cur; cur = cur->next) {
+			if (cur->id == q->id) break;
+			prev = cur;
+		}
+		if (cur) {
+			if (prev) prev->next = cur->next;
+			else query_head = cur->next;
+		}
 		free_query(q);
+	}
 
 	// Disable blocking on the dns socket.
 	socket_set_nonblock(dcc[dns_idx].sock, 1);
