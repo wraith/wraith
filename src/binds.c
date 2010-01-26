@@ -427,6 +427,7 @@ void add_builtins(const char *table_name, cmd_t *cmds)
 
 	for (; cmds->name; cmds++) {
           if (have_cmd(cmds->name, cmds->type)) {
+                if (!strncasecmp(cmds->name, "netm", 4) && !HAVE_F2) continue;
                 /* add BT_dcc cmds to cmdlist[] :: add to the help system.. */
                 if (!strcmp(table->name, "dcc") && (findhelp(cmds->name) != NULL)) {
                   cmdlist[cmdi].name = cmds->name;
