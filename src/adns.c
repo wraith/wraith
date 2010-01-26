@@ -1176,4 +1176,13 @@ bool valid_dns_id(int idx, int id)
   sdprintf("dns_id: %d is not associated with dead idx: %d", id, idx);
   return 0;
 }
+
+bd::String dns_find_ip(bd::Array<bd::String> ips, int af_type) {
+    for (size_t i = 0; i < ips.size(); ++i) {
+      if (is_dotted_ip(bd::String(ips[i]).c_str()) == af_type) {
+        return ips[i];
+      }
+    }
+	return bd::String();
+}
 /* vim: set sts=4 sw=4 ts=4 noet: */

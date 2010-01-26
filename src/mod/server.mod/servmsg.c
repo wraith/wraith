@@ -1776,7 +1776,7 @@ static void connect_server(void)
     /* I'm resolving... don't start another server connect request */
     resolvserv = 1;
     /* Resolve the hostname. */
-    int dns_id = egg_dns_lookup(botserver, 20, server_dns_callback, (void *) (long) newidx);
+    int dns_id = egg_dns_lookup(botserver, 20, server_dns_callback, (void *) (long) newidx, conf.bot->net.v6 ? DNS_LOOKUP_AAAA : DNS_LOOKUP_A);
     if (dns_id >= 0)
       dcc[newidx].dns_id = dns_id;
     /* wait for async reply */
@@ -1803,28 +1803,28 @@ static void server_dns_callback(int id, void *client_data, const char *host, bd:
 
   my_addr_t addr;
   char *ip = NULL;
+  const char* dns_type = NULL;
+  bd::String ip_from_dns;
 
-  /* FIXME: this is a temporary hack to stop bots from connecting over ipv4 when they should be on ipv6
-   * eventually will handle this in open_telnet(ips);
-   */
 #ifdef USE_IPV6
+  /* If IPv6 is wanted, ensure we are connecting to an IPv6 server, otherwise skip it */
   if (conf.bot->net.v6) {
-    size_t i = 0;
-    for (i = 0; i < ips.size(); ++i) {
-      if (is_dotted_ip(bd::String(ips[i]).c_str()) == AF_INET6) {
-        ip = strdup(bd::String(ips[i]).c_str());
-        break;
-      }
-    }
-    if (!ip) {
-      putlog(LOG_SERV, "*", "Failed connect to %s (Could not DNS as IPV6)", host);
-      trying_server = 0;
-      lostdcc(idx);
-      return;
+    ip_from_dns = dns_find_ip(ips, AF_INET6);
+    if (!ip_from_dns.length()) {
+      dns_type = "IPv6";
+      goto fatal_dns;
     }
   } else
 #endif /* USE_IPV6 */
-    ip = strdup(bd::String(ips[0]).c_str());
+  {
+    /* If IPv4 is wanted, don't connect to IPv6! */
+    ip_from_dns = dns_find_ip(ips, AF_INET);
+    if (!ip_from_dns.length()) {
+      dns_type = "IPv4";
+      goto fatal_dns;
+    }
+  }
+  ip = strdup(ip_from_dns.c_str());
 
   get_addr(ip, &addr);
  
@@ -1870,5 +1870,13 @@ static void server_dns_callback(int id, void *client_data, const char *host, bd:
     dprintf(DP_MODE, "USER %s localhost %s :%s\n", botuser, dcc[idx].host, replace_vars(botrealname));
     /* Wait for async result now */
   }
+
   free(ip);
+  return;
+
+fatal_dns:
+  putlog(LOG_SERV, "*", "Failed connect to %s (Could not DNS as %s)", host, dns_type);
+  trying_server = 0;
+  lostdcc(idx);
+  return;
 }

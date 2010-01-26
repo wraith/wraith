@@ -22,6 +22,7 @@
   * Add Google DNS servers as backups: 8.8.8.8, 8.8.4.4 (http://code.google.com/speed/public-dns/)
   * If a .resolv.conf exists, only use the nameservers listed in it.
   * Fix problem of bots never reconnecting to hub after being up for long periods. (Was a DNS issue)
+  * Bot no longer connects to IRC over IPv6 if it was specifically given an IPv4 IP.
 * Botlink
   * Bots now link to the first bot in their binary (the localhub) over a UNIX domain socket. Only the localhub connects to the main hubs.
   * Bots must have a matching host to be able to link now.
