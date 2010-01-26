@@ -1446,6 +1446,8 @@ static void do_protect(struct chanset_t* chan, const char* reason) {
       putlog(LOG_MISC, "*", "%s detected in %s: Setting +botbitch to protect the channel.", reason, chan->dname);
       do_chanset(NULL, chan, "+botbitch +bitch", DO_LOCAL | DO_NET);
     }
+//        enforce_closed(chan);
+//        dprintf(DP_MODE, "TOPIC %s :Auto-closed - channel fight\n", chan->name);
 //    enforce_bitch(chan);
     reversing = 1; // Reverse any modes which triggered this.
   }
@@ -1454,14 +1456,9 @@ static void do_protect(struct chanset_t* chan, const char* reason) {
 static void
 check_netfight(struct chanset_t *chan)
 {
-  if (fight_threshold) {
-    if ((chan->channel.fighting) && (chan->channel.fighting > fight_threshold)) {
-      if (!chan_bitch(chan) || !channel_closed(chan)) {
-        putlog(LOG_WARN, "*", "Auto-closed %s - channel fight", chan->dname);
-        do_chanset(NULL, chan, "+bitch +closed +backup", DO_LOCAL | DO_NET);
-        enforce_closed(chan);
-        dprintf(DP_MODE, "TOPIC %s :Auto-closed - channel fight\n", chan->name);
-      }
+  if (channel_protect(chan) && fight_threshold) {
+    if ((chan->channel.fighting) && (chan->channel.fighting > fight_threshold) && !chan_bitch(chan)) {
+      do_protect(chan, "Channel fight");
     }
   }
   chan->channel.fighting = 0;   /* we put this here because we need to clear it once per min */

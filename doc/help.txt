@@ -1635,8 +1635,9 @@ See also: reload, backup
 [N]  $blag-threshold$b   Maximum acceptable server lag for the bot to send/honor requests.
 [N]  $bkill-threshold$b  When more than this many bots have been killed/klined in the last
                           minute, close all channels.
-[N]  $bfight-threshold$b When more than this many +ob/-ob/kicks have happened on a channel in 
-                          1 minute, the channel is closed.
+[N]  $bfight-threshold$b When more than this many +obeI/-obeI/kicks have happened on a channel
+                          in 1 minute, the channel is locked down. Channel must be +protect.
+                          See also '%dhelp chanset' for +protect.
  
 [N]  $bcloak-script$b    Decides which script the bot cloaks as. 
                           If set to 0, a random script will be used.
