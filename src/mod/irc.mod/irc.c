@@ -1446,7 +1446,7 @@ static void do_protect(struct chanset_t* chan, const char* reason) {
       putlog(LOG_MISC, "*", "%s detected in %s: Setting +botbitch to protect the channel.", reason, chan->dname);
       do_chanset(NULL, chan, "+botbitch +bitch", DO_LOCAL | DO_NET);
     }
-    enforce_bitch(chan);
+//    enforce_bitch(chan);
     reversing = 1; // Reverse any modes which triggered this.
   }
 }
