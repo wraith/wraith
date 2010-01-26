@@ -1506,6 +1506,9 @@ gotmode(char *from, char *msg)
           }
         }
       }
+      // If reversing, dump the modes out
+      if (reversing)
+        flush_mode(chan, QUICK);
       for (i = 0; i < modecnt; i++)
         if (modes[i])
           free(modes[i]);
