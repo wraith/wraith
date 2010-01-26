@@ -802,6 +802,8 @@ void server_send_ison()
       dprintf(DP_SERVER, "ISON %s\n", origbotname);
   }
 }
+
+#ifdef not_used
 /* Called once a minute... but if we're the only one on the
  * channel, we only wanna send out "lusers" once every 5 mins.
  */
@@ -827,6 +829,7 @@ static void minutely_checks()
     }
   }
 }
+#endif
 
 /* Pong from server.
  */
