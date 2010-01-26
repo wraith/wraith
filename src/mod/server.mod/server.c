@@ -1011,14 +1011,19 @@ static void server_secondly()
       if (cnt_10 == 9) {
         // Ensure that +D/+f are not conflicting
 
-        // In +D but am +f, need to -D
-        if (deaf_set && (doflood(NULL) || (Auth::ht_host.size() && auth_chan && strlen(auth_prefix)))) {
-          dprintf(DP_SERVER, "MODE %s -%c\n", botname, deaf_char);
-          deaf_set = 0;
-        } else if (!deaf_set && use_deaf && deaf_char) {
-          // Not +D but should be, probably had +f removed.
-          dprintf(DP_SERVER, "MODE %s +%c\n", botname, deaf_char);
-          deaf_set = 1;
+        if (deaf_char) {
+          // +f or auth bots in used need to see channel chatter.
+          bool need_chatter = doflood(NULL) || (Auth::ht_host.size() && auth_chan && strlen(auth_prefix));
+
+          // In +D but am +f, need to -D
+          if (deaf_set && (need_chatter || !use_deaf)) {
+            dprintf(DP_SERVER, "MODE %s -%c\n", botname, deaf_char);
+            deaf_set = 0;
+          } else if (!deaf_set && use_deaf && !need_chatter) {
+            // Not +D but should be, probably had +f removed.
+            dprintf(DP_SERVER, "MODE %s +%c\n", botname, deaf_char);
+            deaf_set = 1;
+          }
         }
 
         cnt_10 = 0;
