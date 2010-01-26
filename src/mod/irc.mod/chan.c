@@ -2885,11 +2885,9 @@ static int gotkick(char *from, char *origmsg)
       return 0;
 
     if ((m = ismember(chan, nick))) {
-      struct userrec *u2 = NULL;
-
-      simple_snprintf(s1, sizeof(s1), "%s!%s", m->nick, m->userhost);
-      u2 = get_user_by_host(s1);
-      set_handle_laston(chan->dname, u2, now);
+      member_getuser(m);
+      if (m->user)
+        set_handle_laston(chan->dname, m->user, now);
 //      maybe_revenge(chan, from, s1, REVENGE_KICK);
     } else {
       simple_snprintf(s1, sizeof(s1), "%s!*@could.not.loookup.hostname", nick);
