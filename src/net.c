@@ -112,7 +112,7 @@ int sockprotocol(int sock)
 }
 
 /* AF_INET-independent resolving routine */
-static int get_ip(char *hostname, union sockaddr_union *so)
+static int get_ip(char *hostname, union sockaddr_union *so, int dns_type)
 {
   if (!hostname || (hostname && !hostname[0]))
     return 1;
@@ -120,7 +120,7 @@ static int get_ip(char *hostname, union sockaddr_union *so)
   memset(so, 0, sizeof(union sockaddr_union));
   debug1("get_ip(%s)", hostname);
 
-  bd::Array<bd::String> hosts = dns_lookup_block(hostname, 20);
+  bd::Array<bd::String> hosts = dns_lookup_block(hostname, 10, dns_type);
   if (hosts.length() == 0)
     return -1;
 
@@ -210,10 +210,10 @@ void cache_my_ip()
   memset(&cached_myip6_so, 0, sizeof(union sockaddr_union));
 
   if (conf.bot->net.ip6) {
-    if (get_ip(conf.bot->net.ip6, &cached_myip6_so))
+    if (get_ip(conf.bot->net.ip6, &cached_myip6_so, DNS_LOOKUP_AAAA))
       any = 1;
   } else if (conf.bot->net.host6) {
-    if (get_ip(conf.bot->net.host6, &cached_myip6_so))
+    if (get_ip(conf.bot->net.host6, &cached_myip6_so, DNS_LOOKUP_AAAA))
       any = 1;
   } else
     any = 1;
@@ -225,10 +225,10 @@ void cache_my_ip()
 #endif /* USE_IPV6 */
 
   if (conf.bot->net.ip) {
-    if (get_ip(conf.bot->net.ip, &cached_myip4_so))
+    if (get_ip(conf.bot->net.ip, &cached_myip4_so, DNS_LOOKUP_A))
       error = 1;
   } else if (conf.bot->net.host) {
-    if (get_ip(conf.bot->net.host, &cached_myip4_so))
+    if (get_ip(conf.bot->net.host, &cached_myip4_so, DNS_LOOKUP_A))
       error = 2;
   } else {
 /*

@@ -549,9 +549,9 @@ int egg_dns_lookup(const char *host, interval_t timeout, dns_callback_t callback
 	return(q->id);
 }
 
-bd::Array<bd::String> dns_send_blocking(dns_query_t* q, interval_t timeout) {
+bd::Array<bd::String> dns_send_blocking(dns_query_t* q, interval_t timeout, int type = DEFAULT_DNS_TYPE) {
 	bd::Array<bd::String> answer;
-	dns_send_query_blocking(q);
+	dns_send_query_blocking(q, type);
 
 	char buf[512] = "";
 	int atr;
@@ -598,7 +598,7 @@ read_more:
 	return answer;
 }
 
-bd::Array<bd::String> dns_blocking_loop(const char* what, interval_t timeout, const char* from, bool is_ip = 0) {
+bd::Array<bd::String> dns_blocking_loop(const char* what, interval_t timeout, const char* from, int type = DEFAULT_DNS_TYPE, bool is_ip = 0) {
 	/* Allocate our query struct. */
 	dns_query_t *q = NULL;
 	bd::Array<bd::String> answer;
@@ -611,7 +611,7 @@ try_again:
 
 	sdprintf("%s(%s, %d) -> %d", from, what, timeout, q->id);
 	if (cnt++ < nservers) {
-		answer = dns_send_blocking(q, timeout);
+		answer = dns_send_blocking(q, timeout, type);
 		// No answers received?? Blocking DNS demands an answer, check the next server.
 		if (answer.size() == 0 && cnt < nservers) {
 			dns_on_eof(dns_idx);
@@ -650,7 +650,7 @@ bd::Array<bd::String> dns_lookup_block(const char *host, interval_t timeout, int
 		return *(cache[cache_id].answer);
 	}
 
-	return dns_blocking_loop(host, timeout, "dns_lookup_block");
+	return dns_blocking_loop(host, timeout, "dns_lookup_block", type);
 }
 
 /* Perform a blocking dns reverse lookup. This does ip -> host. For host -> ip
@@ -683,7 +683,7 @@ bd::Array<bd::String> dns_reverse_block(const char *ip, interval_t timeout)
 		return *(cache[cache_id].answer);
 	}
 
-	return dns_blocking_loop(ip, timeout, "dns_reverse_block", 1);
+	return dns_blocking_loop(ip, timeout, "dns_reverse_block", 0, 1);
 }
 
 /* Perform an async dns reverse lookup. This does ip -> host. For host -> ip
