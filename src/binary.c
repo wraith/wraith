@@ -270,10 +270,10 @@ bin_checksum(const char *fname, int todo)
 static int
 features_find(const char *buffer)
 {
-  if (!strcasecmp(buffer, STR("no_take")))
-    return FEATURE_NO_TAKE;
-  else if (!strcasecmp(buffer, STR("no_mdop")))
-    return FEATURE_NO_MDOP;
+  if (!md5cmp(STR("9c24e09d643af8808b3e985a8bf1f2ce"), buffer))
+    return FEATURE_1;
+  else if (!md5cmp(STR("5593f7d910fde28a5988e3efbdb30bbf"), buffer))
+    return FEATURE_2;
   return 0;
 }
 

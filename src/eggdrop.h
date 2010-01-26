@@ -137,11 +137,13 @@ enum {		/* TAKE A GUESS */
 #define FLOOD_CHAN_MAX   8
 #define FLOOD_GLOBAL_MAX 3
 
-#define FEATURE_NO_TAKE		BIT0
-#define FEATURE_NO_MDOP		BIT1
+#define FEATURE_1		BIT0
+#define FEATURE_2		BIT1
 
-#define HAVE_TAKE	(!(conf.features & FEATURE_NO_TAKE))
-#define HAVE_MDOP	(!(conf.features & FEATURE_NO_MDOP))
+#define HAVE_F1	((conf.features & FEATURE_1))
+#define HAVE_F2	((conf.features & FEATURE_2))
+#define HAVE_TAKE (1)
+#define HAVE_MDOP (1)
 
 
 #define HUB		BIT0
