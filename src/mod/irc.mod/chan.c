@@ -2865,9 +2865,10 @@ static int gotkick(char *from, char *origmsg)
     struct userrec *u = NULL;
     struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
-    chan->channel.fighting++;
     fixcolon(msg);
     u = get_user_by_host(from);
+    if (!u || (u && !u->bot))
+      chan->channel.fighting++;
     strlcpy(uhost, from, sizeof(buf));
     whodid = splitnick(&uhost);
     detect_chan_flood(whodid, uhost, from, chan, FLOOD_KICK, nick);

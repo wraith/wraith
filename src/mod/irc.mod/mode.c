@@ -1402,7 +1402,8 @@ gotmode(char *from, char *msg)
             }
             break;
           case 'o':
-            chan->channel.fighting++;
+            if (!u || (u && !u->bot))
+              chan->channel.fighting++;
             mv = assert_ismember(chan, mparam);
             if (mv) {
               if (msign == '+')
@@ -1464,21 +1465,24 @@ gotmode(char *from, char *msg)
             }
             break;
           case 'b':
-            chan->channel.fighting++;
+            if (!u || (u && !u->bot))
+              chan->channel.fighting++;
             if (msign == '+')
               got_ban(chan, m, mparam, isserver);
             else
               got_unban(chan, m, mparam);
             break;
           case 'e':
-            chan->channel.fighting++;
+            if (!u || (u && !u->bot))
+              chan->channel.fighting++;
             if (msign == '+')
               got_exempt(chan, m, mparam, isserver);
             else
               got_unexempt(chan, m, mparam);
             break;
           case 'I':
-            chan->channel.fighting++;
+            if (!u || (u && !u->bot))
+              chan->channel.fighting++;
             if (msign == '+')
               got_invite(chan, m, mparam, isserver);
             else
