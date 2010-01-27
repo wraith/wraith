@@ -115,7 +115,7 @@ static int gotfake433(char *nick)
 {
   //Failed to get jupenick on connect, try normal nick
   if (altnick_char == 0 && jupenick[0] && !rfc_casecmp(botname, jupenick)) {
-    strlcpy(botname, origbotname, NICKLEN);
+    strlcpy(botname, origbotname, sizeof(botname));
   } else //Rotate on failed normal nick
     rotate_nick(botname, origbotname);
   putlog(LOG_SERV, "*", "NICK IN USE: '%s' Trying '%s'", nick, botname);
@@ -192,7 +192,7 @@ void rehash_server(const char *servname, const char *nick)
     curservport = dcc[servidx].port;
 
   if (nick && nick[0]) {
-    strlcpy(botname, nick, NICKLEN);
+    strlcpy(botname, nick, sizeof(botname));
 
     dprintf(DP_SERVER, "WHOIS %s\n", botname); /* get user@host */
     dprintf(DP_SERVER, "USERHOST %s\n", botname); /* get user@ip */
@@ -953,7 +953,7 @@ static int got432(char *from, char *msg)
   } else {
     putlog(LOG_MISC, "*", "Server says my %snick '%s' is invalid.", is_jnick ? "jupe" : "", botname);
     if (jupenick[0] && !strcmp(botname, jupenick))
-      strlcpy(botname, origbotname, NICKLEN);
+      strlcpy(botname, origbotname, sizeof(botname));
     else
       rotate_nick(botname, origbotname);
 
@@ -991,7 +991,7 @@ static int got433(char *from, char *msg)
     } else {  //Else need to find a new nick
       // Failed to get jupenick, not on origbotname now, try for origbotname and rotate from there
       if (tried_jupenick) {
-        strlcpy(rnick, origbotname, NICKLEN);
+        strlcpy(rnick, origbotname, sizeof(rnick));
         tried_jupenick = 0;
       } else {
         // Was a failed attempt at a rotated nick, keep rotating on origbotname
@@ -1111,7 +1111,7 @@ static int gotnick(char *from, char *msg)
 
   if (match_my_nick(nick)) {
     /* Regained nick! */
-    strlcpy(botname, msg, NICKLEN);
+    strlcpy(botname, msg, sizeof(botname));
 
     tried_jupenick = 0;
     tried_nick = 0;

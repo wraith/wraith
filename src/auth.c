@@ -45,7 +45,7 @@ bd::HashTable<bd::String, Auth*> Auth::ht_host(10);
 Auth::Auth(const char *_nick, const char *_host, struct userrec *u)
 {
   Status(AUTHING);
-  strlcpy(nick, _nick, nick_len + 1);
+  strlcpy(nick, _nick, NICKLEN);
   strlcpy(host, _host, UHOSTLEN);
   if (u) {
     user = u;
@@ -88,7 +88,7 @@ void Auth::Done()
 }
 
 void Auth::NewNick(const char *newnick) {
-  strlcpy(nick, newnick, nick_len + 1);
+  strlcpy(nick, newnick, NICKLEN);
 }
 
 Auth *Auth::Find(const char *_host)

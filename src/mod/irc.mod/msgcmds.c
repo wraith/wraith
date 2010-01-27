@@ -186,7 +186,7 @@ static int msg_op(char *nick, char *host, struct userrec *u, char *par)
 
 static int msg_ident(char *nick, char *host, struct userrec *u, char *par)
 {
-  char s[UHOSTLEN] = "", s1[UHOSTLEN] = "", *pass = NULL, who[NICKLEN] = "";
+  char s[UHOSTLEN] = "", s1[UHOSTLEN] = "", *pass = NULL, who[HANDLEN + 1] = "";
   struct userrec *u2 = NULL;
 
   if (match_my_nick(nick) || (u && u->bot))
@@ -194,10 +194,9 @@ static int msg_ident(char *nick, char *host, struct userrec *u, char *par)
 
   pass = newsplit(&par);
   if (!par[0])
-    strlcpy(who, nick, sizeof(nick));
+    strlcpy(who, nick, sizeof(who));
   else {
     strlcpy(who, par, sizeof(who));
-    who[NICKMAX] = 0;
   }
   u2 = get_user_by_handle(userlist, who);
   if (u2 && rfc_casecmp(who, origbotname) && !u2->bot) {
