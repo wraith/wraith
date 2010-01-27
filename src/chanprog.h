@@ -34,7 +34,7 @@ void load_internal_users();
 void setup_HQ(int);
 
 extern struct chanset_t		*chanset, *chanset_default;
-extern char			admin[], origbotnick[NICKLEN + 1], origbotname[NICKLEN + 1], jupenick[NICKLEN], botname[NICKLEN + 1], *def_chanset;
+extern char			admin[], origbotnick[NICKLEN], origbotname[NICKLEN], jupenick[NICKLEN], botname[NICKLEN], *def_chanset;
 extern port_t			my_port;
 extern bool			reset_chans, cookies_disabled;
 
