@@ -876,8 +876,8 @@ share_pls_ignore(int idx, char *par)
     if (strchr(from, 'p'))
       expire_time = 0;
     from = newsplit(&par);
-    if (strlen(from) > HANDLEN + 1)
-      from[HANDLEN + 1] = 0;
+    if (strlen(from) > HANDLEN)
+      from[HANDLEN] = 0;
     par[65] = 0;
     if (conf.bot->hub)
       putlog(LOG_CMDS, "@", "%s: ignore %s (%s: %s)", dcc[idx].nick, ign, from, par);

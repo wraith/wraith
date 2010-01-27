@@ -358,8 +358,8 @@ static void dtx_arg(int& argc, char *argv[])
         exit(0);
       case 'B':
         used_B = 1;
-        strlcpy(origbotname, optarg, HANDLEN + 1);
-        strlcpy(origbotnick, optarg, HANDLEN + 1);
+        strlcpy(origbotname, optarg, sizeof(origbotname));
+        strlcpy(origbotnick, optarg, sizeof(origbotnick));
         break;
       case 'H':
         printf("SHA1 (%s): %s\n", optarg, SHA1(optarg));
@@ -448,8 +448,8 @@ static void dtx_arg(int& argc, char *argv[])
 
   if ((argc - (optind - 1)) == 2) {
     used_B = 1;
-    strlcpy(origbotname, argv[optind], HANDLEN + 1);
-    strlcpy(origbotnick, argv[optind], HANDLEN + 1);
+    strlcpy(origbotname, argv[optind], sizeof(origbotname));
+    strlcpy(origbotnick, argv[optind], sizeof(origbotnick));
     /* Trim off .conf */
     p = strchr(origbotname, '.');
     if (p) {

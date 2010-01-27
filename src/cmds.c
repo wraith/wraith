@@ -960,7 +960,7 @@ static void cmd_boot(int idx, char *par)
   if (strchr(who, '@') != NULL) {
     char whonick[HANDLEN + 1];
 
-    splitcn(whonick, who, '@', HANDLEN + 1);
+    splitcn(whonick, who, '@', sizeof(whonick));
     if (!strcasecmp(who, conf.bot->nick)) {
       cmd_boot(idx, whonick);
       return;
