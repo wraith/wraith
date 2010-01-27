@@ -1255,7 +1255,7 @@ static void server_activity(int idx, char *msg, int len)
   char *from = NULL, *code = NULL;
 
   if (trying_server) {
-    strlcpy(dcc[idx].nick, "(server)", NICKLEN);
+    strlcpy(dcc[idx].nick, "(server)", sizeof(dcc[idx].nick));
     putlog(LOG_SERV, "*", "Connected to %s", dcc[idx].host);
 
     trying_server = 0;
@@ -1751,8 +1751,8 @@ static void connect_server(void)
     putlog(LOG_SERV, "*", "Trying server %s:%d", botserver, botserverport);
 
     dcc[newidx].port = botserverport;
-    strlcpy(dcc[newidx].nick, "(server)", NICKLEN);
-    strlcpy(dcc[newidx].host, botserver, UHOSTLEN);
+    strlcpy(dcc[newidx].nick, "(server)", sizeof(dcc[newidx].nick));
+    strlcpy(dcc[newidx].host, botserver, sizeof(dcc[newidx].host));
 
     botuserhost[0] = 0;
 

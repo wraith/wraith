@@ -497,9 +497,9 @@ dcc_read(bd::Stream& stream)
       if (type == STR("port"))
         dcc[idx].port = atoi(buf.c_str());
       if (type == STR("nick"))
-        strlcpy(dcc[idx].nick, buf.c_str(), NICKLEN);
+        strlcpy(dcc[idx].nick, buf.c_str(), sizeof(dcc[idx].nick));
       if (type == STR("host"))
-        strlcpy(dcc[idx].host, buf.c_str(), UHOSTLEN);
+        strlcpy(dcc[idx].host, buf.c_str(), sizeof(dcc[idx].host));
     }
   }
   return -1;
@@ -806,7 +806,7 @@ do_boot(int idx, const char *by, const char *reason)
 
   if (dcc[idx].u.chat->su_nick) {
     dcc[idx].user = get_user_by_handle(userlist, dcc[idx].u.chat->su_nick);
-    strlcpy(dcc[idx].nick, dcc[idx].u.chat->su_nick, NICKLEN);
+    strlcpy(dcc[idx].nick, dcc[idx].u.chat->su_nick, sizeof(dcc[idx].nick));
     dcc[idx].type = &DCC_CHAT;
     dprintf(idx, "Returning to real nick %s!\n", dcc[idx].u.chat->su_nick);
     free(dcc[idx].u.chat->su_nick);
@@ -893,8 +893,8 @@ listen_all(port_t lport, bool off)
         dcc[idx].port = port;
         dcc[idx].sock = i6;
         dcc[idx].timeval = now;
-        strlcpy(dcc[idx].nick, "(telnet6)", NICKLEN);
-        strlcpy(dcc[idx].host, "*", UHOSTLEN);
+        strlcpy(dcc[idx].nick, "(telnet6)", sizeof(dcc[idx].nick));
+        strlcpy(dcc[idx].host, "*",  sizeof(dcc[idx].host));
         putlog(LOG_DEBUG, "*", "Listening on IPv6 at telnet port %d", port);
       }
       i = open_listen_by_af(&port, AF_INET);
@@ -914,8 +914,8 @@ listen_all(port_t lport, bool off)
         dcc[idx].port = port;
         dcc[idx].sock = i;
         dcc[idx].timeval = now;
-        strlcpy(dcc[idx].nick, "(telnet)", NICKLEN);
-        strlcpy(dcc[idx].host, "*", UHOSTLEN);
+        strlcpy(dcc[idx].nick, "(telnet)", sizeof(dcc[idx].nick));
+        strlcpy(dcc[idx].host, "*", sizeof(dcc[idx].host));
         putlog(LOG_DEBUG, "*", "Listening on IPv4 at telnet port %d", port);
       }
 #ifdef USE_IPV6
@@ -972,8 +972,8 @@ identd_open(const char *sourceIp, const char *destIp, int identd)
       dcc[idx].port = port;
       dcc[idx].sock = i;
       dcc[idx].timeval = now;
-      strlcpy(dcc[idx].nick, "(identd)", NICKLEN);
-      strlcpy(dcc[idx].host, "*", UHOSTLEN);
+      strlcpy(dcc[idx].nick, "(identd)", sizeof(dcc[idx].nick));
+      strlcpy(dcc[idx].host, "*", sizeof(dcc[idx].host));
       putlog(LOG_DEBUG, "*", "Identd daemon started.");
       howlong.sec = 15;
       howlong.usec = 0;

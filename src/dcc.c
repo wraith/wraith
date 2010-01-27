@@ -638,8 +638,8 @@ dcc_identd_connect(int idx, char *buf, int atr)
   dcc[j].sock = sock;
   dcc[j].port = port;
   dcc[j].addr = dcc[idx].addr;
-  strlcpy(dcc[j].host, dcc[idx].host, UHOSTLEN);
-  strlcpy(dcc[j].nick, "*", NICKLEN);
+  strlcpy(dcc[j].host, dcc[idx].host, sizeof(dcc[j].host));
+  strlcpy(dcc[j].nick, "*", sizeof(dcc[j].nick));
   /* dcc[j].uint.ident_sock = dcc[idx].sock; */
   dcc[j].timeval = now;
 }
@@ -733,7 +733,7 @@ dcc_chat_secpass(int idx, char *buf, int atr)
       if (dcc[idx].status & STAT_TELNET)
         dprintf(idx, TLN_IAC_C TLN_WONT_C TLN_ECHO_C "\n");
       dcc[idx].user = get_user_by_handle(userlist, dcc[idx].u.chat->away);
-      strlcpy(dcc[idx].nick, dcc[idx].u.chat->away, NICKLEN);
+      strlcpy(dcc[idx].nick, dcc[idx].u.chat->away, sizeof(dcc[idx].nick));
       free(dcc[idx].u.chat->away);
       free(dcc[idx].u.chat->su_nick);
       dcc[idx].u.chat->away = NULL;
@@ -1073,7 +1073,7 @@ dcc_chat_pass(int idx, char *buf, int atr)
       if (dcc[idx].status & STAT_TELNET)
         dprintf(idx, TLN_IAC_C TLN_WONT_C TLN_ECHO_C "\n");
       dcc[idx].user = get_user_by_handle(userlist, dcc[idx].u.chat->away);
-      strlcpy(dcc[idx].nick, dcc[idx].u.chat->away, NICKLEN);
+      strlcpy(dcc[idx].nick, dcc[idx].u.chat->away, sizeof(dcc[idx].nick));
       free(dcc[idx].u.chat->away);
       free(dcc[idx].u.chat->su_nick);
       dcc[idx].u.chat->away = NULL;
@@ -1412,7 +1412,7 @@ dcc_telnet(int idx, char *buf, int ii)
     dcc[i].uint.ident_sock = dcc[idx].sock;
     dcc[i].port = 0;
     dcc[i].timeval = now;
-    strlcpy(dcc[i].nick, "*", NICKLEN);
+    strlcpy(dcc[i].nick, "*", sizeof(dcc[i].nick));
     putlog(LOG_BOTS, "*", "Connection over local socket: %s", s);
     dcc_telnet_got_ident(i, x);
     return;
@@ -1449,14 +1449,14 @@ dcc_telnet(int idx, char *buf, int ii)
   dcc[i].addr = ip;
   dcc[i].sock = sock;
   dcc[i].user = get_user_by_host(x);		/* check for matching -telnet!telnet@ip */
-  strlcpy(dcc[i].host, s, UHOSTLEN);
+  strlcpy(dcc[i].host, s, sizeof(dcc[i].host));
 #ifdef USE_IPV6
   if (af_type == AF_INET6)
     strlcpy(dcc[i].host6, s, sizeof(dcc[i].host6));
 #endif /* USE_IPV6 */
   dcc[i].port = port;
   dcc[i].timeval = now;
-  strlcpy(dcc[i].nick, "*", NICKLEN);
+  strlcpy(dcc[i].nick, "*", sizeof(dcc[i].nick));
 
   dcc[i].u.dns->ibuf = idx;
 
@@ -1489,7 +1489,7 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, b
   //Clear the ip (still saved in dcc[i].addr)
   dcc[i].host[0] = 0;
   if (hosts.size()) {
-    strlcpy(dcc[i].host, bd::String(hosts[0]).c_str(), UHOSTLEN);
+    strlcpy(dcc[i].host, bd::String(hosts[0]).c_str(), sizeof(dcc[i].host));
 
     //Check forward
     int dns_id = egg_dns_lookup(bd::String(hosts[0]).c_str(), 20, dcc_telnet_dns_forward_callback, (void *) (long) i);
@@ -1526,7 +1526,7 @@ static void dcc_telnet_dns_forward_callback(int id, void *client_data, const cha
   // If the forward did not match, replace the saved host with the ip
   if (!(ips.size() && !strcmp(bd::String(ips[0]).c_str(), iptostr(htonl(dcc[i].addr))))) {
     forward_matched = false;
-    strlcpy(dcc[i].host, iptostr(htonl(dcc[i].addr)), UHOSTLEN);
+    strlcpy(dcc[i].host, iptostr(htonl(dcc[i].addr)), sizeof(dcc[i].host));
   }
 
   if (forward_matched) {
@@ -1569,14 +1569,14 @@ static void dcc_telnet_dns_forward_callback(int id, void *client_data, const cha
 
   if (sock < 0) {
     if (sock == -2)
-      strlcpy(s, "DNS lookup failed for ident", UHOSTLEN);
+      strlcpy(s, "DNS lookup failed for ident", sizeof(s));
     else
-      strlcpy(s, strerror(errno), UHOSTLEN);
+      strlcpy(s, strerror(errno), sizeof(s));
   } else {
     j = new_dcc(&DCC_IDENT, 0);
     if (j < 0) {
       killsock(sock);
-      strlcpy(s, "No Free DCC's", UHOSTLEN);
+      strlcpy(s, "No Free DCC's", sizeof(s));
     }
   }
   if (s[0]) {
@@ -1588,8 +1588,8 @@ static void dcc_telnet_dns_forward_callback(int id, void *client_data, const cha
   dcc[j].sock = sock;
   dcc[j].port = 113;
   dcc[j].addr = dcc[i].addr;
-  strlcpy(dcc[j].host, dcc[i].host, UHOSTLEN);
-  strlcpy(dcc[j].nick, "*", NICKLEN);
+  strlcpy(dcc[j].host, dcc[i].host, sizeof(dcc[j].host));
+  strlcpy(dcc[j].nick, "*", sizeof(dcc[j].nick));
   dcc[j].uint.ident_sock = dcc[i].sock;
   dcc[j].user = dcc[i].user;
   dcc[j].timeval = now;
@@ -1716,7 +1716,7 @@ dcc_telnet_id(int idx, char *buf, int atr)
     dcc[idx].encrypt = 1;
   }
 
-  nick[HANDLEN] = 0;
+  nick[HANDLEN] = 0; // Trim to handle length before looking up user.
 
   dcc[idx].user = get_user_by_handle(userlist, nick);
 
@@ -1761,7 +1761,7 @@ dcc_telnet_id(int idx, char *buf, int atr)
     return;
   }
   correct_handle(nick);
-  strlcpy(dcc[idx].nick, nick, NICKLEN);
+  strlcpy(dcc[idx].nick, nick, sizeof(dcc[idx].nick));
   if (!strcmp(dcc[idx].host, "UNKNOWN@localhost"))
     simple_snprintf(dcc[idx].host, sizeof(dcc[idx].host), "%s@localhost", nick);
   if (dcc[idx].user->bot) {
@@ -2061,7 +2061,7 @@ dcc_telnet_got_ident(int i, char *host)
     return;
   }
 
-  strlcpy(dcc[i].host, host, UHOSTLEN);
+  strlcpy(dcc[i].host, host, sizeof(dcc[i].host));
 
   bool unix_domain = 0;
   if (!strcmp(host, "UNKNOWN@localhost"))
@@ -2128,7 +2128,7 @@ dcc_telnet_got_ident(int i, char *host)
     dcc[i].status |= STAT_UNIXDOMAIN;
 
   /* Copy acceptable-nick/host mask */
-  strlcpy(dcc[i].nick, dcc[idx].host, HANDLEN);
+  strlcpy(dcc[i].nick, dcc[idx].host, sizeof(dcc[i].nick));
   dcc[i].timeval = now;
 
   dcc[i].u.other = NULL;

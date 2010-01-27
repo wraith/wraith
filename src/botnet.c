@@ -1019,8 +1019,8 @@ int botlink(char *linker, int idx, char *nick)
       dcc[i].timeval = now;
       dcc[i].port = port;
       dcc[i].user = u;
-      strlcpy(dcc[i].nick, nick, NICKLEN);
-      strlcpy(dcc[i].host, address, UHOSTLEN);
+      strlcpy(dcc[i].nick, nick, sizeof(dcc[i].nick));
+      strlcpy(dcc[i].host, address, sizeof(dcc[i].host));
       dcc[i].u.dns->cptr = strdup(linker);
       dcc[i].u.dns->ibuf = idx;
       dcc[i].bot = 1;
@@ -1065,7 +1065,7 @@ static void botlink_dns_callback(int id, void *client_data, const char *host, bd
   }
 
   dcc[i].addr = inet_addr(bd::String(ips[0]).c_str());
-  strlcpy(dcc[i].host, bd::String(ips[0]).c_str(), UHOSTLEN);
+  strlcpy(dcc[i].host, bd::String(ips[0]).c_str(), sizeof(dcc[i].host));
 
   botlink_real(i);
 }
@@ -1182,9 +1182,9 @@ void tandem_relay(int idx, char *nick, register int i)
 
   dcc[i].port = bi->relay_port;
   dcc[i].addr = 0L;
-  strlcpy(dcc[i].nick, nick, NICKLEN);
+  strlcpy(dcc[i].nick, nick, sizeof(dcc[i].nick));
   dcc[i].user = u;
-  strlcpy(dcc[i].host, bi->address, UHOSTLEN);
+  strlcpy(dcc[i].host, bi->address, sizeof(dcc[i].host));
   if (conf.bot->hub) 
     dprintf(idx, "%s %s @ %s:%d ...\n", "Establishing encrypted connection to", nick, bi->address, bi->relay_port);
   dprintf(idx, "(Type *BYE* on a line by itself to abort.)\n");

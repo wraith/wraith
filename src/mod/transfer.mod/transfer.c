@@ -857,8 +857,8 @@ static int raw_dcc_resend_send(char *filename, char *nick, char *from, int resen
   dcc[i].sock = zz;
   dcc[i].addr = (in_addr_t) (-559026163);
   dcc[i].port = port;
-  strlcpy(dcc[i].nick, nick, NICKLEN);
-  strlcpy(dcc[i].host, "irc", 4);
+  strlcpy(dcc[i].nick, nick, sizeof(dcc[i].nick));
+  strlcpy(dcc[i].host, "irc", sizeof(dcc[i].host));
   dcc[i].u.xfer->filename = strdup(filename);
   dcc[i].u.xfer->origname = strdup(filename);
   strlcpy(dcc[i].u.xfer->from, from, NICKLEN);

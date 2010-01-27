@@ -906,7 +906,7 @@ static void bot_thisbot(int idx, char *par)
   noshare = 1;
   change_handle(dcc[idx].user, par);
   noshare = 0;
-  strlcpy(dcc[idx].nick, par, NICKLEN);
+  strlcpy(dcc[idx].nick, par, sizeof(dcc[idx].nick));
 }
 
 /* Used to send a direct msg from Tcl on one bot to Tcl on another
@@ -1312,14 +1312,14 @@ static void bot_rsim(char *botnick, char *code, char *msg)
     dcc[idx].simultime = now;
     dcc[idx].simul = ridx;
     dcc[idx].status = status;
-    strlcpy(dcc[idx].simulbot, botnick, NICKLEN);
+    strlcpy(dcc[idx].simulbot, botnick, sizeof(dcc[idx].simulbot));
     dcc[idx].u.chat->con_flags = rconmask;
     struct chat_info dummy;
     strlcpy(dcc[idx].u.chat->con_chan, rconchan, sizeof(dummy.con_chan));
     dcc[idx].u.chat->strip_flags = STRIP_ALL;
-    strlcpy(dcc[idx].nick, nick, NICKLEN);
+    strlcpy(dcc[idx].nick, nick, sizeof(dcc[idx].nick));
     simple_snprintf(buf, sizeof buf, "%s@%s", nick, botnick);
-    strlcpy(dcc[idx].host, buf, UHOSTLEN);
+    strlcpy(dcc[idx].host, buf, sizeof(dcc[idx].host));
     dcc[idx].addr = 0L;
     dcc[idx].user = get_user_by_handle(userlist, nick);
   }

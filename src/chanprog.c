@@ -612,7 +612,7 @@ void rehash_ip() {
         dcc[idx].port = 0;
         dcc[idx].sock = i;
         dcc[idx].timeval = now;
-        strlcpy(dcc[idx].nick, "(unix_domain)", NICKLEN);
+        strlcpy(dcc[idx].nick, "(unix_domain)", sizeof(dcc[idx].nick));
         putlog(LOG_DEBUG, "*", "Listening on telnet %s", conf.localhub_socket);
       }
     }
@@ -726,8 +726,8 @@ void setup_HQ(int n) {
     dcc[n].u.chat->con_flags = conmask | LOG_ALL;
     dcc[n].u.chat->strip_flags = STRIP_ALL;
     dcc[n].status = STAT_ECHO;
-    strlcpy(dcc[n].nick, STR("HQ"), NICKLEN);
-    strlcpy(dcc[n].host, STR("llama@console"), UHOSTLEN);
+    strlcpy(dcc[n].nick, STR("HQ"), sizeof(dcc[n].nick));
+    strlcpy(dcc[n].host, STR("llama@console"), sizeof(dcc[n].host));
     dcc[n].user = get_user_by_handle(userlist, dcc[n].nick);
     /* Make sure there's an innocuous HQ user if needed */
     if (!dcc[n].user) {
