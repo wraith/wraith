@@ -908,9 +908,32 @@ void nicks_available(char* buf, char delim, bool buf_contains_available) {
   nick_available(is_jupe, is_orig);
 }
 
+/* This is a reply to MONITOR: Online
+ * RPL_MONONLINE
+ * :<server> 730 <nick|*> :nick!user@host[,nick!user@host]*
+ */
+static void got730(char* from, char* msg)
+{
+  char *tmp = newsplit(&msg);
+  fixcolon(msg);
+
+
+  if (tmp[0] && (!strcmp(tmp, "*") || match_my_nick(tmp))) {
+    // If any of the nicks online match my jupenick or nick, unset nick_juped and jnick_juped
+    // This will prevent the bot from thinking its nick is juped if someone else got it after a netsplit
+    char *nick = NULL;
+    while ((nick = newsplit(&msg, ','))[0]) {
+      bool is_jupe = 0, is_orig = 0;
+      nick_which(nick, is_jupe, is_orig);
+      if (is_jupe && jnick_juped) jnick_juped = 0;
+      else if (is_orig && nick_juped) nick_juped = 0;
+    }
+  }
+}
+
 /* This is a reply to MONITOR: Offline
  * RPL_MONOFFLINE
- * :<server> 731 <nick> :nick[,nick1]*
+ * :<server> 731 <nick|*> :nick[,nick1]*
  */
 static void got731(char* from, char* msg)
 {
@@ -1708,6 +1731,7 @@ static cmd_t my_raw_binds[] =
   {"318",	"",	(Function) whoispenalty,	NULL, LEAF},	/* :End of /WHOIS */
   {"369",	"",	(Function) got369,		NULL, LEAF},	/* :End of /WHOWAS */
   {"718",	"",	(Function) got718,		NULL, LEAF},
+  {"730",	"",	(Function) got730,		NULL, LEAF},	/* RPL_MONONLINE */
   {"731",	"",	(Function) got731,		NULL, LEAF},	/* RPL_MONOFFLINE */
   {NULL,	NULL,	NULL,				NULL, 0}
 };
