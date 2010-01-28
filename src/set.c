@@ -104,7 +104,7 @@ static variable_t vars[] = {
  VAR("msg-invite",	msginvite,		VAR_WORD|VAR_NOLHUB,				0, 0, NULL),
  VAR("msg-op",		msgop,			VAR_WORD|VAR_NOLHUB,				0, 0, NULL),
  VAR("msg-pass",	msgpass,		VAR_WORD|VAR_NOLHUB,				0, 0, NULL),
- VAR("msgrate",		&msgrate,		VAR_INT|VAR_NOLHUB,				0, 90, "1"),
+ VAR("msgrate",		&msgrate,		VAR_INT|VAR_NOLHUB,				0, 90, "2"),
  VAR("nick",		origbotname,		VAR_WORD|VAR_NOHUB|VAR_NICK|VAR_NODEF,	0, 0, NULL),
  VAR("notify-time",	&ison_time,		VAR_INT|VAR_NOLHUB,				1, 30, "10"),
  VAR("oidentd",		&oidentd,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "0"),
