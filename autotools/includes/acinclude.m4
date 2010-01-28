@@ -20,7 +20,7 @@ EOF
 fi
 
 if test -n "$GXX"; then
-  CXXFLAGS="$CXXFLAGS -O3"
+  CXXFLAGS="$CXXFLAGS"
 fi
 
 ])
