@@ -1631,6 +1631,8 @@ static int got465(char *from, char *msg)
 
 /* 718 $me nick user@host :msg 
  * for receiving a msg while +g
+ * csircd: :irc.nac.net 718 bryand_ bryand_ bryan bryan@shatow.net :is messaging you, but you have CALLERID enabled (umode +g)
+ * ratbox: :irc.servercentral.net 718 bryand_ bryan bryan@shatow.net :is messaging you, and you have umode +g.
  */
 static int got718(char *from, char *msg)
 {
@@ -1638,6 +1640,9 @@ static int got718(char *from, char *msg)
 
   newsplit(&msg);
   nick = newsplit(&msg);
+  if (match_my_nick(nick)) // CSIRCD is stupid.
+    nick = newsplit(&msg);
+
   uhost = newsplit(&msg);
   fixcolon(msg);
 
