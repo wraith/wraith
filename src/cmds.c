@@ -1623,6 +1623,9 @@ static void cmd_hash(int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# hash ...", dcc[idx].nick);
   dprintf(idx, "MD5(%s) = %s\n", par, MD5(par));
   dprintf(idx, "SHA1(%s) = %s\n", par, SHA1(par));
+  char *salted = salted_sha1(par);
+  dprintf(idx, "SALTED-SHA1(%s) = %s\n", par, salted);
+  free(salted);
   dprintf(idx, "SHA256(%s) = %s\n", par, SHA256(par));
 }
 
@@ -1646,6 +1649,10 @@ static void cmd_sha1(int idx, char *par)
 
   putlog(LOG_CMDS, "*", "#%s# sha1 ...", dcc[idx].nick);
   dprintf(idx, "SHA1(%s) = %s\n", par, SHA1(par));
+
+  char *salted = salted_sha1(par);
+  dprintf(idx, "SALTED-SHA1(%s) = %s\n", par, salted);
+  free(salted);
 }
 
 static void cmd_sha256(int idx, char *par)
