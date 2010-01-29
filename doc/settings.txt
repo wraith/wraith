@@ -18,7 +18,6 @@ irc.easynews.com
 irc.eversible.com
 irc.he.net
 irc.mzima.net
-irc.nac.net
 irc.paraphysics.net
 irc.serious.biz
 irc.servercentral.net
@@ -37,7 +36,6 @@ irc.du.se
 irc.efnet.ch
 irc.efnet.fr
 irc.efnet.nl
-irc.efnet.no
 irc.efnet.pl
 irc.efnet.ru
 irc.homelien.no
