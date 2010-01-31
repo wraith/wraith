@@ -22,14 +22,14 @@ int EncryptedStream::loadFile (const int fd) {
   /* Peak at the first few bytes to determine the algorithm used */
   if (str[0] == 0x7F && str[2] == 0x7F) {
     enc_flags = str[1];
-    in_buf = str(3, str.length() - 3);
+    in_buf = str(3);
   } else {
     enc_flags |= ENC_NO_HEADER;
 
     // Old socksfile format?
     if (bd::String(str(0, 5)) == "+enc\n") {
       enc_flags |= (ENC_KEEP_NEWLINES|ENC_AES_256_ECB|ENC_BASE64_BROKEN);
-      in_buf = str(5, str.length() - 5);
+      in_buf = str(5);
     } else {
       /* Peak at the first block to see if it matches a userfile or an old conf file */
       bd::String my_peek(decrypt_string(key, broken_base64Decode(str(0, 32))));

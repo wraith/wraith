@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
     line = file.getline().chomp();
     if (line[0] == '#') continue;
     if (line[0] == ':') {
-      type = line(1, line.length() - 1);
+      type = line(1);
       if (type == "end")
         break;
 
