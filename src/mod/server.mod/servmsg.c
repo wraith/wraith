@@ -262,7 +262,7 @@ got004(char *from, char *msg)
   tmp = newsplit(&msg);
 
   /* cookies won't work on ircu or Unreal or snircd */
-  if (strstr(tmp, "u2.") || strstr(tmp, "Unreeal") || strstr(tmp, "snircd")) {
+  if (strstr(tmp, "u2.") || strstr(tmp, "Unreal") || strstr(tmp, "snircd")) {
     putlog(LOG_DEBUG, "*", "Disabling cookies as they are not supported on %s", cursrvname);
     cookies_disabled = true;
   }
