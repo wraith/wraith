@@ -83,9 +83,9 @@ makehelp: makehelp.c ../lib/bdlib/src/libbdlib.a
 	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makehelp.c ../lib/bdlib/src/libbdlib.a -o makehelp
 	@$(STRIP) makehelp@EXEEXT@
 
-sorthelp: sorthelp.c
+sorthelp: sorthelp.c ../lib/bdlib/src/libbdlib.a
 	@echo -e "Compiling: \033[1msorthelp\033[0m"
-	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) sorthelp.c -o sorthelp
+	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) sorthelp.c ../lib/bdlib/src/libbdlib.a -o sorthelp
 	@$(STRIP) sorthelp@EXEEXT@
 
 stringfix: stringfix.c common.h ../config.h eggdrop.h
