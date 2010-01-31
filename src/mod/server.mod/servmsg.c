@@ -1824,7 +1824,7 @@ static void server_dns_callback(int id, void *client_data, const char *host, bd:
       goto fatal_dns;
     }
   }
-  ip = strdup(ip_from_dns.c_str());
+  ip = ip_from_dns.dup();
 
   get_addr(ip, &addr);
  
@@ -1871,7 +1871,7 @@ static void server_dns_callback(int id, void *client_data, const char *host, bd:
     /* Wait for async result now */
   }
 
-  free(ip);
+  delete[] ip;
   return;
 
 fatal_dns:
