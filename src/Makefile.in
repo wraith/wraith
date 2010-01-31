@@ -73,9 +73,9 @@ makeres: makeres.c
 	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makeres.c -o makeres
 	@$(STRIP) makeres@EXEEXT@
 
-makeset: makeset.c
+makeset: makeset.c ../lib/bdlib/src/libbdlib.a
 	@echo -e "Compiling: \033[1mmakeset\033[0m"
-	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makeset.c -o makeset
+	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makeset.c ../lib/bdlib/src/libbdlib.a -o makeset
 	@$(STRIP) makeset@EXEEXT@
 
 makehelp: makehelp.c

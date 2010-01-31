@@ -215,24 +215,28 @@ checkclean.debug:
 	fi)
 	@touch stamp.debug
 
-wraith:	checkclean.wraith general
+lib:
+	+@cd lib && $(MAKE)
+
+wraith:	checkclean.wraith lib general
 	@echo ""
 	@echo "Making binary"
 	@echo ""
 	@echo ""
-	+@cd lib && $(MAKE)
 	+@cd src/mod && $(MAKE_BIN) static
 	+@cd src && $(MAKE_BIN) $(BINEXEC)
 	@echo ""
 
 dwraith: debug
 
-debug: checkclean.debug general
+lib.debug:
+	+@cd lib && $(MAKE) debug
+
+debug: checkclean.debug lib.debug general
 	@echo ""
 	@echo "Making debug binary"
 	@echo ""
 	@echo ""
-	+@cd lib && $(MAKE) debug
 	+@cd src/mod && $(MAKE_DEBUG) static
 	+@cd src && $(MAKE_DEBUG) $(BINEXEC)
 	@echo ""

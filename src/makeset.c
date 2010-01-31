@@ -1,6 +1,5 @@
-#include <iostream>
-#include <fstream>
-#include <string>
+#include <bdlib/src/Stream.h>
+#include <bdlib/src/String.h>
 #include <cctype>
 #include <algorithm>
 #include <cstring>
@@ -10,41 +9,37 @@ int main(int argc, char *argv[]) {
   if (argc == 2)
     return 1;
 
-  fstream file;
-  ofstream out;
-  file.open(argv[1]);
-  out.open(argv[2]);
+  bd::Stream file, out;
+  file.loadFile(argv[1]);
 
-
-  char line[1024] = "";
-  string type;
+  bd::String type, line;
   char c;
 
-  while (file.getline(line, sizeof(line))) {
+  while (file.tell() < file.length()) {
+    line = file.getline().chomp();
     if (line[0] == '#') continue;
     if (line[0] == ':') {
-      type = &line[1];
+      type = line(1, line.length() - 1);
       if (type == "end")
         break;
 
-      transform(type.begin(), type.end(), type.begin(), (int(*)(int)) toupper);
+      transform(type.begin(), type.end(), type.mdata(), (int(*)(int)) toupper);
 
       type = "DEFAULT_" + type;
-      out << "#define " << type << " \"\\" << endl;
+      out << "#define " << type << " \"\\" << "\n";
     } else {
       if (!type.length()) 
         continue;
 
       out << line;
-      c = file.peek();
+      c = file.peek()[0];
       if (strchr("\n:", c)) {
-        out << "\"\n" << endl;
+        out << "\"\n\n";
         type = "";
       } else
-        out << ",\\" << endl;
+        out << ",\\\n";
     }
   }
 
-  file.close();
-  out.close();
+  out.writeFile(argv[2]);
 }
