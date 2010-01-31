@@ -68,9 +68,9 @@ blah:
 	@echo "Use the build script."
 	@echo ""
 
-makeres: makeres.c
+makeres: makeres.c ../lib/bdlib/src/libbdlib.a
 	@echo -e "Compiling: \033[1mmakeres\033[0m"
-	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makeres.c -o makeres
+	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makeres.c ../lib/bdlib/src/libbdlib.a -o makeres
 	@$(STRIP) makeres@EXEEXT@
 
 makeset: makeset.c ../lib/bdlib/src/libbdlib.a
