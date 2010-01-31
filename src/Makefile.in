@@ -78,9 +78,9 @@ makeset: makeset.c ../lib/bdlib/src/libbdlib.a
 	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makeset.c ../lib/bdlib/src/libbdlib.a -o makeset
 	@$(STRIP) makeset@EXEEXT@
 
-makehelp: makehelp.c
+makehelp: makehelp.c ../lib/bdlib/src/libbdlib.a
 	@echo -e "Compiling: \033[1mmakehelp\033[0m"
-	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makehelp.c -o makehelp
+	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makehelp.c ../lib/bdlib/src/libbdlib.a -o makehelp
 	@$(STRIP) makehelp@EXEEXT@
 
 sorthelp: sorthelp.c
