@@ -16,6 +16,9 @@ int EncryptedStream::loadFile (const int fd) {
 
   bd::String in_buf;
 
+  // When loading, we should never be told what format it is in, just determine it from the header.
+  enc_flags = 0;
+
   /* Peak at the first few bytes to determine the algorithm used */
   if (str[0] == 0x7F && str[2] == 0x7F) {
     enc_flags = str[1];
