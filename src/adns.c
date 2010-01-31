@@ -1087,7 +1087,7 @@ void tell_dnsdebug(int idx)
 	for (int i = 0; i < ncache; i++) {
 		dprintf(idx, "cache(%d) %s expires in %ds\n", i, cache[i].query, (int) (cache[i].expiretime - now));
 		for (size_t n = 0; n < cache[i].answer->size(); n++)
-			dprintf(idx, "%d: %s\n", n, cache[i].answer->join(',').c_str());
+			dprintf(idx, "%zu: %s\n", n, cache[i].answer->join(',').c_str());
 	}
 }
 
