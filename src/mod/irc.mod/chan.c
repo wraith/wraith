@@ -972,12 +972,19 @@ void check_this_ban(struct chanset_t *chan, char *banmask, bool sticky)
   char user[UHOSTLEN] = "";
 
   for (memberlist *m = chan->channel.member; m && m->nick[0]; m = m->next) {
-    simple_snprintf(user, sizeof(user), "%s!%s", m->nick, m->userhost);
-    if (wild_match(banmask, user) &&
-        !(use_exempts &&
-          (u_match_mask(global_exempts, user) ||
-           u_match_mask(chan->exempts, user))))
-      refresh_ban_kick(chan, m, user);
+    for (int i = 0; i < (m->userip[0] ? 2 : 1); ++i) {
+      if (i == 0)
+        simple_snprintf(user, sizeof(user), "%s!%s", m->nick, m->userhost);
+      if (i == 1)
+        simple_snprintf(user, sizeof(user), "%s!%s", m->nick, m->userip);
+      if ((wild_match(banmask, user)  || match_cidr(banmask, user)) &&
+          !(use_exempts &&
+            (u_match_mask(global_exempts, user) ||
+             u_match_mask(chan->exempts, user)))) {
+        refresh_ban_kick(chan, m, user);
+        break;
+      }
+    }
   }
   if (!isbanned(chan, banmask) &&
       (!channel_dynamicbans(chan) || sticky))
@@ -1119,30 +1126,35 @@ static void check_this_member(struct chanset_t *chan, char *nick, struct flag_re
   }
 
   char s[UHOSTLEN] = "";
+  for (int i = 0; i < (m->userip[0] ? 2 : 1); ++i) {
+    if (i == 0)
+      simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
+    if (i == 1)
+      simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
 
-  simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
-  /* check vs invites */
-  if (use_invites &&
-      (u_match_mask(global_invites,s) ||
-       u_match_mask(chan->invites, s)))
-    refresh_invite(chan, s);
-  /* don't kickban if permanent exempted */
-  if (!(use_exempts &&
-        (u_match_mask(global_exempts, s) ||
-         u_match_mask(chan->exempts, s)))) {
+    /* check vs invites */
+    if (use_invites &&
+        (u_match_mask(global_invites,s) ||
+         u_match_mask(chan->invites, s)))
+      refresh_invite(chan, s);
+    /* don't kickban if permanent exempted */
+    if (!(use_exempts &&
+          (u_match_mask(global_exempts, s) ||
+           u_match_mask(chan->exempts, s)))) {
 
-    /* Are they banned in the internal list? */
-    if (u_match_mask(global_bans, s) || u_match_mask(chan->bans, s))
-      refresh_ban_kick(chan, m, s);
+      /* Are they banned in the internal list? */
+      if (u_match_mask(global_bans, s) || u_match_mask(chan->bans, s))
+        refresh_ban_kick(chan, m, s);
 
-    /* are they +k ? */
-    if (!chan_sentkick(m) && (chan_kick(*fr) || glob_kick(*fr)) && me_op(chan)) {
-      char *p = (char *) get_user(&USERENTRY_COMMENT, m->user);
+      /* are they +k ? */
+      if (!chan_sentkick(m) && (chan_kick(*fr) || glob_kick(*fr)) && me_op(chan)) {
+        char *p = (char *) get_user(&USERENTRY_COMMENT, m->user);
 
-      check_exemptlist(chan, s);
-      quickban(chan, m->userhost);
-      dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, bankickprefix, p ? p : response(RES_KICKBAN));
-      m->flags |= SENTKICK;
+        check_exemptlist(chan, s);
+        quickban(chan, m->userhost);
+        dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, bankickprefix, p ? p : response(RES_KICKBAN));
+        m->flags |= SENTKICK;
+      }
     }
   }
 }
