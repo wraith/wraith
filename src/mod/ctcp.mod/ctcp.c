@@ -616,7 +616,9 @@ static int ctcp_CHAT(char *nick, char *uhost, struct userrec *u, char *object, c
       if (dcc[i].type && (dcc[i].type->flags & DCT_LISTEN) && (!strcmp(dcc[i].nick, "(telnet)")))
         ix = i;
     }
-    if (dcc_total == max_dcc || (ix < 0 && (ix = listen_all(0, 0, 0)) < 0))
+    if (!iptolong(getmyip())) {
+      simple_snprintf(&ctcp_reply[strlen(ctcp_reply)], sizeof(ctcp_reply) - strlen(ctcp_reply), "\001ERROR no ipv4 ip defined. Use /dcc chat %s\001", botname);
+    } else if (dcc_total == max_dcc || (ix < 0 && (ix = listen_all(0, 0, 0)) < 0))
       strlcat(ctcp_reply, "\001ERROR no telnet port\001", sizeof(ctcp_reply));
     else {
       if (listen_time <= 2)

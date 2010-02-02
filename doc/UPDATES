@@ -1,4 +1,5 @@
 * Cleanup DCC/Telnet listening so bot only listens on IPV6 if it was specifically given an IPV6 IP.
+* CTCP bot CHAT will no longer work if the bot does not have an IPV4 IP set.
 
 1.3 - http://wraith.botpack.net/milestone/1.3
 * Binary / shell / startup changes
