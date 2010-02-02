@@ -973,10 +973,10 @@ void check_this_ban(struct chanset_t *chan, char *banmask, bool sticky)
 
   for (memberlist *m = chan->channel.member; m && m->nick[0]; m = m->next) {
     for (int i = 0; i < (m->userip[0] ? 2 : 1); ++i) {
-      if (i == 0)
-        simple_snprintf(user, sizeof(user), "%s!%s", m->nick, m->userhost);
-      if (i == 1)
+      if (i == 0 && m->userip[0]) // Check userip first in case userhost is already an ip
         simple_snprintf(user, sizeof(user), "%s!%s", m->nick, m->userip);
+      else
+        simple_snprintf(user, sizeof(user), "%s!%s", m->nick, m->userhost);
       if ((wild_match(banmask, user)  || match_cidr(banmask, user)) &&
           !(use_exempts &&
             (u_match_mask(global_exempts, user) ||
@@ -1127,10 +1127,10 @@ static void check_this_member(struct chanset_t *chan, char *nick, struct flag_re
 
   char s[UHOSTLEN] = "";
   for (int i = 0; i < (m->userip[0] ? 2 : 1); ++i) {
-    if (i == 0)
-      simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
-    if (i == 1)
+    if (i == 0 && m->userip[0]) // Check userip first in case userhost is already an ip
       simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
+    else
+      simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
 
     /* check vs invites */
     if (use_invites &&
