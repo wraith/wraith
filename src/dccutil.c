@@ -840,11 +840,14 @@ listen_all(port_t lport, bool off)
   struct portmap *pmap = NULL, *pold = NULL;
 
   port = realport = lport;
-  for (pmap = root; pmap; pold = pmap, pmap = pmap->next)
-    if (pmap->realport == port) {
-      port = pmap->mappedto;
-      break;
-    }
+  // If using a random port, lookup the port mapping
+  if (lport == 0) {
+    for (pmap = root; pmap; pold = pmap, pmap = pmap->next)
+      if (pmap->realport == port) {
+        port = pmap->mappedto;
+        break;
+      }
+  }
 
   for (ii = 0; ii < dcc_total; ii++) {
     if (dcc[ii].type && (dcc[ii].type == &DCC_TELNET) && (dcc[ii].port == port) &&
@@ -852,11 +855,9 @@ listen_all(port_t lport, bool off)
       idx = ii;
 
       if (off) {
-        if (pmap) {
-          if (pold)
-            pold->next = pmap->next;
-          else
-            root = pmap->next;
+        if (lport == 0 && pmap) {
+          if (pold) pold->next = pmap->next;
+          else root = pmap->next;
           free(pmap);
         }
 #ifdef USE_IPV6
@@ -918,19 +919,23 @@ listen_all(port_t lport, bool off)
         strlcpy(dcc[idx].host, "*", UHOSTLEN);
         putlog(LOG_DEBUG, "*", "Listening on IPv4 at telnet port %d", port);
       }
+
+      // If was asked for a random listen, save it in a mapping
+      if (lport == 0) {
 #ifdef USE_IPV6
-      if (i > 0 || i6 > 0) {
+        if (i > 0 || i6 > 0) {
 #else
-      if (i > 0) {
+          if (i > 0) {
 #endif /* USE_IPV6 */
-        if (!pmap) {
-          pmap = (struct portmap *) my_calloc(1, sizeof(struct portmap));
-          pmap->next = root;
-          root = pmap;
+            if (!pmap) {
+              pmap = (struct portmap *) my_calloc(1, sizeof(struct portmap));
+              pmap->next = root;
+              root = pmap;
+            }
+            pmap->realport = realport;
+            pmap->mappedto = port;
+          }
         }
-        pmap->realport = realport;
-        pmap->mappedto = port;
-      }
     }
   }
   /* if one of the protocols failed, the one which worked will be returned
