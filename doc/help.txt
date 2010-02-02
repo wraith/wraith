@@ -487,7 +487,10 @@ See also: link
                        will see no reference to it over the botnet in any place.
                        The +o restriction goes for +v as well.
         $brbl$b             Do RBL lookups on clients and ban on matches.
-                       Uses 'rbl-servers'. See also '%dhelp set'
+                       Uses 'rbl-servers'. See also '%dhelp set'. Only the
+                       +r bot will do lookups. On positive match, the bot
+                       will add a ban to the botnet and all bots will enforce
+                       the ban.
         $btake$b           Once a bot is opped, it will mass op all other bots
                        in the channel. After that, they will all attempt to 
                        mass deop in hopes 'taking' the channel. :)
