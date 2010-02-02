@@ -732,19 +732,25 @@ static char *quickban(struct chanset_t *chan, char *uhost)
 static void kick_all(struct chanset_t *chan, char *hostmask, const char *comment, int bantype)
 {
   int flushed = 0;
-  char s[UHOSTLEN] = "";
+  char s[UHOSTLEN] = "", sip[UHOSTLEN] = "";
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
   for (memberlist *m = chan->channel.member; m && m->nick[0]; m = m->next) {
     simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
+    if (m->userip[0])
+      simple_snprintf(sip, sizeof(sip), "%s!%s", m->nick, m->userip);
     get_user_flagrec(m->user, &fr, chan->dname, chan);
-    if ((wild_match(hostmask, s) || match_cidr(hostmask, s)) && 
+    if ((wild_match(hostmask, s) || match_cidr(hostmask, s) ||
+          (sip[0] && (wild_match(hostmask, sip) || match_cidr(hostmask, sip)))) &&
         !chan_sentkick(m) &&
 	!match_my_nick(m->nick) && !chan_issplit(m) &&
 	!(use_exempts &&
 	  ((bantype && (isexempted(chan, s) || (chan->ircnet_status & CHAN_ASKED_EXEMPTS))) ||
 	   (u_match_mask(global_exempts, s) ||
-	    u_match_mask(chan->exempts, s))))) {
+	    u_match_mask(chan->exempts, s) ||
+            (sip[0] &&
+             (u_match_mask(global_exempts, sip) ||
+              u_match_mask(chan->exempts, sip))))))) {
       if (!flushed) {
 	/* We need to kick someone, flush eventual bans first */
 	flush_mode(chan, QUICK);
