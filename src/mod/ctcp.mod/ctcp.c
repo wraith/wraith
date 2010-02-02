@@ -387,7 +387,10 @@ static void ctcp_minutely()
   }
 
   if (listen_time <= 0) {
-    listen_all(0, 1, 0);
+    for (int i = 0; i < dcc_total; i++) {
+      if (dcc[i].type && (dcc[i].type->flags & DCT_LISTEN) && !strcmp(dcc[i].nick, "(telnet)"))
+        listen_all(0, 1, 0);
+    }
   } else
     listen_time--;
 }
