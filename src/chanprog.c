@@ -587,7 +587,7 @@ void rehash_ip() {
 
   if (conf.bot->hub) {
     struct bot_addr *bi = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, conf.bot->u);
-    listen_all(bi->telnet_port, 0);
+    listen_all(bi->telnet_port, 0, 1);
     my_port = bi->telnet_port;
   } else if (conf.bot->localhub) {
     // If not listening on the domain socket, open it up

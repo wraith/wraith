@@ -828,15 +828,15 @@ do_boot(int idx, const char *by, const char *reason)
 }
 
 int
-listen_all(port_t lport, bool off)
+listen_all(port_t lport, bool off, bool should_v6)
 {
   int idx = -1;
   port_t port, realport;
 
 #ifdef USE_IPV6
-  int i6 = 0;
+  int i6 = -1;
 #endif /* USE_IPV6 */
-  int i = 0, ii = 0;
+  int i = -1;
   struct portmap *pmap = NULL, *pold = NULL;
 
   port = realport = lport;
@@ -849,7 +849,8 @@ listen_all(port_t lport, bool off)
       }
   }
 
-  for (ii = 0; ii < dcc_total; ii++) {
+  // Look for an existing open port and close if requested
+  for (int ii = 0; ii < dcc_total; ii++) {
     if (dcc[ii].type && (dcc[ii].type == &DCC_TELNET) && (dcc[ii].port == port) &&
            (!strcmp(dcc[ii].nick, "(telnet)") || !strcmp(dcc[ii].nick, "(telnet6)"))) {
       idx = ii;
@@ -881,35 +882,39 @@ listen_all(port_t lport, bool off)
     if (dcc_total >= max_dcc) {
       putlog(LOG_ERRORS, "*", "Can't open listening port - no more DCC Slots");
     } else {
+      if (should_v6 && (conf.bot->net.ip6 || conf.bot->net.host6)) {
 #ifdef USE_IPV6
-      i6 = open_listen_by_af(&port, AF_INET6);
-      if (i6 < 0) {
-        putlog(LOG_ERRORS, "*", "Can't open IPv6 listening port %d - %s", port,
-               i6 == -1 ? "it's taken." : "couldn't assign ip.");
-      } else {
-        /* now setup ipv4/ipv6 listening port */
-        idx = new_dcc(&DCC_TELNET, 0);
-        dcc[idx].addr = 0L;
-        strlcpy(dcc[idx].host6, myipstr(AF_INET6), sizeof(dcc[idx].host6));
-        dcc[idx].port = port;
-        dcc[idx].sock = i6;
-        dcc[idx].timeval = now;
-        strlcpy(dcc[idx].nick, "(telnet6)", NICKLEN);
-        strlcpy(dcc[idx].host, "*", UHOSTLEN);
-        putlog(LOG_DEBUG, "*", "Listening on IPv6 at telnet port %d", port);
+        i6 = open_listen_by_af(&port, AF_INET6);
+        if (i6 < 0) {
+          putlog(LOG_ERRORS, "*", "Can't open IPv6 listening port %d - %s", port,
+              i6 == -1 ? "it's taken." : "couldn't assign ip.");
+        } else {
+          /* now setup ipv4/ipv6 listening port */
+          idx = new_dcc(&DCC_TELNET, 0);
+          dcc[idx].addr = 0L;
+          strlcpy(dcc[idx].host6, myipstr(AF_INET6), sizeof(dcc[idx].host6));
+          dcc[idx].port = port;
+          dcc[idx].sock = i6;
+          dcc[idx].timeval = now;
+          strlcpy(dcc[idx].nick, "(telnet6)", NICKLEN);
+          strlcpy(dcc[idx].host, "*", UHOSTLEN);
+          putlog(LOG_DEBUG, "*", "Listening on IPv6 at telnet port %d", port);
+        }
+#endif
+        if (i6 < 0)
+          putlog(LOG_ERRORS, "*", "Can't open IPv6 listening port %d - %s", port, i6 == -1 ? "it's taken." : "couldn't assign ip.");
       }
+
+      /* now setup ipv4 listening port */
+#ifdef USE_IPV6
       i = open_listen_by_af(&port, AF_INET);
 #else
       i = open_listen(&port);
 #endif /* USE_IPV6 */
+
       if (i < 0) {
-#ifdef USE_IPV6
-        if (i6 < 0)
-#endif /* USE_IPV6 */
-          putlog(LOG_ERRORS, "*", "Can't open IPv4 listening port %d - %s", port,
-                 i == -1 ? "it's taken." : "couldn't assign ip.");
+        putlog(LOG_ERRORS, "*", "Can't open IPv4 listening port %d - %s", port, i == -1 ? "it's taken." : "couldn't assign ip.");
       } else {
-        /* now setup ipv4 listening port */
         idx = new_dcc(&DCC_TELNET, 0);
         dcc[idx].addr = iptolong(getmyip());
         dcc[idx].port = port;
@@ -923,7 +928,7 @@ listen_all(port_t lport, bool off)
       // If was asked for a random listen, save it in a mapping
       if (lport == 0) {
 #ifdef USE_IPV6
-        if (i > 0 || i6 > 0) {
+        if (i > 0 || (should_v6 && i6 > 0)) {
 #else
           if (i > 0) {
 #endif /* USE_IPV6 */
