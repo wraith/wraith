@@ -87,7 +87,7 @@
   * Removed 'chanset +knock' and replaced with 'chanset knock (Op|Voice|User)', see 'help chaninfo'.
   * Default log timestamp now includes seconds.
   * Hubs no longer include their own timestamp over botnet.
-  * Floodbots (+f) are now listed in cmd_userlist
+  * Floodbots (+f) and Resolvbots (+r) are now listed in cmd_userlist
   * Floodbots (+f) will automatically unDEAF themselves to they can monitor the channel for floods (namely flood-chan).
     Note that this is done about 10 seconds after adding +f to a bot. Removing +f will set DEAF again.
 
