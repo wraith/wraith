@@ -739,6 +739,8 @@ static void kick_all(struct chanset_t *chan, char *hostmask, const char *comment
     simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
     if (m->userip[0])
       simple_snprintf(sip, sizeof(sip), "%s!%s", m->nick, m->userip);
+    else
+      sip[0] = 0;
     get_user_flagrec(m->user, &fr, chan->dname, chan);
     if ((wild_match(hostmask, s) || match_cidr(hostmask, s) ||
           (sip[0] && (wild_match(hostmask, sip) || match_cidr(hostmask, sip)))) &&
