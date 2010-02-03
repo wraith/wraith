@@ -1084,7 +1084,7 @@ gotmode(char *from, char *msg)
       if (me_op(chan)) {
         char tmp[1024] = "";
 
-        if (role && (!u || (u && !u->bot))) {
+        if (!isserver[0] && role && (!u || (u && !u->bot))) {
           if (m && deops >= 3) {
             if (chan->mdop) {
               if (role < 5 && !chan_sentkick(m)) {
