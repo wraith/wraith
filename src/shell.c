@@ -73,7 +73,6 @@ void clear_tmp()
         strcmp(dir_ent->d_name, ".bin.old") && 
         strncmp(dir_ent->d_name, STR(".socks-"), 7) &&
         strcmp(dir_ent->d_name, ".") && 
-        strcmp(dir_ent->d_name, ".un") && 
         strcmp(dir_ent->d_name, "..")) {
 
       flen = strlen(dir_ent->d_name) + strlen(tempdir) + 1;
