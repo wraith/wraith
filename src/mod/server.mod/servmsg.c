@@ -197,7 +197,7 @@ join_chans()
   for (register struct chanset_t *chan = chanset; chan; chan = chan->next) {
     if (shouldjoin(chan)) {
       chan->status &= ~(CHAN_ACTIVE | CHAN_PEND | CHAN_JOINING);
-      dprintf(DP_SERVER, "JOIN %s %s\n", (chan->name[0]) ? chan->name : chan->dname,
+      dprintf(DP_MODE, "JOIN %s %s\n", (chan->name[0]) ? chan->name : chan->dname,
                                          chan->channel.key[0] ? chan->channel.key : chan->key_prot);
       chan->status |= CHAN_JOINING;
     }
