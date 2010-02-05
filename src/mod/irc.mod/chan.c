@@ -1443,7 +1443,10 @@ void recheck_channel(struct chanset_t *chan, int dobans)
       }
       // Flush out mask changes
       flush_mode(chan, QUICK); 
+    }
 
+    // Do this here as the above only runs after already having been opped and having gotten bans.
+    if (dobans) {
       if ((chan->status & CHAN_ASKEDMODES) && !channel_inactive(chan)) 
         dprintf(DP_MODE, "MODE %s\n", chan->name);
       recheck_channel_modes(chan);

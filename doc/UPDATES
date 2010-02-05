@@ -1,4 +1,5 @@
 * Bot now attempts to join a channel immediately on invite.
+* Fix bot not setting 'chanmode' channel modes when getting opped.
 
 1.3 - http://wraith.botpack.net/milestone/1.3
 * Binary / shell / startup changes
