@@ -92,6 +92,9 @@
   * Floodbots (+f) and Resolvbots (+r) are now listed in cmd_userlist
   * Floodbots (+f) will automatically unDEAF themselves to they can monitor the channel for floods (namely flood-chan).
     Note that this is done about 10 seconds after adding +f to a bot. Removing +f will set DEAF again.
+  * Added SHA256 support (cmd_sha256, Auth cmd: sha256)
+  * Add cmd_encrypt_fish and cmd_decrypt_fish which uses eggdrop's blowfish (same as FiSH)
+  * Add cmd_hash which returns the MD5, SHA1 and SHA256 of the given string.
 
 1.2.16.1
 * Fix linux compile errors

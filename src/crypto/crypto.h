@@ -2,8 +2,10 @@
 #define _CRYPTO_H
 
 #include "aes_util.h"
+#include "bf_util.h"
 #include <openssl/crypto.h>
 #include <openssl/aes.h>
+#include <openssl/blowfish.h>
 #include <openssl/md5.h>
 #include <openssl/sha.h>
 

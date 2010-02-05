@@ -265,7 +265,7 @@ See also: cmdpass
 ###  $bbotjoin$b <bot> <channel> [options]
    Adds a channel to the bot's channel list. If options are specified, the 
    channel will be configured with the options.
-
+ 
    $bTHIS CMD IS CURRENTLY EXPERIMENTAL AND WILL NOT ACTUALLY SAVE STATE$b
    $bMEANING, ALL BOTS WILL JOIN EVENTUALLY AFTER DOING BOTJOIN$b
  
@@ -904,7 +904,14 @@ See also: down
 ###  $bdecrypt$b <key> <string>
    Decrypts the string using the specified key.
  
-See also: encrypt, randstring, md5, sha1
+See also: decrypt_fish, encrypt, encrypt_fish, randstring, md5, sha1, sha256, hash
+::decrypt_fish
+###  $bdecrypt_fish$b <key> <string>
+   Decrypts the string using the specified key.
+ 
+   This algorithm is eggdrop's blowfish, same as FiSH.
+ 
+See also: decrypt, encrypt, encrypt_fish, randstring, md5, sha1, sha256, hash
 :leaf:deluser
 ###  $bdeluser$b <nickname>
    Deletes a user record for a user on the channel, using their
@@ -971,7 +978,14 @@ See also: color, console, login, page, strip
 ###  $bencrypt$b <key> <string>
    Encrypts the string using the specified key.
  
-See also: decrypt, randstring, md5, sha1
+See also: encrypt_fish, decrypt, decrypt_fish, randstring, md5, sha1, sha256, hash
+::encrypt_fish
+###  $bencrypt_fish$b <key> <string>
+   Encrypts the string using the specified key.
+ 
+   This algorithm is eggdrop's blowfish, same as FiSH.
+ 
+See also: encrypt, decrypt, decrypt_fish, randstring, md5, sha1, sha256, hash
 ::exec:
 ###  $bexec$b <params>
    The bot will execute the specified program with each param specified,
@@ -1048,6 +1062,11 @@ See also: console, channels%{+m}, status%{-}
    Perm owners may not change their handle without recompiling binaries first. 
  
 See also: newpass%{+mi}, chhandle, chpass%{-}%{+n}, chsecpass%{-}
+::hash
+###  $bhash$b <string>
+   Returns the MD5, SHA1, and SHA256 hash of the specified string.
+ 
+See also: randstring, md5, sha1, sha256, encrypt, encrypt_fish, decrypt, decrypt_fish
 ::help:
 ###  $bhelp$b [cmd]
    Alone, will show all cmds that match your flags. With a cmd it will show
@@ -1262,7 +1281,7 @@ See also: echo, color, console, page, strip, whois
      '%dmatch *.edu 16 25'
    This would show results 16 through 25 matching any users with a hostmask
    that ends with ".edu".
-
+ 
    $bThis command will not match on bots. You must use 'matchbot' for that.$b
 See also: matchbot
 ::matchbot
@@ -1274,7 +1293,7 @@ See also: match
 ###  $bmd5$b <string>
    Returns the MD5 hash of the specified string.
  
-See also: randstring, sha1, encrypt, decrypt
+See also: randstring, sha1, sha256, hash, encrypt, encrypt_fish, decrypt, decrypt_fish
 ::me
 ###  $bme$b <text>
    Performs an action on the party line. This appears as "* bryan is leaving",
@@ -1453,7 +1472,7 @@ See also: color, console, echo, login, strip
 ###  $brandstring$b <len>
    Displays a random string of length 'len' up to 300 chars.
  
-See also: md5, sha1, encrypt, decrypt
+See also: md5, sha1, sha256, hash, encrypt, encrypt_fish, decrypt, decrypt_fish
 ::rehash
 ###  $brehash$b 
    Don't use this cmd, it doesn't do what you think it does, and can result
@@ -1599,7 +1618,7 @@ See also: reload, backup
  
 [L]  $bservers$b         Comma-separated list of servers the bot will use.
 [L]  $bservers6$b        Comma-separated list of servers the bot will use (FOR IPv6).
-
+ 
 [L]  $brbl-servers$b     Servers to use for RBL checking in channels that are +rbl.
  
 [S]  $brealname$b        The bot's "real name" when connecting. (supports '$n' expansion)
@@ -1626,11 +1645,11 @@ See also: reload, backup
  
 [B]  $bident-botnick$b   Send botnick instead of shell username on connect (non-ident)
 [B]  $boidentd$b         Make bot try and use oidentd spoofing as BOTNICK.
-
+ 
 [B]  $blink_cleartext$b  Allows bots to link without an encryption scheme. This is needed
                          for allowing older bots to link in. Be sure to never leave this on
                          unless upgrading or letting an older bot link in to upgrade.
-
+ 
 [B]  $bdccauth$b         Boolean (0 or 1). Set to use auth checking on dcc/telnet login.
 [N]  $bop-bots$b         Number of bots to ask every time an oprequest is to be made.
 [N]  $bin-bots$b         Number of bots to ask every time an inrequest is to be made.
@@ -1665,7 +1684,12 @@ See also: botset
 ###  $bsha1$b <string>
    Returns the SHA1 hash of the specified string.
  
-See also: randstring, md5, encrypt, decrypt
+See also: randstring, md5, sha256, hash, encrypt, encrypt_fish, decrypt, decrypt_fish
+::sha256
+###  $bsha256$b <string>
+   Returns the SHA256 hash of the specified string.
+ 
+See also: randstring, md5, sha1, hash, encrypt, encrypt_fish, decrypt, decrypt_fish
 ::simul
 ###  $bsimul$b <handle> <text>
    This allows you to simulate the specified handle typing the given text.

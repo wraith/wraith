@@ -50,6 +50,23 @@ bd::String encrypt_string(const bd::String& key, const bd::String& data) {
   return encrypted;
 }
 
+#ifdef not_needed
+/**
+ * @brief Encrypt a string with Blowfish ECB
+ * @param key The key to encrypt with
+ * @param data The string to encrypt
+ * @return A new, encrypted string
+ */
+bd::String encrypt_string_bf(const bd::String& key, const bd::String& data) {
+  if (!key) return data;
+  size_t len = data.length();
+  char *bdata = (char*) bf_encrypt_ecb_binary(key.c_str(), (unsigned char*) data.c_str(), &len);
+  bd::String encrypted(bdata, len);
+  free(bdata);
+  return encrypted;
+}
+#endif
+
 /**
  * @brief Encrypt a string with AES 256 CBC
  * @param key The key to encrypt with
@@ -233,6 +250,36 @@ char *SHA1(const char *string)
 int sha1cmp(const char *hash, const char *string) {
   int n = strcmp(hash, SHA1(string));
   SHA1(NULL);
+  return n;
+}
+
+char *SHA256(const char *string)
+{
+  static int n = 0;
+  static char ret[5][SHA256_HASH_LENGTH + 1];
+  //Cleanse the current buffer
+  if (!string) {
+    OPENSSL_cleanse(ret[n], SHA256_HASH_LENGTH + 1);
+    return NULL;
+  }
+  char* sha256string = ret[n++];
+  unsigned char   sha256out[SHA256_HASH_LENGTH + 1] = "";
+  SHA256_CTX ctx;
+
+  SHA256_Init(&ctx);
+  SHA256_Update(&ctx, string, strlen(string));
+  SHA256_Final(sha256out, &ctx);
+  btoh(sha256out, SHA256_DIGEST_LENGTH, sha256string, SHA256_HASH_LENGTH + 1);
+  OPENSSL_cleanse(&ctx, sizeof(ctx));
+
+  if (n == 5) n = 0;
+
+  return sha256string;
+}
+
+int sha256cmp(const char *hash, const char *string) {
+  int n = strcmp(hash, SHA256(string));
+  SHA256(NULL);
   return n;
 }
 
