@@ -1397,21 +1397,7 @@ void recheck_channel(struct chanset_t *chan, int dobans)
 
     /* This is a bad hack for +e/+I */
     if (dobans == 2 && chan->channel.members > 1) {
-      if (!(chan->status & (CHAN_ASKEDBANS|CHAN_HAVEBANS))) {
-        chan->status |= CHAN_ASKEDBANS;
-        dprintf(DP_MODE, "MODE %s +b\n", chan->name);
-      }
-      if (do_eI) {
-        chan->channel.last_eI = now;
-        if (!(chan->ircnet_status & CHAN_ASKED_EXEMPTS) && use_exempts == 1) {
-          chan->ircnet_status |= CHAN_ASKED_EXEMPTS;
-          dprintf(DP_MODE, "MODE %s +e\n", chan->name);
-        }
-        if (!(chan->ircnet_status & CHAN_ASKED_INVITES) && use_invites == 1) {
-          chan->ircnet_status |= CHAN_ASKED_INVITES;
-          dprintf(DP_MODE, "MODE %s +I\n", chan->name);
-        }
-      }
+      get_channel_masks(chan);
     }
 
   //Check +d/+O/+k
