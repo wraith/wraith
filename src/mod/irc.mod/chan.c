@@ -2398,7 +2398,8 @@ static int gotinvite(char *from, char *msg)
   if (!chan)
     /* Might be a short-name */
     chan = findchan_by_dname(msg);
-  else {
+
+  if (chan) {
     if (channel_pending(chan) || channel_active(chan))
       dprintf(DP_HELP, "NOTICE %s :I'm already here.\n", nick);
     else if (shouldjoin(chan))
