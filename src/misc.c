@@ -652,11 +652,11 @@ readsocks(const char *fname)
     else if (type == STR("+buildts"))
       old_buildts = strtol(str.c_str(), NULL, 10);
     else if (type == STR("+botname"))
-      nick = strdup(str.c_str());
+      nick = str.dup();
     else if (type == STR("+ip4"))
-      ip4 = strdup(str.c_str());
+      ip4 = str.dup();
     else if (type == STR("+ip6"))
-      ip6 = strdup(str.c_str());
+      ip6 = str.dup();
     else if (type == STR("+serv_cache")) {
       if (!cached_005 && str.find(STR("005")))
         cached_005 = 1;
@@ -695,16 +695,13 @@ readsocks(const char *fname)
       reset_chans = 1;
     }
   }
-  if (nick)
-    free(nick);
+  delete[] nick;
+  delete[] ip4;
+  delete[] ip6;
   if (jnick)
     free(jnick);
   if (socksfile)
     free(socksfile);
-  if (ip4)
-    free(ip4);
-  if (ip6)
-    free(ip6);
 }
 
 

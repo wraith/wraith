@@ -22,18 +22,18 @@ int EncryptedStream::loadFile (const int fd) {
   /* Peak at the first few bytes to determine the algorithm used */
   if (str[0] == 0x7F && str[2] == 0x7F) {
     enc_flags = str[1];
-    in_buf = str(3, str.length() - 3);
+    in_buf = str(3);
   } else {
     enc_flags |= ENC_NO_HEADER;
 
     // Old socksfile format?
     if (bd::String(str(0, 5)) == "+enc\n") {
       enc_flags |= (ENC_KEEP_NEWLINES|ENC_AES_256_ECB|ENC_BASE64_BROKEN);
-      in_buf = str(5, str.length() - 5);
+      in_buf = str(5);
     } else {
       /* Peak at the first block to see if it matches a userfile or an old conf file */
-      bd::String peek(decrypt_string(key, broken_base64Decode(str(0, 32))));
-      if (peek(0, 4) == "#4v:" || peek(0, 2) == "! ")
+      bd::String my_peek(decrypt_string(key, broken_base64Decode(str(0, 32))));
+      if (my_peek(0, 4) == "#4v:" || my_peek(0, 2) == "! ")
         enc_flags |= (ENC_KEEP_NEWLINES|ENC_AES_256_ECB|ENC_BASE64_BROKEN);
       in_buf = str;
     }
@@ -65,9 +65,9 @@ int EncryptedStream::loadFile (const int fd) {
 
 void EncryptedStream::apply_filters(bd::String& buf, const bd::String& IV) const {
   if (enc_flags & ENC_AES_256_CBC) {
-    unsigned char* iv = (unsigned char*) strdup(IV.c_str());
+    unsigned char* iv = (unsigned char*) IV.dup();
     buf = encrypt_string_cbc(key, buf, iv);
-    free(iv);
+    delete[] iv;
   } else if (enc_flags & ENC_AES_256_ECB)
     buf = encrypt_string(key, buf);
 
@@ -84,9 +84,9 @@ void EncryptedStream::unapply_filters(bd::String& buf, const bd::String& IV) con
     buf = bd::base64Decode(buf);
 
   if (enc_flags & ENC_AES_256_CBC) {
-    unsigned char* iv = (unsigned char*) strdup(IV.c_str());
+    unsigned char* iv = (unsigned char*) IV.dup();
     buf = decrypt_string_cbc(key, buf, iv);
-    free(iv);
+    delete[] iv;
   }
   else if (enc_flags & ENC_AES_256_ECB)
     buf = decrypt_string(key, buf);

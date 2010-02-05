@@ -68,24 +68,24 @@ blah:
 	@echo "Use the build script."
 	@echo ""
 
-makeres: makeres.c
+makeres: makeres.c ../lib/bdlib/src/libbdlib.a
 	@echo -e "Compiling: \033[1mmakeres\033[0m"
-	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makeres.c -o makeres
+	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makeres.c ../lib/bdlib/src/libbdlib.a -o makeres
 	@$(STRIP) makeres@EXEEXT@
 
-makeset: makeset.c
+makeset: makeset.c ../lib/bdlib/src/libbdlib.a
 	@echo -e "Compiling: \033[1mmakeset\033[0m"
-	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makeset.c -o makeset
+	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makeset.c ../lib/bdlib/src/libbdlib.a -o makeset
 	@$(STRIP) makeset@EXEEXT@
 
-makehelp: makehelp.c
+makehelp: makehelp.c ../lib/bdlib/src/libbdlib.a
 	@echo -e "Compiling: \033[1mmakehelp\033[0m"
-	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makehelp.c -o makehelp
+	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makehelp.c ../lib/bdlib/src/libbdlib.a -o makehelp
 	@$(STRIP) makehelp@EXEEXT@
 
-sorthelp: sorthelp.c
+sorthelp: sorthelp.c ../lib/bdlib/src/libbdlib.a
 	@echo -e "Compiling: \033[1msorthelp\033[0m"
-	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) sorthelp.c -o sorthelp
+	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) sorthelp.c ../lib/bdlib/src/libbdlib.a -o sorthelp
 	@$(STRIP) sorthelp@EXEEXT@
 
 stringfix: stringfix.c common.h ../config.h eggdrop.h

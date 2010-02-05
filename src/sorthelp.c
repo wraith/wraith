@@ -1,116 +1,21 @@
-/*
- * Copyright (C) 1997 Robey Pointer
- * Copyright (C) 1999 - 2002 Eggheads Development Team
- * Copyright (C) 2002 - 2008 Bryan Drewery
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- */
-
-
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <bdlib/src/String.h>
+#include <bdlib/src/Stream.h>
 
 typedef struct {
   int leaf;
   int hub;
-  char *name;
-  char *txt;
+  bd::String* name;
+  bd::String* txt;
 } cmds;
-
-#define BUFSIZE 20240
 
 cmds cmdlist[900];
 int cmdi = 0;
 
-char *replace(char *string, char *oldie, char *newbie)
-{
-  static char newstring[BUFSIZE] = "";
-  int str_index, newstr_index, oldie_index, end, new_len, old_len, cpy_len;
-  char *c = NULL;
-
-  if (string == NULL) return "";
-  if ((c = (char *) strstr(string, oldie)) == NULL) return string;
-  new_len = strlen(newbie);
-  old_len = strlen(oldie);
-  end = strlen(string) - old_len;
-  oldie_index = c - string;
-  newstr_index = 0;
-  str_index = 0;
-  while(str_index <= end && c != NULL) {
-    cpy_len = oldie_index-str_index;
-    strncpy(newstring + newstr_index, string + str_index, cpy_len);
-    newstr_index += cpy_len;
-    str_index += cpy_len;
-    strcpy(newstring + newstr_index, newbie);
-    newstr_index += new_len;
-    str_index += old_len;
-    if((c = (char *) strstr(string + str_index, oldie)) != NULL)
-     oldie_index = c - string;
-  }
-  strcpy(newstring + newstr_index, string + str_index);
-  return (newstring);
-}
-
-char *step_thru_file(FILE *fd)
-{
-  char tempBuf[BUFSIZE] = "", *retStr = NULL;
-
-  if (fd == NULL) {
-    return NULL;
-  }
-  retStr = NULL;
-  while (!feof(fd)) {
-    fgets(tempBuf, sizeof(tempBuf), fd);
-    if (!feof(fd)) {
-      if (retStr == NULL) {
-        retStr = (char *) calloc(1, strlen(tempBuf) + 2);
-        strcpy(retStr, tempBuf);
-      } else {
-        retStr = (char *) realloc(retStr, strlen(retStr) + strlen(tempBuf));
-        strcat(retStr, tempBuf);
-      }
-      if (retStr[strlen(retStr)-1] == '\n') {
-        retStr[strlen(retStr)-1] = 0;
-        break;
-      }
-    }
-  }
-  return retStr;
-}
-
-char *newsplit(char **rest)
-{
-  register char *o, *r;
-
-  if (!rest)
-    return *rest = "";
-  o = *rest;
-  while (*o == ' ')
-    o++;
-  r = o;
-  while (*o && (*o != ' '))
-    o++;
-  if (*o)
-    *o++ = 0;
-  *rest = o;
-  return r;
-}
-
-int skipline (char *line, int *skip) {
+int skipline (const char *line, int *skip) {
   static int multi = 0;
 
   if ((!strncmp(line, "//", 2))) {
@@ -131,113 +36,84 @@ int skipline (char *line, int *skip) {
 
 int my_cmp (const cmds *c1, const cmds *c2)
 {
-  return strcmp (c1->name, c2->name);
+  return c1->name->compare(*(c2->name));
 }
 
-int parse_help(char *infile, char *outfile) {
-  FILE *in = NULL, *out = NULL;
-  char *buffer = NULL, my_buf[BUFSIZE] = "", *fulllist = (char *) calloc(1, 1);
-  int skip = 0, line = 0, i = 0, leaf = 0, hub = 0;
+int parse_help(const bd::String& infile, const bd::String& outfile) {
+  bd::Stream in, out;
+  bd::String buffer, ifdef, my_buf, fulllist;
+  int skip = 0, i = 0, leaf = 0, hub = 0;
 
-  if (!(in = fopen(infile, "r"))) {
-    printf("Error: Cannot open '%s' for reading\n", infile);
-    return 1;
-  }
-  printf("Sorting help file '%s'", infile);
-  while ((!feof(in)) && ((buffer = step_thru_file(in)) != NULL) ) {
+  in.loadFile(infile);
+  printf("Sorting help file '%s'", infile.c_str());
+  while (in.tell() < in.length()) {
+    buffer = in.getline().chomp();
 
-    line++;
-    if ((*buffer)) {
-      if (strchr(buffer, '\n')) *(char*)strchr(buffer, '\n') = 0;
-      if ((skipline(buffer, &skip))) continue;
-      if (buffer[0] == ':') { //New cmd 
-        char *ifdef = (char *) calloc(1, strlen(buffer) + 1), *p;
+    if ((skipline(buffer.c_str(), &skip))) continue;
+    if (buffer[0] == ':') { //New cmd
+      ++buffer;
+      ifdef = newsplit(buffer, ':');
 
-        buffer++;
-        strcpy(ifdef, buffer);
-        p = strchr(ifdef, ':');
-        *p = 0;
-        if (ifdef && ifdef[0]) {
-          if (!strcasecmp(ifdef, "leaf"))
-            leaf++;
-          else if (!strcasecmp(ifdef, "hub"))
-            hub++;
-        }
-
-        /* finish last command */
-        if (my_buf && my_buf[0]) {
-          my_buf[strlen(my_buf)] = 0;
-          cmdlist[cmdi].txt = (char *) calloc(1, strlen(my_buf) + 1);
-          strcpy(cmdlist[cmdi].txt, my_buf);
-          i++;
-          cmdi++;
-        }
-	/* move on to next cmd now */
-        p = strchr(buffer, ':');
-        p++;
-        if (strcmp(p, "end")) {		/* NEXT CMD */
-          printf(".");
-          my_buf[0] = 0;
-          cmdlist[cmdi].leaf = leaf;
-          cmdlist[cmdi].hub = hub;
-          hub = leaf = 0;
-          for (i = 0; i < cmdi; i++ )	/* Eliminate duplicates */
-            if (!strcmp(cmdlist[i].name, p)) {
-              printf("\b[%s]", p);
-              cmdi--;
-              my_buf[0] = 0;
-              continue;
-            }
-          cmdlist[cmdi].name = (char *) calloc(1, strlen(p) + 1);
-          strcpy(cmdlist[cmdi].name, p);
-        } else {			/* END */
-          break;
-        }
-      } else {				/* CMD HELP INFO */
-        strcat(my_buf, buffer);
-        strcat(my_buf, "\\n");
+      if (ifdef.length()) {
+        if (ifdef == "leaf")
+          leaf++;
+        else if (ifdef == "hub")
+          hub++;
       }
+
+      /* finish last command */
+      if (my_buf.length()) {
+        cmdlist[cmdi].txt = new bd::String(my_buf);
+        ++i;
+        ++cmdi;
+        my_buf.clear();
+      }
+      /* move on to next cmd now */
+      if (buffer !=  "end") {		/* NEXT CMD */
+        printf(".");
+        cmdlist[cmdi].leaf = leaf;
+        cmdlist[cmdi].hub = hub;
+        hub = leaf = 0;
+        for (i = 0; i < cmdi; i++ ) {	/* Eliminate duplicates */
+          if (cmdlist[i].name && *(cmdlist[i].name) == buffer) {
+            printf("\b[%s]", buffer.c_str());
+            --cmdi;
+            continue;
+          }
+        }
+        cmdlist[cmdi].name = new bd::String(buffer);
+      } else {			/* END */
+        break;
+      }
+    } else {				/* CMD HELP INFO */
+      my_buf += buffer + "{NEWLINE}";
     }
-    buffer = NULL;
   }
-  if (in) fclose(in);
-  if (!(out = fopen(outfile, "w"))) {
-    printf("Error: Cannot open '%s' for writing\n", outfile);
-    return 1;
-  }
+
   qsort(cmdlist, cmdi, sizeof(cmds), (int (*)(const void *, const void *)) &my_cmp);
 
+  bd::String buf;
   for (i = 0; i < cmdi; i++ ) {
-    fulllist = (char *) realloc(fulllist, strlen(fulllist) + strlen(cmdlist[i].name) + 2);
-    strcat(fulllist, cmdlist[i].name);
-    strcat(fulllist, " ");
-    fprintf(out, ":");
-    if (cmdlist[i].leaf) fprintf(out, "leaf");
-    else if (cmdlist[i].hub) fprintf(out, "hub");
-    fprintf(out, ":%s\n", cmdlist[i].name);
-    fprintf(out, "%s", replace(cmdlist[i].txt, "\\n", "\n"));
+    fulllist += *(cmdlist[i].name) + " ";
+    out << ":";
+    if (cmdlist[i].leaf) out << "leaf";
+    else if (cmdlist[i].hub) out << "hub";
+    out << buf.printf(":%s\n", cmdlist[i].name->c_str());
+    out << cmdlist[i].txt->sub("{NEWLINE}", "\n");
   }
 
-  fprintf(out, "::end\n");
-  if (out) fclose(out);
+  out << "::end\n";
+
+  out.writeFile(outfile);
   printf(" Success\n");
-  fulllist[strlen(fulllist)] = 0;
-  printf("Sorted (%d): %s\n", cmdi, fulllist);
+  printf("Sorted (%d): %s\n", cmdi, fulllist.c_str());
   return 0;
 }
 
 int main(int argc, char **argv) {
-  char *in = NULL, *out = NULL;
-  int ret = 0;
-
   if (argc < 3) return 1;
-  in = (char *) calloc(1, strlen(argv[1]) + 1);
-  strcpy(in, argv[1]);
-  out = (char *) calloc(1, strlen(argv[2]) + 1);
-  strcpy(out, argv[2]);
-  ret = parse_help(in, out);
-  free(in);
-  free(out);
-  return ret;
+
+  bd::String in(argv[1]), out(argv[2]);
+  return parse_help(in, out);
 }
 
