@@ -76,6 +76,8 @@ MAKE_UTILS_NR = $(MAKE) 'CXX=$(CXX)' 'STRIP=touch' \
 
 MAKE_CONFIG = $(MAKE) 'MAKE=$(MAKE)'
 
+.PHONY: checkclean.wraith checkclean.debug lib wraith dwraith lib.debug debug check general crypto utils sorthelp makehelp makeset makeres stringfix set res help sort indent tar distrib distclean clean cleanutils test default
+
 default: wraith
 
 test:
