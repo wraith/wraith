@@ -52,6 +52,7 @@
 * Misc fixes
   * All existing compile errors fixed.
   * Cleanup +r implementation a bit to lookup users more often than only on join. (fixes #127)
+  * Bot now properly reacts to IP bans if it is +r.
   * If a user does not have a console setting, they will be given default settings on login.
   * Fix a case where the temporary file was not cleaned up when exiting config editor (-C) (fixes #428)
   * Fix cmd_slowpart issues.
