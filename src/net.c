@@ -333,8 +333,8 @@ int allocsock(int sock, int options)
   for (int i = 0; i < MAXSOCKS; i++) {
     if (socklist[i].flags & SOCK_UNUSED) {
       /* yay!  there is table space */
-      socklist[i].inbuf = socklist[i].outbuf = NULL;
-      socklist[i].inbuflen = socklist[i].outbuflen = 0;
+      socklist[i].inbuf = NULL;
+      socklist[i].outbuf = NULL;
       socklist[i].flags = options;
       socklist[i].sock = sock;
       socklist[i].encstatus = 0;
@@ -410,13 +410,12 @@ void real_killsock(register int sock, const char *file, int line)
     if ((socklist[i].sock == sock) && !(socklist[i].flags & SOCK_UNUSED)) {
       close(socklist[i].sock);
       if (socklist[i].inbuf != NULL) {
-	free(socklist[i].inbuf);
+	delete socklist[i].inbuf;
 	socklist[i].inbuf = NULL;
       }
       if (socklist[i].outbuf != NULL) {
-	free(socklist[i].outbuf);
+	delete socklist[i].outbuf;
 	socklist[i].outbuf = NULL;
-	socklist[i].outbuflen = 0;
       }
       if (socklist[i].host)
         free(socklist[i].host);
@@ -1073,35 +1072,29 @@ static int sockread(char *s, int *len)
 
 int sockgets(char *s, int *len)
 {
-  char xx[SGRAB + 4] = "", *p = NULL, *px = NULL;
+  char xx[SGRAB + 4] = "", *p = NULL;
   int ret;
+  size_t newline_index = size_t(-1);
+  bool was_crlf = 0;
 
   for (int i = 0; i < MAXSOCKS; i++) {
     /* Check for stored-up data waiting to be processed */
     if (!(socklist[i].flags & SOCK_UNUSED) && !(socklist[i].flags & SOCK_BUFFER) && (socklist[i].inbuf != NULL)) {
       if (!(socklist[i].flags & SOCK_BINARY)) {
-	/* look for \r too cos windows can't follow RFCs */
-	p = strchr(socklist[i].inbuf, '\n');
-	if (p == NULL)
-	  p = strchr(socklist[i].inbuf, '\r');
-	if (p != NULL) {
-	  *p = 0;
-	  if (strlen(socklist[i].inbuf) > SGRAB)
-	    socklist[i].inbuf[SGRAB] = 0;
-	  strlcpy(s, socklist[i].inbuf, SGRAB + 10); //buf@main.c
-          size_t psiz = strlen(p + 1) + 1;
-	  px = (char *) my_calloc(1, psiz);
-	  strlcpy(px, p + 1, psiz);
-	  free(socklist[i].inbuf);
-	  if (px[0])
-	    socklist[i].inbuf = px;
-	  else {
-	    free(px);
-	    socklist[i].inbuf = NULL;
-	  }
-	  /* Strip CR if this was CR/LF combo */
-	  if (strlen(s) && s[strlen(s) - 1] == '\r')
-	    s[strlen(s) - 1] = 0;
+	/* Find EOL */
+        newline_index = socklist[i].inbuf->find('\n');
+        if (newline_index != size_t(-1) && newline_index != 0 && socklist[i].inbuf->charAt(newline_index - 1) == '\r') {
+          --newline_index;
+          was_crlf = 1;
+        }
+
+	if (newline_index != size_t(-1)) {
+          // Split off a line
+          bd::String line(socklist[i].inbuf->substring(0, newline_index));
+          strlcpy(s, line.c_str(), SGRAB + 1);
+          *(socklist[i].inbuf) += int(newline_index) + 1;
+          if (was_crlf)
+           *(socklist[i].inbuf) += 1;
 
           if (s[0] && socklist[i].encstatus)
             link_read(i, s, (size_t *) len);
@@ -1111,21 +1104,20 @@ int sockgets(char *s, int *len)
 	  return socklist[i].sock;
 	}
       } else {
+        if (!socklist[i].inbuf)
+          socklist[i].inbuf = new bd::String();
         /* i dont think any of this is *ever* called */
 	/* Handling buffered binary data (must have been SOCK_BUFFER before). */
-	if (socklist[i].inbuflen <= SGRAB) {
-	  *len = socklist[i].inbuflen;
-	  memcpy(s, socklist[i].inbuf, socklist[i].inbuflen);
-	  free(socklist[i].inbuf);
+	if (socklist[i].inbuf->length() <= SGRAB) {
+	  *len = socklist[i].inbuf->length();
+	  memcpy(s, socklist[i].inbuf->data(), socklist[i].inbuf->length());
+	  delete socklist[i].inbuf;
           socklist[i].inbuf = NULL;
-	  socklist[i].inbuflen = 0;
 	} else {
 	  /* Split up into chunks of SGRAB bytes. */
 	  *len = SGRAB;
-	  memcpy(s, socklist[i].inbuf, *len);
-	  memmove(socklist[i].inbuf, socklist[i].inbuf + *len, *len);
-	  socklist[i].inbuflen -= *len;
-	  socklist[i].inbuf = (char *) my_realloc(socklist[i].inbuf, socklist[i].inbuflen);
+	  memcpy(s, socklist[i].inbuf->data(), *len);
+          *(socklist[i].inbuf) += *len;
 	}
 	return socklist[i].sock;
       }
@@ -1150,11 +1142,7 @@ int sockgets(char *s, int *len)
     if (socklist[ret].flags & SOCK_STRONGCONN) {
       socklist[ret].flags &= ~SOCK_STRONGCONN;
       /* Buffer any data that came in, for future read. */
-      socklist[ret].inbuflen = *len;
-      socklist[ret].inbuf = (char *) my_calloc(1, *len + 1);
-      /* It might be binary data. You never know. */
-      memcpy(socklist[ret].inbuf, xx, *len);
-      socklist[ret].inbuf[*len] = 0;
+      socklist[ret].inbuf = new bd::String(xx, *len);
     }
     socklist[ret].flags &= ~SOCK_CONNECT;
     s[0] = 0;
@@ -1167,36 +1155,23 @@ int sockgets(char *s, int *len)
   if ((socklist[ret].flags & SOCK_LISTEN) || (socklist[ret].flags & SOCK_PASS))
     return socklist[ret].sock;
   if (socklist[ret].flags & SOCK_BUFFER) {
-    socklist[ret].inbuf = (char *) my_realloc(socklist[ret].inbuf,
-		    			    socklist[ret].inbuflen + *len + 1);
-    memcpy(socklist[ret].inbuf + socklist[ret].inbuflen, xx, *len);
-    socklist[ret].inbuflen += *len;
-    /* We don't know whether it's binary data. Make sure normal strings
-       will be handled properly later on too. */
-    socklist[ret].inbuf[socklist[ret].inbuflen] = 0;
+    if (!socklist[ret].inbuf)
+      socklist[ret].inbuf = new bd::String(xx, *len);
+    else
+      *(socklist[ret].inbuf) += bd::String(xx, *len);
     return -4;			/* Ignore this one. */
   }
   /* Might be necessary to prepend stored-up data! */
   if (socklist[ret].inbuf != NULL) {
-    p = socklist[ret].inbuf;
-    size_t bufsiz = strlen(p) + strlen(xx) + 1;
-    socklist[ret].inbuf = (char *) my_calloc(1, bufsiz);
-    strlcpy(socklist[ret].inbuf, p, bufsiz);
-    strlcat(socklist[ret].inbuf, xx, bufsiz);
-    free(p);
-    if (strlen(socklist[ret].inbuf) < (SGRAB + 2)) {
-      strlcpy(xx, socklist[ret].inbuf, sizeof(xx));
-      free(socklist[ret].inbuf);
+    *(socklist[ret].inbuf) += bd::String(xx);
+    if (socklist[ret].inbuf->length() < (SGRAB + 2)) {
+      strlcpy(xx, socklist[ret].inbuf->c_str(), sizeof(xx));
+      delete socklist[ret].inbuf;
       socklist[ret].inbuf = NULL;
-      socklist[ret].inbuflen = 0;
     } else {
-      p = socklist[ret].inbuf;
-      socklist[ret].inbuflen = strlen(p) - SGRAB;
-      socklist[ret].inbuf = (char *) my_calloc(1, socklist[ret].inbuflen + 1); 
-      strlcpy(socklist[ret].inbuf, p + SGRAB, socklist[ret].inbuflen + 1);
-      *(p + SGRAB) = 0;
-      strlcpy(xx, p, sizeof(xx));
-      free(p);
+      // Take out an SGRAB sized chunk and advance the buffer
+      strlcpy(xx, socklist[ret].inbuf->c_str(), SGRAB + 1);
+      *(socklist[ret].inbuf) += SGRAB;
       /* (leave the rest to be post-pended later) */
     }
   }
@@ -1242,16 +1217,9 @@ int sockgets(char *s, int *len)
   }
   /* Prepend old data back */
   if (socklist[ret].inbuf != NULL) {
-    p = socklist[ret].inbuf;
-    socklist[ret].inbuflen = strlen(p) + strlen(xx);
-    socklist[ret].inbuf = (char *) my_calloc(1, socklist[ret].inbuflen + 1);
-    strlcpy(socklist[ret].inbuf, xx, socklist[ret].inbuflen + 1);
-    strlcat(socklist[ret].inbuf, p, socklist[ret].inbuflen + 1);
-    free(p);
+    socklist[ret].inbuf->insert(0, xx);
   } else {
-    socklist[ret].inbuflen = strlen(xx);
-    socklist[ret].inbuf = (char *) my_calloc(1, socklist[ret].inbuflen + 1);
-    strlcpy(socklist[ret].inbuf, xx, socklist[ret].inbuflen + 1);
+    socklist[ret].inbuf = new bd::String(xx);
   }
   if (data) {
     return socklist[ret].sock;
@@ -1276,7 +1244,6 @@ void tputs(register int z, const char *s, size_t len)
   }
 
   register int x, idx;
-  char *p = NULL;
 
   for (register int i = 0; i < MAXSOCKS; i++) {
     if (!(socklist[i].flags & SOCK_UNUSED) && (socklist[i].sock == z)) {
@@ -1302,18 +1269,7 @@ void tputs(register int z, const char *s, size_t len)
 
       if (len && socklist[i].encstatus)
         s = link_write(i, s, &len);
-      
-      if (socklist[i].outbuf != NULL) {
-	/* Already queueing: just add it */
-	p = (char *) my_realloc(socklist[i].outbuf, socklist[i].outbuflen + len);
-	memcpy(p + socklist[i].outbuflen, s, len);
-	socklist[i].outbuf = p;
-	socklist[i].outbuflen += len;
-//        if (socklist[i].encstatus && s)
-//          free(s);
-	return;
-      }
-      /* Try. */
+
 #ifdef HAVE_ZLIB_H
 /*
       if (socklist[i].gz) { 		
@@ -1324,14 +1280,19 @@ void tputs(register int z, const char *s, size_t len)
       } else
 */
 #endif /* HAVE_ZLIB_H */
+
+      if (socklist[i].outbuf != NULL) {
+	/* Already queueing: just add it */
+        *(socklist[i].outbuf) += bd::String(s, len);
+	return;
+      }
+      /* Try. */
         x = write(z, s, len);
       if (x == -1)
 	x = 0;
       if ((size_t) x < len) {
 	/* Socket is full, queue it */
-	socklist[i].outbuf = (char *) my_calloc(1, len - x);
-	memcpy(socklist[i].outbuf, &s[x], len - x);
-	socklist[i].outbuflen = len - x;
+	socklist[i].outbuf = new bd::String(&s[x], len - x);
       }
 //      if (socklist[i].encstatus && s)
 //        free(s);
@@ -1418,7 +1379,7 @@ void dequeue_sockets()
 	(socklist[i].outbuf != NULL) && (FD_ISSET(socklist[i].sock, &wfds))) {
       /* Trick tputs into doing the work */
       errno = 0;
-      x = write(socklist[i].sock, socklist[i].outbuf, socklist[i].outbuflen);
+      x = write(socklist[i].sock, socklist[i].outbuf->data(), socklist[i].outbuf->length());
       if ((x < 0) && (errno != EAGAIN)
 #ifdef EBADSLT
 	  && (errno != EBADSLT)
@@ -1430,19 +1391,12 @@ void dequeue_sockets()
 	/* This detects an EOF during writing */
 	debug3("net: eof!(write) socket %d (%s,%d)", socklist[i].sock, strerror(errno), errno);
 	socklist[i].flags |= SOCK_EOFD;
-      } else if ((size_t) x == socklist[i].outbuflen) {
+      } else if ((size_t) x == socklist[i].outbuf->length()) {
 	/* If the whole buffer was sent, nuke it */
-	free(socklist[i].outbuf);
+	delete socklist[i].outbuf;
 	socklist[i].outbuf = NULL;
-	socklist[i].outbuflen = 0;
       } else if (x > 0) {
-	char *p = socklist[i].outbuf;
-
-	/* This removes any sent bytes from the beginning of the buffer */
-	socklist[i].outbuf = (char *) my_calloc(1, socklist[i].outbuflen - x);
-	memcpy(socklist[i].outbuf, p + x, socklist[i].outbuflen - x);
-	socklist[i].outbuflen -= x;
-	free(p);
+        *(socklist[i].outbuf) += x;
       } else {
 	debug3("dequeue_sockets(): errno = %d (%s) on %d", errno, strerror(errno), socklist[i].sock);
       }
@@ -1485,9 +1439,9 @@ void tell_netdebug(int idx)
       if (socklist[i].flags & SOCK_NONSOCK)
 	strlcat(s, " (file)", sizeof(s));
       if (socklist[i].inbuf != NULL)
-	simple_sprintf(&s[strlen(s)], " (inbuf: %zu)", strlen(socklist[i].inbuf));
+	simple_sprintf(&s[strlen(s)], " (inbuf: %zu)", socklist[i].inbuf ? socklist[i].inbuf->length() : 0);
       if (socklist[i].outbuf != NULL)
-	simple_sprintf(&s[strlen(s)], " (outbuf: %zu)", socklist[i].outbuflen);
+	simple_sprintf(&s[strlen(s)], " (outbuf: %zu)", socklist[i].outbuf ? socklist[i].outbuf->length() : 0);
       if (socklist[i].host)
         simple_sprintf(&s[strlen(s)], " (%s:%d)", socklist[i].host, socklist[i].port);
       strlcat(s, ",", sizeof(s));

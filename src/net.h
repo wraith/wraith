@@ -10,6 +10,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <setjmp.h>
+#include <bdlib/src/String.h>
 
 namespace bd {
   class Stream;
@@ -74,8 +75,6 @@ union sockaddr_union {			/* replaced by sockname_t */
  * queued on them
  */
 typedef struct {
-  size_t outbuflen;             /* Outbuf could be binary data  */
-  size_t inbuflen;              /* Inbuf could be binary data   */
 #ifdef USE_IPV6
   unsigned int af;
 #endif /* USE_IPV6 */
@@ -85,8 +84,8 @@ typedef struct {
   int iseed;                            /* botlink in seed */
   int gz; /* gzip compression */
   int enclink;				/* new encrypted botlink */
-  char *inbuf;
-  char *outbuf;
+  bd::String* inbuf;
+  bd::String* outbuf;
   char *host;
   port_t port;
   short          flags;
