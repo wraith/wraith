@@ -324,7 +324,7 @@ static void check_exemptlist(struct chanset_t *chan, char *from)
     flush_mode(chan, QUICK);
 }
 
-void priority_do(struct chanset_t * chan, bool opsonly, int action) 
+static void priority_do(struct chanset_t * chan, bool opsonly, int action, bool flush = 1)
 {
   if (!me_op(chan))
     return;
@@ -400,7 +400,8 @@ void priority_do(struct chanset_t * chan, bool opsonly, int action)
               ++sent;
               add_mode(chan, '-', 'o', m->nick);
               if (!floodless && (actions >= ct || (n == 1 && sent > 20))) {
-                flush_mode(chan, QUICK);
+                if (flush)
+                  flush_mode(chan, QUICK);
                 return;
               }
             } else if ((action == PRIO_KICK) && !chan_sentkick(m)) {
@@ -1163,10 +1164,10 @@ void check_this_user(char *hand, int del, char *host)
     }
 }
 
-static void enforce_bitch(struct chanset_t *chan) {
+static void enforce_bitch(struct chanset_t *chan, bool flush = 1) {
   if (!chan || !me_op(chan)) 
     return;
-  priority_do(chan, 1, PRIO_DEOP);
+  priority_do(chan, 1, PRIO_DEOP, flush);
 }
 
 void enforce_closed(struct chanset_t *chan) {
@@ -1359,6 +1360,7 @@ void recheck_channel(struct chanset_t *chan, int dobans)
   char s[UHOSTLEN] = "";
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
   int stop_reset = 0, botops = 0, nonbotops = 0, botnonops = 0;
+  bool flush = 0;
 
   ++stacking;
 
@@ -1385,8 +1387,10 @@ void recheck_channel(struct chanset_t *chan, int dobans)
       putlog(LOG_MISC, "*", "Opped in %s, not checking +closed/+bitch until more bots arrive.", chan->dname);
   } else {
     /* if the chan is +closed, mass deop first, safer that way. */
-    if (chan_bitch(chan) || channel_closed(chan))
-      enforce_bitch(chan);
+    if (chan_bitch(chan) || channel_closed(chan)) {
+      flush = 1;
+      enforce_bitch(chan, 0);
+    }
 
     if (channel_closed(chan))
       enforce_closed(chan);
@@ -1441,8 +1445,8 @@ void recheck_channel(struct chanset_t *chan, int dobans)
         if (channel_enforcebans(chan)) 
           enforce_bans(chan);
       }
-      // Flush out mask changes
-      flush_mode(chan, QUICK); 
+
+      flush = 1;
     }
 
     // Do this here as the above only runs after already having been opped and having gotten bans.
@@ -1451,6 +1455,9 @@ void recheck_channel(struct chanset_t *chan, int dobans)
         dprintf(DP_MODE, "MODE %s\n", chan->name);
       recheck_channel_modes(chan);
     }
+
+    if (flush)
+      flush_mode(chan, QUICK);
   }
   --stacking;
 }
