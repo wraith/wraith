@@ -8,6 +8,7 @@
   * Uname checking (and associated emails) have been removed.
   * Email functionality has been removed.
   * Fix crash on OpenBSD due to mmap(2) bug.
+  * Removed gethostbyname() dependency. This fixes Linux binary compatibility issues / crashes on startup.
 * Cookie op changes
   * Cookie op algorithm changed again, they can no longer be easily reused (fixes #402) Thank you mulder.
   * Cookies no longer fail if the opping bot changes nick after queueing the mode.

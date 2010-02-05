@@ -50,7 +50,9 @@ int egg_dns_init(void);
 
 void egg_dns_send(char *query, int len);
 int egg_dns_lookup(const char *host, interval_t timeout, dns_callback_t callback, void *client_data, int type = (DNS_LOOKUP_A|DNS_LOOKUP_AAAA));
+bd::Array<bd::String> dns_lookup_block(const char *host, interval_t timeout, int type = (DNS_LOOKUP_A|DNS_LOOKUP_AAAA));
 int egg_dns_reverse(const char *ip, interval_t timeout, dns_callback_t callback, void *client_data);
+bd::Array<bd::String> dns_reverse_block(const char *ip, interval_t timeout);
 int egg_dns_cancel(int id, int issue_callback);
 void tell_dnsdebug(int);
 void dns_cache_flush();
