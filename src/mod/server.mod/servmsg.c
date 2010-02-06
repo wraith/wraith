@@ -1639,6 +1639,7 @@ static int got465(char *from, char *msg)
  * for receiving a msg while +g
  * csircd: :irc.nac.net 718 bryand_ bryand_ bryan bryan@shatow.net :is messaging you, but you have CALLERID enabled (umode +g)
  * ratbox: :irc.servercentral.net 718 bryand_ bryan bryan@shatow.net :is messaging you, and you have umode +g.
+ * hybrid: :irc.swepipe.se 718 jjdjff bryan[bryan@shatow.net] :is messaging you, and you are umode +g.
  */
 static int got718(char *from, char *msg)
 {
@@ -1648,8 +1649,19 @@ static int got718(char *from, char *msg)
   nick = newsplit(&msg);
   if (match_my_nick(nick)) // CSIRCD is stupid.
     nick = newsplit(&msg);
+  else if (msg[0] == ':') { // Hybrid is stupid too.
+    char *p = strchr(nick, '['), *p2 = NULL;
+    if (p) {
+      *p++ = 0;
+      if ((p2 = strchr(p, ']'))) {
+        uhost = p;
+        *p2 = 0;
+      }
+    }
+  }
 
-  uhost = newsplit(&msg);
+  if (!uhost)
+    uhost = newsplit(&msg);
   fixcolon(msg);
 
   if (ischanhub()) {
