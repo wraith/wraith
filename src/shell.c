@@ -783,7 +783,8 @@ int crontab_exists(bd::Stream* crontab, bool excludeSelf) {
       }
 
       free(out);
-    }
+    } else
+      ret = 0;
   }
   return ret;
 }
