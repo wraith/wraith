@@ -647,6 +647,8 @@ readsocks(const char *fname)
       dprintf(DP_STDOUT, STR("Added fd: %d\n"), sock_read(stream));
     else if (type == STR("+online_since"))
       online_since = strtol(str.c_str(), NULL, 10);
+    else if (type == STR("+server_online"))
+      server_online = strtol(str.c_str(), NULL, 10);
     else if (type == STR("+server_floodless"))
       floodless = 1;
     else if (type == STR("+buildts"))
@@ -749,6 +751,7 @@ restart(int idx)
   if (server_online) {
     if (botname[0])
       stream << buf.printf(STR("+botname %s\n"), botname);
+    stream << buf.printf(STR("+server_online %li\n"), server_online);
   }
   stream << buf.printf(STR("+online_since %li\n"), online_since);
   if (floodless)
