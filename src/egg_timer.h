@@ -16,7 +16,6 @@ typedef struct egg_timeval_b {
 /* Create a simple timer with no client data, but it repeats. */
 #define timer_create_repeater(howlong,name,callback) timer_create_complex(howlong, name, callback, NULL, TIMER_REPEAT)
 
-int timer_get_time(egg_timeval_t *curtime);
 void timer_get_now(egg_timeval_t *_now);
 int timer_get_now_sec(int *sec);
 int timer_update_now(egg_timeval_t *_now);

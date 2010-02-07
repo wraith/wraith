@@ -48,7 +48,7 @@ static egg_timer_t *timer_list_head = NULL;
 static int timer_next_id = 1;
 
 /* Based on TclpGetTime from Tcl 8.3.3 */
-int timer_get_time(egg_timeval_t *curtime)
+static inline int timer_get_time(egg_timeval_t *curtime)
 {
 	struct timeval tv;
 
