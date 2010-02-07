@@ -249,6 +249,27 @@ static memberlist *newmember(struct chanset_t *chan, char *nick)
   return n;
 }
 
+static bool member_getuser(memberlist* m, bool act_on_lookup) {
+  if (!m) return 0;
+  if (!m->user && !m->tried_getuser) {
+    static char s[UHOSTLEN] = "";
+
+    simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
+    m->user = get_user_by_host(s);
+    if (!m->user && m->userip[0]) {
+      simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
+      m->user = get_user_by_host(s);
+    }
+    m->tried_getuser = 1;
+
+    /* Managed to get the user for a previously unknown user. Act on it! */
+    if (act_on_lookup && m->user)
+      check_this_user(m->user->handle, 0, NULL);
+
+  }
+  return !(m->user == NULL);
+}
+
 /* Always pass the channel dname (display name) to this function <cybah>
  */
 static void update_idle(char *chname, char *nick)
@@ -335,17 +356,7 @@ void priority_do(struct chanset_t * chan, bool opsonly, int action)
   int ops = 0, targets = 0, bpos = 0, tpos = 0, ft = 0, ct = 0, actions = 0, sent = 0;
 
   for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-    if (!m->user && !m->tried_getuser) {
-      char s[256] = "";
-
-      simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
-      m->user = get_user_by_host(s);
-      if (!m->user && m->userip[0]) {
-        simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
-        m->user = get_user_by_host(s);
-      }
-      m->tried_getuser = 1;
-    }
+    member_getuser(m);
 
     if (m->user && m->user->bot && (m->user->flags & USER_OP)) {
       ++ops;
@@ -1376,7 +1387,6 @@ void recheck_channel(struct chanset_t *chan, int dobans)
     return;        		           /* ... it's better not to deop everybody */
 
   memberlist *m = NULL;
-  char s[UHOSTLEN] = "";
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
   int stop_reset = 0, botops = 0, nonbotops = 0, botnonops = 0;
 
@@ -1436,16 +1446,7 @@ void recheck_channel(struct chanset_t *chan, int dobans)
 
   //Check +d/+O/+k
   for (m = chan->channel.member; m && m->nick[0]; m = m->next) { 
-    simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
-
-    if (!m->user && !m->tried_getuser) {
-           m->tried_getuser = 1;
-           m->user = get_user_by_host(s);
-           if (!m->user && m->userip[0]) {
-             simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
-             m->user = get_user_by_host(s);
-           }
-      }
+    member_getuser(m);
       get_user_flagrec(m->user, &fr, chan->dname, chan);
       //Already a bot opped, dont bother resetting masks
       if (glob_bot(fr) && chan_hasop(m) && !match_my_nick(m->nick))
@@ -2880,11 +2881,9 @@ static int gotkick(char *from, char *origmsg)
       return 0;
 
     if ((m = ismember(chan, nick))) {
-      struct userrec *u2 = NULL;
-
-      simple_snprintf(s1, sizeof(s1), "%s!%s", m->nick, m->userhost);
-      u2 = get_user_by_host(s1);
-      set_handle_laston(chan->dname, u2, now);
+      member_getuser(m);
+      if (m->user)
+        set_handle_laston(chan->dname, m->user, now);
 //      maybe_revenge(chan, from, s1, REVENGE_KICK);
     } else {
       simple_snprintf(s1, sizeof(s1), "%s!*@could.not.loookup.hostname", nick);
@@ -3062,7 +3061,8 @@ static int gotquit(char *from, char *msg)
 
     m = ismember(chan, nick);
     if (m) {
-      u = m->user ? m->user : (m->tried_getuser == 0 ? get_user_by_host(from2) : NULL);
+      member_getuser(m);
+      u = m->user;
       if (u) {
         set_handle_laston(chan->dname, u, now); /* If you remove this, the bot will crash when the user record in question
 						   is removed/modified during the tcl binds below, and the users was on more

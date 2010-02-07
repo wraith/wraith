@@ -1309,22 +1309,10 @@ static void cmd_find(int idx, char *par)
     if (!privchan(user, chan, PRIV_OP)) {
 
       for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
+        member_getuser(m, 1);
         char s[UHOSTLEN] = "";
 
         simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
-        if (!m->user && !m->tried_getuser) {
-          m->user = get_user_by_host(s);
-          if (!m->user && m->userip[0]) {
-            simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
-            m->user = get_user_by_host(s);
-          }
-
-          /* Managed to get the user for a previously unknown user. Act on it! */
-          if (m->user)
-            check_this_user(m->user->handle, 0, NULL);
-
-          m->tried_getuser = 1;
-        }
         if ((!lookup_user && wild_match(par, s)) || (lookup_user && m->user == u)) {
           fcount++;
           if (!found) {
@@ -1512,30 +1500,20 @@ static void cmd_channel(int idx, char *par)
 	  strftime(s, 6, "%H:%M", gmtime(&(m->joined)));
       } else
 	strlcpy(s, " --- ", sizeof s);
-      if (m->user == NULL) {
-	simple_snprintf(s1, sizeof s1, "%s!%s", m->nick, m->userhost);
-	m->user = get_user_by_host(s1);
-        if (!m->user && m->userip[0]) {
-          simple_snprintf(s1, sizeof(s1), "%s!%s", m->nick, m->userip);
-          m->user = get_user_by_host(s1);
+
+      // Force +r (re)processing
+      if (!m->userip[0] && doresolv(chan)) {
+        char host[UHOSTLEN] = "", *p = NULL;
+        p = strchr(m->userhost, '@');
+        if (p) {
+          ++p;
+          strlcpy(host, p, strlen(m->userhost) - (p - host));
+          resolve_to_member(chan, m->nick, host);
         }
-
-        if (!m->userip[0] && doresolv(chan)) {
-          char host[UHOSTLEN] = "", *p = NULL;
-          p = strchr(m->userhost, '@');
-          if (p) {
-            ++p;
-            strlcpy(host, p, strlen(m->userhost) - (p - host));
-            resolve_to_member(chan, m->nick, host);
-          }
-        }
-
-        /* Managed to get the user for a previously unknown user. Act on it! */
-        if (m->user)
-          check_this_user(m->user->handle, 0, NULL);
-
-        m->tried_getuser = 1;
       }
+
+      member_getuser(m, 1);
+
       if (m->user == NULL)
 	strlcpy(handle, "*", sizeof handle);
        else

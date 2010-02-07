@@ -643,11 +643,7 @@ getin_request(char *botnick, char *code, char *par)
       return;
     }
 
-    if (!mem->user && !mem->tried_getuser) {
-      simple_snprintf(uhost, sizeof(uhost), "%s!%s", nick, mem->userhost);
-      mem->user = get_user_by_host(uhost);
-      mem->tried_getuser = 1;
-    }
+    member_getuser(mem);
 
     if (mem->user != u) {
       putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - user mismatch: (%s)/(%s)", botnick, nick, chan->dname, u ? u->handle : "*",  mem->user ? mem->user->handle : "*");
@@ -860,11 +856,7 @@ request_op(struct chanset_t *chan)
     if (!chan_hasop(ml) || chan_issplit(ml))
       continue;
 
-    if (!ml->user && !ml->tried_getuser) {
-      simple_snprintf(s, sizeof(s), "%s!%s", ml->nick, ml->userhost);
-      ml->user = get_user_by_host(s);
-      ml->tried_getuser = 1;
-    }
+    member_getuser(ml, 1);
 
     if (!ml->user || !ml->user->bot)
       continue;
@@ -1566,15 +1558,7 @@ check_expired_chanstuff(struct chanset_t *chan)
       if (me_op(chan)) {
         if (dovoice(chan) && !loading) {      /* autovoice of +v users if bot is +y */
           if (!chan_hasop(m) && !chan_hasvoice(m)) {
-            if (!m->user && !m->tried_getuser) {
-              simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
-              m->user = get_user_by_host(s);
-              if (!m->user && m->userip[0]) {
-                simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
-                m->user = get_user_by_host(s);
-              }
-              m->tried_getuser = 1;
-            }
+            member_getuser(m, 1);
 
             if (m->user) {
               get_user_flagrec(m->user, &fr, chan->dname, chan);
