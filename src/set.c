@@ -55,7 +55,8 @@ int login;
  * lower this value at your own risk.  ircd is known to start flood control
  * at 512 bytes/2 seconds.
  */
-int msgrate = 1;
+int msgburst;
+int msgrate;
 char motd[512] = "";
 char msgident[21] = "";
 char msginvite[21] = "";
@@ -104,6 +105,7 @@ static variable_t vars[] = {
  VAR("msg-invite",	msginvite,		VAR_WORD|VAR_NOLHUB,				0, 0, NULL),
  VAR("msg-op",		msgop,			VAR_WORD|VAR_NOLHUB,				0, 0, NULL),
  VAR("msg-pass",	msgpass,		VAR_WORD|VAR_NOLHUB,				0, 0, NULL),
+ VAR("msgburst",	&msgburst,		VAR_INT|VAR_NOLHUB,				1, 90, "4"),
  VAR("msgrate",		&msgrate,		VAR_INT|VAR_NOLHUB,				0, 90, "2"),
  VAR("nick",		origbotname,		VAR_WORD|VAR_NOHUB|VAR_NICK|VAR_NODEF,	0, 0, NULL),
  VAR("notify-time",	&ison_time,		VAR_INT|VAR_NOLHUB,				1, 30, "10"),

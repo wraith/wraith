@@ -170,7 +170,7 @@ static void deq_msg()
    */
   bool nm = 0;
   for(size_t nq = 0; nq < (sizeof(qdsc) / sizeof(qdsc[0])); ++nq) {
-    while (qdsc[nq].q->head && (burst < 4) && ((last_time - now) < MAXPENALTY)) {
+    while (qdsc[nq].q->head && (burst < msgburst) && ((last_time - now) < MAXPENALTY)) {
 #ifdef not_implemented
       if (deq_kick(qdsc[nq].idx)) {
         ++burst;

@@ -1,5 +1,6 @@
 * Speedup irc server queue by bursting more often and fully. Thanks VXP.
 * Add set 'msgrate' to define how often to dequeue to the server. (1 or 2 is good)
+* Add set 'msgburst' to define how many commands to burst to server per msgrate.
 
 1.2.17 - http://wraith.botpack.net/milestone/1.2.17
 * Binary / shell / startup changes
