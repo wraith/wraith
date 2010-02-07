@@ -1583,8 +1583,6 @@ See also: reload, backup
                           matching alias is used. Normal flag checking is done
                           after the alias is expanded. 
                           $bAliases may not reference other aliases.$b
-[S]  $bchanset$b         List of default options for when a channel is added. Same format 
-                          as 'chanset'.
 [N]  $bserver-port$b     Default port to use for server connections.
 [B]  $bauth-chan$b       If set, auth cmds will work in channels as well as in msg, otherwise 
                           only in msg.
