@@ -418,7 +418,6 @@ static void cmd_about(int idx, char *par)
   dprintf(idx, STR(" * $bZero$b for a great stream of ideas, beta testing.\n"));
   dprintf(idx, STR(" * $bMafaioz$b for good ideas, support on wraith.no, beta testing.\n"));
   dprintf(idx, STR(" * $bTical$b for great ideas.\n"));
-  dprintf(idx, STR(" * $bducch$b for great ideas.\n"));
   dprintf(idx, STR(" * $bMany$b others.\n"));
   dprintf(idx, " \n");
   dprintf(idx, STR("For a list of Contributors see: git shortlog -sen master\n"));
