@@ -2,6 +2,7 @@
 #define _MAIN_H
 
 #include <sys/types.h>
+#include "egg_timer.h"
 
 enum {
   UPDATE_AUTO = 1,
@@ -18,6 +19,7 @@ extern int		role, default_flags, default_uflags, do_confedit,
 extern bool		use_stderr, backgrd, used_B, term_z, loading, have_linked_to_hub, restart_was_update, restarting;
 extern char		tempdir[], *binname, owner[], version[151], ver[101], quit_msg[], *socksfile;
 extern time_t		online_since, now, restart_time;
+extern egg_timeval_t	egg_timeval_now;
 extern uid_t		myuid;
 extern pid_t            mypid;
 extern const time_t	buildts;
