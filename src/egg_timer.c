@@ -283,4 +283,4 @@ int timer_info(int id, char **name, egg_timeval_t *initial_len, egg_timeval_t *t
         return(0);
 }
 
-
+/* vim: set sts=4 sw=4 ts=4 noet: */
