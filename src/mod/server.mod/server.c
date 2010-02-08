@@ -116,9 +116,9 @@ static bool replaying_cache = 0;
 /* New bind tables. */
 static bind_table_t *BT_raw = NULL, *BT_msg = NULL;
 bind_table_t *BT_ctcr = NULL, *BT_ctcp = NULL, *BT_msgc = NULL;
-
-#define SERVER_CONNECT_BURST_TIME 20
-#define SERVER_CONNECT_BURST_RATE 5 * 8
+// Ratbox is (5*8):30, ircd-seven is (5*8):20, try to not push th elimits.
+#define SERVER_CONNECT_BURST_TIME 18
+#define SERVER_CONNECT_BURST_RATE 5 * 7
 
 #include "servmsg.c"
 
