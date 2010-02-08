@@ -114,6 +114,8 @@ static bool replaying_cache = 0;
 static bind_table_t *BT_raw = NULL, *BT_msg = NULL;
 bind_table_t *BT_ctcr = NULL, *BT_ctcp = NULL, *BT_msgc = NULL;
 
+void deq_msg();
+
 #include "servmsg.c"
 
 #define MAXPENALTY 10
@@ -140,7 +142,7 @@ static int burst;
  * it will *not* send anything from hq until the 'burst' value drops
  * down to 0 again (allowing a sudden mq flood to sneak through).
  */
-static void deq_msg()
+void deq_msg()
 {
   if (serv < 0)
     return;

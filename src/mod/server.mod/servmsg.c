@@ -213,8 +213,6 @@ static int got001(char *from, char *msg)
   rehash_server(from, msg);
   /* Ok...param #1 of 001 = what server thinks my nick is */
 
-  join_chans();
-
 #ifdef no
   if (strcasecmp(from, dcc[servidx].host)) {
     struct server_list *x = serverlist;
@@ -251,10 +249,25 @@ got004(char *from, char *msg)
 
   tmp = newsplit(&msg);
 
+  bool connect_burst = 0;
+
   /* cookies won't work on ircu or Unreal or snircd */
   if (strstr(tmp, "u2.") || strstr(tmp, "Unreeal") || strstr(tmp, "snircd")) {
     putlog(LOG_DEBUG, "*", "Disabling cookies as they are not supported on %s", cursrvname);
     cookies_disabled = true;
+  } else if (strstr(tmp, "hybrid") || strstr(tmp, "ratbox"))
+    connect_burst = 1;
+
+  if (replaying_cache || !connect_burst)
+    join_chans();
+  else {
+    // Hybrid/ratbox allows bursting 5*8 lines on connect until certain commands are sent, for up to 30 seconds
+    int oldburst = msgburst;
+    msgburst = 5 * 8;
+    join_chans();
+    last_time.sec = now - 100;
+    deq_msg();
+    msgburst = oldburst;
   }
 
   return 0;
