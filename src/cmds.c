@@ -1949,8 +1949,8 @@ static void cmd_timers(int idx, char *par)
 
       timer_info(ids[i], &name, &howlong, &trigger_time, &called);
       timer_diff(&mynow, &trigger_time, &diff);
-      simple_snprintf(interval, sizeof interval, "(%li.%li secs)", howlong.sec, howlong.usec);
-      simple_snprintf(next, sizeof next, "%li.%li secs", diff.sec, diff.usec);
+      simple_snprintf(interval, sizeof interval, "(%lis %lims)", howlong.sec, howlong.usec / 1000);
+      simple_snprintf(next, sizeof next, "%lis %lims", diff.sec, diff.usec / 1000);
       dprintf(idx, "%-2d: %-25s %-15s Next: %-25s Called: %d\n", i, name, interval, next, called);
     }
     free(ids);
