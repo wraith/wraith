@@ -135,6 +135,30 @@ static int burst;
 /*
  *     Bot server queues
  */
+static bool burst_mode_ok(const char *msg, size_t len) {
+  bd::String mode(msg, len);
+  bd::Array<bd::String> list(mode.split(' '));
+  if (list.length() == 2) return 1;
+  if (list.length() == 3) {
+    if (!strchr(CHANMETA, bd::String(list[1]).at(0))) return 1;
+    else if (bd::String(list[2]).at(0) == 'b') return 1;
+  }
+  return 0;
+}
+
+static bool burst_ok(const char* msg, size_t len) {
+  if (strstr(msg, "JOIN 0") ||
+      (strstr(msg, "MODE") && !burst_mode_ok(msg, len)) ||
+      strstr(msg, "NICK") ||
+      strstr(msg, "PART") ||
+      strstr(msg, "KICK") ||
+      strstr(msg, "INVITE") ||
+      strstr(msg, "AWAY")) {
+    sdprintf("BURST MODE VIOLATION!!!: %s\n", msg);
+    return 0;
+  }
+  return 1;
+}
 
 /* Called periodically to shove out another queued item.
  *
@@ -187,13 +211,16 @@ void deq_msg()
         ++burst;
         nm = 1;
       }
-#endif
       if (!qdsc[nq].q->head)
         break;
+#endif
       if (fast_deq(qdsc[nq].idx)) {
         ++burst;
         nm = 1;
-        continue;
+        if (!qdsc[nq].q->head)
+          break;
+        else
+          continue;
       }
       write_to_server(qdsc[nq].q->head->msg, qdsc[nq].q->head->len);
       if (debug_output)
@@ -546,6 +573,12 @@ void queue_server(int which, char *buf, int len)
   struct msgq *q = NULL;
   int qnext = 0;
   bool doublemsg = 0;
+
+  // If connect bursting, hold off any commands which would end the gracetime (flood_endgrace)
+  if (connect_bursting && (which == DP_MODE || which == DP_MODE_NEXT || which == DP_SERVER || which == DP_SERVER_NEXT)) {
+    if (!burst_ok(buf, len))
+      which = DP_HELP;
+  }
 
   switch (which) {
   case DP_MODE_NEXT:
