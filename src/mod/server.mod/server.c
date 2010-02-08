@@ -810,13 +810,11 @@ void next_server(int *ptr, char *servname, port_t *port, char *pass)
 static void do_nettype(void)
 {
   switch (net_type) {
-  case NETT_EFNET:
-    check_mode_r = 0;
-    break;
   case NETT_IRCNET:
     check_mode_r = 1;
     use_fastdeq = 3;
     simple_snprintf(stackablecmds, sizeof(stackablecmds), "INVITE AWAY VERSION NICK");
+    stackable2cmds[0] = 0;
     break;
   case NETT_UNDERNET:
     check_mode_r = 0;
@@ -830,8 +828,11 @@ static void do_nettype(void)
     simple_snprintf(stackablecmds, sizeof(stackablecmds), "PRIVMSG NOTICE PART WHOIS WHOWAS USERHOST ISON WATCH DCCALLOW");
     simple_snprintf(stackable2cmds, sizeof(stackable2cmds), "USERHOST ISON WATCH");
     break;
-  case NETT_HYBRID_EFNET:
+  default:
     check_mode_r = 0;
+    use_fastdeq = 0;
+    stackablecmds[0] = 0;
+    stackable2cmds[0] = 0;
     break;
   }
 }
