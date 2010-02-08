@@ -258,17 +258,39 @@ got004(char *from, char *msg)
   } else if (strstr(tmp, "hybrid") || strstr(tmp, "ratbox"))
     connect_burst = 1;
 
-  if (replaying_cache || !connect_burst)
-    join_chans();
-  else {
+  if (!replaying_cache && connect_burst) {
     // Hybrid/ratbox allows bursting 5*8 lines on connect until certain commands are sent, for up to 30 seconds
-    int oldburst = msgburst;
+    /*
+       BAD:
+         JOIN 0
+         MODE #chan b
+         NICK
+         PART
+         KICK
+         CPRIVMSG
+         CNOTICE
+         WHO 0/mask
+         TIME
+         TOPIC
+         INVITE
+         AWAY
+         OPER
+
+       OK:
+         WHO *
+         WHO !
+         WHO #Chan
+         WHO NICK
+    */
+
+    connect_bursting = now;
     msgburst = 5 * 8;
-    join_chans();
+    msgrate = 200;
     last_time.sec = now - 100;
-    deq_msg();
-    msgburst = oldburst;
+    putlog(LOG_DEBUG, "*", "Server allows connect bursting, bursting for 20 seconds");
   }
+
+  join_chans();
 
   return 0;
 }
@@ -1792,6 +1814,9 @@ static void server_dns_callback(int id, void *client_data, const char *host, bd:
     // Just connecting, set last queue time to the past.
     last_time.sec = now - 100;
     last_time.usec = 0;
+    connect_bursting = 0;
+    real_msgburst = msgburst;
+    real_msgrate = msgrate;
 
     if (serverpass[0])
       dprintf(DP_MODE, "PASS %s\n", serverpass);

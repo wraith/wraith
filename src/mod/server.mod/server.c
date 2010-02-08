@@ -92,6 +92,9 @@ static time_t lastpingtime;	/* IRCNet LAGmeter support -- drummer */
 static char stackablecmds[511] = "";
 static char stackable2cmds[511] = "";
 static egg_timeval_t last_time;
+static time_t connect_bursting = 0;
+static int real_msgburst = 0;
+static int real_msgrate = 0;
 static bool use_penalties;
 static int use_fastdeq;
 size_t nick_len = 9;			/* Maximal nick length allowed on the network. */
@@ -985,6 +988,13 @@ static void server_secondly()
     --cycle_time;
   if (!resolvserv && serv < 0 && !trying_server)
     connect_server();
+
+  if (connect_bursting && server_online && (now - 20) >= connect_bursting) {
+    connect_bursting = 0;
+    msgburst = real_msgburst;
+    msgrate = real_msgrate;
+    putlog(LOG_DEBUG, "*", "Ending server burst mode");
+  }
 }
 
 static void server_check_lag()
