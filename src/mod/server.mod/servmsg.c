@@ -1239,7 +1239,7 @@ static int gotkick(char *from, char *msg)
     /* Not my kick, I don't need to bother about it. */
     return 0;
   if (use_penalties) {
-    last_time += 2;
+    last_time.sec += 2;
     if (debug_output)
       putlog(LOG_SRVOUT, "*", "adding 2secs penalty (successful kick)");
   }
@@ -1264,7 +1264,7 @@ static int whoispenalty(char *from, char *msg)
       i++;
     }
     if (ii) {
-      last_time += 1;
+      last_time.sec += 1;
       if (debug_output)
         putlog(LOG_SRVOUT, "*", "adding 1sec penalty (remote whois)");
     }
@@ -1775,6 +1775,10 @@ static void server_dns_callback(int id, void *client_data, const char *host, bd:
     altnick_char = 0;
     /* reset counter so first ctcp is dumped for tcms */
     first_ctcp_check = 0;
+
+    // Just connecting, set last queue time to the past.
+    last_time.sec = now - 100;
+    last_time.usec = 0;
 
     if (serverpass[0])
       dprintf(DP_MODE, "PASS %s\n", serverpass);

@@ -91,7 +91,7 @@ static bool resolvserv;		/* in the process of resolving a server host */
 static time_t lastpingtime;	/* IRCNet LAGmeter support -- drummer */
 static char stackablecmds[511] = "";
 static char stackable2cmds[511] = "";
-static time_t last_time;
+static egg_timeval_t last_time;
 static bool use_penalties;
 static int use_fastdeq;
 size_t nick_len = 9;			/* Maximal nick length allowed on the network. */
@@ -142,6 +142,9 @@ static int burst;
  */
 static void deq_msg()
 {
+  if (serv < 0)
+    return;
+
   static const struct {
     struct msgq_head *q;
     int idx;
@@ -153,24 +156,26 @@ static void deq_msg()
   bool ok = 0;
 
   /* now < last_time tested 'cause clock adjustments could mess it up */
-  if ((now - last_time) >= msgrate || now < (last_time - 90)) {
-    last_time = now;
+  long usecs = timeval_diff(&egg_timeval_now, &last_time);
+  if (usecs >= msgrate || now < (last_time.sec - 90)) {
+    last_time.sec = egg_timeval_now.sec;
+    last_time.usec = egg_timeval_now.usec;
     if (burst > 0)
       burst = 0;
     ok = 1;
   }
-  if (serv < 0)
-    return;
+
+  if (!ok) return;
 
   struct msgq *q = NULL;
 
-  /* Send upto 4 msgs to server if the *critical queue* has anything in it;
-   * otherwise, dequeue and burst up to 4 messages from the `normal' message
+  /* Send upto 'set msgburst' msgs to server if the *critical queue* has anything in it;
+   * otherwise, dequeue and burst up to 'set msgburst' messages from the `normal' message
    * queue.
    */
   bool nm = 0;
   for(size_t nq = 0; nq < (sizeof(qdsc) / sizeof(qdsc[0])); ++nq) {
-    while (qdsc[nq].q->head && (burst < msgburst) && ((last_time - now) < MAXPENALTY)) {
+    while (qdsc[nq].q->head && (burst < msgburst) && ((last_time.sec - now) < MAXPENALTY)) {
 #ifdef not_implemented
       if (deq_kick(qdsc[nq].idx)) {
         ++burst;
@@ -188,7 +193,7 @@ static void deq_msg()
       if (debug_output)
         putlog(LOG_SRVOUT, "*", "%s %s", qdsc[nq].pfx, qdsc[nq].q->head->msg);
       --(qdsc[nq].q->tot);
-      last_time += calc_penalty(qdsc[nq].q->head->msg);
+      last_time.sec += calc_penalty(qdsc[nq].q->head->msg);
       q = qdsc[nq].q->head->next;
       free(qdsc[nq].q->head->msg);
       free(qdsc[nq].q->head);
@@ -213,7 +218,7 @@ static void deq_msg()
     putlog(LOG_SRVOUT, "@", "[h->] %s", hq.head->msg);
   }
   hq.tot--;
-  last_time += calc_penalty(hq.head->msg);
+  last_time.sec += calc_penalty(hq.head->msg);
   q = hq.head->next;
   free(hq.head->msg);
   free(hq.head);
@@ -235,9 +240,9 @@ static int calc_penalty(char * msg)
     i = strlen(msg);
   else
     i = strlen(cmd);
-  last_time -= 2; /* undo eggdrop standard flood prot */
+  last_time.sec -= 2; /* undo eggdrop standard flood prot */
   if (net_type == NETT_UNDERNET || net_type == NETT_HYBRID_EFNET) {
-    last_time += (2 + i / 120);
+    last_time.sec += (2 + i / 120);
     return 0;
   }
   penalty = (1 + i / 100);
@@ -505,7 +510,7 @@ static bool fast_deq(int which)
           break;
       }
     }
-    last_time += calc_penalty(tosend);
+    last_time.sec += calc_penalty(tosend);
     return 1;
   }
   return 0;
@@ -975,7 +980,6 @@ static void server_secondly()
 {
   if (cycle_time)
     --cycle_time;
-  deq_msg();
   if (!resolvserv && serv < 0 && !trying_server)
     connect_server();
 }
@@ -1101,6 +1105,12 @@ void server_init()
   add_builtins("dcc", C_dcc_serv);
   add_builtins("ctcp", my_ctcps);
 
+  egg_timeval_t howlong;
+
+  howlong.sec = 0;
+  howlong.usec = 400 * 1000;
+
+  timer_create_repeater(&howlong, "server_queue", (Function) deq_msg);
   timer_create_secs(1, "server_secondly", (Function) server_secondly);
   timer_create_secs(30, "server_check_lag", (Function) server_check_lag);
   timer_create_secs(300, "server_5minutely", (Function) server_5minutely);
