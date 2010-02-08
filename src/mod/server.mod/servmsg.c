@@ -284,10 +284,10 @@ got004(char *from, char *msg)
     */
 
     connect_bursting = now;
-    msgburst = 5 * 8;
+    msgburst = SERVER_CONNECT_BURST_RATE;
     msgrate = 200;
     last_time.sec = now - 100;
-    putlog(LOG_DEBUG, "*", "Server allows connect bursting, bursting for 20 seconds");
+    putlog(LOG_DEBUG, "*", "Server allows connect bursting, bursting for %d seconds", SERVER_CONNECT_BURST_TIME);
   }
 
   join_chans();

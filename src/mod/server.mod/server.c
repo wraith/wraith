@@ -117,7 +117,8 @@ static bool replaying_cache = 0;
 static bind_table_t *BT_raw = NULL, *BT_msg = NULL;
 bind_table_t *BT_ctcr = NULL, *BT_ctcp = NULL, *BT_msgc = NULL;
 
-void deq_msg();
+#define SERVER_CONNECT_BURST_TIME 20
+#define SERVER_CONNECT_BURST_RATE 5 * 8
 
 #include "servmsg.c"
 
@@ -989,7 +990,7 @@ static void server_secondly()
   if (!resolvserv && serv < 0 && !trying_server)
     connect_server();
 
-  if (connect_bursting && server_online && (now - 20) >= connect_bursting) {
+  if (connect_bursting && server_online && (now - SERVER_CONNECT_BURST_TIME) >= connect_bursting) {
     connect_bursting = 0;
     msgburst = real_msgburst;
     msgrate = real_msgrate;
