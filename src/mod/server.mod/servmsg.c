@@ -255,7 +255,7 @@ got004(char *from, char *msg)
   if (strstr(tmp, "u2.") || strstr(tmp, "Unreeal") || strstr(tmp, "snircd")) {
     putlog(LOG_DEBUG, "*", "Disabling cookies as they are not supported on %s", cursrvname);
     cookies_disabled = true;
-  } else if (strstr(tmp, "hybrid") || strstr(tmp, "ratbox"))
+  } else if (strstr(tmp, "hybrid") || strstr(tmp, "ratbox") || strstr(tmp, "Charybdis") || strstr(tmp, "ircd-seven"))
     connect_burst = 1;
 
   if (!replaying_cache && connect_burst) {
