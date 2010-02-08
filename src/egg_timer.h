@@ -24,9 +24,11 @@ long timeval_diff(const egg_timeval_t *tv1, const egg_timeval_t *tv2);
 int timer_create_secs(int, const char *, Function);
 int timer_create_complex(egg_timeval_t *howlong, const char *name, Function callback, void *client_data, int flags);
 int timer_destroy(int timer_id);
+#ifdef not_used
 int timer_destroy_all();
+#endif
 int timer_get_shortest(egg_timeval_t *howlong);
-int timer_run();
+void timer_run();
 int timer_list(int **ids);
 int timer_info(int id, char **name, egg_timeval_t *initial_len, egg_timeval_t *trigger_time, int *called);
 #endif /* _EGG_TIMER_H_ */
