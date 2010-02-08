@@ -1333,7 +1333,7 @@ reset_chan_info(struct chanset_t *chan)
     dprintf(DP_MODE, "MODE %s\n", chan->name);
     send_chan_who(DP_MODE, chan);
     /* clear_channel nuked the data...so */
-    dprintf(DP_MODE, "TOPIC %s\n", chan->name);
+    dprintf(DP_HELP, "TOPIC %s\n", chan->name);//Topic is very low priority
   }
 }
 
