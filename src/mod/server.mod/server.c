@@ -199,17 +199,17 @@ static void deq_msg()
       free(qdsc[nq].q->head);
       qdsc[nq].q->head = q;
       ++burst;
-      nm = 1;
+      nm = 2;
     }
     if (!qdsc[nq].q->head)
       qdsc[nq].q->last = NULL;
-    if(nm)
+    if(nm == 1)
       return;
   }
   /* Never send anything from the help queue unless everything else is
    * finished.
    */
-  if (!hq.head || burst || !ok)
+  if (!hq.head || burst || nm)
     return;
   if (fast_deq(DP_HELP))
     return;
