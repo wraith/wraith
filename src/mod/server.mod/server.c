@@ -214,8 +214,9 @@ void deq_msg()
   }
   /* Never send anything from the help queue unless everything else is
    * finished.
+   * Don't process any help queue if connect bursting
    */
-  if (!hq.head || burst || nm)
+  if (!hq.head || burst || nm || connect_bursting)
     return;
   if (fast_deq(DP_HELP))
     return;
