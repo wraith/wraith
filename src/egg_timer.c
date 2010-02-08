@@ -50,7 +50,7 @@ static int timer_next_id = 1;
 /* Based on TclpGetTime from Tcl 8.3.3 */
 static inline int timer_get_time(egg_timeval_t *curtime)
 {
-	struct timeval tv;
+	static struct timeval tv;
 
 	(void) gettimeofday(&tv, NULL);
 	curtime->sec = tv.tv_sec;
@@ -58,18 +58,13 @@ static inline int timer_get_time(egg_timeval_t *curtime)
 	return(0);
 }
 
-int timer_update_now(egg_timeval_t *_now)
+void timer_update_now(egg_timeval_t *_now)
 {
 	timer_get_time(&now);
-	if (_now) {
-		_now->sec = now.sec;
-		_now->usec = now.usec;
-	}
-	return(now.sec);
+	if (_now) timer_get_now(_now);
 }
 
-
-void timer_get_now(egg_timeval_t *_now)
+inline void timer_get_now(egg_timeval_t *_now)
 {
 	_now->sec = now.sec;
 	_now->usec = now.usec;
@@ -99,11 +94,26 @@ int timer_diff(egg_timeval_t *from_time, egg_timeval_t *to_time, egg_timeval_t *
 			diff->usec = 0;
 			return(1);
 		}
-		diff->sec -= 1;
+		--(diff->sec);
 		diff->usec += 1000000;
 	}
 
 	return(0);
+}
+
+/*
+ * Return milliseconds difference between two timevals
+ */
+long timeval_diff(const egg_timeval_t *tv1, const egg_timeval_t *tv2)
+{
+	long secs = tv1->sec - tv2->sec, usecs = tv1->usec - tv2->usec;
+	if (usecs < 0) {
+		usecs += 1000000;
+		--secs;
+	}
+	usecs = (usecs / 1000) + (secs * 1000);
+
+	return usecs;
 }
 
 static int timer_add_to_list(egg_timer_t *timer)
@@ -233,13 +243,13 @@ int timer_run()
 
 			if (timer->trigger_time.usec >= 1000000) {
 				timer->trigger_time.usec -= 1000000;
-				timer->trigger_time.sec += 1;
+				++(timer->trigger_time.sec);
 			}
 
 			/* Add it back into the list. */
 			timer_add_to_list(timer);
 
-			timer->called++;
+			++(timer->called);
 		}
 		else {
 			if (timer->name) free(timer->name);
