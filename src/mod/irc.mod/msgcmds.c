@@ -431,17 +431,7 @@ static int msg_release(char *nick, char *host, struct userrec *u, char *par)
 
   if (u_pass_match(u, pass) && !u_pass_match(u, "-")) {
     putlog(LOG_CMDS, "*", STR("(%s!%s) !%s! RELEASE"), nick, host, u->handle);
-    // Only do this if currently on a jupenick
-    if (jupenick[0] && match_my_nick(jupenick)) {
-      keepnick = 0;
-      release_time = now;
-
-      altnick_char = rolls = 0;
-      tried_nick = now;
-      dprintf(DP_MODE, "NICK %s\n", origbotname);
-      putlog(LOG_MISC, "*", "Releasing jupenick '%s' and switching back to nick '%s'", jupenick, origbotname);
-    } else
-      putlog(LOG_CMDS, "*", "Not releasing nickname. (Not currently on a jupenick)");
+    release_nick();
   } else {
     putlog(LOG_CMDS, "*", STR("(%s!%s) !%s! failed RELEASE"), nick, host, u ? u->handle : "*");
   }

@@ -60,6 +60,7 @@ extern rate_t		flood_msg, flood_ctcp, flood_callerid;
 
 int check_bind_ctcpr(char *, char *, struct userrec *, char *, char *, char *, bind_table_t *);
 void nicks_available(char* buf, char delim = 0, bool buf_contains_available = 1);
+void release_nick();
 
 #define check_bind_ctcp(a, b, c, d, e, f) check_bind_ctcpr(a, b, c, d, e, f, BT_ctcp)
 #define check_bind_ctcr(a, b, c, d, e, f) check_bind_ctcpr(a, b, c, d, e, f, BT_ctcr)

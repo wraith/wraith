@@ -912,6 +912,20 @@ void nicks_available(char* buf, char delim, bool buf_contains_available) {
   nick_available(is_jupe, is_orig);
 }
 
+void release_nick() {
+  // Only do this if currently on a jupenick
+  if (jupenick[0] && match_my_nick(jupenick)) {
+    keepnick = 0;
+    release_time = now;
+
+    altnick_char = rolls = 0;
+    tried_nick = now;
+    dprintf(DP_MODE, "NICK %s\n", origbotname);
+    putlog(LOG_MISC, "*", "Releasing jupenick '%s' and switching back to nick '%s'", jupenick, origbotname);
+  } else
+    putlog(LOG_CMDS, "*", "Not releasing nickname. (Not currently on a jupenick)");
+}
+
 /* This is a reply to MONITOR: Offline
  * RPL_MONOFFLINE
  * :<server> 731 <nick> :nick[,nick1]*
