@@ -401,6 +401,7 @@ static void cmd_about(int idx, char *par)
   dprintf(idx, "..with credits and thanks to the following:\n");
   dprintf(idx, " \n");
   dprintf(idx, STR(" * Eggdev for eggdrop obviously\n"));
+  dprintf(idx, STR(" * $blayzkat$b, my future wife, for great love, support, ideas and motivation.\n"));
   dprintf(idx, STR(" * $bryguy$b for beta testing, providing code, finding bugs, and providing input.\n"));
   dprintf(idx, STR(" * $bSFC$b for providing compile shells, continuous input, feature suggestions, and testing.\n"));
   dprintf(idx, STR(" * $bwarchest$b for his dedicated bug finding, testing, input, and original inspiration to code a botpack.\n"));
@@ -418,6 +419,7 @@ static void cmd_about(int idx, char *par)
   dprintf(idx, STR(" * $bZero$b for a great stream of ideas, beta testing.\n"));
   dprintf(idx, STR(" * $bMafaioz$b for good ideas, support on wraith.no, beta testing.\n"));
   dprintf(idx, STR(" * $bTical$b for great ideas.\n"));
+  dprintf(idx, STR(" * $binsect$b for helping test the RBL code.\n"));
   dprintf(idx, STR(" * $bMany$b others.\n"));
   dprintf(idx, " \n");
   dprintf(idx, STR("For a list of Contributors see: git shortlog -sen master\n"));

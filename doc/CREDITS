@@ -3,6 +3,7 @@ Wraith botpack by Bryan (http://wraith.botpack.net)
 Credits and thanks to the following:
 
 * Eggdev for eggdrop obviously.
+* layzkat, my future wife, for great love, support, ideas and motivation.
 * ryguy for beta testing, providing code, finding bugs, and providing input.
 * SFC for providing compile shells, continuous input, feature suggestions, and testing.
 * warchest for his dedicated bug finding, testing, input, and original inspiration to code a botpack.
@@ -20,6 +21,7 @@ Credits and thanks to the following:
 * Zero for a great stream of ideas, beta testing.
 * Mafaioz for good ideas, support on wraith.no, beta testing.
 * Tical for great ideas.
+* insect for helping test the RBL code.
 * Many others.
 
 For a list of code Contributors see: git shortlog -sen master
