@@ -58,6 +58,7 @@ char msgident[21] = "";
 char msginvite[21] = "";
 char msgop[21] = "";
 char msgpass[21] = "";
+char msgrelease[21] = "";
 int op_bots;
 rate_t op_requests;
 int promisc;
@@ -103,6 +104,7 @@ static variable_t vars[] = {
  VAR("msg-invite",	msginvite,		VAR_WORD|VAR_NOLHUB,				0, 0, NULL),
  VAR("msg-op",		msgop,			VAR_WORD|VAR_NOLHUB,				0, 0, NULL),
  VAR("msg-pass",	msgpass,		VAR_WORD|VAR_NOLHUB,				0, 0, NULL),
+ VAR("msg-release",	msgrelease,		VAR_WORD|VAR_NOLHUB,				0, 0, NULL),
  VAR("nick",		origbotname,		VAR_WORD|VAR_NOHUB|VAR_NICK|VAR_NODEF,	0, 0, NULL),
  VAR("notify-time",	&ison_time,		VAR_INT|VAR_NOLHUB,				1, 30, "10"),
  VAR("oidentd",		&oidentd,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "0"),

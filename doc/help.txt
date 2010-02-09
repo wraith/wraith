@@ -1601,6 +1601,7 @@ See also: reload, backup
 [S]  $bmsg-pass$b        Defines the cmd for setting a pass via msging the bot.
 [S]  $bmsg-invite$b      Defines the cmd for requesting invite via msging the bot.
 [S]  $bmsg-ident$b       Defines the cmd for identing via msging the bot.
+[S]  $bmsg-release$b     Defines the cmd for releasing a nick.
  
 [N]  $bfork-interval$b   Number of seconds in between each fork() call made by the bot. 
                           (Resets PID/CPU)

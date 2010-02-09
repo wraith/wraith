@@ -418,6 +418,35 @@ static int msg_unauth(char *nick, char *host, struct userrec *u, char *par)
   return BIND_RET_BREAK;
 }
 
+static int msg_release(char *nick, char *host, struct userrec *u, char *par)
+{
+  char *pass = NULL;
+
+  if (match_my_nick(nick))
+    return BIND_RET_BREAK;
+  if (u && u->bot)
+    return BIND_RET_BREAK;
+
+  pass = newsplit(&par);
+
+  if (u_pass_match(u, pass) && !u_pass_match(u, "-")) {
+    putlog(LOG_CMDS, "*", STR("(%s!%s) !%s! RELEASE"), nick, host, u->handle);
+    // Only do this if currently on a jupenick
+    if (jupenick[0] && match_my_nick(jupenick)) {
+      keepnick = 0;
+      release_time = now;
+      altnick_char = rolls = 0;
+      tried_nick = now;
+      dprintf(DP_MODE, "NICK %s\n", origbotname);
+    } else
+      putlog(LOG_CMDS, "*", "Not releasing nickname. (Not currently on a jupenick)");
+  } else {
+    putlog(LOG_CMDS, "*", STR("(%s!%s) !%s! failed RELEASE"), nick, host, u ? u->handle : "*");
+  }
+  return BIND_RET_BREAK;
+
+}
+
 /* MSG COMMANDS
  *
  * Function call should be:
@@ -437,6 +466,7 @@ static cmd_t C_msg[] =
   {"invite",		"",	(Function) msg_invite,		NULL, LEAF},
   {"op",		"",	(Function) msg_op,		NULL, LEAF},
   {"pass",		"",	(Function) msg_pass,		NULL, LEAF},
+  {"release",		"",	(Function) msg_release,		NULL, LEAF},
   {"bewm",		"",	(Function) msg_bewm,		NULL, LEAF},
   {NULL,		NULL,	NULL,				NULL, 0}
 };

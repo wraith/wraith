@@ -70,6 +70,7 @@ char botuserhost[UHOSTLEN] = "";	/* bot's user@host (refreshed whenever the bot 
 					/* may not be correct user@host BUT it's how the server sees it */
 char botuserip[UHOSTLEN] = "";		/* bot's user@host with the ip. */
 
+time_t release_time = 0;
 bool keepnick = 1;		/* keep trying to regain my intended
 				   nickname? */
 static bool nick_juped = 0;	/* True if origbotname is juped(RPL437) (dw) */
@@ -1002,6 +1003,10 @@ static void server_secondly()
         ison_cnt = 0;
       } else
         ++ison_cnt;
+    } else if (!keepnick && ((now - release_time) >= 7)) {
+      release_time = 0;
+      keepnick = 1;
+      dprintf(DP_SERVER, "MONITOR S\n");
     }
 
     if (!loading) {
