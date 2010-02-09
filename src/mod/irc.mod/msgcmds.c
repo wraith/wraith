@@ -435,7 +435,11 @@ static int msg_release(char *nick, char *host, struct userrec *u, char *par)
 
     if (glob_master(fr)) {
       putlog(LOG_CMDS, "*", STR("(%s!%s) !%s! RELEASE"), nick, host, u->handle);
-      release_nick();
+      egg_timeval_t howlong;
+      howlong.sec = 5;
+      howlong.usec = 0;
+      timer_create(&howlong, "Release jupenick", (Function) release_nick);
+//      release_nick();
     } else
       putlog(LOG_CMDS, "*", STR("(%s!%s) !%s! failed RELEASE (User it not +m)"), nick, host, u->handle);
   } else
