@@ -429,12 +429,17 @@ static int msg_release(char *nick, char *host, struct userrec *u, char *par)
 
   pass = newsplit(&par);
 
-  if (u_pass_match(u, pass) && !u_pass_match(u, "-")) {
-    putlog(LOG_CMDS, "*", STR("(%s!%s) !%s! RELEASE"), nick, host, u->handle);
-    release_nick();
-  } else {
+  if (u && u_pass_match(u, pass) && !u_pass_match(u, "-")) {
+    struct flag_record fr = {FR_GLOBAL, 0, 0, 0 };
+    get_user_flagrec(u, &fr, NULL);
+
+    if (glob_master(fr)) {
+      putlog(LOG_CMDS, "*", STR("(%s!%s) !%s! RELEASE"), nick, host, u->handle);
+      release_nick();
+    } else
+      putlog(LOG_CMDS, "*", STR("(%s!%s) !%s! failed RELEASE (User it not +m)"), nick, host, u->handle);
+  } else
     putlog(LOG_CMDS, "*", STR("(%s!%s) !%s! failed RELEASE"), nick, host, u ? u->handle : "*");
-  }
   return BIND_RET_BREAK;
 
 }
