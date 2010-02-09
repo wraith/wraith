@@ -211,7 +211,7 @@ colorbuf(char *buf, size_t len, int idx, size_t bufsiz)
  */
 void dumplots(int idx, const char *prefix, const char *data)
 {
-  if (!*data) {
+  if (unlikely(!*data)) {
     dprintf(idx, "%s\n", prefix);
     return;
   }
@@ -268,7 +268,7 @@ dprintf(int idx, const char *format, ...)
   int vlen = egg_vsnprintf(buf, sizeof(buf), format, va);
   va_end(va);
 
-  if (vlen < 0) {
+  if (unlikely(vlen < 0)) {
     // Error parsing format..
     return;
   }
@@ -282,10 +282,10 @@ dprintf(int idx, const char *format, ...)
 
 /* this is for color on dcc :P */
 
-  if (idx < 0) {
+  if (unlikely(idx < 0)) {
     tputs(-idx, buf, len);
   } else if (idx > 0x7FF0) {
-    if (idx == DP_STDOUT || idx == DP_STDOUT) {
+    if (unlikely(idx == DP_STDOUT || idx == DP_STDOUT)) {
       len = colorbuf(buf, len, -1, sizeof(buf));
     }
 
@@ -311,7 +311,7 @@ dprintf(int idx, const char *format, ...)
           break;
         len -= remove_crlf_r(buf);
 
-        if ((idx == DP_DUMP || (floodless && idx != DP_CACHE))) {
+        if (unlikely((idx == DP_DUMP || (floodless && idx != DP_CACHE)))) {
          if (serv != -1) {
            if (debug_output)
              putlog(LOG_SRVOUT, "@", "[d->] %s", buf);
@@ -330,9 +330,9 @@ dprintf(int idx, const char *format, ...)
       buf[len - 1] = '\n';
       buf[len] = 0;
     }
-    if (dcc[idx].simul >= 0 && !dcc[idx].irc) {
+    if (unlikely(dcc[idx].simul >= 0 && !dcc[idx].irc)) {
       bounce_simul(idx, buf);
-    } else if (dcc[idx].irc) {
+    } else if (unlikely(dcc[idx].irc)) {
 //      size_t size = strlen(dcc[idx].simulbot) + strlen(buf) + 20;
 //      char *ircbuf = (char *) my_calloc(1, size);
 
@@ -709,7 +709,7 @@ new_dcc(struct dcc_table *type, int xtra_size)
       break;
 
   /* we managed to get to the end of the list! */
-  if (i == dcc_total) {
+  if (unlikely(i == dcc_total)) {
     i = dcc_total;
     dcc_total++;
   }

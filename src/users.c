@@ -616,11 +616,11 @@ int stream_readuserfile(bd::Stream& stream, struct userrec **ret)
   noshare = 1;
   /* read opening comment */
   bd::String str(stream.getline(180));
-  if (str[1] < '4') {
+  if (unlikely(str[1] < '4')) {
     putlog(LOG_MISC, "*", "!*! Empty or malformed userfile.");
     return 0;
   }
-  if (str[1] > '4') {
+  if (unlikely(str[1] > '4')) {
     putlog(LOG_MISC, "*", "Invalid userfile format.");
     return 0;
   }
@@ -855,7 +855,7 @@ int stream_readuserfile(bd::Stream& stream, struct userrec **ret)
 	  pass = newsplit(&s);	/* old style passwords */
 	  attr = newsplit(&s);
 	  rmspace(s);
-	  if (!attr[0] || !pass[0]) {
+	  if (unlikely(!attr[0] || !pass[0])) {
 	    putlog(LOG_MISC, "*", "* Corrupt user record line: %d!", line);
 	    lasthand[0] = 0;
             noshare = 0;
@@ -869,7 +869,7 @@ int stream_readuserfile(bd::Stream& stream, struct userrec **ret)
             }
 
 	    u = get_user_by_handle(bu, code);
-	    if (u) {
+	    if (unlikely(u)) {
 	      putlog(LOG_ERROR, "@", "* Duplicate user record '%s'!", code);
 	      lasthand[0] = 0;
 	      u = NULL;
@@ -883,7 +883,7 @@ int stream_readuserfile(bd::Stream& stream, struct userrec **ret)
               
 	      if (strlen(code) > HANDLEN)
 		code[HANDLEN] = 0;
-	      if (strlen(pass) > 20) {	/* old style passwords */
+	      if (unlikely(strlen(pass) > 20)) {	/* old style passwords */
 		putlog(LOG_MISC, "*", "* Corrupted password reset for '%s'", code);
                 pass[0] = '-';
                 pass[1] = 0;
@@ -914,13 +914,13 @@ int stream_readuserfile(bd::Stream& stream, struct userrec **ret)
   for (u = bu; u; u = u->next) {
     struct user_entry *e = NULL;
 
-    if (!u->bot && !strcasecmp (u->handle, conf.bot->nick)) {
+    if (unlikely(!u->bot && !strcasecmp (u->handle, conf.bot->nick))) {
       putlog(LOG_MISC, "*", "(!) I have a user record, but am not classified as a BOT!");
       u->bot = 1;
     }
 
     for (e = u->entries; e; e = e->next)
-      if (e->name) {
+      if (likely(e->name)) {
 	struct user_entry_type *uet = find_entry_type(e->name);
 
 	if (uet) {

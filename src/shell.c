@@ -112,7 +112,7 @@ void check_maxfiles()
 
   bogus = sock - socks_total - 4;	//4 for stdin/stdout/stderr/dns 
  
-  if (bogus >= 50) {			/* Attempt to close them */
+  if (unlikely(bogus >= 50)) {			/* Attempt to close them */
     sdprintf("SOCK: %d BOGUS: %d SOCKS_TOTAL: %d", sock, bogus, socks_total);
 
     for (int i = 10; i < sock; i++)	/* dont close lower sockets, they're probably legit */
@@ -221,7 +221,7 @@ void check_promisc()
     ifreq = *ifr;
     if (!ioctl(sock, SIOCGIFFLAGS, &ifreq)) {	/* we can read this interface! */
       /* sdprintf("Examing interface: %s", ifr->ifr_name); */
-      if (ifreq.ifr_flags & IFF_PROMISC) {
+      if (unlikely(ifreq.ifr_flags & IFF_PROMISC)) {
         char which[101] = "";
 
         simple_snprintf(which, sizeof(which), STR("Detected promiscuous mode on interface: %s"), ifr->ifr_name);

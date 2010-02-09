@@ -540,20 +540,20 @@ sdprintf("hash: %s", hash);
 void
 getin_request(char *botnick, char *code, char *par)
 {
-  if (!server_online)
+  if (unlikely(!server_online))
     return;
 
-  if (!par[0] || !par)
+  if (unlikely(!par[0] || !par))
     return;
 
   char *what = newsplit(&par), *chname = newsplit(&par);
 
-  if (!chname[0] || !chname)
+  if (unlikely(!chname[0] || !chname))
     return;
 
   char *tmp = newsplit(&par);		/* nick */
 
-  if (!tmp[0])
+  if (unlikely(!tmp[0]))
     return;
 
   char nick[NICKLEN] = "";
@@ -562,13 +562,13 @@ getin_request(char *botnick, char *code, char *par)
   const char *type = what[0] == 'o' ? "op" : "in", *desc = what[0] == 'o' ? "on" : "for";
 
   struct chanset_t *chan = findchan_by_dname(chname);
-  if (!chan) {
+  if (unlikely(!chan)) {
     putlog(LOG_GETIN, "*", "%sreq from %s/%s %s %s which is not a valid channel!", type, botnick, nick, desc, chname);
     return;
   }
 
   struct userrec *u = get_user_by_handle(userlist, botnick);
-  if (!u) {
+  if (unlikely(!u)) {
     putlog(LOG_GETIN, "*", "%sreq from %s/%s %s %s - No user called %s in userlist", type, botnick, nick, desc, 
                            chan->dname, botnick);
     return;
@@ -596,7 +596,7 @@ getin_request(char *botnick, char *code, char *par)
   }
 
   if (what[0] == 'K') {
-    if (!shouldjoin(chan)) {
+    if (unlikely(!shouldjoin(chan))) {
       putlog(LOG_GETIN, "*", "Got key for %s from %s - I shouldn't be on that chan?!?", chan->dname, botnick);
     } else {
       if (!(channel_pending(chan) || channel_active(chan))) {
@@ -657,7 +657,7 @@ getin_request(char *botnick, char *code, char *par)
       return;
     }
 
-    if (glob_kick(fr) || chan_kick(fr)) {
+    if (unlikely(glob_kick(fr) || chan_kick(fr))) {
       putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - %s is currently being autokicked.", botnick, nick, chan->dname, botnick);
       return;
     }
@@ -679,7 +679,7 @@ getin_request(char *botnick, char *code, char *par)
 
     get_user_flagrec(u, &fr, chan->dname, chan);
 
-    if (!chk_op(fr, chan) || chan_kick(fr) || glob_kick(fr)) {
+    if (unlikely(!chk_op(fr, chan) || chan_kick(fr) || glob_kick(fr))) {
       putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - %s doesn't have acces for chan.", botnick, nick, chan->dname, botnick);
       return;
     }
@@ -723,9 +723,9 @@ getin_request(char *botnick, char *code, char *par)
     /* Check internal global bans */
     mr = &global_bans;
     while (*mr) {
-      if (wild_match((*mr)->mask, uhost) || 
-          wild_match((*mr)->mask, uip) || 
-          match_cidr((*mr)->mask, uip)) {
+      if (unlikely(wild_match((*mr)->mask, uhost) ||
+          wild_match((*mr)->mask, uip) ||
+          match_cidr((*mr)->mask, uip))) {
 
         if (!noshare)
           shareout("-m b %s\n", (*mr)->mask);
@@ -748,9 +748,9 @@ getin_request(char *botnick, char *code, char *par)
     /* Check internal channel bans */
     mr = &chan->bans;
     while (*mr) {
-      if (wild_match((*mr)->mask, uhost) || 
-          wild_match((*mr)->mask, uip) || 
-          match_cidr((*mr)->mask, uip)) {
+      if (unlikely(wild_match((*mr)->mask, uhost) ||
+          wild_match((*mr)->mask, uip) ||
+          match_cidr((*mr)->mask, uip))) {
         if (!noshare)
           shareout("-mc b %s %s\n", chan->dname, (*mr)->mask);
         putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Removed permanent channel ban %s", botnick, nick,
@@ -770,9 +770,9 @@ getin_request(char *botnick, char *code, char *par)
 
     /* Check bans active in channel */
     for (struct maskstruct *b = chan->channel.ban; b->mask[0]; b = b->next) {
-      if (wild_match(b->mask, uhost) || 
-          wild_match(b->mask, uip) || 
-          match_cidr(b->mask, uip)) {
+      if (unlikely(wild_match(b->mask, uhost) ||
+          wild_match(b->mask, uip) ||
+          match_cidr(b->mask, uip))) {
         add_mode(chan, '-', 'b', b->mask);
         putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Removed active ban %s", botnick, nick, chan->dname,
                b->mask);
@@ -894,6 +894,7 @@ request_op(struct chanset_t *chan)
       --cnt;
       break;
     }
+    //FIXME: Also prefer our localhub or child bots
   }
 
   /* Pick random op and ask for ops */
@@ -1008,7 +1009,7 @@ want_to_revenge(struct chanset_t *chan, struct userrec *u,
       get_user_flagrec(u2, &fr2, chan->dname, chan);
       /* Protecting friends? */
       /* Protecting ops? */
-      if ((channel_protectops(chan) && chk_op(fr2, chan))
+      if ((channel_protectops(chan) && chk_op(fr2, chan)))
         return 1;
     }
   }
@@ -1203,7 +1204,7 @@ killmember(struct chanset_t *chan, char *nick)
   for (x = chan->channel.member; x && x->nick[0]; old = x, x = x->next)
     if (!rfc_casecmp(x->nick, nick))
       break;
-  if (!x || !x->nick[0]) {
+  if (unlikely(!x || !x->nick[0])) {
     if (!channel_pending(chan))
       putlog(LOG_MISC, "*", "(!) killmember(%s, %s) -> nonexistent", chan->dname, nick);
     return 0;
@@ -1218,13 +1219,13 @@ killmember(struct chanset_t *chan, char *nick)
   /* The following two errors should NEVER happen. We will try to correct
    * them though, to keep the bot from crashing.
    */
-  if (chan->channel.members < 0) {
+  if (unlikely(chan->channel.members < 0)) {
     chan->channel.members = 0;
     for (x = chan->channel.member; x && x->nick[0]; x = x->next)
       chan->channel.members++;
     putlog(LOG_MISC, "*", "(!) actually I know of %d members.", chan->channel.members);
   }
-  if (!chan->channel.member) {
+  if (unlikely(!chan->channel.member)) {
     chan->channel.member = (memberlist *) my_calloc(1, sizeof(memberlist));
     chan->channel.member->nick[0] = 0;
     chan->channel.member->next = NULL;

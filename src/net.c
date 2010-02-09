@@ -941,7 +941,7 @@ static int sockread(char *s, int *len)
   int grab = SGRAB + 1;
   egg_timeval_t howlong;
 
-  if (timer_get_shortest(&howlong)) {
+  if (unlikely(timer_get_shortest(&howlong))) {
     /* No timer, default to 1 second. */
     t.tv_sec = 1;
     t.tv_usec = 0;
@@ -955,7 +955,7 @@ static int sockread(char *s, int *len)
   
   for (i = 0; i < MAXSOCKS; i++) {
     if (!(socklist[i].flags & (SOCK_UNUSED | SOCK_VIRTUAL))) {
-      if ((socklist[i].sock == STDOUT) && !backgrd)
+      if (unlikely((socklist[i].sock == STDOUT) && !backgrd))
 	fdtmp = STDIN;
       else
 	fdtmp = socklist[i].sock;
@@ -994,7 +994,7 @@ static int sockread(char *s, int *len)
 	  return i;
 	}
 	errno = 0;
-	if ((socklist[i].sock == STDOUT) && !backgrd)
+	if (unlikely((socklist[i].sock == STDOUT) && !backgrd))
 	  x = read(STDIN, s, grab);
 	else
           x = read(socklist[i].sock, s, grab);
@@ -1303,7 +1303,7 @@ void tputs(register int z, const char *s, size_t len)
   /* Make sure we don't cause a crash by looping here */
   static int inhere = 0;
 
-  if (!inhere) {
+  if (unlikely(!inhere)) {
     inhere = 1;
 
     putlog(LOG_MISC, "*", "!!! writing to nonexistent socket: %d", z);

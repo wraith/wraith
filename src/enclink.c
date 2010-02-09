@@ -35,7 +35,7 @@ static void ghost_link_case(int idx, direction_t direction)
 {
   int snum = findanysnum(dcc[idx].sock);
 
-  if (snum >= 0) {
+  if (likely(snum >= 0)) {
     char initkey[33] = "", *tmp2 = NULL;
     char *keyp = NULL, *nick1 = NULL, *nick2 = NULL;
     port_t port = 0;

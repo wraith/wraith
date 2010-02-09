@@ -233,7 +233,7 @@ static memberlist *newmember(struct chanset_t *chan, char *nick)
   n->hops = -1;
   if (!lx) {
     // Free the pseudo-member created in init_channel()
-    if (!chan->channel.member->nick[0]) {
+    if (unlikely(!chan->channel.member->nick[0])) {
       free(chan->channel.member);
       chan->channel.member = NULL;
     }
@@ -1410,7 +1410,7 @@ void recheck_channel(struct chanset_t *chan, int dobans)
 
 
   /* don't do much if i'm lonely bot. Maybe they won't notice me? :P */
-  if (botops == 1 && !botnonops) {
+  if (unlikely(botops == 1 && !botnonops)) {
     if (chan_bitch(chan) || channel_closed(chan))
       putlog(LOG_MISC, "*", "Opped in %s, not checking +closed/+bitch until more bots arrive.", chan->dname);
   } else {
@@ -1889,7 +1889,7 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
   me = match_my_nick(nick);
 
 
-  if (me) {			/* Is it me? */
+  if (unlikely(me)) {			/* Is it me? */
 //    strcpy(botuserhost, m->userhost);		/* Yes, save my own userhost */
     m->joined = now;				/* set this to keep the whining masses happy */
   }
@@ -1900,10 +1900,12 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
   }
 
   //This bot is set +r, so resolve.
-  if (!m->userip[0] && doresolv(chan))
-    resolve_to_member(chan, nick, host);
-  else if (!me && !m->user && m->userip[0] && doresolv(chan) && channel_rbl(chan))
-    resolve_to_rbl(chan, host);
+  if (unlikely(doresolv(chan))) {
+    if (!m->userip[0])
+      resolve_to_member(chan, nick, host);
+    else if (!me && !m->user && m->userip[0] && channel_rbl(chan))
+      resolve_to_rbl(chan, host);
+  }
 
 
   get_user_flagrec(m->user, &fr, chan->dname, chan);

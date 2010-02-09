@@ -915,9 +915,9 @@ int main(int argc, char **argv)
     xx = sockgets(buf, &i);
 
     if (xx >= 0) {		/* Non-error */
-      for (idx = 0; idx < dcc_total; idx++) {
+      for (idx = 0; idx < dcc_total; idx++) {//FIXME: This is looking up the idx for the sock, looping quite a bit, needs to be O(1)
 	if (dcc[idx].type && dcc[idx].sock == xx) {
-	  if (dcc[idx].type && dcc[idx].type->activity) {
+	  if (likely(dcc[idx].type && dcc[idx].type->activity)) {
 	    /* Traffic stats */
 	    if (dcc[idx].type->name) {
 	      if (!strncmp(dcc[idx].type->name, "BOT", 3))
@@ -943,13 +943,13 @@ int main(int argc, char **argv)
 	  break;
 	}
       }
-    } else if (xx == -1) {	/* EOF from someone */
-      if (i == STDOUT && !backgrd)
+    } else if (unlikely(xx == -1)) {	/* EOF from someone */
+      if (unlikely(i == STDOUT && !backgrd))
 	fatal(STR("END OF FILE ON TERMINAL"), 0);
-      for (idx = 0; idx < dcc_total; idx++) {
+      for (idx = 0; idx < dcc_total; idx++) {//FIXME: Same here
 	if (dcc[idx].type && dcc[idx].sock == i) {
           sdprintf(STR("EOF on '%s' idx: %d"), dcc[idx].type ? dcc[idx].type->name : "unknown", idx);
-	  if (dcc[idx].type->eof)
+	  if (likely(dcc[idx].type->eof))
 	    dcc[idx].type->eof(idx);
 	  else {
 	    putlog(LOG_MISC, "*",
@@ -961,12 +961,12 @@ int main(int argc, char **argv)
 	  idx = dcc_total + 1;
 	}
       }
-      if (idx == dcc_total) {
+      if (unlikely(idx == dcc_total)) {
 	putlog(LOG_MISC, "*", STR("(@) EOF socket %d, not a dcc socket, not anything."), i);
 	close(i);
 	killsock(i);
       }
-    } else if (xx == -2 && errno != EINTR) {	/* select() error */
+    } else if (unlikely(xx == -2 && errno != EINTR)) {	/* select() error */
       putlog(LOG_MISC, "*", STR("* Socket error #%d; recovering."), errno);
       for (i = 0; i < dcc_total; i++) {
 	if (dcc[i].type && dcc[i].sock != -1 && (fcntl(dcc[i].sock, F_GETFD, 0) == -1) && (errno = EBADF)) {
@@ -983,7 +983,7 @@ int main(int argc, char **argv)
         flush_modes();
       socket_cleanup = 0;	/* If we've been idle, cleanup & flush */
     }
-    if (do_restart) {
+    if (unlikely(do_restart)) {
       if (do_restart == 1)
         restart(-1);
       else { //rehash()
