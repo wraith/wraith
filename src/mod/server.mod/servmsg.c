@@ -912,17 +912,19 @@ void nicks_available(char* buf, char delim, bool buf_contains_available) {
   nick_available(is_jupe, is_orig);
 }
 
-void release_nick() {
+void release_nick(const char* nick) {
   // Only do this if currently on a jupenick
-  if (jupenick[0] && match_my_nick(jupenick)) {
+  if (jupenick[0] && ((!nick && match_my_nick(jupenick)) || (nick && !rfc_casecmp(jupenick, nick)))) {
     keepnick = 0;
     release_time = now;
 
-    altnick_char = rolls = 0;
-    tried_nick = now;
-    dprintf(DP_MODE, "NICK %s\n", origbotname);
-    putlog(LOG_MISC, "*", "Releasing jupenick '%s' and switching back to nick '%s'", jupenick, origbotname);
-  } else
+    if (match_my_nick(jupenick)) {
+      altnick_char = rolls = 0;
+      tried_nick = now;
+      dprintf(DP_MODE, "NICK %s\n", origbotname);
+      putlog(LOG_MISC, "*", "Releasing jupenick '%s' and switching back to nick '%s'", jupenick, origbotname);
+    }
+  } else if (!nick)
     putlog(LOG_CMDS, "*", "Not releasing nickname. (Not currently on a jupenick)");
 }
 

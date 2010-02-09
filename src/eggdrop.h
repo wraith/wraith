@@ -62,6 +62,8 @@
 #define RANDSPECIAL     "#*+,-./;<=>?[]^_{}|"
 #define RANDSPECIALLEN  19
 
+#define RELEASE_TIME	7
+
 #define ESCAPESHELL	"`\\|#*()[]& "
 
 #if (NICKMAX < 9) || (NICKMAX > 32)

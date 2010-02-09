@@ -1,4 +1,4 @@
-* Add cmd 'release' and msg-release for releasing a bot's jupenick on a 7 second timer.
+* Add cmd 'release', 'netrelease' and msg-release for releasing a bot's jupenick on a 7 second timer.
 
 1.3 - http://wraith.botpack.net/milestone/1.3
 * Binary / shell / startup changes

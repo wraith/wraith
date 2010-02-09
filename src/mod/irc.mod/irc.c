@@ -1723,9 +1723,14 @@ do_nettype()
   }
 }
 
+static void bot_release_nick (char *botnick, char *code, char *par) {
+  release_nick(par);
+}
+
 static cmd_t irc_bot[] = {
   {"gi", "", (Function) getin_request, NULL, LEAF},
   {"mr", "", (Function) mass_request, NULL, LEAF},
+  {"rn", "", (Function) bot_release_nick, NULL, LEAF},
   {NULL, NULL, NULL, NULL, 0}
 };
 

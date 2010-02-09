@@ -1392,6 +1392,12 @@ See also: botnick, nick
    on 'ps'.
  
 See also: ps
+:hub:netrelease
+###  $netrelease$b <nick>
+   Tells all bots to unjupe the specified nickname. They will wait 7 seconds
+   before attempting to regain the nickname.
+ 
+See also: set, release
 :hub:netrontab:
 ###  $bnetcrontab$b <status|delete|show|new> [interval]
    Runs the specified crontab command on all linked bots.
@@ -1490,11 +1496,11 @@ See also: restart
  
 See also: bots%{+n}, newleaf%{-}%{+a}, -bot%{-}
 :leaf:release
-###  $bservers$b
+###  $brelease$b
    Releases the bot's nick if it is on the jupenick. It gives an estimated
    7 seconds before it attempts to regain its jupenick.
  
-See also: set
+See also: set, netrelease
 ::reload
 ###  $breload$b
    Reloads the bot's user file, discarding any changes made since the last
