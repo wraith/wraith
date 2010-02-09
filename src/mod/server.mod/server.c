@@ -1006,7 +1006,7 @@ static void server_secondly()
     } else if (!keepnick && ((now - release_time) >= 7)) {
       release_time = 0;
       keepnick = 1;
-      dprintf(DP_SERVER, "MONITOR S\n");
+      nick_available(1, 0);
     }
 
     if (!loading) {
