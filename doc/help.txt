@@ -1489,6 +1489,12 @@ See also: restart
    relay to. Typing '%dquit' or "*bye*" on a line by itself will end the relay.
  
 See also: bots%{+n}, newleaf%{-}%{+a}, -bot%{-}
+:leaf:release
+###  $bservers$b
+   Releases the bot's nick if it is on the jupenick. It gives an estimated
+   7 seconds before it attempts to regain its jupenick.
+ 
+See also: set
 ::reload
 ###  $breload$b
    Reloads the bot's user file, discarding any changes made since the last

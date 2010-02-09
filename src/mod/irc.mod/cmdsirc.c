@@ -476,6 +476,11 @@ static void cmd_devoice(int idx, char *par)
 
 }
 
+static void cmd_release(int idx, char *par) {
+  putlog(LOG_CMDS, "*", "#%s# release", dcc[idx].nick);
+  release_nick();
+}
+
 static void cmd_op(int idx, char *par)
 {
   struct chanset_t *chan = NULL;
@@ -1908,6 +1913,7 @@ static cmd_t irc_dcc[] =
   {"msg",		"o",	 (Function) cmd_msg,		NULL, LEAF|AUTH},
   {"nick",		"m",	 (Function) cmd_nick,		NULL, LEAF},
   {"op",		"o|o",	 (Function) cmd_op,		NULL, LEAF|AUTH},
+  {"release",		"m",	 (Function) cmd_release,	NULL, LEAF|AUTH},
   {"reset",		"m|m",	 (Function) cmd_reset,		NULL, LEAF|AUTH},
   {"resetbans",		"o|o",	 (Function) cmd_resetbans,	NULL, LEAF|AUTH},
   {"resetexempts",	"o|o",	 (Function) cmd_resetexempts,	NULL, LEAF|AUTH},
