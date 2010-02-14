@@ -1692,7 +1692,7 @@ See also: randstring, md5, sha1, hash, encrypt, encrypt_fish, decrypt, decrypt_f
 ###  $bsimul$b <handle> <text>
    This allows you to simulate the specified handle typing the given text.
    For example:
-      '%dsimul dweeb%d.quit'
+      '%dsimul dweeb %dquit'
    This would appear just as if "dweeb" typed '%dquit'. This command will not
    work unless eggdrop has simul enabled in the config file. 
  
