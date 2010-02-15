@@ -427,7 +427,7 @@ See also: link
                           channel is set to +i. Once the channel is -i then the
                           invite will be removed the next time the bot checks.
                           Please note that this is an IRCnet feature.
-        $bprotect-backup$b    Set +backup in the even of a takeover if the
+        $bprotect-backup$b    Set +backup in the event of a takeover if the
                           channel is +protect.
         $bvoice-non-ident$b   If channel is +voice, clients without an ident will 
                           be voiced. Set to 0 to not voice clients without ident.
