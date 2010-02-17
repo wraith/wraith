@@ -1881,10 +1881,10 @@ static void cmd_encrypt(int idx, char *par)
   }
 
   const char salt2[] = SALT2;
-  char *buf = encrypt_string(key ? key : salt2, par);
+  bd::String crypted = encrypt_string(bd::String(key ? key : salt2), bd::String(par));
+  crypted = bd::base64Encode(crypted);
 
-  dprintf(idx, "encrypt(%s) = %s\n", par, buf);
-  free(buf);
+  dprintf(idx, "encrypt(%s) = %s\n", par, crypted.c_str());
 }
 
 static void cmd_encrypt_fish(int idx, char *par)
@@ -1948,10 +1948,10 @@ static void cmd_decrypt(int idx, char *par)
   }
 
   const char salt2[] = SALT2;
-  char *buf = decrypt_string(key ? key : salt2, par);
+  bd::String ciphertext = bd::base64Decode(par);
+  bd::String cleartext = decrypt_string(bd::String(key ? key : salt2), ciphertext);
 
-  dprintf(idx, "decrypt(%s) = %s\n", par, buf);
-  free(buf);
+  dprintf(idx, "decrypt(%s) = %s\n", par, cleartext.c_str());
 }
 
 static void cmd_restart(int idx, char *par)
