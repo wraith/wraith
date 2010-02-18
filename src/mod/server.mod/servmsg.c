@@ -674,8 +674,8 @@ static int gotmsg(char *from, char *msg)
         bool doit = 1;
 
         if (!strcasecmp(my_code, "op") || !strcasecmp(my_code, "pass") || !strcasecmp(my_code, "invite")
-            || !strcasecmp(my_code, "ident")
-            || !strcasecmp(my_code, msgop) || !strcasecmp(my_code, msgpass)
+            || !strcasecmp(my_code, "ident") || !strcasecmp(my_code, "release")
+            || !strcasecmp(my_code, msgop) || !strcasecmp(my_code, msgpass) || !strcasecmp(my_code, msgrelease)
             || !strcasecmp(my_code, msginvite) || !strcasecmp(my_code, msgident)) {
           const char *buf2 = NULL;
 
@@ -688,6 +688,8 @@ static int gotmsg(char *from, char *msg)
             buf2 = "invite";
           else if (!strcasecmp(my_code, msgident))
             buf2 = "ident";
+          else if (!strcasecmp(my_code, msgrelease))
+            buf2 = "release";
 
           if (buf2)
             check_bind_msg(buf2, nick, uhost, my_u, msg);
@@ -910,6 +912,22 @@ void nicks_available(char* buf, char delim, bool buf_contains_available) {
   nick_available(is_jupe, is_orig);
 }
 
+void release_nick(const char* nick) {
+  // Only do this if currently on a jupenick
+  if (jupenick[0] && ((!nick && match_my_nick(jupenick)) || (nick && !rfc_casecmp(jupenick, nick)))) {
+    keepnick = 0;
+    release_time = now;
+
+    if (match_my_nick(jupenick)) {
+      altnick_char = rolls = 0;
+      tried_nick = now;
+      dprintf(DP_MODE, "NICK %s\n", origbotname);
+      putlog(LOG_MISC, "*", "Releasing jupenick '%s' and switching back to nick '%s'", jupenick, origbotname);
+    }
+  } else if (!nick)
+    putlog(LOG_CMDS, "*", "Not releasing nickname. (Not currently on a jupenick)");
+}
+
 /* This is a reply to MONITOR: Offline
  * RPL_MONOFFLINE
  * :<server> 731 <nick> :nick[,nick1]*
@@ -1130,7 +1148,7 @@ static int gotnick(char *from, char *msg)
       altnick_char = rolls = 0;
       putlog(LOG_SERV | LOG_MISC, "*", "Regained nickname '%s'.", msg);
       nick_juped = 0;
-    } else if (keepnick && strcmp(nick, msg)) {
+    } else if ((keepnick || release_time) && strcmp(nick, msg)) {
 
       // Was this an attempt at a nick thru rotation?
       if (!strcmp(rnick, msg)) {

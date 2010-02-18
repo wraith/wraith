@@ -50,7 +50,7 @@ extern bool		trigger_on_ignore, floodless, keepnick, deaf_set;
 extern int 		servidx, ctcp_mode, answer_ctcp, serv, curserv, default_alines;
 extern unsigned int     rolls;
 extern port_t		default_port, newserverport, curservport;
-extern time_t		server_online, tried_jupenick, tried_nick;
+extern time_t		server_online, tried_jupenick, tried_nick, release_time;
 extern interval_t	cycle_time;
 extern char		cursrvname[], botrealname[121], botuserhost[], ctcp_reply[1024],
 			newserver[], newserverpass[], curnetwork[], botuserip[], altnick_char, deaf_char, callerid_char;
@@ -60,6 +60,7 @@ extern rate_t		flood_msg, flood_ctcp, flood_callerid;
 
 int check_bind_ctcpr(char *, char *, struct userrec *, char *, char *, char *, bind_table_t *);
 void nicks_available(char* buf, char delim = 0, bool buf_contains_available = 1);
+void release_nick(const char* = NULL);
 
 #define check_bind_ctcp(a, b, c, d, e, f) check_bind_ctcpr(a, b, c, d, e, f, BT_ctcp)
 #define check_bind_ctcr(a, b, c, d, e, f) check_bind_ctcpr(a, b, c, d, e, f, BT_ctcr)

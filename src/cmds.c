@@ -3915,6 +3915,21 @@ static void cmd_netnick (int idx, char *par) {
   botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, "curnick");
 }
 
+static void cmd_netrelease (int idx, char* par) {
+  putlog(LOG_CMDS, "*", "#%s# netrelease %s", dcc[idx].nick, par);
+  if (!par || !par[0]) {
+    dprintf(idx, "Usage: netrelease <nick>\n");
+    return;
+  }
+
+  // Don't bother checking what bot has the nick, multiple bots may be trying to jupe it
+  // so instead, tell all bots to release the specified nick.
+  // Any bots trying to get it will stop for 7 seconds, and any bot on it will release it.
+  bd::String str;
+  str.printf("rn %s", par);
+  putallbots(str.c_str());
+}
+
 static void cmd_botnick(int idx, char * par) {
   putlog(LOG_CMDS, "*", "#%s# botnick %s", dcc[idx].nick, par);
   if (!par || !par[0]) {
@@ -4631,6 +4646,7 @@ cmd_t C_dcc[] =
   {"botmsg",		"o",    (Function) cmd_botmsg,          NULL, HUB},
   {"botnick", 		"m", 	(Function) cmd_botnick, 	NULL, HUB},
   {"netnick", 		"m", 	(Function) cmd_netnick, 	NULL, HUB},
+  {"netrelease", 	"m", 	(Function) cmd_netrelease, 	NULL, HUB},
   {"netw", 		"n", 	(Function) cmd_netw, 		NULL, HUB},
   {"netps", 		"n", 	(Function) cmd_netps, 		NULL, HUB},
   {"netlast", 		"n", 	(Function) cmd_netlast, 	NULL, HUB},

@@ -1392,6 +1392,12 @@ See also: botnick, nick
    on 'ps'.
  
 See also: ps
+:hub:netrelease
+###  $netrelease$b <nick>
+   Tells all bots to unjupe the specified nickname. They will wait 7 seconds
+   before attempting to regain the nickname.
+ 
+See also: set, release
 :hub:netrontab:
 ###  $bnetcrontab$b <status|delete|show|new> [interval]
    Runs the specified crontab command on all linked bots.
@@ -1489,6 +1495,12 @@ See also: restart
    relay to. Typing '%dquit' or "*bye*" on a line by itself will end the relay.
  
 See also: bots%{+n}, newleaf%{-}%{+a}, -bot%{-}
+:leaf:release
+###  $brelease$b
+   Releases the bot's nick if it is on the jupenick. It gives an estimated
+   7 seconds before it attempts to regain its jupenick.
+ 
+See also: set, netrelease
 ::reload
 ###  $breload$b
    Reloads the bot's user file, discarding any changes made since the last
@@ -1601,6 +1613,7 @@ See also: reload, backup
 [S]  $bmsg-pass$b        Defines the cmd for setting a pass via msging the bot.
 [S]  $bmsg-invite$b      Defines the cmd for requesting invite via msging the bot.
 [S]  $bmsg-ident$b       Defines the cmd for identing via msging the bot.
+[S]  $bmsg-release$b     Defines the cmd for releasing a nick.
  
 [N]  $bfork-interval$b   Number of seconds in between each fork() call made by the bot. 
                           (Resets PID/CPU)

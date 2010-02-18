@@ -71,6 +71,7 @@
   * Fix +botbitch being very slow and inefficient
   * Better +bitch/+botbitch/+closed handling when in floodless mode.
 * Misc changes
+  * Add cmd 'release', 'netrelease' and msg-release for releasing a bot's jupenick on a 7 second timer.
   * Add MONITOR support. This speeds up NICK grabbing. (fixes #320)
   * Add set 'deaf' to run bot in DEAF mode on supporting IRCDs. This prevents channel conversations coming to the bot. On by default.
   * Add set 'callerid' to run bot in CALLERID mode (+g). +c bots will automatically accept messages from known users. (fixes #45)
