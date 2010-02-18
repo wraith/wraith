@@ -70,6 +70,8 @@
   * Fix a crash from long hubnicks.
   * Fix +botbitch being very slow and inefficient
   * Better +bitch/+botbitch/+closed handling when in floodless mode.
+  * Bot now attempts to join a channel immediately on invite.
+  * Fix bot not setting 'chanmode' channel modes when getting opped.
 * Misc changes
   * Add cmd 'release', 'netrelease' and msg-release for releasing a bot's jupenick on a 7 second timer.
   * Add MONITOR support. This speeds up NICK grabbing. (fixes #320)
