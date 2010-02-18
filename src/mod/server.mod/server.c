@@ -79,7 +79,7 @@ time_t tried_jupenick = 0;
 time_t tried_nick = 0;
 bool use_monitor = 0;
 static bool waiting_for_awake;	/* set when i unidle myself, cleared when I get the response */
-time_t server_online;	/* server connection time */
+time_t server_online = 0;	/* server connection time */
 char botrealname[121] = "A deranged product of evil coders.";	/* realname of bot */
 static interval_t server_timeout = 15;	/* server timeout for connecting */
 struct server_list *serverlist = NULL;	/* old-style queue, still used by

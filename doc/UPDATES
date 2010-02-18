@@ -72,6 +72,7 @@
   * Better +bitch/+botbitch/+closed handling when in floodless mode.
   * Bot now attempts to join a channel immediately on invite.
   * Fix bot not setting 'chanmode' channel modes when getting opped.
+  * Fix bot forgetting server uptime on restart
 * Misc changes
   * Cleanup DCC/Telnet listening so bot only listens on IPV6 if it was specifically given an IPV6 IP.
   * CTCP bot CHAT will no longer work if the bot does not have an IPV4 IP set.

@@ -185,7 +185,6 @@ void rehash_monitor_list() {
 
 void rehash_server(const char *servname, const char *nick)
 {
-  server_online = now;
   altnick_char = 0;
   strlcpy(cursrvname, servname, sizeof(cursrvname));
   if (servidx >= 0)
@@ -220,6 +219,7 @@ static int got001(char *from, char *msg)
 {
 
   fixcolon(msg);
+  server_online = now;
   rehash_server(from, msg);
   /* Ok...param #1 of 001 = what server thinks my nick is */
 
