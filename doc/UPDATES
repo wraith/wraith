@@ -73,6 +73,8 @@
   * Bot now attempts to join a channel immediately on invite.
   * Fix bot not setting 'chanmode' channel modes when getting opped.
 * Misc changes
+  * Cleanup DCC/Telnet listening so bot only listens on IPV6 if it was specifically given an IPV6 IP.
+  * CTCP bot CHAT will no longer work if the bot does not have an IPV4 IP set.
   * Add cmd 'release', 'netrelease' and msg-release for releasing a bot's jupenick on a 7 second timer.
   * Add MONITOR support. This speeds up NICK grabbing. (fixes #320)
   * Add set 'deaf' to run bot in DEAF mode on supporting IRCDs. This prevents channel conversations coming to the bot. On by default.

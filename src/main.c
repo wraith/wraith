@@ -190,7 +190,7 @@ void fatal(const char *s, int recoverable)
 /*  flushlogs(); */
 
   if (my_port)
-    listen_all(my_port, 1); /* close the listening port... */
+    listen_all(my_port, 1, 1); /* close the listening port... */
 
   if (conf.bot && conf.bot->localhub)
     unlink(conf.localhub_socket);
