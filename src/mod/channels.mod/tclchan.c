@@ -804,7 +804,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
   if (!conf.bot->hub && (chan != chanset_default)) {
     if ((old_status ^ chan->status) & (CHAN_INACTIVE | CHAN_BACKUP)) {
       if (!shouldjoin(chan) && (chan->ircnet_status & (CHAN_ACTIVE | CHAN_PEND)))
-        dprintf(DP_SERVER, "PART %s\n", chan->name);
+        dprintf(DP_SERVER, "PART %s\n", chan->name[0] ? chan->name : chan->dname);
       if (shouldjoin(chan) && !(chan->ircnet_status & (CHAN_ACTIVE | CHAN_PEND | CHAN_JOINING))) {
         dprintf(DP_SERVER, "JOIN %s %s\n", (chan->name[0]) ?
   			   chan->name : chan->dname,

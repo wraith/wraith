@@ -109,7 +109,7 @@ struct chanset_t *findchan(const char *name)
   register struct chanset_t	*chan = NULL;
 
   for (chan = chanset; chan; chan = chan->next)
-    if (!rfc_casecmp(chan->name, name))
+    if (chan->name[0] && !rfc_casecmp(chan->name, name))
       return chan;
   return NULL;
 }
