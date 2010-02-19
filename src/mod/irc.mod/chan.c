@@ -156,6 +156,10 @@ static void resolve_rbl_callback(int id, void *client_data, const char *host, bd
 
 void resolve_to_rbl(struct chanset_t *chan, const char *host, resolv_member *r)
 {
+  // Skip past user@ if present
+  char *p = strchr((char*)host, '@');
+  if (p)
+    host = p + 1;
   if (!r) {
     r = (resolv_member *) my_calloc(1, sizeof(resolv_member));
 
@@ -1910,7 +1914,7 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
   if (!m->userip[0] && doresolv(chan))
     resolve_to_member(chan, nick, host);
   else if (!me && !m->user && m->userip[0] && doresolv(chan) && channel_rbl(chan))
-    resolve_to_rbl(chan, host);
+    resolve_to_rbl(chan, m->userip);
 
 
   get_user_flagrec(m->user, &fr, chan->dname, chan);
@@ -2615,7 +2619,7 @@ static int gotjoin(char *from, char *chname)
             if (is_dotted_ip(host)) {
               strlcpy(m->userip, uhost, sizeof(m->userip));
               if (channel_rbl(chan))
-                resolve_to_rbl(chan, host);
+                resolve_to_rbl(chan, m->userip);
             } else
               resolve_to_member(chan, nick, host);
           }
@@ -2638,7 +2642,7 @@ static int gotjoin(char *from, char *chname)
         if (!m->userip[0] && doresolv(chan))
           resolve_to_member(chan, nick, host);
         else if (!m->user && m->userip[0] && doresolv(chan) && channel_rbl(chan))
-          resolve_to_rbl(chan, host);
+          resolve_to_rbl(chan, m->userip);
 
 //	m->flags |= STOPWHO;
 
