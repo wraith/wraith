@@ -178,10 +178,21 @@ void resolve_to_rbl(struct chanset_t *chan, const char *host, resolv_member *r)
 
   *(r->server) = rbl_server;
 
-  size_t iplen = strlen(host) + 1 + rbl_server.length() + 1;
+  size_t iplen = rbl_server.length() + 1;
+  bool v6 = 0;
+  if (strchr(host, ':')) {
+    v6 = 1;
+    iplen += 128 + 1;
+  } else
+    iplen += strlen(host) + 1;
+
   char *ip = (char *) my_calloc(1, iplen);
-  reverse_ip(host, ip);
-  strlcat(ip, ".", iplen);
+  if (v6)
+    socket_ipv6_to_dots(host, ip);
+  else {
+    reverse_ip(host, ip);
+    strlcat(ip, ".", iplen);
+  }
   strlcat(ip, rbl_server.c_str(), iplen);
 
   if (egg_dns_lookup(ip, 20, resolve_rbl_callback, (void *) r, DNS_A) == -2) { //Already querying?
