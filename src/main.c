@@ -583,7 +583,6 @@ static void core_minutely()
       washub = conf.bot->hub;
     else if (washub != conf.bot->hub)
       fatal(STR("MEMORY HACKED"), 0);
-    check_maxfiles();
     check_mypid();
   } else if (conf.bot->hub || conf.bot->localhub)
     send_timesync(-1);
@@ -608,7 +607,8 @@ static void core_halfhourly()
 
     if (link_cleartext)
       putlog(LOG_WARN, "*", STR("'link_cleartext' currently enabled. This is a security risk. Disable with '%sset link_cleartext 0'"), settings.dcc_prefix);
-  }
+  } else
+    check_maxfiles();
 }
 
 static void startup_checks(int hack) {
