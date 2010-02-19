@@ -3012,11 +3012,10 @@ void check_should_cycle(struct chanset_t *chan)
     /* I'm only one opped here... and other side has some ops... so i'm cycling */
     if (localnonops) {
       /* need to unset any +kil first */
-      dprintf(DP_MODE, "MODE %s -ilk %s\nPART %s\nJOIN %s\n", chan->name,
-                            (chan->channel.key && chan->channel.key[0]) ? chan->channel.key : "",
-                             chan->name, chan->name);
+      dprintf(DP_MODE, "MODE %s -ilk %s\n", chan->name[0] ? chan->name : chan->dname, (chan->channel.key && chan->channel.key[0]) ? chan->channel.key : "");
+      dprintf(DP_MODE, "PART %s\n", chan->name[0] ? chan->name : chan->dname);
     } else
-      dprintf(DP_MODE, "PART %s\nJOIN %s\n", chan->name, chan->name);
+      dprintf(DP_MODE, "PART %s\n", chan->name[0] ? chan->name : chan->dname);
   }
 }
 

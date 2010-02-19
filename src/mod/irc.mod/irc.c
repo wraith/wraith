@@ -1370,9 +1370,7 @@ check_lonely_channel(struct chanset_t *chan)
     if (chan->name[0] != '+') { /* Its pointless to cycle + chans for ops */
       putlog(LOG_MISC, "*", "Trying to cycle %s to regain ops.", chan->dname);
       dprintf(DP_MODE, "PART %s\n", chan->name);
-      /* If it's a !chan, we need to recreate the channel with !!chan <cybah> */
-      dprintf(DP_MODE, "JOIN %s%s %s\n", (chan->dname[0] == '!') ? "!" : "", chan->dname, chan->key_prot);
-      chan->ircnet_status |= CHAN_JOINING;
+      // Will auto rejoin once the bot PARTs
       whined = 0;
     }
   } else if (any_ops(chan)) {
