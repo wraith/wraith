@@ -2842,13 +2842,16 @@ static int gotkick(char *from, char *origmsg)
 
   char *nick = newsplit(&msg);
 
-  if (match_my_nick(nick) && channel_pending(chan) && shouldjoin(chan) && !channel_joining(chan)) {
+  if (match_my_nick(nick) && channel_pending(chan)) {
     chan->ircnet_status = 0;
-    chan->ircnet_status |= CHAN_JOINING;
-    dprintf(DP_MODE, "JOIN %s %s\n",
-            (chan->name[0]) ? chan->name : chan->dname,
-            chan->channel.key[0] ? chan->channel.key : chan->key_prot);
-    clear_channel(chan, 1);
+    if (shouldjoin(chan) && !channel_joining(chan)) {
+      chan->ircnet_status |= CHAN_JOINING;
+      dprintf(DP_MODE, "JOIN %s %s\n",
+              (chan->name[0]) ? chan->name : chan->dname,
+              chan->channel.key[0] ? chan->channel.key : chan->key_prot);
+      clear_channel(chan, 1);
+    } else
+      clear_channel(chan, 0);
     return 0; /* rejoin if kicked before getting needed info <Wcc[08/08/02]> */
   }
   if (channel_active(chan)) {
@@ -2889,13 +2892,16 @@ static int gotkick(char *from, char *origmsg)
     }
     irc_log(chan, "%s was kicked by %s (%s)", s1, from, msg);
     /* Kicked ME?!? the sods! */
-    if (match_my_nick(nick) && shouldjoin(chan) && !channel_joining(chan)) {
+    if (match_my_nick(nick)) {
       chan->ircnet_status = 0;
-      dprintf(DP_MODE, "JOIN %s %s\n",
-              (chan->name[0]) ? chan->name : chan->dname,
-              chan->channel.key[0] ? chan->channel.key : chan->key_prot);
-      chan->ircnet_status |= CHAN_JOINING;
-      clear_channel(chan, 1);
+      if (shouldjoin(chan) && !channel_joining(chan)) {
+        dprintf(DP_MODE, "JOIN %s %s\n",
+                (chan->name[0]) ? chan->name : chan->dname,
+                chan->channel.key[0] ? chan->channel.key : chan->key_prot);
+        chan->ircnet_status |= CHAN_JOINING;
+        clear_channel(chan, 1);
+      } else
+        clear_channel(chan, 0);
     } else {
       killmember(chan, nick);
       check_lonely_channel(chan);
