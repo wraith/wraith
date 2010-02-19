@@ -109,6 +109,8 @@ static void get_channel_masks(struct chanset_t* chan);
 
 #endif /* MAKING_IRC */
 
+void join_chan(struct chanset_t* chan, int idx = DP_MODE);
+
 int check_bind_authc(char *, Auth *, char *, char *);
 void notice_invite(struct chanset_t *, char *, char *, char *, bool);
 void real_add_mode(struct chanset_t *, const char, const char, const char *, bool);

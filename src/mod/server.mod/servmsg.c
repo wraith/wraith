@@ -207,9 +207,7 @@ join_chans()
     if (shouldjoin(chan)) {
       // Clear out all channel status flags
       chan->ircnet_status = 0;
-      dprintf(DP_SERVER, "JOIN %s %s\n", (chan->name[0]) ? chan->name : chan->dname,
-                                         chan->channel.key[0] ? chan->channel.key : chan->key_prot);
-      chan->ircnet_status |= CHAN_JOINING;
+      join_chan(chan, DP_SERVER);
     }
   }
 }
@@ -382,9 +380,7 @@ static int got442(char *from, char *msg)
       putlog(LOG_MISC, chname, "Server says I'm not on channel: %s", chname);
       clear_channel(chan, 1);
       chan->ircnet_status = 0;
-      chan->ircnet_status |= CHAN_JOINING;
-      dprintf(DP_MODE, "JOIN %s %s\n", chan->name,
-	      chan->channel.key[0] ? chan->channel.key : chan->key_prot);
+      join_chan(chan);
     }
 
   return 0;

@@ -605,10 +605,8 @@ static void cmd_slowjoin(int idx, char *par)
 
   dprintf(idx, "%i bots joining %s during the next %i seconds\n", count, chan->dname, delay);
 
-  if (!conf.bot->hub && shouldjoin(chan) && !channel_joining(chan)) {
-    dprintf(DP_MODE, "JOIN %s %s\n", chan->name, chan->key_prot);
-    chan->ircnet_status |= CHAN_JOINING;
-  }
+  if (!conf.bot->hub && shouldjoin(chan))
+    join_chan(chan);
 }
 
 static void cmd_slowpart(int idx, char *par)

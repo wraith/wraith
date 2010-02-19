@@ -2022,10 +2022,7 @@ static int got315(char *from, char *msg)
     putlog(LOG_MISC | LOG_JOIN, chan->dname, "Oops, I'm not really on %s.", chan->dname);
     clear_channel(chan, 1);
     chan->ircnet_status &= ~CHAN_ACTIVE;
-    chan->ircnet_status |= CHAN_JOINING;
-    dprintf(DP_MODE, "JOIN %s %s\n",
-	    (chan->name[0]) ? chan->name : chan->dname,
-	    chan->channel.key[0] ? chan->channel.key : chan->key_prot);
+    join_chan(chan);
   } else {
     if (me_op(chan))
       recheck_channel(chan, 2);
@@ -2252,8 +2249,8 @@ static int got403(char *from, char *msg)
       putlog(LOG_MISC, "*",
              "Unique channel %s does not exist... Attempting to join with "
              "short name.", chname);
-      dprintf(DP_SERVER, "JOIN %s\n", chan->dname);
-      chan->ircnet_status |= CHAN_JOINING;
+      chan->name[0] = 0;
+      join_chan(chan);
     } else {
       /* We have found the channel, so the server has given us the short
        * name. Prefix another '!' to it, and attempt the join again...
@@ -2391,7 +2388,7 @@ static int got475(char *from, char *msg)
     if (chan->channel.key[0]) {
       free(chan->channel.key);
       chan->channel.key = (char *) my_calloc(1, 1);
-      dprintf(DP_MODE, "JOIN %s %s\n", chan->dname, chan->key_prot);
+      join_chan(chan);
     } else {
       request_in(chan);
 /* need: key */
@@ -2429,8 +2426,7 @@ static int gotinvite(char *from, char *msg)
     if (channel_pending(chan) || channel_active(chan))
       dprintf(DP_HELP, "NOTICE %s :I'm already here.\n", nick);
     else if (shouldjoin(chan))
-      dprintf(DP_MODE, "JOIN %s %s\n", (chan->name[0]) ? chan->name : chan->dname,
-              chan->channel.key[0] ? chan->channel.key : chan->key_prot);
+      join_chan(chan);
   }
   return 0;
 }
@@ -2814,12 +2810,8 @@ static int gotpart(char *from, char *msg)
     if (match_my_nick(nick)) {
       clear_channel(chan, 1);
       chan->ircnet_status = 0;
-      if (shouldjoin(chan)) {
-	dprintf(DP_MODE, "JOIN %s %s\n",
-	        (chan->name[0]) ? chan->name : chan->dname,
-	        chan->channel.key[0] ? chan->channel.key : chan->key_prot);
-        chan->ircnet_status |= CHAN_JOINING;
-      }
+      if (shouldjoin(chan))
+        join_chan(chan);
     } else
       check_lonely_channel(chan);
   }
@@ -2844,11 +2836,8 @@ static int gotkick(char *from, char *origmsg)
 
   if (match_my_nick(nick) && channel_pending(chan)) {
     chan->ircnet_status = 0;
-    if (shouldjoin(chan) && !channel_joining(chan)) {
-      chan->ircnet_status |= CHAN_JOINING;
-      dprintf(DP_MODE, "JOIN %s %s\n",
-              (chan->name[0]) ? chan->name : chan->dname,
-              chan->channel.key[0] ? chan->channel.key : chan->key_prot);
+    if (shouldjoin(chan)) {
+      join_chan(chan);
       clear_channel(chan, 1);
     } else
       clear_channel(chan, 0);
@@ -2894,11 +2883,8 @@ static int gotkick(char *from, char *origmsg)
     /* Kicked ME?!? the sods! */
     if (match_my_nick(nick)) {
       chan->ircnet_status = 0;
-      if (shouldjoin(chan) && !channel_joining(chan)) {
-        dprintf(DP_MODE, "JOIN %s %s\n",
-                (chan->name[0]) ? chan->name : chan->dname,
-                chan->channel.key[0] ? chan->channel.key : chan->key_prot);
-        chan->ircnet_status |= CHAN_JOINING;
+      if (shouldjoin(chan)) {
+        join_chan(chan);
         clear_channel(chan, 1);
       } else
         clear_channel(chan, 0);

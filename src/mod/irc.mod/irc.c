@@ -605,8 +605,7 @@ getin_request(char *botnick, char *code, char *par)
         chan->channel.key = strdup(nick);
 
         putlog(LOG_GETIN, "*", "Got key for %s from %s (%s) - Joining", chan->dname, botnick, chan->channel.key);
-        dprintf(DP_MODE, "JOIN %s %s\n", chan->name[0] ? chan->name : chan->dname, chan->channel.key);
-        chan->ircnet_status |= CHAN_JOINING;
+        join_chan(chan);
       } else {
         putlog(LOG_GETIN, "*", "Got key for %s from %s - I'm already in the channel", chan->dname, botnick);
       }
@@ -1346,6 +1345,16 @@ static void send_chan_who(int queue, struct chanset_t *chan) {
       dprintf(queue, "WHO %s\n", chan->name);
 }
 
+void join_chan(struct chanset_t* chan, int idx) {
+  if (shouldjoin(chan) && !channel_joining(chan)) {
+    dprintf(idx, "JOIN %s %s\n",
+        (chan->name[0]) ? chan->name : chan->dname,
+        chan->channel.key[0] ? chan->channel.key : chan->key_prot);
+    chan->ircnet_status |= CHAN_JOINING;
+    clear_channel(chan, 1);
+  }
+}
+
 /* If i'm the only person on the channel, and i'm not op'd,
  * might as well leave and rejoin. If i'm NOT the only person
  * on the channel, but i'm still not op'd, demand ops.
@@ -1590,10 +1599,7 @@ check_expired_chanstuff(struct chanset_t *chan)
     }
     check_lonely_channel(chan);
   } else if (shouldjoin(chan) && !channel_pending(chan)) {
-    dprintf(DP_MODE, "JOIN %s %s\n",
-            (chan->name[0]) ? chan->name : chan->dname,
-            chan->channel.key[0] ? chan->channel.key : chan->key_prot);
-    chan->ircnet_status |= CHAN_JOINING;
+    join_chan(chan);
   }
 }
 

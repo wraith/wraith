@@ -805,12 +805,8 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
     if ((old_status ^ chan->status) & (CHAN_INACTIVE | CHAN_BACKUP)) {
       if (!shouldjoin(chan) && (chan->ircnet_status & (CHAN_ACTIVE | CHAN_PEND)))
         dprintf(DP_SERVER, "PART %s\n", chan->name[0] ? chan->name : chan->dname);
-      if (shouldjoin(chan) && !(chan->ircnet_status & (CHAN_ACTIVE | CHAN_PEND | CHAN_JOINING))) {
-        dprintf(DP_SERVER, "JOIN %s %s\n", (chan->name[0]) ?
-  			   chan->name : chan->dname,
-  			   chan->channel.key[0] ?
-    			   chan->channel.key : chan->key_prot);
-        chan->ircnet_status |= CHAN_JOINING;
+      if (shouldjoin(chan) && !(chan->status & (CHAN_ACTIVE | CHAN_PEND | CHAN_JOINING))) {
+        join_chan(chan);
       }
     }
     if (me_op(chan)) {
@@ -1038,6 +1034,6 @@ int channel_add(char *result, char *newname, char *options, bool isdefault)
 
   free(item);
   if (join && shouldjoin(chan))
-    dprintf(DP_SERVER, "JOIN %s %s\n", chan->dname, chan->key_prot);
+    join_chan(chan);
   return ret;
 }
