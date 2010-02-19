@@ -75,10 +75,10 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
           if (m->user)
             check_this_user(m->user->handle, 0, NULL);
         }
+        if (m->user)
+          matched_user = 1;
       }
     }
-    if (m->user)
-      matched_user = 1;
   }
 
   if (!matched_user && channel_rbl(r->chan))
