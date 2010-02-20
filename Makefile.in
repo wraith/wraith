@@ -117,6 +117,7 @@ distrib: clean
 	  -e 's/^BUILDTS .*/BUILDTS = $(BUILDTS)/' \
 	  -e 's/^VERSION .*/VERSION = $(VERSION)/' \
 	  $(DISTRIB)/Makefile.in > Makefile.in.tmp && mv Makefile.in.tmp $(DISTRIB)/Makefile.in
+	@sed -i -e 's/GIT_REQUIRED=1/GIT_REQUIRED=0/' $(DISTRIB)/configure
 #	@for s in `find $(DISTRIB)/src/ -name '*.h' -or -name '*.c'`; do mangle -rnw $$s > /dev/null 2>&1; done
 
 tar: distrib
