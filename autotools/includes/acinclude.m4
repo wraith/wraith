@@ -546,9 +546,8 @@ AC_TRY_COMPILE([#include <openssl/opensslv.h>],[
 #if !defined(OPENSSL_VERSION_NUMBER)
 #error "Missing openssl version"
 #endif
-#if  (OPENSSL_VERSION_NUMBER < 0x009060af) \
- || ((OPENSSL_VERSION_NUMBER > 0x00907000) && (OPENSSL_VERSION_NUMBER < 0x0090702f))
-#error "Insecure openssl version " OPENSSL_VERSION_TEXT
+#if  (OPENSSL_VERSION_NUMBER < 0x0090800f)
+#error "Old/Insecure OpenSSL version " OPENSSL_VERSION_TEXT
 #endif],
 [AC_MSG_RESULT(OK)],
 [
