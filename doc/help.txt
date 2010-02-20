@@ -405,7 +405,7 @@ See also: link
                           Once the ban is removed, then the exempt will be
                           removed the next time the bot checks. Please note
                           that this is an IRCnet feature.
-        $bknock$b         Allow auto-inviting on /KNOCK?
+        $bknock$b         Allow auto-inviting on /KNOCK? +y bots will invite.
                               None/0         Don't invite on /KNOCK
                               Op/1           Ops (+o) are invited on /KNOCK
                               Voice/2        Voices (+v) are invited on /KNOCK
