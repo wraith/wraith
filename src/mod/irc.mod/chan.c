@@ -1174,25 +1174,48 @@ static void check_this_member(struct chanset_t *chan, char *nick, struct flag_re
 }
 
 
-//del=1 -user, del=2 -host
+//1 -user
+//2 -host
 void check_this_user(char *hand, int del, char *host)
 {
-  char s[UHOSTLEN] = "";
   memberlist *m = NULL;
-  struct userrec *u = NULL;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
-  for (struct chanset_t *chan = chanset; chan; chan = chan->next)
+  for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
     for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-      simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
-      u = m->user ? m->user : get_user_by_host(s);
-      if ((u && !strcasecmp(u->handle, hand) && del < 2) ||
-	  (!u && del == 2 && wild_match(host, s))) {
-	u = del ? NULL : u;
-	get_user_flagrec(u, &fr, chan->dname, chan);
-	check_this_member(chan, m->nick, &fr);
+      bool check_member = 0;
+      bool had_user = m->user ? 1 : 0;
+      member_getuser(m);
+      struct userrec* u = m->user;
+      if (m->user && !had_user) // If a member is newly recognized, act on it
+        check_member = 1;
+      else if (del != 2 && m->user && !strcasecmp(m->user->handle, hand)) { //general check / -user, match specified user
+        check_member = 1;
+        if (del == 1)
+          u = NULL; // Pretend user doesn't exist when checking
+      } else if (0 && del == 2) { //-host, may now match on a diff user and need to act on them
+        /*
+        for (int i = 0; i < (m->userip[0] ? 2 : 1); ++i) {
+          if (i == 0 && m->userip[0]) // Check userip first in case userhost is already an ip
+            simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
+          else
+            simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
+          if (wild_match(host, s) ||
+              (i == 0 && m->userip[0] && match_cidr(host, s))) {
+            check_member = 1;
+            break;
+          }
+        }
+        */
+        if (m->user && !had_user)
+          check_member = 1;
+      }
+      if (check_member) {
+        get_user_flagrec(u, &fr, chan->dname, chan);
+        check_this_member(chan, m->nick, &fr);
       }
     }
+  }
 }
 
 static void enforce_bitch(struct chanset_t *chan, bool flush = 1) {
