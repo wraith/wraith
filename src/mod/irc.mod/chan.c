@@ -232,12 +232,15 @@ static memberlist *newmember(struct chanset_t *chan, char *nick)
     lx = x;
     x = x->next;
   }
+  /*
+   * redundant as calloc is used
+   n->next = NULL;
+   n->split = 0L;
+   n->last = 0L;
+   n->delay = 0L;
+   */
 
-  n->next = NULL;
   strlcpy(n->nick, nick, sizeof(n->nick));
-  n->split = 0L;
-  n->last = 0L;
-  n->delay = 0L;
   n->hops = -1;
   if (!lx) {
     // Free the pseudo-member created in init_channel()
@@ -253,7 +256,7 @@ static memberlist *newmember(struct chanset_t *chan, char *nick)
     lx->next = n;
   }
 
-  chan->channel.members++;
+  ++(chan->channel.members);
   return n;
 }
 
@@ -1849,7 +1852,6 @@ static void memberlist_reposition(struct chanset_t *chan, memberlist *target) {
 
 static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick, char *flags, int hops, char* realname, char* ip)
 {
-  char userhost[UHOSTLEN] = "";
   memberlist *m = ismember(chan, nick);	/* in my channel list copy? */
 //  bool waschanop = 0;
   bool me = 0;
@@ -1858,13 +1860,12 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
 
   if (!m) {			/* Nope, so update */
     m = newmember(chan, nick);	/* Get a new channel entry */
-    m->joined = m->split = m->delay = 0L;	/* Don't know when he joined */
-    m->flags = 0;		/* No flags for now */
     m->last = now;		/* Last time I saw him */
-    m->user = NULL;
+
+    /* Store the userhost */
+    simple_snprintf(m->userhost, sizeof(m->userhost), "%s@%s", user, host);
   }
-  if (!m->nick[0])
-    strlcpy(m->nick, nick, sizeof(m->nick));	/* Store the nick in list */
+
 
   m->hops = hops;
 
@@ -1899,18 +1900,12 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
 //  if (!(m->flags & (CHANVOICE | CHANOP)))
 //    m->flags |= STOPWHO;
 
-  /* Store the userhost */
-  if (!m->userhost[0])
-    simple_snprintf(m->userhost, sizeof(m->userhost), "%s@%s", user, host);
-
   if (!m->userip[0]) {
     if (ip)
       simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, ip);
     else if (is_dotted_ip(host))
       simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, host);
   }
-
-  simple_snprintf(userhost, sizeof(userhost), "%s!%s", nick, m->userhost);
 
   me = match_my_nick(nick);
 
@@ -1920,10 +1915,7 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
     m->joined = now;				/* set this to keep the whining masses happy */
   }
 
-  if (!m->user && !m->tried_getuser) {
-    m->user = get_user_by_host(userhost);
-    m->tried_getuser = 1;
-  }
+  member_getuser(m);
 
   //This bot is set +r, so resolve.
   if (!m->userip[0] && doresolv(chan))
@@ -2603,11 +2595,7 @@ static int gotjoin(char *from, char *chname)
 	if (m)
 	  killmember(chan, nick);
 	m = newmember(chan, nick);
-	m->joined = now;
-	m->split = 0L;
-	m->flags = 0;
-	m->last = now;
-	m->delay = 0L;
+	m->joined = m->last = now;
 	strlcpy(m->userhost, uhost, sizeof(m->userhost));
         if (is_dotted_ip(host))
           strlcpy(m->userip, uhost, sizeof(m->userip));
