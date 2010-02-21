@@ -1465,3 +1465,82 @@ bool sock_has_data(int type, int sock)
   return ret;
 }
 
+bool socket_run() {
+  static int socket_cleanup = 0;
+  char buf[SGRAB + 10] = "";
+  int i = 0, idx = 0;
+
+  /* Only do this every so often. */
+  if (!socket_cleanup) {
+    socket_cleanup = 5;
+
+    /* Check for server or dcc activity. */
+    dequeue_sockets();
+  } else
+    --socket_cleanup;
+
+  int xx = sockgets(buf, &i);
+
+  if (xx >= 0) {		/* Non-error */
+    if ((idx = findanyidx(xx)) != -1) {
+      if (likely(dcc[idx].type->activity)) {
+        /* Traffic stats */
+        if (dcc[idx].type->name) {
+          if (!strncmp(dcc[idx].type->name, "BOT", 3))
+            traffic.in_today.bn += strlen(buf) + 1;
+          else if (!strcmp(dcc[idx].type->name, "SERVER"))
+            traffic.in_today.irc += strlen(buf) + 1;
+          else if (!strncmp(dcc[idx].type->name, "CHAT", 4))
+            traffic.in_today.dcc += strlen(buf) + 1;
+          else if (!strncmp(dcc[idx].type->name, "FILES", 5))
+            traffic.in_today.dcc += strlen(buf) + 1;
+          else if (!strcmp(dcc[idx].type->name, "SEND"))
+            traffic.in_today.trans += strlen(buf) + 1;
+          else if (!strncmp(dcc[idx].type->name, "GET", 3))
+            traffic.in_today.trans += strlen(buf) + 1;
+          else
+            traffic.in_today.unknown += strlen(buf) + 1;
+        }
+        dcc[idx].type->activity(idx, buf, (size_t) i);
+      } else
+        putlog(LOG_MISC, "*",
+            STR("!!! untrapped dcc activity: type %s, sock %d"),
+            dcc[idx].type->name, dcc[idx].sock);
+    }
+  } else if (unlikely(xx == -1)) {	/* EOF from someone */
+    if (unlikely(i == STDOUT && !backgrd))
+      fatal(STR("END OF FILE ON TERMINAL"), 0);
+    if ((idx = findanyidx(i)) != -1) {
+      sdprintf(STR("EOF on '%s' idx: %d"), dcc[idx].type ? dcc[idx].type->name : "unknown", idx);
+      if (likely(dcc[idx].type->eof))
+        dcc[idx].type->eof(idx);
+      else {
+        putlog(LOG_MISC, "*",
+            STR("*** ATTENTION: DEAD SOCKET (%d) OF TYPE %s UNTRAPPED"),
+            i, dcc[idx].type ? dcc[idx].type->name : "*UNKNOWN*");
+        killsock(i);
+        lostdcc(idx);
+      }
+    } else if (unlikely(idx == -1)) {
+      putlog(LOG_MISC, "*", STR("(@) EOF socket %d, not a dcc socket, not anything."), i);
+      close(i);
+      killsock(i);
+    }
+  } else if (unlikely(xx == -2 && errno != EINTR)) {	/* select() error */
+    putlog(LOG_MISC, "*", STR("* Socket error #%d; recovering."), errno);
+    for (i = 0; i < dcc_total; i++) {
+      if (dcc[i].type && dcc[i].sock != -1 && (fcntl(dcc[i].sock, F_GETFD, 0) == -1) && (errno = EBADF)) {
+        putlog(LOG_MISC, "*",
+            STR("DCC socket %d (type %s, name '%s') expired -- pfft"),
+            dcc[i].sock, dcc[i].type->name, dcc[i].nick);
+        killsock(dcc[i].sock);
+        lostdcc(i);
+        i--;
+      }
+    }
+  } else if (xx == -3) {                      /* Idle */
+    socket_cleanup = 0;	/* If we've been idle, cleanup & flush */
+    return 1;
+  }
+  return 0;
+}
