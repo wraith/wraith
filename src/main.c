@@ -597,10 +597,6 @@ static void core_minutely()
 /*     flushlogs(); */
 }
 
-static void core_hourly()
-{
-}
-
 static void core_halfhourly()
 {
   if (conf.bot->hub) {
@@ -882,7 +878,6 @@ int main(int argc, char **argv)
   timer_create_secs(60, STR("core_minutely"), (Function) core_minutely);
   timer_create_secs(60, STR("check_botnet_pings"), (Function) check_botnet_pings);
   timer_create_secs(60, STR("check_expired_ignores"), (Function) check_expired_ignores);
-  timer_create_secs(3600, STR("core_hourly"), (Function) core_hourly);
   timer_create_secs(1800, STR("core_halfhourly"), (Function) core_halfhourly);
 
   if (socksfile)
