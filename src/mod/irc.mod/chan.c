@@ -196,6 +196,14 @@ void resolve_to_rbl(struct chanset_t *chan, const char *host, resolv_member *r)
   free(ip);
 }
 
+// Just got a part event (KICK, PART) on me
+static void check_rejoin(struct chanset_t* chan) {
+  if (shouldjoin(chan))
+    join_chan(chan);
+  else // Out of chan, not rejoining, just clear it
+    clear_channel(chan, 1);
+}
+
 /* ID length for !channels.
  */
 #define CHANNEL_ID_LEN 5
@@ -2769,7 +2777,6 @@ static int gotpart(char *from, char *msg)
   if (chan && !shouldjoin(chan) && match_my_nick(nick)) {
     irc_log(chan, "Parting");    
     clear_channel(chan, 1);
-    chan->ircnet_status = 0;
     return 0;
   }
   if (chan && !channel_pending(chan)) {
@@ -2795,10 +2802,7 @@ static int gotpart(char *from, char *msg)
       irc_log(chan, "Part: %s (%s)", nick, uhost);
     /* If it was me, all hell breaks loose... */
     if (match_my_nick(nick)) {
-      clear_channel(chan, 1);
-      chan->ircnet_status = 0;
-      if (shouldjoin(chan))
-        join_chan(chan);
+      check_rejoin(chan);
     } else
       check_lonely_channel(chan);
   }
@@ -2822,12 +2826,7 @@ static int gotkick(char *from, char *origmsg)
   char *nick = newsplit(&msg);
 
   if (match_my_nick(nick) && channel_pending(chan)) {
-    chan->ircnet_status = 0;
-    if (shouldjoin(chan)) {
-      join_chan(chan);
-      clear_channel(chan, 1);
-    } else
-      clear_channel(chan, 0);
+    check_rejoin(chan);
     return 0; /* rejoin if kicked before getting needed info <Wcc[08/08/02]> */
   }
   if (channel_active(chan)) {
@@ -2869,12 +2868,7 @@ static int gotkick(char *from, char *origmsg)
     irc_log(chan, "%s was kicked by %s (%s)", s1, from, msg);
     /* Kicked ME?!? the sods! */
     if (match_my_nick(nick)) {
-      chan->ircnet_status = 0;
-      if (shouldjoin(chan)) {
-        join_chan(chan);
-        clear_channel(chan, 1);
-      } else
-        clear_channel(chan, 0);
+      check_rejoin(chan);
     } else {
       killmember(chan, nick);
       check_lonely_channel(chan);

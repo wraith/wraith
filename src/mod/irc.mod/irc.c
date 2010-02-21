@@ -1350,8 +1350,8 @@ void join_chan(struct chanset_t* chan, int idx) {
     dprintf(idx, "JOIN %s %s\n",
         (chan->name[0]) ? chan->name : chan->dname,
         chan->channel.key[0] ? chan->channel.key : chan->key_prot);
-    chan->ircnet_status |= CHAN_JOINING;
     clear_channel(chan, 1);
+    chan->ircnet_status |= CHAN_JOINING;
   }
 }
 

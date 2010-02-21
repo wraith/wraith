@@ -204,11 +204,8 @@ void
 join_chans()
 {
   for (register struct chanset_t *chan = chanset; chan; chan = chan->next) {
-    if (shouldjoin(chan)) {
-      // Clear out all channel status flags
-      chan->ircnet_status = 0;
+    if (shouldjoin(chan))
       join_chan(chan, DP_SERVER);
-    }
   }
 }
 
@@ -375,13 +372,10 @@ static int got442(char *from, char *msg)
   newsplit(&msg);
   chname = newsplit(&msg);
   chan = findchan(chname);
-  if (chan)
-    if (shouldjoin(chan) && !channel_joining(chan)) {
-      putlog(LOG_MISC, chname, "Server says I'm not on channel: %s", chname);
-      clear_channel(chan, 1);
-      chan->ircnet_status = 0;
-      join_chan(chan);
-    }
+  if (chan && shouldjoin(chan) && !channel_joining(chan)) {
+    putlog(LOG_MISC, chname, "Server says I'm not on channel: %s", chname);
+    join_chan(chan);
+  }
 
   return 0;
 }
@@ -1274,11 +1268,11 @@ static void kill_server(int idx, void *x)
 {
   disconnect_server(idx, NO_LOST);	/* eof_server will lostdcc() it. */
 
-  if (!segfaulted)		// don't bother if we've segfaulted, too many memory calls in this loop
-    for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
-      chan->ircnet_status = 0;
-      clear_channel(chan, 1);
-    }
+  if (segfaulted)		// don't bother if we've segfaulted, too many memory calls in this loop
+    return;
+
+  for (struct chanset_t *chan = chanset; chan; chan = chan->next)
+    clear_channel(chan, 1);
   /* A new server connection will be automatically initiated in
      about 2 seconds. */
 }
