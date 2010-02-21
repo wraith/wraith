@@ -46,6 +46,7 @@
   * New userfile pass algorithm (salted-sha1)
   * New userfile cmdpass algorithm (salted-sha1)
   * New userfile storage format.
+  * Raise Handle length up to 32 characters.
 * cmd_set fixes
   * Sanitize cmd_set input locally as well as remotely (fixes #273)
   * Ensure that some set variables are only 1 word long.

@@ -1846,7 +1846,6 @@ static void cmd_deluser(int idx, char *par)
     char buf[HANDLEN + 1] = "";
 
     strlcpy(buf, u->handle, sizeof buf);
-    buf[HANDLEN] = 0;
     if (deluser(u->handle)) {
       dprintf(idx, "Deleted %s.\n", buf); /* ?!?! :) */
       putlog(LOG_CMDS, "*", "#%s# deluser %s [%s]", dcc[idx].nick, nick, buf);

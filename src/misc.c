@@ -1001,7 +1001,7 @@ int bot_aggressive_to(struct userrec *u)
     }
   }
 
-  char mypval[HANDLEN + 4] = "", botpval[HANDLEN + 4] = "";
+  char mypval[HANDLEN + 3 + 1] = "", botpval[HANDLEN + 3 + 1] = "";
 
   link_pref_val(u, botpval);
   link_pref_val(conf.bot->u, mypval);

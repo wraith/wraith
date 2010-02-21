@@ -355,7 +355,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
 	  strlcpy(result, "addedby needs argument", RESULT_LEN);
 	return ERROR;
       }
-      strlcpy(chan->added_by, item[i], NICKLEN);
+      strlcpy(chan->added_by, item[i], sizeof(chan->added_by));
     } else if (!cmd && !strcmp(item[i], "addedts")) {
       i++;
       if (i >= items) {

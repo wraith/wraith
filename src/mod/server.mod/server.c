@@ -924,8 +924,8 @@ static int ctcp_DCC_CHAT(char *nick, char *from, struct userrec *u, char *object
     dcc[i].addr = my_atoul(ip);
     dcc[i].port = atoi(prt);
     dcc[i].sock = -1;
-    strlcpy(dcc[i].nick, u->handle, NICKLEN);
-    strlcpy(dcc[i].host, from, UHOSTLEN);
+    strlcpy(dcc[i].nick, u->handle, sizeof(dcc[i].nick));
+    strlcpy(dcc[i].host, from, sizeof(dcc[i].host));
     dcc[i].timeval = now;
     dcc[i].user = u;
 

@@ -1211,7 +1211,7 @@ static void cmd_chaninfo(int idx, char *par)
     dprintf(idx, "No such channel.\n");
     return;
   } else {
-    char nick[NICKLEN] = "", date[81] = "";
+    char nick[HANDLEN + 1] = "", date[81] = "";
     int deflag = 0;
 
     if (chan->added_ts) {

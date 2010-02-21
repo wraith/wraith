@@ -969,7 +969,7 @@ static void cmd_boot(int idx, char *par)
   if (strchr(who, '@') != NULL) {
     char whonick[HANDLEN + 1];
 
-    splitcn(whonick, who, '@', HANDLEN + 1);
+    splitcn(whonick, who, '@', sizeof(whonick));
     if (!strcasecmp(who, conf.bot->nick)) {
       cmd_boot(idx, whonick);
       return;
@@ -3116,7 +3116,7 @@ static void cmd_su(int idx, char *par)
         dcc[idx].u.chat->su_channel = dcc[idx].u.chat->channel;
 
 	dcc[idx].user = u;
-	strlcpy(dcc[idx].nick, par, NICKLEN);
+	strlcpy(dcc[idx].nick, par, sizeof(dcc[idx].nick));
 	/* Display password prompt and turn off echo (send IAC WILL ECHO). */
 	dprintf(idx, "Enter password for %s%s\n", par,
 		(dcc[idx].status & STAT_TELNET) ? TLN_IAC_C TLN_WILL_C
@@ -3133,7 +3133,7 @@ static void cmd_su(int idx, char *par)
         dcc[idx].u.chat->su_nick = strdup(dcc[idx].nick);
         dcc[idx].u.chat->su_channel = dcc[idx].u.chat->channel;
 	dcc[idx].user = u;
-	strlcpy(dcc[idx].nick, par, NICKLEN);
+	strlcpy(dcc[idx].nick, par, sizeof(dcc[idx].nick));
 	dcc_chatter(idx);
       }
     }
@@ -4512,7 +4512,7 @@ static void cmd_quit(int idx, char *text)
 
 	if (dcc[idx].u.chat->su_nick) {
 		dcc[idx].user = get_user_by_handle(userlist, dcc[idx].u.chat->su_nick);
-		strlcpy(dcc[idx].nick, dcc[idx].u.chat->su_nick, NICKLEN);
+		strlcpy(dcc[idx].nick, dcc[idx].u.chat->su_nick, sizeof(dcc[idx].nick));
                 dcc[idx].u.chat->channel = dcc[idx].u.chat->su_channel;
 		dcc[idx].type = &DCC_CHAT;
 		dprintf(idx, "Returning to real nick %s!\n", dcc[idx].u.chat->su_nick);

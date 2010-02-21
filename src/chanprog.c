@@ -58,10 +58,10 @@ char *def_chanset = "+enforcebans +dynamicbans +userbans -bitch +cycle -inactive
 struct chanset_t 	*chanset = NULL;	/* Channel list			*/
 struct chanset_t	*chanset_default = NULL;	/* Default channel list */
 char 			admin[121] = "";	/* Admin info			*/
-char			origbotnick[NICKLEN + 1] = "";	/* from -B (placed into conf.bot->nick .. for backup when conf is cleared */
-char 			origbotname[NICKLEN + 1] = "";	/* Nick to regain */
+char			origbotnick[HANDLEN + 1] = "";	/* from -B (placed into conf.bot->nick .. for backup when conf is cleared */
+char 			origbotname[NICKLEN] = "";	/* Nick to regain */
 char                    jupenick[NICKLEN] = "";
-char 			botname[NICKLEN + 1] = "";	/* IRC nickname */
+char 			botname[NICKLEN] = "";	/* IRC nickname */
 port_t     		my_port = 0;
 bool			reset_chans = 0;
 bool                    cookies_disabled = 0;
@@ -612,7 +612,7 @@ void rehash_ip() {
         dcc[idx].port = 0;
         dcc[idx].sock = i;
         dcc[idx].timeval = now;
-        strlcpy(dcc[idx].nick, "(unix_domain)", NICKLEN);
+        strlcpy(dcc[idx].nick, "(unix_domain)", sizeof(dcc[idx].nick));
         putlog(LOG_DEBUG, "*", "Listening on telnet %s", conf.localhub_socket);
       }
     }
@@ -726,8 +726,8 @@ void setup_HQ(int n) {
     dcc[n].u.chat->con_flags = conmask | LOG_ALL;
     dcc[n].u.chat->strip_flags = STRIP_ALL;
     dcc[n].status = STAT_ECHO;
-    strlcpy(dcc[n].nick, STR("HQ"), NICKLEN);
-    strlcpy(dcc[n].host, STR("llama@console"), UHOSTLEN);
+    strlcpy(dcc[n].nick, STR("HQ"), sizeof(dcc[n].nick));
+    strlcpy(dcc[n].host, STR("llama@console"), sizeof(dcc[n].host));
     dcc[n].user = get_user_by_handle(userlist, dcc[n].nick);
     /* Make sure there's an innocuous HQ user if needed */
     if (!dcc[n].user) {

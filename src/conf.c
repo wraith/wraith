@@ -902,7 +902,7 @@ fill_conf_bot(bool fatal)
   /* This first clause should actually be obsolete */
   if (!used_B && conf.bots && conf.bots->nick) {
     mynick = strdup(conf.bots->nick);
-    strlcpy(origbotnick, conf.bots->nick, HANDLEN + 1);
+    strlcpy(origbotnick, conf.bots->nick, sizeof(origbotnick));
   } else
     mynick = strldup(origbotnick, HANDLEN);
 

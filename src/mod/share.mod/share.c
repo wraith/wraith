@@ -876,8 +876,8 @@ share_pls_ignore(int idx, char *par)
     if (strchr(from, 'p'))
       expire_time = 0;
     from = newsplit(&par);
-    if (strlen(from) > HANDLEN + 1)
-      from[HANDLEN + 1] = 0;
+    if (strlen(from) > HANDLEN)
+      from[HANDLEN] = 0;
     par[65] = 0;
     if (conf.bot->hub)
       putlog(LOG_CMDS, "@", "%s: ignore %s (%s: %s)", dcc[idx].nick, ign, from, par);
@@ -1011,13 +1011,13 @@ share_ufsend(int idx, char *par)
       i = new_dcc(&DCC_FORK_SEND, sizeof(struct xfer_info));
       dcc[i].addr = my_atoul(ip);
       dcc[i].port = atoi(port);
-      strlcpy(dcc[i].nick, "*users", NICKLEN);
+      strlcpy(dcc[i].nick, "*users", sizeof(dcc[i].nick));
       dcc[i].u.xfer->filename = strdup(s);
       dcc[i].u.xfer->origname = dcc[i].u.xfer->filename;
       dcc[i].u.xfer->length = atoi(par);
       dcc[i].u.xfer->f = f;
       dcc[i].sock = sock;
-      strlcpy(dcc[i].host, dcc[idx].nick, UHOSTLEN);
+      strlcpy(dcc[i].host, dcc[idx].nick, sizeof(dcc[i].host));
       dcc[idx].status |= STAT_GETTING;
     }
   }
@@ -1544,7 +1544,7 @@ start_sending_users(int idx)
   } else {
     updatebot(-1, dcc[idx].nick, '+', 0, 0, 0, NULL);
     dcc[idx].status |= STAT_SENDING;
-    strlcpy(dcc[j].host, dcc[idx].nick, UHOSTLEN); /* Store bot's nick */
+    strlcpy(dcc[j].host, dcc[idx].nick, sizeof(dcc[j].host)); /* Store bot's nick */
     dprintf(idx, "s us %lu %d %lu\n", iptolong(getmyip()), dcc[j].port, dcc[j].u.xfer->length);
     /* Start up a tbuf to queue outgoing changes for this bot until the
      * userlist is done transferring.

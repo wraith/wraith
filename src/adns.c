@@ -370,8 +370,8 @@ static int get_dns_idx()
           dcc[dns_idx].sock = sock;
           dns_sock = sock;
           sdprintf("dns_sock: %d", dcc[dns_idx].sock);
-          strlcpy(dcc[dns_idx].host, dns_ip, UHOSTLEN);
-          strlcpy(dcc[dns_idx].nick, "(adns)", NICKLEN);
+          strlcpy(dcc[dns_idx].host, dns_ip, sizeof(dcc[dns_idx].host));
+          strlcpy(dcc[dns_idx].nick, "(adns)", sizeof(dcc[dns_idx].nick));
           sdprintf("dns_ip: %s", dns_ip);
           dcc[dns_idx].timeval = now;
           dns_handler.timeout_val = 0;
