@@ -1049,12 +1049,19 @@ static void server_check_lag()
 
 static void server_5minutely()
 {
-  if (server_online && waiting_for_awake && ((now - lastpingtime) >= 300)) {
-      /* Uh oh!  Never got pong from last time, five minutes ago!
-       * Server is probably stoned.
-       */
-      disconnect_server(servidx, DO_LOST);
-      putlog(LOG_SERV, "*", "Server got stoned; jumping...");
+  if (server_online) {
+    if (waiting_for_awake && ((now - lastpingtime) >= 300)) {
+        /* Uh oh!  Never got pong from last time, five minutes ago!
+         * Server is probably stoned.
+         */
+        disconnect_server(servidx, DO_LOST);
+        putlog(LOG_SERV, "*", "Server got stoned; jumping...");
+    }
+    if (keepnick && (jnick_juped == 2 || nick_juped == 2)) {
+      // Try getting nick every 5 minutes to check if it is still juped
+      nick_juped = jnick_juped = 0;
+      server_send_ison();
+    }
   }
 }
 
