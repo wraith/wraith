@@ -899,7 +899,8 @@ void clear_channel(struct chanset_t *chan, bool reset)
 
   chan->channel.last_eI = 0;
 
-  chan->ircnet_status &= ~CHAN_HAVEBANS;
+  chan->ircnet_status = 0;
+//  chan->ircnet_status &= ~CHAN_HAVEBANS;
 
   if (reset)
     init_channel(chan, 1);
