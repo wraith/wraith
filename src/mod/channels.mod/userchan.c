@@ -525,7 +525,7 @@ static void tell_masks(const char type, int idx, bool show_inact, char *match, b
       } else
 	display_mask(type, idx, k++, mr, chan, show_inact);
     }
-    if (chan->status & CHAN_ACTIVE) {
+    if (chan->ircnet_status & CHAN_ACTIVE) {
       masklist *ml = NULL;
       masklist *channel_list = (type == 'b' ? chan->channel.ban : type == 'e' ? chan->channel.exempt : chan->channel.invite);
 
@@ -734,7 +734,7 @@ flood-exempt %d flood-lock-time %d knock %d \
 %cmeankicks %cenforcebans %cdynamicbans %cuserbans %cbitch \
 %cprivate %ccycle %cinactive %cdynamicexempts %cuserexempts \
 %cdynamicinvites %cuserinvites %cnodesynch %cclosed %cvoice \
-%cfastop %cautoop %cbotbitch %cbackup %cnomassjoin %crbl %c%s",
+%cfastop %cautoop %cbotbitch %cbackup %cnomassjoin %crbl %cvoicebitch %c%s",
 	w,
 /* Chanchar template
  *      temp,
@@ -789,6 +789,7 @@ flood-exempt %d flood-lock-time %d knock %d \
         PLSMNS(channel_backup(chan)),
         PLSMNS(channel_nomassjoin(chan)),
         PLSMNS(channel_rbl(chan)),
+        PLSMNS(channel_voicebitch(chan)),
 	HAVE_TAKE ? PLSMNS(channel_take(chan)) : ' ',
         HAVE_TAKE ? "take " : " "
 /* Chanflag template

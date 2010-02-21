@@ -607,7 +607,7 @@ static void cmd_slowjoin(int idx, char *par)
 
   if (!conf.bot->hub && shouldjoin(chan) && !channel_joining(chan)) {
     dprintf(DP_MODE, "JOIN %s %s\n", chan->name, chan->key_prot);
-    chan->status |= CHAN_JOINING;
+    chan->ircnet_status |= CHAN_JOINING;
   }
 }
 
@@ -1182,7 +1182,7 @@ static void show_int(int idx, char *work, int *cnt, const char *desc, int state,
 #define SHOW_FLAG(name, state) show_flag(idx, work, &cnt, name, state, sizeof(work))
 #define SHOW_INT(desc, state, yes, no) show_int(idx, work, &cnt, desc, state, yes, no, sizeof(work))
 #define P_STR deflag == P_KICK ? "Kick" : (deflag == P_DEOP ? "Deop" : (deflag == P_DELETE ? "Remove" : NULL))
-#define F_STR(x) x == FLOOD_EXEMPT_OP ? "Op" : (x == FLOOD_EXEMPT_VOICE ? "Voice" : (x == FLOOD_EXEMPT_USER ? "User" : NULL))
+#define F_STR(x) x == CHAN_FLAG_OP ? "Op" : (x == CHAN_FLAG_VOICE ? "Voice" : (x == CHAN_FLAG_USER ? "User" : NULL))
 static void cmd_chaninfo(int idx, char *par)
 {
   char *chname = NULL, work[512] = "";
@@ -1255,6 +1255,7 @@ static void cmd_chaninfo(int idx, char *par)
     if (HAVE_TAKE)
       SHOW_FLAG("take",		channel_take(chan));
     SHOW_FLAG("voice",		channel_voice(chan));
+    SHOW_FLAG("voicebitch",		channel_voicebitch(chan));
     SHOW_FLAG("", 0);
     SHOW_FLAG("dynamicbans",	channel_dynamicbans(chan));
     SHOW_FLAG("userbans",	!channel_nouserbans(chan));

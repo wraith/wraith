@@ -606,7 +606,7 @@ getin_request(char *botnick, char *code, char *par)
 
         putlog(LOG_GETIN, "*", "Got key for %s from %s (%s) - Joining", chan->dname, botnick, chan->channel.key);
         dprintf(DP_MODE, "JOIN %s %s\n", chan->name[0] ? chan->name : chan->dname, chan->channel.key);
-        chan->status |= CHAN_JOINING;
+        chan->ircnet_status |= CHAN_JOINING;
       } else {
         putlog(LOG_GETIN, "*", "Got key for %s from %s - I'm already in the channel", chan->dname, botnick);
       }
@@ -1280,8 +1280,8 @@ any_ops(struct chanset_t *chan)
 
 static void get_channel_masks(struct chanset_t* chan) {
   bd::String tocheck(size_t(4));
-  if (!(chan->status & CHAN_ASKEDBANS)) {
-    chan->status |= CHAN_ASKEDBANS;
+  if (!(chan->ircnet_status & CHAN_ASKEDBANS)) {
+    chan->ircnet_status |= CHAN_ASKEDBANS;
     tocheck += 'b';
   }
 
@@ -1323,8 +1323,8 @@ reset_chan_info(struct chanset_t *chan)
     free(chan->channel.key);
     chan->channel.key = (char *) my_calloc(1, 1);
     clear_channel(chan, 1);
-    chan->status |= CHAN_PEND;
-    chan->status &= ~(CHAN_ACTIVE | CHAN_ASKEDMODES | CHAN_JOINING);
+    chan->ircnet_status |= CHAN_PEND;
+    chan->ircnet_status &= ~(CHAN_ACTIVE | CHAN_ASKEDMODES | CHAN_JOINING);
     /* don't bother checking bans if it's +take */
     if (!channel_take(chan)) {
       if (opped) {
@@ -1372,7 +1372,7 @@ check_lonely_channel(struct chanset_t *chan)
       dprintf(DP_MODE, "PART %s\n", chan->name);
       /* If it's a !chan, we need to recreate the channel with !!chan <cybah> */
       dprintf(DP_MODE, "JOIN %s%s %s\n", (chan->dname[0] == '!') ? "!" : "", chan->dname, chan->key_prot);
-      chan->status |= CHAN_JOINING;
+      chan->ircnet_status |= CHAN_JOINING;
       whined = 0;
     }
   } else if (any_ops(chan)) {
@@ -1565,24 +1565,24 @@ check_expired_chanstuff(struct chanset_t *chan)
 
       if (me_op(chan)) {
         if (dovoice(chan) && !loading) {      /* autovoice of +v users if bot is +y */
-          if (!chan_hasop(m) && !chan_hasvoice(m)) {
+          if (!chan_hasop(m) && !chan_hasvoice(m) && !chan_sentvoice(m)) {
             member_getuser(m, 1);
 
             if (m->user) {
               get_user_flagrec(m->user, &fr, chan->dname, chan);
               if (!glob_bot(fr)) {
-                if (!chan_sentvoice(m) && !(m->flags & EVOICE) && 
+                if (!(m->flags & EVOICE) &&
                     (
-                     (channel_voice(chan) && !chk_devoice(fr)) ||
+                     /* +voice: Voice all clients who are not flag:+q. If the chan is +voicebitch, only op flag:+v clients */
+                     (channel_voice(chan) && !chk_devoice(fr) && (!channel_voicebitch(chan) || (channel_voicebitch(chan) && chk_voice(fr, chan)))) ||
+                     /* Or, if the channel is -voice but they still qualify to be voiced */
                      (!channel_voice(chan) && !privchan(fr, chan, PRIV_VOICE) && chk_voice(fr, chan))
                     )
                    ) {
                   add_mode(chan, '+', 'v', m->nick);
-                } else if ((chk_devoice(fr) || (m->flags & EVOICE))) {
-                  add_mode(chan, '-', 'v', m->nick);
                 }
               }
-            } else if (!chan_sentvoice(m) && !m->user && channel_voice(chan) && voice_ok(m, chan)) {
+            } else if (!m->user && channel_voice(chan) && !channel_voicebitch(chan) && voice_ok(m, chan)) {
               add_mode(chan, '+', 'v', m->nick);
             }
           }
@@ -1595,7 +1595,7 @@ check_expired_chanstuff(struct chanset_t *chan)
     dprintf(DP_MODE, "JOIN %s %s\n",
             (chan->name[0]) ? chan->name : chan->dname,
             chan->channel.key[0] ? chan->channel.key : chan->key_prot);
-    chan->status |= CHAN_JOINING;
+    chan->ircnet_status |= CHAN_JOINING;
   }
 }
 
@@ -1681,13 +1681,13 @@ irc_report(int idx, int details)
     if (!privchan(fr, chan, PRIV_OP) && (idx == DP_STDOUT || glob_master(fr) || chan_master(fr))) {
       p = NULL;
       if (shouldjoin(chan)) {
-        if (chan->status & CHAN_JUPED)
+        if (chan->ircnet_status & CHAN_JUPED)
           p = "juped";
         else if (channel_joining(chan))
           p = "joining";
-        else if (!(chan->status & CHAN_ACTIVE))
+        else if (!(chan->ircnet_status & CHAN_ACTIVE))
           p = "trying";
-        else if (chan->status & CHAN_PEND)
+        else if (chan->ircnet_status & CHAN_PEND)
           p = "pending";
         else if ((chan->dname[0] != '+') && !me_op(chan))
           p = "want ops!";

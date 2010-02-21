@@ -205,10 +205,11 @@ join_chans()
 {
   for (register struct chanset_t *chan = chanset; chan; chan = chan->next) {
     if (shouldjoin(chan)) {
-      chan->status &= ~(CHAN_ACTIVE | CHAN_PEND | CHAN_JOINING);
+      // Clear out all channel status flags
+      chan->ircnet_status = 0;
       dprintf(DP_SERVER, "JOIN %s %s\n", (chan->name[0]) ? chan->name : chan->dname,
                                          chan->channel.key[0] ? chan->channel.key : chan->key_prot);
-      chan->status |= CHAN_JOINING;
+      chan->ircnet_status |= CHAN_JOINING;
     }
   }
 }
@@ -380,8 +381,8 @@ static int got442(char *from, char *msg)
     if (shouldjoin(chan) && !channel_joining(chan)) {
       putlog(LOG_MISC, chname, "Server says I'm not on channel: %s", chname);
       clear_channel(chan, 1);
-      chan->status &= ~CHAN_ACTIVE;
-      chan->status |= CHAN_JOINING;
+      chan->ircnet_status = 0;
+      chan->ircnet_status |= CHAN_JOINING;
       dprintf(DP_MODE, "JOIN %s %s\n", chan->name,
 	      chan->channel.key[0] ? chan->channel.key : chan->key_prot);
     }
@@ -1085,13 +1086,13 @@ static int got437(char *from, char *msg)
   if (s[0] && (strchr(CHANMETA, s[0]) != NULL)) {
     chan = findchan(s);
     if (chan) {
-      chan->status &= ~(CHAN_JOINING);
-      if (chan->status & CHAN_ACTIVE) {
+      chan->ircnet_status &= ~(CHAN_JOINING);
+      if (chan->ircnet_status & CHAN_ACTIVE) {
 	putlog(LOG_MISC, "*", "Can't change nickname on %s.  Is my nickname banned?", s);
       } else {
 	if (!channel_juped(chan)) {
 	  putlog(LOG_MISC, "*", "Channel %s is juped. :(", s);
-	  chan->status |= CHAN_JUPED;
+	  chan->ircnet_status |= CHAN_JUPED;
 	}
       }
     }
@@ -1278,8 +1279,10 @@ static void kill_server(int idx, void *x)
   disconnect_server(idx, NO_LOST);	/* eof_server will lostdcc() it. */
 
   if (!segfaulted)		// don't bother if we've segfaulted, too many memory calls in this loop
-    for (struct chanset_t *chan = chanset; chan; chan = chan->next)
-       clear_channel(chan, 1);
+    for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
+      chan->ircnet_status = 0;
+      clear_channel(chan, 1);
+    }
   /* A new server connection will be automatically initiated in
      about 2 seconds. */
 }
@@ -1839,7 +1842,7 @@ static void connect_server(void)
     use_monitor = 0;
 
     for (chan = chanset; chan; chan = chan->next)
-      chan->status &= ~CHAN_JUPED;
+      chan->ircnet_status &= ~CHAN_JUPED;
 
     dcc[newidx].timeval = now;
     dcc[newidx].sock = -1;

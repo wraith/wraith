@@ -499,6 +499,9 @@ See also: link
                        unless they are +q globally or +q for the channel.
                        If a botnet master devoices them, they will remain 
                        devoiced no matter who voices them.
+        $bvoicebitch$b     Enforce voices in a +bitch style. Only +v users
+                       will be allowed to be voiced. This does take +private
+                       into mind as well.
         $bdynamicbans$b    Only activate bans on the channel when necessary?
                        This keeps the channel's ban list from getting
                        excessively long. The bot still remembers every ban,

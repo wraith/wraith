@@ -1409,7 +1409,7 @@ gotmode(char *from, char *msg)
                 mv->flags &= ~SENTVOICE;
                 mv->flags |= CHANVOICE;
                 if (channel_active(chan) && dovoice(chan)) {
-                  if (dv || chk_devoice(victim)) {
+                  if (dv || chk_devoice(victim) || (channel_voicebitch(chan) && !chk_voice(victim, chan))) {
                     add_mode(chan, '-', 'v', mparam);
                   } else if (reversing) {
                     add_mode(chan, '-', 'v', mparam);
@@ -1427,8 +1427,8 @@ gotmode(char *from, char *msg)
                     /* if they arent +v|v and VOICER is m+ then EVOICE them */
                   } else {
                     /* FIXME: same thing here */
-                    if (!match_my_nick(nick) && channel_voice(chan) && 
-                        (glob_master(user) || chan_master(user) || glob_bot(user)) && 
+                    if (!match_my_nick(nick) && channel_voice(chan) && !glob_bot(user) &&
+                        (glob_master(user) || chan_master(user)) &&
                         rfc_casecmp(nick, mparam)) {
                       /* if the user is not +q set them norEVOICE. */
                       if (!chan_quiet(victim) && !(mv->flags & EVOICE)) {
@@ -1488,7 +1488,7 @@ gotmode(char *from, char *msg)
       if (chan->channel.do_opreq)
         request_op(chan);
       if (!me_op(chan) && isserver[0])		/* FIXME, WTF IS THIS? */
-        chan->status |= CHAN_ASKEDMODES;
+        chan->ircnet_status |= CHAN_ASKEDMODES;
     }
   }
   return 0;

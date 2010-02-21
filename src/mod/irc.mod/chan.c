@@ -539,8 +539,8 @@ static bool detect_chan_flood(char *floodnick, char *floodhost, char *from,
        (glob_master(fr) || chan_master(fr))) ||
       ((which != FLOOD_DEOP) && (which != FLOOD_KICK) && 
        ( (chk_noflood(fr) || 
-         (m && chan->flood_exempt_mode == FLOOD_EXEMPT_OP && chan_hasop(m)) || 
-         (m && chan->flood_exempt_mode == FLOOD_EXEMPT_VOICE && (chan_hasvoice(m) || chan_hasop(m))) )
+         (m && chan->flood_exempt_mode == CHAN_FLAG_OP && chan_hasop(m)) ||
+         (m && chan->flood_exempt_mode == CHAN_FLAG_VOICE && (chan_hasvoice(m) || chan_hasop(m))) )
       )))
     return 0;
 
@@ -1034,7 +1034,7 @@ void recheck_channel_modes(struct chanset_t *chan)
     }
   }
 
-  if (!(chan->status & CHAN_ASKEDMODES)) {
+  if (!(chan->ircnet_status & CHAN_ASKEDMODES)) {
     if (pls & CHANINV && !(cur & CHANINV))
       add_mode(chan, '+', 'i', "");
     else if (mns & CHANINV && cur & CHANINV)
@@ -1127,7 +1127,7 @@ static void check_this_member(struct chanset_t *chan, char *nick, struct flag_re
   if (dovoice(chan)) {
     if (chan_hasvoice(m) && !chan_hasop(m)) {
       /* devoice +q users .. */
-      if (chk_devoice(*fr))
+      if (chk_devoice(*fr) || (channel_voicebitch(chan) && !chk_voice(*fr, chan)))
         add_mode(chan, '-', 'v', m->nick);
     } else if (!chan_hasvoice(m) && !chan_hasop(m)) {
       /* voice +v users */
@@ -1446,7 +1446,7 @@ void recheck_channel(struct chanset_t *chan, int dobans)
 
     //Only reset masks if the bot has already received the ban list before (meaning it has already been opped once)
     //Ie, don't set bans without knowing what they are! (asked for above on first op)
-    if (dobans && (chan->status & CHAN_HAVEBANS)) {
+    if (dobans && (chan->ircnet_status & CHAN_HAVEBANS)) {
       if (channel_nouserbans(chan) && !stop_reset)
         resetbans(chan);
       else
@@ -1472,7 +1472,7 @@ void recheck_channel(struct chanset_t *chan, int dobans)
 
     // Do this here as the above only runs after already having been opped and having gotten bans.
     if (dobans) {
-      if ((chan->status & CHAN_ASKEDMODES) && !channel_inactive(chan)) 
+      if ((chan->ircnet_status & CHAN_ASKEDMODES) && !channel_inactive(chan))
         dprintf(DP_MODE, "MODE %s\n", chan->name);
       recheck_channel_modes(chan);
     }
@@ -1661,9 +1661,9 @@ static int got710(char *from, char *msg)
   get_user_flagrec(u, &fr, chan->dname, chan);
 
   // PASSING: +o and op || +v and op/voice || user
-  if (!((chan->knock_flags == FLOOD_EXEMPT_OP && chk_op(fr, chan)) ||
-       (chan->knock_flags == FLOOD_EXEMPT_VOICE && (chk_op(fr, chan) || chk_voice(fr, chan))) ||
-       (chan->knock_flags == FLOOD_EXEMPT_USER)) ||
+  if (!((chan->knock_flags == CHAN_FLAG_OP && chk_op(fr, chan)) ||
+       (chan->knock_flags == CHAN_FLAG_VOICE && (chk_op(fr, chan) || chk_voice(fr, chan))) ||
+       (chan->knock_flags == CHAN_FLAG_USER)) ||
       chan_kick(fr) || glob_kick(fr)) {
     return 0;
   }
@@ -1701,9 +1701,9 @@ static int got324(char *from, char *msg)
   bool ok = 0;
   char *p = NULL, *q = NULL;
 
-  if (chan->status & CHAN_ASKEDMODES)
+  if (chan->ircnet_status & CHAN_ASKEDMODES)
     ok = 1;
-  chan->status &= ~CHAN_ASKEDMODES;
+  chan->ircnet_status &= ~CHAN_ASKEDMODES;
   chan->channel.mode = 0;
   while (msg[i] != 0) {
     if (msg[i] == 'i')
@@ -1754,7 +1754,7 @@ static int got324(char *from, char *msg)
 	 * an asterisk and this has been agreed upon by other major IRC 
 	 * networks so we'll check for an asterisk here as well 
 	 * (guppy 22Dec2001) */ 
-        chan->status |= CHAN_ASKEDMODES;
+        chan->ircnet_status |= CHAN_ASKEDMODES;
     }
     if (msg[i] == 'l') {
       p = strchr(msg, ' ');
@@ -2015,14 +2015,14 @@ static int got315(char *from, char *msg)
     return 0;
 
   /* Finished getting who list, can now be considered officially ON CHANNEL */
-  chan->status |= CHAN_ACTIVE;
-  chan->status &= ~(CHAN_PEND | CHAN_JOINING);
+  chan->ircnet_status |= CHAN_ACTIVE;
+  chan->ircnet_status &= ~(CHAN_PEND | CHAN_JOINING);
   /* Am *I* on the channel now? if not, well d0h. */
   if (shouldjoin(chan) && !ismember(chan, botname)) {
     putlog(LOG_MISC | LOG_JOIN, chan->dname, "Oops, I'm not really on %s.", chan->dname);
     clear_channel(chan, 1);
-    chan->status &= ~CHAN_ACTIVE;
-    chan->status |= CHAN_JOINING;
+    chan->ircnet_status &= ~CHAN_ACTIVE;
+    chan->ircnet_status |= CHAN_JOINING;
     dprintf(DP_MODE, "JOIN %s %s\n",
 	    (chan->name[0]) ? chan->name : chan->dname,
 	    chan->channel.key[0] ? chan->channel.key : chan->key_prot);
@@ -2030,7 +2030,7 @@ static int got315(char *from, char *msg)
     if (me_op(chan))
       recheck_channel(chan, 2);
     else if (chan->channel.members == 1)
-      chan->status |= CHAN_STOP_CYCLE;
+      chan->ircnet_status |= CHAN_STOP_CYCLE;
     else if (any_ops(chan))
       request_op(chan);
   }
@@ -2077,8 +2077,8 @@ static int got368(char *from, char *msg)
   chname = newsplit(&msg);
   chan = findchan(chname);
   if (chan) {
-    chan->status &= ~CHAN_ASKEDBANS;
-    chan->status |= CHAN_HAVEBANS;
+    chan->ircnet_status &= ~CHAN_ASKEDBANS;
+    chan->ircnet_status |= CHAN_HAVEBANS;
 
     if (channel_nouserbans(chan))
       resetbans(chan);
@@ -2253,7 +2253,7 @@ static int got403(char *from, char *msg)
              "Unique channel %s does not exist... Attempting to join with "
              "short name.", chname);
       dprintf(DP_SERVER, "JOIN %s\n", chan->dname);
-      chan->status |= CHAN_JOINING;
+      chan->ircnet_status |= CHAN_JOINING;
     } else {
       /* We have found the channel, so the server has given us the short
        * name. Prefix another '!' to it, and attempt the join again...
@@ -2287,7 +2287,7 @@ static int got471(char *from, char *msg)
    */
   chan = findchan_by_dname(chname);
   if (chan) {
-    chan->status &= ~CHAN_JOINING;
+    chan->ircnet_status &= ~CHAN_JOINING;
     putlog(LOG_JOIN, chan->dname, "Channel full--can't join: %s", chan->dname);
     request_in(chan);
 /* need: limit */
@@ -2320,7 +2320,7 @@ static int got473(char *from, char *msg)
    */
   chan = findchan_by_dname(chname);
   if (chan) {
-    chan->status &= ~CHAN_JOINING;
+    chan->ircnet_status &= ~CHAN_JOINING;
     putlog(LOG_JOIN, chan->dname, "Channel invite only--can't join: %s", chan->dname);
     request_in(chan);
 /* need: invite */
@@ -2353,7 +2353,7 @@ static int got474(char *from, char *msg)
    */
   chan = findchan_by_dname(chname);
   if (chan) {
-    chan->status &= ~CHAN_JOINING;
+    chan->ircnet_status &= ~CHAN_JOINING;
     putlog(LOG_JOIN, chan->dname, "Banned from channel--can't join: %s", chan->dname);
     request_in(chan);
 /* need: unban */
@@ -2386,7 +2386,7 @@ static int got475(char *from, char *msg)
    */
   chan = findchan_by_dname(chname);
   if (chan && shouldjoin(chan)) {
-    chan->status &= ~CHAN_JOINING;
+    chan->ircnet_status &= ~CHAN_JOINING;
     putlog(LOG_JOIN, chan->dname, "Bad key--can't join: %s", chan->dname);
     if (chan->channel.key[0]) {
       free(chan->channel.key);
@@ -2567,7 +2567,7 @@ static int gotjoin(char *from, char *chname)
   } else if (!channel_pending(chan)) {
     char *host = NULL;
 
-    chan->status &= ~CHAN_STOP_CYCLE;
+    chan->ircnet_status &= ~CHAN_STOP_CYCLE;
 
     detect_chan_flood(nick, uhost, from, chan, FLOOD_JOIN, NULL);
 
@@ -2577,8 +2577,8 @@ static int gotjoin(char *from, char *chname)
     if (!channel_active(chan) && !match_my_nick(nick)) {
       /* uh, what?!  i'm on the channel?! */
       putlog(LOG_ERROR, "*", "confused bot: guess I'm on %s and didn't realize it", chan->dname);
-      chan->status |= CHAN_ACTIVE;
-      chan->status &= ~(CHAN_PEND | CHAN_JOINING);
+      chan->ircnet_status |= CHAN_ACTIVE;
+      chan->ircnet_status &= ~(CHAN_PEND | CHAN_JOINING);
       reset_chan_info(chan);
     } else {
       memberlist *m = ismember(chan, nick);
@@ -2636,7 +2636,7 @@ static int gotjoin(char *from, char *chname)
 	   * unique name for the channel (as the server see's it). <cybah>
 	   */
 	  strlcpy(chan->name, chname, 81);
-	  chan->status &= ~CHAN_JUPED;
+	  chan->ircnet_status &= ~CHAN_JUPED;
 
           /* ... and log us joining. Using chan->dname for the channel is
 	   * important in this case. As the config file will never contain
@@ -2745,14 +2745,16 @@ static int gotjoin(char *from, char *chname)
             if (m->user) {
               if (!(m->flags & EVOICE) &&
                   (
-                   (channel_voice(chan) && !chk_devoice(fr)) ||
+                   /* +voice: Voice all clients who are not flag:+q. If the chan is +voicebitch, only op flag:+v clients */
+                   (channel_voice(chan) && !chk_devoice(fr) && (!channel_voicebitch(chan) || (channel_voicebitch(chan) && chk_voice(fr, chan)))) ||
+                   /* Or, if the channel is -voice but they still qualify to be voiced */
                    (!channel_voice(chan) && !privchan(fr, chan, PRIV_VOICE) && chk_voice(fr, chan))
                   )
                  ) {
                 m->delay = now + chan->auto_delay;
                 m->flags |= SENTVOICE;
               }
-            } else if (!m->user && channel_voice(chan) && voice_ok(m, chan)) {
+            } else if (!m->user && channel_voice(chan) && !channel_voicebitch(chan) && voice_ok(m, chan)) {
               m->delay = now + chan->auto_delay;
               m->flags |= SENTVOICE;
             }
@@ -2784,7 +2786,7 @@ static int gotpart(char *from, char *msg)
   if (chan && !shouldjoin(chan) && match_my_nick(nick)) {
     irc_log(chan, "Parting");    
     clear_channel(chan, 1);
-    chan->status &= ~(CHAN_ACTIVE | CHAN_PEND | CHAN_JOINING);
+    chan->ircnet_status = 0;
     return 0;
   }
   if (chan && !channel_pending(chan)) {
@@ -2794,8 +2796,8 @@ static int gotpart(char *from, char *msg)
     if (!channel_active(chan)) {
       /* whoa! */
       putlog(LOG_ERRORS, "*", "confused bot: guess I'm on %s and didn't realize it", chan->dname);
-      chan->status |= CHAN_ACTIVE;
-      chan->status &= ~(CHAN_PEND | CHAN_JOINING);
+      chan->ircnet_status |= CHAN_ACTIVE;
+      chan->ircnet_status &= ~(CHAN_PEND | CHAN_JOINING);
       reset_chan_info(chan);
     }
     set_handle_laston(chan->dname, u, now);
@@ -2811,12 +2813,12 @@ static int gotpart(char *from, char *msg)
     /* If it was me, all hell breaks loose... */
     if (match_my_nick(nick)) {
       clear_channel(chan, 1);
-      chan->status &= ~(CHAN_ACTIVE | CHAN_PEND | CHAN_JOINING);
+      chan->ircnet_status = 0;
       if (shouldjoin(chan)) {
 	dprintf(DP_MODE, "JOIN %s %s\n",
 	        (chan->name[0]) ? chan->name : chan->dname,
 	        chan->channel.key[0] ? chan->channel.key : chan->key_prot);
-        chan->status |= CHAN_JOINING;
+        chan->ircnet_status |= CHAN_JOINING;
       }
     } else
       check_lonely_channel(chan);
@@ -2841,8 +2843,8 @@ static int gotkick(char *from, char *origmsg)
   char *nick = newsplit(&msg);
 
   if (match_my_nick(nick) && channel_pending(chan) && shouldjoin(chan) && !channel_joining(chan)) {
-    chan->status &= ~(CHAN_ACTIVE | CHAN_PEND);
-    chan->status |= CHAN_JOINING;
+    chan->ircnet_status = 0;
+    chan->ircnet_status |= CHAN_JOINING;
     dprintf(DP_MODE, "JOIN %s %s\n",
             (chan->name[0]) ? chan->name : chan->dname,
             chan->channel.key[0] ? chan->channel.key : chan->key_prot);
@@ -2888,11 +2890,11 @@ static int gotkick(char *from, char *origmsg)
     irc_log(chan, "%s was kicked by %s (%s)", s1, from, msg);
     /* Kicked ME?!? the sods! */
     if (match_my_nick(nick) && shouldjoin(chan) && !channel_joining(chan)) {
-      chan->status &= ~(CHAN_ACTIVE | CHAN_PEND);
+      chan->ircnet_status = 0;
       dprintf(DP_MODE, "JOIN %s %s\n",
               (chan->name[0]) ? chan->name : chan->dname,
               chan->channel.key[0] ? chan->channel.key : chan->key_prot);
-      chan->status |= CHAN_JOINING;
+      chan->ircnet_status |= CHAN_JOINING;
       clear_channel(chan, 1);
     } else {
       killmember(chan, nick);

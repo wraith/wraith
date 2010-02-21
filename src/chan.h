@@ -23,9 +23,9 @@ typedef struct memstruct {
   char userip[UHOSTLEN];
 } memberlist;
 
-#define FLOOD_EXEMPT_OP	1
-#define FLOOD_EXEMPT_VOICE 2
-#define FLOOD_EXEMPT_USER 3
+#define CHAN_FLAG_OP	1
+#define CHAN_FLAG_VOICE 2
+#define CHAN_FLAG_USER 3
 
 #define CHANMETA "#&!+"
 #define NICKVALID "[{}]^`|\\_-"
@@ -242,24 +242,26 @@ struct chanset_t {
 #define CHAN_NODESYNCH      BIT15
 #define CHAN_FASTOP         BIT16	/* Bots will not use +o-b to op (no cookies) */ 
 #define CHAN_PRIVATE        BIT17	/* users need |o to access chan */ 
-#define CHAN_ACTIVE         BIT18	/* like i'm actually on the channel and stuff */
-#define CHAN_PEND           BIT19	/* just joined; waiting for end of WHO list */
-#define CHAN_FLAGGED        BIT20	/* flagged during rehash for delete   */
-#define CHAN_ASKEDBANS      BIT21
-#define CHAN_ASKEDMODES     BIT22	/* find out key-info on IRCu          */
-#define CHAN_JUPED          BIT23	/* Is channel juped                   */
-#define CHAN_STOP_CYCLE     BIT24	/* Some efnetservers have defined NO_CHANOPS_WHEN_SPLIT */
-#define CHAN_AUTOOP         BIT25
-#define CHAN_JOINING        BIT26	/* attempting to join, dont flood with JOIN #chan */
-#define CHAN_MEANKICKS      BIT27	/* use mean/offensive kicks/bans */
-#define CHAN_HAVEBANS       BIT28	/* have been opped and received the ban list */
+#define CHAN_DYNAMICEXEMPTS BIT18
+#define CHAN_NOUSEREXEMPTS  BIT19
+#define CHAN_DYNAMICINVITES BIT20
+#define CHAN_NOUSERINVITES  BIT21
+#define CHAN_FLAGGED        BIT22	/* flagged during rehash for delete   */
+#define CHAN_AUTOOP         BIT23
+#define CHAN_MEANKICKS      BIT24	/* use mean/offensive kicks/bans */
+#define CHAN_VOICEBITCH     BIT25
 
 #define CHAN_ASKED_EXEMPTS  BIT0
 #define CHAN_ASKED_INVITES  BIT1
-#define CHAN_DYNAMICEXEMPTS BIT2
-#define CHAN_NOUSEREXEMPTS  BIT3
-#define CHAN_DYNAMICINVITES BIT4
-#define CHAN_NOUSERINVITES  BIT5
+#define CHAN_HAVEBANS       BIT2	/* have been opped and received the ban list */
+#define CHAN_ASKEDBANS      BIT3
+#define CHAN_ASKEDMODES     BIT4	/* find out key-info on IRCu          */
+#define CHAN_ACTIVE         BIT5	/* like i'm actually on the channel and stuff */
+#define CHAN_PEND           BIT6	/* just joined; waiting for end of WHO list */
+#define CHAN_JOINING        BIT7	/* attempting to join, dont flood with JOIN #chan */
+#define CHAN_JUPED          BIT8	/* Is channel juped                   */
+#define CHAN_STOP_CYCLE     BIT9	/* Some efnetservers have defined NO_CHANOPS_WHEN_SPLIT */
+
 /* prototypes */
 memberlist *ismember(struct chanset_t *, const char *);
 struct chanset_t *findchan(const char *name);
@@ -270,9 +272,16 @@ struct chanset_t *findchan_by_dname(const char *name);
 /* is this channel +t? */
 #define channel_optopic(chan) (chan->channel.mode & CHANTOPIC)
 
-#define channel_active(chan)  (chan->status & CHAN_ACTIVE)
-#define channel_joining(chan) (chan->status & CHAN_JOINING)
-#define channel_pending(chan)  (chan->status & CHAN_PEND)
+#define channel_active(chan)  (chan->ircnet_status & CHAN_ACTIVE)
+#define channel_joining(chan) (chan->ircnet_status & CHAN_JOINING)
+#define channel_pending(chan)  (chan->ircnet_status & CHAN_PEND)
+#define channel_juped(chan) (chan->ircnet_status & CHAN_JUPED)
+#define channel_stop_cycle(chan) (chan->ircnet_status & CHAN_STOP_CYCLE)
+
+#define channel_dynamicexempts(chan) (chan->status & CHAN_DYNAMICEXEMPTS)
+#define channel_nouserexempts(chan) (chan->status & CHAN_NOUSEREXEMPTS)
+#define channel_dynamicinvites(chan) (chan->status & CHAN_DYNAMICINVITES)
+#define channel_nouserinvites(chan) (chan->status & CHAN_NOUSERINVITES)
 #define channel_backup(chan) (chan->status & CHAN_BACKUP)
 #define channel_bitch(chan) (chan->status & CHAN_BITCH)
 #define chan_bitch(chan) (chan->status & (CHAN_BITCH|CHAN_BOTBITCH))
@@ -284,12 +293,7 @@ struct chanset_t *findchan_by_dname(const char *name);
 #define channel_secret(chan) (chan->status & CHAN_SECRET)
 #define channel_cycle(chan) (chan->status & CHAN_CYCLE)
 #define channel_inactive(chan) (chan->status & CHAN_INACTIVE)
-#define channel_dynamicexempts(chan) (chan->ircnet_status & CHAN_DYNAMICEXEMPTS)
-#define channel_nouserexempts(chan) (chan->ircnet_status & CHAN_NOUSEREXEMPTS)
-#define channel_dynamicinvites(chan) (chan->ircnet_status & CHAN_DYNAMICINVITES)
-#define channel_nouserinvites(chan) (chan->ircnet_status & CHAN_NOUSERINVITES)
-#define channel_juped(chan) (chan->status & CHAN_JUPED)
-#define channel_stop_cycle(chan) (chan->status & CHAN_STOP_CYCLE)
+
 
 #ifdef REVENGE
 #define channel_revenge(chan) (chan->status & CHAN_REVENGE)
@@ -305,6 +309,7 @@ struct chanset_t *findchan_by_dname(const char *name);
 #define channel_nomassjoin(chan) (chan->status & CHAN_NOMASSJOIN)
 #define channel_meankicks(chan) (chan->status & CHAN_MEANKICKS)
 #define channel_rbl(chan) (chan->status & CHAN_RBL)
+#define channel_voicebitch(chan) (chan->status & CHAN_VOICEBITCH)
 /* Chanflag template
  *#define channel_temp(chan) (chan->status & CHAN_PRIVATE)
  */

@@ -504,7 +504,7 @@ static int ctcp_INVITE_UNBAN(char *nick, char *uhost, struct userrec *u, char *o
     if (p)
       *p = 0;
     while (chan) {
-      if (chan->status & CHAN_ACTIVE) {
+      if (chan->ircnet_status & CHAN_ACTIVE) {
         if (!strcasecmp(chan->name, chname)) {
           dprintf(DP_HELP, "NOTICE %s :\002BitchX\002: Access Denied\n", nick);
           return BIND_RET_LOG;
