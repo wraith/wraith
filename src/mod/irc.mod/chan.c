@@ -1818,7 +1818,6 @@ static void memberlist_reposition(struct chanset_t *chan, memberlist *target) {
 
 static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick, char *flags, int hops, char* realname, char* ip)
 {
-  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
   char userhost[UHOSTLEN] = "";
   memberlist *m = ismember(chan, nick);	/* in my channel list copy? */
 //  bool waschanop = 0;
@@ -1900,41 +1899,6 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
     resolve_to_member(chan, nick, host);
   else if (!me && !m->user && m->userip[0] && doresolv(chan) && channel_rbl(chan))
     resolve_to_rbl(chan, host);
-
-
-  get_user_flagrec(m->user, &fr, chan->dname, chan);
-  
-  if (me_op(chan)) {
-    /* are they a chanop, and me too */
-        /* are they a channel or global de-op */
-    if (chan_hasop(m) && chk_deop(fr, chan) && !me)
-        /* && target_priority(chan, m, 1) */
-      add_mode(chan, '-', 'o', nick);
-
-    /* if channel is enforce bans */
-    if (channel_enforcebans(chan) &&
-        !chan_sentkick(m) && 
-        /* and user matches a ban */
-        (u_match_mask(global_bans, userhost) || u_match_mask(chan->bans, userhost)) &&
-        /* and it's not me, and i'm an op */
-        !me) {
-      /*  && target_priority(chan, m, 0) */
-      dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, nick, bankickprefix, r_banned(chan));
-      m->flags |= SENTKICK;
-    }
-    /* if the user is a +k */
-    else if ((chan_kick(fr) || glob_kick(fr)) &&
-           !chan_sentkick(m) &&
-           /* and it's not me :) who'd set me +k anyway, a sicko? */
-           /* and if im an op */
-           !me) {
-           /* && target_priority(chan, m, 0) */
-      /* cya later! */
-      quickban(chan, userhost);
-      dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, nick, bankickprefix, response(RES_KICKBAN));
-      m->flags |= SENTKICK;
-    }
-  }
 
   return 0;
 }
