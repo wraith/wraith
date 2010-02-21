@@ -847,7 +847,9 @@ bool bot_shouldjoin(struct userrec* u, struct flag_record* fr, struct chanset_t*
   }
 #endif
   // Ignore +inactive during cmd_slowjoin to ensure that +backup bots join
-  return ((ignore_inactive || !channel_inactive(chan)) && (channel_backup(chan) || (!glob_backup(*fr) && !chan_backup(*fr))));
+  return (!glob_kick(*fr) && !chan_kick(*fr) &&
+      ((ignore_inactive || !channel_inactive(chan)) &&
+       (channel_backup(chan) || (!glob_backup(*fr) && !chan_backup(*fr)))));
 }
 
 bool shouldjoin(struct chanset_t *chan)
