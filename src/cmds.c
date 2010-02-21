@@ -3415,7 +3415,7 @@ static void cmd_pls_user(int idx, char *par)
 
     char ahost[UHOSTLEN] = "", *phost = NULL;
 
-    if (!strchr(host, '!')) {
+    if (host[0] && !strchr(host, '!')) {
       if (!strchr(host, '@')) {
         simple_snprintf(ahost, sizeof(ahost), "*!*@%s", host);
       } else
@@ -3430,7 +3430,7 @@ static void cmd_pls_user(int idx, char *par)
     u2 = get_user_by_handle(userlist, handle);
     simple_snprintf(tmp, sizeof(tmp), "%li %s", (long)now, dcc[idx].nick);
     set_user(&USERENTRY_ADDED, u2, tmp);
-    dprintf(idx, "Added %s (%s) with no flags.\n", handle, phost);
+    dprintf(idx, "Added %s (%s) with no flags.\n", handle, phost[0] ? phost : "no host");
     while (par[0]) {
       phost = 0;
       ahost[0] = 0;
