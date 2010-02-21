@@ -359,7 +359,7 @@ sdprintf("tohash: %s", tohash);
 static inline void cookie_key(char *key, size_t key_len, const char* randstring, const memberlist *opper, const char *chname) {
   const char salt1[] = SALT1;
   const char salt2[] = SALT2;
-  simple_snprintf2(key, key_len, STR("%c%c%c%s%c%c%c%c%c%c%^s%c%c%c%c%c%c%c%s"),
+  simple_snprintf2(key, key_len, STR("%c%c%c%^s%c%c%c%c%c%c%^s%c%c%c%c%c%c%c%s"),
                                         randstring[0],
                                         salt1[5],
                                         randstring[3],
