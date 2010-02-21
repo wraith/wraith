@@ -1434,9 +1434,9 @@ void recheck_channel(struct chanset_t *chan, int dobans)
       get_channel_masks(chan);
     }
 
-  //Check +d/+O/+k
-  for (m = chan->channel.member; m && m->nick[0]; m = m->next) { 
-    member_getuser(m);
+    //Check +d/+O/+k
+    for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
+      member_getuser(m);
       get_user_flagrec(m->user, &fr, chan->dname, chan);
       //Already a bot opped, dont bother resetting masks
       if (glob_bot(fr) && chan_hasop(m) && !match_my_nick(m->nick))
