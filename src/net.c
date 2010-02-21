@@ -1333,14 +1333,12 @@ int findanysnum(register int sock)
   return -1;
 }
 
-static int findanyidx(register int sock)
+int findanyidx(int sock)
 {
-  register int j;
-
   if (sock != -1)
-    for (j = 0; j < dcc_total; j++)
-      if (dcc[j].type && dcc[j].sock == sock)
-        return j;
+    for (int idx = 0; idx < dcc_total; ++idx)
+      if (dcc[idx].type && dcc[idx].sock == sock)
+        return idx;
 
   return -1;
 }
