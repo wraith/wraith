@@ -2015,7 +2015,6 @@ static int got315(char *from, char *msg)
   /* Am *I* on the channel now? if not, well d0h. */
   if (shouldjoin(chan) && !ismember(chan, botname)) {
     putlog(LOG_MISC | LOG_JOIN, chan->dname, "Oops, I'm not really on %s.", chan->dname);
-    clear_channel(chan, 1);
     chan->ircnet_status &= ~CHAN_ACTIVE;
     join_chan(chan);
   } else {
