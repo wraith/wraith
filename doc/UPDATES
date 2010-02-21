@@ -1,7 +1,3 @@
-* Fix case where bot would not get the +e and +I lists when getting opped.
-* Add chanset '+/-voicebitch' for a +bitch style enforcement over voices.
-* If a bot devoices a user in a +voice channel, the +y bot will no longer enforce this.
-
 1.3 - http://wraith.botpack.net/milestone/1.3
 * Binary / shell / startup changes
   * Binary error messages are no longer obscure numbers or fake segfaults. (Compile with OBSCURE_ERRORS to re-enable)
@@ -78,6 +74,8 @@
   * Fix bot not setting 'chanmode' channel modes when getting opped.
   * Fix bot forgetting server uptime on restart
   * Fix '+user user' with no hostmask adding the hostmask '*!*@' to the user.
+  * Fix case where bot would not get the +e and +I lists when getting opped.
+  * If a bot devoices a user in a +voice channel, the +y bot will no longer enforce this.
 * Misc changes
   * Cleanup DCC/Telnet listening so bot only listens on IPV6 if it was specifically given an IPV6 IP.
   * CTCP bot CHAT will no longer work if the bot does not have an IPV4 IP set.
@@ -109,6 +107,7 @@
   * Add cmd_encrypt_fish and cmd_decrypt_fish which uses eggdrop's blowfish (same as FiSH)
   * Add cmd_hash which returns the MD5, SHA1 and SHA256 of the given string.
   * Credits/cmd_about updates.
+  * Add chanset '+/-voicebitch' for a +bitch style enforcement over voices.
 
 1.2.16.1
 * Fix linux compile errors
