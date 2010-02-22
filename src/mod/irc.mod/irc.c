@@ -1608,8 +1608,10 @@ irc_minutely()
   for (register struct chanset_t *chan = chanset; chan; chan = chan->next) {
     warn_pls_take(chan);
     if (server_online) {
-      check_netfight(chan);
-      check_servers(chan);
+      if (!channel_pending(chan)) {
+        check_netfight(chan);
+        check_servers(chan);
+      }
       check_expired_chanstuff(chan);
     }
   }
