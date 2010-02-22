@@ -1854,7 +1854,6 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
 {
   memberlist *m = ismember(chan, nick);	/* in my channel list copy? */
 //  bool waschanop = 0;
-  bool me = 0;
 //  struct chanset_t *ch = NULL;
 //  memberlist *ml = NULL;
 
@@ -1907,21 +1906,15 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
       simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, host);
   }
 
-  me = match_my_nick(nick);
-
-
-  if (me) {			/* Is it me? */
-//    strcpy(botuserhost, m->userhost);		/* Yes, save my own userhost */
-    m->joined = now;				/* set this to keep the whining masses happy */
-  }
-
   member_getuser(m);
 
   //This bot is set +r, so resolve.
-  if (!m->userip[0] && doresolv(chan))
-    resolve_to_member(chan, nick, host);
-  else if (!me && !m->user && m->userip[0] && doresolv(chan) && channel_rbl(chan))
-    resolve_to_rbl(chan, host);
+  if (doresolv(chan)) {
+    if (!m->userip[0])
+      resolve_to_member(chan, nick, host);
+    else if (!m->user && m->userip[0] && channel_rbl(chan))
+      resolve_to_rbl(chan, host);
+  }
 
   return 0;
 }
@@ -2004,12 +1997,14 @@ static int got315(char *from, char *msg)
   /* Finished getting who list, can now be considered officially ON CHANNEL */
   chan->ircnet_status |= CHAN_ACTIVE;
   chan->ircnet_status &= ~(CHAN_PEND | CHAN_JOINING);
+  memberlist* me = ismember(chan, botname);
   /* Am *I* on the channel now? if not, well d0h. */
-  if (shouldjoin(chan) && !ismember(chan, botname)) {
+  if (shouldjoin(chan) && !me) {
     putlog(LOG_MISC | LOG_JOIN, chan->dname, "Oops, I'm not really on %s.", chan->dname);
     chan->ircnet_status &= ~CHAN_ACTIVE;
     join_chan(chan);
   } else {
+    me->joined = now;				/* set this to keep the whining masses happy */
     if (me_op(chan))
       recheck_channel(chan, 2);
     else if (chan->channel.members == 1)
