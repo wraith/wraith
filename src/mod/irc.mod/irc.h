@@ -109,6 +109,7 @@ static void get_channel_masks(struct chanset_t* chan);
 
 #endif /* MAKING_IRC */
 
+void force_join_chan(struct chanset_t* chan, int idx = DP_MODE);
 void join_chan(struct chanset_t* chan, int idx = DP_MODE);
 
 int check_bind_authc(char *, Auth *, char *, char *);

@@ -199,7 +199,7 @@ void resolve_to_rbl(struct chanset_t *chan, const char *host, resolv_member *r)
 // Just got a part event (KICK, PART) on me
 static void check_rejoin(struct chanset_t* chan) {
   if (shouldjoin(chan))
-    join_chan(chan);
+    force_join_chan(chan);
   else // Out of chan, not rejoining, just clear it
     clear_channel(chan, 1);
 }
@@ -2001,8 +2001,7 @@ static int got315(char *from, char *msg)
   /* Am *I* on the channel now? if not, well d0h. */
   if (shouldjoin(chan) && !me) {
     putlog(LOG_MISC | LOG_JOIN, chan->dname, "Oops, I'm not really on %s.", chan->dname);
-    chan->ircnet_status &= ~CHAN_ACTIVE;
-    join_chan(chan);
+    force_join_chan(chan);
   } else {
     me->joined = now;				/* set this to keep the whining masses happy */
     if (me_op(chan))

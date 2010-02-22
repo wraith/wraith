@@ -1345,6 +1345,11 @@ static void send_chan_who(int queue, struct chanset_t *chan) {
       dprintf(queue, "WHO %s\n", chan->name);
 }
 
+void force_join_chan(struct chanset_t* chan, int idx) {
+  chan->ircnet_status = 0;
+  join_chan(chan, idx);
+}
+
 void join_chan(struct chanset_t* chan, int idx) {
   if (shouldjoin(chan) && !(chan->ircnet_status & (CHAN_ACTIVE | CHAN_PEND | CHAN_JOINING))) {
     dprintf(idx, "JOIN %s %s\n",

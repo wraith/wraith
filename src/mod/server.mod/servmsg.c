@@ -205,7 +205,7 @@ join_chans()
 {
   for (register struct chanset_t *chan = chanset; chan; chan = chan->next) {
     if (shouldjoin(chan))
-      join_chan(chan, DP_SERVER);
+      force_join_chan(chan, DP_SERVER);
   }
 }
 
@@ -374,7 +374,7 @@ static int got442(char *from, char *msg)
   chan = findchan(chname);
   if (chan && shouldjoin(chan) && !channel_joining(chan)) {
     putlog(LOG_MISC, chname, "Server says I'm not on channel: %s", chname);
-    join_chan(chan);
+    force_join_chan(chan);
   }
 
   return 0;
