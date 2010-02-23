@@ -641,7 +641,7 @@ readsocks(const char *fname)
 
   while (stream.tell() < stream.length()) {
     str = stream.getline().chomp();
-//    dprintf(DP_DEBUG, "read line: %s\n", str.c_str());
+    dprintf(DP_DEBUG, "read line: %s\n", str.c_str());
     type = newsplit(str);
 
     if (type == STR("-dcc"))
