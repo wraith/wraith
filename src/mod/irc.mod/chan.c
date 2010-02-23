@@ -3003,6 +3003,7 @@ void check_should_cycle(struct chanset_t *chan)
     }
   }
   if (splitbotops > 5) {
+    sdprintf("Cycling %s", chan->dname);
     /* I'm only one opped here... and other side has some ops... so i'm cycling */
     if (localnonops) {
       /* need to unset any +kil first */
