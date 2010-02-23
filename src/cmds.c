@@ -1053,7 +1053,7 @@ static void cmd_console(int idx, char *par)
       return;
     }
 
-    strlcpy(dcc[dest].u.chat->con_chan, nick, 81);
+    strlcpy(dcc[dest].u.chat->con_chan, nick, sizeof(dcc[dest].u.chat->con_chan));
     nick[0] = 0;
     if ((dest == idx) && !glob_master(fr) && !chan_master(fr))
       /* Consoling to another channel for self */

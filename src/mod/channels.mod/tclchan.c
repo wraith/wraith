@@ -1009,7 +1009,7 @@ int channel_add(char *result, const char *newname, char *options, bool isdefault
      * any code later on. chan->name gets updated with the channel name as
      * the server knows it, when we join the channel. <cybah>
      */
-    strlcpy(chan->dname, newname, 81);
+    strlcpy(chan->dname, newname, sizeof(chan->dname));
 
     /* Initialize chan->channel info */
     if (isdefault) {

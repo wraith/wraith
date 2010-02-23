@@ -1309,7 +1309,7 @@ reset_chan_info(struct chanset_t *chan)
   if (!chan) return;
 
   if (!chan->name[0])
-    strlcpy(chan->name, chan->dname, 81);
+    strlcpy(chan->name, chan->dname, sizeof(chan->name));
 
   /* Don't reset the channel if we're already resetting it */
   if (!shouldjoin(chan)) {

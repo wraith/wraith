@@ -2635,7 +2635,7 @@ static int gotjoin(char *from, char *chname)
 	  /* It was me joining! Need to update the channel record with the
 	   * unique name for the channel (as the server see's it). <cybah>
 	   */
-	  strlcpy(chan->name, chname, 81);
+	  strlcpy(chan->name, chname, sizeof(chan->name));
 	  chan->ircnet_status &= ~CHAN_JUPED;
 
           /* ... and log us joining. Using chan->dname for the channel is
