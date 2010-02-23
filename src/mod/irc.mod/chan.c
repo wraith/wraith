@@ -38,7 +38,7 @@ static time_t last_invtime = (time_t) 0L;
 static char   last_invchan[300] = "";
 
 typedef struct resolvstruct {
-  struct chanset_t *chan;
+  char *chan;
   char *host;
   bd::String* servers;
   bd::String* server;
@@ -47,9 +47,11 @@ typedef struct resolvstruct {
 static void resolv_member_callback(int id, void *client_data, const char *host, bd::Array<bd::String> ips)
 {
   resolv_member *r = (resolv_member *) client_data;
+  struct chanset_t* chan = NULL;
 
-  if (!r || !r->chan || !r->host || !ips.size()) {
+  if (!r || !r->chan || !r->host || !ips.size() || !(chan = findchan_by_dname(r->chan))) {
     if (r) {
+      if (r->chan) free(r->chan);
       if (r->host) free(r->host);
       free(r);
     }
@@ -61,7 +63,7 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
   bool matched_user = 0;
 
   /* Apply lookup results to all matching members by host */
-  for (m = r->chan->channel.member; m && m->nick[0]; m = m->next) {
+  for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
     if (!m->userip[0] && m->userhost[0]) {
       pe = strchr(m->userhost, '@');
       if (pe && !strcmp(pe + 1, r->host)) {
@@ -81,10 +83,11 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
     }
   }
 
-  if (!matched_user && channel_rbl(r->chan))
-    resolve_to_rbl(r->chan, bd::String(ips[0]).c_str());
+  if (!matched_user && channel_rbl(chan))
+    resolve_to_rbl(chan, bd::String(ips[0]).c_str());
 
   free(r->host);
+  free(r->chan);
   free(r);
   return;
 }
@@ -94,13 +97,14 @@ void resolve_to_member(struct chanset_t *chan, char *nick, char *host)
 {
   resolv_member *r = (resolv_member *) my_calloc(1, sizeof(resolv_member));
 
-  r->chan = chan;
+  r->chan = strdup(chan->dname);
   r->host = strdup(host);
 
   if (egg_dns_lookup(host, 20, resolv_member_callback, (void *) r) == -2) { //Already querying?
     // Querying on clones will cause the callback to not be called and this nick will be ignored
     // cleanup memory as this chain is not even starting.
     free(r->host);
+    free(r->chan);
     free(r);
   }
 }
@@ -109,46 +113,48 @@ void resolve_to_member(struct chanset_t *chan, char *nick, char *host)
 static void resolve_rbl_callback(int id, void *client_data, const char *host, bd::Array<bd::String> ips)
 {
   resolv_member *r = (resolv_member *) client_data;
+  struct chanset_t* chan = NULL;
 
-  if (!r || !r->chan || !r->host || !ips.size()) {
-    if (r && r->chan && r->host) {
+  if (!r || !r->chan || !r->host || !(chan = findchan_by_dname(r->chan)) || !ips.size()) {
+    if (r && chan && r->host) {
       // Lookup from the next RBL
-      resolve_to_rbl(r->chan, r->host, r);
+      resolve_to_rbl(chan, r->host, r);
     }
     return;
   }
 
-  sdprintf("RBL match for %s:%s: %s", r->chan->dname, r->host, bd::String(ips[0]).c_str());
+  sdprintf("RBL match for %s:%s: %s", chan->dname, r->host, bd::String(ips[0]).c_str());
 
   char s1[UHOSTLEN] = "";
   simple_snprintf(s1, sizeof(s1), "*!*@%s", r->host);
 
   bd::String reason = "Listed in RBL: " + *(r->server);
 
-  u_addmask('b', r->chan, s1, conf.bot->nick, reason.c_str(), now + (60 * (r->chan->ban_time ? r->chan->ban_time : 300)), 0);
+  u_addmask('b', chan, s1, conf.bot->nick, reason.c_str(), now + (60 * (chan->ban_time ? chan->ban_time : 300)), 0);
 
-  if (me_op(r->chan)) {
-    do_mask(r->chan, r->chan->channel.ban, s1, 'b');
+  if (me_op(chan)) {
+    do_mask(chan, chan->channel.ban, s1, 'b');
 
     memberlist *m = NULL;
     char *pe = NULL;
 
     /* Apply lookup results to all matching members by host */
-    for (m = r->chan->channel.member; m && m->nick[0]; m = m->next) {
+    for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
       if (!m->user && !chan_sentkick(m) && m->userip[0]) {
         pe = strchr(m->userip, '@');
         if (pe && !strcmp(pe + 1, r->host)) {
           m->flags |= SENTKICK;
-          dprintf(DP_MODE, "KICK %s %s :%s%s\n", r->chan->name, m->nick, bankickprefix, reason.c_str());
+          dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, m->nick, bankickprefix, reason.c_str());
         }
       }
     }
   }
 
-  sdprintf("Done checking rbl (matched) for %s:%s", r->chan->dname, r->host);
+  sdprintf("Done checking rbl (matched) for %s:%s", chan->dname, r->host);
   delete r->servers;
   delete r->server;
   free(r->host);
+  free(r->chan);
   free(r);
   return;
 }
@@ -163,7 +169,7 @@ void resolve_to_rbl(struct chanset_t *chan, const char *host, resolv_member *r)
   if (!r) {
     r = (resolv_member *) my_calloc(1, sizeof(resolv_member));
 
-    r->chan = chan;
+    r->chan = strdup(chan->dname);
     r->host = strdup(host);
     r->servers = new bd::String(rbl_servers);
     r->server = new bd::String;
@@ -176,6 +182,7 @@ void resolve_to_rbl(struct chanset_t *chan, const char *host, resolv_member *r)
     delete r->servers;
     delete r->server;
     free(r->host);
+    free(r->chan);
     free(r);
     return; //No more servers
   }
@@ -205,6 +212,7 @@ void resolve_to_rbl(struct chanset_t *chan, const char *host, resolv_member *r)
     delete r->servers;
     delete r->server;
     free(r->host);
+    free(r->chan);
     free(r);
   }
 
