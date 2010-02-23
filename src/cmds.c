@@ -891,7 +891,7 @@ static void cmd_userlist(int idx, char *par)
   PRINT_USERS(0, USER_OP, USER_MASTER, "Ops");
   PRINT_USERS(0, 0, USER_OP, "Users");
 
-  dprintf(idx, "Total bots: %d\n", bt);
+  dprintf(idx, "Total bots : %d\n", bt);
   dprintf(idx, "Total users: %d\n", tt);
 
   return;
@@ -4382,7 +4382,9 @@ void gotremotereply (char *frombot, char *tohand, char *toidx, char *ln) {
     buf = (char *) my_calloc(1, siz);
 
     simple_snprintf(buf, siz, "(%s)", frombot);
-    dprintf(idx, "%-13s %s\n", buf, ln);
+    char format[10] = "";
+    simple_snprintf(format, sizeof(format), "%%-%ds %%s\n", HANDLEN + 2);
+    dprintf(idx, format, buf, ln);
     free(buf);
   }
 }

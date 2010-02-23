@@ -817,24 +817,24 @@ void channels_report(int idx, int details)
 	if (channel_active(chan)) {
 	  /* If it's a !chan, we want to display it's unique name too <cybah> */
 	  if (chan->dname[0]=='!') {
-	    dprintf(idx, "    %-10s: %2d member%s enforcing \"%s\" (%s), "
+	    dprintf(idx, "    %-20s: %2d member%s enforcing \"%s\" (%s), "
 	            "unique name %s\n", chan->dname, chan->channel.members,
 	            (chan->channel.members==1) ? "," : "s,", s2, s, chan->name);
 	  } else {
-	    dprintf(idx, "    %-10s: %2d member%s enforcing \"%s\" (%s)\n",
+	    dprintf(idx, "    %-20s: %2d member%s enforcing \"%s\" (%s)\n",
 	            chan->dname, chan->channel.members,
 	            chan->channel.members == 1 ? "," : "s,", s2, s);
 	  }
 	} else {
           if (!conf.bot->hub)
-            dprintf(idx, "    %-10s: (%s), enforcing \"%s\"  (%s)\n", chan->dname,
+            dprintf(idx, "    %-20s: (%s), enforcing \"%s\"  (%s)\n", chan->dname,
 		  channel_pending(chan) ? "pending" : "not on channel", s2, s);
           else
-            dprintf(idx, "    %-10s: (%s), enforcing \"%s\"  (%s)\n", chan->dname,
+            dprintf(idx, "    %-20s: (%s), enforcing \"%s\"  (%s)\n", chan->dname,
 		  "limbo", s2, s);
 	}
       } else {
-	dprintf(idx, "    %-10s: channel is set +inactive\n",
+	dprintf(idx, "    %-20s: channel is set +inactive\n",
 		chan->dname);
       }
       if (details) {

@@ -363,7 +363,7 @@ static void write_user(const struct userrec *u, bd::Stream& stream, int idx)
   bd::String buf;
 
   build_flags(s, &fr, NULL);
-  stream << buf.printf("%s%-10s - %-24s\n", u->bot ? "-" : "", u->handle, s);
+  stream << buf.printf("%s%s - %s\n", u->bot ? "-" : "", u->handle, s);
 
   struct chanset_t *cst = NULL;
 
@@ -377,7 +377,7 @@ static void write_user(const struct userrec *u, bd::Stream& stream, int idx)
       fr.match = FR_CHAN;
       fr.chan = ch->flags;
       build_flags(s, &fr, NULL);
-      stream << buf.printf("! %-20s %li %-10s %s\n", ch->channel, (long) ch->laston, s, ch->info ? ch->info : "");
+      stream << buf.printf("! %s %li %s %s\n", ch->channel, (long) ch->laston, s, ch->info ? ch->info : "");
     }
   }
   for (struct user_entry *ue = u->entries; ue; ue = ue->next) {
