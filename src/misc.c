@@ -655,12 +655,11 @@ readsocks(const char *fname)
     else if (type == STR("+server_floodless"))
       floodless = 1;
     else if (type == STR("+chan")) {
-      bd::String chname = newsplit(str), status = newsplit(str), ircnet_status = newsplit(str);
+      bd::String chname = str;
       channel_add(NULL, chname.c_str(), NULL);
       struct chanset_t* chan = findchan_by_dname(chname.c_str());
-      chan->status = atoi(status.c_str());
-      chan->ircnet_status = atoi(ircnet_status.c_str());
-      chan->ircnet_status &= ~(CHAN_ACTIVE);
+      strlcpy(chan->name, chan->dname, sizeof(chan->name));
+      chan->status = chan->ircnet_status = 0;
       chan->ircnet_status |= CHAN_PEND;
       reset_chans = 2;
     }
@@ -773,7 +772,7 @@ restart(int idx)
     stream << buf.printf(STR("+server_floodless %d\n"), floodless);
   for (struct chanset_t *chan = chanset; chan; chan = chan->next)
     if (shouldjoin(chan) && channel_active(chan))
-      stream << buf.printf(STR("+chan %s %d %d\n"), chan->dname, chan->status, chan->ircnet_status);
+      stream << buf.printf(STR("+chan %s\n"), chan->dname);
   stream << buf.printf(STR("+buildts %li\n"), buildts);
   stream << buf.printf(STR("+ip4 %s\n"), myipstr(AF_INET));
   stream << buf.printf(STR("+ip6 %s\n"), myipstr(AF_INET6));
