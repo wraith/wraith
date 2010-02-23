@@ -640,11 +640,11 @@ readsocks(const char *fname)
     str = stream.getline().chomp();
     type = newsplit(str);
 
-//    dprintf(DP_STDOUT, "read line: %s\n", buf.c_str());
+//    dprintf(DP_DEBUG, "read line: %s\n", buf.c_str());
     if (type == STR("-dcc"))
-      dprintf(DP_STDOUT, STR("Added dcc: %d\n"), dcc_read(stream));
+      dprintf(DP_DEBUG, STR("Added dcc: %d\n"), dcc_read(stream));
     else if (type == STR("-sock"))
-      dprintf(DP_STDOUT, STR("Added fd: %d\n"), sock_read(stream));
+      dprintf(DP_DEBUG, STR("Added fd: %d\n"), sock_read(stream));
     else if (type == STR("+online_since"))
       online_since = strtol(str.c_str(), NULL, 10);
     else if (type == STR("+server_online"))
@@ -670,8 +670,8 @@ readsocks(const char *fname)
   if (old_buildts && buildts > old_buildts)
     restart_was_update = 1;
 
-  tell_dcc(DP_STDOUT);
-  tell_netdebug(DP_STDOUT);
+  tell_dcc(DP_DEBUG);
+  tell_netdebug(DP_DEBUG);
 
   unlink(fname);
 
