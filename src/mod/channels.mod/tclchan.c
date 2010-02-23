@@ -912,7 +912,7 @@ void clear_channel(struct chanset_t *chan, bool reset)
 
 /* Create new channel and parse commands.
  */
-int channel_add(char *result, char *newname, char *options, bool isdefault)
+int channel_add(char *result, const char *newname, char *options, bool isdefault)
 {
   /* When loading userfile */
   if (newname && newname[0] && loading && !strcmp(newname, "default"))

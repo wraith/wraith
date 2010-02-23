@@ -1453,10 +1453,14 @@ static void share_read_stream(int idx, bd::Stream& stream) {
   /* If this is ever changed, do mind the restarting bool as it will prevent 001 from dumping JOINs.. */
   if (reset_chans) {
     reset_chans = 0;
-//    putlog(LOG_DEBUG, "*", "Resetting channel info for all channels...");
-//    for (chan = chanset; chan; chan = chan->next)
-//      reset_chan_info(chan);
-    join_chans();
+    putlog(LOG_DEBUG, "*", "Resetting channel info for all channels...");
+    for (chan = chanset; chan; chan = chan->next) {
+      if (shouldjoin(chan) && channel_pending(chan)) { // Set when reading socksfile
+        chan->ircnet_status &= ~(CHAN_PEND); // Reset flags to force a reset
+        reset_chan_info(chan);
+      }
+    }
+//    join_chans();
   }
 }
 

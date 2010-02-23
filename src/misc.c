@@ -50,6 +50,7 @@
 #include "tandem.h"
 #include "src/mod/server.mod/server.h"
 #include "src/mod/irc.mod/irc.h"
+#include "src/mod/channels.mod/channels.h"
 #include "userrec.h"
 #include "stat.h"
 #include "net.h"
@@ -638,9 +639,9 @@ readsocks(const char *fname)
 
   while (stream.tell() < stream.length()) {
     str = stream.getline().chomp();
+//    dprintf(DP_DEBUG, "read line: %s\n", str.c_str());
     type = newsplit(str);
 
-//    dprintf(DP_DEBUG, "read line: %s\n", buf.c_str());
     if (type == STR("-dcc"))
       dprintf(DP_DEBUG, STR("Added dcc: %d\n"), dcc_read(stream));
     else if (type == STR("-sock"))
@@ -651,6 +652,15 @@ readsocks(const char *fname)
       server_online = strtol(str.c_str(), NULL, 10);
     else if (type == STR("+server_floodless"))
       floodless = 1;
+    else if (type == STR("+chan")) {
+      bd::String chname = newsplit(str), status = newsplit(str), ircnet_status = newsplit(str);
+      channel_add(NULL, chname.c_str(), NULL);
+      struct chanset_t* chan = findchan_by_dname(chname.c_str());
+      chan->status = atoi(status.c_str());
+      chan->ircnet_status = atoi(ircnet_status.c_str());
+      chan->ircnet_status &= ~(CHAN_ACTIVE);
+      chan->ircnet_status |= CHAN_PEND;
+    }
     else if (type == STR("+buildts"))
       old_buildts = strtol(str.c_str(), NULL, 10);
     else if (type == STR("+botname"))
@@ -757,6 +767,9 @@ restart(int idx)
   stream << buf.printf(STR("+online_since %li\n"), online_since);
   if (floodless)
     stream << buf.printf(STR("+server_floodless %d\n"), floodless);
+  for (struct chanset_t *chan = chanset; chan; chan = chan->next)
+    if (shouldjoin(chan) && channel_active(chan))
+      stream << buf.printf(STR("+chan %s %d %d\n"), chan->dname, chan->status, chan->ircnet_status);
   stream << buf.printf(STR("+buildts %li\n"), buildts);
   stream << buf.printf(STR("+ip4 %s\n"), myipstr(AF_INET));
   stream << buf.printf(STR("+ip6 %s\n"), myipstr(AF_INET6));
@@ -768,12 +781,12 @@ restart(int idx)
 
   if (conf.bot->hub)
     write_userfile(idx);
-
+/*
   if (server_online) {
     do_chanset(NULL, NULL, STR("+inactive"), DO_LOCAL);
     dprintf(DP_DUMP, STR("JOIN 0\n"));
   }
-
+*/
   fixmod(binname);
 
   /* replace image now */
