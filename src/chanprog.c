@@ -832,8 +832,13 @@ chans_delbot(const char *bot, struct chanset_t *chan)
 
 bool bot_shouldjoin(struct userrec* u, struct flag_record* fr, struct chanset_t* chan, bool ignore_inactive)
 {
+  // If restarting, keep this channel.
+  if (restarting && reset_chans && channel_pending(chan)) return 1;
   /* If the bot is restarting (and hasn't finished getting the userfile for the first time) DO NOT JOIN channels - breaks +B/+backup */
   if (restarting || loading) return 0;
+
+  // No user record, can't make any safe assumptions really
+  if (!u) return 0;
 
 #ifdef DEBUG
   /* Force debugging bots to only join 3 channels */
@@ -852,12 +857,9 @@ bool bot_shouldjoin(struct userrec* u, struct flag_record* fr, struct chanset_t*
 
 bool shouldjoin(struct chanset_t *chan)
 {
-  if (conf.bot->u) {
-    struct flag_record fr = { FR_CHAN|FR_GLOBAL|FR_BOT, 0, 0, 0 };
-    get_user_flagrec(conf.bot->u, &fr, chan->dname, chan);
-    return bot_shouldjoin(conf.bot->u, &fr, chan);
-  }
-  return 0;
+  struct flag_record fr = { FR_CHAN|FR_GLOBAL|FR_BOT, 0, 0, 0 };
+  get_user_flagrec(conf.bot->u, &fr, chan->dname, chan);
+  return bot_shouldjoin(conf.bot->u, &fr, chan);
 }
 
 /* do_chanset() set (options) on (chan)
