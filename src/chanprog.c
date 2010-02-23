@@ -63,7 +63,7 @@ char 			origbotname[NICKLEN] = "";	/* Nick to regain */
 char                    jupenick[NICKLEN] = "";
 char 			botname[NICKLEN] = "";	/* IRC nickname */
 port_t     		my_port = 0;
-bool			reset_chans = 0;
+int			reset_chans = 0;
 bool                    cookies_disabled = 0;
 char s2_4[3] = "",s1_6[3] = "",s1_11[3] = "";
 

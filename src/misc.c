@@ -637,6 +637,8 @@ readsocks(const char *fname)
   stream.loadFile(fname);
   bd::String str, type;
 
+  reset_chans = 0;
+
   while (stream.tell() < stream.length()) {
     str = stream.getline().chomp();
 //    dprintf(DP_DEBUG, "read line: %s\n", str.c_str());
@@ -660,6 +662,7 @@ readsocks(const char *fname)
       chan->ircnet_status = atoi(ircnet_status.c_str());
       chan->ircnet_status &= ~(CHAN_ACTIVE);
       chan->ircnet_status |= CHAN_PEND;
+      reset_chans = 2;
     }
     else if (type == STR("+buildts"))
       old_buildts = strtol(str.c_str(), NULL, 10);
@@ -705,7 +708,8 @@ readsocks(const char *fname)
         replay_cache(servidx, NULL);
       else
         dprintf(DP_DUMP, "VERSION\n");
-      reset_chans = 1;
+      if (!reset_chans)
+        reset_chans = 1;
     }
   }
   delete[] nick;

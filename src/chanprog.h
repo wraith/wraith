@@ -36,6 +36,7 @@ void setup_HQ(int);
 extern struct chanset_t		*chanset, *chanset_default;
 extern char			admin[], origbotnick[HANDLEN + 1], origbotname[NICKLEN], jupenick[NICKLEN], botname[NICKLEN], *def_chanset;
 extern port_t			my_port;
-extern bool			reset_chans, cookies_disabled;
+extern int			reset_chans;
+extern bool			cookies_disabled;
 
 #endif /* !_CHANPROG_H */
