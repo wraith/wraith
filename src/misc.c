@@ -771,7 +771,7 @@ restart(int idx)
   if (floodless)
     stream << buf.printf(STR("+server_floodless %d\n"), floodless);
   for (struct chanset_t *chan = chanset; chan; chan = chan->next)
-    if (shouldjoin(chan) && channel_active(chan))
+    if (shouldjoin(chan) && (channel_active(chan) || channel_pending(chan)))
       stream << buf.printf(STR("+chan %s\n"), chan->dname);
   stream << buf.printf(STR("+buildts %li\n"), buildts);
   stream << buf.printf(STR("+ip4 %s\n"), myipstr(AF_INET));
