@@ -833,7 +833,7 @@ chans_delbot(const char *bot, struct chanset_t *chan)
 bool bot_shouldjoin(struct userrec* u, struct flag_record* fr, struct chanset_t* chan, bool ignore_inactive)
 {
   // If restarting, keep this channel.
-  if (restarting && (reset_chans == 2) && channel_pending(chan)) return 1;
+  if (restarting && (reset_chans == 2) && (channel_active(chan) || channel_pending(chan))) return 1;
   /* If the bot is restarting (and hasn't finished getting the userfile for the first time) DO NOT JOIN channels - breaks +B/+backup */
   if (restarting || loading) return 0;
 
