@@ -31,13 +31,11 @@ efnet.cs.hut.fi
 efnet.port80.se
 efnet.xs4all.nl
 irc.ac.za
-irc.daxnet.no
 irc.du.se
 irc.efnet.ch
 irc.efnet.fr
 irc.efnet.nl
 irc.efnet.pl
-irc.efnet.ru
 irc.homelien.no
 irc.inet.tele.dk
 irc.inter.net.il
