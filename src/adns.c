@@ -297,11 +297,27 @@ static void free_query(dns_query_t*& q) {
 	q = NULL;
 }
 
+static int get_dns_id() {
+	while (1) {
+		int id = randint(65534);
+		bool found = 0;
+		// Make sure this ID is not already in use, avoid a race condition
+		for (dns_query_t *q = query_head; q; q = q->next) {
+			if (q->id == id) {
+				found = 1;
+				break;
+			}
+		}
+		if (found) continue;
+		return id;
+	}
+}
+
 static dns_query_t *alloc_query(void *client_data, dns_callback_t callback, const char *query)
 {
 	dns_query_t *q = (dns_query_t *) my_calloc(1, sizeof(*q));
 
-	q->id = randint(65534);
+	q->id = get_dns_id();
 	q->query = strdup(query);
 	q->answers = 0;
         q->answer = new bd::Array<bd::String>;
@@ -1264,7 +1280,7 @@ void tell_dnsdebug(int idx)
 	for (int i = 0; i < ncache; i++) {
 		dprintf(idx, "cache(%d) %s expires in %ds\n", i, cache[i].query, (int) (cache[i].expiretime - now));
 		for (size_t n = 0; n < cache[i].answer->size(); n++)
-			dprintf(idx, "%zu: %s\n", n, cache[i].answer->join(',').c_str());
+			dprintf(idx, "%zu: %s\n", n, bd::String((*(cache[i].answer))[n]).c_str());
 	}
 }
 
