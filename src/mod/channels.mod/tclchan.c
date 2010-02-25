@@ -804,7 +804,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
   if (!conf.bot->hub && (chan != chanset_default)) {
     if ((old_status ^ chan->status) & (CHAN_INACTIVE | CHAN_BACKUP)) {
       if (!shouldjoin(chan) && (chan->ircnet_status & (CHAN_ACTIVE | CHAN_PEND))) {
-        putlog(LOG_MISC, "*", "In %s, but I shouldn't be, parting...", chan->dname);
+        putlog(LOG_DEBUG, "*", "In %s, but I shouldn't be, parting...", chan->dname);
         dprintf(DP_SERVER, "PART %s\n", chan->name);
       }
       if (shouldjoin(chan) && !(chan->ircnet_status & (CHAN_ACTIVE | CHAN_PEND | CHAN_JOINING))) {
