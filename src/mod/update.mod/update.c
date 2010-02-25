@@ -300,8 +300,8 @@ static void start_sending_binary(int idx, bool streamable)
   simple_snprintf(update_file, sizeof update_file, "wraith.%s-%s", sysname, egg_version);
 
   simple_snprintf(update_fpath, sizeof update_fpath, "%s/bins/%s", dirname(binname), update_file);
-  if (!can_stat(update_fpath))
-    simple_snprintf(update_fpath, sizeof update_fpath, "%s/%s", dirname(binname), update_file);
+//  if (!can_stat(update_fpath))
+//    simple_snprintf(update_fpath, sizeof update_fpath, "%s/%s", dirname(binname), update_file);
 
   if (!can_stat(update_fpath)) {
     putlog(LOG_MISC, "*", "Need to update \002%s\002 with %s but there was an error: %s", dcc[idx].nick, update_fpath,
