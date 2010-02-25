@@ -185,7 +185,6 @@ void rehash_monitor_list() {
 
 void rehash_server(const char *servname, const char *nick)
 {
-  altnick_char = 0;
   strlcpy(cursrvname, servname, sizeof(cursrvname));
   if (servidx >= 0)
     curservport = dcc[servidx].port;
