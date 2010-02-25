@@ -1834,8 +1834,7 @@ static void connect_server(void)
     jnick_juped = 0;
     tried_jupenick = 0;
     tried_nick = 0;
-    rolls = 0;
-    altnick_char = 0;
+    altnick_char = rolls = 0;
     use_monitor = 0;
 
     for (chan = chanset; chan; chan = chan->next)
@@ -1934,7 +1933,7 @@ static void server_dns_callback(int id, void *client_data, const char *host, bd:
     else
       strlcpy(botname, origbotname, sizeof(botname));
     /* Start alternate nicks from the beginning */
-    altnick_char = 0;
+    altnick_char = rolls = 0;
     /* reset counter so first ctcp is dumped for tcms */
     first_ctcp_check = 0;
 
