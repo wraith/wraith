@@ -54,6 +54,8 @@
 #include "src/mod/irc.mod/irc.h"
 #include "src/mod/server.mod/server.h"
 
+void irc_init();
+
 static struct flag_record fr = { 0, 0, 0, 0 };
 
 static bd::Stream* stream_in;
@@ -1453,6 +1455,7 @@ static void share_read_stream(int idx, bd::Stream& stream) {
   /* If this is ever changed, do mind the restarting bool as it will prevent 001 from dumping JOINs.. */
   if (reset_chans) {
     if (reset_chans == 2) {
+      irc_init();
       putlog(LOG_DEBUG, "*", "Resetting channel info for all channels...");
       for (chan = chanset; chan; chan = chan->next) {
         if (shouldjoin(chan) && channel_pending(chan)) { // Set when reading socksfile
