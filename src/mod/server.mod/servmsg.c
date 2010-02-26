@@ -310,13 +310,13 @@ got005(char *from, char *msg)
       use_354 = 1;
     else if (!strcasecmp(tmp, "DEAF")) {
       deaf_char = p ? p[0] : 'D';
-      if (use_deaf) {
+      if (use_deaf && !deaf_set) {
         dprintf(DP_SERVER, "MODE %s +%c\n", botname, deaf_char);
         deaf_set = 1;
       }
     } else if (!strcasecmp(tmp, "CALLERID")) {
       callerid_char = p ? p[0] : 'g';
-      if (use_callerid) {
+      if (use_callerid && !in_callerid) {
         dprintf(DP_SERVER, "MODE %s +%c\n", botname, callerid_char);
         in_callerid = 1;
       }
@@ -408,8 +408,10 @@ rate_t flood_callerid = { 6, 2 };
 
 void unset_callerid(int data)
 {
-  dprintf(DP_MODE, "MODE %s :-%c\n", botname, callerid_char);
-  in_callerid = 0;
+  if (in_callerid) {
+    dprintf(DP_MODE, "MODE %s :-%c\n", botname, callerid_char);
+    in_callerid = 0;
+  }
 }
 
 /* Do on NICK, PRIVMSG, NOTICE and JOIN.
