@@ -467,11 +467,11 @@ static int proxy_connect(int sock, const char *ip, port_t port, int proxy_type)
                    (port % 256), x[0], x[1], x[2], x[3], botuser);
     tputs(sock, s, strlen(botuser) + 9);
   } else if (proxy_type == PROXY_SUN) {
-    simple_snprintf(s, sizeof s, "%s %d\n", ip, port);
-    tputs(sock, s, strlen(s));
+    size_t len = simple_snprintf(s, sizeof s, "%s %d\n", ip, port);
+    tputs(sock, s, len);
   } else if (proxy_type == PROXY_HTTP) {
-    simple_snprintf(s, sizeof s, "CONNECT %s:%d\n\n", ip, port);
-    tputs(sock, s, strlen(s));
+    size_t len = simple_snprintf(s, sizeof s, "CONNECT %s:%d\n\n", ip, port);
+    tputs(sock, s, len);
   }
 
   return sock;

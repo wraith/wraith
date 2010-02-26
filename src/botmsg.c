@@ -88,8 +88,8 @@ void botnet_send_cmdpass(int idx, char *cmd, char *pass)
 
     buf = (char *) my_calloc(1, siz);
 
-    simple_snprintf(buf, siz, "cp %s %s\n", cmd, pass);
-    send_tand_but(idx, buf, strlen(buf));
+    size_t len = simple_snprintf(buf, siz, "cp %s %s\n", cmd, pass);
+    send_tand_but(idx, buf, len);
     free(buf);
   }
 }
@@ -112,8 +112,8 @@ int botnet_send_cmd(char * fbot, char * bot, char *fhnd, int fromidx, char * cmd
 
 void botnet_send_cmd_broad(int idx, char * fbot, char *fhnd, int fromidx, char * cmd) {
   if (tands > 0) {
-    simple_snprintf(OBUF, sizeof OBUF, "rc * %s %s %i %s\n", fbot, fhnd, fromidx, cmd);
-    send_tand_but(idx, OBUF, strlen(OBUF));
+    size_t len = simple_snprintf(OBUF, sizeof OBUF, "rc * %s %s %i %s\n", fbot, fhnd, fromidx, cmd);
+    send_tand_but(idx, OBUF, len);
   }
   if (idx < 0) {
     char tmp[24] = "";
