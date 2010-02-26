@@ -127,18 +127,24 @@ bind_table_t *BT_ctcr = NULL, *BT_ctcp = NULL, *BT_msgc = NULL;
 /* Maximum messages to store in each queue. */
 static int maxqmsg = 300;
 static struct msgq_head mq, hq, modeq, cacheq;
+
 static const struct {
   struct msgq_head *q;
   int idx;
+  const char* name;
   const char pfx;
-} qdsc[3] = {
-  { &modeq, 	DP_MODE, 	'm' },
-  { &mq, 	DP_SERVER, 	's' },
-  { &hq, 	DP_HELP, 	'h' },
+  bool *double_msg;
+  bool burst;
+} qdsc[4] = {
+  { &modeq, 	DP_MODE,	"MODE", 	'm',	&double_mode,	1 },
+  { &mq, 	DP_SERVER,	"SERVER", 	's',	&double_server,	1 },
+  { &hq, 	DP_HELP,	"HELP", 	'h',	&double_help,	0 },
+  { &cacheq, 	DP_CACHE,	"CACHE", 	'c',	NULL,		0 },
 };
 #define Q_MODE 0
 #define Q_SERVER 1
 #define Q_HELP 2
+#define Q_CACHE 3
 static int burst;
 
 #include "cmdsserv.c"
@@ -208,7 +214,7 @@ void deq_msg()
    */
   bool nm = 0;
   for(size_t nq = 0; nq < (sizeof(qdsc) / sizeof(qdsc[0])); ++nq) {
-    while (qdsc[nq].q->head && (burst < msgburst) && ((last_time.sec - now) < MAXPENALTY)) {
+    while (qdsc[nq].q->head && qdsc[nq].burst && (burst < msgburst) && ((last_time.sec - now) < MAXPENALTY)) {
 #ifdef not_implemented
       if (deq_kick(qdsc[nq].idx)) {
         ++burst;
@@ -533,10 +539,8 @@ static bool fast_deq(int which)
  */
 static void empty_msgq()
 {
-  msgq_clear(&modeq);
-  msgq_clear(&mq);
-  msgq_clear(&hq);
-  msgq_clear(&cacheq);
+  for (size_t i = 0; i < (sizeof(qdsc) / sizeof(qdsc[0])); ++i)
+    msgq_clear(qdsc[i].q);
   burst = 0;
 }
 
@@ -548,71 +552,53 @@ void queue_server(int which, char *buf, int len)
   if (serv < 0)
     return;
 
-  struct msgq_head *h = NULL, tempq;
-  struct msgq *q = NULL;
-  int qnext = 0;
-  bool doublemsg = 0;
-
   // If connect bursting, hold off any commands which would end the gracetime (flood_endgrace)
   if (connect_bursting && (which == DP_MODE || which == DP_MODE_NEXT || which == DP_SERVER || which == DP_SERVER_NEXT)) {
     if (!burst_ok(buf, len))
       which = DP_HELP;
   }
 
+  int qnext = 0;
+  int which_q = 0;
+
   switch (which) {
-  case DP_MODE_NEXT:
-    qnext = 1;
-    /* Fallthrough */
-  case DP_MODE:
-    h = &modeq;
-    tempq = modeq;
-    if (double_mode)
-      doublemsg = 1;
-    break;
-
-  case DP_SERVER_NEXT:
-    qnext = 1;
-    /* Fallthrough */
-  case DP_SERVER:
-    h = &mq;
-    tempq = mq;
-    if (double_server)
-      doublemsg = 1;
-    break;
-
-  case DP_HELP_NEXT:
-    qnext = 1;
-    /* Fallthrough */
-  case DP_HELP:
-    h = &hq;
-    tempq = hq;
-    if (double_help)
-      doublemsg = 1;
-    break;
-
-  case DP_CACHE:
-    h = &cacheq;
-    tempq = cacheq;
-    doublemsg = 0;
-    break;
-
-  default:
-    putlog(LOG_MISC, "*", "!!! queuing unknown type to server!!");
-    return;
+    case DP_MODE_NEXT:
+      qnext = 1;
+    case DP_MODE:
+      which_q = Q_MODE;
+      break;
+    case DP_SERVER_NEXT:
+      qnext = 1;
+    case DP_SERVER:
+      which_q = Q_SERVER;
+      break;
+    case DP_HELP_NEXT:
+      qnext = 1;
+    case DP_HELP:
+      which_q = Q_HELP;
+      break;
+    case DP_CACHE:
+      which_q = Q_CACHE;
+      break;
+    default:
+      putlog(LOG_MISC, "*", "!!! queuing unknown type to server!!");
+      return;
   }
 
+  struct msgq_head *h = qdsc[which_q].q;
+
   if (h->tot < maxqmsg) {
+    int doublemsg = 0;
+    if (qdsc[which_q].double_msg)
+      doublemsg = *(qdsc[which_q].double_msg);
     /* Don't queue msg if it's already queued?  */
     if (!doublemsg) {
-      struct msgq *tq = NULL, *tqq = NULL;
-
-      for (tq = tempq.head; tq; tq = tqq) {
-	tqq = tq->next;
+      for (struct msgq* tq = qdsc[which_q].q->head; tq; tq = tq->next) {
 	if (!strcasecmp(tq->msg, buf)) {
 	  if (!double_warned) {
 	    if (buf[len - 1] == '\n')
 	      buf[len - 1] = 0;
-	    debug1("msg already queued. skipping: %s", buf);
+	    putlog(LOG_DEBUG, "*", "msg already queued. skipping: %s", buf);
 	    double_warned = 1;
 	  }
 	  return;
@@ -620,7 +606,7 @@ void queue_server(int which, char *buf, int len)
       }
     }
 
-    q = (struct msgq *) my_calloc(1, sizeof(struct msgq));
+    struct msgq *q = (struct msgq *) my_calloc(1, sizeof(struct msgq));
     if (qnext)
       q->next = h->head;
     else
@@ -640,57 +626,13 @@ void queue_server(int which, char *buf, int len)
     h->warned = 0;
     double_warned = 0;
   } else {
-    if (!h->warned) {
-      switch (which) {   
-	case DP_MODE_NEXT:
- 	/* Fallthrough */
-	case DP_MODE:
-      putlog(LOG_MISC, "*", "!!! OVER MAXIMUM MODE QUEUE");
- 	break;
-    
-	case DP_SERVER_NEXT:
- 	/* Fallthrough */
- 	case DP_SERVER:
-	putlog(LOG_MISC, "*", "!!! OVER MAXIMUM SERVER QUEUE");
-	break;
-            
-	case DP_HELP_NEXT:
-	/* Fallthrough */
-	case DP_HELP:
-	putlog(LOG_MISC, "*", "!!! OVER MAXIMUM HELP QUEUE");
-	break;
-      }
-    }
+    if (!h->warned)
+      putlog(LOG_MISC, "*", "!!! OVER MAXIMUM %s QUEUE", qdsc[which_q].name);
     h->warned = 1;
   }
 
-  if (debug_output && !h->warned) {
-    switch (which) {
-    case DP_MODE:
-      putlog(LOG_SRVOUT, "@", "[!m] %s", buf);
-      break;
-    case DP_SERVER:
-      putlog(LOG_SRVOUT, "@", "[!s] %s", buf);
-      break;
-    case DP_HELP:
-      putlog(LOG_SRVOUT, "@", "[!h] %s", buf);
-      break;
-    case DP_MODE_NEXT:
-      putlog(LOG_SRVOUT, "@", "[!!m] %s", buf);
-      break;
-    case DP_SERVER_NEXT:
-      putlog(LOG_SRVOUT, "@", "[!!s] %s", buf);
-      break;
-    case DP_HELP_NEXT:
-      putlog(LOG_SRVOUT, "@", "[!!h] %s", buf);
-      break;
-#ifdef DEBUG
-    case DP_CACHE:
-      sdprintf("CACHE: %s", buf);
-      break;
-#endif
-    }
-  }
+  if (debug_output && !h->warned)
+    putlog(LOG_SRVOUT, "@", "[%s%c] %s", qnext ? "!!" : "!", qdsc[which_q].pfx, buf);
 
   /* Try flushing immediately */
   deq_msg();
