@@ -1134,7 +1134,7 @@ static int got451(char *from, char *msg)
    * (minutely) sending of joins occurs before the bot does its ping reply.
    * Probably should do something about it some time - beldin
    */
-  putlog(LOG_MISC, "*", "%s says I'm not registered, trying next one.", from);
+  putlog(LOG_SERV, "*", "%s says I'm not registered, trying next one.", from);
   nuke_server("The server says we are not registered yet..");
   return 0;
 }
@@ -1212,7 +1212,7 @@ static int gotmode(char *from, char *msg)
       /* umode +r? - D0H dalnet uses it to mean something different */
       fixcolon(buf);
       if ((buf[0] == '+') && strchr(buf, 'r')) {
-	putlog(LOG_MISC | LOG_JOIN, "*", "%s has me i-lined (jumping)", dcc[servidx].host);
+	putlog(LOG_SERV, "*", "%s has me i-lined (jumping)", dcc[servidx].host);
 	nuke_server("i-lines suck");
       }
     }
@@ -1263,7 +1263,7 @@ static void disconnect_server(int idx, int dolost)
 
 static void eof_server(int idx)
 {
-  putlog(LOG_SERV, "*", "Disconnected from %s", dcc[idx].host);
+  putlog(LOG_SERV, "*", "Disconnected from %s (EOF)", dcc[idx].host);
   disconnect_server(idx, DO_LOST);
 }
 
