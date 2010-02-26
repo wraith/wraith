@@ -99,7 +99,7 @@ static bool use_penalties = 0;
 static int use_fastdeq;
 size_t nick_len = 9;			/* Maximal nick length allowed on the network. */
 char deaf_char = 0;
-bool deaf_set = 0;
+bool in_deaf = 0;
 char callerid_char = 0;
 bool in_callerid = 0;
 
@@ -1022,13 +1022,13 @@ static void server_secondly()
           bool need_chatter = doflood(NULL) || (Auth::ht_host.size() && auth_chan && strlen(auth_prefix));
 
           // In +D but am +f, need to -D
-          if (deaf_set && (need_chatter || !use_deaf)) {
+          if (in_deaf && (need_chatter || !use_deaf)) {
             dprintf(DP_SERVER, "MODE %s -%c\n", botname, deaf_char);
-            deaf_set = 0;
-          } else if (!deaf_set && use_deaf && !need_chatter) {
+            in_deaf = 0;
+          } else if (!in_deaf && use_deaf && !need_chatter) {
             // Not +D but should be, probably had +f removed.
             dprintf(DP_SERVER, "MODE %s +%c\n", botname, deaf_char);
-            deaf_set = 1;
+            in_deaf = 1;
           }
         }
 
