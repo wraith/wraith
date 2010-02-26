@@ -1491,7 +1491,7 @@ hide_chans(const char *nick, struct userrec *u, char *_channels, bool publicOnly
         if (!(p = strchr(chname, '!')))
           continue;
 
-    chan = findchan_by_dname(p);
+    chan = findchan(p);
 
     if (chan && !publicOnly)
      get_user_flagrec(u, &fr, chan->dname, chan);
