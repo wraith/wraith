@@ -438,11 +438,13 @@ static bool fast_deq(int which)
 
   struct msgq_head *h = NULL;
   struct msgq *m = NULL, *nm = NULL;
-  char msgstr[511] = "", nextmsgstr[511] = "", tosend[511] = "", victims[511] = "", stackable[511] = "",
+  char msgstr[511] = "", nextmsgstr[511] = "", tosend[511] = "", stackable[511] = "",
        *msg = NULL, *nextmsg = NULL, *cmd = NULL, *nextcmd = NULL, *to = NULL, *nextto = NULL, *stckbl = NULL;
-  int cmd_count = 0, stack_method = 1;
+  int cmd_count = 0;
+  char stack_delim = ',';
   size_t len;
   bool found = 0, doit = 0;
+  bd::String victims;
 
   switch (which) {
     case DP_MODE:
@@ -482,13 +484,13 @@ static bool fast_deq(int which)
     stckbl = stackable;
     while (strlen(stckbl) > 0)
       if (!strcasecmp(newsplit(&stckbl), cmd)) {
-        stack_method = 2;
+        stack_delim = ' ';
         break;
       }    
   }
   to = newsplit(&msg);
   len = strlen(to);
-  strlcpy(victims, to, sizeof(victims));
+  victims = to;
   while (m) {
     nm = m->next;
     if (!nm)
@@ -500,15 +502,12 @@ static bool fast_deq(int which)
     len = strlen(nextto);
     if ( strcmp(to, nextto) /* we don't stack to the same recipients */
         && !strcmp(cmd, nextcmd) && !strcmp(msg, nextmsg)
-        && ((strlen(cmd) + strlen(victims) + strlen(nextto)
+        && ((strlen(cmd) + victims.length() + strlen(nextto)
 	     + strlen(msg) + 2) < 510)
         && (!stack_limit || cmd_count < stack_limit - 1)) {
       cmd_count++;
-      if (stack_method == 1)
-        strlcat(victims, ",", sizeof(victims));
-      else
-        strlcat(victims, " ", sizeof(victims));
-      strlcat(victims, nextto, sizeof(victims));
+      victims += stack_delim;
+      victims += nextto;
 
       doit = 1;
       m->next = nm->next;
@@ -521,7 +520,7 @@ static bool fast_deq(int which)
       m = m->next;
   }
   if (doit) {
-    simple_snprintf(tosend, sizeof(tosend), "%s %s %s", cmd, victims, msg);
+    simple_snprintf(tosend, sizeof(tosend), "%s %s %s", cmd, victims.c_str(), msg);
     len = strlen(tosend);
     write_to_server(tosend, len);
     m = h->head->next;
