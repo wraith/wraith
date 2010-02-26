@@ -287,11 +287,13 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
           which = '-';
         if (which) {
           char mode_char = strcmp(var->name, "deaf") == 0 ? deaf_char : callerid_char;
-          if (mode_char == deaf_char)
-            in_deaf = num;
-          else if (mode_char == callerid_char)
-            in_callerid = num;
-          dprintf(DP_SERVER, "MODE %s %c%c\n", botname, which, mode_char);
+          if ((mode_char == deaf_char && in_deaf != num) || (mode_char == callerid_char && in_callerid != num)) {
+            if (mode_char == deaf_char)
+              in_deaf = num;
+            else if (mode_char == callerid_char)
+              in_callerid = num;
+            dprintf(DP_SERVER, "MODE %s %c%c\n", botname, which, mode_char);
+          }
         }
       }
     }
