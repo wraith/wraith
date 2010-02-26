@@ -127,6 +127,18 @@ bind_table_t *BT_ctcr = NULL, *BT_ctcp = NULL, *BT_msgc = NULL;
 /* Maximum messages to store in each queue. */
 static int maxqmsg = 300;
 static struct msgq_head mq, hq, modeq, cacheq;
+static const struct {
+  struct msgq_head *q;
+  int idx;
+  const char pfx;
+} qdsc[3] = {
+  { &modeq, 	DP_MODE, 	'm' },
+  { &mq, 	DP_SERVER, 	's' },
+  { &hq, 	DP_HELP, 	'h' },
+};
+#define Q_MODE 0
+#define Q_SERVER 1
+#define Q_HELP 2
 static int burst;
 
 #include "cmdsserv.c"
@@ -174,15 +186,6 @@ void deq_msg()
 {
   if (serv < 0)
     return;
-
-  static const struct {
-    struct msgq_head *q;
-    int idx;
-    const char *pfx;
-  } qdsc[2] = {
-    { &modeq, 	DP_MODE, 	"[m->]" },
-    { &mq, 	DP_SERVER, 	"[s->]" },
-  };
   bool ok = 0;
 
   /* now < last_time tested 'cause clock adjustments could mess it up */
@@ -214,7 +217,7 @@ void deq_msg()
       if (!qdsc[nq].q->head)
         break;
 #endif
-      if (fast_deq(qdsc[nq].idx)) {
+      if (fast_deq(nq)) {
         ++burst;
         nm = 1;
         if (!qdsc[nq].q->head)
@@ -224,7 +227,7 @@ void deq_msg()
       }
       write_to_server(qdsc[nq].q->head->msg, qdsc[nq].q->head->len);
       if (debug_output)
-        putlog(LOG_SRVOUT, "*", "%s %s", qdsc[nq].pfx, qdsc[nq].q->head->msg);
+        putlog(LOG_SRVOUT, "*", "[%c->] %s", qdsc[nq].pfx, qdsc[nq].q->head->msg);
       --(qdsc[nq].q->tot);
       last_time.sec += calc_penalty(qdsc[nq].q->head->msg);
       q = qdsc[nq].q->head->next;
@@ -245,12 +248,11 @@ void deq_msg()
    */
   if (!hq.head || burst || nm || connect_bursting)
     return;
-  if (fast_deq(DP_HELP))
+  if (fast_deq(Q_HELP))
     return;
   write_to_server(hq.head->msg, hq.head->len);
-  if (debug_output) {
-    putlog(LOG_SRVOUT, "@", "[h->] %s", hq.head->msg);
-  }
+  if (debug_output)
+    putlog(LOG_SRVOUT, "*", "[%c->] %s", qdsc[Q_HELP].pfx, qdsc[Q_HELP].q->head->msg);
   hq.tot--;
   last_time.sec += calc_penalty(hq.head->msg);
   q = hq.head->next;
@@ -436,7 +438,7 @@ static bool fast_deq(int which)
   if (!use_fastdeq)
     return 0;
 
-  struct msgq_head *h = NULL;
+  struct msgq_head *h = qdsc[which].q;
   struct msgq *m = NULL, *nm = NULL;
   char msgstr[511] = "", nextmsgstr[511] = "", tosend[511] = "", stackable[511] = "",
        *msg = NULL, *nextmsg = NULL, *cmd = NULL, *nextcmd = NULL, *to = NULL, *nextto = NULL, *stckbl = NULL;
@@ -446,19 +448,6 @@ static bool fast_deq(int which)
   bool found = 0, doit = 0;
   bd::String victims;
 
-  switch (which) {
-    case DP_MODE:
-      h = &modeq;
-      break;
-    case DP_SERVER:
-      h = &mq;
-      break;
-    case DP_HELP:
-      h = &hq;
-      break;
-    default:
-      return 0;
-  }
   m = h->head;
   strlcpy(msgstr, m->msg, sizeof msgstr);
   msg = msgstr;
@@ -530,19 +519,10 @@ static bool fast_deq(int which)
     if (!h->head)
       h->last = 0;
     h->tot--;
-    if (debug_output) {
-      switch (which) {
-        case DP_MODE:
-          putlog(LOG_SRVOUT, "*", "[m=>] %s", tosend);
-          break;
-        case DP_SERVER:
-          putlog(LOG_SRVOUT, "*", "[s=>] %s", tosend);
-          break;
-        case DP_HELP:
-          putlog(LOG_SRVOUT, "*", "[h=>] %s", tosend);
-          break;
-      }
-    }
+
+    if (debug_output)
+      putlog(LOG_SRVOUT, "*", "[%c=>] %s", qdsc[which].pfx, tosend);
+
     last_time.sec += calc_penalty(tosend);
     return 1;
   }
