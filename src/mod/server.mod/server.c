@@ -500,9 +500,8 @@ static bool fast_deq(int which)
         && ((strlen(cmd) + victims.length() + strlen(nextto)
 	     + strlen(msg) + 2) < 510)
         && (!stack_limit || cmd_count < stack_limit - 1)) {
-      cmd_count++;
-      victims += stack_delim;
-      victims += nextto;
+      ++cmd_count;
+      victims += stack_delim + nextto;
 
       doit = 1;
       m->next = nm->next;
@@ -510,13 +509,12 @@ static bool fast_deq(int which)
         h->last = m;
       free(nm->msg);
       free(nm);
-      h->tot--;
+      --(h->tot);
     } else
       m = m->next;
   }
   if (doit) {
-    simple_snprintf(tosend, sizeof(tosend), "%s %s %s", cmd, victims.c_str(), msg);
-    len = strlen(tosend);
+    len = simple_snprintf(tosend, sizeof(tosend), "%s %s %s", cmd, victims.c_str(), msg);
     write_to_server(tosend, len);
     m = h->head->next;
     free(h->head->msg);
@@ -524,7 +522,7 @@ static bool fast_deq(int which)
     h->head = m;
     if (!h->head)
       h->last = 0;
-    h->tot--;
+    --(h->tot);
 
     if (debug_output)
       putlog(LOG_SRVOUT, "*", "[%c=>] %s", qdsc[which].pfx, tosend);
