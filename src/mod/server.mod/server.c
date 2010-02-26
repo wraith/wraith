@@ -88,7 +88,6 @@ interval_t cycle_time;			/* cycle time till next server connect */
 port_t default_port = 6667;		/* default IRC port */
 bool trigger_on_ignore;	/* trigger bindings if user is ignored ? */
 int answer_ctcp = 1;		/* answer how many stacked ctcp's ? */
-static bool check_mode_r;	/* check for IRCNET +r modes */
 static int net_type = NETT_EFNET;
 static bool resolvserv;		/* in the process of resolving a server host */
 static time_t lastpingtime;	/* IRCNet LAGmeter support -- drummer */
@@ -820,27 +819,22 @@ static void do_nettype(void)
 {
   switch (net_type) {
   case NETT_EFNET:
-    check_mode_r = 0;
     break;
   case NETT_IRCNET:
-    check_mode_r = 1;
     use_fastdeq = 3;
     simple_snprintf(stackablecmds, sizeof(stackablecmds), "INVITE AWAY VERSION NICK");
     break;
   case NETT_UNDERNET:
-    check_mode_r = 0;
     use_fastdeq = 2;
     simple_snprintf(stackablecmds, sizeof(stackablecmds), "PRIVMSG NOTICE TOPIC PART WHOIS USERHOST USERIP ISON");
     simple_snprintf(stackable2cmds, sizeof(stackable2cmds), "USERHOST USERIP ISON");
     break;
   case NETT_DALNET:
-    check_mode_r = 0;
     use_fastdeq = 2;
     simple_snprintf(stackablecmds, sizeof(stackablecmds), "PRIVMSG NOTICE PART WHOIS WHOWAS USERHOST ISON WATCH DCCALLOW");
     simple_snprintf(stackable2cmds, sizeof(stackable2cmds), "USERHOST ISON WATCH");
     break;
   case NETT_HYBRID_EFNET:
-    check_mode_r = 0;
     break;
   }
 }

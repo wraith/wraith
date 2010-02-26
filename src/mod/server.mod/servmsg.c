@@ -1201,8 +1201,8 @@ static int gotmode(char *from, char *msg)
   ch = newsplit(&buf);
   /* Usermode changes? */
   if (strchr(CHANMETA, ch[0]) == NULL) {
-    if (match_my_nick(ch) && check_mode_r) {
-      /* umode +r? - D0H dalnet uses it to mean something different */
+    if (match_my_nick(ch) && !strcmp(curnetwork, "IRCnet")) {
+      // Umode +r is restricted on IRCnet, can only chat.
       fixcolon(buf);
       if ((buf[0] == '+') && strchr(buf, 'r')) {
 	putlog(LOG_MISC | LOG_JOIN, "*", "%s has me i-lined (jumping)", dcc[servidx].host);
