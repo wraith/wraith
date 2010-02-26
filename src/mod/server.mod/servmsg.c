@@ -316,8 +316,10 @@ got005(char *from, char *msg)
       }
     } else if (!strcasecmp(tmp, "CALLERID")) {
       callerid_char = p ? p[0] : 'g';
-      if (use_callerid)
+      if (use_callerid) {
         dprintf(DP_SERVER, "MODE %s +%c\n", botname, callerid_char);
+        in_callerid = 1;
+      }
     } else if (!strcasecmp(tmp, "EXCEPTS"))
       use_exempts = 1;
     else if (!strcasecmp(tmp, "INVEX"))
@@ -400,7 +402,6 @@ static char lastmsghost[FLOOD_GLOBAL_MAX][128];
 static time_t lastmsgtime[FLOOD_GLOBAL_MAX];
 static int dronemsgs;
 static time_t dronemsgtime;
-static bool in_callerid = 0;
 static interval_t flood_callerid_time = 60;
 
 rate_t flood_callerid = { 6, 2 };
