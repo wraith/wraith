@@ -985,15 +985,15 @@ static void pls_chan(int idx, char *par, char *bot)
       dprintf(idx, " %s\n", result);
   } else {
     if ((chan = findchan_by_dname(chname))) {
-      if (!bot) {
-        char tmp[51] = "";
+      char tmp[51] = "";
 
-        simple_snprintf(tmp, sizeof(tmp), "addedby %s addedts %li", dcc[idx].nick, (long) now);
-        if (buf[0]) {
-          strlcat(buf, " ", sizeof(buf));
-          strlcat(buf, tmp, sizeof(buf));
-        }
-        do_chanset(NULL, chan, buf[0] ? buf : tmp, DO_LOCAL);
+      simple_snprintf(tmp, sizeof(tmp), "addedby %s addedts %li", dcc[idx].nick, (long) now);
+      if (buf[0]) {
+        strlcat(buf, " ", sizeof(buf));
+        strlcat(buf, tmp, sizeof(buf));
+      }
+      do_chanset(NULL, chan, buf[0] ? buf : tmp, DO_LOCAL);
+      if (!bot) {
         dprintf(idx, "Channel %s added to the botnet.\n", chname);
       } else {
         dprintf(idx, "Channel %s added to the bot: %s\n", chname, bot);

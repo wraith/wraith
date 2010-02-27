@@ -77,6 +77,7 @@
   * Fix '+user user' with no hostmask adding the hostmask '*!*@' to the user.
   * Fix case where bot would not get the +e and +I lists when getting opped.
   * If a bot devoices a user in a +voice channel, the +y bot will no longer enforce this.
+  * Fix cmd_botjoin not properly setting up addedby/addedts for the channel.
 * Misc changes
   * Cleanup DCC/Telnet listening so bot only listens on IPV6 if it was specifically given an IPV6 IP.
   * CTCP bot CHAT will no longer work if the bot does not have an IPV4 IP set.
