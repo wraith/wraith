@@ -106,7 +106,7 @@ static bool double_warned = 0;
 
 static void empty_msgq(void);
 static void disconnect_server(int, int);
-static int calc_penalty(char *);
+static void calc_penalty(char *, size_t);
 static bool fast_deq(int);
 static char *splitnicks(char **);
 static void msgq_clear(struct msgq_head *qh);
@@ -235,7 +235,7 @@ void deq_msg()
       if (debug_output)
         putlog(LOG_SRVOUT, "*", "[%c->] %s", qdsc[nq].pfx, qdsc[nq].q->head->msg);
       --(qdsc[nq].q->tot);
-      last_time.sec += calc_penalty(qdsc[nq].q->head->msg);
+      calc_penalty(qdsc[nq].q->head->msg, qdsc[nq].q->head->len);
       q = qdsc[nq].q->head->next;
       free(qdsc[nq].q->head->msg);
       free(qdsc[nq].q->head);
@@ -260,7 +260,7 @@ void deq_msg()
   if (debug_output)
     putlog(LOG_SRVOUT, "*", "[%c->] %s", qdsc[Q_HELP].pfx, qdsc[Q_HELP].q->head->msg);
   hq.tot--;
-  last_time.sec += calc_penalty(hq.head->msg);
+  calc_penalty(hq.head->msg, hq.head->len);
   q = hq.head->next;
   free(hq.head->msg);
   free(hq.head);
@@ -269,10 +269,10 @@ void deq_msg()
     hq.last = NULL;
 }
 
-static int calc_penalty(char * msg)
+static void calc_penalty(char * msg, size_t len)
 {
   if (!use_penalties && net_type != NETT_UNDERNET && net_type != NETT_HYBRID_EFNET)
-    return 0;
+    return;
 
   char *cmd = NULL, *par1 = NULL, *par2 = NULL, *par3 = NULL;
   register int penalty, i, ii;
@@ -285,7 +285,7 @@ static int calc_penalty(char * msg)
   last_time.sec -= 2; /* undo eggdrop standard flood prot */
   if (net_type == NETT_UNDERNET || net_type == NETT_HYBRID_EFNET) {
     last_time.sec += (2 + i / 120);
-    return 0;
+    return;
   }
   penalty = (1 + i / 100);
   if (!strcasecmp(cmd, "KICK")) {
@@ -395,7 +395,7 @@ static int calc_penalty(char * msg)
   }
   if (debug_output && penalty != 0)
     putlog(LOG_SRVOUT, "*", "Adding penalty: %i", penalty);
-  return penalty;
+  last_time.sec += penalty;
 }
 
 char *splitnicks(char **rest)
@@ -527,7 +527,7 @@ static bool fast_deq(int which)
     if (debug_output)
       putlog(LOG_SRVOUT, "*", "[%c=>] %s", qdsc[which].pfx, tosend);
 
-    last_time.sec += calc_penalty(tosend);
+    calc_penalty(tosend, len);
     return 1;
   }
   return 0;
