@@ -815,27 +815,6 @@ void next_server(int *ptr, char *servname, port_t *port, char *pass)
     pass[0] = 0;
 }
 
-static void do_nettype(void)
-{
-  switch (net_type) {
-  case NETT_EFNET:
-    break;
-  case NETT_IRCNET:
-    simple_snprintf(stackablecmds, sizeof(stackablecmds), "INVITE AWAY VERSION NICK");
-    break;
-  case NETT_UNDERNET:
-    simple_snprintf(stackablecmds, sizeof(stackablecmds), "PRIVMSG NOTICE TOPIC PART WHOIS USERHOST USERIP ISON");
-    simple_snprintf(stackable2cmds, sizeof(stackable2cmds), "USERHOST USERIP ISON");
-    break;
-  case NETT_DALNET:
-    simple_snprintf(stackablecmds, sizeof(stackablecmds), "PRIVMSG NOTICE PART WHOIS WHOWAS USERHOST ISON WATCH DCCALLOW");
-    simple_snprintf(stackable2cmds, sizeof(stackable2cmds), "USERHOST ISON WATCH");
-    break;
-  case NETT_HYBRID_EFNET:
-    break;
-  }
-}
-
 /*
  *     CTCP DCC CHAT functions
  */
@@ -1129,7 +1108,6 @@ static cmd_t my_ctcps[] =
 void server_init()
 {
   strlcpy(botrealname, "A deranged product of evil coders", sizeof(botrealname));
-  strlcpy(stackable2cmds, "USERHOST ISON", sizeof(stackable2cmds));
 
   mq.head = hq.head = modeq.head = NULL;
   mq.last = hq.last = modeq.last = NULL;
@@ -1155,6 +1133,4 @@ void server_init()
   timer_create_secs(30, "server_check_lag", (Function) server_check_lag);
   timer_create_secs(300, "server_5minutely", (Function) server_5minutely);
 //  timer_create_secs(60, "minutely_checks", (Function) minutely_checks);
-
-  do_nettype();
 }

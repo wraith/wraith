@@ -306,12 +306,23 @@ got005(char *from, char *msg)
     }
     else if (!strcasecmp(tmp, "NETWORK")) {
       strlcpy(curnetwork, p, 120);
-      if (!strcasecmp(tmp, "IRCnet"))
+      if (!strcasecmp(tmp, "IRCnet")) {
+        simple_snprintf(stackablecmds, sizeof(stackablecmds), "INVITE AWAY VERSION NICK");
+        simple_snprintf(stackable2cmds, sizeof(stackable2cmds), "USERHOST ISON");
         use_fastdeq = 3;
-      else if (!strcasecmp(tmp, "DALnet"))
+      } else if (!strcasecmp(tmp, "DALnet")) {
+        simple_snprintf(stackablecmds, sizeof(stackablecmds), "PRIVMSG NOTICE PART WHOIS WHOWAS USERHOST ISON WATCH DCCALLOW");
+        simple_snprintf(stackable2cmds, sizeof(stackable2cmds), "USERHOST ISON WATCH");
         use_fastdeq = 2;
-      else if (!strcasecmp(tmp, "UnderNet"))
+      } else if (!strcasecmp(tmp, "UnderNet")) {
+        simple_snprintf(stackablecmds, sizeof(stackablecmds), "PRIVMSG NOTICE TOPIC PART WHOIS USERHOST USERIP ISON");
+        simple_snprintf(stackable2cmds, sizeof(stackable2cmds), "USERHOST USERIP ISON");
         use_fastdeq = 2;
+      } else {
+        stackablecmds[0] = 0;
+        simple_snprintf(stackable2cmds, sizeof(stackable2cmds), "USERHOST ISON");
+        use_fastdeq = 0;
+      }
     } else if (!strcasecmp(tmp, "PENALTY"))
       use_penalties = 1;
     else if (!strcasecmp(tmp, "WHOX"))
