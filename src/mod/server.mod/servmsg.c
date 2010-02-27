@@ -185,8 +185,8 @@ void rehash_server(const char *servname, const char *nick)
   if (nick && nick[0]) {
     strlcpy(botname, nick, NICKLEN);
 
-    dprintf(DP_SERVER, "WHOIS %s\n", botname); /* get user@host */
-    dprintf(DP_SERVER, "USERHOST %s\n", botname); /* get user@ip */
+    dprintf(DP_MODE, "WHOIS %s\n", botname); /* get user@host */
+    dprintf(DP_MODE, "USERHOST %s\n", botname); /* get user@ip */
     dprintf(DP_SERVER, "MODE %s %s\n", botname, var_get_str_by_name("usermode"));
   }
 }
