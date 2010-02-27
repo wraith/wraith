@@ -821,16 +821,13 @@ static void do_nettype(void)
   case NETT_EFNET:
     break;
   case NETT_IRCNET:
-    use_fastdeq = 3;
     simple_snprintf(stackablecmds, sizeof(stackablecmds), "INVITE AWAY VERSION NICK");
     break;
   case NETT_UNDERNET:
-    use_fastdeq = 2;
     simple_snprintf(stackablecmds, sizeof(stackablecmds), "PRIVMSG NOTICE TOPIC PART WHOIS USERHOST USERIP ISON");
     simple_snprintf(stackable2cmds, sizeof(stackable2cmds), "USERHOST USERIP ISON");
     break;
   case NETT_DALNET:
-    use_fastdeq = 2;
     simple_snprintf(stackablecmds, sizeof(stackablecmds), "PRIVMSG NOTICE PART WHOIS WHOWAS USERHOST ISON WATCH DCCALLOW");
     simple_snprintf(stackable2cmds, sizeof(stackable2cmds), "USERHOST ISON WATCH");
     break;

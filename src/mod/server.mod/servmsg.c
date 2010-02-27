@@ -304,9 +304,15 @@ got005(char *from, char *msg)
       if (need_to_rehash_monitor)
         rehash_monitor_list();
     }
-    else if (!strcasecmp(tmp, "NETWORK"))
+    else if (!strcasecmp(tmp, "NETWORK")) {
       strlcpy(curnetwork, p, 120);
-    else if (!strcasecmp(tmp, "PENALTY"))
+      if (!strcasecmp(tmp, "IRCnet"))
+        use_fastdeq = 3;
+      else if (!strcasecmp(tmp, "DALnet"))
+        use_fastdeq = 2;
+      else if (!strcasecmp(tmp, "UnderNet"))
+        use_fastdeq = 2;
+    } else if (!strcasecmp(tmp, "PENALTY"))
       use_penalties = 1;
     else if (!strcasecmp(tmp, "WHOX"))
       use_354 = 1;
