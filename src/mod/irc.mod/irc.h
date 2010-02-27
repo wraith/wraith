@@ -146,7 +146,7 @@ void reset_chan_info(struct chanset_t *);
 char *getnick(const char *, struct chanset_t *);
 
 extern int		max_bans, max_exempts, max_invites, max_modes;
-extern bool		use_354;
+extern bool		use_354, include_lk;
 extern unsigned int	modesperline;
 #endif				/* _EGG_MOD_IRC_IRC_H */
 

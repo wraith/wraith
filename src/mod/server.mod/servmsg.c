@@ -261,6 +261,8 @@ got004(char *from, char *msg)
   if (strstr(tmp, "u2.") || strstr(tmp, "Unreal") || strstr(tmp, "snircd")) {
     putlog(LOG_DEBUG, "*", "Disabling cookies as they are not supported on %s", cursrvname);
     cookies_disabled = true;
+  } else if (strstr(tmp, "hybrid") || strstr(tmp, "ratbox") || strstr(tmp, "Charybdis") || strstr(tmp, "ircd-seven")) {
+    include_lk = 0;
   }
 
   return 0;
@@ -1833,6 +1835,7 @@ static void connect_server(void)
     rolls = 0;
     altnick_char = 0;
     use_monitor = 0;
+    include_lk = 1;
 
     for (chan = chanset; chan; chan = chan->next)
       chan->ircnet_status &= ~CHAN_JUPED;

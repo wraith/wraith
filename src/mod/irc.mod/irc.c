@@ -69,7 +69,6 @@ static cache_t *irccache = NULL;
 
 #define do_eI (((now - chan->channel.last_eI) > 30) ? 1 : 0)
 
-static int net_type = 0;
 static time_t wait_split = 900;    /* Time to wait for user to return from
                                  * net-split. */
 int max_bans;                   /* Modified by net-type 1-4 */
@@ -87,7 +86,7 @@ bool use_354 = 0;                /* Use ircu's short 354 /who
 static bool kick_fun = 0;
 static bool ban_fun = 1;
 static bool prevent_mixing = 1;  /* To prevent mixing old/new modes */
-static bool include_lk = 1;      /* For correct calculation
+bool include_lk = 1;      /* For correct calculation
                                  * in real_add_mode. */
 bd::HashTable<bd::String, unsigned long> bot_counters;
 static unsigned long my_counter = 0;
@@ -1717,30 +1716,6 @@ irc_report(int idx, int details)
   }
 }
 
-static void
-do_nettype()
-{
-  switch (net_type) {
-    case 0:                    /* Efnet */
-      include_lk = 0;
-      break;
-    case 1:                    /* Ircnet */
-      include_lk = 1;
-      break;
-    case 2:                    /* Undernet */
-      include_lk = 1;
-      break;
-    case 3:                    /* Dalnet */
-      include_lk = 1;
-      break;
-    case 4:                    /* hybrid-6+ */
-      include_lk = 0;
-      break;
-    default:
-      break;
-  }
-}
-
 static void bot_release_nick (char *botnick, char *code, char *par) {
   release_nick(par);
 }
@@ -1776,6 +1751,4 @@ irc_init()
   add_builtins("raw", irc_raw);
   add_builtins("msg", C_msg);
   add_builtins("msgc", C_msgc);
-
-  do_nettype();
 }
