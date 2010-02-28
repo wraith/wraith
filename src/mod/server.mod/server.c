@@ -86,7 +86,6 @@ port_t default_port = 6667;		/* default IRC port */
 bool trigger_on_ignore;	/* trigger bindings if user is ignored ? */
 int answer_ctcp = 1;		/* answer how many stacked ctcp's ? */
 static bool check_mode_r;	/* check for IRCNET +r modes */
-static int net_type = NETT_EFNET;
 static bool resolvserv;		/* in the process of resolving a server host */
 static time_t lastpingtime;	/* IRCNet LAGmeter support -- drummer */
 static char stackablecmds[511] = "";
@@ -95,6 +94,8 @@ static egg_timeval_t last_time;
 static time_t connect_bursting = 0;
 static int real_msgburst = 0;
 static int real_msgrate = 0;
+static int flood_count = 0;
+static egg_timeval_t flood_time = {0, 0};
 static bool use_penalties;
 static int use_fastdeq;
 size_t nick_len = 9;			/* Maximal nick length allowed on the network. */
@@ -129,12 +130,12 @@ static int maxqmsg = 300;
 static struct msgq_head mq, hq, modeq, cacheq;
 
 static const struct {
-  struct msgq_head *q;
-  int idx;
+  struct msgq_head* const q;
+  const int idx;
   const char* name;
   const char pfx;
-  bool *double_msg;
-  bool burst;
+  const bool *double_msg;
+  const bool burst;
 } qdsc[4] = {
   { &modeq, 	DP_MODE,	"MODE", 	'm',	&double_mode,	1 },
   { &mq, 	DP_SERVER,	"SERVER", 	's',	&double_server,	1 },
@@ -187,24 +188,63 @@ static bool burst_ok(const char* msg, size_t len) {
  * Will send upto 4 msgs from modeq, and then send 1 msg every time
  * it will *not* send anything from hq until the 'burst' value drops
  * down to 0 again (allowing a sudden mq flood to sneak through).
+ *
+ * ratbox:
+ * Every msg sent is added to a count, every second this count decreases by 2.
+ * Typical max count is 20, then excess flood is triggered.
+ * So after 1 bursts:
+ * Count = 5
+ * Decaying by 1 every second
  */
 void deq_msg()
 {
   if (serv < 0)
     return;
-  bool ok = 0;
 
-  /* now < last_time tested 'cause clock adjustments could mess it up */
-  long usecs = timeval_diff(&egg_timeval_now, &last_time);
-  if (usecs >= msgrate || now < (last_time.sec - 90)) {
-    last_time.sec = egg_timeval_now.sec;
-    last_time.usec = egg_timeval_now.usec;
-    if (burst > 0)
-      burst = 0;
-    ok = 1;
+  msgrate = 100;
+
+#ifdef DEBUG
+  if (connect_bursting)
+    sdprintf("BURSTING!!!!!\n");
+#endif
+
+  if (timeval_diff(&egg_timeval_now, &flood_time) >= 1000) {
+    // Increase flood_count by 1 every msg, but decrease by 2 every second, use this to determine an acceptable burst rate
+    if (flood_count > 1)
+      flood_count -= 2;
+    else if (flood_count == 1)
+      flood_count = 0;
+
+    flood_time.sec = egg_timeval_now.sec;
+    flood_time.usec = egg_timeval_now.usec;
   }
 
-  if (!ok) return;
+  /* now < last_time tested 'cause clock adjustments could mess it up */
+  if (timeval_diff(&egg_timeval_now, &last_time) >= msgrate || now < (last_time.sec - 90)) {
+    last_time.sec = egg_timeval_now.sec;
+    last_time.usec = egg_timeval_now.usec;
+
+    if (burst > 0) {
+      if (flood_count < 5)
+        burst = 0;
+      else if (flood_count < 10)
+        burst -= 4;
+      else if (flood_count < 13)
+        burst -= 3;
+      else if (flood_count < 15)
+        burst -= 2;
+      else
+        --burst;
+      if (burst < 0)
+        burst = 0;
+    }
+  } else
+    return;
+
+#ifdef DEBUG
+  if (flood_count)
+    sdprintf("flood count: %d", flood_count);
+#endif
 
   struct msgq *q = NULL;
 
@@ -212,19 +252,19 @@ void deq_msg()
    * otherwise, dequeue and burst up to 'set msgburst' messages from the `normal' message
    * queue.
    */
+  egg_timeval_t last_time_save = { last_time.sec, last_time.usec };
   bool nm = 0;
   for(size_t nq = 0; nq < (sizeof(qdsc) / sizeof(qdsc[0])); ++nq) {
     while (qdsc[nq].q->head && qdsc[nq].burst && (burst < msgburst) && ((last_time.sec - now) < MAXPENALTY)) {
 #ifdef not_implemented
       if (deq_kick(qdsc[nq].idx)) {
-        ++burst;
+        ++burst;++flood_count;
         nm = 1;
       }
       if (!qdsc[nq].q->head)
         break;
 #endif
       if (fast_deq(nq)) {
-        ++burst;
         nm = 1;
         if (!qdsc[nq].q->head)
           break;
@@ -232,6 +272,7 @@ void deq_msg()
           continue;
       }
       write_to_server(qdsc[nq].q->head->msg, qdsc[nq].q->head->len);
+      ++burst;++flood_count;
       if (debug_output)
         putlog(LOG_SRVOUT, "*", "[%c->] %s", qdsc[nq].pfx, qdsc[nq].q->head->msg);
       --(qdsc[nq].q->tot);
@@ -240,13 +281,31 @@ void deq_msg()
       free(qdsc[nq].q->head->msg);
       free(qdsc[nq].q->head);
       qdsc[nq].q->head = q;
-      ++burst;
       nm = 2;
     }
     if (!qdsc[nq].q->head)
       qdsc[nq].q->last = NULL;
     if(nm == 1)
-      return;
+      break;
+  }
+  // Do this penalty calc here as it's dependant on burst/flood_count
+  if (!connect_bursting) {
+    // The penalty includes a length-based penalty from calc_penalty
+
+    last_time.sec -= (msgrate / 1000); // Remove normal msgrate
+    // Add 150ms for each current burst
+    last_time.usec += (150*burst) * 1000;
+    // Add some penalty for each flood_count
+    last_time.usec += (40*flood_count) * 1000;
+    // Cap the penalty at 1800 and depent more on flood_count
+    if (timeval_diff(&last_time, &last_time_save) > 1800) {
+      last_time.sec = last_time_save.sec;
+      last_time.usec = 1800 * 1000;
+    }
+#ifdef DEBUG
+    if (timeval_diff(&last_time, &last_time_save))
+      sdprintf("PENALTY: %lims", timeval_diff(&last_time, &last_time_save));
+#endif
   }
   /* Never send anything from the help queue unless everything else is
    * finished.
@@ -257,10 +316,15 @@ void deq_msg()
   if (fast_deq(Q_HELP))
     return;
   write_to_server(hq.head->msg, hq.head->len);
+  ++burst;++flood_count;
   if (debug_output)
     putlog(LOG_SRVOUT, "*", "[%c->] %s", qdsc[Q_HELP].pfx, qdsc[Q_HELP].q->head->msg);
   hq.tot--;
   calc_penalty(hq.head->msg, hq.head->len);
+#ifdef DEBUG
+  if (timeval_diff(&last_time, &last_time_save))
+    sdprintf("PENALTY: %lims", timeval_diff(&last_time, &last_time_save));
+#endif
   q = hq.head->next;
   free(hq.head->msg);
   free(hq.head);
@@ -271,7 +335,7 @@ void deq_msg()
 
 static void calc_penalty(char * msg, size_t len)
 {
-  if (!use_penalties && net_type != NETT_UNDERNET && net_type != NETT_HYBRID_EFNET)
+  if (connect_bursting)
     return;
 
   char *cmd = NULL, *par1 = NULL, *par2 = NULL, *par3 = NULL;
@@ -282,11 +346,14 @@ static void calc_penalty(char * msg, size_t len)
     i = strlen(msg);
   else
     i = strlen(cmd);
-  last_time.sec -= 2; /* undo eggdrop standard flood prot */
-  if (net_type == NETT_UNDERNET || net_type == NETT_HYBRID_EFNET) {
-    last_time.sec += (2 + i / 120);
+  if (!use_penalties) {
+    // Add some penalty for large messages
+    last_time.usec += ((double)i / 300.0) * (1000*1000);
     return;
   }
+
+  last_time.sec -= (msgrate / 1000); // Remove normal msgrate
+
   penalty = (1 + i / 100);
   if (!strcasecmp(cmd, "KICK")) {
     par1 = newsplit(&msg); /* channel */
@@ -516,6 +583,7 @@ static bool fast_deq(int which)
   if (doit) {
     len = simple_snprintf(tosend, sizeof(tosend), "%s %s %s", cmd, victims.c_str(), msg);
     write_to_server(tosend, len);
+    ++burst;++flood_count;
     m = h->head->next;
     free(h->head->msg);
     free(h->head);
@@ -540,6 +608,8 @@ static void empty_msgq()
   for (size_t i = 0; i < (sizeof(qdsc) / sizeof(qdsc[0])); ++i)
     msgq_clear(qdsc[i].q);
   burst = 0;
+  flood_count = 0;
+  flood_time.sec = flood_time.usec = 0;
 }
 
 /* Use when sending msgs... will spread them out so there's no flooding.
@@ -764,36 +834,6 @@ void next_server(int *ptr, char *servname, port_t *port, char *pass)
     strcpy(pass, x->pass);
   else
     pass[0] = 0;
-}
-
-static void do_nettype(void)
-{
-  switch (net_type) {
-  case NETT_IRCNET:
-    check_mode_r = 1;
-    use_fastdeq = 3;
-    simple_snprintf(stackablecmds, sizeof(stackablecmds), "INVITE AWAY VERSION NICK");
-    stackable2cmds[0] = 0;
-    break;
-  case NETT_UNDERNET:
-    check_mode_r = 0;
-    use_fastdeq = 2;
-    simple_snprintf(stackablecmds, sizeof(stackablecmds), "PRIVMSG NOTICE TOPIC PART WHOIS USERHOST USERIP ISON");
-    simple_snprintf(stackable2cmds, sizeof(stackable2cmds), "USERHOST USERIP ISON");
-    break;
-  case NETT_DALNET:
-    check_mode_r = 0;
-    use_fastdeq = 2;
-    simple_snprintf(stackablecmds, sizeof(stackablecmds), "PRIVMSG NOTICE PART WHOIS WHOWAS USERHOST ISON WATCH DCCALLOW");
-    simple_snprintf(stackable2cmds, sizeof(stackable2cmds), "USERHOST ISON WATCH");
-    break;
-  default:
-    check_mode_r = 0;
-    use_fastdeq = 0;
-    stackablecmds[0] = 0;
-    stackable2cmds[0] = 0;
-    break;
-  }
 }
 
 /*
@@ -1075,13 +1115,11 @@ void server_init()
   egg_timeval_t howlong;
 
   howlong.sec = 0;
-  howlong.usec = 400 * 1000;
+  howlong.usec = 200 * 1000;
 
   timer_create_repeater(&howlong, "server_queue", (Function) deq_msg);
   timer_create_secs(1, "server_secondly", (Function) server_secondly);
   timer_create_secs(30, "server_check_lag", (Function) server_check_lag);
   timer_create_secs(300, "server_5minutely", (Function) server_5minutely);
   timer_create_secs(60, "minutely_checks", (Function) minutely_checks);
-
-  do_nettype();
 }
