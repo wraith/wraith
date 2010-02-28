@@ -100,9 +100,6 @@ static bool use_penalties;
 static int use_fastdeq;
 size_t nick_len = 9;			/* Maximal nick length allowed on the network. */
 
-static bool double_mode = 0;		/* allow a msgs to be twice in a queue? */
-static bool double_server = 0;
-static bool double_help = 0;
 static bool double_warned = 0;
 
 static void empty_msgq(void);
@@ -134,13 +131,13 @@ static const struct {
   const int idx;
   const char* name;
   const char pfx;
-  const bool *double_msg;
+  const bool double_msg;
   const bool burst;
 } qdsc[4] = {
-  { &modeq, 	DP_MODE,	"MODE", 	'm',	&double_mode,	1 },
-  { &mq, 	DP_SERVER,	"SERVER", 	's',	&double_server,	1 },
-  { &hq, 	DP_HELP,	"HELP", 	'h',	&double_help,	0 },
-  { &cacheq, 	DP_CACHE,	"CACHE", 	'c',	NULL,		0 },
+  { &modeq, 	DP_MODE,	"MODE", 	'm',	0,	1 },
+  { &mq, 	DP_SERVER,	"SERVER", 	's',	0,	1 },
+  { &hq, 	DP_HELP,	"HELP", 	'h',	0,	0 },
+  { &cacheq, 	DP_CACHE,	"CACHE", 	'c',	0,	0 },
 };
 #define Q_MODE 0
 #define Q_SERVER 1
@@ -656,11 +653,8 @@ void queue_server(int which, char *buf, int len)
   struct msgq_head *h = qdsc[which_q].q;
 
   if (h->tot < maxqmsg) {
-    int doublemsg = 0;
-    if (qdsc[which_q].double_msg)
-      doublemsg = *(qdsc[which_q].double_msg);
     /* Don't queue msg if it's already queued?  */
-    if (!doublemsg) {
+    if (!qdsc[which_q].double_msg) {
       for (struct msgq* tq = qdsc[which_q].q->head; tq; tq = tq->next) {
 	if (!strcasecmp(tq->msg, buf)) {
 	  if (!double_warned) {
