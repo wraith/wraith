@@ -123,7 +123,6 @@ bind_table_t *BT_ctcr = NULL, *BT_ctcp = NULL, *BT_msgc = NULL;
 #define MAXPENALTY 10
 
 /* Maximum messages to store in each queue. */
-static int maxqmsg = 300;
 static struct msgq_head mq, hq, modeq, cacheq;
 
 static const struct {
@@ -133,11 +132,12 @@ static const struct {
   const char pfx;
   const bool double_msg;
   const bool burst;
+  const int maxqmsg;
 } qdsc[4] = {
-  { &modeq, 	DP_MODE,	"MODE", 	'm',	0,	1 },
-  { &mq, 	DP_SERVER,	"SERVER", 	's',	0,	1 },
-  { &hq, 	DP_HELP,	"HELP", 	'h',	0,	0 },
-  { &cacheq, 	DP_CACHE,	"CACHE", 	'c',	0,	0 },
+  { &modeq, 	DP_MODE,	"MODE", 	'm',	0,	1, 	300 },
+  { &mq, 	DP_SERVER,	"SERVER", 	's',	0,	1,	300 },
+  { &hq, 	DP_HELP,	"HELP", 	'h',	0,	0,	300 },
+  { &cacheq, 	DP_CACHE,	"CACHE", 	'c',	0,	0,	1000 },
 };
 #define Q_MODE 0
 #define Q_SERVER 1
@@ -652,7 +652,7 @@ void queue_server(int which, char *buf, int len)
 
   struct msgq_head *h = qdsc[which_q].q;
 
-  if (h->tot < maxqmsg) {
+  if (h->tot < qdsc[which_q].maxqmsg) {
     /* Don't queue msg if it's already queued?  */
     if (!qdsc[which_q].double_msg) {
       for (struct msgq* tq = qdsc[which_q].q->head; tq; tq = tq->next) {
@@ -1046,16 +1046,17 @@ void server_report(int idx, int details)
 	    trying_server ? "(trying)" : s);
   } else
     dprintf(idx, "    No server currently.\n");
-  if (modeq.tot)
-    dprintf(idx, "    Mode queue is at %d%%, %d msgs\n",
-            (int) ((float) (modeq.tot * 100.0) / (float) maxqmsg),
-	    (int) modeq.tot);
-  if (mq.tot)
-    dprintf(idx, "    Server queue is at %d%%, %d msgs\n",
-           (int) ((float) (mq.tot * 100.0) / (float) maxqmsg), (int) mq.tot);
-  if (hq.tot)
-    dprintf(idx, "    Help queue is at %d%%, %d msgs\n",
-           (int) ((float) (hq.tot * 100.0) / (float) maxqmsg), (int) hq.tot);
+
+  if (server_online)
+    dprintf(idx, "    burst: %d flood_count: %d\n", burst, flood_count);
+
+  for (size_t i = 0; i < (sizeof(qdsc) / sizeof(qdsc[0])); ++i) {
+    if (qdsc[i].q->tot)
+      dprintf(idx, "    %s queue is at %d%%, %d msgs\n",
+          qdsc[i].name,
+          (int) ((float) (qdsc[i].q->tot * 100.0) / (float) qdsc[i].maxqmsg),
+          (int) qdsc[i].q->tot);
+  }
   if (details) {
     dprintf(idx, "    Flood is: %d msg/%ds, %d ctcp/%ds\n",
 	    flood_msg.count, flood_msg.time, flood_ctcp.count, flood_ctcp.time);
