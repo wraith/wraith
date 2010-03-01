@@ -207,11 +207,6 @@ void deq_msg()
 
   msgrate = 100;
 
-#ifdef DEBUG
-  if (connect_bursting)
-    sdprintf("BURSTING!!!!!\n");
-#endif
-
   if (timeval_diff(&egg_timeval_now, &flood_time) >= 1000) {
     // Increase flood_count by 1 every msg, but decrease by 2 every second, use this to determine an acceptable burst rate
     if (flood_count > 1)
@@ -305,6 +300,11 @@ void deq_msg()
       sdprintf("PENALTY (%d): %lims", flood_count, timeval_diff(&last_time, &last_time_save));
 #endif
   }
+#ifdef DEBUG
+  else if (connect_bursting && bursted)
+    sdprintf("BURSTING!!!!!\n");
+#endif
+
 }
 
 static void calc_penalty(char * msg, size_t len)
