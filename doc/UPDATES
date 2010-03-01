@@ -2,6 +2,7 @@
 * Add set 'msgrate' to define how often to dequeue to the server. (1 or 2 is good)
 * Add set 'msgburst' to define how many commands to burst to server per msgrate.
 * On hybrid/ratbox servers, burst some commands on connect
+* Add cmd_play for playing files to irc. (ASCII art gallery exhibition)
 
 1.2.17 - http://wraith.botpack.net/milestone/1.2.17
 * Binary / shell / startup changes
