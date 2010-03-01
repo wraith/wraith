@@ -32,6 +32,7 @@ namespace bd {
 #define DP_HELP_NEXT    0x7FF9
 #define DP_DUMP		0x8000
 #define DP_CACHE	0x8001
+#define DP_PLAY		0x8002
 
 
 

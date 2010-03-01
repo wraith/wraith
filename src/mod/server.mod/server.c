@@ -123,7 +123,7 @@ bind_table_t *BT_ctcr = NULL, *BT_ctcp = NULL, *BT_msgc = NULL;
 #define MAXPENALTY 10
 
 /* Maximum messages to store in each queue. */
-static struct msgq_head mq, hq, modeq, cacheq;
+static struct msgq_head mq, hq, modeq, aq, cacheq;
 
 static const struct {
   struct msgq_head* const q;
@@ -132,17 +132,20 @@ static const struct {
   const char pfx;
   const bool double_msg;
   const bool burst;
-  const int maxqmsg;
-} qdsc[4] = {
-  { &modeq, 	DP_MODE,	"MODE", 	'm',	0,	1, 	300 },
-  { &mq, 	DP_SERVER,	"SERVER", 	's',	0,	1,	300 },
-  { &hq, 	DP_HELP,	"HELP", 	'h',	0,	0,	300 },
-  { &cacheq, 	DP_CACHE,	"CACHE", 	'c',	0,	0,	1000 },
+  const bool connect_burst;
+  const size_t maxqmsg;
+} qdsc[5] = {
+  { &modeq, 	DP_MODE,	"MODE", 	'm',	0,	1, 	1,	300 },
+  { &mq, 	DP_SERVER,	"SERVER", 	's',	0,	1,	1,	300 },
+  { &hq, 	DP_HELP,	"HELP", 	'h',	0,	0,	0,	300 },
+  { &aq, 	DP_PLAY,	"PLAY", 	'p',	1,	1,	0,	10000 },
+  { &cacheq, 	DP_CACHE,	"CACHE", 	'c',	0,	0,	0,	1000 },
 };
 #define Q_MODE 0
 #define Q_SERVER 1
 #define Q_HELP 2
-#define Q_CACHE 3
+#define Q_PLAY 3
+#define Q_CACHE 4
 static int burst;
 
 #include "cmdsserv.c"
@@ -613,6 +616,9 @@ void queue_server(int which, char *buf, int len)
     case DP_HELP:
       which_q = Q_HELP;
       break;
+    case DP_PLAY:
+      which_q = Q_PLAY;
+      break;
     case DP_CACHE:
       which_q = Q_CACHE;
       break;
@@ -1063,11 +1069,6 @@ void server_init()
 {
   strlcpy(botrealname, "A deranged product of evil coders", sizeof(botrealname));
   strlcpy(stackable2cmds, "USERHOST ISON", sizeof(stackable2cmds));
-
-  mq.head = hq.head = modeq.head = NULL;
-  mq.last = hq.last = modeq.last = NULL;
-  mq.tot = hq.tot = modeq.tot = 0;
-  mq.warned = hq.warned = modeq.warned = 0;
 
   /*
    * Init of all the variables *must* be done in _start rather than
