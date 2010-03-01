@@ -994,7 +994,7 @@ static void server_secondly()
 static void server_check_lag()
 {
   if (server_online && !waiting_for_awake && !trying_server) {
-    dprintf(DP_DUMP, "PING :%li\n", (long)now);
+    dprintf(DP_MODE_NEXT, "PING :%li\n", (long)now);
     lastpingtime = now;
     waiting_for_awake = 1;
   }

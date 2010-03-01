@@ -176,7 +176,7 @@ void detected_drone_flood(struct chanset_t* chan, memberlist* m) {
     chan->channel.drone_joins = 0;
     chan->channel.drone_jointime = 0;
 
-    dprintf(DP_DUMP, "MODE %s +%s\n", chan->name[0] ? chan->name : chan->dname, buf);
+    dprintf(DP_MODE_NEXT, "MODE %s +%s\n", chan->name[0] ? chan->name : chan->dname, buf);
     howlong.sec = chan->flood_lock_time;
     howlong.usec = 0;
     timer_create_complex(&howlong, "unlock", (Function) unlock_chan, (void *) chan, 0);

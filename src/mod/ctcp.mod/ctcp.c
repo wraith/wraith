@@ -467,7 +467,7 @@ static int ctcp_VERSION(char *nick, char *uhost, struct userrec *u, char *object
   int queue = DP_HELP;
 
   if (!first_ctcp_check) {
-    queue = DP_DUMP;
+    queue = DP_SERVER;
     first_ctcp_check = 1;
   }
 

@@ -1557,7 +1557,7 @@ static int got302(char *from, char *msg)
       }
       if (cchan->ban) {
         cchan->ban = 0;
-        dprintf(DP_DUMP, "MODE %s +b *!%s\n", cchan->dname, uhost);
+        dprintf(DP_MODE_NEXT, "MODE %s +b *!%s\n", cchan->dname, uhost);
       }
     }
   }
@@ -1617,14 +1617,14 @@ static int got341(char *from, char *msg)
     cchan = cache_chan_add(cache, chan->dname);
 
   if (!cache->uhost[0]) {
-    dprintf(DP_DUMP, "MODE %s +b %s!*@*\n", chan->name, nick);
+    dprintf(DP_MODE_NEXT, "MODE %s +b %s!*@*\n", chan->name, nick);
     cchan->ban = 1;
-    dprintf(DP_DUMP, "USERHOST %s\n", nick);
+    dprintf(DP_MODE_NEXT, "USERHOST %s\n", nick);
   } else {
-    dprintf(DP_DUMP, "MODE %s +b *!*%s\n", chan->name, cache->uhost);
+    dprintf(DP_MODE_NEXT, "MODE %s +b *!*%s\n", chan->name, cache->uhost);
   }
   putlog(LOG_MISC, "*", "HIJACKED invite detected: %s to %s", nick, chan->dname);
-  dprintf(DP_DUMP, "PRIVMSG %s :ALERT! \002%s was invited via a hijacked connection/process.\002\n", chan->name, nick);
+  dprintf(DP_MODE_NEXT, "PRIVMSG %s :ALERT! \002%s was invited via a hijacked connection/process.\002\n", chan->name, nick);
   return 0;
 }
 #endif /* CACHE */

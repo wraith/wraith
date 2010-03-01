@@ -479,7 +479,7 @@ static bool detect_flood(char *floodnick, char *floodhost, char *from, int which
     set_pls_g = 1;
     dronemsgs = 0;
     dronemsgtime = 0;
-    dprintf(DP_DUMP, "MODE %s :+g\n", botname);
+    dprintf(DP_MODE_NEXT, "MODE %s :+g\n", botname);
     howlong.sec = flood_g_time;
     howlong.usec = 0;
     timer_create(&howlong, "Unset umode +g", (Function) unset_g);
