@@ -166,6 +166,8 @@ static bool burst_ok(const char* msg, size_t len) {
   if (strstr(msg, "JOIN 0") ||
       (strstr(msg, "MODE") && !burst_mode_ok(msg, len)) ||
       strstr(msg, "NICK") ||
+      strstr(msg, "PRIVMSG") ||
+      strstr(msg, "NOTICE") ||
       strstr(msg, "PART") ||
       strstr(msg, "KICK") ||
       strstr(msg, "INVITE") ||
