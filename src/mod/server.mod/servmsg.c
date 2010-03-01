@@ -37,6 +37,11 @@ unsigned int rolls = 0;
 static void rotate_nick(char *nick, char *orignick)
 {
   size_t len = strlen(nick);
+  // Cap the len calcs at the max NICKLEN for this server
+  if (len > nick_len) {
+    len = nick_len;
+    nick[len] = 0;
+  }
   int use_chr = 1;
 
 #ifdef DEBUG
