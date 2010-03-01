@@ -312,8 +312,8 @@ struct chanset_t *findchan_by_dname(const char *name);
 struct msgq_head {
   struct msgq *head;
   struct msgq *last;
-  int tot;
-  int warned;
+  size_t tot;
+  bool warned;
 };
 
 /* Used to queue a lot of things */

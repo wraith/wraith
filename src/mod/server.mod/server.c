@@ -240,11 +240,6 @@ void deq_msg()
   } else
     return;
 
-#ifdef DEBUG
-  if (flood_count)
-    sdprintf("flood count: %d", flood_count);
-#endif
-
   struct msgq *q = NULL;
 
   /* Send upto 'set msgburst' msgs to server if the *critical queue* has anything in it;
@@ -252,24 +247,20 @@ void deq_msg()
    * queue.
    */
   egg_timeval_t last_time_save = { last_time.sec, last_time.usec };
-  bool nm = 0;
+  bool bursted = 0;
   for(size_t nq = 0; nq < (sizeof(qdsc) / sizeof(qdsc[0])); ++nq) {
-    while (qdsc[nq].q->head && qdsc[nq].burst && (burst < msgburst) && ((last_time.sec - now) < MAXPENALTY)) {
+    while (qdsc[nq].q->head &&
+        // If burstable queue and can burst, or not a burstable queue and not connect bursting
+        ((qdsc[nq].burst && (burst < msgburst)) || (!qdsc[nq].burst && !connect_bursting)) &&
+        ((last_time.sec - now) < MAXPENALTY)) {
 #ifdef not_implemented
       if (deq_kick(qdsc[nq].idx)) {
         ++burst;++flood_count;
-        nm = 1;
+        continue;
       }
-      if (!qdsc[nq].q->head)
-        break;
 #endif
-      if (fast_deq(nq)) {
-        nm = 1;
-        if (!qdsc[nq].q->head)
-          break;
-        else
-          continue;
-      }
+      if (fast_deq(nq))
+        continue;
       write_to_server(qdsc[nq].q->head->msg, qdsc[nq].q->head->len);
       ++burst;++flood_count;
       if (debug_output)
@@ -280,13 +271,15 @@ void deq_msg()
       free(qdsc[nq].q->head->msg);
       free(qdsc[nq].q->head);
       qdsc[nq].q->head = q;
-      nm = 2;
+      if (qdsc[nq].burst)
+        bursted = 1;
+      else // Help Queue does not burst, push out 1 line then go to next queue.
+        break;
     }
     if (!qdsc[nq].q->head)
       qdsc[nq].q->last = NULL;
-    if(nm == 1)
-      break;
   }
+
   // Do this penalty calc here as it's dependant on burst/flood_count
   if (!connect_bursting) {
     // The penalty includes a length-based penalty from calc_penalty
@@ -303,33 +296,9 @@ void deq_msg()
     }
 #ifdef DEBUG
     if (timeval_diff(&last_time, &last_time_save))
-      sdprintf("PENALTY: %lims", timeval_diff(&last_time, &last_time_save));
+      sdprintf("PENALTY (%d): %lims", flood_count, timeval_diff(&last_time, &last_time_save));
 #endif
   }
-  /* Never send anything from the help queue unless everything else is
-   * finished.
-   * Don't process any help queue if connect bursting
-   */
-  if (!hq.head || burst || nm || connect_bursting)
-    return;
-  if (fast_deq(Q_HELP))
-    return;
-  write_to_server(hq.head->msg, hq.head->len);
-  ++burst;++flood_count;
-  if (debug_output)
-    putlog(LOG_SRVOUT, "*", "[%c->] %s", qdsc[Q_HELP].pfx, qdsc[Q_HELP].q->head->msg);
-  hq.tot--;
-  calc_penalty(hq.head->msg, hq.head->len);
-#ifdef DEBUG
-  if (timeval_diff(&last_time, &last_time_save))
-    sdprintf("PENALTY: %lims", timeval_diff(&last_time, &last_time_save));
-#endif
-  q = hq.head->next;
-  free(hq.head->msg);
-  free(hq.head);
-  hq.head = q;
-  if (!hq.head)
-    hq.last = NULL;
 }
 
 static void calc_penalty(char * msg, size_t len)
