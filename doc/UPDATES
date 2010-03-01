@@ -5,6 +5,7 @@
 * On ratbox type servers, use an optimized queue for better throughput on the queue.
 * Add cmd_play for playing files to irc. (ASCII art gallery exhibition)
 * Utilize CPRIVMSG/CNOTICE if available.
+* Chain WHO requests to try avoiding Max SendQ
 
 1.2.17 - http://wraith.botpack.net/milestone/1.2.17
 * Binary / shell / startup changes

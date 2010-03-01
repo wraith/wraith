@@ -1499,6 +1499,13 @@ void recheck_channel(struct chanset_t *chan, int dobans)
   --stacking;
 }
 
+static int got001(char *from, char *msg)
+{
+  //Just connected, cleanup some vars
+  chained_who.clear();
+  return 0;
+}
+
 /* got 302: userhost
  * <server> 302 <to> :<nick??user@host>
  */
@@ -2018,7 +2025,26 @@ static int got315(char *from, char *msg)
 
   newsplit(&msg);
   chname = newsplit(&msg);
+
+  if (!chained_who.isEmpty()) {
+    // Send off next WHO request
+    while (1) {
+      if (chained_who.isEmpty()) break;
+      // Dequeue the next chan in the chain
+      chan = findchan(bd::String(chained_who.dequeue()).c_str());
+      if (chan) {
+        if (!strcmp(chan->name, chname)) continue; // First reply got queued too
+        if (!shouldjoin(chan)) continue; // No longer care about this channel
+        // Somehow got the WHO already
+        if (channel_active(chan) && !channel_pending(chan)) continue;
+        send_chan_who(chained_who_idx, chan);
+        break;
+      }
+    }
+  }
+
   chan = findchan(chname);
+
   /* May have left the channel before the who info came in */
   if (!chan || !channel_pending(chan))
     return 0;
@@ -3366,6 +3392,7 @@ static int gotnotice(char *from, char *msg)
 
 static cmd_t irc_raw[] =
 {
+  {"001",       "",     (Function) got001,      "irc:001", LEAF},
   {"302",       "",     (Function) got302,      "irc:302", LEAF},
 #ifdef CACHE
   {"341",       "",     (Function) got341,      "irc:341", LEAF},

@@ -56,6 +56,7 @@
 #include "src/mod/ctcp.mod/ctcp.h"
 #include <bdlib/src/String.h>
 #include <bdlib/src/HashTable.h>
+#include <bdlib/src/Queue.h>
 #include <bdlib/src/base64.h>
 
 #include <stdarg.h>
@@ -91,6 +92,9 @@ static bool include_lk = 1;      /* For correct calculation
                                  * in real_add_mode. */
 bd::HashTable<bd::String, unsigned long> bot_counters;
 static unsigned long my_counter = 0;
+
+static bd::Queue<bd::String> chained_who;
+static int chained_who_idx;
 
 static int
 voice_ok(memberlist *m, struct chanset_t *chan)
@@ -1333,17 +1337,24 @@ reset_chan_info(struct chanset_t *chan)
     }
     /* These 2 need to get out asap, so into the mode queue */
     dprintf(DP_MODE, "MODE %s\n", chan->name);
-    send_chan_who(DP_MODE, chan);
+    send_chan_who(DP_MODE, chan, 1);
     /* clear_channel nuked the data...so */
     dprintf(DP_HELP, "TOPIC %s\n", chan->name);//Topic is very low priority
   }
 }
 
-static void send_chan_who(int queue, struct chanset_t *chan) {
-    if (use_354) /* Added benefit of getting numeric IP! :) */
-      dprintf(queue, "WHO %s %%c%%h%%n%%u%%f%%r%%d%%i\n", chan->name);
-    else
-      dprintf(queue, "WHO %s\n", chan->name);
+static void send_chan_who(int queue, struct chanset_t *chan, bool chain) {
+  if (chain) {
+    if (!chained_who.contains(chan->name))
+      chained_who.enqueue(chan->name);
+    chained_who_idx = queue;
+    if (chained_who.size() > 1)
+      return;
+  }
+  if (use_354) /* Added benefit of getting numeric IP! :) */
+    dprintf(queue, "WHO %s %%c%%h%%n%%u%%f%%r%%d%%i\n", chan->name);
+  else
+    dprintf(queue, "WHO %s\n", chan->name);
 }
 
 /* If i'm the only person on the channel, and i'm not op'd,
