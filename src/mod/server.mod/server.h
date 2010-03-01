@@ -12,6 +12,7 @@
 
 #define DO_LOST 1
 #define NO_LOST 0
+#define DEQ_RATE 200
 
 #define fixcolon(x)             do {                                    \
         if ((x)[0] == ':')                                              \

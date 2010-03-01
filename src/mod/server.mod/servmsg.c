@@ -255,34 +255,13 @@ got004(char *from, char *msg)
   if (strstr(tmp, "u2.") || strstr(tmp, "Unreeal") || strstr(tmp, "snircd")) {
     putlog(LOG_DEBUG, "*", "Disabling cookies as they are not supported on %s", cursrvname);
     cookies_disabled = true;
-  } else if (strstr(tmp, "hybrid") || strstr(tmp, "ratbox") || strstr(tmp, "Charybdis") || strstr(tmp, "ircd-seven"))
+  } else if (strstr(tmp, "hybrid") || strstr(tmp, "ratbox") || strstr(tmp, "Charybdis") || strstr(tmp, "ircd-seven")) {
     connect_burst = 1;
+    if (!strstr(tmp, "hybrid"))
+      use_flood_count = 1;
+  }
 
   if (!replaying_cache && connect_burst) {
-    // Hybrid/ratbox allows bursting 5*8 lines on connect until certain commands are sent, for up to 30 seconds
-    /*
-       BAD:
-         JOIN 0
-         MODE #chan b
-         NICK
-         PART
-         KICK
-         CPRIVMSG
-         CNOTICE
-         WHO 0/mask
-         TIME
-         TOPIC
-         INVITE
-         AWAY
-         OPER
-
-       OK:
-         WHO *
-         WHO !
-         WHO #Chan
-         WHO NICK
-    */
-
     connect_bursting = now;
     msgburst = SERVER_CONNECT_BURST_RATE;
     msgrate = 200;
@@ -1171,6 +1150,7 @@ static void disconnect_server(int idx, int dolost)
   botuserip[0] = 0; 
   have_cprivmsg = 0;
   have_cnotice = 0;
+  use_flood_count = 0;
   if (dolost) {
     Auth::DeleteAll();
     trying_server = 0;
@@ -1823,6 +1803,7 @@ static void server_dns_callback(int id, void *client_data, const char *host, bd:
     last_time.sec = now - 100;
     last_time.usec = 0;
     end_burstmode();
+    use_flood_count = 0;
     real_msgburst = msgburst;
     real_msgrate = msgrate;
 

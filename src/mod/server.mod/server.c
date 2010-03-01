@@ -95,6 +95,7 @@ static time_t connect_bursting = 0;
 static int real_msgburst = 0;
 static int real_msgrate = 0;
 static int flood_count = 0;
+static bool use_flood_count = 0;
 static egg_timeval_t flood_time = {0, 0};
 static bool use_penalties;
 static int use_fastdeq;
@@ -123,6 +124,9 @@ bind_table_t *BT_ctcr = NULL, *BT_ctcp = NULL, *BT_msgc = NULL;
 #include "servmsg.c"
 
 #define MAXPENALTY 10
+
+// If use_flood_count, don't bother with msgrate, otherwise use the user specified msgrate
+#define MSGRATE (use_flood_count ? DEQ_RATE : msgrate)
 
 /* Maximum messages to store in each queue. */
 static struct msgq_head mq, hq, modeq, aq, cacheq;
@@ -167,6 +171,29 @@ static bool burst_mode_ok(const char *msg, size_t len) {
   return 0;
 }
 
+// Hybrid/ratbox allows bursting 5*8 lines on connect until certain commands are sent, for up to 30 seconds
+/*
+   BAD:
+     JOIN 0
+     MODE #chan b
+     NICK
+     PART
+     KICK
+     CPRIVMSG
+     CNOTICE
+     WHO 0/mask
+     TIME
+     TOPIC
+     INVITE
+     AWAY
+     OPER
+
+   OK:
+     WHO *
+     WHO !
+     WHO #Chan
+     WHO NICK
+*/
 static bool burst_ok(const char* msg, size_t len) {
   if (strstr(msg, "JOIN 0") ||
       (strstr(msg, "MODE") && !burst_mode_ok(msg, len)) ||
@@ -205,8 +232,6 @@ void deq_msg()
   if (serv < 0)
     return;
 
-  msgrate = 100;
-
   if (timeval_diff(&egg_timeval_now, &flood_time) >= 1000) {
     // Increase flood_count by 1 every msg, but decrease by 2 every second, use this to determine an acceptable burst rate
     if (flood_count > 1)
@@ -219,23 +244,26 @@ void deq_msg()
   }
 
   /* now < last_time tested 'cause clock adjustments could mess it up */
-  if (timeval_diff(&egg_timeval_now, &last_time) >= msgrate || now < (last_time.sec - 90)) {
+  if (timeval_diff(&egg_timeval_now, &last_time) >= MSGRATE || now < (last_time.sec - 90)) {
     last_time.sec = egg_timeval_now.sec;
     last_time.usec = egg_timeval_now.usec;
 
     if (burst > 0) {
-      if (flood_count < 5)
-        burst = 0;
-      else if (flood_count < 10)
-        burst -= 4;
-      else if (flood_count < 13)
-        burst -= 3;
-      else if (flood_count < 15)
-        burst -= 2;
-      else
+      if (use_flood_count) {
+        if (flood_count < 5)
+          burst = 0;
+        else if (flood_count < 10)
+          burst -= 4;
+        else if (flood_count < 13)
+          burst -= 3;
+        else if (flood_count < 15)
+          burst -= 2;
+        else
+          --burst;
+        if (burst < 0)
+          burst = 0;
+      } else
         --burst;
-      if (burst < 0)
-        burst = 0;
     }
   } else
     return;
@@ -282,10 +310,10 @@ void deq_msg()
   }
 
   // Do this penalty calc here as it's dependant on burst/flood_count
-  if (!connect_bursting) {
+  if (use_flood_count && !connect_bursting) {
     // The penalty includes a length-based penalty from calc_penalty
 
-    last_time.sec -= (msgrate / 1000); // Remove normal msgrate
+    last_time.sec -= (MSGRATE / 1000); // Remove normal msgrate
     // Add 150ms for each current burst
     last_time.usec += (150*burst) * 1000;
     // Add some penalty for each flood_count
@@ -322,11 +350,14 @@ static void calc_penalty(char * msg, size_t len)
     i = strlen(cmd);
   if (!use_penalties) {
     // Add some penalty for large messages
-    last_time.usec += ((double)i / 300.0) * (1000*1000);
+    if (use_flood_count)
+      last_time.usec += ((double)i / 300.0) * (1000*1000);
+    else
+      last_time.usec += ((double)i / 120.0) * (1000*1000);
     return;
   }
 
-  last_time.sec -= (msgrate / 1000); // Remove normal msgrate
+  last_time.sec -= (MSGRATE / 1000); // Remove normal msgrate
 
   penalty = (1 + i / 100);
   if (!strcasecmp(cmd, "KICK")) {
@@ -1091,7 +1122,7 @@ void server_init()
   egg_timeval_t howlong;
 
   howlong.sec = 0;
-  howlong.usec = 200 * 1000;
+  howlong.usec = DEQ_RATE * 1000;
 
   timer_create_repeater(&howlong, "server_queue", (Function) deq_msg);
   timer_create_secs(1, "server_secondly", (Function) server_secondly);
