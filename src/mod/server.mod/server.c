@@ -993,7 +993,7 @@ static void server_secondly()
     connect_server();
 
   if (server_online) {
-    if (keepnick && (!use_monitor || (use_monitor && (jnick_juped == 2 || nick_juped == 2)))) {
+    if (keepnick && !use_monitor) {
       static int ison_cnt = 0;
 
       if (ison_time == 0) //If someone sets this to 0, all hell will break loose!
@@ -1057,10 +1057,16 @@ static void server_5minutely()
         disconnect_server(servidx, DO_LOST);
         putlog(LOG_SERV, "*", "Server got stoned; jumping...");
     }
+  }
+}
+
+static void server_minutely()
+{
+  if (server_online) {
+    // Ratbox sets a nick_delay (default:15min) timer when a nick splits off to prevent collisions,
+    // We must check periodically to see if the local server has unjuped our wanted nicks.
     if (keepnick && (jnick_juped == 2 || nick_juped == 2)) {
-      // Try getting nick every 5 minutes to check if it is still juped
-      nick_juped = jnick_juped = 0;
-      server_send_ison();
+      nick_available(1, 1);
     }
   }
 }
@@ -1168,6 +1174,7 @@ void server_init()
 
   timer_create_secs(1, "server_secondly", (Function) server_secondly);
   timer_create_secs(30, "server_check_lag", (Function) server_check_lag);
+  timer_create_secs(60, "server_minutely", (Function) server_minutely);
   timer_create_secs(300, "server_5minutely", (Function) server_5minutely);
 //  timer_create_secs(60, "minutely_checks", (Function) minutely_checks);
 
