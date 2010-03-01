@@ -216,6 +216,7 @@ static int got001(char *from, char *msg)
 
   fixcolon(msg);
   server_online = now;
+  waiting_for_awake = 0;
   rehash_server(from, msg);
   /* Ok...param #1 of 001 = what server thinks my nick is */
 
@@ -1335,8 +1336,13 @@ static void server_activity(int idx, char *msg, int len)
     serv = dcc[idx].sosck;
     */
     SERVER_SOCKET.timeout_val = 0;
-  }
-  waiting_for_awake = 0;
+
+    // Setup timer for conecting
+    waiting_for_awake = 1;
+    lastpingtime = now - (stoned_timeout + 30); //30 seconds to reach 001
+  } else if (server_online) // Only set once 001 has been received
+    waiting_for_awake = 0;
+
   if (msg[0] == ':') {
     msg++;
     from = newsplit(&msg);

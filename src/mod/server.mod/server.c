@@ -82,6 +82,7 @@ static bool waiting_for_awake;	/* set when i unidle myself, cleared when I get t
 time_t server_online = 0;	/* server connection time */
 char botrealname[121] = "A deranged product of evil coders.";	/* realname of bot */
 static interval_t server_timeout = 15;	/* server timeout for connecting */
+static const interval_t stoned_timeout = 500;
 struct server_list *serverlist = NULL;	/* old-style queue, still used by
 					   server list */
 interval_t cycle_time;			/* cycle time till next server connect */
@@ -1015,17 +1016,10 @@ static void server_check_lag()
     dprintf(DP_DUMP, "PING :%li\n", (long)now);
     lastpingtime = now;
     waiting_for_awake = 1;
-  }
-}
-
-static void server_5minutely()
-{
-  if (server_online && waiting_for_awake && ((now - lastpingtime) >= 300)) {
-      /* Uh oh!  Never got pong from last time, five minutes ago!
-       * Server is probably stoned.
-       */
-      disconnect_server(servidx, DO_LOST);
-      putlog(LOG_SERV, "*", "Server got stoned; jumping...");
+  } else if (servidx != -1 && waiting_for_awake && ((now - lastpingtime) >= stoned_timeout)) {
+    // Not checking server_online as this will handle connect timeouts as well where the connect() works, but the server gets stoned afterwards
+    disconnect_server(servidx, DO_LOST);
+    putlog(LOG_SERV, "*", "Server got stoned; jumping...");
   }
 }
 
@@ -1131,6 +1125,5 @@ void server_init()
 
   timer_create_secs(1, "server_secondly", (Function) server_secondly);
   timer_create_secs(30, "server_check_lag", (Function) server_check_lag);
-  timer_create_secs(300, "server_5minutely", (Function) server_5minutely);
 //  timer_create_secs(60, "minutely_checks", (Function) minutely_checks);
 }
