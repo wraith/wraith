@@ -331,6 +331,10 @@ got005(char *from, char *msg)
       use_354 = 1;
     else if (!strcasecmp(tmp, "EXCEPTS"))
       use_exempts = 1;
+    else if (!strcasecmp(tmp, "CPRIVMSG"))
+      have_cprivmsg = 1;
+    else if (!strcasecmp(tmp, "CNOTICE"))
+      have_cnotice = 1;
     else if (!strcasecmp(tmp, "INVEX"))
       use_invites = 1;
     else if (!strcasecmp(tmp, "MAXBANS")) {
@@ -1165,6 +1169,8 @@ static void disconnect_server(int idx, int dolost)
   floodless = 0;
   botuserhost[0] = 0;
   botuserip[0] = 0; 
+  have_cprivmsg = 0;
+  have_cnotice = 0;
   if (dolost) {
     Auth::DeleteAll();
     trying_server = 0;

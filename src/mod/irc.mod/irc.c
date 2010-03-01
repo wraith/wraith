@@ -1257,7 +1257,7 @@ me_op(struct chanset_t *chan)
 
 /* Check whether I'm voice. Returns boolean 1 or 0.
  */
-static bool
+bool
 me_voice(struct chanset_t *chan)
 {
   memberlist *mx = ismember(chan, botname);

@@ -33,6 +33,7 @@
 #include "common.h"
 #include "chanprog.h"
 #include "settings.h"
+#include "src/mod/irc.mod/irc.h"
 #include "src/mod/channels.mod/channels.h"
 #include "src/mod/server.mod/server.h"
 #include "src/mod/share.mod/share.h"
@@ -944,10 +945,32 @@ samechans(const char *nick, const char *delim)
   return ret;
 }
 
+struct chanset_t* find_common_opped_chan(const char* nick) {
+  for (struct chanset_t* chan = chanset; chan; chan = chan->next) {
+    if (channel_active(chan) && (me_op(chan) || me_voice(chan))) {
+      if (ismember(chan, nick))
+        return chan;
+    }
+  }
+  return NULL;
+}
+
 void privmsg(const char* target, const char* msg, int idx) {
-  dprintf(idx, "PRIVMSG %s :%s\n", target, msg);
+  struct chanset_t* chan = NULL;
+  if (have_cprivmsg && !strchr(CHANMETA, target[0]))
+    chan = find_common_opped_chan(target);
+  if (chan)
+    dprintf(idx, "CPRIVMSG %s %s :%s\n", target, chan->name, msg);
+  else
+    dprintf(idx, "PRIVMSG %s :%s\n", target, msg);
 }
 
 void notice(const char* target, const char* msg, int idx) {
-  dprintf(idx, "NOTICE %s :%s\n", target, msg);
+  struct chanset_t* chan = NULL;
+  if (have_cnotice && !strchr(CHANMETA, target[0]))
+    chan = find_common_opped_chan(target);
+  if (chan)
+    dprintf(idx, "CNOTICE %s %s :%s\n", target, chan->name, msg);
+  else
+    dprintf(idx, "NOTICE %s :%s\n", target, msg);
 }

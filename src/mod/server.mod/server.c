@@ -99,6 +99,8 @@ static egg_timeval_t flood_time = {0, 0};
 static bool use_penalties;
 static int use_fastdeq;
 size_t nick_len = 9;			/* Maximal nick length allowed on the network. */
+bool have_cprivmsg = 0;
+bool have_cnotice = 0;
 
 static bool double_warned = 0;
 

@@ -66,7 +66,6 @@ static void cache_invite(struct chanset_t *, char *, char *, char *, bool, bool)
 void makecookie(char*, size_t, const char *, const memberlist*, const memberlist*, const memberlist* = NULL, const memberlist* = NULL);
 static int checkcookie(const char*, const memberlist*, const memberlist*, const char*, int);
 extern void counter_clear(const char*);
-static bool me_voice(struct chanset_t *);
 static bool any_ops(struct chanset_t *);
 static char *getchanmode(struct chanset_t *);
 static void flush_mode(struct chanset_t *, int);
@@ -113,6 +112,7 @@ void real_add_mode(struct chanset_t *, const char, const char, const char *, boo
 #define add_mode(chan, pls, mode, nick) real_add_mode(chan, pls, mode, nick, 0)
 #define add_cookie(chan, nick) real_add_mode(chan, '+', 'o', nick, 1)
 bool me_op(struct chanset_t *);
+bool me_voice(struct chanset_t *);
 
 void check_this_ban(struct chanset_t *, char *, bool);
 void check_this_exempt(struct chanset_t *, char *, bool);
