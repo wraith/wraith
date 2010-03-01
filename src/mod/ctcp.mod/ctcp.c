@@ -429,7 +429,7 @@ static int ctcp_PING(char *nick, char *uhost, struct userrec *u, char *object, c
   return BIND_RET_BREAK;
 }
 
-bool first_ctcp_check = 0;
+int first_ctcp_check = 0;
 
 static int ctcp_VERSION(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
@@ -466,9 +466,10 @@ static int ctcp_VERSION(char *nick, char *uhost, struct userrec *u, char *object
   
   int queue = DP_HELP;
 
-  if (!first_ctcp_check) {
+  // Send out first few replies right away for dronemons
+  if (first_ctcp_check < 2) {
     queue = DP_SERVER;
-    first_ctcp_check = 1;
+    ++first_ctcp_check;
   }
 
   dprintf(queue, "NOTICE %s :\001%s %s%s\001\n", nick, keyword, ctcpversion, s);
