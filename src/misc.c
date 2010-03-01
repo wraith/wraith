@@ -1057,7 +1057,7 @@ int goodpass(char *pass, int idx, char *nick)
     if (idx)
       dprintf(idx, "%s\n", tell);
     else if (nick[0])
-      dprintf(DP_HELP, "NOTICE %s :%s\n", nick, tell);
+      notice(nick, tell, DP_HELP);
     return 0;
   }
   return 1;

@@ -336,7 +336,7 @@ dprintf(int idx, const char *format, ...)
 
 //      simple_snprintf(ircbuf, size, "PRIVMSG %s :%s", dcc[idx].simulbot, buf);
 //      tputs(dcc[idx].sock, ircbuf, strlen(ircbuf));
-      dprintf(DP_HELP, "PRIVMSG %s :%s\n", dcc[idx].simulbot, buf);
+      privmsg(dcc[idx].simulbot, buf, DP_HELP);
 //      free(ircbuf);
     } else {
       if (dcc[idx].type && ((long) (dcc[idx].type->output) == 1)) {

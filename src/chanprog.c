@@ -943,3 +943,11 @@ samechans(const char *nick, const char *delim)
 
   return ret;
 }
+
+void privmsg(const char* target, const char* msg, int idx) {
+  dprintf(idx, "PRIVMSG %s :%s\n", target, msg);
+}
+
+void notice(const char* target, const char* msg, int idx) {
+  dprintf(idx, "NOTICE %s :%s\n", target, msg);
+}

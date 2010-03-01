@@ -193,8 +193,10 @@ void notice_invite(struct chanset_t *chan, char *handle, char *nick, char *uhost
   if (handle)
     simple_snprintf(fhandle, sizeof(fhandle), "\002%s\002 ", handle);
   putlog(LOG_MISC, "*", "Invited %s%s(%s%s%s) to %s.", handle ? handle : "", handle ? " " : "", nick, uhost ? "!" : "", uhost ? uhost : "", chan->dname);
-  dprintf(DP_MODE, "PRIVMSG %s :\001ACTION has invited %s(%s%s%s) to %s.%s\001\n",
-    chan->name, fhandle, nick, uhost ? "!" : "", uhost ? uhost : "", chan->dname, op ? ops : "");
+  bd::String msg;
+  msg.printf("\001ACTION has invited %s(%s%s%s) to %s.%s\001",
+    fhandle, nick, uhost ? "!" : "", uhost ? uhost : "", chan->dname, op ? ops : "");
+  privmsg(chan->name, msg.c_str(), DP_MODE);
 }
 
 #ifdef CACHE

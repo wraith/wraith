@@ -636,13 +636,13 @@ static int gotmsg(char *from, char *msg)
   /* Send out possible ctcp responses */
   if (ctcp_reply[0]) {
     if (ctcp_mode != 2) {
-      dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
+      notice(nick, ctcp_reply, DP_HELP);
     } else {
       if (now - last_ctcp > flood_ctcp.time) {
-        dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
+        notice(nick, ctcp_reply, DP_HELP);
 	count_ctcp = 1;
       } else if (count_ctcp < flood_ctcp.count) {
-        dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
+        notice(nick, ctcp_reply, DP_HELP);
 	count_ctcp++;
       }
       last_ctcp = now;

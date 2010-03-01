@@ -3905,7 +3905,7 @@ static void rcmd_msg(char * tobot, char * frombot, char * fromhand, char * fromi
   if (!conf.bot->hub) {
     char *nick = newsplit(&par);
 
-    dprintf(DP_SERVER, "PRIVMSG %s :%s\n", nick, par);
+    privmsg(nick, par, DP_SERVER);
     if (!strcasecmp(tobot, conf.bot->nick)) {
       char buf[1024] = "";
 

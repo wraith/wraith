@@ -39,9 +39,12 @@ static int msg_bewm(char *nick, char *host, struct userrec *u, char *par)
 
   if (match_my_nick(nick))
     return BIND_RET_BREAK;
+
+  bd::String msg;
+
   if (!u) {
-    dprintf(DP_SERVER, STR("PRIVMSG %s :---- (%s!%s) attempted to gain secure invite, but is not a recognized user.\n"), 
-          chan->dname, nick, host);
+    msg.printf(STR("---- (%s!%s) attempted to gain secure invite, but is not a recognized user."), nick, host);
+    privmsg(chan->name, msg.c_str(), DP_SERVER);
 
     putlog(LOG_CMDS, "*", STR("(%s!%s) !*! BEWM"), nick, host);
     return BIND_RET_BREAK;
@@ -55,13 +58,13 @@ static int msg_bewm(char *nick, char *host, struct userrec *u, char *par)
 
   if (!chk_op(fr, chan))  {
     putlog(LOG_CMDS, "*", STR("(%s!%s) !%s! !BEWM"), nick, host, u->handle);
-    dprintf(DP_SERVER, STR("PRIVMSG %s :---- %s (%s!%s) attempted to gain secure invite, but is missing a flag.\n"), 
-            chan->dname, u->handle, nick, host);
+    msg.printf(STR("---- %s (%s!%s) attempted to gain secure invite, but is missing a flag."), u->handle, nick, host);
+    privmsg(chan->name, msg.c_str(), DP_SERVER);
     return BIND_RET_BREAK;
   }
 
-  dprintf(DP_SERVER, "PRIVMSG %s :\001ACTION has invited \002%s\002 (%s!%s) to %s.\001\n"
-           , chan->dname, u->handle, nick, host, chan->dname);
+  msg.printf("\001ACTION has invited \002%s\002 (%s!%s) to %s.\001", u->handle, nick, host, chan->dname);
+  privmsg(chan->name, msg.c_str(), DP_SERVER);
 
   cache_invite(chan, nick, host, u->handle, 0, 0);
   putlog(LOG_CMDS, "*", STR("(%s!%s) !%s! BEWM"), nick, host, u->handle);
@@ -82,20 +85,20 @@ static int msg_pass(char *nick, char *host, struct userrec *u, char *par)
   if (u->bot)
     return BIND_RET_BREAK;
   if (!par[0]) {
-    dprintf(DP_HELP, "NOTICE %s :%s\n", nick, u_pass_match(u, "-") ? "You don't have a password set." : "You have a password set.");
+    notice(nick, u_pass_match(u, "-") ? "You don't have a password set." : "You have a password set.", DP_HELP);
     putlog(LOG_CMDS, "*", "(%s!%s) !%s! PASS?", nick, host, u->handle);
     return BIND_RET_BREAK;
   }
   old = newsplit(&par);
   if (!u_pass_match(u, "-") && !par[0]) {
     putlog(LOG_CMDS, "*", "(%s!%s) !%s! $b!$bPASS...", nick, host, u->handle);
-    dprintf(DP_HELP, "NOTICE %s :You already have a password set.\n", nick);
+    notice(nick, "You already have a password set.", DP_HELP);
     return BIND_RET_BREAK;
   }
   if (par[0]) {
     if (!u_pass_match(u, old)) {
       putlog(LOG_CMDS, "*", "(%s!%s) !%s! $b!$bPASS...", nick, host, u->handle);
-      dprintf(DP_HELP, "NOTICE %s :Incorrect password.\n", nick);
+      notice(nick, "Incorrect password.", DP_HELP);
       return BIND_RET_BREAK;
     }
     mynew = newsplit(&par);
@@ -113,8 +116,9 @@ static int msg_pass(char *nick, char *host, struct userrec *u, char *par)
   putlog(LOG_CMDS, "*", "(%s!%s) !%s! PASS", nick, host, u->handle);
 
   set_user(&USERENTRY_PASS, u, mynew);
-  dprintf(DP_HELP, "NOTICE %s :%s '%s'.\n", nick,
-	  mynew == old ? "Password set to:" : "Password changed to:", mynew);
+  bd::String msg;
+  msg.printf("%s '%s'.", mynew == old ? "Password set to:" : "Password changed to:", mynew);
+  notice(nick, msg.c_str(), DP_HELP);
   return BIND_RET_BREAK;
 }
 
@@ -128,6 +132,8 @@ static int msg_op(char *nick, char *host, struct userrec *u, char *par)
     return BIND_RET_BREAK;
   pass = newsplit(&par);
 
+  bd::String msg;
+
   if (homechan[0]) {
     struct chanset_t *hchan = NULL;
 
@@ -136,11 +142,10 @@ static int msg_op(char *nick, char *host, struct userrec *u, char *par)
     if (hchan && channel_active(hchan) && !ismember(hchan, nick)) {
       putlog(LOG_CMDS, "*", "(%s!%s) !*! failed OP %s (not in %s)", nick, host, par, homechan);
       if (par[0]) 
-        dprintf(DP_SERVER, "PRIVMSG %s :---- (%s!%s) attempted to OP for %s but is not currently in %s.\n", 
-              homechan, nick, host, par, homechan);
+        msg.printf("---- (%s!%s) attempted to OP for %s but is not currently in %s.", nick, host, par, homechan);
       else
-        dprintf(DP_SERVER, "PRIVMSG %s :---- (%s!%s) attempted to OP but is not currently in %s.\n", 
-              homechan, nick, host, homechan);
+        msg.printf("---- (%s!%s) attempted to OP but is not currently in %s.", nick, host, homechan);
+      privmsg(homechan, msg.c_str(), DP_SERVER);
       return BIND_RET_BREAK;
     }
   }
@@ -155,8 +160,10 @@ static int msg_op(char *nick, char *host, struct userrec *u, char *par)
             if (do_op(nick, chan, 0, 1)) {
               stats_add(u, 0, 1);
               putlog(LOG_CMDS, "*", "(%s!%s) !%s! OP %s", nick, host, u->handle, par);
-              if (manop_warn && chan->manop)
-                dprintf(DP_HELP, "NOTICE %s :%s is currently set to punish for manual op.\n", nick, chan->dname);
+              if (manop_warn && chan->manop) {
+                msg.printf("%s is currently set to punish for manual op.", chan->dname);
+                notice(nick, msg.c_str(), DP_HELP);
+              }
             }
           }
           return BIND_RET_BREAK;
@@ -168,8 +175,10 @@ static int msg_op(char *nick, char *host, struct userrec *u, char *par)
           if (chk_op(fr, chan)) {
             if (do_op(nick, chan, 0, 1)) {
               stats++;
-              if (manop_warn && chan->manop)
-                dprintf(DP_HELP, "NOTICE %s :%s is currently set to punish for manual op.\n", nick, chan->dname);
+              if (manop_warn && chan->manop) {
+                msg.printf("%s is currently set to punish for manual op.", chan->dname);
+                notice(nick, msg.c_str(), DP_HELP);
+              }
             }
           }
         }
@@ -199,6 +208,7 @@ static int msg_ident(char *nick, char *host, struct userrec *u, char *par)
     strlcpy(who, par, sizeof(who));
     who[NICKMAX] = 0;
   }
+  bd::String msg;
   u2 = get_user_by_handle(userlist, who);
   if (u2 && rfc_casecmp(who, origbotname) && !u2->bot) {
     /* This could be used as detection... */
@@ -208,16 +218,18 @@ static int msg_ident(char *nick, char *host, struct userrec *u, char *par)
       putlog(LOG_CMDS, "*", "(%s!%s) !*! failed IDENT %s", nick, host, who);
       return BIND_RET_BREAK;
     } else if (u == u2) {
-      dprintf(DP_HELP, "NOTICE %s :I recognize you there.\n", nick);
+      notice(nick, "I recognize you there.", DP_HELP);
       return BIND_RET_BREAK;
     } else if (u) {
-      dprintf(DP_HELP, "NOTICE %s :You're not %s, you're %s.\n", nick, who, u->handle);
+      msg.printf("You're not %s, you're %s.", who, u->handle);
+      notice(nick, msg.c_str(), DP_HELP);
       return BIND_RET_BREAK;
     } else {
       putlog(LOG_CMDS, "*", "(%s!%s) !*! IDENT %s", nick, host, who);
       simple_snprintf(s, sizeof s, "%s!%s", nick, host);
       maskaddr(s, s1, 0); /* *!user@host */
-      dprintf(DP_HELP, "NOTICE %s :Added hostmask: %s\n", nick, s1);
+      msg.printf("Added hostmask: %s", s1);
+      notice(nick, msg.c_str(), DP_HELP);
       addhost_by_handle(who, s1);
       check_this_user(who, 0, NULL);
       return BIND_RET_BREAK;
@@ -248,12 +260,15 @@ static int msg_invite(char *nick, char *host, struct userrec *u, char *par)
       putlog(LOG_CMDS, "*", "(%s!%s) !%s! INVITE ALL", nick, host, u->handle);
       return BIND_RET_BREAK;
     }
+    bd::String msg;
     if (!(chan = findchan_by_dname(par))) {
-      dprintf(DP_HELP, "NOTICE %s :Usage: /MSG %s %s <pass> <channel>\n", nick, botname, msginvite);
+      msg.printf("Usage: /MSG %s %s <pass> <channel>", botname, msginvite);
+      notice(nick, msg.c_str(), DP_HELP);
       return BIND_RET_BREAK;
     }
     if (!channel_active(chan)) {
-      dprintf(DP_HELP, "NOTICE %s :%s: Not on that channel right now.\n", nick, par);
+      msg.printf("%s: Not on that channel right now.", par);
+      notice(nick, msg.c_str(), DP_HELP);
       return BIND_RET_BREAK;
     }
     /* We need to check access here also (dw 991002) */
@@ -280,9 +295,9 @@ static void reply(char *nick, struct chanset_t *chan, const char *format, ...)
   va_end(va);
 
   if (chan)
-    dprintf(DP_HELP, "PRIVMSG %s :%s", chan->name, buf);
+    privmsg(chan->name, buf, DP_HELP);
   else
-    dprintf(DP_HELP, "NOTICE %s :%s", nick, buf);
+    notice(nick, buf, DP_HELP);
 }
 
 static void logc(const char *cmd, Auth *a, char *chname, char *par)
@@ -314,7 +329,7 @@ static int msg_authstart(char *nick, char *host, struct userrec *u, char *par)
 
   if (auth) {
     if (auth->Authed()) {
-      dprintf(DP_HELP, STR("NOTICE %s :You are already authed.\n"), nick);
+      notice(nick, "You are already authed.", DP_HELP);
       return 0;
     }
   } else
@@ -322,7 +337,9 @@ static int msg_authstart(char *nick, char *host, struct userrec *u, char *par)
 
   /* Send "auth." if they are recognized, otherwise "auth!" */
   auth->Status(AUTH_PASS);
-  dprintf(DP_HELP, STR("PRIVMSG %s :auth%s %s\n"), nick, u ? "." : "!", conf.bot->nick);
+  bd::String msg;
+  msg.printf(STR("auth%s %s"), u ? "." : "!", conf.bot->nick);
+  privmsg(nick, msg.c_str(), DP_HELP);
 
   return BIND_RET_BREAK;
 }
@@ -332,7 +349,9 @@ AuthFinish(Auth *auth)
 {
   putlog(LOG_CMDS, "*", STR("(%s!%s) !%s! +AUTH"), auth->nick, auth->host, auth->handle);
   auth->Done();
-  dprintf(DP_HELP, STR("NOTICE %s :You are now authorized for cmds, see %chelp\n"), auth->nick, auth_prefix[0]);
+  bd::String msg;
+  msg.printf(STR("You are now authorized for cmds, see %chelp"), auth_prefix[0]);
+  notice(auth->nick, msg.c_str(), DP_HELP);
 }
 
 static int msg_auth(char *nick, char *host, struct userrec *u, char *par)
@@ -357,7 +376,9 @@ static int msg_auth(char *nick, char *host, struct userrec *u, char *par)
       putlog(LOG_CMDS, "*", STR("(%s!%s) !%s! AUTH"), nick, host, u->handle);
       auth->Status(AUTH_HASH);
       auth->MakeHash();
-      dprintf(DP_HELP, STR("PRIVMSG %s :-Auth %s %s\n"), nick, auth->rand, conf.bot->nick);
+      bd::String msg;
+      msg.printf(STR("-Auth %s %s"), auth->rand, conf.bot->nick);
+      privmsg(nick, msg.c_str(), DP_HELP);
     } else {
       /* no auth_key and/or no SECPASS for the user, don't require a hash auth */
       AuthFinish(auth);
@@ -389,7 +410,7 @@ static int msg_pls_auth(char *nick, char *host, struct userrec *u, char *par)
       char s[300] = "";
 
       putlog(LOG_CMDS, "*", STR("(%s!%s) !%s! failed +AUTH"), nick, host, u->handle);
-      dprintf(DP_HELP, STR("NOTICE %s :Invalid hash.\n"), nick);
+      notice(nick, STR("Invalid hash."), DP_HELP);
       simple_snprintf(s, sizeof(s), "*!%s", host);
       addignore(s, origbotname, STR("Invalid auth hash."), now + (60 * ignore_time));
       delete auth;
@@ -412,7 +433,7 @@ static int msg_unauth(char *nick, char *host, struct userrec *u, char *par)
     return BIND_RET_BREAK;
 
   delete auth;
-  dprintf(DP_HELP, STR("NOTICE %s :You are now unauthorized.\n"), nick);
+  notice(nick, STR("You are now unauthorized."), DP_HELP);
   putlog(LOG_CMDS, "*", STR("(%s!%s) !%s! UNAUTH"), nick, host, u->handle);
 
   return BIND_RET_BREAK;
@@ -479,7 +500,9 @@ static int msgc_op(Auth *a, char *chname, char *par)
     if (!strcasecmp(tmp, "force") || !strcasecmp(tmp, "f")) 
       force = 1;
     else {
-      dprintf(DP_HELP, "NOTICE %s :Invalid option: %s\n", a->nick, tmp);
+      bd::String msg;
+      msg.printf("Invalid option: %s", tmp);
+      notice(a->nick, msg.c_str(), DP_HELP);
       return 0;
     }
   }
@@ -528,7 +551,9 @@ static int msgc_voice(Auth *a, char *chname, char *par)
     if (!strcasecmp(tmp, "force") || !strcasecmp(tmp, "f")) 
       force = 1;
     else {
-      dprintf(DP_HELP, "NOTICE %s :Invalid option: %s\n", a->nick, tmp);
+      bd::String msg;
+      msg.printf("Invalid option: %s", tmp);
+      notice(a->nick, msg.c_str(), DP_HELP);
       return 0;
     }
   }
@@ -672,7 +697,9 @@ static int msgc_invite(Auth *a, char *chname, char *par)
     if (!strcasecmp(tmp, "force") || !strcasecmp(tmp, "f")) 
       force = 1;
     else {
-      dprintf(DP_HELP, "NOTICE %s :Invalid option: %s\n", a->nick, tmp);
+      bd::String msg;
+      msg.printf("Invalid option: %s", tmp);
+      notice(a->nick, msg.c_str(), DP_HELP);
       return 0;
     }
   }

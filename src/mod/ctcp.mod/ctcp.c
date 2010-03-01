@@ -43,6 +43,7 @@
 #include <arpa/inet.h>
 #include <sys/utsname.h>
 #include <ctype.h>
+#include <bdlib/src/String.h>
 
 #define AVGAWAYTIME             60
 #define AVGHERETIME             5
@@ -409,8 +410,10 @@ static int ctcp_FINGER(char *nick, char *uhost, struct userrec *u, char *object,
     idletime = now - cloak_awaytime;
   else if (cloak_heretime)
     idletime = now - cloak_heretime;
-  dprintf(DP_HELP, "NOTICE %s :\001%s %s (%s) Idle %d second%s\001\n", nick, keyword, "",
+  bd::String msg;
+  msg.printf("\001%s %s (%s) Idle %d second%s\001", keyword, "",
                    botuserhost, (int) idletime, idletime == 1 ? "" : "s");
+  notice(nick, msg.c_str(), DP_HELP);
   return BIND_RET_BREAK;
 }
 
@@ -419,13 +422,18 @@ static int ctcp_ECHO(char *nick, char *uhost, struct userrec *u, char *object, c
   char reply[60] = "";
 
   strlcpy(reply, text, sizeof(reply));
-  dprintf(DP_HELP, "NOTICE %s :\001%s %s\001\n", nick, keyword, reply);
+  bd::String msg;
+  msg.printf("\001%s %s\001", keyword, reply);
+  notice(nick, msg.c_str(), DP_HELP);
   return BIND_RET_BREAK;
 }
 static int ctcp_PING(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
-  if (strlen(text) <= 80)       /* bitchx ignores > 80 */
-    dprintf(DP_HELP, "NOTICE %s :\001%s %s\001\n", nick, keyword, text);
+  if (strlen(text) <= 80) {       /* bitchx ignores > 80 */
+    bd::String msg;
+    msg.printf("\001%s %s\001", keyword, text);
+    notice(nick, msg.c_str(), DP_HELP);
+  }
   return BIND_RET_BREAK;
 }
 
@@ -472,17 +480,24 @@ static int ctcp_VERSION(char *nick, char *uhost, struct userrec *u, char *object
     ++first_ctcp_check;
   }
 
-  dprintf(queue, "NOTICE %s :\001%s %s%s\001\n", nick, keyword, ctcpversion, s);
+  bd::String msg;
+  msg.printf("\001%s %s%s\001", keyword, ctcpversion, s);
+  notice(nick, msg.c_str(), queue);
 
-  if (ctcpversion2[0])
-    dprintf(DP_HELP, "NOTICE %s :\001%s %s\001\n", nick, keyword, ctcpversion2);
+  if (ctcpversion2[0]) {
+    msg.printf("\001%s %s\001", keyword, ctcpversion2);
+    notice(nick, msg.c_str(), DP_HELP);
+  }
   return BIND_RET_BREAK;
 }
 
 static int ctcp_WHOAMI(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
-  if (cloak_script > 0 && cloak_script < 9)
-    dprintf(DP_HELP, "NOTICE %s :\002BitchX\002: Access Denied\n", nick);
+  if (cloak_script > 0 && cloak_script < 9) {
+    bd::String msg;
+    msg.printf("\002BitchX\002: Access Denied");
+    notice(nick, msg.c_str(), DP_HELP);
+  }
   return BIND_RET_BREAK;
 }
 
@@ -495,7 +510,9 @@ static int ctcp_OP(char *nick, char *uhost, struct userrec *u, char *object, cha
     p = strchr(chan, ' ');
     if (p)
       *p = 0;
-    dprintf(DP_HELP, "NOTICE %s :\002BitchX\002: I'm not on %s or I'm not opped\n", nick, chan);
+    bd::String msg;
+    msg.printf("\002BitchX\002: I'm not on %s or I'm not opped", chan);
+    notice(nick, msg.c_str(), DP_HELP);
   }
   return BIND_RET_BREAK;
 }
@@ -505,6 +522,7 @@ static int ctcp_INVITE_UNBAN(char *nick, char *uhost, struct userrec *u, char *o
   if (text[0] == '#' && cloak_script > 0 && cloak_script < 9) {
     struct chanset_t *chan = chanset;
     char chname[256] = "", *p = NULL;
+    bd::String msg;
 
     strlcpy(chname, text, sizeof(chname));
     p = strchr(chname, ' ');
@@ -513,13 +531,15 @@ static int ctcp_INVITE_UNBAN(char *nick, char *uhost, struct userrec *u, char *o
     while (chan) {
       if (chan->status & CHAN_ACTIVE) {
         if (!strcasecmp(chan->name, chname)) {
-          dprintf(DP_HELP, "NOTICE %s :\002BitchX\002: Access Denied\n", nick);
+          msg.printf("\002BitchX\002: Access Denied");
+          notice(nick, msg.c_str(), DP_HELP);
           return BIND_RET_LOG;
         }
       }
       chan = chan->next;
     }
-    dprintf(DP_HELP, "NOTICE %s :\002BitchX\002: I'm not on that channel\n", nick);
+    msg.printf("\002BitchX\002: I'm not on that channel");
+    notice(nick, msg.c_str(), DP_HELP);
   }
   return BIND_RET_BREAK;
 }
@@ -532,7 +552,9 @@ static int ctcp_USERINFO(char *nick, char *uhost, struct userrec *u, char *objec
     strlcpy(ctcpuserinfo, botname, sizeof(ctcpuserinfo));
     strlcat(ctcpuserinfo, " ?", sizeof(ctcpuserinfo));
   }
-  dprintf(DP_HELP, "NOTICE %s :\001%s %s\001\n", nick, keyword, ctcpuserinfo);
+  bd::String msg;
+  msg.printf("\001%s %s\001", keyword, ctcpuserinfo);
+  notice(nick, msg.c_str(), DP_HELP);
   return BIND_RET_BREAK;
 }
 
@@ -542,6 +564,7 @@ static int ctcp_CLIENTINFO(char *nick, char *uhost, struct userrec *u, char *obj
     return BIND_RET_BREAK;
 
   char buf[256] = "";
+  bd::String msg;
 
   if (!text[0]) {
     strlcpy(buf, "SED UTC ACTION DCC CDCC BDCC XDCC VERSION CLIENTINFO USERINFO ERRMSG FINGER TIME PING ECHO INVITE WHOAMI OP OPS UNBAN IDENT XLINK UPTIME :Use CLIENTINFO <COMMAND> to get more specific information", sizeof(buf));
@@ -592,10 +615,12 @@ static int ctcp_CLIENTINFO(char *nick, char *uhost, struct userrec *u, char *obj
   else if (!strcasecmp(text, "UPTIME"))
     strlcpy(buf, "UPTIME my uptime", sizeof(buf));
   else {
-    dprintf(DP_HELP, "NOTICE %s :\001ERRMSG %s is not a valid function\001\n", nick, text);
+    msg.printf("\001ERRMSG %s is not a valid function\001", text);
+    notice(nick, msg.c_str(), DP_HELP);
     return BIND_RET_LOG;
   }
-  dprintf(DP_HELP, "NOTICE %s :\001%s %s\001\n", nick, keyword, buf);
+  msg.printf("\001%s %s\001", keyword, buf);
+  notice(nick, msg.c_str(), DP_HELP);
   return BIND_RET_BREAK;
 }
 
@@ -604,7 +629,9 @@ static int ctcp_TIME(char *nick, char *uhost, struct userrec *u, char *object, c
   char tms[81] = "";
 
   strlcpy(tms, ctime(&now), sizeof(tms));
-  dprintf(DP_HELP, "NOTICE %s :\001%s %s\001\n", nick, keyword, tms);
+  bd::String msg;
+  msg.printf("\001%s %s\001", keyword, tms);
+  notice(nick, msg.c_str(), DP_HELP);
   return BIND_RET_BREAK;
 }
 
@@ -634,7 +661,9 @@ static int ctcp_CHAT(char *nick, char *uhost, struct userrec *u, char *object, c
       /* do me a favour and don't change this back to a CTCP reply,
        * CTCP replies are NOTICE's this has to be a PRIVMSG
        * -poptix 5/1/1997 */
-      dprintf(DP_SERVER, "PRIVMSG %s :\001DCC CHAT chat %lu %u\001\n", nick, iptolong(getmyip()), dcc[ix].port);
+      bd::String msg;
+      msg.printf("\001DCC CHAT chat %lu %u\001", iptolong(getmyip()), dcc[ix].port);
+      privmsg(nick, msg.c_str(), DP_SERVER);
     }
     return BIND_RET_BREAK;
 }

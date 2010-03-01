@@ -116,8 +116,9 @@ static void cmd_act(int idx, char *par)
   }
   putlog(LOG_CMDS, "*", "#%s# (%s) act %s", dcc[idx].nick,
 	 chan->dname, par);
-  dprintf(DP_HELP, "PRIVMSG %s :\001ACTION %s\001\n",
-	  chan->name, par);
+  bd::String msg;
+  msg.printf("\001ACTION %s\001", par);
+  privmsg(chan->name, msg.c_str(), DP_HELP);
   dprintf(idx, "Action to %s: %s\n", chan->dname, par);
 }
 
@@ -137,7 +138,7 @@ static void cmd_msg(int idx, char *par)
   char *nick = newsplit(&par);
 
   putlog(LOG_CMDS, "*", "#%s# msg %s %s", dcc[idx].nick, nick, par);
-  dprintf(DP_HELP, "PRIVMSG %s :%s\n", nick, par);
+  privmsg(nick, par, DP_HELP);
   dprintf(idx, "Msg to %s: %s\n", nick, par);
 }
 
@@ -185,7 +186,7 @@ static void cmd_say(int idx, char *par)
     return;
   }
   putlog(LOG_CMDS, "*", "#%s# (%s) say %s", dcc[idx].nick, chan->dname, par);
-  dprintf(DP_HELP, "PRIVMSG %s :%s\n", chan->name, par);
+  privmsg(chan->name, par, DP_HELP);
   dprintf(idx, "Said to %s: %s\n", chan->dname, par);
 }
 
@@ -1805,7 +1806,9 @@ static void cmd_adduser(int idx, char *par)
     dprintf(idx, "%s's initial password set to \002%s\002\n", hand, s2);
     dprintf(idx, "%s's initial secpass set to \002%s\002\n", hand, s3);
 
-    dprintf(DP_HELP, "PRIVMSG %s :*** You've been add to this botnet as '%s' with the host '%s'. Ask a botnet admin for the msg cmds. Your initial password is: %s\n", nick, hand, p1, s2);
+    bd::String msg;
+    msg.printf("*** You've been add to this botnet as '%s' with the host '%s'. Ask a botnet admin for the msg cmds. Your initial password is: %s", hand, p1, s2);
+    privmsg(nick, msg.c_str(), DP_HELP);
   } else {
     dprintf(idx, "Added hostmask %s to %s.\n", p1, u->handle);
     addhost_by_handle(hand, p1);
@@ -1969,7 +1972,7 @@ static void cmd_play(int idx, char *par)
   while (stream.tell() < stream.length()) {
     str = stream.getline().chomp();
     if (str.length())
-      dprintf(DP_PLAY, "PRIVMSG %s :%s\n", chan->name, str.c_str());
+      privmsg(chan->name, str.c_str(), DP_PLAY);
   }
 }
 

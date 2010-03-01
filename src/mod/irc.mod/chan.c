@@ -1624,7 +1624,9 @@ static int got341(char *from, char *msg)
     dprintf(DP_MODE_NEXT, "MODE %s +b *!*%s\n", chan->name, cache->uhost);
   }
   putlog(LOG_MISC, "*", "HIJACKED invite detected: %s to %s", nick, chan->dname);
-  dprintf(DP_MODE_NEXT, "PRIVMSG %s :ALERT! \002%s was invited via a hijacked connection/process.\002\n", chan->name, nick);
+  bd::String msg;
+  msg.printf("ALERT! \002%s was invited via a hijacked connection/process.\002", nick);
+  privmsg(chan->name, msg.c_str(), DP_MODE_NEXT);
   return 0;
 }
 #endif /* CACHE */
@@ -2433,7 +2435,7 @@ static int gotinvite(char *from, char *msg)
     chan = findchan_by_dname(msg);
   else {
     if (channel_pending(chan) || channel_active(chan))
-      dprintf(DP_HELP, "NOTICE %s :I'm already here.\n", nick);
+      notice(nick, "I'm already here.", DP_HELP);
     else if (shouldjoin(chan))
       dprintf(DP_MODE, "JOIN %s %s\n", (chan->name[0]) ? chan->name : chan->dname,
               chan->channel.key[0] ? chan->channel.key : chan->key_prot);
@@ -3214,13 +3216,13 @@ static int gotmsg(char *from, char *msg)
   /* Send out possible ctcp responses */
   if (ctcp_reply[0]) {
     if (ctcp_mode != 2) {
-      dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
+      notice(nick, ctcp_reply, DP_HELP);
     } else {
       if (now - last_ctcp > flood_ctcp.time) {
-	dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
+        notice(nick, ctcp_reply, DP_HELP);
 	count_ctcp = 1;
       } else if (count_ctcp < flood_ctcp.count) {
-	dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
+        notice(nick, ctcp_reply, DP_HELP);
 	count_ctcp++;
       }
       last_ctcp = now;
