@@ -253,7 +253,8 @@ void deq_msg()
    */
   egg_timeval_t last_time_save = { last_time.sec, last_time.usec };
   bool bursted = 0;
-  for(size_t nq = 0; nq < (sizeof(qdsc) / sizeof(qdsc[0])); ++nq) {
+  // -1 here to avoid DP_CACHE
+  for(size_t nq = 0; nq < (sizeof(qdsc) / sizeof(qdsc[0])) - 1; ++nq) {
     while (qdsc[nq].q->head &&
         // If burstable queue and can burst, or not a burstable queue and not connect bursting
         ((qdsc[nq].burst && (burst < msgburst)) || (!qdsc[nq].burst && !connect_bursting)) &&
