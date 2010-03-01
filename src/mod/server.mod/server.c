@@ -970,6 +970,14 @@ static void dcc_chat_hostresolved(int i)
  *     Server timer functions
  */
 
+static void end_burstmode() {
+  if (connect_bursting) {
+    connect_bursting = 0;
+    msgburst = real_msgburst;
+    msgrate = real_msgrate;
+  }
+}
+
 static void server_secondly()
 {
   if (cycle_time)
@@ -978,9 +986,7 @@ static void server_secondly()
     connect_server();
 
   if (connect_bursting && server_online && (now - SERVER_CONNECT_BURST_TIME) >= connect_bursting) {
-    connect_bursting = 0;
-    msgburst = real_msgburst;
-    msgrate = real_msgrate;
+    end_burstmode();
     putlog(LOG_DEBUG, "*", "Ending server burst mode");
   }
 }

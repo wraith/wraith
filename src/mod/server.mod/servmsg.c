@@ -1148,6 +1148,7 @@ static int gotmode(char *from, char *msg)
   return 0;
 }
 
+static void end_burstmode();
 
 static void disconnect_server(int idx, int dolost)
 {
@@ -1169,6 +1170,7 @@ static void disconnect_server(int idx, int dolost)
     trying_server = 0;
     lostdcc(idx);
   }
+  end_burstmode();
 
   /* Invalidate the cmd_swhois cache callback data */
   for (int i = 0; i < dcc_total; i++) {
@@ -1814,7 +1816,7 @@ static void server_dns_callback(int id, void *client_data, const char *host, bd:
     // Just connecting, set last queue time to the past.
     last_time.sec = now - 100;
     last_time.usec = 0;
-    connect_bursting = 0;
+    end_burstmode();
     real_msgburst = msgburst;
     real_msgrate = msgrate;
 
