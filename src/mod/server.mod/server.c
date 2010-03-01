@@ -323,6 +323,9 @@ void deq_msg()
       last_time.sec = last_time_save.sec;
       last_time.usec = 1800 * 1000;
     }
+    // If lagging, raise the penalty up to avoid TCP burst/excess flood
+    if (server_lag > 5)
+      last_time.sec += 2;
 #ifdef DEBUG
     if (timeval_diff(&last_time, &last_time_save))
       sdprintf("PENALTY (%d): %lims", flood_count, timeval_diff(&last_time, &last_time_save));
