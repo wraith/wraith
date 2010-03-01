@@ -1151,7 +1151,7 @@ static int goterror(char *from, char *msg)
   if (msg[0] == ':')
     msg++;       
   putlog(LOG_SERV, "*", "-ERROR from server- %s", msg);
-  putlog(LOG_SERV, "*", "Disconnecting from server.");
+  putlog(LOG_SERV, "*", "Disconnecting from %s.", dcc[servidx].host);
   nuke_server("Bah, stupid error messages.");
   return 1;
 }
@@ -1688,7 +1688,7 @@ static int got465(char *from, char *msg)
   newsplit(&msg); /* nick */
   fixcolon(msg);
   putlog(LOG_SERV, "*", "I am klined: %s", msg);
-  putlog(LOG_SERV, "*", "Disconnecting from server.");
+  putlog(LOG_SERV, "*", "Disconnecting from %s.", dcc[servidx].host);
   nuke_server("I am klined!");
   return 1;                                           
 }
