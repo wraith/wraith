@@ -64,7 +64,7 @@ void timer_update_now(egg_timeval_t *_now)
 	if (_now) timer_get_now(_now);
 }
 
-inline void timer_get_now(egg_timeval_t *_now)
+void timer_get_now(egg_timeval_t *_now)
 {
 	_now->sec = now.sec;
 	_now->usec = now.usec;
