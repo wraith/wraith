@@ -38,6 +38,7 @@ namespace bd {
 void init_dcc(void);
 void dumplots(int, const char *, const char *);
 void dprintf(int, const char *, ...) __attribute__((format(printf, 2, 3)));
+void dprintf_real(int, char*, size_t, size_t);
 void chatout(const char *, ...) __attribute__((format(printf, 1, 2)));
 void chanout_but(int, int, const char *, ...) __attribute__((format(printf, 3, 4)));
 void dcc_chatter(int);

@@ -651,6 +651,10 @@ readsocks(const char *fname)
       server_online = strtol(str.c_str(), NULL, 10);
     else if (type == STR("+server_floodless"))
       floodless = 1;
+    else if (type == STR("+in_deaf"))
+      in_deaf = 1;
+    else if (type == STR("+in_callerid"))
+      in_callerid = 1;
     else if (type == STR("+buildts"))
       old_buildts = strtol(str.c_str(), NULL, 10);
     else if (type == STR("+botname"))
@@ -757,6 +761,10 @@ restart(int idx)
   stream << buf.printf(STR("+online_since %li\n"), online_since);
   if (floodless)
     stream << buf.printf(STR("+server_floodless %d\n"), floodless);
+  if (in_deaf)
+    stream << buf.printf(STR("+in_deaf\n"));
+  if (in_callerid)
+    stream << buf.printf(STR("+in_callerid\n"));
   stream << buf.printf(STR("+buildts %li\n"), buildts);
   stream << buf.printf(STR("+ip4 %s\n"), myipstr(AF_INET));
   stream << buf.printf(STR("+ip6 %s\n"), myipstr(AF_INET6));

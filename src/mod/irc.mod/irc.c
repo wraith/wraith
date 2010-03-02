@@ -69,7 +69,6 @@ static cache_t *irccache = NULL;
 
 #define do_eI (((now - chan->channel.last_eI) > 30) ? 1 : 0)
 
-static int net_type = 0;
 static time_t wait_split = 900;    /* Time to wait for user to return from
                                  * net-split. */
 int max_bans;                   /* Modified by net-type 1-4 */
@@ -87,7 +86,7 @@ bool use_354 = 0;                /* Use ircu's short 354 /who
 static bool kick_fun = 0;
 static bool ban_fun = 1;
 static bool prevent_mixing = 1;  /* To prevent mixing old/new modes */
-static bool include_lk = 1;      /* For correct calculation
+bool include_lk = 1;      /* For correct calculation
                                  * in real_add_mode. */
 bd::HashTable<bd::String, unsigned long> bot_counters;
 static unsigned long my_counter = 0;
@@ -605,8 +604,7 @@ getin_request(char *botnick, char *code, char *par)
         chan->channel.key = strdup(nick);
 
         putlog(LOG_GETIN, "*", "Got key for %s from %s (%s) - Joining", chan->dname, botnick, chan->channel.key);
-        dprintf(DP_MODE, "JOIN %s %s\n", chan->name[0] ? chan->name : chan->dname, chan->channel.key);
-        chan->ircnet_status |= CHAN_JOINING;
+        join_chan(chan);
       } else {
         putlog(LOG_GETIN, "*", "Got key for %s from %s - I'm already in the channel", chan->dname, botnick);
       }
@@ -1347,6 +1345,21 @@ static void send_chan_who(int queue, struct chanset_t *chan) {
       dprintf(queue, "WHO %s\n", chan->name);
 }
 
+void force_join_chan(struct chanset_t* chan, int idx) {
+  chan->ircnet_status = 0;
+  join_chan(chan, idx);
+}
+
+void join_chan(struct chanset_t* chan, int idx) {
+  if (shouldjoin(chan) && !(chan->ircnet_status & (CHAN_ACTIVE | CHAN_PEND | CHAN_JOINING))) {
+    dprintf(idx, "JOIN %s %s\n",
+        (chan->name[0]) ? chan->name : chan->dname,
+        chan->channel.key[0] ? chan->channel.key : chan->key_prot);
+    clear_channel(chan, 1);
+    chan->ircnet_status |= CHAN_JOINING;
+  }
+}
+
 /* If i'm the only person on the channel, and i'm not op'd,
  * might as well leave and rejoin. If i'm NOT the only person
  * on the channel, but i'm still not op'd, demand ops.
@@ -1371,9 +1384,7 @@ check_lonely_channel(struct chanset_t *chan)
     if (chan->name[0] != '+') { /* Its pointless to cycle + chans for ops */
       putlog(LOG_MISC, "*", "Trying to cycle %s to regain ops.", chan->dname);
       dprintf(DP_MODE, "PART %s\n", chan->name);
-      /* If it's a !chan, we need to recreate the channel with !!chan <cybah> */
-      dprintf(DP_MODE, "JOIN %s%s %s\n", (chan->dname[0] == '!') ? "!" : "", chan->dname, chan->key_prot);
-      chan->ircnet_status |= CHAN_JOINING;
+      // Will auto rejoin once the bot PARTs
       whined = 0;
     }
   } else if (any_ops(chan)) {
@@ -1604,12 +1615,8 @@ check_expired_chanstuff(struct chanset_t *chan)
       m = n;
     }
     check_lonely_channel(chan);
-  } else if (shouldjoin(chan) && !channel_pending(chan)) {
-    dprintf(DP_MODE, "JOIN %s %s\n",
-            (chan->name[0]) ? chan->name : chan->dname,
-            chan->channel.key[0] ? chan->channel.key : chan->key_prot);
-    chan->ircnet_status |= CHAN_JOINING;
-  }
+  } else if (shouldjoin(chan))
+    join_chan(chan);
 }
 
 void
@@ -1618,8 +1625,10 @@ irc_minutely()
   for (register struct chanset_t *chan = chanset; chan; chan = chan->next) {
     warn_pls_take(chan);
     if (server_online) {
-      check_netfight(chan);
-      check_servers(chan);
+      if (!channel_pending(chan)) {
+        check_netfight(chan);
+        check_servers(chan);
+      }
       check_expired_chanstuff(chan);
     }
   }
@@ -1720,30 +1729,6 @@ irc_report(int idx, int details)
   }
 }
 
-static void
-do_nettype()
-{
-  switch (net_type) {
-    case 0:                    /* Efnet */
-      include_lk = 0;
-      break;
-    case 1:                    /* Ircnet */
-      include_lk = 1;
-      break;
-    case 2:                    /* Undernet */
-      include_lk = 1;
-      break;
-    case 3:                    /* Dalnet */
-      include_lk = 1;
-      break;
-    case 4:                    /* hybrid-6+ */
-      include_lk = 0;
-      break;
-    default:
-      break;
-  }
-}
-
 static void bot_release_nick (char *botnick, char *code, char *par) {
   release_nick(par);
 }
@@ -1779,6 +1764,4 @@ irc_init()
   add_builtins("raw", irc_raw);
   add_builtins("msg", C_msg);
   add_builtins("msgc", C_msgc);
-
-  do_nettype();
 }

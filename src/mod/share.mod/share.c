@@ -407,7 +407,7 @@ share_chattr(int idx, char *par)
             if (!(dcc[idx].status & STAT_GETTING))
               putlog(LOG_CMDS, "@", "%s: chattr %s %s %s", dcc[idx].nick, hand, s, par);
           } else
-            recheck_channel(cst, 0);
+            check_this_user(u->handle, 0, NULL);
         } else {
           fr.match = FR_GLOBAL;
           get_user_flagrec(dcc[idx].user, &fr, 0);
@@ -426,8 +426,7 @@ share_chattr(int idx, char *par)
             if (!(dcc[idx].status & STAT_GETTING))
               putlog(LOG_CMDS, "@", "%s: chattr %s %s", dcc[idx].nick, hand, s);
           } else {
-            for (cst = chanset; cst; cst = cst->next)
-              recheck_channel(cst, 0);
+            check_this_user(u->handle, 0, NULL);
           }
         }
         noshare = 0;

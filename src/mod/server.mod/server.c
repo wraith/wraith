@@ -82,13 +82,13 @@ static bool waiting_for_awake;	/* set when i unidle myself, cleared when I get t
 time_t server_online = 0;	/* server connection time */
 char botrealname[121] = "A deranged product of evil coders.";	/* realname of bot */
 static interval_t server_timeout = 15;	/* server timeout for connecting */
+static const interval_t stoned_timeout = 500;
 struct server_list *serverlist = NULL;	/* old-style queue, still used by
 					   server list */
 interval_t cycle_time;			/* cycle time till next server connect */
 port_t default_port = 6667;		/* default IRC port */
 bool trigger_on_ignore;	/* trigger bindings if user is ignored ? */
 int answer_ctcp = 1;		/* answer how many stacked ctcp's ? */
-static bool check_mode_r;	/* check for IRCNET +r modes */
 static int net_type = NETT_EFNET;
 static bool resolvserv;		/* in the process of resolving a server host */
 static time_t lastpingtime;	/* IRCNet LAGmeter support -- drummer */
@@ -99,8 +99,9 @@ static bool use_penalties = 0;
 static int use_fastdeq;
 size_t nick_len = 9;			/* Maximal nick length allowed on the network. */
 char deaf_char = 0;
-bool deaf_set = 0;
+bool in_deaf = 0;
 char callerid_char = 0;
+bool in_callerid = 0;
 
 static bool double_mode = 0;		/* allow a msgs to be twice in a queue? */
 static bool double_server = 0;
@@ -815,35 +816,6 @@ void next_server(int *ptr, char *servname, port_t *port, char *pass)
     pass[0] = 0;
 }
 
-static void do_nettype(void)
-{
-  switch (net_type) {
-  case NETT_EFNET:
-    check_mode_r = 0;
-    break;
-  case NETT_IRCNET:
-    check_mode_r = 1;
-    use_fastdeq = 3;
-    simple_snprintf(stackablecmds, sizeof(stackablecmds), "INVITE AWAY VERSION NICK");
-    break;
-  case NETT_UNDERNET:
-    check_mode_r = 0;
-    use_fastdeq = 2;
-    simple_snprintf(stackablecmds, sizeof(stackablecmds), "PRIVMSG NOTICE TOPIC PART WHOIS USERHOST USERIP ISON");
-    simple_snprintf(stackable2cmds, sizeof(stackable2cmds), "USERHOST USERIP ISON");
-    break;
-  case NETT_DALNET:
-    check_mode_r = 0;
-    use_fastdeq = 2;
-    simple_snprintf(stackablecmds, sizeof(stackablecmds), "PRIVMSG NOTICE PART WHOIS WHOWAS USERHOST ISON WATCH DCCALLOW");
-    simple_snprintf(stackable2cmds, sizeof(stackable2cmds), "USERHOST ISON WATCH");
-    break;
-  case NETT_HYBRID_EFNET:
-    check_mode_r = 0;
-    break;
-  }
-}
-
 /*
  *     CTCP DCC CHAT functions
  */
@@ -1021,13 +993,13 @@ static void server_secondly()
           bool need_chatter = doflood(NULL) || (Auth::ht_host.size() && auth_chan && strlen(auth_prefix));
 
           // In +D but am +f, need to -D
-          if (deaf_set && (need_chatter || !use_deaf)) {
+          if (in_deaf && (need_chatter || !use_deaf)) {
             dprintf(DP_SERVER, "MODE %s -%c\n", botname, deaf_char);
-            deaf_set = 0;
-          } else if (!deaf_set && use_deaf && !need_chatter) {
+            in_deaf = 0;
+          } else if (!in_deaf && use_deaf && !need_chatter) {
             // Not +D but should be, probably had +f removed.
             dprintf(DP_SERVER, "MODE %s +%c\n", botname, deaf_char);
-            deaf_set = 1;
+            in_deaf = 1;
           }
         }
 
@@ -1044,17 +1016,10 @@ static void server_check_lag()
     dprintf(DP_DUMP, "PING :%li\n", (long)now);
     lastpingtime = now;
     waiting_for_awake = 1;
-  }
-}
-
-static void server_5minutely()
-{
-  if (server_online && waiting_for_awake && ((now - lastpingtime) >= 300)) {
-      /* Uh oh!  Never got pong from last time, five minutes ago!
-       * Server is probably stoned.
-       */
-      disconnect_server(servidx, DO_LOST);
-      putlog(LOG_SERV, "*", "Server got stoned; jumping...");
+  } else if (servidx != -1 && waiting_for_awake && ((now - lastpingtime) >= stoned_timeout)) {
+    // Not checking server_online as this will handle connect timeouts as well where the connect() works, but the server gets stoned afterwards
+    disconnect_server(servidx, DO_LOST);
+    putlog(LOG_SERV, "*", "Server got stoned; jumping...");
   }
 }
 
@@ -1137,7 +1102,6 @@ static cmd_t my_ctcps[] =
 void server_init()
 {
   strlcpy(botrealname, "A deranged product of evil coders", sizeof(botrealname));
-  strlcpy(stackable2cmds, "USERHOST ISON", sizeof(stackable2cmds));
 
   mq.head = hq.head = modeq.head = NULL;
   mq.last = hq.last = modeq.last = NULL;
@@ -1161,8 +1125,5 @@ void server_init()
 
   timer_create_secs(1, "server_secondly", (Function) server_secondly);
   timer_create_secs(30, "server_check_lag", (Function) server_check_lag);
-  timer_create_secs(300, "server_5minutely", (Function) server_5minutely);
 //  timer_create_secs(60, "minutely_checks", (Function) minutely_checks);
-
-  do_nettype();
 }

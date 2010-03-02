@@ -209,13 +209,8 @@ void
 join_chans()
 {
   for (register struct chanset_t *chan = chanset; chan; chan = chan->next) {
-    if (shouldjoin(chan)) {
-      // Clear out all channel status flags
-      chan->ircnet_status = 0;
-      dprintf(DP_SERVER, "JOIN %s %s\n", (chan->name[0]) ? chan->name : chan->dname,
-                                         chan->channel.key[0] ? chan->channel.key : chan->key_prot);
-      chan->ircnet_status |= CHAN_JOINING;
-    }
+    if (shouldjoin(chan))
+      force_join_chan(chan, DP_SERVER);
   }
 }
 
@@ -226,6 +221,7 @@ static int got001(char *from, char *msg)
 
   fixcolon(msg);
   server_online = now;
+  waiting_for_awake = 0;
   rehash_server(from, msg);
   /* Ok...param #1 of 001 = what server thinks my nick is */
 
@@ -271,6 +267,8 @@ got004(char *from, char *msg)
   if (strstr(tmp, "u2.") || strstr(tmp, "Unreal") || strstr(tmp, "snircd")) {
     putlog(LOG_DEBUG, "*", "Disabling cookies as they are not supported on %s", cursrvname);
     cookies_disabled = true;
+  } else if (strstr(tmp, "hybrid") || strstr(tmp, "ratbox") || strstr(tmp, "Charybdis") || strstr(tmp, "ircd-seven")) {
+    include_lk = 0;
   }
 
   return 0;
@@ -312,22 +310,41 @@ got005(char *from, char *msg)
       if (need_to_rehash_monitor)
         rehash_monitor_list();
     }
-    else if (!strcasecmp(tmp, "NETWORK"))
+    else if (!strcasecmp(tmp, "NETWORK")) {
       strlcpy(curnetwork, p, 120);
-    else if (!strcasecmp(tmp, "PENALTY"))
+      if (!strcasecmp(tmp, "IRCnet")) {
+        simple_snprintf(stackablecmds, sizeof(stackablecmds), "INVITE AWAY VERSION NICK");
+        simple_snprintf(stackable2cmds, sizeof(stackable2cmds), "USERHOST ISON");
+        use_fastdeq = 3;
+      } else if (!strcasecmp(tmp, "DALnet")) {
+        simple_snprintf(stackablecmds, sizeof(stackablecmds), "PRIVMSG NOTICE PART WHOIS WHOWAS USERHOST ISON WATCH DCCALLOW");
+        simple_snprintf(stackable2cmds, sizeof(stackable2cmds), "USERHOST ISON WATCH");
+        use_fastdeq = 2;
+      } else if (!strcasecmp(tmp, "UnderNet")) {
+        simple_snprintf(stackablecmds, sizeof(stackablecmds), "PRIVMSG NOTICE TOPIC PART WHOIS USERHOST USERIP ISON");
+        simple_snprintf(stackable2cmds, sizeof(stackable2cmds), "USERHOST USERIP ISON");
+        use_fastdeq = 2;
+      } else {
+        stackablecmds[0] = 0;
+        simple_snprintf(stackable2cmds, sizeof(stackable2cmds), "USERHOST ISON");
+        use_fastdeq = 0;
+      }
+    } else if (!strcasecmp(tmp, "PENALTY"))
       use_penalties = 1;
     else if (!strcasecmp(tmp, "WHOX"))
       use_354 = 1;
     else if (!strcasecmp(tmp, "DEAF")) {
       deaf_char = p ? p[0] : 'D';
-      if (use_deaf) {
+      if (use_deaf && !in_deaf) {
         dprintf(DP_SERVER, "MODE %s +%c\n", botname, deaf_char);
-        deaf_set = 1;
+        in_deaf = 1;
       }
     } else if (!strcasecmp(tmp, "CALLERID")) {
       callerid_char = p ? p[0] : 'g';
-      if (use_callerid)
+      if (use_callerid && !in_callerid) {
         dprintf(DP_SERVER, "MODE %s +%c\n", botname, callerid_char);
+        in_callerid = 1;
+      }
     } else if (!strcasecmp(tmp, "EXCEPTS"))
       use_exempts = 1;
     else if (!strcasecmp(tmp, "INVEX"))
@@ -382,15 +399,10 @@ static int got442(char *from, char *msg)
   newsplit(&msg);
   chname = newsplit(&msg);
   chan = findchan(chname);
-  if (chan)
-    if (shouldjoin(chan) && !channel_joining(chan)) {
-      putlog(LOG_MISC, chname, "Server says I'm not on channel: %s", chname);
-      clear_channel(chan, 1);
-      chan->ircnet_status = 0;
-      chan->ircnet_status |= CHAN_JOINING;
-      dprintf(DP_MODE, "JOIN %s %s\n", chan->name,
-	      chan->channel.key[0] ? chan->channel.key : chan->key_prot);
-    }
+  if (chan && shouldjoin(chan) && !channel_joining(chan)) {
+    putlog(LOG_MISC, chname, "Server says I'm not on channel: %s", chname);
+    force_join_chan(chan);
+  }
 
   return 0;
 }
@@ -415,15 +427,16 @@ static char lastmsghost[FLOOD_GLOBAL_MAX][128];
 static time_t lastmsgtime[FLOOD_GLOBAL_MAX];
 static int dronemsgs;
 static time_t dronemsgtime;
-static bool in_callerid = 0;
 static interval_t flood_callerid_time = 60;
 
 rate_t flood_callerid = { 6, 2 };
 
 void unset_callerid(int data)
 {
-  dprintf(DP_MODE, "MODE %s :-%c\n", botname, callerid_char);
-  in_callerid = 0;
+  if (in_callerid) {
+    dprintf(DP_MODE, "MODE %s :-%c\n", botname, callerid_char);
+    in_callerid = 0;
+  }
 }
 
 /* Do on NICK, PRIVMSG, NOTICE and JOIN.
@@ -1213,8 +1226,8 @@ static int gotmode(char *from, char *msg)
   ch = newsplit(&buf);
   /* Usermode changes? */
   if (strchr(CHANMETA, ch[0]) == NULL) {
-    if (match_my_nick(ch) && check_mode_r) {
-      /* umode +r? - D0H dalnet uses it to mean something different */
+    if (match_my_nick(ch) && !strcmp(curnetwork, "IRCnet")) {
+      // Umode +r is restricted on IRCnet, can only chat.
       fixcolon(buf);
       if ((buf[0] == '+') && strchr(buf, 'r')) {
 	putlog(LOG_SERV, "*", "%s has me i-lined (jumping)", dcc[servidx].host);
@@ -1246,7 +1259,7 @@ static void disconnect_server(int idx, int dolost)
   use_penalties = 0;
   use_354 = 0;
   deaf_char = 0;
-  deaf_set = 0;
+  in_deaf = 0;
   callerid_char = 0;
   in_callerid = 0;
   use_exempts = 0;
@@ -1283,11 +1296,11 @@ static void kill_server(int idx, void *x)
 {
   disconnect_server(idx, NO_LOST);	/* eof_server will lostdcc() it. */
 
-  if (!segfaulted)		// don't bother if we've segfaulted, too many memory calls in this loop
-    for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
-      chan->ircnet_status = 0;
-      clear_channel(chan, 1);
-    }
+  if (segfaulted)		// don't bother if we've segfaulted, too many memory calls in this loop
+    return;
+
+  for (struct chanset_t *chan = chanset; chan; chan = chan->next)
+    clear_channel(chan, 1);
   /* A new server connection will be automatically initiated in
      about 2 seconds. */
 }
@@ -1328,8 +1341,13 @@ static void server_activity(int idx, char *msg, int len)
     serv = dcc[idx].sosck;
     */
     SERVER_SOCKET.timeout_val = 0;
-  }
-  waiting_for_awake = 0;
+
+    // Setup timer for conecting
+    waiting_for_awake = 1;
+    lastpingtime = now - (stoned_timeout + 30); //30 seconds to reach 001
+  } else if (server_online) // Only set once 001 has been received
+    waiting_for_awake = 0;
+
   if (msg[0] == ':') {
     msg++;
     from = newsplit(&msg);
@@ -1503,7 +1521,7 @@ hide_chans(const char *nick, struct userrec *u, char *_channels, bool publicOnly
         if (!(p = strchr(chname, '!')))
           continue;
 
-    chan = findchan_by_dname(p);
+    chan = findchan(p);
 
     if (chan && !publicOnly)
      get_user_flagrec(u, &fr, chan->dname, chan);
@@ -1845,6 +1863,7 @@ static void connect_server(void)
     rolls = 0;
     altnick_char = 0;
     use_monitor = 0;
+    include_lk = 1;
 
     for (chan = chanset; chan; chan = chan->next)
       chan->ircnet_status &= ~CHAN_JUPED;
