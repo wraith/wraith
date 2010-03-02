@@ -179,7 +179,7 @@ flush_cookies(struct chanset_t *chan, int pri)
       char outbuf[201] = "";
 
       const size_t len = simple_snprintf(outbuf, sizeof(outbuf), "MODE %s %s\r\n", chan->name, out);
-      tputs(serv, outbuf, len);
+      dprintf_real(DP_MODE, outbuf, len, sizeof(outbuf));
       /* dprintf(DP_MODE, "MODE %s %s\n", chan->name, out); */
     } else
       dprintf(DP_MODE, "MODE %s %s\n", chan->name, out);
@@ -588,7 +588,7 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
         add_mode(chan, '-', 'o', mv->nick);
 
       if (len)
-        tputs(serv, outbuf, len);
+        dprintf_real(DP_MODE_NEXT, outbuf, len, sizeof(outbuf));
     }
 
 
@@ -1075,10 +1075,7 @@ gotmode(char *from, char *msg)
             if (role < 5) {
               m->flags |= SENTKICK;
               const size_t len = simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MASSDEOP));
-              if (role <= 2)
-                tputs(serv, tmp, len);
-              else
-                dprintf(DP_MODE, "%s", tmp);
+              dprintf_real(DP_MODE_NEXT, tmp, len, sizeof(tmp));
             } else {
               if (u) {
                 simple_snprintf(tmp, sizeof(tmp), "Mass deop on %s by %s", chan->dname, m->nick);
@@ -1094,10 +1091,7 @@ gotmode(char *from, char *msg)
                 if (role < 5) {
                   m->flags |= SENTKICK;
                   const size_t len = simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MANUALOP));
-                  if (role <= 2)
-                    tputs(serv, tmp, len);
-                  else
-                    dprintf(DP_MODE, "%s", tmp);
+                  dprintf_real(DP_MODE_NEXT, tmp, len, sizeof(tmp));
                 } else { 
                   if (u) {
                     simple_snprintf(tmp, sizeof(tmp), "Mass op on %s by %s", chan->dname, m->nick);
@@ -1140,7 +1134,7 @@ gotmode(char *from, char *msg)
                         if (mv)
                           mv->flags |= SENTKICK;
                         const size_t len = simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, mparam, kickprefix, response(RES_BADOPPED));
-                        tputs(serv, tmp, len);
+                        dprintf_real(DP_MODE_NEXT, tmp, len, sizeof(tmp));
                       }
                     }
                   }
@@ -1158,7 +1152,7 @@ gotmode(char *from, char *msg)
                 if (!chan_sentkick(m)) {
                   m->flags |= SENTKICK;
                   const size_t len = simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_BADOP));
-                  tputs(serv, tmp, len);
+                  dprintf_real(DP_MODE_NEXT, tmp, len, sizeof(tmp));
                 }
                 simple_snprintf(tmp, sizeof(tmp), "%s!%s MODE %s %s", m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
                 deflag_user(u, DEFLAG_BADCOOKIE, tmp, chan);
@@ -1196,7 +1190,7 @@ gotmode(char *from, char *msg)
                   /* Kick opper */
                   if (!chan_sentkick(m)) {
                     const size_t len = simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MANUALOP));
-                    tputs(serv, tmp, len);
+                    dprintf_real(DP_MODE_NEXT, tmp, len, sizeof(tmp));
                     m->flags |= SENTKICK;
                   }
                   simple_snprintf(tmp, sizeof(tmp), "%s!%s MODE %s %s", m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
@@ -1221,7 +1215,7 @@ gotmode(char *from, char *msg)
                         if (mv)
                           mv->flags |= SENTKICK;
                         const size_t len = simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, mparam, kickprefix, response(RES_MANUALOPPED));
-                        tputs(serv, tmp, len);
+                        dprintf_real(DP_MODE_NEXT, tmp, len, sizeof(tmp));
                       }
                     }
                   }
