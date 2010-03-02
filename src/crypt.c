@@ -25,7 +25,7 @@ char *encrypt_string(const char *keydata, char *in)
 
   len = strlen(in);
   bdata = aes_encrypt_ecb_binary(keydata, (unsigned char *) in, &len);
-  if (keydata && *keydata) {
+  if (likely(keydata && *keydata)) {
     res = b64enc(bdata, len);
     OPENSSL_cleanse(bdata, len);
     free(bdata);
@@ -88,7 +88,7 @@ char *decrypt_string(const char *keydata, char *in)
   size_t len = strlen(in);
   char *buf = NULL, *res = NULL;
 
-  if (keydata && *keydata) {
+  if (likely(keydata && *keydata)) {
     buf = b64dec((const unsigned char *) in, &len);
     res = (char *) aes_decrypt_ecb_binary(keydata, (unsigned char *) buf, &len);
     OPENSSL_cleanse(buf, len);

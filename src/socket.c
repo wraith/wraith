@@ -215,13 +215,12 @@ int socket_create(const char *dest_ip, int dest_port, const char *src_ip, int sr
 
 
         if (flags & SOCKET_CLIENT) {
-          for (int i = 0; i < MAXSOCKS; i++) {
-            if (!(socklist[i].flags & SOCK_UNUSED) && (socklist[i].sock == sock)) {
-              socklist[i].flags = (socklist[i].flags & ~SOCK_VIRTUAL) | SOCK_CONNECT | SOCK_PASS;
-              socklist[i].host = strdup(dest_ip);
-              socklist[i].port = dest_port;
-            }
-          }
+			int i = -1;
+			if ((i = findanysnum(sock)) != -1) {
+				socklist[i].flags = (socklist[i].flags & ~SOCK_VIRTUAL) | SOCK_CONNECT | SOCK_PASS;
+				socklist[i].host = strdup(dest_ip);
+				socklist[i].port = dest_port;
+			}
 
           if (connect(sock, &dest_name.u.addr, dest_name.len) != 0) {
 		if (errno != EINPROGRESS) {

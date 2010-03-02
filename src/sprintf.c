@@ -89,7 +89,7 @@ re_eval:
     if (*fp == '%' || width_modifier) {
 re_eval_with_modifier:
       ++fp;
-      if (width_modifier) {
+      if (unlikely(width_modifier)) {
         if (egg_isdigit(*fp)) {
           width = 10 * width + (*fp - '0');
           goto re_eval;
@@ -174,7 +174,7 @@ re_eval_with_modifier:
         continue;
       }
       if (s) {
-        if (width > 0) {
+        if (unlikely(width > 0)) {
           width -= strlen(s);
           if (width < 0) width = 0;
           if (rpad) {
@@ -184,7 +184,7 @@ re_eval_with_modifier:
         }
 
         /* Left padding / right justification */
-        if (width > 0) {
+        if (unlikely(width > 0)) {
           while (width > 0 && c < size - 1) {
             buf[c++] = pad;
             --width;
@@ -193,7 +193,7 @@ re_eval_with_modifier:
         }
 
         /* Advance the buffer with content */
-        if (caps) {
+        if (unlikely(caps)) {
           while (*s && c < size - 1)
             buf[c++] = toupper(*s++);
           caps = false;

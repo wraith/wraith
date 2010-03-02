@@ -957,12 +957,12 @@ gotmode(char *from, char *msg)
   if (msg[0] && (strchr(CHANMETA, msg[0]) != NULL)) {
     char *ch = newsplit(&msg);
 
-    if (match_my_nick(ch))
+    if (unlikely(match_my_nick(ch)))
       return 0;
 
     struct chanset_t *chan = findchan(ch);
 
-    if (!chan) {
+    if (unlikely(!chan)) {
       putlog(LOG_MISC, "*", "Oops.   Someone made me join %s... leaving...", ch);
       dprintf(DP_SERVER, "PART %s\n", ch);
       return 0;
@@ -1148,7 +1148,7 @@ gotmode(char *from, char *msg)
               }
             }
 
-            if (failure) { /* One of the hashes failed! */
+            if (unlikely(failure)) { /* One of the hashes failed! */
               /* Did *I* do this heinous act? */
               if (match_my_nick(m->nick)) {
                 detected(DETECT_HIJACK, "Possible Hijack: bad cookie");

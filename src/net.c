@@ -260,16 +260,15 @@ void cache_my_ip()
  */
 int sockoptions(int sock, int operation, int sock_options)
 {
-  for (int i = 0; i < MAXSOCKS; i++) {
-    if ((socklist[i].sock == sock) && !(socklist[i].flags & SOCK_UNUSED)) {
-      if (operation == EGG_OPTION_SET)
-	      socklist[i].flags |= sock_options;
-      else if (operation == EGG_OPTION_UNSET)
-	      socklist[i].flags &= ~sock_options;
-      else
-	      return -2;
-      return 0;
-    }
+  int i = -1;
+  if ((i = findanysnum(sock)) != -1) {
+    if (operation == EGG_OPTION_SET)
+      socklist[i].flags |= sock_options;
+    else if (operation == EGG_OPTION_UNSET)
+      socklist[i].flags &= ~sock_options;
+    else
+      return -2;
+    return 0;
   }
   return -1;
 }
@@ -406,25 +405,24 @@ void real_killsock(register int sock, const char *file, int line)
     return;
   }
 
-  for (register int i = 0; i < MAXSOCKS; i++) {
-    if ((socklist[i].sock == sock) && !(socklist[i].flags & SOCK_UNUSED)) {
-      close(socklist[i].sock);
-      if (socklist[i].inbuf != NULL) {
-	delete socklist[i].inbuf;
-	socklist[i].inbuf = NULL;
-      }
-      if (socklist[i].outbuf != NULL) {
-	delete socklist[i].outbuf;
-	socklist[i].outbuf = NULL;
-      }
-      if (socklist[i].host)
-        free(socklist[i].host);
-      bzero(&socklist[i], sizeof(socklist[i]));
-      socklist[i].flags = SOCK_UNUSED;
-      socks_total--;
-      sdprintf("killsock(%d, %s, %d) (socklist: %d)", sock, file, line, i);
-      return;
+  int i = -1;
+  if ((i = findanysnum(sock)) != -1) {
+    close(socklist[i].sock);
+    if (socklist[i].inbuf != NULL) {
+      delete socklist[i].inbuf;
+      socklist[i].inbuf = NULL;
     }
+    if (socklist[i].outbuf != NULL) {
+      delete socklist[i].outbuf;
+      socklist[i].outbuf = NULL;
+    }
+    if (socklist[i].host)
+      free(socklist[i].host);
+    bzero(&socklist[i], sizeof(socklist[i]));
+    socklist[i].flags = SOCK_UNUSED;
+    socks_total--;
+    sdprintf("killsock(%d, %s, %d) (socklist: %d)", sock, file, line, i);
+    return;
   }
   putlog(LOG_MISC, "*", "Attempt to kill un-allocated socket %d %s:%d !!", sock, file, line);
 }
@@ -451,9 +449,9 @@ static int proxy_connect(int sock, const char *ip, port_t port, int proxy_type)
     } else {	/* if not resolved, resolve it with blocking calls.. (shouldn't happen ever) */
       return -1;
     }
-    for (int i = 0; i < MAXSOCKS; i++)
-      if (!(socklist[i].flags & SOCK_UNUSED) && socklist[i].sock == sock)
-        socklist[i].flags |= SOCK_PROXYWAIT;
+    int i = -1;
+    if ((i = findanysnum(sock)) != -1)
+      socklist[i].flags |= SOCK_PROXYWAIT;
 #ifdef USE_IPV6
     if (af_ty == AF_INET6)
       simple_snprintf(s, sizeof s,
@@ -574,13 +572,11 @@ int open_telnet_raw(int sock, const char *ipIn, port_t sport, bool proxy_on, int
     socklen = SUN_LEN(&so.sock_un);
   }
 
-  for (int i = 0; i < MAXSOCKS; i++) {
-    if (!(socklist[i].flags & SOCK_UNUSED) && (socklist[i].sock == sock)) {
-      socklist[i].flags = (socklist[i].flags & ~SOCK_VIRTUAL) | SOCK_CONNECT;
-      socklist[i].host = strdup(ipIn);
-      socklist[i].port = port;
-      break;
-    }
+  int i = -1;
+  if ((i = findanysnum(sock)) != -1) {
+    socklist[i].flags = (socklist[i].flags & ~SOCK_VIRTUAL) | SOCK_CONNECT;
+    socklist[i].host = strdup(ipIn);
+    socklist[i].port = port;
   }
 
   if (identd && sport) //Only open identd if not a unix domain socket
@@ -941,7 +937,7 @@ static int sockread(char *s, int *len)
   int grab = SGRAB + 1;
   egg_timeval_t howlong;
 
-  if (timer_get_shortest(&howlong)) {
+  if (unlikely(timer_get_shortest(&howlong))) {
     /* No timer, default to 1 second. */
     t.tv_sec = 1;
     t.tv_usec = 0;
@@ -955,7 +951,7 @@ static int sockread(char *s, int *len)
   
   for (i = 0; i < MAXSOCKS; i++) {
     if (!(socklist[i].flags & (SOCK_UNUSED | SOCK_VIRTUAL))) {
-      if ((socklist[i].sock == STDOUT) && !backgrd)
+      if (unlikely((socklist[i].sock == STDOUT) && !backgrd))
 	fdtmp = STDIN;
       else
 	fdtmp = socklist[i].sock;
@@ -994,7 +990,7 @@ static int sockread(char *s, int *len)
 	  return i;
 	}
 	errno = 0;
-	if ((socklist[i].sock == STDOUT) && !backgrd)
+	if (unlikely((socklist[i].sock == STDOUT) && !backgrd))
 	  x = read(STDIN, s, grab);
 	else
           x = read(socklist[i].sock, s, grab);
@@ -1245,65 +1241,61 @@ void tputs(register int z, const char *s, size_t len)
 
   register int x, idx;
 
-  for (register int i = 0; i < MAXSOCKS; i++) {
-    if (!(socklist[i].flags & SOCK_UNUSED) && (socklist[i].sock == z)) {
-      for (idx = 0; idx < dcc_total; idx++) {
-        if (dcc[idx].type && (dcc[idx].sock == z) && dcc[idx].type->name) {
-          if (!strncmp(dcc[idx].type->name, "BOT", 3))
-                traffic.out_today.bn += len;
-          else if (!strcmp(dcc[idx].type->name, "SERVER"))
-                traffic.out_today.irc += len;
-          else if (!strncmp(dcc[idx].type->name, "CHAT", 4))
-                traffic.out_today.dcc += len;
-          else if (!strncmp(dcc[idx].type->name, "FILES", 5))
-                traffic.out_today.filesys += len;
-          else if (!strcmp(dcc[idx].type->name, "SEND"))
-                traffic.out_today.trans += len;
-          else if (!strncmp(dcc[idx].type->name, "GET", 3))
-                traffic.out_today.trans += len;
-          else
-                traffic.out_today.unknown += len;
-          break;
-        }
-      }
+  int i = -1;
+  if ((i = findanysnum(z)) != -1) {
+    if ((idx = findanyidx(z)) != -1 && dcc[idx].type->name) {
+      if (!strncmp(dcc[idx].type->name, "BOT", 3))
+        traffic.out_today.bn += len;
+      else if (!strcmp(dcc[idx].type->name, "SERVER"))
+        traffic.out_today.irc += len;
+      else if (!strncmp(dcc[idx].type->name, "CHAT", 4))
+        traffic.out_today.dcc += len;
+      else if (!strncmp(dcc[idx].type->name, "FILES", 5))
+        traffic.out_today.filesys += len;
+      else if (!strcmp(dcc[idx].type->name, "SEND"))
+        traffic.out_today.trans += len;
+      else if (!strncmp(dcc[idx].type->name, "GET", 3))
+        traffic.out_today.trans += len;
+      else
+        traffic.out_today.unknown += len;
+    }
 
-      if (len && socklist[i].encstatus)
-        s = link_write(i, s, &len);
+    if (len && socklist[i].encstatus)
+      s = link_write(i, s, &len);
 
 #ifdef HAVE_ZLIB_H
-/*
-      if (socklist[i].gz) { 		
-        FILE *fp;
-        fp = gzdopen(z, "wb0");
-        x = gzwrite(fp, s, len);
-        
-      } else
-*/
+    /*
+       if (socklist[i].gz) {
+       FILE *fp;
+       fp = gzdopen(z, "wb0");
+       x = gzwrite(fp, s, len);
+
+       } else
+       */
 #endif /* HAVE_ZLIB_H */
 
-      if (socklist[i].outbuf != NULL) {
-	/* Already queueing: just add it */
-        *(socklist[i].outbuf) += bd::String(s, len);
-	return;
-      }
-      /* Try. */
-        x = write(z, s, len);
-      if (x == -1)
-	x = 0;
-      if ((size_t) x < len) {
-	/* Socket is full, queue it */
-	socklist[i].outbuf = new bd::String(&s[x], len - x);
-      }
-//      if (socklist[i].encstatus && s)
-//        free(s);
+    if (socklist[i].outbuf != NULL) {
+      /* Already queueing: just add it */
+      *(socklist[i].outbuf) += bd::String(s, len);
       return;
     }
+    /* Try. */
+    x = write(z, s, len);
+    if (x == -1)
+      x = 0;
+    if ((size_t) x < len) {
+      /* Socket is full, queue it */
+      socklist[i].outbuf = new bd::String(&s[x], len - x);
+    }
+    //      if (socklist[i].encstatus && s)
+    //        free(s);
+    return;
   }
 
   /* Make sure we don't cause a crash by looping here */
   static int inhere = 0;
 
-  if (!inhere) {
+  if (unlikely(!inhere)) {
     inhere = 1;
 
     putlog(LOG_MISC, "*", "!!! writing to nonexistent socket: %d", z);
@@ -1333,14 +1325,12 @@ int findanysnum(register int sock)
   return -1;
 }
 
-static int findanyidx(register int sock)
+int findanyidx(int sock)
 {
-  register int j;
-
   if (sock != -1)
-    for (j = 0; j < dcc_total; j++)
-      if (dcc[j].type && dcc[j].sock == sock)
-        return j;
+    for (int idx = 0; idx < dcc_total; ++idx)
+      if (dcc[idx].type && dcc[idx].sock == sock)
+        return idx;
 
   return -1;
 }
@@ -1459,22 +1449,98 @@ void tell_netdebug(int idx)
 bool sock_has_data(int type, int sock)
 {
   bool ret = 0;
-  int i;
+  int i = -1;
 
-  for (i = 0; i < MAXSOCKS; i++)
-    if (!(socklist[i].flags & SOCK_UNUSED) && socklist[i].sock == sock)
-      break;
-  if (i < MAXSOCKS) {
+  if ((i = findanysnum(sock)) != -1) {
     switch (type) {
       case SOCK_DATA_OUTGOING:
-	ret = (socklist[i].outbuf != NULL);
-	break;
+        ret = (socklist[i].outbuf != NULL);
+        break;
       case SOCK_DATA_INCOMING:
-	ret = (socklist[i].inbuf != NULL);
-	break;
+        ret = (socklist[i].inbuf != NULL);
+        break;
     }
   } else
     debug1("sock_has_data: could not find socket #%d, returning false.", sock);
   return ret;
 }
 
+bool socket_run() {
+  static int socket_cleanup = 0;
+  char buf[SGRAB + 10] = "";
+  int i = 0, idx = 0;
+
+  /* Only do this every so often. */
+  if (!socket_cleanup) {
+    socket_cleanup = 5;
+
+    /* Check for server or dcc activity. */
+    dequeue_sockets();
+  } else
+    --socket_cleanup;
+
+  int xx = sockgets(buf, &i);
+
+  if (xx >= 0) {		/* Non-error */
+    if ((idx = findanyidx(xx)) != -1) {
+      if (likely(dcc[idx].type->activity)) {
+        /* Traffic stats */
+        if (dcc[idx].type->name) {
+          if (!strncmp(dcc[idx].type->name, "BOT", 3))
+            traffic.in_today.bn += strlen(buf) + 1;
+          else if (!strcmp(dcc[idx].type->name, "SERVER"))
+            traffic.in_today.irc += strlen(buf) + 1;
+          else if (!strncmp(dcc[idx].type->name, "CHAT", 4))
+            traffic.in_today.dcc += strlen(buf) + 1;
+          else if (!strncmp(dcc[idx].type->name, "FILES", 5))
+            traffic.in_today.dcc += strlen(buf) + 1;
+          else if (!strcmp(dcc[idx].type->name, "SEND"))
+            traffic.in_today.trans += strlen(buf) + 1;
+          else if (!strncmp(dcc[idx].type->name, "GET", 3))
+            traffic.in_today.trans += strlen(buf) + 1;
+          else
+            traffic.in_today.unknown += strlen(buf) + 1;
+        }
+        dcc[idx].type->activity(idx, buf, (size_t) i);
+      } else
+        putlog(LOG_MISC, "*",
+            STR("!!! untrapped dcc activity: type %s, sock %d"),
+            dcc[idx].type->name, dcc[idx].sock);
+    }
+  } else if (unlikely(xx == -1)) {	/* EOF from someone */
+    if (unlikely(i == STDOUT && !backgrd))
+      fatal(STR("END OF FILE ON TERMINAL"), 0);
+    if ((idx = findanyidx(i)) != -1) {
+      sdprintf(STR("EOF on '%s' idx: %d"), dcc[idx].type ? dcc[idx].type->name : "unknown", idx);
+      if (likely(dcc[idx].type->eof))
+        dcc[idx].type->eof(idx);
+      else {
+        putlog(LOG_MISC, "*",
+            STR("*** ATTENTION: DEAD SOCKET (%d) OF TYPE %s UNTRAPPED"),
+            i, dcc[idx].type ? dcc[idx].type->name : "*UNKNOWN*");
+        killsock(i);
+        lostdcc(idx);
+      }
+    } else if (unlikely(idx == -1)) {
+      putlog(LOG_MISC, "*", STR("(@) EOF socket %d, not a dcc socket, not anything."), i);
+      close(i);
+      killsock(i);
+    }
+  } else if (unlikely(xx == -2 && errno != EINTR)) {	/* select() error */
+    putlog(LOG_MISC, "*", STR("* Socket error #%d; recovering."), errno);
+    for (i = 0; i < dcc_total; i++) {
+      if (dcc[i].type && dcc[i].sock != -1 && (fcntl(dcc[i].sock, F_GETFD, 0) == -1) && (errno = EBADF)) {
+        putlog(LOG_MISC, "*",
+            STR("DCC socket %d (type %s, name '%s') expired -- pfft"),
+            dcc[i].sock, dcc[i].type->name, dcc[i].nick);
+        killsock(dcc[i].sock);
+        lostdcc(i);
+        i--;
+      }
+    }
+  } else if (xx == -3) {                      /* Idle */
+    socket_cleanup = 0;	/* If we've been idle, cleanup & flush */
+    return 1;
+  }
+  return 0;
+}

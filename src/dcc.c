@@ -370,7 +370,7 @@ cont_link(int idx, char *buf, int ii)
 {
   /* If we're already connected somewhere, unlink and idle a sec */
   for (int i = 0; i < dcc_total; i++) {
-    if (dcc[i].type && (dcc[i].type == &DCC_BOT) && (!bot_aggressive_to(dcc[i].user))) {
+    if (unlikely(dcc[i].type && (dcc[i].type == &DCC_BOT) && (!bot_aggressive_to(dcc[i].user)))) {
       putlog(LOG_BOTS, "*", "Unlinking %s - restructure", dcc[i].nick);
       botnet_send_unlinked(i, dcc[i].nick, "Restructure");
       killsock(dcc[i].sock);
@@ -1222,16 +1222,16 @@ dcc_chat(int idx, char *buf, int len)
     else
       *d = 0;
 
-    if (u_pass_match(dcc[idx].user, buf)) {     /* user said their password :) */
+    if (unlikely(u_pass_match(dcc[idx].user, buf))) {     /* user said their password :) */
       dprintf(idx, "Sure you want that going to the partyline? ;) (msg to partyline halted.)\n");
-    } else if (!strncmp(buf, STR("+Auth "), 6)) {    /* ignore extra +Auth lines */
+    } else if (unlikely(!strncmp(buf, STR("+Auth "), 6))) {    /* ignore extra +Auth lines */
     } else if ((!strncmp(buf, settings.dcc_prefix, strlen(settings.dcc_prefix))) || (dcc[idx].u.chat->channel < 0)) {
       if (!strncmp(buf, settings.dcc_prefix, strlen(settings.dcc_prefix)) && (dcc[idx].u.chat->channel >= 0))        /* strip '.' out */
         buf++;
       v = newsplit(&buf);
       rmspace(buf);
       check_bind_dcc(v, idx, buf);
-    } else if (buf[0] == ',') {
+    } else if (unlikely(buf[0] == ',')) {
       int me = 0;
 
       if ((buf[1] == 'm') && (buf[2] == 'e') && buf[3] == ' ')
@@ -1257,7 +1257,7 @@ dcc_chat(int idx, char *buf, int len)
         }
        }
       }
-    } else if (buf[0] == '\'') {
+    } else if (unlikely(buf[0] == '\'')) {
       int me = 0;
 
       if ((buf[1] == 'm') && (buf[2] == 'e') && ((buf[3] == ' ') || (buf[3] == '\'') || (buf[3] == ',')))
@@ -1377,7 +1377,7 @@ dcc_telnet(int idx, char *buf, int ii)
   int i;
   char x[1024] = "";
 
-  if (dcc_total + 1 > max_dcc) {
+  if (unlikely(dcc_total + 1 > max_dcc)) {
     int j;
 
     j = answer(dcc[idx].sock, s, &ip, &port, 0);
@@ -1392,7 +1392,7 @@ dcc_telnet(int idx, char *buf, int ii)
 
   while ((sock == -1) && (errno == EAGAIN))
     sock = answer(dcc[idx].sock, s, &ip, &port, 0);
-  if (sock < 0) {
+  if (unlikely(sock < 0)) {
     putlog(LOG_MISC, "*", "Failed TELNET incoming (%s)", strerror(errno));
 //    killsock(dcc[idx].sock);
     return;
@@ -1433,7 +1433,7 @@ dcc_telnet(int idx, char *buf, int ii)
   // Are they ignored by IP?
   simple_snprintf(x, sizeof(x), "-telnet!telnet@%s", iptostr(htonl(ip)));
 
-  if (match_ignore(x) || detect_telnet_flood(x)) {
+  if (unlikely(match_ignore(x) || detect_telnet_flood(x))) {
     putlog(LOG_DEBUG, "*", "Ignored telnet connection from: %s", x);
     killsock(sock);
     return;

@@ -77,5 +77,36 @@
 #define BIT30   (uint32_t) 0x040000000
 #define BIT31   (uint32_t) 0x080000000
 
+/* Thanks libratbox */
+#ifdef __GNUC__
+
+#ifdef likely
+#undef likely
+#endif
+#ifdef unlikely
+#undef unlikely
+#endif
+
+#if __GNUC__ == 2 && __GNUC_MINOR__ < 96
+# define __builtin_expect(x, expected_value) (x)
+#endif
+
+#define likely(x)       __builtin_expect(!!(x), 1)
+#define unlikely(x)     __builtin_expect(!!(x), 0)
+
+#else /* !__GNUC__ */
+
+#define UNUSED(x) x
+
+#ifdef likely
+#undef likely
+#endif
+#ifdef unlikely
+#undef unlikely
+#endif
+#define likely(x)    (x)
+#define unlikely(x)  (x)
+#endif
+
 
 #endif				/* _COMMON_H */

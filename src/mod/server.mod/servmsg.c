@@ -1318,7 +1318,7 @@ static void server_activity(int idx, char *msg, int len)
 {
   char *from = NULL, *code = NULL;
 
-  if (trying_server) {
+  if (unlikely(trying_server)) {
     strlcpy(dcc[idx].nick, "(server)", sizeof(dcc[idx].nick));
     putlog(LOG_SERV, "*", "Connected to %s", dcc[idx].host);
 

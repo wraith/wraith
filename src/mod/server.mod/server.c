@@ -589,7 +589,7 @@ void queue_server(int which, char *buf, int len)
     return;
   }
 
-  if (h->tot < maxqmsg) {
+  if (likely(h->tot < maxqmsg)) {
     /* Don't queue msg if it's already queued?  */
     if (!doublemsg) {
       struct msgq *tq = NULL, *tqq = NULL;
