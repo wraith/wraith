@@ -3989,13 +3989,18 @@ static void cmd_netmsg(int idx, char * par) {
   putlog(LOG_CMDS, "*", "#%s# netmsg %s", dcc[idx].nick, par);
   tnick = newsplit(&par);
   if (!par[0]) {
-    dprintf(idx, "Usage: netmsg <nick|#channel> <message>\n");
+    dprintf(idx, "Usage: netmsg <#channel> <message>\n");
+    return;
+  }
+
+  if (!strchr(CHANMETA, tnick[0])) {
+    dprintf(idx, "You may only netmsg channels the bots are opped in.\n");
     return;
   }
 
   char tmp[1024] = "";
 
-  simple_snprintf(tmp, sizeof tmp, "msg %s %s", tnick, par);
+  simple_snprintf(tmp, sizeof tmp, "nmsg %s %s", tnick, par);
   botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, tmp);
 }
 
@@ -4012,6 +4017,18 @@ static void rcmd_msg(char * tobot, char * frombot, char * fromhand, char * fromi
     }
   }
 }
+
+static void rcmd_nmsg(char * tobot, char * frombot, char * fromhand, char * fromidx, char * par) {
+  if (!conf.bot->hub) {
+    char *nick = newsplit(&par);
+
+    if (!strchr(CHANMETA, nick[0])) return;
+    if (!me_op(findchan_by_dname(nick))) return;
+
+    rcmd_msg(tobot, frombot, fromhand, fromidx, par);
+  }
+}
+
 
 /* netlag */
 static void cmd_netlag(int idx, char * par) {
@@ -4357,6 +4374,8 @@ void gotremotecmd (char *forbot, char *frombot, char *fromhand, char *fromidx, c
     rcmd_jump(frombot, fromhand, fromidx, par);
   } else if (!strcmp(cmd, "msg")) {
     rcmd_msg(forbot, frombot, fromhand, fromidx, par);
+  } else if (!strcmp(cmd, "nmsg")) {
+    rcmd_nmsg(forbot, frombot, fromhand, fromidx, par);
   } else if (!strcmp(cmd, "ver")) {
     rcmd_ver(frombot, fromhand, fromidx);
   } else if (!strcmp(cmd, "ping")) {

@@ -110,6 +110,7 @@
   * Add cmd_hash which returns the MD5, SHA1 and SHA256 of the given string.
   * Credits/cmd_about updates.
   * Add chanset '+/-voicebitch' for a +bitch style enforcement over voices.
+  * Add cmd_netmsg back in. It may only be used to message channels the bots are opped in.
 
 1.2.16.1
 * Fix linux compile errors

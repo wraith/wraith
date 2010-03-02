@@ -282,10 +282,10 @@ See also: botpart, +chan, -chan, chanset, chaninfo
 See also: jump, servers, botserver
 :hub:botmsg:
 ###  $bbotmsg$b <bot> <nickname|#chan> <text>
-   sends a private message to someone from the bot, just as if the
+   Sends a private message to someone from the bot, just as if the
    bot had typed /msg.
  
-See also: msg%{+n}
+See also: netmsg, msg%{+n}
 :hub:botnick:
 ###  $bbotnick$b <bot>
    The specified bot will display its current nick over DCC.
@@ -1367,7 +1367,7 @@ See also: whois
    Sends a private message to someone from the bot, just as if the
    bot had typed /msg.
  
-See also: botmsg%{+n}
+See also: netmsg, botmsg%{+n}
 :hub:netcrontab:
 ###  $bnetcrontab$b <status|delete|show|new> [interval]
    Runs the specified command on all linked bots.
@@ -1383,6 +1383,11 @@ See also: lagged
    the user that they are currently running as.
  
 See also: last
+:hub:netmsg:
+###  $bnetmsg$b <bot> <#chan> <text>
+   Sends a message to the specified channel from all opped bots.
+ 
+See also: botmsg, msg%{+n}
 :hub:netnick:
 ###  $bnetnick$b 
    All bots on the botnet will display their nick over DCC.
