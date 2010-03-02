@@ -1969,7 +1969,7 @@ static void cmd_play(int idx, char *par)
   bd::Stream stream;
   stream.loadFile(par);
   bd::String str;
-  size_t lines =0 ;
+  size_t lines = 0;
   while (stream.tell() < stream.length()) {
     str = stream.getline().chomp();
     if (str.length()) {
