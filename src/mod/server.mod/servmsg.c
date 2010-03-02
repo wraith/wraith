@@ -269,7 +269,8 @@ got004(char *from, char *msg)
     putlog(LOG_DEBUG, "*", "Server allows connect bursting, bursting for %d seconds", SERVER_CONNECT_BURST_TIME);
   }
 
-  join_chans();
+  if (!replaying_cache)
+    join_chans();
 
   return 0;
 }
