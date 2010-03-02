@@ -1579,6 +1579,38 @@ static int got301(char *from, char *msg)
   return 0;
 }
 
+/* got 302: userhost
+ * <server> 302 <to> :<nick??user@host>
+ */
+static int got302(char *from, char *msg)
+{
+  char *p = NULL, *nick = NULL, *uhost = NULL;
+
+  newsplit(&msg);
+  fixcolon(msg);
+
+  p = strchr(msg, '=');
+  if (!p)
+    p = strchr(msg, '*');
+  if (!p)
+    return 0;
+  *p = 0;
+  nick = msg;
+  p += 2;		/* skip =|* plus the next char */
+  uhost = p;
+
+  if ((p = strchr(uhost, ' ')))
+    *p = 0;
+
+  if (match_my_nick(nick)) {
+    strlcpy(botuserip, uhost, UHOSTLEN);
+    sdprintf("botuserip: %s", botuserip);
+    return 0;
+  }
+
+  return 0;
+}
+
 /* 313 $me nick :server text */
 static int got313(char *from, char *msg)
 {
@@ -1755,6 +1787,7 @@ static cmd_t my_raw_binds[] =
   {"001",	"",	(Function) got001,		NULL, LEAF},
   {"004",	"",	(Function) got004,		NULL, LEAF},
   {"005",	"",	(Function) got005,		NULL, LEAF},
+  {"302",       "",     (Function) got302,		NULL, LEAF},
   {"303",	"",	(Function) got303,		NULL, LEAF},
   {"432",	"",	(Function) got432,		NULL, LEAF},
   {"433",	"",	(Function) got433,		NULL, LEAF},

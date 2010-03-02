@@ -1483,6 +1483,7 @@ void recheck_channel(struct chanset_t *chan, int dobans)
   --stacking;
 }
 
+#ifdef CACHE
 /* got 302: userhost
  * <server> 302 <to> :<nick??user@host>
  */
@@ -1490,10 +1491,8 @@ static int got302(char *from, char *msg)
 {
   char *p = NULL, *nick = NULL, *uhost = NULL;
 
-#ifdef CACHE
   cache_t *cache = NULL;
   cache_chan_t *cchan = NULL;
-#endif
 
   newsplit(&msg);
   fixcolon(msg);
@@ -1511,13 +1510,6 @@ static int got302(char *from, char *msg)
   if ((p = strchr(uhost, ' ')))
     *p = 0;
 
-  if (match_my_nick(nick)) {
-    strlcpy(botuserip, uhost, UHOSTLEN);
-    sdprintf("botuserip: %s", botuserip);
-    return 0;
-  }
-
-#ifdef CACHE
   if ((cache = cache_find(nick))) {
     if (!cache->uhost[0])
     strlcpy(cache->uhost, uhost, sizeof(cache->uhost));
@@ -1545,9 +1537,9 @@ static int got302(char *from, char *msg)
       }
     }
   }
-#endif
   return 0;
 }
+#endif
 
 #ifdef CACHE
 /* got341 invited
@@ -3358,8 +3350,8 @@ static int gotnotice(char *from, char *msg)
 
 static cmd_t irc_raw[] =
 {
-  {"302",       "",     (Function) got302,      "irc:302", LEAF},
 #ifdef CACHE
+  {"302",       "",     (Function) got302,      "irc:302", LEAF},
   {"341",       "",     (Function) got341,      "irc:341", LEAF},
 #endif /* CACHE */
   {"324",	"",	(Function) got324,	"irc:324", LEAF},
