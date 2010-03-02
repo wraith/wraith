@@ -4020,12 +4020,12 @@ static void rcmd_msg(char * tobot, char * frombot, char * fromhand, char * fromi
 
 static void rcmd_nmsg(char * tobot, char * frombot, char * fromhand, char * fromidx, char * par) {
   if (!conf.bot->hub) {
-    char *nick = newsplit(&par);
+    char *par2 = strdup(par), *p2 = par2;
+    char *nick = newsplit(&par2);
 
-    if (!strchr(CHANMETA, nick[0])) return;
-    if (!me_op(findchan_by_dname(nick))) return;
-
-    rcmd_msg(tobot, frombot, fromhand, fromidx, par);
+    if (!(!strchr(CHANMETA, nick[0]) || !me_op(findchan_by_dname(nick))))
+        rcmd_msg(tobot, frombot, fromhand, fromidx, par);
+    free(p2);
   }
 }
 
