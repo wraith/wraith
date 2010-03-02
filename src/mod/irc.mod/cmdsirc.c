@@ -1969,11 +1969,22 @@ static void cmd_play(int idx, char *par)
   bd::Stream stream;
   stream.loadFile(par);
   bd::String str;
+  size_t lines =0 ;
   while (stream.tell() < stream.length()) {
     str = stream.getline().chomp();
-    if (str.length())
+    if (str.length()) {
       privmsg(chan->name, str.c_str(), DP_PLAY);
+      ++lines;
+    }
   }
+  dprintf(idx, "Playing %d lines from %s to %s\n", lines, par, chan->dname);
+  long time_to_play = 0;
+  if (lines < 10)
+    time_to_play = 3;
+  else
+    time_to_play = 3 + ((lines - 10) / 2);
+
+  dprintf(idx, "Estimated time-to-play: %li seconds\n", time_to_play);
 }
 
 static cmd_t irc_dcc[] =
