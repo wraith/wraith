@@ -279,14 +279,19 @@ dprintf(int idx, const char *format, ...)
   } else {
     len = size_t(vlen);
   }
+  dprintf_real(idx, buf, len, sizeof(buf));
+}
 
+void
+dprintf_real(int idx, char* buf, size_t len, size_t bufsiz)
+{
 /* this is for color on dcc :P */
 
   if (idx < 0) {
     tputs(-idx, buf, len);
   } else if (idx > 0x7FF0) {
     if (idx == DP_STDOUT || idx == DP_STDOUT) {
-      len = colorbuf(buf, len, -1, sizeof(buf));
+      len = colorbuf(buf, len, -1, bufsiz);
     }
 
     switch (idx) {
@@ -323,7 +328,7 @@ dprintf(int idx, const char *format, ...)
     }
     return;
   } else {                      /* normal chat text */
-    len = colorbuf(buf, len, idx, sizeof(buf));
+    len = colorbuf(buf, len, idx, bufsiz);
 
     if (len > 1000) {           /* Truncate to fit */
       len = 1000;
