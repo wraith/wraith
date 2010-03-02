@@ -50,6 +50,7 @@
 #include "tandem.h"
 #include "src/mod/server.mod/server.h"
 #include "src/mod/irc.mod/irc.h"
+#include "src/mod/channels.mod/channels.h"
 #include "userrec.h"
 #include "stat.h"
 #include "net.h"
@@ -636,11 +637,13 @@ readsocks(const char *fname)
   stream.loadFile(fname);
   bd::String str, type;
 
+  reset_chans = 0;
+
   while (stream.tell() < stream.length()) {
     str = stream.getline().chomp();
+    dprintf(DP_DEBUG, "read line: %s\n", str.c_str());
     type = newsplit(str);
 
-//    dprintf(DP_DEBUG, "read line: %s\n", buf.c_str());
     if (type == STR("-dcc"))
       dprintf(DP_DEBUG, STR("Added dcc: %d\n"), dcc_read(stream));
     else if (type == STR("-sock"))
@@ -655,6 +658,15 @@ readsocks(const char *fname)
       in_deaf = 1;
     else if (type == STR("+in_callerid"))
       in_callerid = 1;
+    else if (type == STR("+chan")) {
+      bd::String chname = str;
+      channel_add(NULL, chname.c_str(), NULL);
+      struct chanset_t* chan = findchan_by_dname(chname.c_str());
+      strlcpy(chan->name, chan->dname, sizeof(chan->name));
+      chan->status = chan->ircnet_status = 0;
+      chan->ircnet_status |= CHAN_PEND;
+      reset_chans = 2;
+    }
     else if (type == STR("+buildts"))
       old_buildts = strtol(str.c_str(), NULL, 10);
     else if (type == STR("+botname"))
@@ -699,7 +711,8 @@ readsocks(const char *fname)
         replay_cache(servidx, NULL);
       else
         dprintf(DP_DUMP, "VERSION\n");
-      reset_chans = 1;
+      if (!reset_chans)
+        reset_chans = 1;
     }
   }
   delete[] nick;
@@ -765,6 +778,9 @@ restart(int idx)
     stream << buf.printf(STR("+in_deaf\n"));
   if (in_callerid)
     stream << buf.printf(STR("+in_callerid\n"));
+  for (struct chanset_t *chan = chanset; chan; chan = chan->next)
+    if (shouldjoin(chan) && (channel_active(chan) || channel_pending(chan)))
+      stream << buf.printf(STR("+chan %s\n"), chan->dname);
   stream << buf.printf(STR("+buildts %li\n"), buildts);
   stream << buf.printf(STR("+ip4 %s\n"), myipstr(AF_INET));
   stream << buf.printf(STR("+ip6 %s\n"), myipstr(AF_INET6));
@@ -776,12 +792,12 @@ restart(int idx)
 
   if (conf.bot->hub)
     write_userfile(idx);
-
+/*
   if (server_online) {
     do_chanset(NULL, NULL, STR("+inactive"), DO_LOCAL);
     dprintf(DP_DUMP, STR("JOIN 0\n"));
   }
-
+*/
   fixmod(binname);
 
   /* replace image now */

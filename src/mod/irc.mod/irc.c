@@ -1308,10 +1308,11 @@ reset_chan_info(struct chanset_t *chan)
   if (!chan) return;
 
   if (!chan->name[0])
-    strlcpy(chan->name, chan->dname, 81);
+    strlcpy(chan->name, chan->dname, sizeof(chan->name));
 
   /* Don't reset the channel if we're already resetting it */
   if (!shouldjoin(chan)) {
+    sdprintf("Resetting %s but I shouldn't be there, parting...", chan->dname);
     dprintf(DP_MODE, "PART %s\n", chan->name);
     return;
   }
@@ -1510,6 +1511,7 @@ static void
 check_expired_chanstuff(struct chanset_t *chan)
 {
   if ((channel_active(chan) || channel_pending(chan)) && !shouldjoin(chan)) {
+    sdprintf("Active/Pending in %s but I shouldn't be there, parting...", chan->dname);
     dprintf(DP_MODE, "PART %s\n", chan->name[0] ? chan->name : chan->dname);
   } else if (channel_active(chan)) {
     masklist *b = NULL, *e = NULL;

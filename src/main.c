@@ -810,7 +810,6 @@ int main(int argc, char **argv)
   channels_init();
   if (!conf.bot->hub) {
     server_init();
-    irc_init();
     ctcp_init();
   }
   transfer_init();
@@ -882,6 +881,12 @@ int main(int argc, char **argv)
 
   if (socksfile)
     readsocks(socksfile);
+
+  if (!conf.bot->hub) {
+    // Restarting in new method - don't enable irc.mod until after receiving userfile.
+    if (reset_chans != 2)
+      irc_init();
+  }
 
   debug0(STR("main: entering loop"));
 

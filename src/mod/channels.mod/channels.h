@@ -50,7 +50,7 @@ int u_sticky_mask(maskrec *, char *);
 int u_setsticky_mask(struct chanset_t *, maskrec *, char *, int, const char);
 int SplitList(char *, const char *, int *, const char ***);
 int channel_modify(char *, struct chanset_t *, int, char **, bool);
-int channel_add(char *, char *, char *, bool = 0);
+int channel_add(char *, const char *, char *, bool = 0);
 void clear_channel(struct chanset_t *, bool);
 int u_equals_mask(maskrec *, char *);
 bool u_match_mask(struct maskrec *, char *);

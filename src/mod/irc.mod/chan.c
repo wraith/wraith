@@ -1544,6 +1544,7 @@ void recheck_channel(struct chanset_t *chan, int dobans)
   --stacking;
 }
 
+#ifdef CACHE
 /* got 302: userhost
  * <server> 302 <to> :<nick??user@host>
  */
@@ -1551,10 +1552,8 @@ static int got302(char *from, char *msg)
 {
   char *p = NULL, *nick = NULL, *uhost = NULL;
 
-#ifdef CACHE
   cache_t *cache = NULL;
   cache_chan_t *cchan = NULL;
-#endif
 
   newsplit(&msg);
   fixcolon(msg);
@@ -1572,13 +1571,6 @@ static int got302(char *from, char *msg)
   if ((p = strchr(uhost, ' ')))
     *p = 0;
 
-  if (match_my_nick(nick)) {
-    strlcpy(botuserip, uhost, UHOSTLEN);
-    sdprintf("botuserip: %s", botuserip);
-    return 0;
-  }
-
-#ifdef CACHE
   if ((cache = cache_find(nick))) {
     if (!cache->uhost[0])
     strlcpy(cache->uhost, uhost, sizeof(cache->uhost));
@@ -1606,9 +1598,9 @@ static int got302(char *from, char *msg)
       }
     }
   }
-#endif
   return 0;
 }
+#endif
 
 #ifdef CACHE
 /* got341 invited
@@ -2634,7 +2626,7 @@ static int gotjoin(char *from, char *chname)
 	  /* It was me joining! Need to update the channel record with the
 	   * unique name for the channel (as the server see's it). <cybah>
 	   */
-	  strlcpy(chan->name, chname, 81);
+	  strlcpy(chan->name, chname, sizeof(chan->name));
 	  chan->ircnet_status &= ~CHAN_JUPED;
 
           /* ... and log us joining. Using chan->dname for the channel is
@@ -2985,6 +2977,7 @@ void check_should_cycle(struct chanset_t *chan)
     }
   }
   if (splitbotops > 5) {
+    sdprintf("Cycling %s", chan->dname);
     /* I'm only one opped here... and other side has some ops... so i'm cycling */
     if (localnonops) {
       /* need to unset any +kil first */
@@ -3338,8 +3331,8 @@ static int gotnotice(char *from, char *msg)
 
 static cmd_t irc_raw[] =
 {
-  {"302",       "",     (Function) got302,      "irc:302", LEAF},
 #ifdef CACHE
+  {"302",       "",     (Function) got302,      "irc:302", LEAF},
   {"341",       "",     (Function) got341,      "irc:341", LEAF},
 #endif /* CACHE */
   {"324",	"",	(Function) got324,	"irc:324", LEAF},

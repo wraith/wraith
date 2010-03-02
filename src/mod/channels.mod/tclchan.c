@@ -815,9 +815,10 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
 
   if (!conf.bot->hub && (chan != chanset_default)) {
     if ((old_status ^ chan->status) & (CHAN_INACTIVE | CHAN_BACKUP)) {
-      if (!shouldjoin(chan) && (chan->ircnet_status & (CHAN_ACTIVE | CHAN_PEND)))
+      if (!shouldjoin(chan) && (chan->ircnet_status & (CHAN_ACTIVE | CHAN_PEND))) {
+        putlog(LOG_DEBUG, "*", "In %s, but I shouldn't be, parting...", chan->dname);
         dprintf(DP_SERVER, "PART %s\n", chan->name[0] ? chan->name : chan->dname);
-      else if (shouldjoin(chan))
+      } else if (shouldjoin(chan))
         join_chan(chan);
     }
     if (me_op(chan)) {
@@ -920,7 +921,7 @@ void clear_channel(struct chanset_t *chan, bool reset)
 
 /* Create new channel and parse commands.
  */
-int channel_add(char *result, char *newname, char *options, bool isdefault)
+int channel_add(char *result, const char *newname, char *options, bool isdefault)
 {
   /* When loading userfile */
   if (newname && newname[0] && loading && !strcmp(newname, "default"))
@@ -1018,7 +1019,7 @@ int channel_add(char *result, char *newname, char *options, bool isdefault)
      * any code later on. chan->name gets updated with the channel name as
      * the server knows it, when we join the channel. <cybah>
      */
-    strlcpy(chan->dname, newname, 81);
+    strlcpy(chan->dname, newname, sizeof(chan->dname));
 
     /* Initialize chan->channel info */
     if (isdefault) {
