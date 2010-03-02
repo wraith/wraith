@@ -1977,7 +1977,7 @@ static void cmd_play(int idx, char *par)
       ++lines;
     }
   }
-  dprintf(idx, "Playing %d lines from %s to %s\n", lines, par, chan->dname);
+  dprintf(idx, "Playing %zu lines from %s to %s\n", lines, par, chan->dname);
   long time_to_play = 0;
   if (lines < 10)
     time_to_play = 3;
