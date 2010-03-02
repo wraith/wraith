@@ -355,7 +355,7 @@ See also: version, netversion, about%{+m|m}, status%{-}
 %{-}
  
 See also: link
-::chaninfo:
+::chaninfo
 ###  $bchaninfo$b <channel>
    This lists all the settings for the bot on the given channel.
    It shows any of the following:
@@ -427,6 +427,8 @@ See also: link
                           channel is set to +i. Once the channel is -i then the
                           invite will be removed the next time the bot checks.
                           Please note that this is an IRCnet feature.
+        $bprotect-backup$b    Set +backup in the event of a takeover if the
+                          channel is +protect.
         $bvoice-non-ident$b   If channel is +voice, clients without an ident will 
                           be voiced. Set to 0 to not voice clients without ident.
  
@@ -486,6 +488,9 @@ See also: link
                        Users who lose access to a channel because of this setting
                        will see no reference to it over the botnet in any place.
                        The +o restriction goes for +v as well.
+        $bprotect$b        Set chan +botbitch and mass deop the channel if someone
+                       attempts to takeover. The channel is also set +backup
+                       if protect-backup is set.
         $brbl$b             Do RBL lookups on clients and ban on matches.
                        Uses 'rbl-servers'. See also '%dhelp set'. Only the
                        +r bot will do lookups. On positive match, the bot
@@ -1680,8 +1685,9 @@ See also: reload, backup
 [N]  $blag-threshold$b   Maximum acceptable server lag for the bot to send/honor requests.
 [N]  $bkill-threshold$b  When more than this many bots have been killed/klined in the last
                           minute, close all channels.
-[N]  $bfight-threshold$b When more than this many +ob/-ob/kicks have happened on a channel in 
-                          1 minute, the channel is closed.
+[N]  $bfight-threshold$b When more than this many +obeI/-obeI/kicks have happened on a channel
+                          in 1 minute, the channel is locked down. Channel must be +protect.
+                          See also '%dhelp chanset' for +protect.
  
 [N]  $bcloak-script$b    Decides which script the bot cloaks as. 
                           If set to 0, a random script will be used.

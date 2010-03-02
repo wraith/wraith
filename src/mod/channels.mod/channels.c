@@ -885,6 +885,8 @@ void channels_report(int idx, int details)
           i += my_strcpy(s + i, "rbl ");
         if (channel_voicebitch(chan))
           i += my_strcpy(s + i, "voicebitch ");
+        if (channel_protect(chan))
+          i += my_strcpy(s + i, "protect ");
 /* Chanflag template
  *	if (channel_temp(chan))
  *	  i += my_strcpy(s + i, "temp ");

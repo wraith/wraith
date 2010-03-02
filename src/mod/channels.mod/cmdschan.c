@@ -1249,6 +1249,7 @@ static void cmd_chaninfo(int idx, char *par)
     SHOW_FLAG("nodesynch",	channel_nodesynch(chan));
     SHOW_FLAG("nomassjoin",	channel_nomassjoin(chan));
     SHOW_FLAG("private",	channel_privchan(chan));
+    SHOW_FLAG("protect",	channel_protect(chan));
     SHOW_FLAG("rbl",		channel_rbl(chan));
 //    SHOW_FLAG("revengebot",	channel_revengebot(chan));
 //    SHOW_FLAG("revenge",	channel_revenge(chan));
@@ -1297,6 +1298,7 @@ static void cmd_chaninfo(int idx, char *par)
     deflag = chan->mop;
     SHOW_INT("Mop: ", chan->mop, P_STR, "Ignore");
 //    SHOW_INT("Revenge-mode: ", chan->revenge_mode, NULL, NULL);
+    SHOW_INT("Protect-backup: ", chan->protect_backup, "Do!", "Don't!");
     SHOW_INT("Voice-non-ident: ", chan->voice_non_ident, "Do!", "Don't!");
 
     dprintf(idx, "Flood settings:   chan ctcp join kick deop nick mjoin\n");

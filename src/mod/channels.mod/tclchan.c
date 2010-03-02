@@ -543,6 +543,14 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
         return ERROR;
       }
       chan->ban_type = atoi(item[i]);
+    } else if (!strcmp(item[i], "protect-backup")) {
+      i++;
+      if (i >= items) {
+        if (result)
+          strlcpy(result, "channel protect-backup needs argument", RESULT_LEN);
+        return ERROR;
+      }
+      chan->protect_backup = atoi(item[i]);
      
 
 /* Chanint template
@@ -646,6 +654,10 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
       chan->status |= CHAN_VOICEBITCH;
     else if (!strcmp(item[i], "-voicebitch"))
       chan->status &= ~CHAN_VOICEBITCH;
+    else if (!strcmp(item[i], "+protect"))
+      chan->status |= CHAN_PROTECT;
+    else if (!strcmp(item[i], "-protect"))
+      chan->status &= ~CHAN_PROTECT;
 /* Chanflag template
  *  else if (!strcmp(item[i], "+temp"))
  *    chan->status |= CHAN_TEMP;
@@ -975,6 +987,7 @@ int channel_add(char *result, char *newname, char *options, bool isdefault)
 /* Chanint template
  *  chan->temp = 0;
  */
+    chan->protect_backup = 1;
     chan->knock_flags = 0;
     chan->flood_lock_time = 120;
     chan->flood_exempt_mode = 0;

@@ -704,6 +704,8 @@ static bool detect_chan_flood(char *floodnick, char *floodhost, char *from,
         dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, floodnick, kickprefix, response(RES_KICKFLOOD));
 	m->flags |= SENTKICK;
       }
+      if (channel_protect(chan))
+        do_protect(chan, "Mass Kick");
     return 1;
     case FLOOD_DEOP:
       if (me_op(chan) && !chan_sentkick(m)) {
@@ -718,6 +720,8 @@ static bool detect_chan_flood(char *floodnick, char *floodhost, char *from,
         simple_snprintf(s, sizeof(s), "Mass deop on %s by %s", chan->dname, from);
         deflag_user(u, DEFLAG_MDOP, s, chan);
       }
+      if (channel_protect(chan))
+        do_protect(chan, "Mass Deop");
       return 1;
     }
   }
@@ -2882,9 +2886,10 @@ static int gotkick(char *from, char *origmsg)
     struct userrec *u = NULL;
     struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
-    chan->channel.fighting++;
     fixcolon(msg);
     u = get_user_by_host(from);
+    if (!u || (u && !u->bot))
+      chan->channel.fighting++;
     strlcpy(uhost, from, sizeof(buf));
     whodid = splitnick(&uhost);
     detect_chan_flood(whodid, uhost, from, chan, FLOOD_KICK, nick);

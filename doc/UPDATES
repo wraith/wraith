@@ -111,6 +111,10 @@
   * Credits/cmd_about updates.
   * Add chanset '+/-voicebitch' for a +bitch style enforcement over voices.
   * Add cmd_netmsg back in. It may only be used to message channels the bots are opped in.
+  * Add chanset '+/-protect' which will set +botbitch and mass deop if any takeover is detected.
+  * Add chanset 'protect-backup' which will optionally set +backup in the event of a takeover with +protect.
+  * Channel settings 'mop' and 'mdop' now react to non-users.
+  * set 'fight-threshold' now requires +protect and is a trigger for +protect. See 'help chanset' for +protect info.
 
 1.2.16.1
 * Fix linux compile errors

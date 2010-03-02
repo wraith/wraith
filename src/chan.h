@@ -179,6 +179,7 @@ struct chanset_t {
   int ban_type;
   interval_t auto_delay;
   int knock_flags;
+  int protect_backup;
 /* Chanint template 
  *int temp;
  */
@@ -230,7 +231,7 @@ struct chanset_t {
 #define CHAN_CLOSED         BIT3	/* Only users +o can join */
 #define CHAN_BITCH          BIT4	/* be a tightwad with ops             */
 #define CHAN_TAKE 	    BIT5	/* When a bot gets opped, take the chan */
-//#define CHAN_KNOCK 	    BIT6	/* Auto invite qualifying people when they knock */
+#define CHAN_PROTECT 	    BIT6	/* Go +bitch and mass deop if anyone mass ops or mass deops */
 #define CHAN_BOTBITCH       BIT7        /* only let bots be opped? */
 #define CHAN_BACKUP         BIT8	/* Join the BOT_BACKUP bots when set */
 #define CHAN_SECRET         BIT9	/* don't advertise channel on botnet  */
@@ -310,6 +311,7 @@ struct chanset_t *findchan_by_dname(const char *name);
 #define channel_meankicks(chan) (chan->status & CHAN_MEANKICKS)
 #define channel_rbl(chan) (chan->status & CHAN_RBL)
 #define channel_voicebitch(chan) (chan->status & CHAN_VOICEBITCH)
+#define channel_protect(chan) (chan->status & CHAN_PROTECT)
 /* Chanflag template
  *#define channel_temp(chan) (chan->status & CHAN_PRIVATE)
  */
