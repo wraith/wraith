@@ -230,9 +230,10 @@ int timer_get_shortest(egg_timeval_t *howlong)
 	return(0);
 }
 
-static void process_timer(egg_timer_t* timer) {
+static bool process_timer(egg_timer_t* timer) {
 	TimerFunc callback = timer->callback;
 	void *client_data = timer->client_data;
+	bool deleted = 0;
 
 	if (timer->flags & TIMER_REPEAT) {
 		/* Update timer. */
@@ -249,23 +250,31 @@ static void process_timer(egg_timer_t* timer) {
 
 		++(timer->called);
 	} else {
-		if (timer->name)
-			free(timer->name);
-		free(timer);
+		deleted = 1;
 	}
 
 	callback(client_data);
+	return deleted;
 }
 
-static void process_timer_list(egg_timer_t *timer_list) {
-	egg_timer_t *timer = NULL, *next = timer_list;
+static void process_timer_list(egg_timer_t* &timer_list) {
+	egg_timer_t *timer = NULL, *prev = NULL, *next = timer_list;
 	while (next) {
 		timer = next;
 		// Timers are sorted by lowest->highest, so if the current one isn't ready to trigger, the rest are not either
 		if (timer->trigger_time.sec > now.sec || (timer->trigger_time.sec == now.sec && timer->trigger_time.usec > now.usec))
 			break;
 		next = timer->next;
-		process_timer(timer);
+		if (process_timer(timer)) {
+			// Deleted, need to shift the queue
+			if (prev) prev->next = timer->next;
+			else timer_list = timer->next;
+
+			if (timer->name)
+				free(timer->name);
+			free(timer);
+		} else
+			prev = timer;
 	}
 }
 
