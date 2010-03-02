@@ -354,9 +354,9 @@ static void calc_penalty(char * msg, size_t len)
   if (!use_penalties) {
     // Add some penalty for large messages
     if (use_flood_count)
-      last_time.usec += ((double)i / 300.0) * (1000*1000);
+      last_time.usec += long(((double)i / 300.0) * (1000*1000));
     else
-      last_time.usec += ((double)i / 120.0) * (1000*1000);
+      last_time.usec += long(((double)i / 120.0) * (1000*1000));
     return;
   }
 
