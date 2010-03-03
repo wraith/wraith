@@ -1990,8 +1990,6 @@ static void server_dns_callback(int id, void *client_data, const char *host, bd:
   strlcpy(serverpass, (char *) dcc[idx].u.dns->cbuf, sizeof(serverpass));
   changeover_dcc(idx, &SERVER_SOCKET, 0);
 
-//  identd_open(idx);
-
   //No proxy, use identd, 2 = spoof ident
   serv = open_telnet(ip, dcc[idx].port, 0, 2);
 

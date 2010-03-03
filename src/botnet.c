@@ -1098,9 +1098,6 @@ static void botlink_real(int i)
   dcc[i].sock = getsock(SOCK_STRONGCONN);
 #endif /* USE_IPV6 */
 
-//  if (dcc[i].sock > 0)
-//    identd_open();                      /* will be closed when an ident is replied. */
-
   int open_telnet_return = 0;
   if (dcc[i].sock < 0 || (open_telnet_return = open_telnet_raw(dcc[i].sock, dcc[i].host, dcc[i].port, 0, 1)) < 0) {
     if (open_telnet_return == -1)
