@@ -21,6 +21,7 @@ typedef struct memstruct {
   char nick[NICKLEN];
   char userhost[UHOSTLEN];
   char userip[UHOSTLEN];
+  bool is_me;
 } memberlist;
 
 #define CHAN_FLAG_OP	1

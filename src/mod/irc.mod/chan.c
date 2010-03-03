@@ -2022,6 +2022,7 @@ static int got315(char *from, char *msg)
     putlog(LOG_MISC | LOG_JOIN, chan->dname, "Oops, I'm not really on %s.", chan->dname);
     force_join_chan(chan);
   } else {
+    me->is_me = 1;
     me->joined = now;				/* set this to keep the whining masses happy */
     if (me_op(chan))
       recheck_channel(chan, 2);
