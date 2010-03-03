@@ -119,7 +119,7 @@
   * set 'fight-threshold' now requires +protect and is a trigger for +protect. See 'help chanset' for +protect info.
   * Bots no longer cycle channels when restarting/upgrading. (This will take effect AFTER upgrading to 1.3)
   * Speedup irc server queue by bursting more often and fully. Thanks VXP.
-  * Add set 'msgrate' to define how often to dequeue to the server. (1 or 2 is good)
+  * Add set 'msgrate' to define how often to dequeue to the server, if non-ratbox.
   * Add set 'msgburst' to define how many commands to burst to server per msgrate.
   * On hybrid/ratbox servers, burst some commands on connect
   * On ratbox type servers, use an optimized queue for better throughput on the queue.
