@@ -56,6 +56,7 @@
 #include "src/mod/ctcp.mod/ctcp.h"
 #include <bdlib/src/String.h>
 #include <bdlib/src/HashTable.h>
+#include <bdlib/src/Queue.h>
 #include <bdlib/src/base64.h>
 
 #include <stdarg.h>
@@ -90,6 +91,9 @@ bool include_lk = 1;      /* For correct calculation
                                  * in real_add_mode. */
 bd::HashTable<bd::String, unsigned long> bot_counters;
 static unsigned long my_counter = 0;
+
+static bd::Queue<bd::String> chained_who;
+static int chained_who_idx;
 
 static int
 voice_ok(memberlist *m, struct chanset_t *chan)
@@ -177,7 +181,7 @@ void detected_drone_flood(struct chanset_t* chan, memberlist* m) {
     chan->channel.drone_joins = 0;
     chan->channel.drone_jointime = 0;
 
-    dprintf(DP_DUMP, "MODE %s +%s\n", chan->name[0] ? chan->name : chan->dname, buf);
+    dprintf(DP_MODE_NEXT, "MODE %s +%s\n", chan->name[0] ? chan->name : chan->dname, buf);
     howlong.sec = chan->flood_lock_time;
     howlong.usec = 0;
     timer_create_complex(&howlong, "unlock", (Function) unlock_chan, (void *) chan, 0);
@@ -194,8 +198,10 @@ void notice_invite(struct chanset_t *chan, char *handle, char *nick, char *uhost
   if (handle)
     simple_snprintf(fhandle, sizeof(fhandle), "\002%s\002 ", handle);
   putlog(LOG_MISC, "*", "Invited %s%s(%s%s%s) to %s.", handle ? handle : "", handle ? " " : "", nick, uhost ? "!" : "", uhost ? uhost : "", chan->dname);
-  dprintf(DP_MODE, "PRIVMSG %s :\001ACTION has invited %s(%s%s%s) to %s.%s\001\n",
-    chan->name, fhandle, nick, uhost ? "!" : "", uhost ? uhost : "", chan->dname, op ? ops : "");
+  bd::String msg;
+  msg.printf("\001ACTION has invited %s(%s%s%s) to %s.%s\001",
+    fhandle, nick, uhost ? "!" : "", uhost ? uhost : "", chan->dname, op ? ops : "");
+  privmsg(chan->name, msg.c_str(), DP_MODE);
 }
 
 #ifdef CACHE
@@ -1248,7 +1254,7 @@ me_op(struct chanset_t *chan)
 
 /* Check whether I'm voice. Returns boolean 1 or 0.
  */
-static bool
+bool
 me_voice(struct chanset_t *chan)
 {
   memberlist *mx = ismember(chan, botname);
@@ -1333,17 +1339,24 @@ reset_chan_info(struct chanset_t *chan)
     }
     /* These 2 need to get out asap, so into the mode queue */
     dprintf(DP_MODE, "MODE %s\n", chan->name);
-    send_chan_who(DP_MODE, chan);
+    send_chan_who(DP_MODE, chan, 1);
     /* clear_channel nuked the data...so */
-    dprintf(DP_MODE, "TOPIC %s\n", chan->name);
+    dprintf(DP_HELP, "TOPIC %s\n", chan->name);//Topic is very low priority
   }
 }
 
-static void send_chan_who(int queue, struct chanset_t *chan) {
-    if (use_354) /* Added benefit of getting numeric IP! :) */
-      dprintf(queue, "WHO %s %%c%%h%%n%%u%%f%%r%%d%%i\n", chan->name);
-    else
-      dprintf(queue, "WHO %s\n", chan->name);
+static void send_chan_who(int queue, struct chanset_t *chan, bool chain) {
+  if (chain) {
+    if (!chained_who.contains(chan->name))
+      chained_who.enqueue(chan->name);
+    chained_who_idx = queue;
+    if (chained_who.size() > 1)
+      return;
+  }
+  if (use_354) /* Added benefit of getting numeric IP! :) */
+    dprintf(queue, "WHO %s %%c%%h%%n%%u%%f%%r%%d%%i\n", chan->name);
+  else
+    dprintf(queue, "WHO %s\n", chan->name);
 }
 
 void force_join_chan(struct chanset_t* chan, int idx) {

@@ -45,6 +45,9 @@
 #include "src/mod/share.mod/share.h"
 #include "src/mod/update.mod/update.h"
 
+#include "src/chanprog.h"
+#include <bdlib/src/String.h>
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <netinet/in.h>
@@ -491,7 +494,7 @@ void dcc_send(int idx, char *buf, int len)
   dcc[idx].timeval = now;
   if (dcc[idx].status > dcc[idx].u.xfer->length &&
       dcc[idx].u.xfer->length > 0) {
-    dprintf(DP_HELP,"NOTICE %s :Bogus file length.\n", dcc[idx].nick);
+    notice(dcc[idx].nick, "Bogus file length.", DP_HELP);
     putlog(LOG_FILES, "*",
 	   "File too long: dropping dcc send %s from %s!%s",
 	   dcc[idx].u.xfer->origname, dcc[idx].nick, dcc[idx].host);
@@ -747,7 +750,9 @@ static void dcc_get_pending(int idx, char *buf, int len)
   dcc[idx].addr = ip;
   dcc[idx].port = (int) port;
   if (dcc[idx].sock == -1) {
-    dprintf(DP_HELP, "NOTICE %s :Bad connection (%s)\n", dcc[idx].nick, strerror(errno));
+    bd::String msg;
+    msg.printf("Bad connection (%s)", strerror(errno));
+    notice(dcc[idx].nick, msg.c_str(), DP_HELP);
     putlog(LOG_FILES, "*", "DCC bad connection: GET %s (%s!%s)",
 	   dcc[idx].u.xfer->origname, dcc[idx].nick, dcc[idx].host);
     fclose(dcc[idx].u.xfer->f);

@@ -22,6 +22,6 @@
 void ctcp_init();
 void scriptchanged();
 extern char		kickprefix[], bankickprefix[];
-extern bool		first_ctcp_check;
+extern int		first_ctcp_check;
 
 #endif				/* _EGG_MOD_CTCP_CTCP_H */

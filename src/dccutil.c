@@ -307,6 +307,7 @@ dprintf_real(int idx, char* buf, size_t len, size_t bufsiz)
       case DP_SERVER:
       case DP_HELP:
       case DP_MODE:
+      case DP_PLAY:
       case DP_MODE_NEXT:
       case DP_SERVER_NEXT:
       case DP_HELP_NEXT:
@@ -343,7 +344,7 @@ dprintf_real(int idx, char* buf, size_t len, size_t bufsiz)
 
 //      simple_snprintf(ircbuf, size, "PRIVMSG %s :%s", dcc[idx].simulbot, buf);
 //      tputs(dcc[idx].sock, ircbuf, strlen(ircbuf));
-      dprintf(DP_HELP, "PRIVMSG %s :%s\n", dcc[idx].simulbot, buf);
+      privmsg(dcc[idx].simulbot, buf, DP_HELP);
 //      free(ircbuf);
     } else {
       if (dcc[idx].type && ((long) (dcc[idx].type->output) == 1)) {

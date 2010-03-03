@@ -702,7 +702,7 @@ See also: chhandle, chpass
 See also: +host, -host
 :leaf:clearqueue
 ###  $bclearqueue$b <queue>
-   Removes all msgs from the specified queue (mode/server/help/all)
+   Removes all msgs from the specified queue (mode/server/help/play/all)
 :hub:cmdpass:
 ###  $bcmdpass$b <command> <pass> [newpassword]
    Places the specified pass on the cmd so that the cmd will need to be 
@@ -1477,6 +1477,18 @@ See also: deop, console
    many pending lines, you may be booted off the bot.
  
 See also: color, console, echo, login, strip
+:leaf:play
+###  $bplay$b [channel] <file>
+   Plays the specified file to the specified channel. If no channel is
+   given then your console channel is used.
+ 
+   The 'play' queue is used for this, which is the lowest priority on
+   the bot. Any IRC related queue needs will immediately trump
+   the 'play' queue and delay the playing of the file.
+ 
+   Only files in the bots directory path may be played. (Symlinked
+   paths are fine). This is to prevent a user from playing /etc/passwd
+   since the cmd is +m.
 ::ps:
 ###  $bps$b [ps-param]
    Will run 'ps' on the bot's shell and display any results. If
@@ -1643,6 +1655,9 @@ See also: reload, backup
 [L]  $bservers$b         Comma-separated list of servers the bot will use.
 [L]  $bservers6$b        Comma-separated list of servers the bot will use (FOR IPv6).
  
+[N]  $bmsgburst$b        How many messages to burst at once to server. (Too high will excess flood)
+[N]  $bmsgrate$b         How often (seconds) to dequeue msgs to the server. (1 or 2 is good)
+
 [L]  $brbl-servers$b     Servers to use for RBL checking in channels that are +rbl.
  
 [S]  $brealname$b        The bot's "real name" when connecting. (supports '$n' expansion)

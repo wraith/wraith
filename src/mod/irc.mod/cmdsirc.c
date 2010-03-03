@@ -24,6 +24,9 @@
  *
  */
 
+#include <bdlib/src/Stream.h>
+#include <bdlib/src/String.h>
+#include "src/misc_file.h"
 
 /* Do we have any flags that will allow us ops on a channel?
  */
@@ -113,8 +116,9 @@ static void cmd_act(int idx, char *par)
   }
   putlog(LOG_CMDS, "*", "#%s# (%s) act %s", dcc[idx].nick,
 	 chan->dname, par);
-  dprintf(DP_HELP, "PRIVMSG %s :\001ACTION %s\001\n",
-	  chan->name, par);
+  bd::String msg;
+  msg.printf("\001ACTION %s\001", par);
+  privmsg(chan->name, msg.c_str(), DP_HELP);
   dprintf(idx, "Action to %s: %s\n", chan->dname, par);
 }
 
@@ -134,7 +138,7 @@ static void cmd_msg(int idx, char *par)
   char *nick = newsplit(&par);
 
   putlog(LOG_CMDS, "*", "#%s# msg %s %s", dcc[idx].nick, nick, par);
-  dprintf(DP_HELP, "PRIVMSG %s :%s\n", nick, par);
+  privmsg(nick, par, DP_HELP);
   dprintf(idx, "Msg to %s: %s\n", nick, par);
 }
 
@@ -182,7 +186,7 @@ static void cmd_say(int idx, char *par)
     return;
   }
   putlog(LOG_CMDS, "*", "#%s# (%s) say %s", dcc[idx].nick, chan->dname, par);
-  dprintf(DP_HELP, "PRIVMSG %s :%s\n", chan->name, par);
+  privmsg(chan->name, par, DP_HELP);
   dprintf(idx, "Said to %s: %s\n", chan->dname, par);
 }
 
@@ -1785,7 +1789,9 @@ static void cmd_adduser(int idx, char *par)
     dprintf(idx, "%s's initial password set to \002%s\002\n", hand, s2);
     dprintf(idx, "%s's initial secpass set to \002%s\002\n", hand, s3);
 
-    dprintf(DP_HELP, "PRIVMSG %s :*** You've been add to this botnet as '%s' with the host '%s'. Ask a botnet admin for the msg cmds. Your initial password is: %s\n", nick, hand, p1, s2);
+    bd::String msg;
+    msg.printf("*** You've been add to this botnet as '%s' with the host '%s'. Ask a botnet admin for the msg cmds. Your initial password is: %s", hand, p1, s2);
+    privmsg(nick, msg.c_str(), DP_HELP);
   } else {
     dprintf(idx, "Added hostmask %s to %s.\n", p1, u->handle);
     addhost_by_handle(hand, p1);
@@ -1890,6 +1896,79 @@ static void cmd_reset(int idx, char *par)
   }
 }
 
+static void cmd_play(int idx, char *par)
+{
+  if (!par[0]) {
+    dprintf(idx, "Usage: play [channel] <file>\n");
+    return;
+  }
+
+  char *chname = NULL;
+  struct chanset_t *chan = NULL;
+
+  if (strchr(CHANMETA, par[0]) != NULL)
+    chname = newsplit(&par);
+  else
+    chname = 0;
+  chan = get_channel(idx, chname);
+  if (!chan)
+    return;
+
+  if (!par[0]) {
+    dprintf(idx, "Usage: play [channel] <file>\n");
+    return;
+  }
+
+  memberlist *m = ismember(chan, botname);
+
+  if (!m) {
+    dprintf(idx, "Cannot play to %s: I'm not on that channel.\n", chan->dname);
+    return;
+  }
+
+  get_user_flagrec(dcc[idx].user, &user, chan->dname);
+
+  if (!me_op(chan) && !me_voice(chan)) {
+    dprintf(idx, "Cannot play to %s: I am not voiced or opped.\n", chan->dname);
+    return;
+  }
+  putlog(LOG_CMDS, "*", "#%s# (%s) play %s", dcc[idx].nick, chan->dname, par);
+
+  // Ensure file exists and is within proper path
+  bd::String file(par);
+
+  if (file[0] == '/' || file(0, 2) == "..") {
+    dprintf(idx, "Cannot play '%s': Illegal path.\n", par);
+    return;
+  }
+
+  if (!can_stat(par)) {
+    dprintf(idx, "Cannot play '%s': Cannot access file.\n", par);
+    return;
+  }
+
+  bd::String prefix;
+  bd::Stream stream;
+  stream.loadFile(par);
+  bd::String str;
+  size_t lines = 0;
+  while (stream.tell() < stream.length()) {
+    str = stream.getline().chomp();
+    if (str.length()) {
+      privmsg(chan->name, str.c_str(), DP_PLAY);
+      ++lines;
+    }
+  }
+  dprintf(idx, "Playing %zu lines from %s to %s\n", lines, par, chan->dname);
+  long time_to_play = 0;
+  if (lines < 10)
+    time_to_play = 3;
+  else
+    time_to_play = 3 + ((lines - 10) / 2);
+
+  dprintf(idx, "Estimated time-to-play: %li seconds\n", time_to_play);
+}
+
 static cmd_t irc_dcc[] =
 {
   {"act",		"o|o",	 (Function) cmd_act,		NULL, LEAF},
@@ -1912,6 +1991,7 @@ static cmd_t irc_dcc[] =
   {"msg",		"o",	 (Function) cmd_msg,		NULL, LEAF|AUTH},
   {"nick",		"m",	 (Function) cmd_nick,		NULL, LEAF},
   {"op",		"o|o",	 (Function) cmd_op,		NULL, LEAF|AUTH},
+  {"play",		"m|m",	 (Function) cmd_play,		NULL, LEAF|AUTH},
   {"release",		"m",	 (Function) cmd_release,	NULL, LEAF|AUTH},
   {"reset",		"m|m",	 (Function) cmd_reset,		NULL, LEAF|AUTH},
   {"resetbans",		"o|o",	 (Function) cmd_resetbans,	NULL, LEAF|AUTH},

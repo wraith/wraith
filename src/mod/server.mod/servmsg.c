@@ -198,8 +198,8 @@ void rehash_server(const char *servname, const char *nick)
   if (nick && nick[0]) {
     strlcpy(botname, nick, sizeof(botname));
 
-    dprintf(DP_SERVER, "WHOIS %s\n", botname); /* get user@host */
-    dprintf(DP_SERVER, "USERHOST %s\n", botname); /* get user@ip */
+    dprintf(DP_MODE, "WHOIS %s\n", botname); /* get user@host */
+    dprintf(DP_MODE, "USERHOST %s\n", botname); /* get user@ip */
     dprintf(DP_SERVER, "MODE %s %s\n", botname, var_get_str_by_name("usermode"));
     rehash_monitor_list();
   }
@@ -224,8 +224,6 @@ static int got001(char *from, char *msg)
   waiting_for_awake = 0;
   rehash_server(from, msg);
   /* Ok...param #1 of 001 = what server thinks my nick is */
-
-  join_chans();
 
 #ifdef no
   if (strcasecmp(from, dcc[servidx].host)) {
@@ -263,13 +261,28 @@ got004(char *from, char *msg)
 
   tmp = newsplit(&msg);
 
+  bool connect_burst = 0;
+
   /* cookies won't work on ircu or Unreal or snircd */
   if (strstr(tmp, "u2.") || strstr(tmp, "Unreal") || strstr(tmp, "snircd")) {
     putlog(LOG_DEBUG, "*", "Disabling cookies as they are not supported on %s", cursrvname);
     cookies_disabled = true;
   } else if (strstr(tmp, "hybrid") || strstr(tmp, "ratbox") || strstr(tmp, "Charybdis") || strstr(tmp, "ircd-seven")) {
-    include_lk = 0;
+    connect_burst = 1;
+    if (!strstr(tmp, "hybrid"))
+      use_flood_count = 1;
   }
+
+  if (!replaying_cache && connect_burst) {
+    connect_bursting = now;
+    msgburst = SERVER_CONNECT_BURST_RATE;
+    msgrate = 200;
+    last_time.sec = now - 100;
+    putlog(LOG_DEBUG, "*", "Server allows connect bursting, bursting for %d seconds", SERVER_CONNECT_BURST_TIME);
+  }
+
+  if (!replaying_cache)
+    join_chans();
 
   return 0;
 }
@@ -347,6 +360,10 @@ got005(char *from, char *msg)
       }
     } else if (!strcasecmp(tmp, "EXCEPTS"))
       use_exempts = 1;
+    else if (!strcasecmp(tmp, "CPRIVMSG"))
+      have_cprivmsg = 1;
+    else if (!strcasecmp(tmp, "CNOTICE"))
+      have_cnotice = 1;
     else if (!strcasecmp(tmp, "INVEX"))
       use_invites = 1;
     else if (!strcasecmp(tmp, "MAXBANS")) {
@@ -489,7 +506,7 @@ static bool detect_flood(char *floodnick, char *floodhost, char *from, int which
     in_callerid = 1;
     dronemsgs = 0;
     dronemsgtime = 0;
-    dprintf(DP_DUMP, "MODE %s :+%c\n", botname, callerid_char);
+    dprintf(DP_MODE_NEXT, "MODE %s :+%c\n", botname, callerid_char);
     howlong.sec = flood_callerid_time;
     howlong.usec = 0;
     timer_create(&howlong, "Unset CALLERID", (Function) unset_callerid);
@@ -649,13 +666,13 @@ static int gotmsg(char *from, char *msg)
   /* Send out possible ctcp responses */
   if (ctcp_reply[0]) {
     if (ctcp_mode != 2) {
-      dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
+      notice(nick, ctcp_reply, DP_HELP);
     } else {
       if (now - last_ctcp > flood_ctcp.time) {
-        dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
+        notice(nick, ctcp_reply, DP_HELP);
 	count_ctcp = 1;
       } else if (count_ctcp < flood_ctcp.count) {
-        dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
+        notice(nick, ctcp_reply, DP_HELP);
 	count_ctcp++;
       }
       last_ctcp = now;
@@ -1239,6 +1256,7 @@ static int gotmode(char *from, char *msg)
   return 0;
 }
 
+static void end_burstmode();
 
 static void disconnect_server(int idx, int dolost)
 {
@@ -1264,11 +1282,15 @@ static void disconnect_server(int idx, int dolost)
   in_callerid = 0;
   use_exempts = 0;
   use_invites = 0;
+  have_cprivmsg = 0;
+  have_cnotice = 0;
+  use_flood_count = 0;
   if (dolost) {
     Auth::DeleteAll();
     trying_server = 0;
     lostdcc(idx);
   }
+  end_burstmode();
 
   /* Invalidate the cmd_swhois cache callback data */
   for (int i = 0; i < dcc_total; i++) {
@@ -1381,7 +1403,7 @@ static int gotkick(char *from, char *msg)
     /* Not my kick, I don't need to bother about it. */
     return 0;
   if (use_penalties) {
-    last_time += 2;
+    last_time.sec += 2;
     if (debug_output)
       putlog(LOG_SRVOUT, "*", "adding 2secs penalty (successful kick)");
   }
@@ -1406,7 +1428,7 @@ static int whoispenalty(char *from, char *msg)
       i++;
     }
     if (ii) {
-      last_time += 1;
+      last_time.sec += 1;
       if (debug_output)
         putlog(LOG_SRVOUT, "*", "adding 1sec penalty (remote whois)");
     }
@@ -1997,6 +2019,14 @@ static void server_dns_callback(int id, void *client_data, const char *host, bd:
     altnick_char = 0;
     /* reset counter so first ctcp is dumped for tcms */
     first_ctcp_check = 0;
+
+    // Just connecting, set last queue time to the past.
+    last_time.sec = now - 100;
+    last_time.usec = 0;
+    end_burstmode();
+    use_flood_count = 0;
+    real_msgburst = msgburst;
+    real_msgrate = msgrate;
 
     if (serverpass[0])
       dprintf(DP_MODE, "PASS %s\n", serverpass);

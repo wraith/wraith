@@ -44,13 +44,13 @@ typedef struct egg_timer_b {
 } egg_timer_t;
 
 /* We keep a sorted list of active timers. */
-static egg_timer_t *timer_list_head = NULL;
+static egg_timer_t *timer_repeat_head = NULL, *timer_once_head = NULL;
 static int timer_next_id = 1;
 
 /* Based on TclpGetTime from Tcl 8.3.3 */
-int timer_get_time(egg_timeval_t *curtime)
+static inline int timer_get_time(egg_timeval_t *curtime)
 {
-	struct timeval tv;
+	static struct timeval tv;
 
 	(void) gettimeofday(&tv, NULL);
 	curtime->sec = tv.tv_sec;
@@ -58,16 +58,11 @@ int timer_get_time(egg_timeval_t *curtime)
 	return(0);
 }
 
-int timer_update_now(egg_timeval_t *_now)
+void timer_update_now(egg_timeval_t *_now)
 {
 	timer_get_time(&now);
-	if (_now) {
-		_now->sec = now.sec;
-		_now->usec = now.usec;
-	}
-	return(now.sec);
+	if (_now) timer_get_now(_now);
 }
-
 
 void timer_get_now(egg_timeval_t *_now)
 {
@@ -99,19 +94,34 @@ int timer_diff(egg_timeval_t *from_time, egg_timeval_t *to_time, egg_timeval_t *
 			diff->usec = 0;
 			return(1);
 		}
-		diff->sec -= 1;
+		--(diff->sec);
 		diff->usec += 1000000;
 	}
 
 	return(0);
 }
 
-static int timer_add_to_list(egg_timer_t *timer)
+/*
+ * Return milliseconds difference between two timevals
+ */
+long timeval_diff(const egg_timeval_t *tv1, const egg_timeval_t *tv2)
+{
+	long secs = tv1->sec - tv2->sec, usecs = tv1->usec - tv2->usec;
+	if (usecs < 0) {
+		usecs += 1000000;
+		--secs;
+	}
+	usecs = (usecs / 1000) + (secs * 1000);
+
+	return usecs;
+}
+
+static int timer_add_to_list(egg_timer_t* &timer_list, egg_timer_t *timer)
 {
 	egg_timer_t *prev = NULL, *ptr = NULL;
 
 	/* Find out where this should go in the list. */
-	for (ptr = timer_list_head; ptr; ptr = ptr->next) {
+	for (ptr = timer_list; ptr; ptr = ptr->next) {
 		if (timer->trigger_time.sec < ptr->trigger_time.sec) break;
 		if (timer->trigger_time.sec == ptr->trigger_time.sec && timer->trigger_time.usec < ptr->trigger_time.usec) break;
 		prev = ptr;
@@ -123,8 +133,8 @@ static int timer_add_to_list(egg_timer_t *timer)
 		prev->next = timer;
 	}
 	else {
-		timer->next = timer_list_head;
-		timer_list_head = timer;
+		timer->next = timer_list;
+		timer_list = timer;
 	}
 	return(0);
 }
@@ -157,18 +167,20 @@ int timer_create_complex(egg_timeval_t *howlong, const char *name, Function call
 	timer->trigger_time.usec = now.usec + howlong->usec;
 	timer->called = 0;
 
-	timer_add_to_list(timer);
+	if (timer->flags & TIMER_REPEAT)
+		timer_add_to_list(timer_repeat_head, timer);
+	else
+		timer_add_to_list(timer_once_head, timer);
 
 	return(timer->id);
 }
 
-/* Destroy a timer, given an id. */
-int timer_destroy(int timer_id)
+static int timer_destroy_list(egg_timer_t* &timer_list, int timer_id)
 {
 	egg_timer_t *prev = NULL, *timer = NULL;
 
 	prev = NULL;
-	for (timer = timer_list_head; timer; timer = timer->next) {
+	for (timer = timer_list; timer; timer = timer->next) {
 		if (timer->id == timer_id) break;
 		prev = timer;
 	}
@@ -177,13 +189,24 @@ int timer_destroy(int timer_id)
 
 	/* Unlink it. */
 	if (prev) prev->next = timer->next;
-	else timer_list_head = timer->next;
+	else timer_list = timer->next;
 
-	if (timer->name) free(timer->name);
+	if (timer->name)
+		free(timer->name);
 	free(timer);
 	return(0);
 }
 
+/* Destroy a timer, given an id. */
+int timer_destroy(int timer_id)
+{
+	if (timer_destroy_list(timer_repeat_head, timer_id))
+		if (timer_destroy_list(timer_once_head, timer_id))
+			return 1;
+	return 0;
+}
+
+#ifdef not_used
 int timer_destroy_all()
 {
 	egg_timer_t *timer = NULL, *next = NULL;
@@ -194,10 +217,11 @@ int timer_destroy_all()
 	timer_list_head = NULL;
 	return(0);
 }
+#endif
 
 int timer_get_shortest(egg_timeval_t *howlong)
 {
-	egg_timer_t *timer = timer_list_head;
+	egg_timer_t *timer = timer_repeat_head;
 
 	/* No timers? Boo. */
 	if (!timer) return(1);
@@ -206,49 +230,58 @@ int timer_get_shortest(egg_timeval_t *howlong)
 	return(0);
 }
 
-int timer_run()
-{
-	egg_timer_t *timer = NULL;
-        TimerFunc callback;
-	void *client_data = NULL;
+static bool process_timer(egg_timer_t* timer) {
+	TimerFunc callback = timer->callback;
+	void *client_data = timer->client_data;
+	bool deleted = 0;
 
-	while (timer_list_head) {
-		timer = timer_list_head;
+	if (timer->flags & TIMER_REPEAT) {
+		/* Update timer. */
+		/* This used to be '+= howlong.sec' but, if the time changed say 3 years (happened), this function
+		 * would end up executing all timers for 3 years until it is caught up.
+		 */
+		timer->trigger_time.sec = now.sec + timer->howlong.sec;
+		timer->trigger_time.usec = now.usec + timer->howlong.usec;
 
-		if (timer->trigger_time.sec > now.sec || 
-			(timer->trigger_time.sec == now.sec && timer->trigger_time.usec > now.usec)) break;
-
-		timer_list_head = timer_list_head->next;
-
-		callback = timer->callback;
-		client_data = timer->client_data;
-
-		if (timer->flags & TIMER_REPEAT) {
-			/* Update timer. */
-                        /* This used to be '+= howlong.sec' but, if the time changed say 3 years (happened), this function 
-                         * would end up executing all timers for 3 years until it is caught up.
-                         */
-			timer->trigger_time.sec = now.sec + timer->howlong.sec;
-			timer->trigger_time.usec = now.usec + timer->howlong.usec;
-
-			if (timer->trigger_time.usec >= 1000000) {
-				timer->trigger_time.usec -= 1000000;
-				timer->trigger_time.sec += 1;
-			}
-
-			/* Add it back into the list. */
-			timer_add_to_list(timer);
-
-			timer->called++;
-		}
-		else {
-			if (timer->name) free(timer->name);
-			free(timer);
+		if (timer->trigger_time.usec >= 1000000) {
+			timer->trigger_time.usec -= 1000000;
+			++(timer->trigger_time.sec);
 		}
 
-		callback(client_data);
+		++(timer->called);
+	} else {
+		deleted = 1;
 	}
-	return(0);
+
+	callback(client_data);
+	return deleted;
+}
+
+static void process_timer_list(egg_timer_t* &timer_list) {
+	egg_timer_t *timer = NULL, *prev = NULL, *next = timer_list;
+	while (next) {
+		timer = next;
+		// Timers are sorted by lowest->highest, so if the current one isn't ready to trigger, the rest are not either
+		if (timer->trigger_time.sec > now.sec || (timer->trigger_time.sec == now.sec && timer->trigger_time.usec > now.usec))
+			break;
+		next = timer->next;
+		if (process_timer(timer)) {
+			// Deleted, need to shift the queue
+			if (prev) prev->next = timer->next;
+			else timer_list = timer->next;
+
+			if (timer->name)
+				free(timer->name);
+			free(timer);
+		} else
+			prev = timer;
+	}
+}
+
+void timer_run()
+{
+	process_timer_list(timer_once_head);
+	process_timer_list(timer_repeat_head);
 }
 
 int timer_list(int **ids)
@@ -257,12 +290,12 @@ int timer_list(int **ids)
 	int ntimers = 0;
 
 	/* Count timers. */
-	for (timer = timer_list_head; timer; timer = timer->next) ntimers++;
+	for (timer = timer_repeat_head; timer; timer = timer->next) ntimers++;
 
 	/* Fill in array. */
 	*ids = (int *) my_calloc(1, sizeof(int) * (ntimers+1));
 	ntimers = 0;
-	for (timer = timer_list_head; timer; timer = timer->next) {
+	for (timer = timer_repeat_head; timer; timer = timer->next) {
 		(*ids)[ntimers++] = timer->id;
 	}
 	return(ntimers);
@@ -272,7 +305,7 @@ int timer_info(int id, char **name, egg_timeval_t *initial_len, egg_timeval_t *t
 {
         egg_timer_t *timer = NULL;
 
-        for (timer = timer_list_head; timer; timer = timer->next) {
+        for (timer = timer_repeat_head; timer; timer = timer->next) {
                 if (timer->id == id) break;
         }
         if (!timer) return(-1);
@@ -283,4 +316,4 @@ int timer_info(int id, char **name, egg_timeval_t *initial_len, egg_timeval_t *t
         return(0);
 }
 
-
+/* vim: set sts=4 sw=4 ts=4 noet: */

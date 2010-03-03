@@ -454,3 +454,4 @@ void rem_builtins(const char *table_name, cmd_t *cmds)
 		bind_entry_del(table, -1, cmds->name, name, NULL);
 	}
 }
+/* vim: set sts=4 sw=4 ts=4 noet: */

@@ -12,6 +12,7 @@
 
 #define DO_LOST 1
 #define NO_LOST 0
+#define DEQ_RATE 200
 
 #define fixcolon(x)             do {                                    \
         if ((x)[0] == ':')                                              \
@@ -46,7 +47,7 @@ enum {
 
 extern bind_table_t	*BT_ctcp, *BT_ctcr, *BT_msgc;
 extern size_t		nick_len;
-extern bool		trigger_on_ignore, floodless, keepnick, in_deaf, in_callerid;
+extern bool		trigger_on_ignore, floodless, keepnick, in_deaf, in_callerid, have_cprivmsg, have_cnotice;
 extern int 		servidx, ctcp_mode, answer_ctcp, serv, curserv, default_alines;
 extern unsigned int     rolls;
 extern port_t		default_port, newserverport, curservport;

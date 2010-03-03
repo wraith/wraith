@@ -89,28 +89,32 @@ interval_t cycle_time;			/* cycle time till next server connect */
 port_t default_port = 6667;		/* default IRC port */
 bool trigger_on_ignore;	/* trigger bindings if user is ignored ? */
 int answer_ctcp = 1;		/* answer how many stacked ctcp's ? */
-static int net_type = NETT_EFNET;
 static bool resolvserv;		/* in the process of resolving a server host */
 static time_t lastpingtime;	/* IRCNet LAGmeter support -- drummer */
 static char stackablecmds[511] = "";
 static char stackable2cmds[511] = "";
-static time_t last_time;
-static bool use_penalties = 0;
+static egg_timeval_t last_time;
+static time_t connect_bursting = 0;
+static int real_msgburst = 0;
+static int real_msgrate = 0;
+static int flood_count = 0;
+static bool use_flood_count = 0;
+static egg_timeval_t flood_time = {0, 0};
+static bool use_penalties;
 static int use_fastdeq;
 size_t nick_len = 9;			/* Maximal nick length allowed on the network. */
 char deaf_char = 0;
 bool in_deaf = 0;
 char callerid_char = 0;
 bool in_callerid = 0;
+bool have_cprivmsg = 0;
+bool have_cnotice = 0;
 
-static bool double_mode = 0;		/* allow a msgs to be twice in a queue? */
-static bool double_server = 0;
-static bool double_help = 0;
 static bool double_warned = 0;
 
 static void empty_msgq(void);
 static void disconnect_server(int, int);
-static int calc_penalty(char *);
+static void calc_penalty(char *, size_t);
 static bool fast_deq(int);
 static char *splitnicks(char **);
 static void msgq_clear(struct msgq_head *qh);
@@ -120,20 +124,41 @@ static bool replaying_cache = 0;
 /* New bind tables. */
 static bind_table_t *BT_raw = NULL, *BT_msg = NULL;
 bind_table_t *BT_ctcr = NULL, *BT_ctcp = NULL, *BT_msgc = NULL;
+// Ratbox is (5*8):30, ircd-seven is (5*8):20, try to not push th elimits.
+#define SERVER_CONNECT_BURST_TIME 18
+#define SERVER_CONNECT_BURST_RATE 5 * 7
 
 #include "servmsg.c"
 
 #define MAXPENALTY 10
 
-/* Number of seconds to wait between transmitting queued lines to the server
- * lower this value at your own risk.  ircd is known to start flood control
- * at 512 bytes/2 seconds.
- */
-#define msgrate 2
+// If use_flood_count, don't bother with msgrate, otherwise use the user specified msgrate
+#define MSGRATE (use_flood_count ? DEQ_RATE : msgrate)
 
 /* Maximum messages to store in each queue. */
-static int maxqmsg = 300;
-static struct msgq_head mq, hq, modeq, cacheq;
+static struct msgq_head mq, hq, modeq, aq, cacheq;
+
+static const struct {
+  struct msgq_head* const q;
+  const int idx;
+  const char* name;
+  const char pfx;
+  const bool double_msg;
+  const bool burst;
+  const bool connect_burst;
+  const size_t maxqmsg;
+} qdsc[5] = {
+  { &modeq, 	DP_MODE,	"MODE", 	'm',	0,	1, 	1,	300 },
+  { &mq, 	DP_SERVER,	"SERVER", 	's',	0,	1,	1,	300 },
+  { &hq, 	DP_HELP,	"HELP", 	'h',	0,	0,	0,	300 },
+  { &aq, 	DP_PLAY,	"PLAY", 	'p',	1,	1,	0,	10000 },
+  { &cacheq, 	DP_CACHE,	"CACHE", 	'c',	0,	0,	0,	1000 },
+};
+#define Q_MODE 0
+#define Q_SERVER 1
+#define Q_HELP 2
+#define Q_PLAY 3
+#define Q_CACHE 4
 static int burst;
 
 #include "cmdsserv.c"
@@ -142,6 +167,55 @@ static int burst;
 /*
  *     Bot server queues
  */
+static bool burst_mode_ok(const char *msg, size_t len) {
+  bd::String mode(msg, len);
+  bd::Array<bd::String> list(mode.split(' '));
+  if (list.length() == 2) return 1;
+  if (list.length() == 3) {
+    if (!strchr(CHANMETA, bd::String(list[1]).at(0))) return 1;
+    else if (bd::String(list[2]).at(0) == 'b') return 1;
+  }
+  return 0;
+}
+
+// Hybrid/ratbox allows bursting 5*8 lines on connect until certain commands are sent, for up to 30 seconds
+/*
+   BAD:
+     JOIN 0
+     MODE #chan b
+     NICK
+     PART
+     KICK
+     CPRIVMSG
+     CNOTICE
+     WHO 0/mask
+     TIME
+     TOPIC
+     INVITE
+     AWAY
+     OPER
+
+   OK:
+     WHO *
+     WHO !
+     WHO #Chan
+     WHO NICK
+*/
+static bool burst_ok(const char* msg, size_t len) {
+  if (strstr(msg, "JOIN 0") ||
+      (strstr(msg, "MODE") && !burst_mode_ok(msg, len)) ||
+      strstr(msg, "NICK") ||
+      strstr(msg, "PRIVMSG") ||
+      strstr(msg, "NOTICE") ||
+      strstr(msg, "PART") ||
+      strstr(msg, "KICK") ||
+      strstr(msg, "INVITE") ||
+      strstr(msg, "AWAY")) {
+    sdprintf("BURST MODE VIOLATION!!!: %s\n", msg);
+    return 0;
+  }
+  return 1;
+}
 
 /* Called periodically to shove out another queued item.
  *
@@ -152,93 +226,129 @@ static int burst;
  * Will send upto 4 msgs from modeq, and then send 1 msg every time
  * it will *not* send anything from hq until the 'burst' value drops
  * down to 0 again (allowing a sudden mq flood to sneak through).
+ *
+ * ratbox:
+ * Every msg sent is added to a count, every second this count decreases by 2.
+ * Typical max count is 20, then excess flood is triggered.
+ * So after 1 bursts:
+ * Count = 5
+ * Decaying by 1 every second
  */
-static void deq_msg()
+void deq_msg()
 {
-  bool ok = 0;
+  if (serv < 0)
+    return;
+
+  if (timeval_diff(&egg_timeval_now, &flood_time) >= 1000) {
+    // Increase flood_count by 1 every msg, but decrease by 2 every second, use this to determine an acceptable burst rate
+    if (flood_count > 1)
+      flood_count -= 2;
+    else if (flood_count == 1)
+      flood_count = 0;
+
+    flood_time.sec = egg_timeval_now.sec;
+    flood_time.usec = egg_timeval_now.usec;
+  }
 
   /* now < last_time tested 'cause clock adjustments could mess it up */
-  if ((now - last_time) >= msgrate || now < (last_time - 90)) {
-    last_time = now;
-    if (burst > 0)
-      burst--;
-    ok = 1;
-  }
-  if (serv < 0)
+  if (timeval_diff(&egg_timeval_now, &last_time) >= MSGRATE || now < (last_time.sec - 90)) {
+    last_time.sec = egg_timeval_now.sec;
+    last_time.usec = egg_timeval_now.usec;
+
+    if (burst > 0) {
+      if (use_flood_count) {
+        if (flood_count < 5)
+          burst = 0;
+        else if (flood_count < 10)
+          burst -= 4;
+        else if (flood_count < 13)
+          burst -= 3;
+        else if (flood_count < 15)
+          burst -= 2;
+        else
+          --burst;
+        if (burst < 0)
+          burst = 0;
+      } else
+        --burst;
+    }
+  } else
     return;
 
   struct msgq *q = NULL;
 
-  /* Send upto 4 msgs to server if the *critical queue* has anything in it */
-  if (modeq.head) {
-    while (modeq.head && (burst < 4) && ((last_time - now) < MAXPENALTY)) {
-      if (!modeq.head)
-        break;
-      if (fast_deq(DP_MODE)) {
-        burst++;
+  /* Send upto 'set msgburst' msgs to server if the *critical queue* has anything in it;
+   * otherwise, dequeue and burst up to 'set msgburst' messages from the `normal' message
+   * queue.
+   */
+  egg_timeval_t last_time_save = { last_time.sec, last_time.usec };
+  bool bursted = 0;
+  // -1 here to avoid DP_CACHE
+  for(size_t nq = 0; nq < (sizeof(qdsc) / sizeof(qdsc[0])) - 1; ++nq) {
+    while (qdsc[nq].q->head &&
+        // If burstable queue and can burst, or not a burstable queue and not connect bursting
+        ((qdsc[nq].burst && (burst < msgburst)) || (!qdsc[nq].burst && !connect_bursting)) &&
+        ((last_time.sec - now) < MAXPENALTY)) {
+#ifdef not_implemented
+      if (deq_kick(qdsc[nq].idx)) {
+        ++burst;++flood_count;
         continue;
       }
-      write_to_server(modeq.head->msg, modeq.head->len);
+#endif
+      if (fast_deq(nq))
+        continue;
+      write_to_server(qdsc[nq].q->head->msg, qdsc[nq].q->head->len);
+      ++burst;++flood_count;
       if (debug_output)
-        putlog(LOG_SRVOUT, "@", "[m->] %s", modeq.head->msg);
-      modeq.tot--;
-      last_time += calc_penalty(modeq.head->msg);
-      q = modeq.head->next;
-      free(modeq.head->msg);
-      free(modeq.head);
-      modeq.head = q;
-      burst++;
+        putlog(LOG_SRVOUT, "*", "[%c->] %s", qdsc[nq].pfx, qdsc[nq].q->head->msg);
+      --(qdsc[nq].q->tot);
+      calc_penalty(qdsc[nq].q->head->msg, qdsc[nq].q->head->len);
+      q = qdsc[nq].q->head->next;
+      free(qdsc[nq].q->head->msg);
+      free(qdsc[nq].q->head);
+      qdsc[nq].q->head = q;
+      if (qdsc[nq].burst)
+        bursted = 1;
+      else // Help Queue does not burst, push out 1 line then go to next queue.
+        break;
     }
-    if (!modeq.head)
-      modeq.last = 0;
-    return;
+    if (!qdsc[nq].q->head)
+      qdsc[nq].q->last = NULL;
   }
-  /* Send something from the normal msg q even if we're slightly bursting */
-  if (burst > 1)
-    return;
-  if (mq.head) {
-    burst++;
-    if (fast_deq(DP_SERVER))
-      return;
-    write_to_server(mq.head->msg, mq.head->len);
-    if (debug_output) {
-      putlog(LOG_SRVOUT, "@", "[s->] %s", mq.head->msg);
+
+  // Do this penalty calc here as it's dependant on burst/flood_count
+  if (use_flood_count && !connect_bursting) {
+    // The penalty includes a length-based penalty from calc_penalty
+
+    last_time.sec -= (MSGRATE / 1000); // Remove normal msgrate
+    // Add 150ms for each current burst
+    last_time.usec += (150*burst) * 1000;
+    // Add some penalty for each flood_count
+    last_time.usec += (40*flood_count) * 1000;
+    // Cap the penalty at 1800 and depent more on flood_count
+    if (timeval_diff(&last_time, &last_time_save) > 1800) {
+      last_time.sec = last_time_save.sec;
+      last_time.usec = 1800 * 1000;
     }
-    mq.tot--;
-    last_time += calc_penalty(mq.head->msg);
-    q = mq.head->next;
-    free(mq.head->msg);
-    free(mq.head);
-    mq.head = q;
-    if (!mq.head)
-      mq.last = NULL;
-    return;
+    // If lagging, raise the penalty up to avoid TCP burst/excess flood
+    if (server_lag > 5)
+      last_time.sec += 2;
+#ifdef DEBUG
+    if (timeval_diff(&last_time, &last_time_save))
+      sdprintf("PENALTY (%d): %lims", flood_count, timeval_diff(&last_time, &last_time_save));
+#endif
   }
-  /* Never send anything from the help queue unless everything else is
-   * finished.
-   */
-  if (!hq.head || burst || !ok)
-    return;
-  if (fast_deq(DP_HELP))
-    return;
-  write_to_server(hq.head->msg, hq.head->len);
-  if (debug_output) {
-    putlog(LOG_SRVOUT, "@", "[h->] %s", hq.head->msg);
-  }
-  hq.tot--;
-  last_time += calc_penalty(hq.head->msg);
-  q = hq.head->next;
-  free(hq.head->msg);
-  free(hq.head);
-  hq.head = q;
-  if (!hq.head)
-    hq.last = NULL;
+#ifdef DEBUG
+  else if (connect_bursting && bursted)
+    sdprintf("BURSTING!!!!!\n");
+#endif
+
 }
 
-static int calc_penalty(char * msg)
+static void calc_penalty(char * msg, size_t len)
 {
-  if (!use_penalties && net_type != NETT_UNDERNET && net_type != NETT_HYBRID_EFNET)
-    return 0;
+  if (connect_bursting)
+    return;
 
   char *cmd = NULL, *par1 = NULL, *par2 = NULL, *par3 = NULL;
   register int penalty, i, ii;
@@ -248,11 +358,17 @@ static int calc_penalty(char * msg)
     i = strlen(msg);
   else
     i = strlen(cmd);
-  last_time -= 2; /* undo eggdrop standard flood prot */
-  if (net_type == NETT_UNDERNET || net_type == NETT_HYBRID_EFNET) {
-    last_time += (2 + i / 120);
-    return 0;
+  if (!use_penalties) {
+    // Add some penalty for large messages
+    if (use_flood_count)
+      last_time.usec += long(((double)i / 300.0) * (1000*1000));
+    else
+      last_time.usec += long(((double)i / 120.0) * (1000*1000));
+    return;
   }
+
+  last_time.sec -= (MSGRATE / 1000); // Remove normal msgrate
+
   penalty = (1 + i / 100);
   if (!strcasecmp(cmd, "KICK")) {
     par1 = newsplit(&msg); /* channel */
@@ -361,7 +477,7 @@ static int calc_penalty(char * msg)
   }
   if (debug_output && penalty != 0)
     putlog(LOG_SRVOUT, "*", "Adding penalty: %i", penalty);
-  return penalty;
+  last_time.sec += penalty;
 }
 
 char *splitnicks(char **rest)
@@ -410,27 +526,16 @@ static bool fast_deq(int which)
   if (!use_fastdeq)
     return 0;
 
-  struct msgq_head *h = NULL;
+  struct msgq_head *h = qdsc[which].q;
   struct msgq *m = NULL, *nm = NULL;
-  char msgstr[511] = "", nextmsgstr[511] = "", tosend[511] = "", victims[511] = "", stackable[511] = "",
+  char msgstr[511] = "", nextmsgstr[511] = "", tosend[511] = "", stackable[511] = "",
        *msg = NULL, *nextmsg = NULL, *cmd = NULL, *nextcmd = NULL, *to = NULL, *nextto = NULL, *stckbl = NULL;
-  int cmd_count = 0, stack_method = 1;
+  int cmd_count = 0;
+  char stack_delim = ',';
   size_t len;
   bool found = 0, doit = 0;
+  bd::String victims;
 
-  switch (which) {
-    case DP_MODE:
-      h = &modeq;
-      break;
-    case DP_SERVER:
-      h = &mq;
-      break;
-    case DP_HELP:
-      h = &hq;
-      break;
-    default:
-      return 0;
-  }
   m = h->head;
   strlcpy(msgstr, m->msg, sizeof msgstr);
   msg = msgstr;
@@ -456,13 +561,13 @@ static bool fast_deq(int which)
     stckbl = stackable;
     while (strlen(stckbl) > 0)
       if (!strcasecmp(newsplit(&stckbl), cmd)) {
-        stack_method = 2;
+        stack_delim = ' ';
         break;
       }    
   }
   to = newsplit(&msg);
   len = strlen(to);
-  strlcpy(victims, to, sizeof(victims));
+  victims = to;
   while (m) {
     nm = m->next;
     if (!nm)
@@ -474,15 +579,11 @@ static bool fast_deq(int which)
     len = strlen(nextto);
     if ( strcmp(to, nextto) /* we don't stack to the same recipients */
         && !strcmp(cmd, nextcmd) && !strcmp(msg, nextmsg)
-        && ((strlen(cmd) + strlen(victims) + strlen(nextto)
+        && ((strlen(cmd) + victims.length() + strlen(nextto)
 	     + strlen(msg) + 2) < 510)
         && (!stack_limit || cmd_count < stack_limit - 1)) {
-      cmd_count++;
-      if (stack_method == 1)
-        strlcat(victims, ",", sizeof(victims));
-      else
-        strlcat(victims, " ", sizeof(victims));
-      strlcat(victims, nextto, sizeof(victims));
+      ++cmd_count;
+      victims += stack_delim + nextto;
 
       doit = 1;
       m->next = nm->next;
@@ -490,35 +591,26 @@ static bool fast_deq(int which)
         h->last = m;
       free(nm->msg);
       free(nm);
-      h->tot--;
+      --(h->tot);
     } else
       m = m->next;
   }
   if (doit) {
-    simple_snprintf(tosend, sizeof(tosend), "%s %s %s", cmd, victims, msg);
-    len = strlen(tosend);
+    len = simple_snprintf(tosend, sizeof(tosend), "%s %s %s", cmd, victims.c_str(), msg);
     write_to_server(tosend, len);
+    ++burst;++flood_count;
     m = h->head->next;
     free(h->head->msg);
     free(h->head);
     h->head = m;
     if (!h->head)
       h->last = 0;
-    h->tot--;
-    if (debug_output) {
-      switch (which) {
-        case DP_MODE:
-          putlog(LOG_SRVOUT, "*", "[m=>] %s", tosend);
-          break;
-        case DP_SERVER:
-          putlog(LOG_SRVOUT, "*", "[s=>] %s", tosend);
-          break;
-        case DP_HELP:
-          putlog(LOG_SRVOUT, "*", "[h=>] %s", tosend);
-          break;
-      }
-    }
-    last_time += calc_penalty(tosend);
+    --(h->tot);
+
+    if (debug_output)
+      putlog(LOG_SRVOUT, "*", "[%c=>] %s", qdsc[which].pfx, tosend);
+
+    calc_penalty(tosend, len);
     return 1;
   }
   return 0;
@@ -528,11 +620,11 @@ static bool fast_deq(int which)
  */
 static void empty_msgq()
 {
-  msgq_clear(&modeq);
-  msgq_clear(&mq);
-  msgq_clear(&hq);
-  msgq_clear(&cacheq);
+  for (size_t i = 0; i < (sizeof(qdsc) / sizeof(qdsc[0])); ++i)
+    msgq_clear(qdsc[i].q);
   burst = 0;
+  flood_count = 0;
+  flood_time.sec = flood_time.usec = 0;
 }
 
 /* Use when sending msgs... will spread them out so there's no flooding.
@@ -543,65 +635,53 @@ void queue_server(int which, char *buf, int len)
   if (serv < 0)
     return;
 
-  struct msgq_head *h = NULL, tempq;
-  struct msgq *q = NULL;
-  int qnext = 0;
-  bool doublemsg = 0;
-
-  switch (which) {
-  case DP_MODE_NEXT:
-    qnext = 1;
-    /* Fallthrough */
-  case DP_MODE:
-    h = &modeq;
-    tempq = modeq;
-    if (double_mode)
-      doublemsg = 1;
-    break;
-
-  case DP_SERVER_NEXT:
-    qnext = 1;
-    /* Fallthrough */
-  case DP_SERVER:
-    h = &mq;
-    tempq = mq;
-    if (double_server)
-      doublemsg = 1;
-    break;
-
-  case DP_HELP_NEXT:
-    qnext = 1;
-    /* Fallthrough */
-  case DP_HELP:
-    h = &hq;
-    tempq = hq;
-    if (double_help)
-      doublemsg = 1;
-    break;
-
-  case DP_CACHE:
-    h = &cacheq;
-    tempq = cacheq;
-    doublemsg = 0;
-    break;
-
-  default:
-    putlog(LOG_MISC, "*", "!!! queuing unknown type to server!!");
-    return;
+  // If connect bursting, hold off any commands which would end the gracetime (flood_endgrace)
+  if (connect_bursting && (which == DP_MODE || which == DP_MODE_NEXT || which == DP_SERVER || which == DP_SERVER_NEXT)) {
+    if (!burst_ok(buf, len))
+      which = DP_HELP;
   }
 
-  if (likely(h->tot < maxqmsg)) {
-    /* Don't queue msg if it's already queued?  */
-    if (!doublemsg) {
-      struct msgq *tq = NULL, *tqq = NULL;
+  int qnext = 0;
+  int which_q = 0;
 
-      for (tq = tempq.head; tq; tq = tqq) {
-	tqq = tq->next;
+  switch (which) {
+    case DP_MODE_NEXT:
+      qnext = 1;
+    case DP_MODE:
+      which_q = Q_MODE;
+      break;
+    case DP_SERVER_NEXT:
+      qnext = 1;
+    case DP_SERVER:
+      which_q = Q_SERVER;
+      break;
+    case DP_HELP_NEXT:
+      qnext = 1;
+    case DP_HELP:
+      which_q = Q_HELP;
+      break;
+    case DP_PLAY:
+      which_q = Q_PLAY;
+      break;
+    case DP_CACHE:
+      which_q = Q_CACHE;
+      break;
+    default:
+      putlog(LOG_MISC, "*", "!!! queuing unknown type to server!!");
+      return;
+  }
+
+  struct msgq_head *h = qdsc[which_q].q;
+
+  if (h->tot < qdsc[which_q].maxqmsg) {
+    /* Don't queue msg if it's already queued?  */
+    if (!qdsc[which_q].double_msg) {
+      for (struct msgq* tq = qdsc[which_q].q->head; tq; tq = tq->next) {
 	if (!strcasecmp(tq->msg, buf)) {
 	  if (!double_warned) {
 	    if (buf[len - 1] == '\n')
 	      buf[len - 1] = 0;
-	    debug1("msg already queued. skipping: %s", buf);
+	    putlog(LOG_DEBUG, "*", "msg already queued. skipping: %s", buf);
 	    double_warned = 1;
 	  }
 	  return;
@@ -609,7 +689,7 @@ void queue_server(int which, char *buf, int len)
       }
     }
 
-    q = (struct msgq *) my_calloc(1, sizeof(struct msgq));
+    struct msgq *q = (struct msgq *) my_calloc(1, sizeof(struct msgq));
     if (qnext)
       q->next = h->head;
     else
@@ -629,61 +709,16 @@ void queue_server(int which, char *buf, int len)
     h->warned = 0;
     double_warned = 0;
   } else {
-    if (!h->warned) {
-      switch (which) {   
-	case DP_MODE_NEXT:
- 	/* Fallthrough */
-	case DP_MODE:
-      putlog(LOG_MISC, "*", "!!! OVER MAXIMUM MODE QUEUE");
- 	break;
-    
-	case DP_SERVER_NEXT:
- 	/* Fallthrough */
- 	case DP_SERVER:
-	putlog(LOG_MISC, "*", "!!! OVER MAXIMUM SERVER QUEUE");
-	break;
-            
-	case DP_HELP_NEXT:
-	/* Fallthrough */
-	case DP_HELP:
-	putlog(LOG_MISC, "*", "!!! OVER MAXIMUM HELP QUEUE");
-	break;
-      }
-    }
+    if (!h->warned)
+      putlog(LOG_MISC, "*", "!!! OVER MAXIMUM %s QUEUE", qdsc[which_q].name);
     h->warned = 1;
   }
 
-  if (debug_output && !h->warned) {
-    switch (which) {
-    case DP_MODE:
-      putlog(LOG_SRVOUT, "@", "[!m] %s", buf);
-      break;
-    case DP_SERVER:
-      putlog(LOG_SRVOUT, "@", "[!s] %s", buf);
-      break;
-    case DP_HELP:
-      putlog(LOG_SRVOUT, "@", "[!h] %s", buf);
-      break;
-    case DP_MODE_NEXT:
-      putlog(LOG_SRVOUT, "@", "[!!m] %s", buf);
-      break;
-    case DP_SERVER_NEXT:
-      putlog(LOG_SRVOUT, "@", "[!!s] %s", buf);
-      break;
-    case DP_HELP_NEXT:
-      putlog(LOG_SRVOUT, "@", "[!!h] %s", buf);
-      break;
-#ifdef DEBUG
-    case DP_CACHE:
-      sdprintf("CACHE: %s", buf);
-      break;
-#endif
-    }
-  }
+  if (debug_output && !h->warned)
+    putlog(LOG_SRVOUT, "@", "[%s%c] %s", qnext ? "!!" : "!", qdsc[which_q].pfx, buf);
 
-  if (which == DP_MODE || which == DP_MODE_NEXT)
-    deq_msg();		/* DP_MODE needs to be sent ASAP, flush if
-			   possible. */
+  /* Try flushing immediately */
+  deq_msg();
 }
 
 /* Add a new server to the server_list.
@@ -956,11 +991,18 @@ static void dcc_chat_hostresolved(int i)
  *     Server timer functions
  */
 
+static void end_burstmode() {
+  if (connect_bursting) {
+    connect_bursting = 0;
+    msgburst = real_msgburst;
+    msgrate = real_msgrate;
+  }
+}
+
 static void server_secondly()
 {
   if (cycle_time)
     --cycle_time;
-  deq_msg();
   if (!resolvserv && serv < 0 && !trying_server)
     connect_server();
 
@@ -1007,13 +1049,17 @@ static void server_secondly()
       } else
         ++cnt_10;
     }
+    if (connect_bursting && (now - SERVER_CONNECT_BURST_TIME) >= connect_bursting) {
+      end_burstmode();
+      putlog(LOG_DEBUG, "*", "Ending server burst mode");
+    }
   }
 }
 
 static void server_check_lag()
 {
   if (server_online && !waiting_for_awake && !trying_server) {
-    dprintf(DP_DUMP, "PING :%li\n", (long)now);
+    dprintf(DP_MODE_NEXT, "PING :%li\n", (long)now);
     lastpingtime = now;
     waiting_for_awake = 1;
   } else if (servidx != -1 && waiting_for_awake && ((now - lastpingtime) >= stoned_timeout)) {
@@ -1064,16 +1110,17 @@ void server_report(int idx, int details)
 	    trying_server ? "(trying)" : s);
   } else
     dprintf(idx, "    No server currently.\n");
-  if (modeq.tot)
-    dprintf(idx, "    Mode queue is at %d%%, %d msgs\n",
-            (int) ((float) (modeq.tot * 100.0) / (float) maxqmsg),
-	    (int) modeq.tot);
-  if (mq.tot)
-    dprintf(idx, "    Server queue is at %d%%, %d msgs\n",
-           (int) ((float) (mq.tot * 100.0) / (float) maxqmsg), (int) mq.tot);
-  if (hq.tot)
-    dprintf(idx, "    Help queue is at %d%%, %d msgs\n",
-           (int) ((float) (hq.tot * 100.0) / (float) maxqmsg), (int) hq.tot);
+
+  if (server_online)
+    dprintf(idx, "    burst: %d flood_count: %d\n", burst, flood_count);
+
+  for (size_t i = 0; i < (sizeof(qdsc) / sizeof(qdsc[0])); ++i) {
+    if (qdsc[i].q->tot)
+      dprintf(idx, "    %s queue is at %d%%, %d msgs\n",
+          qdsc[i].name,
+          (int) ((float) (qdsc[i].q->tot * 100.0) / (float) qdsc[i].maxqmsg),
+          (int) qdsc[i].q->tot);
+  }
   if (details) {
     dprintf(idx, "    Flood is: %d msg/%ds, %d ctcp/%ds\n",
 	    flood_msg.count, flood_msg.time, flood_ctcp.count, flood_ctcp.time);
@@ -1103,11 +1150,6 @@ void server_init()
 {
   strlcpy(botrealname, "A deranged product of evil coders", sizeof(botrealname));
 
-  mq.head = hq.head = modeq.head = NULL;
-  mq.last = hq.last = modeq.last = NULL;
-  mq.tot = hq.tot = modeq.tot = 0;
-  mq.warned = hq.warned = modeq.warned = 0;
-
   /*
    * Init of all the variables *must* be done in _start rather than
    * globally.
@@ -1123,6 +1165,12 @@ void server_init()
   add_builtins("dcc", C_dcc_serv);
   add_builtins("ctcp", my_ctcps);
 
+  egg_timeval_t howlong;
+
+  howlong.sec = 0;
+  howlong.usec = DEQ_RATE * 1000;
+
+  timer_create_repeater(&howlong, "server_queue", (Function) deq_msg);
   timer_create_secs(1, "server_secondly", (Function) server_secondly);
   timer_create_secs(30, "server_check_lag", (Function) server_check_lag);
 //  timer_create_secs(60, "minutely_checks", (Function) minutely_checks);

@@ -1544,6 +1544,13 @@ void recheck_channel(struct chanset_t *chan, int dobans)
   --stacking;
 }
 
+static int got001(char *from, char *msg)
+{
+  //Just connected, cleanup some vars
+  chained_who.clear();
+  return 0;
+}
+
 #ifdef CACHE
 /* got 302: userhost
  * <server> 302 <to> :<nick??user@host>
@@ -1594,7 +1601,7 @@ static int got302(char *from, char *msg)
       }
       if (cchan->ban) {
         cchan->ban = 0;
-        dprintf(DP_DUMP, "MODE %s +b *!%s\n", cchan->dname, uhost);
+        dprintf(DP_MODE_NEXT, "MODE %s +b *!%s\n", cchan->dname, uhost);
       }
     }
   }
@@ -1654,14 +1661,16 @@ static int got341(char *from, char *msg)
     cchan = cache_chan_add(cache, chan->dname);
 
   if (!cache->uhost[0]) {
-    dprintf(DP_DUMP, "MODE %s +b %s!*@*\n", chan->name, nick);
+    dprintf(DP_MODE_NEXT, "MODE %s +b %s!*@*\n", chan->name, nick);
     cchan->ban = 1;
-    dprintf(DP_DUMP, "USERHOST %s\n", nick);
+    dprintf(DP_MODE_NEXT, "USERHOST %s\n", nick);
   } else {
-    dprintf(DP_DUMP, "MODE %s +b *!*%s\n", chan->name, cache->uhost);
+    dprintf(DP_MODE_NEXT, "MODE %s +b *!*%s\n", chan->name, cache->uhost);
   }
   putlog(LOG_MISC, "*", "HIJACKED invite detected: %s to %s", nick, chan->dname);
-  dprintf(DP_DUMP, "PRIVMSG %s :ALERT! \002%s was invited via a hijacked connection/process.\002\n", chan->name, nick);
+  bd::String msg;
+  msg.printf("ALERT! \002%s was invited via a hijacked connection/process.\002", nick);
+  privmsg(chan->name, msg.c_str(), DP_MODE_NEXT);
   return 0;
 }
 #endif /* CACHE */
@@ -2008,7 +2017,26 @@ static int got315(char *from, char *msg)
 
   newsplit(&msg);
   chname = newsplit(&msg);
+
+  if (!chained_who.isEmpty()) {
+    // Send off next WHO request
+    while (1) {
+      if (chained_who.isEmpty()) break;
+      // Dequeue the next chan in the chain
+      chan = findchan(bd::String(chained_who.dequeue()).c_str());
+      if (chan) {
+        if (!strcmp(chan->name, chname)) continue; // First reply got queued too
+        if (!shouldjoin(chan)) continue; // No longer care about this channel
+        // Somehow got the WHO already
+        if (channel_active(chan) && !channel_pending(chan)) continue;
+        send_chan_who(chained_who_idx, chan);
+        break;
+      }
+    }
+  }
+
   chan = findchan(chname);
+
   /* May have left the channel before the who info came in */
   if (!chan || !channel_pending(chan))
     return 0;
@@ -2424,7 +2452,7 @@ static int gotinvite(char *from, char *msg)
 
   if (chan) {
     if (channel_pending(chan) || channel_active(chan))
-      dprintf(DP_HELP, "NOTICE %s :I'm already here.\n", nick);
+      notice(nick, "I'm already here.", DP_HELP);
     else if (shouldjoin(chan))
       join_chan(chan);
   }
@@ -3180,13 +3208,13 @@ static int gotmsg(char *from, char *msg)
   /* Send out possible ctcp responses */
   if (ctcp_reply[0]) {
     if (ctcp_mode != 2) {
-      dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
+      notice(nick, ctcp_reply, DP_HELP);
     } else {
       if (now - last_ctcp > flood_ctcp.time) {
-	dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
+        notice(nick, ctcp_reply, DP_HELP);
 	count_ctcp = 1;
       } else if (count_ctcp < flood_ctcp.count) {
-	dprintf(DP_HELP, "NOTICE %s :%s\n", nick, ctcp_reply);
+        notice(nick, ctcp_reply, DP_HELP);
 	count_ctcp++;
       }
       last_ctcp = now;
@@ -3332,6 +3360,7 @@ static int gotnotice(char *from, char *msg)
 
 static cmd_t irc_raw[] =
 {
+  {"001",       "",     (Function) got001,      "irc:001", LEAF},
 #ifdef CACHE
   {"302",       "",     (Function) got302,      "irc:302", LEAF},
   {"341",       "",     (Function) got341,      "irc:341", LEAF},

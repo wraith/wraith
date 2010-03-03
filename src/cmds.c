@@ -1349,7 +1349,7 @@ static void cmd_botcmd(int idx, char *par)
 
   // Restrict dangerous mass commands ('botcmd *' (any *) or 'botcmd &')
   if ((strchr(botm, '*') && !findbot(botm)) || !strcmp(botm, "&")) {
-    if (!strncasecmp(cmd, "di", 2) || (!strncasecmp(cmd, "res", 3) && strncasecmp(cmd, "reset", 5)) || !strncasecmp(cmd, "sui", 3) ||
+    if (!strncasecmp(cmd, "di", 2) || (!strncasecmp(cmd, "res", 3) && strncasecmp(cmd, "reset", 5)) || !strncasecmp(cmd, "sui", 3) || !strncasecmp(cmd, "pl", 2) ||
         !strncasecmp(cmd, "j", 1) || (!strncasecmp(cmd, "dump", 4) && (!strncasecmp(par, "privmsg", 7) || !strncasecmp(par, "notice", 6) || !strncasecmp(par, "quit", 4)))) {
       dprintf(idx, "Not a good idea.\n");
       return;
@@ -2034,8 +2034,8 @@ static void cmd_timers(int idx, char *par)
 
       timer_info(ids[i], &name, &howlong, &trigger_time, &called);
       timer_diff(&mynow, &trigger_time, &diff);
-      simple_snprintf(interval, sizeof interval, "(%li.%li secs)", howlong.sec, howlong.usec);
-      simple_snprintf(next, sizeof next, "%li.%li secs", diff.sec, diff.usec);
+      simple_snprintf(interval, sizeof interval, "(%lis %lims)", howlong.sec, howlong.usec / 1000);
+      simple_snprintf(next, sizeof next, "%lis %lims", diff.sec, diff.usec / 1000);
       dprintf(idx, "%-2d: %-25s %-15s Next: %-25s Called: %d\n", i, name, interval, next, called);
     }
     free(ids);
@@ -4008,7 +4008,7 @@ static void rcmd_msg(char * tobot, char * frombot, char * fromhand, char * fromi
   if (!conf.bot->hub) {
     char *nick = newsplit(&par);
 
-    dprintf(DP_SERVER, "PRIVMSG %s :%s\n", nick, par);
+    privmsg(nick, par, DP_SERVER);
     if (!strcasecmp(tobot, conf.bot->nick)) {
       char buf[1024] = "";
 

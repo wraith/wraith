@@ -115,10 +115,11 @@ static void cmd_clearqueue(int idx, char *par)
     return;
   }
   if (!strcasecmp(par, "all")) {
-    msgs = modeq.tot + mq.tot + hq.tot;
+    msgs = modeq.tot + mq.tot + hq.tot + aq.tot;
     msgq_clear(&modeq);
     msgq_clear(&mq);
     msgq_clear(&hq);
+    msgq_clear(&aq);
     burst = 0;
     double_warned = 0;
     dprintf(idx, "Removed %d message%s from all queues.\n", msgs, 
@@ -136,6 +137,12 @@ static void cmd_clearqueue(int idx, char *par)
     msgq_clear(&hq);
     double_warned = 0;
     dprintf(idx, "Removed %d message%s from the help queue.\n", msgs,
+        (msgs != 1) ? "s" : "");
+  } else if (!strcasecmp(par, "play")) {
+    msgs = aq.tot;
+    msgq_clear(&aq);
+    double_warned = 0;
+    dprintf(idx, "Removed %d message%s from the play queue.\n", msgs,
         (msgs != 1) ? "s" : "");
   } else if (!strcasecmp(par, "server")) {
     msgs = mq.tot;

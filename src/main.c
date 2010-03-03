@@ -120,6 +120,7 @@ char	ver[101] = "";		/* Version info (short form) */
 bool	use_stderr = 1;		/* Send stuff to stderr instead of logfiles? */
 char	quit_msg[1024];		/* quit message */
 time_t	now;			/* duh, now :) */
+egg_timeval_t egg_timeval_now;
 
 int do_confedit = 0;		/* show conf menu if -C */
 static char do_killbot[21] = "";
@@ -697,7 +698,6 @@ void transfer_init();
 
 int main(int argc, char **argv)
 {
-  egg_timeval_t egg_timeval_now;
 
 #ifndef DEBUG
 #ifndef CYGWIN_HACKS

@@ -342,8 +342,11 @@ irc_log(struct chanset_t *chan, const char *format, ...)
   egg_vsnprintf(va_out, sizeof(va_out), format, va);
   va_end(va);
 
-  if ((chan && strcasecmp(chan->dname, "#!obs")) || !chan)
-    dprintf(DP_HELP, "PRIVMSG %s :[%s] %s\n", relay_chan, chan ? chan->dname : "*" , va_out);
+  if ((chan && strcasecmp(chan->dname, "#...")) || !chan) {
+    bd::String msg;
+    msg.printf("[%s] %s", chan ? chan->dname : "*" , va_out);
+    privmsg(relay_chan, msg.c_str(), DP_HELP);
+  }
 /*
   chanout_but(-1, 1, "[%s] %s\n", chan->dname, va_out);
   botnet_send_chan(-1, conf.bot->nick, chan->dname, 1, va_out);

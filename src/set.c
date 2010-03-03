@@ -53,6 +53,12 @@ int ison_time = 10;
 int kill_threshold;
 int lag_threshold;
 int login;
+/* Number of seconds to wait between transmitting queued lines to the server
+ * lower this value at your own risk.  ircd is known to start flood control
+ * at 512 bytes/2 seconds.
+ */
+int msgburst;
+int msgrate;
 char motd[512] = "";
 char msgident[21] = "";
 char msginvite[21] = "";
@@ -105,6 +111,8 @@ static variable_t vars[] = {
  VAR("msg-op",		msgop,			VAR_WORD|VAR_NOLHUB,				0, 0, NULL),
  VAR("msg-pass",	msgpass,		VAR_WORD|VAR_NOLHUB,				0, 0, NULL),
  VAR("msg-release",	msgrelease,		VAR_WORD|VAR_NOLHUB,				0, 0, NULL),
+ VAR("msgburst",	&msgburst,		VAR_INT|VAR_NOLHUB,				1, 90, "5"),
+ VAR("msgrate",		&msgrate,		VAR_INT|VAR_NOLHUB,				DEQ_RATE, 10000, "2200"),
  VAR("nick",		origbotname,		VAR_WORD|VAR_NOHUB|VAR_NICK|VAR_NODEF,	0, 0, NULL),
  VAR("notify-time",	&ison_time,		VAR_INT|VAR_NOLHUB,				1, 30, "10"),
  VAR("oidentd",		&oidentd,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "0"),
