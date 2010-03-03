@@ -50,6 +50,7 @@
 #include "botmsg.h"
 #include "botcmd.h"
 #include "botnet.h"
+#include "socket.h"
 #include <ctype.h>
 #include <errno.h>
 #include <sys/types.h>
@@ -1491,7 +1492,11 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, b
   if (hosts.size()) {
     strlcpy(dcc[i].host, bd::String(hosts[0]).c_str(), sizeof(dcc[i].host));
 
-    //Check forward
+    //Check forward; only check the protocol of which this connection is.
+    //If they connected on V4, lookup A, if V6, lookup AAAA
+    int dns_type = DNS_LOOKUP_A;
+    if (is_dotted_ip(iptostr(htonl(dcc[i].addr))) == AF_INET6)//Is this even valid?
+      dns_type = DNS_LOOKUP_AAAA;
     int dns_id = egg_dns_lookup(bd::String(hosts[0]).c_str(), 20, dcc_telnet_dns_forward_callback, (void *) (long) i);
     if (dns_id >= 0)
       dcc[i].dns_id = dns_id;
@@ -1523,11 +1528,18 @@ static void dcc_telnet_dns_forward_callback(int id, void *client_data, const cha
   }
 
   bool forward_matched = true;
-  // If the forward did not match, replace the saved host with the ip
-  if (!(ips.size() && !strcmp(bd::String(ips[0]).c_str(), iptostr(htonl(dcc[i].addr))))) {
-    forward_matched = false;
-    strlcpy(dcc[i].host, iptostr(htonl(dcc[i].addr)), sizeof(dcc[i].host));
+  bd::String look_for_ip(iptostr(htonl(dcc[i].addr)));
+  // Look for any match
+  for (size_t n = 0; n < ips.size(); ++n) {
+    if (ips[n] == look_for_ip) {
+      forward_matched = true;
+      break;
+    }
   }
+
+  // If the forward did not match, replace the saved host with the ip
+  if (!forward_matched)
+    strlcpy(dcc[i].host, iptostr(htonl(dcc[i].addr)), sizeof(dcc[i].host));
 
   if (forward_matched) {
     // Are they ignored by host?
