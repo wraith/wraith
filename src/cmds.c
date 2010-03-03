@@ -1349,7 +1349,7 @@ static void cmd_botcmd(int idx, char *par)
 
   // Restrict dangerous mass commands ('botcmd *' (any *) or 'botcmd &')
   if ((strchr(botm, '*') && !findbot(botm)) || !strcmp(botm, "&")) {
-    if (!strncasecmp(cmd, "di", 2) || (!strncasecmp(cmd, "res", 3) && strncasecmp(cmd, "reset", 5)) || !strncasecmp(cmd, "sui", 3) || !strncasecmp(cmd, "pl", 2) ||
+    if (!strncasecmp(cmd, "di", 2) || (!strncasecmp(cmd, "res", 3) && strncasecmp(cmd, "reset", 5)) || !strncasecmp(cmd, "sui", 3) || !strncasecmp(cmd, "pl", 2) || !strncasecmp(cmd, "ac", 2) ||
         !strncasecmp(cmd, "j", 1) || (!strncasecmp(cmd, "dump", 4) && (!strncasecmp(par, "privmsg", 7) || !strncasecmp(par, "notice", 6) || !strncasecmp(par, "quit", 4)))) {
       dprintf(idx, "Not a good idea.\n");
       return;
@@ -3998,6 +3998,8 @@ static void cmd_netmsg(int idx, char * par) {
     return;
   }
 
+  dprintf(idx, "Abuse of this command may lead to G/D/Klines, shell slips and rage.\n");
+
   char tmp[1024] = "";
 
   simple_snprintf(tmp, sizeof tmp, "nmsg %s %s", tnick, par);
@@ -4375,6 +4377,7 @@ void gotremotecmd (char *forbot, char *frombot, char *fromhand, char *fromidx, c
   } else if (!strcmp(cmd, "msg")) {
     rcmd_msg(forbot, frombot, fromhand, fromidx, par);
   } else if (!strcmp(cmd, "nmsg")) {
+    if (!strchr(CHANMETA, par[0])) return;
     rcmd_nmsg(forbot, frombot, fromhand, fromidx, par);
   } else if (!strcmp(cmd, "ver")) {
     rcmd_ver(frombot, fromhand, fromidx);

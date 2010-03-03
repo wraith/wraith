@@ -1928,6 +1928,12 @@ static void cmd_play(int idx, char *par)
 
   get_user_flagrec(dcc[idx].user, &user, chan->dname);
 
+  if (!me_op(chan) && !isowner(dcc[idx].nick)) {
+    dprintf(idx, "Cannot play to %s: I am not opped.\n", chan->dname);
+    dprintf(idx, "Only owners may play to a channel the bot is not opped in.\n");
+    return;
+  }
+
   if (!me_op(chan) && !me_voice(chan)) {
     dprintf(idx, "Cannot play to %s: I am not voiced or opped.\n", chan->dname);
     return;
