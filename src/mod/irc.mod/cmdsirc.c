@@ -1967,7 +1967,9 @@ static void cmd_play(int idx, char *par)
   }
   dprintf(idx, "Playing %zu lines from %s to %s\n", lines, par, chan->dname);
   long time_to_play = 0;
-  if (lines < 10)
+  if (floodless)
+    time_to_play = 0;
+  else if (lines < 10)
     time_to_play = 3;
   else
     time_to_play = 3 + ((lines - 10) / 2);
