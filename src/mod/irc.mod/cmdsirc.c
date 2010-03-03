@@ -699,10 +699,10 @@ static void cmd_mmode(int idx, char *par)
   for (m = chan->channel.member; m; m = m->next) {
     if (m->user) {
       if ((m->flags & CHANOP) && m->user->bot &&
-          (!match_my_nick(m->nick)) && (nextbot(m->user->handle) >= 0)) {
+          (!m->is_me) && (nextbot(m->user->handle) >= 0)) {
         chanbots[chanbotcount++] = m;
         continue;
-      } else if (match_my_nick(m->nick))
+      } else if (m->is_me)
         continue;
 
       get_user_flagrec(m->user, &user, chan->dname);
@@ -1585,7 +1585,7 @@ static void cmd_channel(int idx, char *par)
 			maxnicklen, maxhandlen);
 	dprintf(idx, format, chanflag[0],chanflag[1], m->nick, handle, s, atrflag,
 		now - (m->split));
-      } else if (!rfc_casecmp(m->nick, botname)) {
+      } else if (m->is_me) {
         simple_snprintf(format, sizeof format, 
 			"%%c%%c%%-%zus %%-%zus %%s %%c     <- it's me!\n", 
 			maxnicklen, maxhandlen);

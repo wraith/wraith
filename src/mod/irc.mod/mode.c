@@ -538,7 +538,7 @@ static void
 got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
 {
   bool check_chan = 0;
-  bool me_opped = match_my_nick(mv->nick);
+  bool me_opped = mv->is_me;
   bool meop = me_op(chan);
 
   /* Did *I* just get opped? */
@@ -645,8 +645,8 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
   if (me_op(chan)) {
     /* do we want to reop victim? */
     if ((reversing) && 
-        ((m && !match_my_nick(m->nick) && rfc_casecmp(mv->nick, m->nick)) || (!m)) && 
-        !match_my_nick(mv->nick) &&
+        ((m && !m->is_me && rfc_casecmp(mv->nick, m->nick)) || (!m)) &&
+        !mv->is_me &&
         (chk_op(victim, chan) || !chan_bitch(chan)))
       /* Then we'll bless the victim */
       do_op(mv->nick, chan, 0, 0);
@@ -666,7 +666,7 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
 //    mv->flags |= STOPWHO;
 //  }
   /* Was the bot deopped? */
-  if (match_my_nick(mv->nick)) {
+  if (mv->is_me) {
     /* Cancel any pending kicks and modes */
     memberlist *m2 = NULL;
 
@@ -707,7 +707,7 @@ got_ban(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
     return;
   }
 
-  if (m && !match_my_nick(m->nick)) {
+  if (m && !m->is_me) {
     if (channel_nouserbans(chan) && !glob_bot(user)) {
       add_mode(chan, '-', 'b', mask);
       return;
@@ -749,7 +749,7 @@ got_ban(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
         }
       }
     }
-    kick_all(chan, mask, resn[0] ? (const char *) resn : r_banned(chan), match_my_nick(m->nick) ? 0 : 1);
+    kick_all(chan, mask, resn[0] ? (const char *) resn : r_banned(chan), m->is_me ? 0 : 1);
   }
   if (!m && (bounce_bans || bounce_modes) &&
       (!u_equals_mask(global_bans, mask) || !u_equals_mask(chan->bans, mask)))
@@ -804,7 +804,7 @@ got_exempt(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
   if (channel_pending(chan))
     return;
 
-  if (m && !match_my_nick(m->nick)) {   /* It's not my exemption */
+  if (m && !m->is_me) {   /* It's not my exemption */
     if (channel_nouserexempts(chan) && !glob_bot(user) && !glob_master(user) && !chan_master(user)) {
       /* No exempts made by users */
       add_mode(chan, '-', 'e', mask);
@@ -880,7 +880,7 @@ got_invite(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
   if (channel_pending(chan))
     return;
 
-  if (m && !match_my_nick(m->nick)) {   /* It's not my invitation */
+  if (m && !m->is_me) {   /* It's not my invitation */
     if (channel_nouserinvites(chan) && !glob_bot(user) && !glob_master(user) && !chan_master(user)) {
       /* No exempts made by users */
       add_mode(chan, '-', 'I', mask);
@@ -1152,7 +1152,7 @@ gotmode(char *from, char *msg)
 
             if (unlikely(failure)) { /* One of the hashes failed! */
               /* Did *I* do this heinous act? */
-              if (match_my_nick(m->nick)) {
+              if (m->is_me) {
                 detected(DETECT_HIJACK, "Possible Hijack: bad cookie");
               }
               if (randint(7) == 0) {

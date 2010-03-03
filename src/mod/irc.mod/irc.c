@@ -1410,7 +1410,7 @@ check_lonely_channel(struct chanset_t *chan)
     for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
       simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
       u = get_user_by_host(s);
-      if (!match_my_nick(m->nick) && (!u || !u->bot)) {
+      if (!m->is_me && (!u || !u->bot)) {
         ok = 0;
         break;
       }
@@ -1419,7 +1419,7 @@ check_lonely_channel(struct chanset_t *chan)
       /* ALL bots!  make them LEAVE!!! */
 /*
       for (m = chan->channel.member; m && m->nick[0]; m = m->next)
-	if (!match_my_nick(m->nick))
+	if (!m->is_me)
 	  dprintf(DP_SERVER, "PRIVMSG %s :go %s\n", m->nick, chan->dname);
 */
     } else {
@@ -1443,7 +1443,7 @@ static void
 check_servers(struct chanset_t *chan)
 {
   for (memberlist *m = chan->channel.member; m && m->nick[0]; m = m->next) {
-    if (!match_my_nick(m->nick) && chan_hasop(m) && (m->hops == -1)) {
+    if (!m->is_me && chan_hasop(m) && (m->hops == -1)) {
       putlog(LOG_DEBUG, "*", "Updating WHO for '%s' because '%s' is missing data.", chan->dname, m->nick);
       send_chan_who(DP_HELP, chan);
       break;                    /* lets just do one chan at a time to save from flooding */

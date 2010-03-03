@@ -394,7 +394,7 @@ static void priority_do(struct chanset_t * chan, bool opsonly, int action, bool 
 
     if (m->user && m->user->bot && (m->user->flags & USER_OP)) {
       ++ops;
-      if (match_my_nick(m->nick))
+      if (m->is_me)
         bpos = (ops - 1);
 
     } else if (!opsonly || chan_hasop(m)) {
@@ -478,7 +478,7 @@ static int target_priority(struct chanset_t * chan, memberlist *target, int opso
   for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
     if (m->user && ((m->user->flags & (USER_BOT | USER_OP)) == (USER_BOT | USER_OP))) {
       ops++;
-      if (match_my_nick(m->nick))
+      if (m->is_me)
         bpos = ops;
     } else if (!opsonly || chan_hasop(m)) {
       struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
@@ -699,7 +699,7 @@ static bool detect_chan_flood(char *floodnick, char *floodhost, char *from,
 	    simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
 	    if (!chan_sentkick(m) && wild_match(h, s) &&
 		(m->joined >= chan->floodtime[which]) &&
-		!match_my_nick(m->nick) && me_op(chan)) {
+		!m->is_me && me_op(chan)) {
 	      m->flags |= SENTKICK;
 	      if (which == FLOOD_JOIN)
    	        dprintf(DP_SERVER, "KICK %s %s :%sjoin flood\n", chan->name, m->nick, kickprefix);
@@ -795,7 +795,7 @@ static void kick_all(struct chanset_t *chan, char *hostmask, const char *comment
     if ((wild_match(hostmask, s) || match_cidr(hostmask, s) ||
           (sip[0] && (wild_match(hostmask, sip) || match_cidr(hostmask, sip)))) &&
         !chan_sentkick(m) &&
-	!match_my_nick(m->nick) && !chan_issplit(m) &&
+	!m->is_me && !chan_issplit(m) &&
 	!(use_exempts &&
 	  ((bantype && (isexempted(chan, s) || (chan->ircnet_status & CHAN_ASKED_EXEMPTS))) ||
 	   (u_match_mask(global_exempts, s) ||
@@ -1354,7 +1354,7 @@ do_take(struct chanset_t *chan)
 
   /* Make lists of who needs to be opped, and who needs to be deopped */
   for (memberlist *m = chan->channel.member; m && m->nick[0]; m = m->next) {
-    if (rfc_casecmp(m->nick, botname)) {
+    if (!m->is_me) {
       register const bool isbot = m->user && m->user->bot ? 1 : 0;
 
       /* Avoid countless unneeded operations from strcat/strlen */
@@ -1500,7 +1500,7 @@ void recheck_channel(struct chanset_t *chan, int dobans)
       member_getuser(m);
       get_user_flagrec(m->user, &fr, chan->dname, chan);
       //Already a bot opped, dont bother resetting masks
-      if (glob_bot(fr) && chan_hasop(m) && !match_my_nick(m->nick))
+      if (glob_bot(fr) && chan_hasop(m) && !m->is_me)
         stop_reset = 1;
       check_this_member(chan, m->nick, &fr);
     }

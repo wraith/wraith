@@ -948,7 +948,7 @@ bool expired_mask(struct chanset_t *chan, char *who)
 	break;
       }
 
-  if (!m || !chan_hasop(m) || !rfc_casecmp(m->nick, botname))
+  if (!m || !chan_hasop(m) || m->is_me)
     return 1;
 
   /* At this point we know the person/bot who set the mask is currently
