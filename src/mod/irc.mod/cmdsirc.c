@@ -1994,7 +1994,7 @@ static cmd_t irc_dcc[] =
 #endif /* CACHE */
   {"kick",		"o|o",	 (Function) cmd_kick,		NULL, LEAF|AUTH},
   {"kickban",		"o|o",	 (Function) cmd_kickban,	NULL, LEAF|AUTH},
-  {"mmode",             "n|n",	 (Function) cmd_mmode,		NULL, LEAF},
+  {"mmode",             "n|n",	 (Function) cmd_mmode,		NULL, LEAF|AUTH},
   {"mop",		"n|m",	 (Function) cmd_mop,		NULL, LEAF|AUTH},
   {"msg",		"o",	 (Function) cmd_msg,		NULL, LEAF|AUTH},
   {"nick",		"m",	 (Function) cmd_nick,		NULL, LEAF},

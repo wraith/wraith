@@ -164,7 +164,7 @@ static void cmd_clearqueue(int idx, char *par)
  */
 static cmd_t C_dcc_serv[] =
 {
-  {"clearqueue",	"m",	(Function) cmd_clearqueue,	NULL, LEAF},
+  {"clearqueue",	"m",	(Function) cmd_clearqueue,	NULL, LEAF|AUTH},
   {"dump",		"a",	(Function) cmd_dump,		NULL, LEAF},
   {"jump",		"m",	(Function) cmd_jump,		NULL, LEAF},
   {"servers",		"m",	(Function) cmd_servers,		NULL, LEAF},
