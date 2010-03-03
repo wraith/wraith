@@ -185,7 +185,7 @@ sdprintf(STR("GETIDX: auth: %s, idx: %d"), nick, idx);
       idx = -1;
     else {
       sdprintf(STR("FIRST FOUND: %d"), idx);
-      strlcpy(dcc[idx].simulbot, chname ? chname : nick, sizeof(dcc[idx].simulbot));
+      strlcpy(dcc[idx].simulbot, nick, sizeof(dcc[idx].simulbot));
       strlcpy(dcc[idx].u.chat->con_chan, chname ? chname : "*", sizeof(dcc[idx].u.chat->con_chan));
       return 1;
     }
@@ -200,7 +200,7 @@ sdprintf(STR("GETIDX: auth: %s, idx: %d"), nick, idx);
       putlog(LOG_DEBUG, "*", STR("Simul found old idx for %s/%s: (%s!%s)"), nick, chname, nick, host);
       dcc[i].simultime = now;
       idx = i;
-      strlcpy(dcc[idx].simulbot, chname ? chname : nick, sizeof(dcc[idx].simulbot));
+      strlcpy(dcc[idx].simulbot, nick, sizeof(dcc[idx].simulbot));
       strlcpy(dcc[idx].u.chat->con_chan, chname ? chname : "*", sizeof(dcc[idx].u.chat->con_chan));
 
       return 1;
@@ -217,7 +217,7 @@ sdprintf(STR("GETIDX: auth: %s, idx: %d"), nick, idx);
     dcc[idx].simul = 0;		/* not -1, so it's cleaned up later */
     dcc[idx].status = STAT_COLOR;
     dcc[idx].u.chat->con_flags = 0;
-    strlcpy(dcc[idx].simulbot, chname ? chname : nick, sizeof(dcc[idx].simulbot));
+    strlcpy(dcc[idx].simulbot, nick, sizeof(dcc[idx].simulbot));
     strlcpy(dcc[idx].u.chat->con_chan, chname ? chname : "*", sizeof(dcc[idx].u.chat->con_chan));
     dcc[idx].u.chat->strip_flags = STRIP_ALL;
     strlcpy(dcc[idx].nick, handle, sizeof(dcc[idx].nick));
