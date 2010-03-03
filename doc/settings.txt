@@ -19,11 +19,9 @@ irc.eversible.com
 irc.he.net
 irc.mzima.net
 irc.paraphysics.net
-irc.serious.biz
 irc.servercentral.net
 irc.shoutcast.com
 irc.umich.edu
-irc.umn.edu
 irc.wh.verio.net
 irc2.choopa.net
 #EU
@@ -38,8 +36,6 @@ irc.efnet.nl
 irc.efnet.pl
 irc.homelien.no
 irc.inet.tele.dk
-irc.inter.net.il
-irc.swepipe.se
 #CA
 irc.arcti.ca
 irc.choopa.ca
@@ -55,7 +51,6 @@ irc.efnet.ch
 irc.efnet.nl
 irc.ipv6.he.net
 irc.ipv6.homelien.no
-irc.ipv6.inter.net.il
 irc.paraphysics.net
 
 :rbl
