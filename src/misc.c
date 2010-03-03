@@ -671,6 +671,10 @@ readsocks(const char *fname)
       old_buildts = strtol(str.c_str(), NULL, 10);
     else if (type == STR("+botname"))
       nick = str.dup();
+    else if (type == STR("+rolls"))
+      rolls = atoi(str.c_str());
+    else if (type == STR("+altnick_char"))
+      altnick_char = str[0];
     else if (type == STR("+ip4"))
       ip4 = str.dup();
     else if (type == STR("+ip6"))
@@ -769,6 +773,10 @@ restart(int idx)
   if (server_online) {
     if (botname[0])
       stream << buf.printf(STR("+botname %s\n"), botname);
+    if (rolls)
+      stream << buf.printf(STR("+rolls %d\n"), rolls);
+    if (altnick_char)
+      stream << buf.printf(STR("+altnick_char %c\n"), altnick_char);
     stream << buf.printf(STR("+server_online %li\n"), server_online);
   }
   stream << buf.printf(STR("+online_since %li\n"), online_since);

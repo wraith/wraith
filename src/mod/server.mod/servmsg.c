@@ -190,7 +190,6 @@ void rehash_monitor_list() {
 
 void rehash_server(const char *servname, const char *nick)
 {
-  altnick_char = 0;
   strlcpy(cursrvname, servname, sizeof(cursrvname));
   if (servidx >= 0)
     curservport = dcc[servidx].port;
@@ -916,7 +915,7 @@ static void nick_available(bool is_jupe, bool is_orig) {
     /* Ensure we aren't processing a QUIT/NICK and a MONITOR, or just some screw up */
     if (!tried_jupenick || ((now - tried_jupenick) > 2)) {
       tried_jupenick = now;
-      dprintf(DP_DUMP, "NICK %s\n", jupenick);
+      dprintf(DP_MODE_NEXT, "NICK %s\n", jupenick);
       if (!jnick_juped)
         putlog(LOG_MISC, "*", "Switching back to jupenick '%s'", jupenick);
     }
@@ -925,7 +924,7 @@ static void nick_available(bool is_jupe, bool is_orig) {
     if (!tried_nick || ((now - tried_nick) > 2)) {
       altnick_char = rolls = 0;
       tried_nick = now;
-      dprintf(DP_DUMP, "NICK %s\n", origbotname);
+      dprintf(DP_MODE_NEXT, "NICK %s\n", origbotname);
       if (!nick_juped)
         putlog(LOG_MISC, "*", "Switching back to nick '%s'", origbotname);
     }
@@ -1915,8 +1914,7 @@ static void connect_server(void)
     jnick_juped = 0;
     tried_jupenick = 0;
     tried_nick = 0;
-    rolls = 0;
-    altnick_char = 0;
+    altnick_char = rolls = 0;
     use_monitor = 0;
     include_lk = 1;
 
@@ -2014,7 +2012,7 @@ static void server_dns_callback(int id, void *client_data, const char *host, bd:
     else
       strlcpy(botname, origbotname, sizeof(botname));
     /* Start alternate nicks from the beginning */
-    altnick_char = 0;
+    altnick_char = rolls = 0;
     /* reset counter so first ctcp is dumped for tcms */
     first_ctcp_check = 0;
 
