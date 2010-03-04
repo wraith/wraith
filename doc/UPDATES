@@ -96,6 +96,7 @@
   * Removed 'set chanset' as it has been replaced by 'chanset default'
   * Add new channel setting 'ban-type' which support mIRC style ban types (adapted from recent eggdrop patch)
   * EFnet server list updates (To update yours: .set -YES servers - | .set -YES servers6 -)
+  * Default alias updates (To update yours: .set -YES alias - ) 'cq' added as an alias to 'clearqueue play' to stop .play
   * EFnet's CSIRCD servers have been removed as they have proven to be highly incompatible with Ratbox features. (irc.nac.net/irc.efnet.no)
   * Give localhubs credit for adding their child bots in 'whois'.
   * Ident lookup timeout is now 5 seconds (will speed up linking / partyline connecting)

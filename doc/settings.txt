@@ -4,6 +4,7 @@ bl botcmd ?
 bm botmsg
 bs botset 
 op botcmd ? op
+cq clearqueue play
 +list set +
 -list set -
 list set list
