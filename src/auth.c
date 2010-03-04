@@ -260,7 +260,7 @@ void makehash(struct userrec *u, const char *randstring, char *out, size_t out_s
   OPENSSL_cleanse(hash, sizeof(hash));
 }
 
-void check_auth_dcc(Auth *auth, const char *cmd, const char *par)
+int check_auth_dcc(Auth *auth, const char *cmd, const char *par)
 {
-  real_check_bind_dcc(cmd, auth->idx, par, auth);
+  return real_check_bind_dcc(cmd, auth->idx, par, auth);
 }
