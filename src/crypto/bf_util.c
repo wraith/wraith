@@ -91,6 +91,9 @@ bd::String egg_bf_encrypt(bd::String in, const bd::String& key)
  */
 bd::String egg_bf_decrypt(bd::String in, const bd::String& key)
 {
+  // Skip over '+OK '
+  if (in(0, 4) == "+OK ")
+    in += 4;
   bd::String out(size_t(in.length() * .9));
   // Too small to process
   if (in.size() < 12) return out;
