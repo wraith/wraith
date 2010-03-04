@@ -39,6 +39,7 @@
 #include "users.h"
 #include "misc.h"
 #include "main.h"
+#include "chanprog.h"
 
 #include <ctype.h>
 #include <stdarg.h>
@@ -342,7 +343,7 @@ irc_log(struct chanset_t *chan, const char *format, ...)
   egg_vsnprintf(va_out, sizeof(va_out), format, va);
   va_end(va);
 
-  if ((chan && strcasecmp(chan->dname, "#...")) || !chan) {
+  if ((chan && strcasecmp(chan->dname, relay_chan)) || !chan) {
     bd::String msg;
     msg.printf("[%s] %s", chan ? chan->dname : "*" , va_out);
     privmsg(relay_chan, msg.c_str(), DP_HELP);
