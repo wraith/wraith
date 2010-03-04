@@ -1,5 +1,3 @@
-* More Auth commands are now available. Auth up and run +help to see them all.
-
 1.3 - http://wraith.botpack.net/milestone/1.3
 * Binary / shell / startup changes
   * Binary error messages are no longer obscure numbers or fake segfaults. (Compile with OBSCURE_ERRORS to re-enable)
@@ -129,6 +127,7 @@
   * Add cmd_play for playing files to irc. (ASCII art gallery exhibition)
   * Utilize CPRIVMSG/CNOTICE if available.
   * Chain WHO requests to try avoiding Max SendQ
+  * More Auth channel commands are now available. Auth up and run +help to see them all.
 
 1.2.16.1
 * Fix linux compile errors
