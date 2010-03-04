@@ -1774,5 +1774,4 @@ irc_init()
   add_builtins("bot", irc_bot);
   add_builtins("raw", irc_raw);
   add_builtins("msg", C_msg);
-  add_builtins("msgc", C_msgc);
 }
