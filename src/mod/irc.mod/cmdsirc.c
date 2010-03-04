@@ -26,13 +26,19 @@
 
 #include <bdlib/src/Stream.h>
 #include <bdlib/src/String.h>
+#include <algorithm>
 #include "src/misc_file.h"
 
 /* Do we have any flags that will allow us ops on a channel?
  */
-static struct chanset_t *get_channel(int idx, char *chname, bool check_console = 1)
+static struct chanset_t *get_channel(int idx, char *chname, bool check_console = 1, bool* all = NULL)
 {
   struct chanset_t *chan = NULL;
+
+  if (all && ((chname && chname[0] && !strcmp(chname, "*")) || (check_console && !(chname && chname[0]) && !strcmp(dcc[idx].u.chat->con_chan, "*")))) {
+    *all = 1;
+    return NULL;
+  }
 
   if (chname && chname[0]) {
     chan = findchan_by_dname(chname);
@@ -72,15 +78,12 @@ static int has_op(int idx, struct chanset_t *chan)
  */
 char *getnick(const char *handle, struct chanset_t *chan)
 {
-  struct userrec *u = NULL;
-  char s[UHOSTLEN] = "";
-
   for (register memberlist *m = chan->channel.member; m && m->nick[0]; m = m->next) {
-    simple_snprintf(s, sizeof s, "%s!%s", m->nick, m->userhost);
-    if ((u = get_user_by_host(s)) && !strcasecmp(u->handle, handle))
+    member_getuser(m);
+    if (m->user && !strcasecmp(m->user->handle, handle))
       return m->nick;
   }
-  return NULL;
+  return "";
 }
 
 static void cmd_act(int idx, char *par)
@@ -219,23 +222,16 @@ static void cmd_kickban(int idx, char *par)
     return;
   }
 
-  struct chanset_t *chan = NULL;
   char *chname = NULL;
   bool all = 0;
 
-  if (par[0] == '*' && par[1] == ' ') {
-    all = 1;
-    newsplit(&par);
-  } else {
-    if (strchr(CHANMETA, par[0]) != NULL)
-      chname = newsplit(&par);
-    else
-      chname = 0;
-    chan = get_channel(idx, chname);
-    if (!chan || !has_op(idx, chan))
-      return;
-  }
-
+  if (strchr(CHANMETA, par[0]))
+    chname = newsplit(&par);
+  else
+    chname = NULL;
+  struct chanset_t* chan = get_channel(idx, chname, 1, &all);
+  if (!all && !chan)
+    return;
 
   putlog(LOG_CMDS, "*", "#%s# (%s) kickban %s", dcc[idx].nick, all ? "*" : chan->dname, par);
 
@@ -346,18 +342,14 @@ static void cmd_kickban(int idx, char *par)
 
 static void cmd_voice(int idx, char *par)
 {
-  char *nick = newsplit(&par);
-  struct chanset_t *chan = NULL;
+  char *nick = newsplit(&par), *chname = newsplit(&par);
+  if (strchr(CHANMETA, nick[0]) || (!chname[0] && !strcmp(nick, "*")))
+    std::swap(nick, chname);
   bool all = 0;
 
-  if (par[0] == '*' && !par[1]) {
-    all = 1;
-    newsplit(&par);
-  } else {
-    chan = get_channel(idx, par);
-    if (!chan || !has_op(idx, chan))
-      return;
-  }
+  struct chanset_t* chan = get_channel(idx, chname, 1, &all);
+  if (!all && !chan)
+    return;
 
   memberlist *m = NULL;
 
@@ -365,7 +357,7 @@ static void cmd_voice(int idx, char *par)
     chan = chanset;
   putlog(LOG_CMDS, "*", "#%s# (%s) voice %s", dcc[idx].nick, all ? "*" : chan->dname , nick);
   while (chan) {
-    if (!nick[0] && !(nick = getnick(dcc[idx].nick, chan))) {
+    if (!nick[0] && !(nick = getnick(dcc[idx].nick, chan))[0]) {
       if (all) goto next;
       dprintf(idx, "Usage: voice <nick> [channel|*]\n");
       return;
@@ -414,18 +406,14 @@ static void cmd_voice(int idx, char *par)
 
 static void cmd_devoice(int idx, char *par)
 {
-  struct chanset_t *chan = NULL;
-  char *nick = newsplit(&par);
+  char *nick = newsplit(&par), *chname = newsplit(&par);
+  if (strchr(CHANMETA, nick[0]) || (!chname[0] && !strcmp(nick, "*")))
+    std::swap(nick, chname);
   bool all = 0;
 
-  if (par[0] == '*' && !par[1]) {
-    all = 1;
-    newsplit(&par);
-  } else {
-    chan = get_channel(idx, par);
-    if (!chan || !has_op(idx, chan))
-      return;
-  }
+  struct chanset_t* chan = get_channel(idx, chname, 1, &all);
+  if (!all && !chan)
+    return;
 
   memberlist *m = NULL;
 
@@ -433,7 +421,7 @@ static void cmd_devoice(int idx, char *par)
     chan = chanset;
   putlog(LOG_CMDS, "*", "#%s# (%s) devoice %s", dcc[idx].nick, all ? "*" : chan->dname, nick);
   while (chan) {
-  if (!nick[0] && !(nick = getnick(dcc[idx].nick, chan))) {
+  if (!nick[0] && !(nick = getnick(dcc[idx].nick, chan))[0]) {
     if (all) goto next;
     dprintf(idx, "Usage: devoice <nick> [channel|*]\n");
     return;
@@ -487,18 +475,14 @@ static void cmd_release(int idx, char *par) {
 
 static void cmd_op(int idx, char *par)
 {
-  struct chanset_t *chan = NULL;
-  char *nick = newsplit(&par);
+  char *nick = newsplit(&par), *chname = newsplit(&par);
+  if (strchr(CHANMETA, nick[0]) || (!chname[0] && !strcmp(nick, "*")))
+    std::swap(nick, chname);
   bool all = 0;
 
-  if (par[0] == '*' && !par[1]) {
-    all = 1;
-    newsplit(&par);
-  } else {
-    chan = get_channel(idx, par);
-    if (!chan || !has_op(idx, chan))
-      return;
-  }
+  struct chanset_t* chan = get_channel(idx, chname, 1, &all);
+  if (!all && !chan)
+    return;
 
   char s[UHOSTLEN] = "";
   memberlist *m = NULL;
@@ -510,7 +494,7 @@ static void cmd_op(int idx, char *par)
 
   while (chan) {
   get_user_flagrec(dcc[idx].user, &user, chan->dname);
-  if (!nick[0] && !(nick = getnick(dcc[idx].nick, chan))) {
+  if (!nick[0] && !(nick = getnick(dcc[idx].nick, chan))[0]) {
     if (all) goto next;
     dprintf(idx, "Usage: op <nick> [channel|*]\n");
     return;
@@ -977,18 +961,14 @@ static void cmd_mmode(int idx, char *par)
 
 static void cmd_deop(int idx, char *par)
 {
-  struct chanset_t *chan = NULL;
-  char *nick = newsplit(&par);
+  char *nick = newsplit(&par), *chname = newsplit(&par);
+  if (strchr(CHANMETA, nick[0]) || (!chname[0] && !strcmp(nick, "*")))
+    std::swap(nick, chname);
   bool all = 0;
 
-  if (par[0] == '*' && !par[1]) {
-    all = 1;
-    newsplit(&par);
-  } else {
-    chan = get_channel(idx, par);
-    if (!chan || !has_op(idx, chan))
-      return;
-  }
+  struct chanset_t* chan = get_channel(idx, chname, 1, &all);
+  if (!all && !chan)
+    return;
 
   char s[UHOSTLEN] = "";
   memberlist *m = NULL;
@@ -1000,7 +980,7 @@ static void cmd_deop(int idx, char *par)
 
   while (chan) {
     get_user_flagrec(dcc[idx].user, &user, chan->dname);
-    if (!nick[0] && !(nick = getnick(dcc[idx].nick, chan))) {
+    if (!nick[0] && !(nick = getnick(dcc[idx].nick, chan))[0]) {
       if (all) goto next;  
       dprintf(idx, "Usage: deop <nick> [channel|*]\n");
       return;
@@ -1068,22 +1048,16 @@ static void cmd_kick(int idx, char *par)
     return;
   }
 
-  struct chanset_t *chan = NULL;
   char *chname = NULL;
   bool all = 0;
 
-  if (par[0] == '*' && par[1] == ' ') {
-    all = 1;
-    newsplit(&par);
-  } else {
-    if (strchr(CHANMETA, par[0]) != NULL)
-      chname = newsplit(&par);
-    else
-      chname = 0;
-    chan = get_channel(idx, chname);
-    if (!chan || !has_op(idx, chan))
-      return;
-  }
+  if (strchr(CHANMETA, par[0]))
+    chname = newsplit(&par);
+  else
+    chname = NULL;
+  struct chanset_t* chan = get_channel(idx, chname, 1, &all);
+  if (!all && !chan)
+    return;
 
   putlog(LOG_CMDS, "*", "#%s# (%s) kick %s", dcc[idx].nick, all ? "*" : chan->dname, par);
 
@@ -1374,22 +1348,17 @@ static void cmd_find(int idx, char *par)
 
 static void do_invite(int idx, char *par, bool op)
 {
-  struct chanset_t *chan = NULL;
-  memberlist *m = NULL;
+  char *nick = newsplit(&par), *chname = newsplit(&par);
+  if (strchr(CHANMETA, nick[0]) || (!chname[0] && !strcmp(nick, "*")))
+    std::swap(nick, chname);
   bool all = 0;
-  char *nick = NULL;
 
-  if (!par[0])
-    par = dcc[idx].nick;
-  nick = newsplit(&par);
-  if (par[0] == '*' && !par[1]) {
-    all = 1;
-    newsplit(&par);
-  } else {
-    chan = get_channel(idx, par);
-    if (!chan || !has_op(idx, chan))
-      return;
-  }
+  struct chanset_t* chan = get_channel(idx, chname, 1, &all);
+  if (!all && !chan)
+    return;
+
+  memberlist *m = NULL;
+
   if (all)
     chan = chanset;
 

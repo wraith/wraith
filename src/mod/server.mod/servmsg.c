@@ -1550,7 +1550,7 @@ hide_chans(const char *nick, struct userrec *u, char *_channels, bool publicOnly
     if (!chan || 
         
         (!publicOnly && (
-          getnick(u->handle, chan) || 
+          getnick(u->handle, chan)[0] ||
           !(channel_hidden(chan)) || 
           chk_op(fr, chan)
         )) ||
