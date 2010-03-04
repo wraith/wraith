@@ -167,12 +167,12 @@ bool check_aliases(int idx, const char *cmd, const char *args)
   return found;
 }
 
-void check_bind_dcc(const char *cmd, int idx, const char *text)
+int check_bind_dcc(const char *cmd, int idx, const char *text)
 {
-  real_check_bind_dcc(cmd, idx, text, NULL);
+  return real_check_bind_dcc(cmd, idx, text, NULL);
 }
 
-void real_check_bind_dcc(const char *cmd, int idx, const char *text, Auth *auth)
+int real_check_bind_dcc(const char *cmd, int idx, const char *text, Auth *auth)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
   bind_entry_t *entry = NULL;
@@ -218,13 +218,13 @@ void real_check_bind_dcc(const char *cmd, int idx, const char *text, Auth *auth)
               putlog(LOG_CMDS, "*", "$ #%s# %s **hidden** %s", dcc[idx].nick, entry->mask, p && *p ? p : "");
               putlog(LOG_MISC, "*", "%s attempted %s%s with missing or incorrect command password", dcc[idx].nick, settings.dcc_prefix, entry->mask);
               free(args);
-              return;
+              return 0;
             }
           } else {
             putlog(LOG_CMDS, "*", "! #%s# %s %s", dcc[idx].nick, cmd, args);
             dprintf(idx, "What?  You need '%shelp'\n", (dcc[idx].u.chat->channel >= 0) ? settings.dcc_prefix : "");
             free(args);
-            return;
+            return 0;
           }
         }
         break;
@@ -234,13 +234,13 @@ void real_check_bind_dcc(const char *cmd, int idx, const char *text, Auth *auth)
 
   if (entry && auth) {
     if (!(entry->cflags & AUTH))
-      return;
+      return 0;
   }
 
   hits = 0;
   bool log_bad = 0;
 
-  check_bind_hits(BT_dcc, cmd, &fr, &hits, idx, args);
+  int ret = check_bind_hits(BT_dcc, cmd, &fr, &hits, idx, args);
 
   if (hits != 1)
     log_bad = 1;
@@ -258,6 +258,7 @@ void real_check_bind_dcc(const char *cmd, int idx, const char *text, Auth *auth)
     putlog(LOG_CMDS, "*", "! #%s# %s %s", dcc[idx].nick, cmd, args);
 
   free(args);
+  return ret;
 }
 
 void check_bind_bot(const char *nick, const char *code, const char *param)

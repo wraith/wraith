@@ -52,6 +52,6 @@ class Auth {
 
 void makehash(struct userrec *u, const char *randstring, char *out, size_t out_size);
 
-void check_auth_dcc(Auth *, const char *, const char *);
+int check_auth_dcc(Auth *, const char *, const char *);
 
 #endif /* !_AUTH_H */

@@ -23,6 +23,7 @@ typedef struct {
 typedef struct {
         const char *name;
         struct flag_record     flags;
+        int type;
 } mycmds;
 
 typedef struct {

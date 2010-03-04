@@ -154,7 +154,7 @@ enum {		/* TAKE A GUESS */
 #define AUTH_CHAN	BIT3
 #define AUTH_MSG	BIT4
 #define AUTH_NOT	BIT5
-#define AUTH_ALL	AUTH|AUTH_CHAN|AUTH_MSG|AUTH_NOT
+#define AUTH_ALL	(AUTH|AUTH_CHAN|AUTH_MSG|AUTH_NOT)
 #define have_cmd(name, flags) ((!is_restricted_cmd(name)) && (!(flags & (HUB|LEAF)) || (flags & HUB && conf.bot->hub) || (flags & LEAF && !conf.bot->hub)))
 
 

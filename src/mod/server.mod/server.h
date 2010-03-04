@@ -45,7 +45,7 @@ enum {
 	NETT_HYBRID_EFNET	= 4	/* new +e/+I Efnet hybrid.	  */
 };
 
-extern bind_table_t	*BT_ctcp, *BT_ctcr, *BT_msgc;
+extern bind_table_t	*BT_ctcp, *BT_ctcr;
 extern size_t		nick_len;
 extern bool		trigger_on_ignore, floodless, keepnick, in_deaf, in_callerid, have_cprivmsg, have_cnotice;
 extern int 		servidx, ctcp_mode, answer_ctcp, serv, curserv, default_alines;

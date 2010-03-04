@@ -672,6 +672,9 @@ static void cmd_help(int idx, char *par)
     for (n = 0; n < cmdi; n++) { /* loop each command */
       if (!flagrec_ok(&cmdlist[n].flags, &fr) || !wild_match(match, (char *) cmdlist[n].name))
         continue;
+      // Auth?
+      if (!(!dcc[idx].irc || (dcc[idx].irc && (cmdlist[n].type & AUTH_ALL))))
+        continue;
       fnd++;
       if (nowild) {
         flg[0] = 0;

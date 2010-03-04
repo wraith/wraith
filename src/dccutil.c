@@ -344,7 +344,10 @@ dprintf_real(int idx, char* buf, size_t len, size_t bufsiz)
 
 //      simple_snprintf(ircbuf, size, "PRIVMSG %s :%s", dcc[idx].simulbot, buf);
 //      tputs(dcc[idx].sock, ircbuf, strlen(ircbuf));
-      privmsg(dcc[idx].simulbot, buf, DP_HELP);
+      if (!strcmp(dcc[idx].u.chat->con_chan, "*"))
+        privmsg(dcc[idx].simulbot, buf, DP_HELP);
+      else
+        notice(dcc[idx].simulbot, buf, DP_HELP);
 //      free(ircbuf);
     } else {
       if (dcc[idx].type && ((long) (dcc[idx].type->output) == 1)) {

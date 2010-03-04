@@ -123,7 +123,7 @@ static bool replaying_cache = 0;
 
 /* New bind tables. */
 static bind_table_t *BT_raw = NULL, *BT_msg = NULL;
-bind_table_t *BT_ctcr = NULL, *BT_ctcp = NULL, *BT_msgc = NULL;
+bind_table_t *BT_ctcr = NULL, *BT_ctcp = NULL;
 // Ratbox is (5*8):30, ircd-seven is (5*8):20, try to not push th elimits.
 #define SERVER_CONNECT_BURST_TIME 18
 #define SERVER_CONNECT_BURST_RATE 5 * 7
@@ -1166,7 +1166,6 @@ void server_init()
    * globally.
    */
 
-  BT_msgc = bind_table_add("msgc", 3, "Ass", MATCH_FLAGS, 0); // Auth, chname, par
   BT_msg = bind_table_add("msg", 4, "ssUs", MATCH_FLAGS, 0);
   BT_raw = bind_table_add("raw", 2, "ss", 0, BIND_STACKABLE);
   BT_ctcr = bind_table_add("ctcr", 6, "ssUsss", 0, BIND_STACKABLE);

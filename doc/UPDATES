@@ -1,3 +1,5 @@
+* More Auth commands are now available. Auth up and run +help to see them all.
+
 1.3 - http://wraith.botpack.net/milestone/1.3
 * Binary / shell / startup changes
   * Binary error messages are no longer obscure numbers or fake segfaults. (Compile with OBSCURE_ERRORS to re-enable)
@@ -94,6 +96,7 @@
   * Removed 'set chanset' as it has been replaced by 'chanset default'
   * Add new channel setting 'ban-type' which support mIRC style ban types (adapted from recent eggdrop patch)
   * EFnet server list updates (To update yours: .set -YES servers - | .set -YES servers6 -)
+  * Default alias updates (To update yours: .set -YES alias - ) 'cq' added as an alias to 'clearqueue play' to stop .play
   * EFnet's CSIRCD servers have been removed as they have proven to be highly incompatible with Ratbox features. (irc.nac.net/irc.efnet.no)
   * Give localhubs credit for adding their child bots in 'whois'.
   * Ident lookup timeout is now 5 seconds (will speed up linking / partyline connecting)
