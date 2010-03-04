@@ -579,10 +579,6 @@ int open_telnet_raw(int sock, const char *ipIn, port_t sport, bool proxy_on, int
     socklist[i].port = port;
   }
 
-#ifndef CYGWIN_HACKS
-  // Only open identd socket if running as root or on cygwin.
-  if (!conf.uid)
-#endif
   if (identd && sport) //Only open identd if not a unix domain socket
     identd_open(myipstr(is_resolved), ipIn, identd);
 

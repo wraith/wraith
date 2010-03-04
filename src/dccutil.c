@@ -965,40 +965,46 @@ listen_all(port_t lport, bool off, bool should_v6)
 void
 identd_open(const char *sourceIp, const char *destIp, int identd)
 {
-  int idx;
-  int i = -1;
-  port_t port = 113;
+#ifndef CYGWIN_HACKS
+  // Only open identd socket if running as root or on cygwin.
+  if (!conf.uid)
+#endif
+  {
+    int idx;
+    int i = -1;
+    port_t port = 113;
 
-  for (idx = 0; idx < dcc_total; idx++)
-    if (dcc[idx].type == &DCC_IDENTD_CONNECT)
-      return;                   /* it's already open :) */
+    for (idx = 0; idx < dcc_total; idx++)
+      if (dcc[idx].type == &DCC_IDENTD_CONNECT)
+        return;                   /* it's already open :) */
 
-  idx = -1;
+    idx = -1;
 
-  identd_hack = 1;
+    identd_hack = 1;
 #ifdef USE_IPV6
-  i = open_listen_by_af(&port, AF_INET6);
+    i = open_listen_by_af(&port, AF_INET6);
 #else
-  i = open_listen(&port);
+    i = open_listen(&port);
 #endif /* USE_IPV6 */
-  identd_hack = 0;
-  if (i >= 0) {
-    idx = new_dcc(&DCC_IDENTD_CONNECT, 0);
-    if (idx >= 0) {
-      egg_timeval_t howlong;
+    identd_hack = 0;
+    if (i >= 0) {
+      idx = new_dcc(&DCC_IDENTD_CONNECT, 0);
+      if (idx >= 0) {
+        egg_timeval_t howlong;
 
-      dcc[idx].addr = iptolong(getmyip());
-      dcc[idx].port = port;
-      dcc[idx].sock = i;
-      dcc[idx].timeval = now;
-      strlcpy(dcc[idx].nick, "(identd)", sizeof(dcc[idx].nick));
-      strlcpy(dcc[idx].host, "*", sizeof(dcc[idx].host));
-      putlog(LOG_DEBUG, "*", "Identd daemon started.");
-      howlong.sec = 15;
-      howlong.usec = 0;
-      timer_create(&howlong, "identd_close()", (Function) identd_close);
-    } else
-      killsock(i);
+        dcc[idx].addr = iptolong(getmyip());
+        dcc[idx].port = port;
+        dcc[idx].sock = i;
+        dcc[idx].timeval = now;
+        strlcpy(dcc[idx].nick, "(identd)", sizeof(dcc[idx].nick));
+        strlcpy(dcc[idx].host, "*", sizeof(dcc[idx].host));
+        putlog(LOG_DEBUG, "*", "Identd daemon started.");
+        howlong.sec = 15;
+        howlong.usec = 0;
+        timer_create(&howlong, "identd_close()", (Function) identd_close);
+      } else
+        killsock(i);
+    }
   }
 
   /* Only makes sense if we're spoofing by nick */
