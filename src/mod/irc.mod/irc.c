@@ -1650,22 +1650,18 @@ irc_minutely()
 }
 
 
-int check_bind_authc(char *cmd, Auth *auth, char *chname, char *args)
+int check_bind_authc(char *cmd, Auth *a, char *chname, char *par)
 {
   struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
   int x = 0;
 
-  get_user_flagrec(auth->user, &fr, chname);
-  x = check_bind(BT_msgc, cmd, &fr, auth, chname, args);
+  get_user_flagrec(a->user, &fr, chname);
 
-
-  if (x & BIND_RET_LOG) {
-    if (chname)
-      putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %c%s %s", auth->nick, auth->host, 
-                            auth->handle, chname, auth_prefix[0], cmd, args);
-    else
-      putlog(LOG_CMDS, "*", "(%s!%s) !%s! %c%s %s", auth->nick, auth->host, auth->handle, auth_prefix[0], cmd, args);
+  if (a->GetIdx(chname)) {
+    x = check_auth_dcc(a, cmd, par);
   }
+
+  LOGC(cmd);
 
   if (x & BIND_RET_BREAK)
     return (1);
