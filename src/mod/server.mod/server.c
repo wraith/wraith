@@ -1017,7 +1017,7 @@ static void server_secondly()
         ison_cnt = 0;
       } else
         ++ison_cnt;
-    } else if (!keepnick && ((now - release_time) >= RELEASE_TIME)) {
+    } else if (!keepnick && release_time && ((now - release_time) >= RELEASE_TIME)) {
       release_time = 0;
       keepnick = 1;
       nick_available(1, 0);
