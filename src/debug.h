@@ -13,6 +13,7 @@
 #undef DEBUG_CONTEXT
 
 #define GET_BUFS 5
+#define get_buf_inc() if (++current_get_buf == GET_BUFS) current_get_buf = 0;
 
 /*
  *    Handy aliases for memory tracking and core dumps

@@ -1486,11 +1486,10 @@ bool socket_run() {
   if (xx >= 0) {		/* Non-error */
     if ((idx = findanyidx(xx)) != -1) {
       if (likely(dcc[idx].type->activity)) {
-        if (buf[0])
+        if (buf[0]) {
           strlcpy(get_buf[current_get_buf], buf, sizeof(get_buf[current_get_buf]));
-
-        if (++current_get_buf == GET_BUFS)
-          current_get_buf = 0;
+          get_buf_inc();
+        }
 
         /* Traffic stats */
         if (dcc[idx].type->name) {
