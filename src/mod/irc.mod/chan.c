@@ -1891,6 +1891,13 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
 
     /* Store the userhost */
     simple_snprintf(m->userhost, sizeof(m->userhost), "%s@%s", user, host);
+
+    if (!m->userip[0]) {
+      if (ip)
+        simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, ip);
+      else if (is_dotted_ip(host))
+        simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, host);
+    }
   }
 
 
@@ -1926,13 +1933,6 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
     m->flags &= ~CHANVOICE;
 //  if (!(m->flags & (CHANVOICE | CHANOP)))
 //    m->flags |= STOPWHO;
-
-  if (!m->userip[0]) {
-    if (ip)
-      simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, ip);
-    else if (is_dotted_ip(host))
-      simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, host);
-  }
 
   member_getuser(m);
 
