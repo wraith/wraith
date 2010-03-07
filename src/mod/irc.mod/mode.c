@@ -957,12 +957,12 @@ gotmode(char *from, char *msg)
   if (msg[0] && (strchr(CHANMETA, msg[0]) != NULL)) {
     char *ch = newsplit(&msg);
 
-    if (unlikely(match_my_nick(ch)))
-      return 0;
-
     struct chanset_t *chan = findchan(ch);
 
     if (unlikely(!chan)) {
+      if (unlikely(match_my_nick(ch)))
+        return 0;
+
       putlog(LOG_MISC, "*", "Oops.   Someone made me join %s... leaving...", ch);
       dprintf(DP_SERVER, "PART %s\n", ch);
       return 0;
@@ -985,16 +985,15 @@ gotmode(char *from, char *msg)
 
       /* Split up from */
       if (!isserver[0]) {
-        u = get_user_by_host(from);
         nick = splitnick(&from);
         if ((m = ismember(chan, nick))) {
           m->last = now;
-          if (!m->user && u)
-            m->user = u;
+          member_getuser(m);
+          u = m->user;
         } else {
           if (channel_pending(chan))
             return 0;
-          dprintf(DP_MODE, "KICK %s %s :Desync\n", chan->dname, nick);
+          dprintf(DP_MODE, "KICK %s %s :Desync\n", chan->name[0] ? chan->name : chan->dname, nick);
           putlog(LOG_MISC, "*", "* Mode change on %s for nonexistant %s!", chan->dname, nick);
           send_chan_who(DP_MODE, chan);
           return 0;
