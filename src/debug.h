@@ -12,6 +12,8 @@
 
 #undef DEBUG_CONTEXT
 
+#define GET_BUFS 5
+
 /*
  *    Handy aliases for memory tracking and core dumps
  */
@@ -29,8 +31,10 @@
 #define debug3(x,a1,a2,a3)      putlog(LOG_DEBUG,"*",x,a1,a2,a3)
 #define debug4(x,a1,a2,a3,a4)   putlog(LOG_DEBUG,"*",x,a1,a2,a3,a4)
 
-
+#include "net.h"
 extern bool		sdebug, segfaulted;
+extern size_t		current_get_buf;
+extern char		get_buf[GET_BUFS][SGRAB + 5];
 
 void setlimits();
 void sdprintf (const char *, ...) __attribute__((format(printf, 1, 2)));
