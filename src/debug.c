@@ -181,6 +181,32 @@ static void got_segv(int z)
 #endif
   fatal("SEGMENT VIOLATION -- CRASHING!", 1);
 #ifdef DEBUG
+  char gdb[1024] = "", btfile[256] = "", std_in[101] = "", *out = NULL;
+  unsigned int core = 0;
+
+  simple_snprintf(btfile, sizeof(btfile), ".gdb-backtrace-%d", getpid());
+
+  FILE *f = fopen(btfile, "w");
+
+  if (f) {
+    strlcpy(std_in, "bt 100\nbt 100 full\n", sizeof(stdin));
+//    simple_snprintf(stdin, sizeof(stdin), "detach\n");
+//    simple_snprintf(stdin, sizeof(stdin), "q\n");
+
+    simple_snprintf(gdb, sizeof(gdb), "gdb %s %d", binname, getpid());
+    shell_exec(gdb, std_in, &out, NULL);
+    fprintf(f, "%s\n", out);
+    fclose(f);
+    free(out);
+  }
+
+  //enabling core dumps
+  struct rlimit limit;
+  if (!getrlimit(RLIMIT_CORE, &limit)) {
+    limit.rlim_cur = limit.rlim_max;
+    if(!setrlimit(RLIMIT_CORE, &limit)) core = limit.rlim_cur;
+  }
+
   raise(SIGSEGV);
 #else
   exit(1);
