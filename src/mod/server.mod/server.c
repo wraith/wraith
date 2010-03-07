@@ -97,7 +97,8 @@ static egg_timeval_t last_time;
 static time_t connect_bursting = 0;
 static int real_msgburst = 0;
 static int real_msgrate = 0;
-static int flood_count = 0;
+int flood_count = 0;
+int burst = 0;
 static bool use_flood_count = 0;
 static egg_timeval_t flood_time = {0, 0};
 static bool use_penalties;
@@ -159,7 +160,6 @@ static const struct {
 #define Q_HELP 2
 #define Q_PLAY 3
 #define Q_CACHE 4
-static int burst;
 
 #include "cmdsserv.c"
 

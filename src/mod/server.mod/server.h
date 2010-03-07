@@ -48,7 +48,7 @@ enum {
 extern bind_table_t	*BT_ctcp, *BT_ctcr;
 extern size_t		nick_len;
 extern bool		trigger_on_ignore, floodless, keepnick, in_deaf, in_callerid, have_cprivmsg, have_cnotice;
-extern int 		servidx, ctcp_mode, answer_ctcp, serv, curserv, default_alines;
+extern int 		servidx, ctcp_mode, answer_ctcp, serv, curserv, default_alines, flood_count, burst;
 extern unsigned int     rolls;
 extern port_t		default_port, newserverport, curservport;
 extern time_t		server_online, tried_jupenick, tried_nick, release_time;

@@ -675,6 +675,10 @@ readsocks(const char *fname)
       rolls = atoi(str.c_str());
     else if (type == STR("+altnick_char"))
       altnick_char = str[0];
+    else if (type == STR("+burst"))
+      burst = atoi(str.c_str());
+    else if (type == STR("+flood_count"))
+      flood_count = atoi(str.c_str());
     else if (type == STR("+ip4"))
       ip4 = str.dup();
     else if (type == STR("+ip6"))
@@ -777,6 +781,10 @@ restart(int idx)
       stream << buf.printf(STR("+rolls %d\n"), rolls);
     if (altnick_char)
       stream << buf.printf(STR("+altnick_char %c\n"), altnick_char);
+    if (burst)
+      stream << buf.printf(STR("+burst %d\n"), burst);
+    if (flood_count)
+      stream << buf.printf(STR("+flood_count %d\n"), flood_count);
     stream << buf.printf(STR("+server_online %li\n"), server_online);
   }
   stream << buf.printf(STR("+online_since %li\n"), online_since);
