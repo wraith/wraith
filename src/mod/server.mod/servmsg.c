@@ -1365,7 +1365,7 @@ static void server_activity(int idx, char *msg, int len)
 
     // Setup timer for conecting
     waiting_for_awake = 1;
-    lastpingtime = now - (stoned_timeout + 30); //30 seconds to reach 001
+    lastpingtime = now - (stoned_timeout - 30); //30 seconds to reach 001
   } else if (server_online) // Only set once 001 has been received
     waiting_for_awake = 0;
 
