@@ -303,6 +303,8 @@ void deq_msg()
         putlog(LOG_SRVOUT, "*", "[%c->] %s", qdsc[nq].pfx, qdsc[nq].q->head->msg);
       --(qdsc[nq].q->tot);
       calc_penalty(qdsc[nq].q->head->msg, qdsc[nq].q->head->len);
+
+      // Shift off dequeued message
       q = qdsc[nq].q->head->next;
       free(qdsc[nq].q->head->msg);
       free(qdsc[nq].q->head);
@@ -690,22 +692,21 @@ void queue_server(int which, char *buf, int len)
     }
 
     struct msgq *q = (struct msgq *) my_calloc(1, sizeof(struct msgq));
-    if (qnext)
-      q->next = h->head;
-    else
-      q->next = NULL;
+
     if (h->head) {
-      if (!qnext)
+      if (!qnext) //Not next, add to end of queue
         h->last->next = q;
+      else if (qnext) { //Should be next, insert into front of queue
+        q->next = h->head;
+        h->head = q;
+      }
     } else
       h->head = q;
-    if (qnext)
-       h->head = q;
     h->last = q;
     q->len = len;
     q->msg = (char *) my_calloc(1, len + 1);
     strlcpy(q->msg, buf, len + 1);
-    h->tot++;
+    ++(h->tot);
     h->warned = 0;
     double_warned = 0;
   } else {
