@@ -902,7 +902,7 @@ int main(int argc, char **argv)
 
     if (socket_run() == 1) {
        /* Idle calls */
-      if (!conf.bot->hub) {
+      if (!conf.bot->hub && server_online) {
         flush_modes();
       }
     }
