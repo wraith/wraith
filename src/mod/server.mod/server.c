@@ -292,11 +292,11 @@ void deq_msg()
 #ifdef not_implemented
       if (deq_kick(qdsc[nq].idx)) {
         ++burst;++flood_count;
-        continue;
+        break;
       }
 #endif
       if (fast_deq(nq))
-        continue;
+        break;
       write_to_server(qdsc[nq].q->head->msg, qdsc[nq].q->head->len);
       ++burst;++flood_count;
       if (debug_output)
@@ -694,15 +694,15 @@ void queue_server(int which, char *buf, int len)
     struct msgq *q = (struct msgq *) my_calloc(1, sizeof(struct msgq));
 
     if (h->head) {
-      if (!qnext) //Not next, add to end of queue
+      if (!qnext) { //Not next, add to end of queue
         h->last->next = q;
-      else if (qnext) { //Should be next, insert into front of queue
+        h->last = q;
+      } else if (qnext) { //Should be next, insert into front of queue
         q->next = h->head;
         h->head = q;
       }
     } else
-      h->head = q;
-    h->last = q;
+      h->head = h->last = q;
     q->len = len;
     q->msg = (char *) my_calloc(1, len + 1);
     strlcpy(q->msg, buf, len + 1);
