@@ -2018,6 +2018,8 @@ static int got315(char *from, char *msg)
   newsplit(&msg);
   chname = newsplit(&msg);
 
+  putlog(LOG_DEBUG, "*", "END who %s", chname);
+
   if (!chained_who.isEmpty()) {
     // Send off next WHO request
     while (1) {
