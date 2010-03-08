@@ -127,6 +127,7 @@
   * Utilize CPRIVMSG/CNOTICE if available.
   * Chain WHO requests to try avoiding Max SendQ
   * More Auth channel commands are now available. Auth up and run +help to see them all.
+  * Add debug buffer output on crash - please give to bryan if it ever comes up.
 
 1.2.16.1
 * Fix linux compile errors

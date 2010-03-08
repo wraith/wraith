@@ -253,6 +253,11 @@ static bool process_timer(egg_timer_t* timer) {
 		deleted = 1;
 	}
 
+	if (timer->name) {
+		simple_snprintf(get_buf[current_get_buf], sizeof(get_buf[current_get_buf]), "Execing timer: %s", timer->name);
+		get_buf_inc();
+	}
+
 	callback(client_data);
 	return deleted;
 }

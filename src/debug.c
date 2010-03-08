@@ -51,6 +51,8 @@
 
 bool		sdebug = 0;             /* enable debug output? */
 bool		segfaulted = 0;
+char	get_buf[GET_BUFS][SGRAB + 5];
+size_t	current_get_buf = 0;
 
 
 #ifdef DEBUG_CONTEXT
@@ -149,6 +151,15 @@ static void write_debug()
 }
 #endif /* DEBUG_CONTEXT */
 
+static void write_debug()
+{
+  putlog(LOG_MISC, "*", "** Paste to bryan:");
+  const size_t cur_buf = (current_get_buf == 0) ? GET_BUFS - 1 : current_get_buf - 1;
+  for (size_t i = 0; i < GET_BUFS; i++)
+    putlog(LOG_MISC, "*", "%c %02zu: %s", i == cur_buf ? '*' : '+', i, get_buf[i]);
+  putlog(LOG_MISC, "*", "** end");
+}
+
 #ifndef DEBUG
 static void got_bus(int) __attribute__ ((noreturn));
 #endif /* DEBUG */
@@ -156,9 +167,7 @@ static void got_bus(int) __attribute__ ((noreturn));
 static void got_bus(int z)
 {
   signal(SIGBUS, SIG_DFL);
-#ifdef DEBUG_CONTEXT
   write_debug();
-#endif
   fatal("BUS ERROR -- CRASHING!", 1);
 #ifdef DEBUG
   raise(SIGBUS);
@@ -176,11 +185,35 @@ static void got_segv(int z)
   segfaulted = 1;
   alarm(0);		/* dont let anything jump out of this signal! */
   signal(SIGSEGV, SIG_DFL);
-#ifdef DEBUG_CONTEXT
   write_debug();
-#endif
   fatal("SEGMENT VIOLATION -- CRASHING!", 1);
 #ifdef DEBUG
+  char gdb[1024] = "", btfile[256] = "", std_in[101] = "", *out = NULL;
+  unsigned int core = 0;
+
+  simple_snprintf(btfile, sizeof(btfile), ".gdb-backtrace-%d", getpid());
+
+  FILE *f = fopen(btfile, "w");
+
+  if (f) {
+    strlcpy(std_in, "bt 100\nbt 100 full\n", sizeof(stdin));
+//    simple_snprintf(stdin, sizeof(stdin), "detach\n");
+//    simple_snprintf(stdin, sizeof(stdin), "q\n");
+
+    simple_snprintf(gdb, sizeof(gdb), "gdb %s %d", binname, getpid());
+    shell_exec(gdb, std_in, &out, NULL);
+    fprintf(f, "%s\n", out);
+    fclose(f);
+    free(out);
+  }
+
+  //enabling core dumps
+  struct rlimit limit;
+  if (!getrlimit(RLIMIT_CORE, &limit)) {
+    limit.rlim_cur = limit.rlim_max;
+    if(!setrlimit(RLIMIT_CORE, &limit)) core = limit.rlim_cur;
+  }
+
   raise(SIGSEGV);
 #else
   exit(1);
@@ -191,9 +224,7 @@ static void got_fpe(int) __attribute__ ((noreturn));
 
 static void got_fpe(int z)
 {
-#ifdef DEBUG_CONTEXT
   write_debug();
-#endif
   fatal("FLOATING POINT ERROR -- CRASHING!", 0);
   exit(1);		/* for GCC noreturn */
 }
@@ -215,9 +246,7 @@ static void got_abort(int) __attribute__ ((noreturn));
 static void got_abort(int z)
 {
   signal(SIGABRT, SIG_DFL);
-#ifdef DEBUG_CONTEXT
   write_debug();
-#endif
   fatal("GOT SIGABRT -- CRASHING!", 1);
 #ifdef DEBUG
   raise(SIGSEGV);
