@@ -112,12 +112,12 @@
   * Add cmd_encrypt_fish and cmd_decrypt_fish which uses eggdrop's blowfish (same as FiSH)
   * Add cmd_hash which returns the MD5, SHA1 and SHA256 of the given string.
   * Credits/cmd_about updates.
-  * Add chanset '+/-voicebitch' for a +bitch style enforcement over voices.
+  * Add chanset '+/-voicebitch' for a +bitch style enforcement over voices. (fixes #381)
   * Add chanset '+/-protect' which will set +botbitch and mass deop if any takeover is detected.
   * Add chanset 'protect-backup' which will optionally set +backup in the event of a takeover with +protect.
   * Channel settings 'mop' and 'mdop' now react to non-users.
   * set 'fight-threshold' now requires +protect and is a trigger for +protect. See 'help chanset' for +protect info.
-  * Bots no longer cycle channels when restarting/upgrading. (This will take effect AFTER upgrading to 1.3)
+  * Bots no longer cycle channels when restarting/upgrading. (This will take effect AFTER upgrading to 1.3) (fixes #187)
   * Speedup irc server queue by bursting more often and fully. Thanks VXP.
   * Add set 'msgrate' to define how often to dequeue to the server, if non-ratbox.
   * Add set 'msgburst' to define how many commands to burst to server per msgrate.
@@ -126,7 +126,7 @@
   * Add cmd_play for playing files to irc. (ASCII art gallery exhibition)
   * Utilize CPRIVMSG/CNOTICE if available.
   * Chain WHO requests to try avoiding Max SendQ
-  * More Auth channel commands are now available. Auth up and run +help to see them all.
+  * More Auth channel commands are now available. Auth up and run +help to see them all. (fixes #2)
   * Add debug buffer output on crash - please give to bryan if it ever comes up.
 
 1.2.16.1
