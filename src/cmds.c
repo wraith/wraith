@@ -1505,7 +1505,7 @@ static void cmd_chaddr(int idx, char *par)
     dprintf(idx, "This command is only useful for tandem bots.\n");
     return;
   }
-  if ((u1 && u1->bot) && (!dcc[idx].user || !dcc[idx].user->flags & USER_OWNER)) {
+  if ((u1 && u1->bot) && (!dcc[idx].user || !(dcc[idx].user->flags & USER_OWNER))) {
     dprintf(idx, "You can't change a bot's address.\n");
     return;
   }
