@@ -436,7 +436,6 @@ static void dtx_arg(int& argc, char *argv[])
 	printf(STR("pack: %d conf: %d settings_t: %d prefix: %d pad: %d needed padding: %d\n"), SIZE_PACK, SIZE_CONF, sizeof(settings_t), PREFIXLEN, SIZE_PAD, (16 - ((sizeof(settings_t) - sizeof(settings.padding)) % 16)) % 16);
 #endif
         if (settings.dynamic_initialized[0]) {
-          ++sdebug;
           bin_to_conf();
         }
 	exit(0);
