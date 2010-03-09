@@ -90,7 +90,7 @@ static bool prevent_mixing = 1;  /* To prevent mixing old/new modes */
 bool include_lk = 1;      /* For correct calculation
                                  * in real_add_mode. */
 bd::HashTable<bd::String, unsigned long> bot_counters;
-static unsigned long my_counter = 0;
+unsigned long my_cookie_counter = 0;
 
 static bd::Queue<bd::String> chained_who;
 static int chained_who_idx;
@@ -401,8 +401,8 @@ void makecookie(char *out, size_t len, const char *chname, const memberlist* opp
   char cookie_clear[101] = "";
 
   //Increase my counter
-  ++my_counter;
-  simple_snprintf2(cookie_clear, sizeof(cookie_clear), STR("%s%s%D"), randstring, &ts[3], my_counter);
+  ++my_cookie_counter;
+  simple_snprintf2(cookie_clear, sizeof(cookie_clear), STR("%s%s%D"), randstring, &ts[3], my_cookie_counter);
 
   char key[150] = "";
   cookie_key(key, sizeof(key), randstring, opper, chname);
