@@ -402,6 +402,8 @@ void makecookie(char *out, size_t len, const char *chname, const memberlist* opp
 
   //Increase my counter
   ++my_cookie_counter;
+  if (my_cookie_counter > (unsigned long)(-500))
+    my_cookie_counter = 0;
   simple_snprintf2(cookie_clear, sizeof(cookie_clear), STR("%s%s%D"), randstring, &ts[3], my_cookie_counter);
 
   char key[150] = "";
@@ -507,6 +509,10 @@ if (indexHint == 0) {
   if (indexHint == 0 && conf.bot->u != opper->user) {
     if (counter <= last_counter)
       return BC_COUNTER;
+
+    // graceful overflow
+    if (counter > (unsigned long)(-1000))
+      counter = 0;
 
     //Update counter for the opper
     bot_counters[handle] = counter;
