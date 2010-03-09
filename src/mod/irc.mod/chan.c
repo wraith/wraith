@@ -1223,6 +1223,7 @@ void check_this_user(char *hand, int del, char *host)
     for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
       bool check_member = 0;
       bool had_user = m->user ? 1 : 0;
+      m->tried_getuser = 0;
       member_getuser(m);
       struct userrec* u = m->user;
       if (m->user && !had_user) // If a member is newly recognized, act on it
