@@ -3066,6 +3066,8 @@ static int gotquit(char *from, char *msg)
       member_getuser(m);
       u = m->user;
       if (u) {
+        if (u->bot)
+          counter_clear(u->handle);
         set_handle_laston(chan->dname, u, now); /* If you remove this, the bot will crash when the user record in question
 						   is removed/modified during the tcl binds below, and the users was on more
 						   than one monitored channel */

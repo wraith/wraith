@@ -149,5 +149,6 @@ char *getnick(const char *, struct chanset_t *);
 extern int		max_bans, max_exempts, max_invites, max_modes;
 extern bool		use_354, include_lk;
 extern unsigned int	modesperline;
+extern unsigned long my_cookie_counter;
 #endif				/* _EGG_MOD_IRC_IRC_H */
 

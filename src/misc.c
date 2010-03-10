@@ -679,6 +679,10 @@ readsocks(const char *fname)
       burst = atoi(str.c_str());
     else if (type == STR("+flood_count"))
       flood_count = atoi(str.c_str());
+    else if (type == STR("+my_cookie_counter")) {
+      my_cookie_counter = strtol(str.c_str(), NULL, 10);
+      my_cookie_counter += 100; // Increase to avoid race conditions
+    }
     else if (type == STR("+ip4"))
       ip4 = str.dup();
     else if (type == STR("+ip6"))
@@ -785,6 +789,8 @@ restart(int idx)
       stream << buf.printf(STR("+burst %d\n"), burst);
     if (flood_count)
       stream << buf.printf(STR("+flood_count %d\n"), flood_count);
+    if (my_cookie_counter)
+      stream << buf.printf(STR("+my_cookie_counter %lu\n"), my_cookie_counter);
     stream << buf.printf(STR("+server_online %li\n"), server_online);
   }
   stream << buf.printf(STR("+online_since %li\n"), online_since);
