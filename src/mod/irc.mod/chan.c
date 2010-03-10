@@ -756,19 +756,19 @@ static void do_closed_kick(struct chanset_t *chan, memberlist *m)
       refresh_ban_kick(chan, m, s);
 
     check_exemptlist(chan, s);
-    s1 = quickban(chan, m->userhost);
+    s1 = quickban(chan, s);
     u_addmask('b', chan, s1, conf.bot->nick, "joined closed chan", now + (60 * chan->ban_time), 0);
   }
   return;
 }
 
-/* Given a [nick!]user@host, place a quick ban on them on a chan.
+/* Given a nick!user@host, place a quick ban on them on a chan.
  */
-static char *quickban(struct chanset_t *chan, char *uhost)
+static char *quickban(struct chanset_t *chan, char *from)
 {
   static char s1[512] = "";
 
-  maskaddr(uhost, s1, chan->ban_type);
+  maskaddr(from, s1, chan->ban_type);
   do_mask(chan, chan->channel.ban, s1, 'b');
   return s1;
 }
@@ -1200,7 +1200,7 @@ static void check_this_member(struct chanset_t *chan, char *nick, struct flag_re
         char *p = (char *) get_user(&USERENTRY_COMMENT, m->user);
 
         check_exemptlist(chan, s);
-        quickban(chan, m->userhost);
+        quickban(chan, s);
         dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, bankickprefix, p ? p : response(RES_KICKBAN));
         m->flags |= SENTKICK;
       }
@@ -3137,7 +3137,7 @@ static int gotmsg(char *from, char *msg)
 	   u_match_mask(chan->exempts, from)))) {
       if (ban_fun) {
 	check_exemptlist(chan, from);
-	u_addmask('b', chan, quickban(chan, uhost), conf.bot->nick,
+	u_addmask('b', chan, quickban(chan, from), conf.bot->nick,
                "that was fun, let's do it again!", now + (60 * chan->ban_time), 0);
       }
       if (kick_fun) {
@@ -3296,7 +3296,7 @@ static int gotnotice(char *from, char *msg)
 	   u_match_mask(chan->exempts, from)))) {
       if (ban_fun) {
 	check_exemptlist(chan, from);
-	u_addmask('b', chan, quickban(chan, uhost), conf.bot->nick,
+	u_addmask('b', chan, quickban(chan, from), conf.bot->nick,
                "that was fun, let's do it again!", now + (60 * chan->ban_time), 0);
       }
       if (kick_fun) {
