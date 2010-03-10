@@ -405,7 +405,7 @@ static void cmd_about(int idx, char *par)
   dprintf(idx, STR(" * $bryguy$b for beta testing, providing code, finding bugs, and providing input.\n"));
   dprintf(idx, STR(" * $bSFC$b for providing compile shells, continuous input, feature suggestions, and testing.\n"));
   dprintf(idx, STR(" * $bwarchest$b for his dedicated bug finding, testing, input, and original inspiration to code a botpack.\n"));
-  dprintf(idx, STR(" * $context$b for finding bugs, code, ideas, git, being involved in development.\n"));
+  dprintf(idx, STR(" * $bcontext$b for finding bugs, code, ideas, git, being involved in development.\n"));
   dprintf(idx, STR(" * $bxmage$b for beta testing.\n"));
   dprintf(idx, STR(" * $bpasswd$b for beta testing, and his dedication to finding bugs.\n"));
   dprintf(idx, STR(" * $bpgpkeys$b for finding bugs, and providing input.\n"));
