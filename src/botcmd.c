@@ -315,8 +315,9 @@ static void bot_bye(int idx, char *par)
   bots = bots_in_subtree(findbot(dcc[idx].nick));
   users = users_in_subtree(findbot(dcc[idx].nick));
   simple_snprintf(s, sizeof(s), "%s %s. %s (lost %d bot%s and %d user%s)",
-		 "Disconnected from:", conf.bot->hub ? dcc[idx].nick : "botnet", par[0] ?
-		 par : "No reason", bots, (bots != 1) ?
+		 "Disconnected from:",
+                 (conf.bot->hub || (conf.bot->localhub && bot_aggressive_to(dcc[idx].user))) ? dcc[idx].nick : "botnet",
+                  par[0] ? par : "No reason", bots, (bots != 1) ?
 		 "s" : "", users, (users != 1) ? "s" : "");
   putlog(LOG_BOTS, "*", "%s", s);
   chatout("*** %s\n", s);
