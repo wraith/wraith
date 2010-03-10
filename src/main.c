@@ -770,7 +770,13 @@ int main(int argc, char **argv)
 
   /* Version info! */
   simple_snprintf(ver, sizeof(ver), STR("[%s] Wraith %s"), settings.packname, egg_version);
-  simple_snprintf(version, sizeof(version), STR("%s (%lu)"), ver, buildts);
+  simple_snprintf(version, sizeof(version), STR("%s%s (%lu)"), ver,
+#ifdef DEBUG
+      "(d)",
+#else
+      "",
+#endif
+      buildts);
 
   memcpy(&nowtm, gmtime(&now), sizeof(struct tm));
   lastmin = nowtm.tm_min;
