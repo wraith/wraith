@@ -352,14 +352,16 @@ static int bind_vcheck_hits (bind_table_t *table, const char *match, struct flag
 
 	check_bind_executing++;
 
-	for (int i = 1; i <= table->nargs; i++) {
-		args[i] = va_arg(ap, void *);
-	}
-
 	if (hits) (*hits) = 0;
 
 	/* Default return value is 0 */
 	retval = 0;
+
+	if (!table) return retval;
+
+	for (int i = 1; i <= table->nargs; i++) {
+		args[i] = va_arg(ap, void *);
+	}
 
 	/* Check if we're searching for a partial match. */
 	if (table->match_type & MATCH_PARTIAL) matchlen = strlen(match);
