@@ -13,8 +13,8 @@
   get_buf_inc(); \
 } while (0)
 
-#define ContextNote(from, buf) do { \
-  simple_snprintf(get_buf[current_get_buf], sizeof(get_buf[current_get_buf]), "%s: %s", from, buf); \
+#define ContextNote(_from, _buf) do { \
+  simple_snprintf(get_buf[current_get_buf], sizeof(get_buf[current_get_buf]), "%s: %s", _from, _buf); \
   get_buf_inc(); \
 } while(0)
 
