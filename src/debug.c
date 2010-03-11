@@ -104,8 +104,7 @@ void sdprintf (const char *format, ...)
 
   remove_crlf(s);
 
-  simple_snprintf(get_buf[current_get_buf], sizeof(get_buf[current_get_buf]), "dbg: %s", s);
-  get_buf_inc();
+  ContextNote("dbg", s);
 
 #ifdef DEBUG
   if (sdebug) {
