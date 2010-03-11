@@ -1290,7 +1290,7 @@ static void disconnect_server(int idx, int dolost)
     lostdcc(idx);
   }
   end_burstmode();
-
+  reset_chans = 0;
   /* Invalidate the cmd_swhois cache callback data */
   for (int i = 0; i < dcc_total; i++) {
     if (dcc[i].type && dcc[i].whois[0]) {
