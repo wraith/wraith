@@ -1051,7 +1051,7 @@ void conf_add_userlist_bots()
         if (!user_has_host(NULL, u, uhost) && !host_conflicts(uhost))
           addhost_by_handle(bot->nick, uhost);
       }
-      if (bot->net.ip6) {
+      if (bot->net.ip6 && strcmp(bot->net.ip6, "::")) {
         simple_snprintf(uhost, sizeof(uhost), "*!%s@%s", conf.username, bot->net.ip6);
         if (!user_has_host(NULL, u, uhost) && !host_conflicts(uhost))
           addhost_by_handle(bot->nick, uhost);
