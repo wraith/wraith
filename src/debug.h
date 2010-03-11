@@ -13,11 +13,15 @@
   get_buf_inc(); \
 } while (0)
 
+#define ContextNote(from, buf) do { \
+  simple_snprintf(get_buf[current_get_buf], sizeof(get_buf[current_get_buf]), "%s: %s", from, buf); \
+  get_buf_inc(); \
+} while(0)
+
+
 /*
  *    Handy aliases for memory tracking and core dumps
  */
-#  define ContextNote(note)     {}
-
 #define debug0(x)               putlog(LOG_DEBUG,"*",x)
 #define debug1(x,a1)            putlog(LOG_DEBUG,"*",x,a1)
 #define debug2(x,a1,a2)         putlog(LOG_DEBUG,"*",x,a1,a2)

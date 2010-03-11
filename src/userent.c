@@ -845,7 +845,7 @@ static bool botaddr_set(struct userrec *u, struct user_entry *e, void *buf)
       free(bi->uplink);
       free(bi);
     }
-    ContextNote("(sharebug) occurred in botaddr_set");
+    ContextNote("botaddr_set", "(sharebug) occurred in botaddr_set");
     bi = (struct bot_addr *) buf;
     e->u.extra = (struct bot_addr *) buf;
   }
