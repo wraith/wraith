@@ -712,6 +712,13 @@ readsocks(const char *fname)
         botnet_send_bye(STR("IP changed."));
       }
       fatal("brb", 1);
+    } else if (conf.bot->hub) {
+      // I became a hub during restart... disconnect from IRC.
+      if (tands > 0) {		/* We're not linked yet.. but for future */
+        botnet_send_chat(-1, conf.bot->nick, STR("Changing to HUB."));
+        botnet_send_bye(STR("Changing to HUB."));
+      }
+      nuke_server("emoquit");
     } else {
       simple_snprintf(nserv, sizeof(nserv), "%s:%d", dcc[servidx].host, dcc[servidx].port);
       add_server(nserv);
