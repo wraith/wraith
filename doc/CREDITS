@@ -22,6 +22,8 @@ Credits and thanks to the following:
 * Mafaioz for good ideas, support on wraith.no, beta testing.
 * Tical for great ideas.
 * insect for helping test the RBL code.
+* Phillip for ideas / code.
+* ducch for ideas / findings bugs / code.
 * Many others.
 
 For a list of code Contributors see: git shortlog -sen master
