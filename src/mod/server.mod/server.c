@@ -1006,8 +1006,7 @@ static void server_secondly()
     --cycle_time;
   if (!resolvserv && serv < 0 && !trying_server)
     connect_server();
-
-  if (server_online) {
+  else if (server_online) {
     if (keepnick && !use_monitor) {
       static int ison_cnt = 0;
 
