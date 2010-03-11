@@ -1494,19 +1494,19 @@ bool socket_run() {
         /* Traffic stats */
         if (dcc[idx].type->name) {
           if (!strncmp(dcc[idx].type->name, "BOT", 3))
-            traffic.in_today.bn += strlen(buf) + 1;
+            traffic.in_today.bn += i + 1;
           else if (!strcmp(dcc[idx].type->name, "SERVER"))
-            traffic.in_today.irc += strlen(buf) + 1;
+            traffic.in_today.irc += i + 1;
           else if (!strncmp(dcc[idx].type->name, "CHAT", 4))
-            traffic.in_today.dcc += strlen(buf) + 1;
+            traffic.in_today.dcc += i + 1;
           else if (!strncmp(dcc[idx].type->name, "FILES", 5))
-            traffic.in_today.dcc += strlen(buf) + 1;
+            traffic.in_today.dcc += i + 1;
           else if (!strcmp(dcc[idx].type->name, "SEND"))
-            traffic.in_today.trans += strlen(buf) + 1;
+            traffic.in_today.trans += i + 1;
           else if (!strncmp(dcc[idx].type->name, "GET", 3))
-            traffic.in_today.trans += strlen(buf) + 1;
+            traffic.in_today.trans += i + 1;
           else
-            traffic.in_today.unknown += strlen(buf) + 1;
+            traffic.in_today.unknown += i + 1;
         }
         dcc[idx].type->activity(idx, buf, (size_t) i);
       } else
