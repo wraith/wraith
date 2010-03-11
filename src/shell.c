@@ -432,6 +432,9 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool
       exit(1);
     }
 
+    // Close all sockets
+    for (int fd = 3; fd < MAX_SOCKETS; ++fd) close(fd);
+
     char *argv[15];
     if (simple) {
       char *p = NULL;
@@ -442,8 +445,6 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool
         argv[n++] = p;
       argv[n] = NULL;
 
-      // Close all sockets
-      for (int fd = 3; fd < MAX_SOCKETS; ++fd) close(fd);
     } else {
       argv[0] = "/bin/sh";
       argv[1] = "-c";
