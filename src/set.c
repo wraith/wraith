@@ -555,7 +555,9 @@ void var_set(variable_t *var, const char *target, const char *datain)
       if (var->ldata)
         free(var->ldata);
 
+#ifdef DEBUG
 sdprintf("var: %s (local): %s", var->name, data ? data : "(NULL)");
+#endif
       if (data && !clear)
         var->ldata = strdup(data);
       else
@@ -569,7 +571,9 @@ sdprintf("var: %s (local): %s", var->name, data ? data : "(NULL)");
       domem = 0;
     if (var->gdata)
       free(var->gdata);
+#ifdef DEBUG
 sdprintf("var: %s (global): %s", var->name, data ? data : "(NULL)");
+#endif
     if (data && !clear)
       var->gdata = strdup(data);
     else
@@ -710,7 +714,9 @@ void var_parse_my_botset()
 
   for (i = 0; vars[i].name; i++) {
     if (vars[i].ldata && !vars[i].flagged) {
+#ifdef DEBUG
       sdprintf("var[%s] nulled but we missed it!, reseting.", vars[i].name);
+#endif
       var_set(&vars[i], conf.bot->nick, NULL);
     }
     vars[i].flagged = 0;

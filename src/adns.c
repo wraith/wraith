@@ -338,13 +338,11 @@ static void query_transform_ip(dns_query_t* q, const char* ip) {
 		char temp[128] = "";
 
 		socket_ipv6_to_dots(ip, temp);
-		sdprintf("dots: %s", temp);
 		size_t iplen = strlen(temp) + 9 + 1;
 		q->ip = (char *) my_calloc(1, iplen);
 		//		reverse_ip(temp, q->ip);
 		strlcat(q->ip, temp, iplen);
 		strlcat(q->ip, "ip6.arpa", iplen);
-		sdprintf("reversed ipv6 ip: %s", q->ip);
 	}
 	else {
 		size_t iplen = strlen(ip) + 13 + 1;
@@ -410,7 +408,9 @@ void egg_dns_send(char *query, int len, bool blocking)
 	}
         if (!dns_handler.timeout_val) {
           dns_handler.timeout_val = &async_server_timeout;
+#ifdef DEBUG
           sdprintf("SETTING TIMEOUT to %d", async_server_timeout);
+#endif
           dcc[dns_idx].timeval = now;
         }
 
@@ -771,7 +771,9 @@ static void dns_read(int idx, char* buf, int& atr, bool blocking) {
 			return;
 		}
 	}
+#ifdef DEBUG
 	sdprintf("SETTING TIMEOUT to 0: Received reply.");
+#endif
 	dns_handler.timeout_val = 0;
 	errno = 0;
 	return;
