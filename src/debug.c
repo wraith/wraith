@@ -106,15 +106,13 @@ void sdprintf (const char *format, ...)
 
   ContextNote("dbg", s);
 
-#ifdef DEBUG
   if (sdebug) {
-#endif
     if (!backgrd)
       dprintf(DP_STDOUT, "[D:%lu] %s%s%s\n", (unsigned long) mypid, BOLD(-1), s, BOLD_END(-1));
     else
       printf("[D:%lu] %s%s%s\n", (unsigned long) mypid, BOLD(-1), s, BOLD_END(-1));
-#ifdef DEBUG
   }
+#ifdef DEBUG
   logfile(LOG_DEBUG, s);
 #endif
 }
