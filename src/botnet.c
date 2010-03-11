@@ -1052,6 +1052,8 @@ static void botlink_dns_callback(int id, void *client_data, const char *host, bd
   long data = (long) client_data;
   int i = (int) data;
 
+  Context;
+
   if (!valid_dns_id(i, id))
     return;
 
@@ -1211,6 +1213,8 @@ static void tandem_relay_dns_callback(int id, void *client_data, const char *hos
   //64bit hacks
   long data = (long) client_data;
   int i = (int) data, idx = -1;
+
+  Context;
 
   if (!valid_dns_id(i, id))
     return;

@@ -1481,15 +1481,12 @@ bool socket_run() {
 
   int xx = sockgets(buf, &i);
 
-  get_buf[current_get_buf][0] = 0;
-
   if (xx >= 0) {		/* Non-error */
     if ((idx = findanyidx(xx)) != -1) {
       if (likely(dcc[idx].type->activity)) {
         /* Traffic stats */
         if (dcc[idx].type->name) {
-          simple_snprintf(get_buf[current_get_buf], sizeof(get_buf[current_get_buf]), "%s: %s", dcc[idx].type->name, buf);
-          get_buf_inc();
+          ContextNote(dcc[idx].type->name, buf);
 
           if (!strncmp(dcc[idx].type->name, "BOT", 3))
             traffic.in_today.bn += i + 1;

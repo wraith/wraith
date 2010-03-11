@@ -778,7 +778,6 @@ static bool botaddr_unpack(struct userrec *u, struct user_entry *e)
   struct bot_addr *bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
 
   /* address:port/port:hublevel:uplink */
-  Context;
 
   strlcpy(p, e->u.list->extra, sizeof(p));
   q1 = strchr(p, ':');
@@ -838,7 +837,6 @@ static bool botaddr_set(struct userrec *u, struct user_entry *e, void *buf)
 {
   register struct bot_addr *bi = (struct bot_addr *) e->u.extra;
 
-  Context;
   if (!bi && !buf)
     return 1;
   if (bi != buf) {
@@ -847,7 +845,7 @@ static bool botaddr_set(struct userrec *u, struct user_entry *e, void *buf)
       free(bi->uplink);
       free(bi);
     }
-    ContextNote("(sharebug) occurred in botaddr_set");
+    ContextNote("botaddr_set", "(sharebug) occurred in botaddr_set");
     bi = (struct bot_addr *) buf;
     e->u.extra = (struct bot_addr *) buf;
   }
