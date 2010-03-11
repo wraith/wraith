@@ -198,6 +198,7 @@ void fatal(const char *s, int recoverable)
 
   sdprintf(STR("Closing %d sockets"), dcc_total);
   for (int i = 0; i < dcc_total; i++) {
+    if (!backgrd && i == STDOUT) continue;
     if (dcc[i].type && dcc[i].sock >= 0) {
       sdprintf(STR("Closing %s dcc(%d)"), dcc[i].type->name, i);
       killsock(dcc[i].sock);
