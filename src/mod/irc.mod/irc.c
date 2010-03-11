@@ -678,7 +678,7 @@ getin_request(char *botnick, char *code, char *par)
     char *shared_nick = par[0] ? newsplit(&par) : NULL;
     memberlist* shared_member = shared_nick ? ismember(chan, shared_nick) : NULL;
     char *shared_host = par[0] ? newsplit(&par) : NULL;
-    if (!shared_nick || !shared_member || !shared_host || !(chan->channel.members == members) || strcmp(shared_host, shared_member->userhost)) {
+    if (!shared_nick || !shared_member || !shared_host || !((chan->channel.members - chan->channel.splitmembers) == members) || strcmp(shared_host, shared_member->userhost)) {
       putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - Bot seems to be on a different network???", botnick, nick, chan->dname);
       return;
     }
@@ -723,7 +723,7 @@ getin_request(char *botnick, char *code, char *par)
     bool sendi = 0;
 
     if (chan->channel.maxmembers) {
-      int lim = chan->channel.members + 5, curlim = chan->channel.maxmembers;
+      int lim = (chan->channel.members - chan->channel.splitmembers) + 5, curlim = chan->channel.maxmembers;
       if (curlim < lim) {
         char s2[6] = "";
 
@@ -904,13 +904,14 @@ request_op(struct chanset_t *chan)
   int shared_idx = 0;
 
   for (shared_member = chan->channel.member; shared_member && shared_member->nick[0]; shared_member = shared_member->next) {
-    if (shared_idx == shared_member_cnt)
+    if (shared_member->split) continue;
+    if (shared_idx >= shared_member_cnt)
       break;
     ++shared_idx;
   }
 
   /* first scan for bots on my server, ask first found for ops */
-  simple_snprintf(s, sizeof(s), "gi o %s %s %d %s %s", chan->dname, botname, chan->channel.members, shared_member->nick, shared_member->userhost);
+  simple_snprintf(s, sizeof(s), "gi o %s %s %d %s %s", chan->dname, botname, (chan->channel.members - chan->channel.splitmembers), shared_member->nick, shared_member->userhost);
 
   /* look for bots 0-1 hops away */
   for (i2 = 0; i2 < i; i2++) {
@@ -1534,7 +1535,7 @@ raise_limit(struct chanset_t *chan)
   if (chan->mode_mns_prot & CHANLIMIT)
     return;
 
-  int nl = chan->channel.members + chan->limitraise;	/* new limit */
+  int nl = (chan->channel.members - chan->channel.splitmembers) + chan->limitraise;	/* new limit */
   int i = chan->limitraise >> 2;			/* DIV 4 */
   /* if the newlimit will be in the range made by these vars, dont change. */
   int ul = nl + i;					/* upper limit */
