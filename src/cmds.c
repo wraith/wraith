@@ -4140,6 +4140,8 @@ static void my_dns_callback(int id, void *client_data, const char *host, bd::Arr
   long data = (long) client_data;
   int idx = (int) data;
 
+  Context;
+
   if (!valid_idx(idx))
     return;
 

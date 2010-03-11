@@ -1472,6 +1472,8 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, b
   long data = (long) client_data;
   int i = (int) data;
 
+  Context;
+
   if (!valid_dns_id(i, id))
     return;
 
@@ -1510,6 +1512,8 @@ static void dcc_telnet_dns_forward_callback(int id, void *client_data, const cha
   // 64bit hacks
   long data = (long) client_data;
   int i = (int) data;
+
+  Context;
 
   if (!valid_dns_id(i, id))
     return;

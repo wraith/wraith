@@ -1943,6 +1943,8 @@ static void server_dns_callback(int id, void *client_data, const char *host, bd:
   long data = (long) client_data;
   int idx = (int) data;
 
+  Context;
+
   resolvserv = 0;
 
   if (!valid_dns_id(idx, id))
