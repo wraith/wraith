@@ -1486,13 +1486,11 @@ bool socket_run() {
   if (xx >= 0) {		/* Non-error */
     if ((idx = findanyidx(xx)) != -1) {
       if (likely(dcc[idx].type->activity)) {
-        if (buf[0]) {
-          strlcpy(get_buf[current_get_buf], buf, sizeof(get_buf[current_get_buf]));
-          get_buf_inc();
-        }
-
         /* Traffic stats */
         if (dcc[idx].type->name) {
+          simple_snprintf(get_buf[current_get_buf], sizeof(get_buf[current_get_buf]), "%s: %s", dcc[idx].type->name, buf);
+          get_buf_inc();
+
           if (!strncmp(dcc[idx].type->name, "BOT", 3))
             traffic.in_today.bn += i + 1;
           else if (!strcmp(dcc[idx].type->name, "SERVER"))

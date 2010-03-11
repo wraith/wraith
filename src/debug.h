@@ -12,7 +12,7 @@
 
 #undef DEBUG_CONTEXT
 
-#define GET_BUFS 5
+#define GET_BUFS 30
 #define get_buf_inc() if (++current_get_buf == GET_BUFS) current_get_buf = 0;
 
 /*

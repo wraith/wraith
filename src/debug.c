@@ -110,30 +110,28 @@ void init_debug()
 
 void sdprintf (const char *format, ...)
 {
-#ifndef DEBUG
+  char s[2001] = "";
+  va_list va;
+
+  va_start(va, format);
+  egg_vsnprintf(s, sizeof(s), format, va);
+  va_end(va);
+
+  remove_crlf(s);
+
+  simple_snprintf(get_buf[current_get_buf], sizeof(get_buf[current_get_buf]), "dbg: %s", s);
+  get_buf_inc();
+
+#ifdef DEBUG
   if (sdebug) {
 #endif
-    char s[2001] = "";
-    va_list va;
-
-    va_start(va, format);
-    egg_vsnprintf(s, sizeof(s), format, va);
-    va_end(va);
-    
-    remove_crlf(s);
-
+    if (!backgrd)
+      dprintf(DP_STDOUT, "[D:%lu] %s%s%s\n", (unsigned long) mypid, BOLD(-1), s, BOLD_END(-1));
+    else
+      printf("[D:%lu] %s%s%s\n", (unsigned long) mypid, BOLD(-1), s, BOLD_END(-1));
 #ifdef DEBUG
-    if (sdebug) {
-#endif
-      if (!backgrd)
-        dprintf(DP_STDOUT, "[D:%lu] %s%s%s\n", (unsigned long) mypid, BOLD(-1), s, BOLD_END(-1));
-      else
-        printf("[D:%lu] %s%s%s\n", (unsigned long) mypid, BOLD(-1), s, BOLD_END(-1));
-#ifdef DEBUG
-    }
-    logfile(LOG_DEBUG, s);
-#else
   }
+  logfile(LOG_DEBUG, s);
 #endif
 }
 
@@ -156,7 +154,7 @@ static void write_debug()
   putlog(LOG_MISC, "*", "** Paste to bryan:");
   const size_t cur_buf = (current_get_buf == 0) ? GET_BUFS - 1 : current_get_buf - 1;
   for (size_t i = 0; i < GET_BUFS; i++)
-    putlog(LOG_MISC, "*", "%c %02zu: %s", i == cur_buf ? '*' : '+', i, get_buf[i]);
+    putlog(LOG_MISC, "*", "%c %02zu: %s", i == cur_buf ? '*' : '_', i, get_buf[i]);
   putlog(LOG_MISC, "*", "** end");
 }
 
