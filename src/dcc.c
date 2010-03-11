@@ -1527,7 +1527,7 @@ static void dcc_telnet_dns_forward_callback(int id, void *client_data, const cha
     return;
   }
 
-  bool forward_matched = true;
+  bool forward_matched = false;
   bd::String look_for_ip(iptostr(htonl(dcc[i].addr)));
   // Look for any match
   for (size_t n = 0; n < ips.size(); ++n) {
