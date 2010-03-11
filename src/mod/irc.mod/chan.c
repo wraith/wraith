@@ -2612,6 +2612,7 @@ static int gotjoin(char *from, char *chname)
       if (m && m->split && !strcasecmp(m->userhost, uhost)) {
         splitjoin = 1;
 	m->split = 0;
+        --(chan->channel.splitmembers);
 	m->last = now;
 	m->delay = 0L;
 	m->flags = (chan_hasop(m) ? WASOP : 0);
@@ -3074,6 +3075,7 @@ static int gotquit(char *from, char *msg)
       }
       if (split) {
 	m->split = now;
+        ++(chan->channel.splitmembers);
         irc_log(chan, "%s (%s) got netsplit.", nick, from);
       } else {
 	killmember(chan, nick);

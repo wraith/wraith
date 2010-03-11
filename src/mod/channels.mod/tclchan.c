@@ -857,6 +857,7 @@ static void init_channel(struct chanset_t *chan, bool reset)
   chan->channel.maxmembers = 0;
   chan->channel.mode = 0;
   chan->channel.members = 0;
+  chan->channel.splitmembers = 0;
 
   if (!reset)
     chan->channel.key = (char *) my_calloc(1, 1);

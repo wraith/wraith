@@ -109,6 +109,7 @@ struct chan_t {
 #endif /* G_BACKUP */
   int maxmembers;
   int members;
+  int splitmembers;
   int do_opreq;
   char *topic;
   char *key;

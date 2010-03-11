@@ -1253,8 +1253,12 @@ killmember(struct chanset_t *chan, char *nick)
    */
   if (unlikely(chan->channel.members < 0)) {
     chan->channel.members = 0;
-    for (x = chan->channel.member; x && x->nick[0]; x = x->next)
+    chan->channel.splitmembers = 0;
+    for (x = chan->channel.member; x && x->nick[0]; x = x->next) {
       chan->channel.members++;
+      if (x->split)
+        ++(chan->channel.splitmembers);
+    }
     putlog(LOG_MISC, "*", "(!) actually I know of %d members.", chan->channel.members);
   }
   if (unlikely(!chan->channel.member)) {
@@ -1615,6 +1619,7 @@ check_expired_chanstuff(struct chanset_t *chan)
       if (m->split && now - m->split > wait_split) {
         simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
         putlog(LOG_JOIN, chan->dname, "%s (%s) got lost in the net-split.", m->nick, m->userhost);
+        --(chan->channel.splitmembers);
         killmember(chan, m->nick);
         continue;
       }
