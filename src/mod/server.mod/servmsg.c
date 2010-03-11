@@ -1298,6 +1298,11 @@ static void disconnect_server(int idx, int dolost)
       dcc[i].whowas = 0;
     }
   }
+
+  if (!segfaulted) //Avoid if crashed, too many free()/malloc() in here
+    for (struct chanset_t *chan = chanset; chan; chan = chan->next)
+      clear_channel(chan, 1);
+
 }
 
 static void eof_server(int idx)
@@ -1316,12 +1321,6 @@ static void connect_server(void);
 static void kill_server(int idx, void *x)
 {
   disconnect_server(idx, NO_LOST);	/* eof_server will lostdcc() it. */
-
-  if (segfaulted)		// don't bother if we've segfaulted, too many memory calls in this loop
-    return;
-
-  for (struct chanset_t *chan = chanset; chan; chan = chan->next)
-    clear_channel(chan, 1);
   /* A new server connection will be automatically initiated in
      about 2 seconds. */
 }
