@@ -778,7 +778,6 @@ static bool botaddr_unpack(struct userrec *u, struct user_entry *e)
   struct bot_addr *bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
 
   /* address:port/port:hublevel:uplink */
-  Context;
 
   strlcpy(p, e->u.list->extra, sizeof(p));
   q1 = strchr(p, ':');
@@ -838,7 +837,6 @@ static bool botaddr_set(struct userrec *u, struct user_entry *e, void *buf)
 {
   register struct bot_addr *bi = (struct bot_addr *) e->u.extra;
 
-  Context;
   if (!bi && !buf)
     return 1;
   if (bi != buf) {

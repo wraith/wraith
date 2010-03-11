@@ -55,14 +55,6 @@ char	get_buf[GET_BUFS][SGRAB + 5];
 size_t	current_get_buf = 0;
 
 
-#ifdef DEBUG_CONTEXT
-/* Context storage for fatal crashes */
-char    cx_file[16][16];
-char    cx_note[16][16];
-int     cx_line[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-int     cx_ptr = 0;
-#endif /* DEBUG_CONTEXT */
-
 void setlimits()
 {
 #ifndef CYGWIN_HACKS
@@ -99,13 +91,6 @@ void setlimits()
 
 void init_debug()
 {
-  for (int i = 0; i < 16; i ++)
-    Context;
-
-#ifdef DEBUG_CONTEXT
-  bzero(&cx_file, sizeof cx_file);
-  bzero(&cx_note, sizeof cx_note);
-#endif /* DEBUG_CONTEXT */
 }
 
 void sdprintf (const char *format, ...)
@@ -134,20 +119,6 @@ void sdprintf (const char *format, ...)
   logfile(LOG_DEBUG, s);
 #endif
 }
-
-#ifdef DEBUG_CONTEXT
-
-#define CX(ptr) cx_file[ptr] && cx_file[ptr][0] ? cx_file[ptr] : "", cx_line[ptr], cx_note[ptr] && cx_note[ptr][0] ? cx_note[ptr] : ""
-static void write_debug()
-{
-  char tmpout[150] = "";
-
-  simple_snprintf(tmpout, sizeof tmpout, "* Last 3 contexts: %s/%d [%s], %s/%d [%s], %s/%d [%s]",
-                                  CX(cx_ptr - 2), CX(cx_ptr - 1), CX(cx_ptr));
-  putlog(LOG_MISC, "*", "%s (Paste to bryan)", tmpout);
-  printf("%s\n", tmpout);
-}
-#endif /* DEBUG_CONTEXT */
 
 static void write_debug()
 {
@@ -274,10 +245,7 @@ static void got_alarm(int z)
  */
 static void got_ill(int z)
 {
-#ifdef DEBUG_CONTEXT
-  putlog(LOG_MISC, "*", "* Context: %s/%d [%s]", cx_file[cx_ptr], cx_line[cx_ptr],
-                         (cx_note[cx_ptr][0]) ? cx_note[cx_ptr] : "");
-#endif /* DEBUG_CONTEXT */
+  write_debug();
 }
 
 static void
@@ -314,31 +282,3 @@ void init_signals()
   signal(SIGHUP, got_hup);
   signal(SIGUSR1, got_usr1);
 }
-
-#ifdef DEBUG_CONTEXT
-/* Context */
-void eggContext(const char *file, int line)
-{
-  char x[31] = "", *p = strrchr(file, '/');
-
-  strlcpy(x, p ? p + 1 : file, sizeof x);
-  cx_ptr = ((cx_ptr + 1) & 15);
-  strcpy(cx_file[cx_ptr], x);
-  cx_line[cx_ptr] = line;
-  cx_note[cx_ptr][0] = 0;
-}
-
-/* Called from the ContextNote macro.
- */
-void eggContextNote(const char *file, int line, const char *note)
-{
-  char x[31] = "", *p = strrchr(file, '/');
-
-  strlcpy(x, p ? p + 1 : file, sizeof x);
-  cx_ptr = ((cx_ptr + 1) & 15);
-  strcpy(cx_file[cx_ptr], x);
-  cx_line[cx_ptr] = line;
-  strlcpy(cx_note[cx_ptr], note, sizeof cx_note[cx_ptr]);
-}
-#endif
-
