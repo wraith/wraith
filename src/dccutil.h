@@ -5,8 +5,6 @@
 #include "dcc.h"
 #include "auth.h"
 
-#define dprintf dprintf_eggdrop
-
 /* Public structure for the listening port map */
 struct portmap {
   port_t realport;
@@ -17,6 +15,8 @@ struct portmap {
 namespace bd {
   class Stream;
 }
+
+#define dprintf dprintf_eggdrop
 
 /* Fake idx's for dprintf - these should be ridiculously large +ve nums
  */
@@ -38,8 +38,9 @@ namespace bd {
 
 void init_dcc(void);
 void dumplots(int, const char *, const char *);
+void rdprintf(const char*, int, const char *, ...) __attribute__((format(printf, 3, 4)));
 void dprintf(int, const char *, ...) __attribute__((format(printf, 2, 3)));
-void dprintf_real(int, char*, size_t, size_t);
+void dprintf_real(int, char*, size_t, size_t, const char* = NULL);
 void chatout(const char *, ...) __attribute__((format(printf, 1, 2)));
 void chanout_but(int, int, const char *, ...) __attribute__((format(printf, 3, 4)));
 void dcc_chatter(int);

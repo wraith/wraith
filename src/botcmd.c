@@ -1359,8 +1359,19 @@ static void bot_rsimr(char *botnick, char *code, char *msg)
   }
 }
 
+static void bot_rd(char* botnick, char* code, char* msg)
+{
+  size_t len = atoi(newsplit(&msg));
+  if (msg[0]) {
+    int idx = atoi(newsplit(&msg));
+    if (msg[0])
+      dprintf_real(idx, msg, len, len);
+  }
+}
+
 static cmd_t my_bot[] = 
 {
+  {"rd",	"",	(Function) bot_rd,	NULL, 0},
   {"r-sr",	"",	(Function) bot_rsimr,	NULL, HUB},
   {"r-s",	"",	(Function) bot_rsim,	NULL, 0},
   {NULL, 	NULL, 	NULL, 			NULL, 0}

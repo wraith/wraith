@@ -46,6 +46,7 @@
 #include "botcmd.h"
 #include <errno.h>
 #include "chan.h"
+#include "botmsg.h"
 #include "tandem.h"
 #include "core_binds.h"
 #include "egg_timer.h"
@@ -258,6 +259,31 @@ void dumplots(int idx, const char *prefix, const char *data)
 }
 
 void
+rdprintf(const char* target, int idx, const char *format, ...)
+{
+  char buf[1024] = "";
+  size_t len = 0;
+  va_list va;
+
+  va_start(va, format);
+  int vlen = egg_vsnprintf(buf, sizeof(buf), format, va);
+  va_end(va);
+
+  if (unlikely(vlen < 0)) {
+    // Error parsing format..
+    return;
+  }
+
+  if (size_t(vlen) > (sizeof(buf) - 1)) {
+    len = sizeof(buf) - 1;
+    buf[len] = 0;
+  } else {
+    len = size_t(vlen);
+  }
+  dprintf_real(idx, buf, len, sizeof(buf), target);
+}
+
+void
 dprintf(int idx, const char *format, ...)
 {
   char buf[1024] = "";
@@ -283,11 +309,15 @@ dprintf(int idx, const char *format, ...)
 }
 
 void
-dprintf_real(int idx, char* buf, size_t len, size_t bufsiz)
+dprintf_real(int idx, char* buf, size_t len, size_t bufsiz, const char* target)
 {
 /* this is for color on dcc :P */
 
-  if (unlikely(idx < 0)) {
+  if (unlikely(target)) {
+    char pbot[1024] = "";
+    simple_snprintf(pbot, sizeof(pbot), "rd %zu %d %s", len, idx, buf);
+    putbot(target, pbot);
+  } else if (unlikely(idx < 0)) {
     tputs(-idx, buf, len);
   } else if (idx > 0x7FF0) {
     if (unlikely(idx == DP_STDOUT || idx == DP_STDOUT)) {
