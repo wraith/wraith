@@ -1623,14 +1623,18 @@ check_expired_chanstuff(struct chanset_t *chan)
     } /* me_op */
 
 //    for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
+    int splitmembers = 0;
     for (m = chan->channel.member; m && m->nick[0]; m = n) {
       n = m->next;
-      if (m->split && now - m->split > wait_split) {
-        simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
-        putlog(LOG_JOIN, chan->dname, "%s (%s) got lost in the net-split.", m->nick, m->userhost);
-        --(chan->channel.splitmembers);
-        killmember(chan, m->nick);
-        continue;
+      if (m->split) {
+        ++splitmembers;
+        if (now - m->split > wait_split) {
+          simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
+          putlog(LOG_JOIN, chan->dname, "%s (%s) got lost in the net-split.", m->nick, m->userhost);
+          --(chan->channel.splitmembers);
+          killmember(chan, m->nick);
+          continue;
+        }
       }
 
       //This bot is set +r, so resolve.
@@ -1671,6 +1675,8 @@ check_expired_chanstuff(struct chanset_t *chan)
       }
       m = n;
     }
+    // Update minutely
+    chan->channel.splitmembers = splitmembers;
     check_lonely_channel(chan);
   } else if (shouldjoin(chan))
     join_chan(chan);
