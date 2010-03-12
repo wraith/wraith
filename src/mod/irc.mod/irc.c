@@ -900,14 +900,22 @@ request_op(struct chanset_t *chan)
 
   // Pick a random member to use as verification
   memberlist* shared_member = NULL;
-  int shared_member_cnt = randint(chan->channel.members);
-  int shared_idx = 0;
+  for (int z = 0; z < 5; ++z) {
+    int shared_member_cnt = z < 4 ? randint(chan->channel.members) : 0;
+    int shared_idx = 0;
 
-  for (shared_member = chan->channel.member; shared_member && shared_member->nick[0]; shared_member = shared_member->next) {
-    if (shared_member->split) continue;
-    if (shared_idx >= shared_member_cnt)
-      break;
-    ++shared_idx;
+    for (shared_member = chan->channel.member; shared_member && shared_member->nick[0]; shared_member = shared_member->next) {
+      if (shared_member->split) continue;
+      if (shared_idx >= shared_member_cnt)
+        break;
+      ++shared_idx;
+    }
+    if (shared_member) break;
+  }
+  if (!shared_member) {
+    chan->channel.no_op = now + op_requests.time;
+    putlog(LOG_GETIN, "*", "Too many split clients on %s - Delaying requests for %d seconds.", chan->dname, op_requests.time);
+    return;
   }
 
   /* first scan for bots on my server, ask first found for ops */
