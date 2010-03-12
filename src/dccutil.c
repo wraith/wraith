@@ -313,10 +313,13 @@ dprintf_real(int idx, char* buf, size_t len, size_t bufsiz, const char* target)
 {
 /* this is for color on dcc :P */
 
-  if (unlikely(target)) {
+  if (unlikely(target) && strcmp(target, conf.bot->nick)) {
     char pbot[1024] = "";
     simple_snprintf(pbot, sizeof(pbot), "rd %zu %d %s", len, idx, buf);
-    putbot(target, pbot);
+    if (!strcmp(target, "*"))
+      putallbots(pbot);
+    else
+      putbot(target, pbot);
   } else if (unlikely(idx < 0)) {
     tputs(-idx, buf, len);
   } else if (idx > 0x7FF0) {
