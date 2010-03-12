@@ -1059,7 +1059,7 @@ static void server_secondly()
 static void server_check_lag()
 {
   if (server_online && !waiting_for_awake && !trying_server) {
-    dprintf(DP_MODE_NEXT, "PING :%li\n", (long)now);
+    dprintf(DP_MODE, "PING :%li\n", (long)now);
     lastpingtime = now;
     waiting_for_awake = 1;
   } else if (servidx != -1 && waiting_for_awake && ((now - lastpingtime) >= stoned_timeout)) {
