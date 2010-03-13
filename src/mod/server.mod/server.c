@@ -94,7 +94,7 @@ static time_t lastpingtime;	/* IRCNet LAGmeter support -- drummer */
 static char stackablecmds[511] = "";
 static char stackable2cmds[511] = "";
 static egg_timeval_t last_time;
-static time_t connect_bursting = 0;
+time_t connect_bursting = 0;
 static int real_msgburst = 0;
 static int real_msgrate = 0;
 int flood_count = 0;

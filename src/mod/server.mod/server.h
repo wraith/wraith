@@ -51,7 +51,7 @@ extern bool		trigger_on_ignore, floodless, keepnick, in_deaf, in_callerid, have_
 extern int 		servidx, ctcp_mode, answer_ctcp, serv, curserv, default_alines, flood_count, burst;
 extern unsigned int     rolls;
 extern port_t		default_port, newserverport, curservport;
-extern time_t		server_online, tried_jupenick, tried_nick, release_time;
+extern time_t		server_online, tried_jupenick, tried_nick, release_time, connect_bursting;
 extern interval_t	cycle_time;
 extern char		cursrvname[], botrealname[121], botuserhost[], ctcp_reply[1024],
 			newserver[], newserverpass[], curnetwork[], botuserip[], altnick_char, deaf_char, callerid_char;

@@ -585,6 +585,11 @@ getin_request(char *botnick, char *code, char *par)
     return;
   }
 
+  if (connect_bursting) {
+    putlog(LOG_GETIN, "*", "%sreq from %s/%s %s %s - I'm in connect burst mode.", type, botnick, nick, desc, chan->dname);
+    return;
+  }
+
   if (server_lag > lag_threshold) {
     putlog(LOG_GETIN, "*", "%sreq from %s/%s %s %s - I'm too lagged", type, botnick, nick, desc, chan->dname);
     return;

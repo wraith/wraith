@@ -105,7 +105,7 @@ do_op(char *nick, struct chanset_t *chan, bool delay, bool force)
 
   if (channel_fastop(chan) || channel_take(chan) || cookies_disabled) {
     add_mode(chan, '+', 'o', nick);
-  } else {
+  } else if (!connect_bursting) {
     add_cookie(chan, nick);
   }
   return 1;
