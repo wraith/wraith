@@ -27,12 +27,15 @@ notice_debug:
 
 normal: general notice build
 
-debug: general notice_debug build
+debug: general notice_debug build.debug
 
 general:
 
 build:
 	+@cd bdlib && $(MAKE) bdlib
+
+build.debug:
+	+@cd bdlib && $(MAKE) debug
 
 buildcheck: build
 
