@@ -1451,6 +1451,8 @@ static void cmd_channel(int idx, char *par)
   }
   dprintf(idx, "%s, %d member%s, mode %s:\n", s1, chan->channel.members,
 	  chan->channel.members == 1 ? "" : "s", s);
+  if (chan->channel.splitmembers)
+    dprintf(idx, "%d split members\n", chan->channel.splitmembers);
   if (chan->channel.topic)
     dprintf(idx, "%s: %s\n", "Channel Topic", chan->channel.topic);
   if (channel_active(chan)) {

@@ -678,7 +678,7 @@ getin_request(char *botnick, char *code, char *par)
     char *shared_nick = par[0] ? newsplit(&par) : NULL;
     memberlist* shared_member = shared_nick ? ismember(chan, shared_nick) : NULL;
     char *shared_host = par[0] ? newsplit(&par) : NULL;
-    if (!shared_nick || !shared_member || !shared_host || !(chan->channel.members == members) || strcmp(shared_host, shared_member->userhost)) {
+    if (!shared_nick || !shared_member || !shared_host || !((chan->channel.members - chan->channel.splitmembers) == members) || strcmp(shared_host, shared_member->userhost)) {
       putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - Bot seems to be on a different network???", botnick, nick, chan->dname);
       return;
     }
@@ -723,7 +723,7 @@ getin_request(char *botnick, char *code, char *par)
     bool sendi = 0;
 
     if (chan->channel.maxmembers) {
-      int lim = chan->channel.members + 5, curlim = chan->channel.maxmembers;
+      int lim = (chan->channel.members - chan->channel.splitmembers) + 5, curlim = chan->channel.maxmembers;
       if (curlim < lim) {
         char s2[6] = "";
 
@@ -900,17 +900,26 @@ request_op(struct chanset_t *chan)
 
   // Pick a random member to use as verification
   memberlist* shared_member = NULL;
-  int shared_member_cnt = randint(chan->channel.members);
-  int shared_idx = 0;
+  for (int z = 0; z < 5; ++z) {
+    int shared_member_cnt = z < 4 ? randint(chan->channel.members) : 0;
+    int shared_idx = 0;
 
-  for (shared_member = chan->channel.member; shared_member && shared_member->nick[0]; shared_member = shared_member->next) {
-    if (shared_idx == shared_member_cnt)
-      break;
-    ++shared_idx;
+    for (shared_member = chan->channel.member; shared_member && shared_member->nick[0]; shared_member = shared_member->next) {
+      if (shared_member->split) continue;
+      if (shared_idx >= shared_member_cnt)
+        break;
+      ++shared_idx;
+    }
+    if (shared_member) break;
+  }
+  if (!shared_member) {
+    chan->channel.no_op = now + op_requests.time;
+    putlog(LOG_GETIN, "*", "Too many split clients on %s - Delaying requests for %d seconds.", chan->dname, op_requests.time);
+    return;
   }
 
   /* first scan for bots on my server, ask first found for ops */
-  simple_snprintf(s, sizeof(s), "gi o %s %s %d %s %s", chan->dname, botname, chan->channel.members, shared_member->nick, shared_member->userhost);
+  simple_snprintf(s, sizeof(s), "gi o %s %s %d %s %s", chan->dname, botname, (chan->channel.members - chan->channel.splitmembers), shared_member->nick, shared_member->userhost);
 
   /* look for bots 0-1 hops away */
   for (i2 = 0; i2 < i; i2++) {
@@ -1253,8 +1262,12 @@ killmember(struct chanset_t *chan, char *nick)
    */
   if (unlikely(chan->channel.members < 0)) {
     chan->channel.members = 0;
-    for (x = chan->channel.member; x && x->nick[0]; x = x->next)
+    chan->channel.splitmembers = 0;
+    for (x = chan->channel.member; x && x->nick[0]; x = x->next) {
       chan->channel.members++;
+      if (x->split)
+        ++(chan->channel.splitmembers);
+    }
     putlog(LOG_MISC, "*", "(!) actually I know of %d members.", chan->channel.members);
   }
   if (unlikely(!chan->channel.member)) {
@@ -1415,14 +1428,9 @@ check_lonely_channel(struct chanset_t *chan)
 
   memberlist *m = NULL;
   char s[UHOSTLEN] = "";
-  int i = 0;
   static int whined = 0;
 
-  /* Count non-split channel members */
-  for (m = chan->channel.member; m && m->nick[0]; m = m->next)
-    if (!chan_issplit(m))
-      i++;
-  if (i == 1 && channel_cycle(chan) && !channel_stop_cycle(chan)) {
+  if ((chan->channel.members - chan->channel.splitmembers) == 1 && channel_cycle(chan) && !channel_stop_cycle(chan)) {
     if (chan->name[0] != '+') { /* Its pointless to cycle + chans for ops */
       putlog(LOG_MISC, "*", "Trying to cycle %s to regain ops.", chan->dname);
       dprintf(DP_MODE, "PART %s\n", chan->name);
@@ -1530,7 +1538,7 @@ raise_limit(struct chanset_t *chan)
   if (chan->mode_mns_prot & CHANLIMIT)
     return;
 
-  int nl = chan->channel.members + chan->limitraise;	/* new limit */
+  int nl = (chan->channel.members - chan->channel.splitmembers) + chan->limitraise;	/* new limit */
   int i = chan->limitraise >> 2;			/* DIV 4 */
   /* if the newlimit will be in the range made by these vars, dont change. */
   int ul = nl + i;					/* upper limit */
@@ -1610,13 +1618,18 @@ check_expired_chanstuff(struct chanset_t *chan)
     } /* me_op */
 
 //    for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
+    int splitmembers = 0;
     for (m = chan->channel.member; m && m->nick[0]; m = n) {
       n = m->next;
-      if (m->split && now - m->split > wait_split) {
-        simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
-        putlog(LOG_JOIN, chan->dname, "%s (%s) got lost in the net-split.", m->nick, m->userhost);
-        killmember(chan, m->nick);
-        continue;
+      if (m->split) {
+        ++splitmembers;
+        if (now - m->split > wait_split) {
+          simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
+          putlog(LOG_JOIN, chan->dname, "%s (%s) got lost in the net-split.", m->nick, m->userhost);
+          --(chan->channel.splitmembers);
+          killmember(chan, m->nick);
+          continue;
+        }
       }
 
       //This bot is set +r, so resolve.
@@ -1657,6 +1670,8 @@ check_expired_chanstuff(struct chanset_t *chan)
       }
       m = n;
     }
+    // Update minutely
+    chan->channel.splitmembers = splitmembers;
     check_lonely_channel(chan);
   } else if (shouldjoin(chan))
     join_chan(chan);
