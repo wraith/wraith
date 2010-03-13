@@ -1428,14 +1428,9 @@ check_lonely_channel(struct chanset_t *chan)
 
   memberlist *m = NULL;
   char s[UHOSTLEN] = "";
-  int i = 0;
   static int whined = 0;
 
-  /* Count non-split channel members */
-  for (m = chan->channel.member; m && m->nick[0]; m = m->next)
-    if (!chan_issplit(m))
-      i++;
-  if (i == 1 && channel_cycle(chan) && !channel_stop_cycle(chan)) {
+  if ((chan->channel.members - chan->channel.splitmembers) == 1 && channel_cycle(chan) && !channel_stop_cycle(chan)) {
     if (chan->name[0] != '+') { /* Its pointless to cycle + chans for ops */
       putlog(LOG_MISC, "*", "Trying to cycle %s to regain ops.", chan->dname);
       dprintf(DP_MODE, "PART %s\n", chan->name);
