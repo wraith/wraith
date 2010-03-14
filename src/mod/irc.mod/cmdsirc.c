@@ -1924,7 +1924,6 @@ static void cmd_play(int idx, char *par)
     return;
   }
 
-  bd::String prefix;
   bd::Stream stream;
   stream.loadFile(par);
   bd::String str;
