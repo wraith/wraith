@@ -1284,6 +1284,7 @@ static void disconnect_server(int idx, int dolost)
   have_cprivmsg = 0;
   have_cnotice = 0;
   use_flood_count = 0;
+  modesperline = 0;
   if (dolost) {
     Auth::DeleteAll();
     trying_server = 0;
