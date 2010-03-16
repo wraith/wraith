@@ -1729,6 +1729,7 @@ flush_modes()
   Context;
 
   for (register struct chanset_t *chan = chanset; chan; chan = chan->next) {
+    if (!me_op(chan)) continue;
     for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
       if (m->delay && m->delay <= now) {
         m->delay = 0L;

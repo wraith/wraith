@@ -918,6 +918,16 @@ void clear_channel(struct chanset_t *chan, bool reset)
 
   if (reset)
     init_channel(chan, 1);
+  for (size_t i = 0; i < MODES_PER_LINE_MAX; ++i) {
+    if (chan->cmode[i].op) {
+      free(chan->cmode[i].op);
+      chan->cmode[i].op = NULL;
+    }
+    if (chan->ccmode[i].op) {
+      free(chan->ccmode[i].op);
+      chan->ccmode[i].op = NULL;
+    }
+  }
 }
 
 /* Create new channel and parse commands.

@@ -693,8 +693,6 @@ static inline bool chanset_unlink(struct chanset_t *chan)
  */
 void remove_channel(struct chanset_t *chan)
 {
-   int i;
-
    if (chan != chanset_default) {
      irc_log(chan, "Parting");
      /* Remove the channel from the list, so that noone can pull it
@@ -721,10 +719,6 @@ void remove_channel(struct chanset_t *chan)
      noshare = 0;
    }
    free(chan->channel.key);
-   for (i = 0; i < MODES_PER_LINE_MAX && chan->cmode[i].op; i++)
-     free(chan->cmode[i].op);
-   for (i = 0; i < (MODES_PER_LINE_MAX - 1) && chan->ccmode[i].op; i++)
-     free(chan->ccmode[i].op);
    if (chan->key)
      free(chan->key);
    if (chan->rmkey)
