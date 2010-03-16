@@ -114,6 +114,9 @@ do_op(char *nick, struct chanset_t *chan, bool delay, bool force)
 static void
 flush_cookies(struct chanset_t *chan, int pri)
 {
+  if (connect_bursting) // Make sure not in burst mode
+    return;
+
   char out[512] = "", *p = out, post[512] = "";
   size_t postsize = sizeof(post) - 1;
   memberlist *nicks[3] = { NULL, NULL, NULL };
