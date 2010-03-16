@@ -151,7 +151,7 @@ void logidx(int idx, const char *format, ...)
   va_end(va);
 
   if (idx < 0)
-    putlog(LOG_DEBUG, "*", "%s", va_out);
+    putlog(LOG_MISC, "*", "%s", va_out);
   else
     dprintf(idx, "%s\n", va_out);
 }

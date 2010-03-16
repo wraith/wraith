@@ -948,7 +948,7 @@ int updatebin(int idx, char *par, int secs)
   Tempfile *conffile = new Tempfile("conf");
 
   if (writeconf(NULL, conffile->fd, CONF_ENC)) {
-    putlog(LOG_MISC, "*", STR("Failed to write temporary config file for update."));
+    logidx(idx, STR("Failed to write temporary config file for update."));
     delete conffile;
     return 1;
   }
@@ -961,8 +961,7 @@ int updatebin(int idx, char *par, int secs)
   argv[2] = 0;
   i = simple_exec(argv);
   if (i == -1 || WEXITSTATUS(i) != 2) {
-    dprintf(idx, STR("Couldn't restart new binary (error %d)\n"), i);
-    putlog(LOG_MISC, "*", STR("Couldn't restart new binary (error %d)"), i);
+    logidx(idx, STR("Couldn't restart new binary (error %d)"), i);
     delete conffile;
     return i;
   }
@@ -978,8 +977,7 @@ int updatebin(int idx, char *par, int secs)
   i = simple_exec(argv);
   delete conffile;
   if (i == -1 || WEXITSTATUS(i) != 6) { /* 6 for successfull config read/write */
-    dprintf(idx, STR("Couldn't pass config to new binary (error %d)\n"), i);
-    putlog(LOG_MISC, "*", STR("Couldn't pass config to new binary (error %d)"), i);
+    logidx(idx, STR("Couldn't pass config to new binary (error %d)"), i);
     return i;
   }
 #endif /* !CYGWIN_HACKS */
