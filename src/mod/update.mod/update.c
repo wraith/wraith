@@ -253,9 +253,10 @@ void finish_update_stream(int idx, bd::Stream& stream)
   putlog(LOG_DEBUG, "*", "Update binary is %zu bytes.", stream.length());
   putlog(LOG_MISC, "*", "Updating with binary: %s", buf2);
   
-  if (updatebin(0, buf2, 120))
+  if (updatebin(0, buf2, 120)) {
     putlog(LOG_MISC, "*", "Failed to update to new binary..");
-  else
+    unlink(buf2);
+  } else
     updated = 1;
 }
 
