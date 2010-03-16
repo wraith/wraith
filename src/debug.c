@@ -162,7 +162,7 @@ static void got_segv(int z)
   FILE *f = fopen(btfile, "w");
 
   if (f) {
-    strlcpy(std_in, "bt 100\nbt 100 full\n", sizeof(stdin));
+    strlcpy(std_in, "bt 100\nbt 100 full\ndetach\nquit\n", sizeof(stdin));
 //    simple_snprintf(stdin, sizeof(stdin), "detach\n");
 //    simple_snprintf(stdin, sizeof(stdin), "q\n");
 
