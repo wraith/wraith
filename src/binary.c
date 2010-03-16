@@ -554,14 +554,21 @@ check_sum(const char *fname, const char *cfgfile, bool read_stdin)
   }
 }
 
-bool check_bin_initialized(const char *fname)
+/*
+ * @returns 0 = initialized, 1 = not initialized, 2 = corrupted
+ */
+int check_bin_initialized(const char *fname)
 {
   const char* argv[] = {fname, "-p", 0};
   int i = simple_exec(argv);
-  if (i != -1 && WEXITSTATUS(i) == 4)
-    return 1;
+  if (i != -1) {
+    if (WEXITSTATUS(i) == 4)
+      return 0;
+    else if (WEXITSTATUS(i) == 5)
+      return 1;
+  }
 
-  return 0;
+  return 2;
 }
 
 bool check_bin_compat(const char *fname)
@@ -594,7 +601,7 @@ void write_settings(const char *fname, int die, bool doconf, int initialized)
   int bits = WRITE_CHECKSUM;
   /* see if the binary is already initialized or not */
   if (initialized == -1)
-    initialized = check_bin_initialized(fname);
+    initialized = check_bin_initialized(fname) ? 0 : 1;
 
   /* only write pack data if the binary is uninitialized
    * otherwise, assume it has similar/correct/updated pack data

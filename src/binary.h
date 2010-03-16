@@ -13,7 +13,7 @@ extern int checked_bin_buf;
 
 void check_sum(const char *, const char *, bool);
 void write_settings(const char *, int, bool, int initialized = -1);
-bool check_bin_initialized(const char *fname);
+int check_bin_initialized(const char *fname);
 bool check_bin_compat(const char *fname);
 void conf_to_bin(conf_t *, bool, int);
 void reload_bin_data();

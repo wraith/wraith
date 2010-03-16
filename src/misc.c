@@ -930,8 +930,13 @@ int updatebin(int idx, char *par, int secs)
   }
 
   /* Check if the new binary is compatible */
-  int initialized = (int)check_bin_initialized(path);
-  if (!initialized && !check_bin_compat(path)) {
+  int initialized_code = check_bin_initialized(path);
+  printf("%d\n", initialized_code);
+  if (initialized_code == 2) {
+    logidx(idx, STR("New binary is corrupted or the wrong architecture/operating system."));
+    free(path);
+    return 1;
+  } else if (initialized_code == 1 && !check_bin_compat(path)) {
     logidx(idx, STR("New binary must be initialized as pack structure has been changed in new version."));
     free(path);
     return 1;
@@ -943,7 +948,7 @@ int updatebin(int idx, char *par, int secs)
   simple_snprintf(buf, sizeof(buf), STR("%s/.bin.old"), conf.datadir);
   copyfile(binname, buf);
 
-  write_settings(path, -1, 0, initialized);	/* re-write the binary with our packdata */
+  write_settings(path, -1, 0, initialized_code ? 0 : 1);	/* re-write the binary with our packdata */
 
   Tempfile *conffile = new Tempfile("conf");
 
