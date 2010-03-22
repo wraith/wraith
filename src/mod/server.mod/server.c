@@ -287,7 +287,7 @@ void deq_msg()
   for(size_t nq = 0; nq < (sizeof(qdsc) / sizeof(qdsc[0])) - 1; ++nq) {
     while (qdsc[nq].q->head &&
         // If burstable queue and can burst, or not a burstable queue and not connect bursting
-        ((qdsc[nq].burst && (burst < msgburst)) || (!qdsc[nq].burst && !connect_bursting)) &&
+        ((qdsc[nq].burst && (burst < msgburst && (!connect_bursting || (connect_bursting && qdsc[nq].connect_burst)))) || (!qdsc[nq].burst && !connect_bursting)) &&
         ((last_time.sec - now) < MAXPENALTY)) {
 #ifdef not_implemented
       if (deq_kick(qdsc[nq].idx)) {
