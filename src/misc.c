@@ -724,6 +724,7 @@ readsocks(const char *fname)
       add_server(nserv);
       curserv = 0;
       keepnick = 0; /* Wait to change nicks until relinking, fixes nick/jupenick switching issues during restart */
+      reset_flood();
       if (!server_online) server_online = now;
       rehash_server(dcc[servidx].host, nick);
       if (cached_005)

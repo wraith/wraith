@@ -1069,6 +1069,12 @@ static void server_check_lag()
   }
 }
 
+void reset_flood()
+{
+  flood_time.sec = last_time.sec = now - 100;
+  flood_time.usec = last_time.usec = 0;
+}
+
 static void server_minutely()
 {
   if (server_online) {

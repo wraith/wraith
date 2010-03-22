@@ -82,5 +82,6 @@ void join_chans();
 void check_hostmask();
 void next_server(int *, char *, port_t *, char *);
 void server_send_ison();
+void reset_flood();
 
 #endif		/* _EGG_MOD_SERVER_SERVER_H */
