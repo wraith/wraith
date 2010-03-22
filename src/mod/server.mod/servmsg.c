@@ -276,7 +276,8 @@ got004(char *from, char *msg)
     connect_bursting = now;
     msgburst = SERVER_CONNECT_BURST_RATE;
     msgrate = 200;
-    last_time.sec = now - 100;
+    flood_time.sec = last_time.sec = now - 100;
+    flood_time.usec = last_time.usec = 0;
     putlog(LOG_DEBUG, "*", "Server allows connect bursting, bursting for %d seconds", SERVER_CONNECT_BURST_TIME);
   }
 
@@ -2020,8 +2021,8 @@ static void server_dns_callback(int id, void *client_data, const char *host, bd:
     first_ctcp_check = 0;
 
     // Just connecting, set last queue time to the past.
-    last_time.sec = now - 100;
-    last_time.usec = 0;
+    flood_time.sec = last_time.sec = now - 100;
+    flood_time.usec = last_time.usec = 0;
     end_burstmode();
     use_flood_count = 0;
     real_msgburst = msgburst;

@@ -327,7 +327,7 @@ void deq_msg()
     last_time.usec += (150*burst) * 1000;
     // Add some penalty for each flood_count
     last_time.usec += (40*flood_count) * 1000;
-    // Cap the penalty at 1800 and depent more on flood_count
+    // Cap the penalty at 1800 and depend more on flood_count
     if (timeval_diff(&last_time, &last_time_save) > 1800) {
       last_time.sec = last_time_save.sec;
       last_time.usec = 1800 * 1000;
