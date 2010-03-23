@@ -34,13 +34,21 @@ bd::String encrypt_string(const bd::String& key, const bd::String& data) {
  * @param IV The IV to use (WARNING: This is modified inplace)
  * @return A new, encrypted string
  */
-bd::String encrypt_string_cbc(const bd::String& key, const bd::String& data, unsigned char* IV) {
+bd::String encrypt_string_cbc(const bd::String& key, bd::String data, bd::String IV) {
   if (!key) return data;
-  size_t len = data.length();
-  char *bdata = (char*) aes_encrypt_cbc_binary(key.c_str(), (unsigned char*) data.c_str(), &len, IV);
-  bd::String encrypted(bdata, len);
-  free(bdata);
-  return encrypted;
+
+  // Add padding
+  size_t padding = CRYPT_BLOCKSIZE;
+  if (data.length() % CRYPT_BLOCKSIZE)
+    padding = (CRYPT_BLOCKSIZE - (data.length() % CRYPT_BLOCKSIZE));
+  // Pad with padding bytes of padding
+  data.resize(data.length() + padding, padding);
+
+  AES_set_encrypt_key((const unsigned char *) key.c_str(), CRYPT_KEYBITS, &e_key);
+  AES_cbc_encrypt((const unsigned char*)data.data(), (unsigned char*)data.mdata(), data.length(), &e_key, (unsigned char*)IV.mdata(), AES_ENCRYPT);
+  OPENSSL_cleanse(&e_key, sizeof(e_key));
+
+  return data;
 }
 
 /**
