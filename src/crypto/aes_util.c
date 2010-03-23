@@ -155,6 +155,7 @@ aes_encrypt_cbc_binary(const char *keydata, unsigned char *in, size_t *inlen, un
     len += (CRYPT_BLOCKSIZE - (len % CRYPT_BLOCKSIZE));
 
   out = (unsigned char *) my_calloc(1, len + 1);
+  memcpy(out, in, *inlen);
   *inlen = len;
 
   if (!keydata || !*keydata) {
@@ -165,7 +166,7 @@ aes_encrypt_cbc_binary(const char *keydata, unsigned char *in, size_t *inlen, un
 
     strlcpy(key, keydata, sizeof(key));
     AES_set_encrypt_key((const unsigned char *) key, CRYPT_KEYBITS, &e_key);
-    AES_cbc_encrypt(in, out, len, &e_key, ivec, AES_ENCRYPT);
+    AES_cbc_encrypt(out, out, len, &e_key, ivec, AES_ENCRYPT);
     OPENSSL_cleanse(key, sizeof(key));
     OPENSSL_cleanse(&e_key, sizeof(e_key));
   }
@@ -180,6 +181,7 @@ aes_decrypt_cbc_binary(const char *keydata, unsigned char *in, size_t *len, unsi
 
   *len -= *len % CRYPT_BLOCKSIZE;
   out = (unsigned char *) my_calloc(1, *len + 1);
+  memcpy(out, in, *len);
 
   if (!keydata || !*keydata) {
     /* No key, no decryption */
@@ -189,7 +191,7 @@ aes_decrypt_cbc_binary(const char *keydata, unsigned char *in, size_t *len, unsi
 
     strlcpy(key, keydata, sizeof(key));
     AES_set_decrypt_key((const unsigned char *) key, CRYPT_KEYBITS, &d_key);
-    AES_cbc_encrypt(in, out, *len, &d_key, ivec, AES_DECRYPT);
+    AES_cbc_encrypt(out, out, *len, &d_key, ivec, AES_DECRYPT);
     OPENSSL_cleanse(key, sizeof(key));
     OPENSSL_cleanse(&d_key, sizeof(d_key));
   }
