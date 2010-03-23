@@ -151,10 +151,13 @@ aes_encrypt_cbc_binary(const char *keydata, unsigned char *in, size_t *inlen, un
   unsigned char *out = NULL;
 
   /* First pad indata to CRYPT_BLOCKSIZE multiple */
-  if (len % CRYPT_BLOCKSIZE)             /* more than 1 block? */
-    len += (CRYPT_BLOCKSIZE - (len % CRYPT_BLOCKSIZE));
+  size_t padding = 16;
+  if (len % CRYPT_BLOCKSIZE)              /* more than 1 block? */
+    padding = (CRYPT_BLOCKSIZE - (len % CRYPT_BLOCKSIZE));
+  len += padding;
 
-  out = (unsigned char *) my_calloc(1, len + 1);
+  out = (unsigned char *) my_calloc(1, len);
+  memset(out + *inlen, padding, padding);
   memcpy(out, in, *inlen);
   *inlen = len;
 
@@ -170,7 +173,6 @@ aes_encrypt_cbc_binary(const char *keydata, unsigned char *in, size_t *inlen, un
     OPENSSL_cleanse(key, sizeof(key));
     OPENSSL_cleanse(&e_key, sizeof(e_key));
   }
-  out[len] = 0;
   return out;
 }
 
@@ -196,7 +198,13 @@ aes_decrypt_cbc_binary(const char *keydata, unsigned char *in, size_t *len, unsi
     OPENSSL_cleanse(&d_key, sizeof(d_key));
   }
 
-  *len = strlen((char*) out);
-  out[*len] = 0;
+  // How much padding?
+  size_t padding = out[*len - 1];
+
+  if (!padding)
+    *len = strlen((char*) out);
+  else
+    *len -= padding;
+
   return out;
 }
