@@ -64,11 +64,9 @@ int EncryptedStream::loadFile (const int fd) {
 }
 
 void EncryptedStream::apply_filters(bd::String& buf, const bd::String& IV) const {
-  if (enc_flags & ENC_AES_256_CBC) {
-    unsigned char* iv = (unsigned char*) IV.dup();
-    buf = encrypt_string_cbc(key, buf, iv);
-    delete[] iv;
-  } else if (enc_flags & ENC_AES_256_ECB)
+  if (enc_flags & ENC_AES_256_CBC)
+    buf = encrypt_string_cbc(key, buf, IV);
+  else if (enc_flags & ENC_AES_256_ECB)
     buf = encrypt_string(key, buf);
 
   if (enc_flags & ENC_BASE64_BROKEN)
@@ -83,11 +81,8 @@ void EncryptedStream::unapply_filters(bd::String& buf, const bd::String& IV) con
   if (enc_flags & ENC_BASE64)
     buf = bd::base64Decode(buf);
 
-  if (enc_flags & ENC_AES_256_CBC) {
-    unsigned char* iv = (unsigned char*) IV.dup();
-    buf = decrypt_string_cbc(key, buf, iv);
-    delete[] iv;
-  }
+  if (enc_flags & ENC_AES_256_CBC)
+    buf = decrypt_string_cbc(key, buf, IV);
   else if (enc_flags & ENC_AES_256_ECB)
     buf = decrypt_string(key, buf);
 }
