@@ -74,17 +74,23 @@ bd::String decrypt_string(const bd::String& key, const bd::String& data) {
  * @param IV The IV to use (WARNING: This is modified inplace)
  * @return A new, decrypted string
  */
-bd::String decrypt_string_cbc(const bd::String& key, const bd::String& data, unsigned char* IV) {
+bd::String decrypt_string_cbc(const bd::String& key, bd::String data, bd::String IV) {
   if (!key) return data;
-  size_t len = data.length();
-  char *bdata = (char*) aes_decrypt_cbc_binary(key.c_str(), (unsigned char*) data.c_str(), &len, IV);
-  bd::String decrypted(bdata, len);
-  OPENSSL_cleanse(bdata, len);
-  free(bdata);
-  return decrypted;
+
+  data.resize(data.length() - (data.length() % CRYPT_BLOCKSIZE));
+  AES_set_decrypt_key((const unsigned char *) key.c_str(), CRYPT_KEYBITS, &d_key);
+  AES_cbc_encrypt((const unsigned char*)data.data(), (unsigned char*)data.mdata(), data.length(), &d_key, (unsigned char*)IV.mdata(), AES_DECRYPT);
+  OPENSSL_cleanse(&d_key, sizeof(d_key));
+
+  // How much padding?
+  size_t padding = data[data.length() - 1];
+
+  if (!padding || padding > 16)
+    data.resize(strlen((char*) data.c_str()));
+  else
+    data.resize(data.length() - padding);
+  return data;
 }
-
-
 
 unsigned char *
 aes_encrypt_ecb_binary(const char *keydata, unsigned char *in, size_t *inlen)
