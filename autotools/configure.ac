@@ -6,7 +6,7 @@ AC_PREREQ(2.59)
 AC_INIT([wraith],[],[wraith@botpack.net])
 AC_CONFIG_SRCDIR(src/eggdrop.h)
 AC_CONFIG_HEADER(config.h)
-AC_COPYRIGHT([Copyright (c) 2003 - 2009 Bryan Drewery])
+AC_COPYRIGHT([Copyright (c) 2003 - 2010 Bryan Drewery])
 AC_REVISION($Revision$)
 
 EGG_SAVE_PARAMETERS
