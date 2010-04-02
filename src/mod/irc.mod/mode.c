@@ -997,7 +997,7 @@ gotmode(char *from, char *msg)
           if (channel_pending(chan))
             return 0;
           dprintf(DP_MODE, "KICK %s %s :Desync\n", chan->name[0] ? chan->name : chan->dname, nick);
-          putlog(LOG_MISC, "*", "* Mode change on %s for nonexistant %s!", chan->dname, nick);
+          putlog(LOG_MISC, chan->dname, "* Mode change on %s from nonexistant %s!", chan->dname, nick);
           send_chan_who(DP_MODE, chan);
           return 0;
         }
