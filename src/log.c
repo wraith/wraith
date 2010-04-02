@@ -199,6 +199,7 @@ bool logfile_open()
   return 1;
 }
 
+#ifdef unused
 bool logfile_stat(const char *fname)
 {
   struct stat st;
@@ -214,10 +215,12 @@ bool logfile_stat(const char *fname)
   }
   return 1;
 }
+#endif
 
 void logfile(int type, const char *msg)
 {
-  if (!log_f && !logfile_open())
+  // Only log if this is an actual bot and not a startup/cron proc
+  if (!safe_to_log || (!log_f && !logfile_open()))
     return;
 
 //  if (!logfile_stat(".l"))

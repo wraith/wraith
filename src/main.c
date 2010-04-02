@@ -95,6 +95,7 @@ const char	*egg_version = VERSION;
 char	git_version[50] = "";
 
 bool	used_B = 0;		/* did we get started with -B? */
+bool	safe_to_log = 0;
 int 	role;
 bool 	loading = 0;
 int	default_flags = 0;	/* Default user flags and */
@@ -800,6 +801,8 @@ int main(int argc, char **argv)
       exit(1);
     }
   }
+
+  safe_to_log = 1;
 
   init_flags();			/* needed to establish FLAGS[] */
   core_binds_init();
