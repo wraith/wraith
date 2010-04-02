@@ -592,21 +592,21 @@ void tell_bottree(int idx)
     return;
   }
 
-  char s[161] = "", work[1024] = "", *color_str = NULL;
+  char *color_str = NULL;
   tand_t *last[20] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                        NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
   tand_t *thisbot = NULL, *bot = NULL, *bot2 = NULL;
-  int lev = 0, more = 1, mark[20], ok, cnt, i = 0, imark, tothops = 0;
+  int lev = 0, more = 1, mark[20], ok, cnt, i = 0, tothops = 0;
   struct userrec *botu = NULL;
+  bd::String s, work;
 
   for (bot = tandbot; bot; bot = bot->next)
     if (!bot->uplink) {
-      if (i) {
-	s[i++] = ',';
-	s[i++] = ' ';
-      }
-      strlcpy(s + i, bot->bot, sizeof(s) - i);
-      i += strlen(bot->bot);
+      if (i)
+        s += ", ";
+      s += bot->bot;
+      if (!i)
+        i = 1;
     }
 
   if (bot_hublevel(conf.bot->u) < 999)
@@ -616,15 +616,14 @@ void tell_bottree(int idx)
   else
     color_str = (char *) NULL;
 
-  if (s[0])
-    dprintf(idx, "(%s %s)\n", "No trace info for:", s);
+  if (s.length())
+    dprintf(idx, "(%s %s)\n", "No trace info for:", s.c_str());
   dprintf(idx, "%s%s%s (%s)\n", color_str ? color_str : "",
                                     conf.bot->nick,
                                     color_str ? COLOR_END(idx) : "",
                                     egg_version);
 
   thisbot = (tand_t *) 1;
-  work[0] = 0;
   while (more) {
     if (lev == 20) {
       dprintf(idx, "\n%s\n", "Tree too complex!");
@@ -636,21 +635,19 @@ void tell_bottree(int idx)
       if (bot->uplink == thisbot)
 	cnt++;
     if (cnt) {
-      imark = 0;
       for (i = 0; i < lev; i++) {
 	if (mark[i])
-	  strlcpy(work + imark, "  |  ", sizeof(work) - imark);
-	else
-	  strlcpy(work + imark, "     ", sizeof(work) - imark);
-	imark += 5;
+          work += "  |  ";
+        else
+          work += "     ";
       }
       if (cnt > 1)
-	strlcpy(work + imark, "  |-", sizeof(work) - imark);
+        work += "  |-";
       else
-	strlcpy(work + imark, "  `-", sizeof(work) - imark);
-      s[0] = 0;
+        work += "  `-";
+      s.clear();
       bot = tandbot;
-      while (!s[0]) {
+      while (bot && !s) {
 	if (bot->uplink == thisbot) {
           botu = get_user_by_handle(userlist, bot->bot);
        
@@ -661,23 +658,19 @@ void tell_bottree(int idx)
           else
             color_str = (char *) NULL;
 
-          if (bot->share)
-            i = simple_snprintf(s, sizeof(s), "%c", bot->share);
-          else
-            i = simple_snprintf(s, sizeof(s), "-");
-          i = simple_snprintf(s + 1, sizeof(s) - 1, "%s%s%s (%s)", color_str ? color_str : "",
+          s.printf("%c%s%s%s (%s)", bot->share ? bot->share : '-', color_str ? color_str : "",
                                                 bot->bot,
                                                 color_str ? COLOR_END(idx) : "",
                                                 bot->version);
 	} else
 	  bot = bot->next;
       }
-      dprintf(idx, "%s%s\n", work, s);
+      dprintf(idx, "%s%s\n", work.c_str(), s.c_str());
       if (cnt > 1)
 	mark[lev] = 1;
       else
 	mark[lev] = 0;
-      work[0] = 0;
+      work.clear();
       last[lev] = thisbot;
       thisbot = bot;
       lev++;
@@ -707,11 +700,7 @@ void tell_bottree(int idx)
                   color_str = (char *) NULL;
 
 		bot2 = bot;
-                if (bot->share)
-                  i = simple_snprintf(s, sizeof(s), "%c", bot->share);
-                else
-                  i = simple_snprintf(s, sizeof(s), "-");
-                i = simple_snprintf(s + 1, sizeof(s) - 1, "%s%s%s (%s)", color_str ? color_str : "",
+                s.printf("%c%s%s%s (%s)", bot->share ? bot->share : '-', color_str ? color_str : "",
                                                       bot->bot,
                                                       color_str ? COLOR_END(idx) : "",
                                                       bot->version);
@@ -720,21 +709,19 @@ void tell_bottree(int idx)
 	  }
 	}
 	if (cnt) {
-	  imark = 0;
 	  for (i = 1; i < lev; i++) {
 	    if (mark[i - 1])
-	      strlcpy(work + imark, "  |  ", sizeof(work) - imark);
-	    else
-	      strlcpy(work + imark, "     ", sizeof(work) - imark);
-	    imark += 5;
+              work += "  |  ";
+            else
+              work += "     ";
 	  }
 	  more = 1;
 	  if (cnt > 1)
-	    dprintf(idx, "%s  |-%s\n", work, s);
+	    dprintf(idx, "%s  |-%s\n", work.c_str(), s.c_str());
 	  else
-	    dprintf(idx, "%s  `-%s\n", work, s);
+	    dprintf(idx, "%s  `-%s\n", work.c_str(), s.c_str());
 	  thisbot = bot2;
-	  work[0] = 0;
+          work.clear();
 	  if (cnt > 1)
 	    mark[lev - 1] = 1;
 	  else

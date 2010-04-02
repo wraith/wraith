@@ -81,6 +81,7 @@
   * Fix bots never timing out when connecting to servers sometimes.
   * Bot no longer tries opening an identd socket unless it's root or running on cygwin.
   * Fix crash when setting a bot +B
+  * Fix crash and lockup in cmd_bottree
 * Misc changes
   * Cleanup DCC/Telnet listening so bot only listens on IPV6 if it was specifically given an IPV6 IP.
   * CTCP bot CHAT will no longer work if the bot does not have an IPV4 IP set.
