@@ -1130,7 +1130,9 @@ gotmode(char *from, char *msg)
                */
               for (i = 0; i < (modecnt - 1); i++) { /* Don't need to hit the -b */
                 if (msign == '+' && mmode == 'o') {
-                  mv = ismember(chan, mparam);
+                  mv = assert_ismember(chan, mparam);
+                  // Unknown client - I am desycned, don't punish or it may lead to fight
+                  if (!mv) continue;
 
                   const char *cookie = &(modes[modecnt - 1][3]);
                   if ((isbadop = checkcookie(chan->dname, m, mv, cookie, i))) {
