@@ -860,7 +860,7 @@ static void init_channel(struct chanset_t *chan, bool reset)
   chan->channel.splitmembers = 0;
 
   if (!reset)
-    chan->channel.key = (char *) my_calloc(1, 1);
+    my_setkey(chan, NULL);
 
   chan->channel.ban = (masklist *) my_calloc(1, sizeof(masklist));
   init_masklist(chan->channel.ban);

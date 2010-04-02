@@ -84,7 +84,6 @@ static void do_protect(struct chanset_t* chan, const char* reason);
 static bool do_op(char *, struct chanset_t *, bool, bool);
 static void request_op(struct chanset_t *);
 static void request_in(struct chanset_t *);
-static void my_setkey(struct chanset_t *, char *);
 //static void maybe_revenge(struct chanset_t *, char *, char *, int);
 static bool detect_chan_flood(char *, char *, char *, struct chanset_t *, int,
 			     char *);
@@ -109,6 +108,7 @@ static void get_channel_masks(struct chanset_t* chan);
 
 #endif /* MAKING_IRC */
 
+void my_setkey(struct chanset_t *, char *);
 void force_join_chan(struct chanset_t* chan, int idx = DP_MODE);
 void join_chan(struct chanset_t* chan, int idx = DP_MODE);
 

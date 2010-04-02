@@ -616,10 +616,7 @@ getin_request(char *botnick, char *code, char *par)
       putlog(LOG_GETIN, "*", "Got key for %s from %s - I shouldn't be on that chan?!?", chan->dname, botnick);
     } else {
       if (!(channel_pending(chan) || channel_active(chan))) {
-        /* Cache the key */
-        free(chan->channel.key);
-        chan->channel.key = strdup(nick);
-
+        my_setkey(chan, nick);
         putlog(LOG_GETIN, "*", "Got key for %s from %s (%s) - Joining", chan->dname, botnick, chan->channel.key);
         join_chan(chan);
       } else {
@@ -1209,15 +1206,11 @@ maybe_revenge(struct chanset_t *chan, char *whobad, char *whovictim, int type)
 
 /* Set the key.
  */
-static void
+void
 my_setkey(struct chanset_t *chan, char *k)
 {
   free(chan->channel.key);
-  if (k == NULL) {
-    chan->channel.key = (char *) my_calloc(1, 1);
-    return;
-  }
-  chan->channel.key = strdup(k);
+  chan->channel.key = k ? strdup(k) : (char *) my_calloc(1, 1);
 }
 
 /* Adds a ban, exempt or invite mask to the list
@@ -1372,8 +1365,7 @@ reset_chan_info(struct chanset_t *chan)
   if (!channel_pending(chan)) {
     bool opped = me_op(chan) ? 1 : 0;
 
-    free(chan->channel.key);
-    chan->channel.key = (char *) my_calloc(1, 1);
+    my_setkey(chan, NULL);
     clear_channel(chan, 1);
     chan->ircnet_status |= CHAN_PEND;
     chan->ircnet_status &= ~(CHAN_ACTIVE | CHAN_ASKEDMODES | CHAN_JOINING);

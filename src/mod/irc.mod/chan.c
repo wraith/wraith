@@ -2414,8 +2414,7 @@ static int got475(char *from, char *msg)
     chan->ircnet_status &= ~CHAN_JOINING;
     putlog(LOG_JOIN, chan->dname, "Bad key--can't join: %s", chan->dname);
     if (chan->channel.key[0]) {
-      free(chan->channel.key);
-      chan->channel.key = (char *) my_calloc(1, 1);
+      my_setkey(chan, NULL);
       join_chan(chan);
     } else {
       request_in(chan);
