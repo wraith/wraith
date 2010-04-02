@@ -777,7 +777,7 @@ void reload_bin_data() {
     if (oldbots)
       free_conf_bots(oldbots);
 
-    if (!conf.bot->localhub) {
+    if (!conf.bot->localhub && !conf.bot->hub) {
       free_conf_bots(conf.bots);
 
       if (was_localhub) {
