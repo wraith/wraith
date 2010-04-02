@@ -2038,7 +2038,7 @@ static int got315(char *from, char *msg)
   chan = findchan(chname);
 
   /* May have left the channel before the who info came in */
-  if (!chan || !channel_pending(chan))
+  if (!chan || !channel_pending(chan) || !shouldjoin(chan))
     return 0;
 
   /* Finished getting who list, can now be considered officially ON CHANNEL */
@@ -2046,7 +2046,7 @@ static int got315(char *from, char *msg)
   chan->ircnet_status &= ~(CHAN_PEND | CHAN_JOINING);
   memberlist* me = ismember(chan, botname);
   /* Am *I* on the channel now? if not, well d0h. */
-  if (shouldjoin(chan) && !me) {
+  if (!me) {
     putlog(LOG_MISC | LOG_JOIN, chan->dname, "Oops, I'm not really on %s.", chan->dname);
     force_join_chan(chan);
   } else {
