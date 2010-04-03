@@ -266,7 +266,7 @@ flush_mode(struct chanset_t *chan, int pri)
 
   /* Do -{b,e,I} before +{b,e,I} to avoid the server ignoring overlaps */
   for (i = 0; i < modesperline; i++) {
-    if ((chan->cmode[i].type & MINUS) && postsize > strlen(chan->cmode[i].op)) {
+    if (chan->cmode[i].op && (chan->cmode[i].type & MINUS) && postsize > strlen(chan->cmode[i].op)) {
       if (plus) {
         *p++ = '-', plus = 0;
       }
@@ -285,7 +285,7 @@ flush_mode(struct chanset_t *chan, int pri)
 
   /* now do all the + modes... */
   for (i = 0; i < modesperline; i++) {
-    if ((chan->cmode[i].type & PLUS) && postsize > strlen(chan->cmode[i].op)) {
+    if (chan->cmode[i].op && (chan->cmode[i].type & PLUS) && postsize > strlen(chan->cmode[i].op)) {
       if (plus != 1) {
         *p++ = '+', plus = 1;
       }
