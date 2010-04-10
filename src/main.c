@@ -302,7 +302,7 @@ static void show_help()
   const char format[] = "%-30s %-30s\n";
 
   printf(STR("%s\n\n"), version);
-  printf(STR("%s [options] [botnick[.conf]]\n"));
+  printf(STR("%s [options] [botnick[.conf]]\n"), binname);
   printf(STR("Not supplying any options will make all bots in the binary spawn.\n"));
   printf(format, STR("Option"), STR("Description"));
   printf(format, STR("------"), STR("-----------"));
