@@ -8,6 +8,8 @@ cq clearqueue play
 +list set +
 -list set -
 list set list
+-bot -user
++bot newleaf
 
 # From http://stats.efnet.org with hubs removed
 :servers

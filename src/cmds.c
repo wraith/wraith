@@ -4557,7 +4557,6 @@ cmd_t C_dcc[] =
   {"+host",		"o|o",	(Function) cmd_pls_host,	NULL, AUTH},
   {"+ignore",		"m",	(Function) cmd_pls_ignore,	NULL, AUTH},
   {"+user",		"m",	(Function) cmd_pls_user,	NULL, AUTH},
-  {"-bot",		"a",	(Function) cmd_mns_user,	NULL, HUB},
   {"-host",		"",	(Function) cmd_mns_host,	NULL, AUTH},
   {"-ignore",		"m",	(Function) cmd_mns_ignore,	NULL, AUTH},
   {"-user",		"m",	(Function) cmd_mns_user,	NULL, AUTH},

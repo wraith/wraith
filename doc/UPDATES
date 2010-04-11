@@ -130,6 +130,7 @@
   * Chain WHO requests to try avoiding Max SendQ
   * More Auth channel commands are now available. Auth up and run +help to see them all. (fixes #2)
   * Add debug buffer output on crash - please give to bryan if it ever comes up.
+  * Remove hardcoded -bot alias and move to 'set alias'. Also add a '+bot' alias to 'newleaf'
 
 1.2.16.1
 * Fix linux compile errors
