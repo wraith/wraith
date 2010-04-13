@@ -39,8 +39,9 @@
 * PackConfig changes
   * PackConfig can now be securely read over STDIN. Use ./wraith -Q, then paste it in.
   * Binary will no longer generate SALTS if missing from the PackConfig. This was causing too much confusion.
-  * SHELLHASH and Owner passwords in the PackConfig can now be salted-sha1. '+' + RAND(5) + '$' + SHA1(RAND(5) + 'password')
-  * SHELLHASH may no longer be an MD5 Hash.
+  * SHELLHASH renamed to BINARYPASS (SHELLHASH is still supported)
+  * BINARYPASS and Owner passwords in the PackConfig can now be salted-sha1. '+' + RAND(5) + '$' + SHA1(RAND(5) + 'password')
+  * BINARYPASS may no longer be an MD5 Hash.
 * Userfile / sharing changes
   * Userfile transfer is now made over botlink (no extra ports needed) (works behind NAT/firewall)
   * New userfile pass algorithm (salted-sha1)
