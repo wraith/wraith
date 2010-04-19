@@ -932,7 +932,6 @@ int updatebin(int idx, char *par, int secs)
 
   /* Check if the new binary is compatible */
   int initialized_code = check_bin_initialized(path);
-  printf("%d\n", initialized_code);
   if (initialized_code == 2) {
     logidx(idx, STR("New binary is corrupted or the wrong architecture/operating system."));
     free(path);
