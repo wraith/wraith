@@ -450,14 +450,16 @@ share_pls_chrec(int idx, char *par)
     user = newsplit(&par);
     if ((u = get_user_by_handle(userlist, user))) {
       chan = findchan_by_dname(par);
-      noshare = 1;
-      shareout_but(idx, "+cr %s %s\n", user, par);
-      if (!get_chanrec(u, par)) {
-        add_chanrec(u, par);
-        if (conf.bot->hub)
-          putlog(LOG_CMDS, "@", "%s: +chrec %s %s", dcc[idx].nick, user, par);
+      if (chan) {
+        noshare = 1;
+        shareout_but(idx, "+cr %s %s\n", user, par);
+        if (!get_chanrec(u, par)) {
+          add_chanrec(u, par);
+          if (conf.bot->hub)
+            putlog(LOG_CMDS, "@", "%s: +chrec %s %s", dcc[idx].nick, user, par);
+        }
+        noshare = 0;
       }
-      noshare = 0;
     }
   }
 }
@@ -473,15 +475,16 @@ share_mns_chrec(int idx, char *par)
     user = newsplit(&par);
     if ((u = get_user_by_handle(userlist, user))) {
       chan = findchan_by_dname(par);
-      noshare = 1;
-      del_chanrec(u, par);
-      shareout_but(idx, "-cr %s %s\n", user, par);
-      noshare = 0;
-      if (conf.bot->hub)
-        putlog(LOG_CMDS, "@", "%s: -chrec %s %s", dcc[idx].nick, user, par);
-      else
-        recheck_channel(chan, 0);
-
+      if (chan) {
+        noshare = 1;
+        del_chanrec(u, par);
+        shareout_but(idx, "-cr %s %s\n", user, par);
+        noshare = 0;
+        if (conf.bot->hub)
+          putlog(LOG_CMDS, "@", "%s: -chrec %s %s", dcc[idx].nick, user, par);
+        else
+          recheck_channel(chan, 0);
+      }
     }
   }
 }
@@ -699,12 +702,14 @@ share_chchinfo(int idx, char *par)
     if ((u = get_user_by_handle(userlist, hand))) {
       chan = newsplit(&par);
       cst = findchan_by_dname(chan);
-      shareout_but(idx, "chchinfo %s %s %s\n", hand, chan, par);
-      noshare = 1;
-      set_handle_chaninfo(userlist, hand, chan, par);
-      noshare = 0;
-      if (conf.bot->hub)
-        putlog(LOG_CMDS, "@", "%s: change info %s %s", dcc[idx].nick, chan, hand);
+      if (cst) {
+        shareout_but(idx, "chchinfo %s %s %s\n", hand, chan, par);
+        noshare = 1;
+        set_handle_chaninfo(userlist, hand, chan, par);
+        noshare = 0;
+        if (conf.bot->hub)
+          putlog(LOG_CMDS, "@", "%s: change info %s %s", dcc[idx].nick, chan, hand);
+      }
     }
   }
 }
@@ -750,16 +755,18 @@ static void share_mns_maskchan(int idx, char *par)
 
     chname = newsplit(&par);
     chan = findchan_by_dname(chname);
-    shareout_but(idx, "-mc %c %s %s\n", type, chname, par);
-    if (conf.bot->hub)
-      putlog(LOG_CMDS, "@", "%s: cancel %s %s on %s", dcc[idx].nick, 
-                            type == 'b' ? "ban" : type == 'e' ? "exempt" : "invite", par, chname);
-    str_unescape(par, '\\');
-    noshare = 1;
-    value = u_delmask(type, chan, par, 1);
-    noshare = 0;
-    if (!conf.bot->hub && value > 0)
-      add_delay(chan, '-', type, par);
+    if (chan) {
+      shareout_but(idx, "-mc %c %s %s\n", type, chname, par);
+      if (conf.bot->hub)
+        putlog(LOG_CMDS, "@", "%s: cancel %s %s on %s", dcc[idx].nick,
+            type == 'b' ? "ban" : type == 'e' ? "exempt" : "invite", par, chname);
+      str_unescape(par, '\\');
+      noshare = 1;
+      value = u_delmask(type, chan, par, 1);
+      noshare = 0;
+      if (!conf.bot->hub && value > 0)
+        add_delay(chan, '-', type, par);
+    }
   }
 }
 
@@ -819,26 +826,28 @@ static void share_pls_maskchan(int idx, char *par)
     tm = newsplit(&par);
     chname = newsplit(&par);
     chan = findchan_by_dname(chname);
-    shareout_but(idx, "+mc %c %s %s %s %s\n", type, mask, tm, chname, par);
-    str_unescape(mask, '\\');
-    from = newsplit(&par);
-    if (strchr(from, 's')) {
-      flags |= MASKREC_STICKY;
-      stick = 1;
+    if (chan) {
+      shareout_but(idx, "+mc %c %s %s %s %s\n", type, mask, tm, chname, par);
+      str_unescape(mask, '\\');
+      from = newsplit(&par);
+      if (strchr(from, 's')) {
+        flags |= MASKREC_STICKY;
+        stick = 1;
+      }
+      if (strchr(from, 'p'))
+        flags |= MASKREC_PERM;
+      from = newsplit(&par);
+      if (conf.bot->hub)
+        putlog(LOG_CMDS, "@", "%s: %s %s on %s (%s:%s)", dcc[idx].nick, str_type, mask, chname, from, par);
+      expire_time = (time_t) atoi(tm);
+      if (expire_time != 0L)
+        expire_time += now;
+      noshare = 1;
+      u_addmask(type, chan, mask, from, par, expire_time, flags);
+      noshare = 0;
+      if (!conf.bot->hub)
+        check_this_mask(type, chan, mask, stick);
     }
-    if (strchr(from, 'p'))
-      flags |= MASKREC_PERM;
-    from = newsplit(&par);
-    if (conf.bot->hub)
-      putlog(LOG_CMDS, "@", "%s: %s %s on %s (%s:%s)", dcc[idx].nick, str_type, mask, chname, from, par);
-    expire_time = (time_t) atoi(tm);
-    if (expire_time != 0L)
-      expire_time += now;
-    noshare = 1;
-    u_addmask(type, chan, mask, from, par, expire_time, flags);
-    noshare = 0;
-    if (!conf.bot->hub)
-      check_this_mask(type, chan, mask, stick);
   }
 }
 
