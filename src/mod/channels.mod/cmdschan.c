@@ -1347,22 +1347,6 @@ static void cmd_chanset(int idx, char *par)
       else
         chan = findchan_by_dname(chname);
 
-      if (!glob_master(user) && !chan_master(user)) {
-        dprintf(idx, "You don't have access to %s. \n", chname);
-	return;
-      } else if ((!chan && (chname[0] != '+')) || (chan && privchan(user, chan, PRIV_OP))) {
-        dprintf(idx, "No such channel.\n");
-	return;
-      } else if ((strstr(par, "+private") || strstr(par, "-private")) && (!glob_owner(user))) {
-        dprintf(idx, "You don't have access to set +/-private on %s (halting command).\n", chname);
-	return;
-      } else if ((strstr(par, "+backup") || strstr(par, "-backup")) && (!glob_owner(user))) {
-        dprintf(idx, "You don't have access to set +/-backup on %s (halting command).\n", chname);
-	return;
-      } else if ((strstr(par, "+inactive") || strstr(par, "-inactive")) && (!glob_owner(user))) {
-        dprintf(idx, "You don't have access to set +/-inactive on %s (halting command).\n", chname);
-        return;
-      }
       if (!chan) {
         if (par[0])
 	  *--par = ' ';
@@ -1377,6 +1361,24 @@ static void cmd_chanset(int idx, char *par)
       dprintf(idx, "Invalid console channel.\n");
       return;
     }
+  }
+
+  get_user_flagrec(dcc[idx].user, &user, chan->dname);
+  if (!glob_master(user) && !chan_master(user)) {
+    dprintf(idx, "You don't have access to %s. \n", chan->dname);
+    return;
+  } else if ((!chan && (chname[0] != '+')) || (chan && privchan(user, chan, PRIV_OP))) {
+    dprintf(idx, "No such channel.\n");
+    return;
+  } else if ((strstr(par, "+private") || strstr(par, "-private")) && (!glob_owner(user))) {
+    dprintf(idx, "You don't have access to set +/-private on %s (halting command).\n", chan->dname);
+    return;
+  } else if ((strstr(par, "+backup") || strstr(par, "-backup")) && (!glob_owner(user))) {
+    dprintf(idx, "You don't have access to set +/-backup on %s (halting command).\n", chan->dname);
+    return;
+  } else if ((strstr(par, "+inactive") || strstr(par, "-inactive")) && (!glob_owner(user))) {
+    dprintf(idx, "You don't have access to set +/-inactive on %s (halting command).\n", chan->dname);
+    return;
   }
 
   putlog(LOG_CMDS, "*", "#%s# chanset (%s) %s", dcc[idx].nick, all ? "*" : chan->dname, par);
