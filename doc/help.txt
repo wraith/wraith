@@ -1401,7 +1401,7 @@ See also: botnick, nick
  
 See also: ps
 :hub:netrelease
-###  $netrelease$b <nick>
+###  $bnetrelease$b <nick>
    Tells all bots to unjupe the specified nickname. They will wait 7 seconds
    before attempting to regain the nickname.
  
