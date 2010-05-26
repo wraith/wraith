@@ -169,7 +169,7 @@ char *delignore(char *);
 void tell_ignores(int, char *);
 bool match_ignore(char *);
 void check_expired_ignores();
-void autolink_cycle(char *);
+void autolink_cycle();
 void tell_file_stats(int, char *);
 void tell_user_ident(int, char *);
 void tell_users_match(int, char *, int, int, char *, int);
@@ -179,7 +179,7 @@ void check_pmode();
 void link_pref_val(struct userrec *u, char *lval);
 void check_stale_dcc_users();
 
-extern char			userfile[];
+extern char			userfile[], autolink_failed[];
 extern interval_t			ignore_time;
 extern bool			dont_restructure;
 
