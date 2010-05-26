@@ -805,10 +805,13 @@ writeconf(char *filename, int fd, int bits)
 
 #endif /* CYGWIN_HACKS */
   for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
-    *stream << buf.printf(STR("%s%s %s %s%s %s\n"),
+    *stream << buf.printf(STR("%s%s %s %s%s"),
              bot->disabled ? "/" : "", bot->nick,
              bot->net.ip ? bot->net.ip : "*", bot->net.host6 ? "+" : "",
-             bot->net.host ? bot->net.host : (bot->net.host6 ? bot->net.host6 : "*"), bot->net.ip6 ? bot->net.ip6 : "");
+             bot->net.host ? bot->net.host : (bot->net.host6 ? bot->net.host6 : "*"));
+    if (bot->net.ip6)
+      *stream << buf.printf(STR(" %s"), bot->net.ip6 ? bot->net.ip6 : "");
+    *stream << "\n";
   }
 
   if (fd != -1)
