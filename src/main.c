@@ -524,7 +524,7 @@ static void core_secondly()
   ++cnt;
 
   if (((conf.bot->localhub || conf.bot->hub) && (cnt % 30) == 0) || (cnt % 5) == 0) {
-    autolink_cycle(NULL);         /* attempt autolinks */
+    autolink_cycle();         /* attempt autolinks */
     cnt = 0;
   }
 
@@ -878,7 +878,7 @@ int main(int argc, char **argv)
   }
 
   online_since = now;
-  autolink_cycle(NULL);		/* Hurry and connect to tandem bots */
+  autolink_cycle();		/* Hurry and connect to tandem bots */
   timer_create_secs(1, STR("core_secondly"), (Function) core_secondly);
   timer_create_secs(10, STR("check_expired_dcc"), (Function) check_expired_dcc);
   timer_create_secs(10, STR("core_10secondly"), (Function) core_10secondly);

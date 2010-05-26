@@ -57,6 +57,7 @@
 #include "EncryptedStream.h"
 
 char userfile[121] = "";	/* where the user records are stored */
+char autolink_failed[HANDLEN + 1] = "";
 interval_t ignore_time = 10;		/* how many minutes will ignores last? */
 bool	dont_restructure = 0;		/* set when we botlink() to a hub with +U, only stops bot from restructuring */
 
@@ -1195,8 +1196,15 @@ void autolink_cycle_leaf(char *start)
 }
 
 
-void autolink_cycle(char *start)
+void autolink_cycle()
 {
+  char start[HANDLEN + 1] = "";
+
+  if (autolink_failed[0]) {
+    strlcpy(start, autolink_failed, HANDLEN + 1);
+    autolink_failed[0] = 0;
+  }
+
   if (conf.bot->hub)
     autolink_cycle_hub(start);
   else if (conf.bot->localhub)
