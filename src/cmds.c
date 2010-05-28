@@ -1991,7 +1991,7 @@ static void cmd_die(int idx, char *par)
   } else {
     simple_snprintf(s1, sizeof s1, "BOT SHUTDOWN (Authorized by %s)", dcc[idx].nick);
     simple_snprintf(s2, sizeof s2, "DIE BY %s!%s (request)", dcc[idx].nick, dcc[idx].host);
-    strlcpy(quit_msg, dcc[idx].nick, 1024);
+    strlcpy(quit_msg, "requested", 1024);
   }
   kill_bot(s1, s2);
 }
