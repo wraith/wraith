@@ -2,6 +2,7 @@
 * Properly honor exemptions when kicking matched RBL clients
 * Fixed parsing errors in .chanset
 * Only global +n can use .chanset * now
+* cmd_die no longer puts user's nick into the quit msg.
 * Fix problems with changing IP
 * Add an extra 2 second delay before releasing nick to aide in syncing and time to type /nick
 
