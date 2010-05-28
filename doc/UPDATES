@@ -1,6 +1,7 @@
 * Fix crash related to slowpart
 * Fixed parsing errors in .chanset
 * Only global +n can use .chanset * now
+* Add an extra 2 second delay before releasing nick to aide in syncing and time to type /nick
 
 1.3 - http://wraith.botpack.net/milestone/1.3
 * Binary / shell / startup changes
