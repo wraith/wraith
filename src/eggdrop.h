@@ -62,7 +62,7 @@
 #define RANDSPECIAL     "#*+,-./;<=>?[]^_{}|"
 #define RANDSPECIALLEN  19
 
-#define RELEASE_TIME	7
+#define RELEASE_TIME	8
 
 #define ESCAPESHELL	"`\\|#*()[]& "
 
