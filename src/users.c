@@ -1004,7 +1004,7 @@ struct userrec *next_hub(struct userrec *current, char *lowval, char *highval)
   return NULL;
 }
 
-void autolink_cycle_hub(char *start)
+static void autolink_cycle_hub(char *start)
 {
   char bestval[HANDLEN + 4] = "", curval[HANDLEN + 4] = "", myval[HANDLEN + 4] = "";
   tand_t *bot = NULL;
@@ -1084,7 +1084,7 @@ typedef struct hublist_entry {
 
 int botlinkcount = 0;
 
-void autolink_random_hub(char *avoidbot) {
+static void autolink_random_hub(char *avoidbot) {
   /* Pick a random hub, but avoid 'avoidbot' */
   int hlc = 0;
   struct hublist_entry *hl = NULL, *hl2 = NULL;
@@ -1126,7 +1126,7 @@ void autolink_random_hub(char *avoidbot) {
   }
 }
 
-void autolink_cycle_leaf(char *start)
+static void autolink_cycle_leaf(char *start)
 {
   struct bot_addr *my_ba = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, conf.bot->u);
   char uplink[HANDLEN + 1] = "", avoidbot[HANDLEN + 1] = "", curhub[HANDLEN + 1] = "";
@@ -1206,9 +1206,9 @@ void autolink_cycle()
   }
 
   if (conf.bot->hub)
-    autolink_cycle_hub(start);
+    autolink_cycle_hub(start[0] ? start : NULL);
   else if (conf.bot->localhub)
-    autolink_cycle_leaf(start);
+    autolink_cycle_leaf(start[0] ? start : NULL);
   else { //Connect to the localhub
     if (tands == 0) {
       // Make sure not already trying for the localhub
