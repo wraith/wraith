@@ -54,7 +54,7 @@ _CFLGS = -fno-strict-aliasing -W -Wformat \
 #-Wconversion
 #-Wtraditional
 
-MAKEFLAGS = -s -j4
+MAKEFLAGS = -s @MAKEJOBS@
 
 MAKE_BIN = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CXX)' 'LD=$(LD)' \
 'CCDEPMODE=$(CCDEPMODE)' 'BRANCH=$(BRANCH)' 'COMMIT=$(COMMIT_SHORT)' 'BUILDTS=$(BUILDTS)' 'VERSION=$(VERSION)' \
