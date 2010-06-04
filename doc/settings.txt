@@ -33,12 +33,12 @@ efnet.port80.se
 efnet.xs4all.nl
 irc.ac.za
 irc.du.se
-irc.efnet.ch
 irc.efnet.fr
 irc.efnet.nl
 irc.efnet.pl
 irc.homelien.no
 irc.inet.tele.dk
+irc.underworld.no
 #CA
 irc.arcti.ca
 irc.choopa.ca
@@ -50,7 +50,6 @@ efnet.ipv6.xs4all.nl
 irc.ac.za
 irc.choopa.ca
 irc.choopa.net
-irc.efnet.ch
 irc.efnet.nl
 irc.ipv6.he.net
 irc.ipv6.homelien.no
