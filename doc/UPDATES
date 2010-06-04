@@ -3,6 +3,7 @@
 * Only global +n can use .chanset * now
 * cmd_die no longer puts user's nick into the quit msg.
 * Update rbl list, 'set -yes rbl-servers -' to get new list.
+* Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
 
 1.3 - http://wraith.botpack.net/milestone/1.3
 * Binary / shell / startup changes
