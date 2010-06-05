@@ -226,4 +226,4 @@ if test -d .git; then
   git submodule update
 fi
 ]
-test -f lib/bdlib/configure && cd lib/bdlib && ./configure
+test -f lib/bdlib/configure && cd lib/bdlib && MAKEJOBS="$MAKEJOBS" ./configure
