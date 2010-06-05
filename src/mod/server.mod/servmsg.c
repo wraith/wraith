@@ -1237,8 +1237,15 @@ static int gotnick(char *from, char *msg)
       }
     } else
       putlog(LOG_SERV | LOG_MISC, "*", "Nickname changed to '%s'???", msg);
-  } else if ((keepnick) && (rfc_casecmp(nick, msg))) { //Ignore case changes
-    nicks_available(nick);
+  } else if ((rfc_casecmp(nick, msg))) { //Ignore case changes
+    if (keepnick)
+      nicks_available(nick);
+    else if (keepnick && release_time) {
+      // Someone else has regained the nickname, revert to keeping the nick in case they lose it
+      // within the release_time window.
+      keepnick = 0;
+      release_time = 0;
+    }
   }
   free(buf_ptr);
   return 0;
