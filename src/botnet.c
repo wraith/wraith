@@ -1048,13 +1048,29 @@ static void botlink_dns_callback(int id, void *client_data, const char *host, bd
 //    idx = dcc[i].u.dns->ibuf;
 //  }
 
-  if (!ips.size()) {
+  bd::String ip_from_dns;
+
+  if (ips.size()) {
+#ifdef USE_IPV6
+    /* If IPv6 is available use it, otherwise fall back on IPv4 */
+    if (conf.bot->net.v6)
+      ip_from_dns = dns_find_ip(ips, AF_INET6);
+    if (!ip_from_dns)
+#endif /* USE_IPV6 */
+    {
+      /* Use IPv4 if no ipv6 is available */
+      ip_from_dns = dns_find_ip(ips, AF_INET);
+    }
+  }
+
+  if (!ips.size() || !ip_from_dns) {
+    putlog(LOG_BOTS, "*", "Could not link to %s (DNS error).\n", dcc[i].nick);
     lostdcc(i);
     return;
   }
 
-  dcc[i].addr = inet_addr(bd::String(ips[0]).c_str());
-  strlcpy(dcc[i].host, bd::String(ips[0]).c_str(), sizeof(dcc[i].host));
+  dcc[i].addr = inet_addr(ip_from_dns.c_str());
+  strlcpy(dcc[i].host, ip_from_dns.c_str(), sizeof(dcc[i].host));
 
   botlink_real(i);
 }
