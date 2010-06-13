@@ -9,6 +9,8 @@
 * Fix problems with changing IP
 * Add an extra 2 second delay before releasing nick to aide in syncing and time to type /nick
 * When a nick is released, start regaining as soon as it is witnessed to have been taken again
+* Fix cmd_relay so it does not use IPv6 if not supported.
+* Fix bot linking so it does not use IPv6 if not supported.
 
 1.3 - http://wraith.botpack.net/milestone/1.3
 * Binary / shell / startup changes
