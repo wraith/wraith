@@ -697,7 +697,10 @@ static void cmd_help(int idx, char *par)
         if (!strcmp(flg, flag)) {
           if (first) {
             dprintf(idx, "%s\n", buf[0] ? buf : "");
-            dprintf(idx, "# DCC (%s)\n", flag);
+            if (dcc[idx].irc)
+              dprintf(idx, "# IRC (%s)\n", flag);
+            else
+              dprintf(idx, "# DCC (%s)\n", flag);
             simple_snprintf(buf, sizeof(buf), "  ");
           }
           if (end && !first) {
