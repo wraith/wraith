@@ -41,5 +41,9 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  out.writeFile(argv[2]);
+  if (out.writeFile(argv[2])) {
+    fprintf(stderr, "Failure writing %s\n", argv[2]);
+    return 1;
+  }
+  return 0;
 }
