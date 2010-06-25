@@ -88,9 +88,12 @@ help_t help[] = \n\
     }
   }
   out << "#endif /* HELP_H */\n";
-  printf(" Success\n");
 
-  out.writeFile(outfile);
+  if (out.writeFile(outfile)) {
+    fprintf(stderr, "Failure writing %s\n", outfile.c_str());
+    return 1;
+  }
+  printf(" Success\n");
   return 0;
 }
 

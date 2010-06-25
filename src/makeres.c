@@ -79,10 +79,19 @@ typedef const char * res_t;\n\n");
       outs << buf.printf("\t\"%s\",\n", buffer.c_str());
     }
   }
+
+  if (out.writeFile(outFile)) {
+    fprintf(stderr, "Failure writing %s\n", outFile.c_str());
+    return 1;
+  }
+
+  if (outs.writeFile(outsFile)) {
+    fprintf(stderr, "Failure writing %s\n", outsFile.c_str());
+    return 1;
+  }
+
   printf(" Success\n");
 
-  out.writeFile(outFile);
-  outs.writeFile(outsFile);
   return 0;
 }
 
