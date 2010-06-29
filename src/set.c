@@ -392,8 +392,25 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
       add_server(data);
     
     if (server_online) {
-      curserv = -1;
-      next_server(&curserv, cursrvname, &curservport, NULL);
+      bool found_server = 0;
+
+      for (struct server_list *n = (*(struct server_list **)var->mem); n; n = n->next) {
+        if (((n->port && n->port == curservport) || (!n->port && default_port == curservport)) &&
+            !strcmp(n->name, cursrvname)) {
+          found_server = 1;
+          break;
+        }
+      }
+
+      if (!found_server) {
+        // Current server not found in new list, jump!
+        nuke_server("server removed");
+        cycle_time = 0;
+      } else {
+        // Update current server in list.
+        curserv = -1;
+        next_server(&curserv, cursrvname, &curservport, NULL);
+      }
     }
   }
 
