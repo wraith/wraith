@@ -808,7 +808,7 @@ void next_server(int *ptr, char *servname, port_t *port, char *pass)
   /* -1  -->  Go to specified server */
   if (*ptr == (-1)) {
     for (; x; x = x->next) {
-      if (x->port == *port) {
+      if ((x->port && x->port == *port) || (!x->port && default_port == *port)) {
 	if (!strcasecmp(x->name, servname)) {
 	  *ptr = i;
 	  return;
