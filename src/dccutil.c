@@ -210,52 +210,19 @@ colorbuf(char *buf, size_t len, int idx, size_t bufsiz)
 
 /* Dump a potentially super-long string of text.
  */
-void dumplots(int idx, const char *prefix, const char *data)
+void dumplots(int idx, const char *prefix, const bd::String data)
 {
   if (unlikely(!*data)) {
     dprintf(idx, "%s\n", prefix);
     return;
   }
 
-  char *p = (char*)data, *q = NULL, *n = NULL, c = 0;
   const size_t max_data_len = 120 - strlen(prefix);
+  bd::Array<bd::String> lines = data.split('\n');
 
-  while ((strlen(p) - ansi_len(p)) > max_data_len) {
-    q = p + max_data_len;
-    /* Search for embedded linefeed first */
-    n = strchr(p, '\n');
-    if (n && n < q) {
-      /* Great! dump that first line then start over */
-      *n = 0;
-      dprintf(idx, "%s%s\n", prefix, p);
-      *n = '\n';
-      p = n + 1;
-    } else {
-      /* Search backwards for the last space */
-      while (*q != ' ' && q != p)
-        q--;
-      if (q == p)
-        q = p + max_data_len;
-      c = *q;
-      *q = 0;
-      dprintf(idx, "%s%s\n", prefix, p);
-      *q = c;
-      p = q;
-      if (c == ' ')
-        p++;
-    }
+  for (size_t i = 0; i < lines.length(); ++i) {
+    dprintf(idx, "%s%s\n", prefix, bd::String(lines[i]).c_str());
   }
-  /* Last trailing bit: split by linefeeds if possible */
-  n = strchr(p, '\n');
-  while (n) {
-    *n = 0;
-    dprintf(idx, "%s%s\n", prefix, p);
-    *n = '\n';
-    p = n + 1;
-    n = strchr(p, '\n');
-  }
-  if (*p)
-    dprintf(idx, "%s%s\n", prefix, p);  /* Last trailing bit */
 }
 
 void
