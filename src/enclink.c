@@ -150,38 +150,34 @@ static const char *ghost_write(int snum, const char *src, size_t *len)
 {
   static char buf[SGRAB + 14] = "";
   char *srcbuf = NULL, *line = NULL, *eol = NULL, *eline = NULL;
-  size_t bufpos = 0;
 
   const size_t bufsiz = *len + 9 + 1;
   srcbuf = (char *) my_calloc(1, bufsiz);
   strlcpy(srcbuf, src, bufsiz);
   line = srcbuf;
+  buf[0] = 0;
 
   eol = strchr(line, '\n');
   while (eol) {
     *eol++ = 0;
     eline = encrypt_string(socklist[snum].okey, line);
     rotate_key(socklist[snum].okey, socklist[snum].oseed);
-//    buf = (char *) my_realloc(buf, bufpos + strlen(eline) + 1 + 9);
-    strcpy((char *) &buf[bufpos], eline);
+    strlcat(buf, eline, sizeof(buf));
     free(eline);
-    strcat(buf, "\n");
-    bufpos = strlen(buf);
+    *len = strlcat(buf, "\n", sizeof(buf));
     line = eol;
     eol = strchr(line, '\n');
   }
   if (line[0]) {
     eline = encrypt_string(socklist[snum].okey, line);
     rotate_key(socklist[snum].okey, socklist[snum].oseed);
-//    buf = (char *) my_realloc(buf, bufpos + strlen(eline) + 1 + 9);
-    strcpy((char *) &buf[bufpos], eline);
+    strlcat(buf, eline, sizeof(buf));
     free(eline);
-    strcat(buf, "\n");
+    *len = strlcat(buf, "\n", sizeof(buf));
   }
   OPENSSL_cleanse(srcbuf, bufsiz);
   free(srcbuf);
 
-  *len = strlen(buf);
   return buf;
 }
 
