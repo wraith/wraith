@@ -5,6 +5,7 @@
 * Fix bot linking so it does not use IPv6 if not supported.
 * Fix auth IRC lookups getting the wrong cached idx
 * Bot will now jump from the server it's on if it is removed from the server list. (fixes a changing network bug)
+* Fix buffer overflow in DCC
 
 * Fix crash related to slowpart
 * Properly honor exemptions when kicking matched RBL clients
