@@ -214,7 +214,7 @@ bin_checksum(const char *fname, int todo)
       /* Now copy in our encrypted settings struct */
       memcpy(&outmap[newpos], &settings.hash, SIZE_PACK);
 #ifdef DEBUG
-      sdprintf(STR("writing pack: %d\n"), SIZE_PACK);
+      sdprintf(STR("writing pack: %zu\n"), SIZE_PACK);
 #endif
     } else {
       /* Just copy the original pack data to the new binary */
@@ -227,7 +227,7 @@ bin_checksum(const char *fname, int todo)
       /* Copy in the encrypted conf data */
       memcpy(&outmap[newpos], &settings.DYNAMIC_HEADER, SIZE_CONF);
 #ifdef DEBUG
-      sdprintf(STR("writing conf: %d\n"), SIZE_CONF);
+      sdprintf(STR("writing conf: %zu\n"), SIZE_CONF);
 #endif
     } else {
       /* Just copy the original conf data to the new binary */

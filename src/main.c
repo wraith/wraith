@@ -435,7 +435,7 @@ static void dtx_arg(int& argc, char *argv[])
 	printf(STR("%s\nBuild Date: %s (%s%lu%s)\n"), version, date, BOLD(-1), buildts, BOLD_END(-1));
         printf(STR("BuildOS: %s%s%s BuildArch: %s%s%s\n"), BOLD(-1), BUILD_OS, BOLD_END(-1), BOLD(-1), BUILD_ARCH, BOLD_END(-1));
 #ifdef DEBUG
-	printf(STR("pack: %d conf: %d settings_t: %d prefix: %d pad: %d needed padding: %d\n"), SIZE_PACK, SIZE_CONF, sizeof(settings_t), PREFIXLEN, SIZE_PAD, (16 - ((sizeof(settings_t) - sizeof(settings.padding)) % 16)) % 16);
+	printf(STR("pack: %zu conf: %zu settings_t: %zu prefix: %zu pad: %zu needed padding: %zu\n"), SIZE_PACK, SIZE_CONF, sizeof(settings_t), PREFIXLEN, SIZE_PAD, (16 - ((sizeof(settings_t) - sizeof(settings.padding)) % 16)) % 16);
 #endif
         if (settings.dynamic_initialized[0]) {
           bin_to_conf();
