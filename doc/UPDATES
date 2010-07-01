@@ -5,6 +5,7 @@
 * Update rbl list, 'set -yes rbl-servers -' to get new list.
 * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
 * Fix default compile so it doesn't use a ton of processes.
+* Fix bot getting killed on OpenBSD 4.7 on startup
 
 1.3 - http://wraith.botpack.net/milestone/1.3
 * Binary / shell / startup changes
