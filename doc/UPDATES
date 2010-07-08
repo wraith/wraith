@@ -6,6 +6,7 @@
 * Fix auth IRC lookups getting the wrong cached idx
 * Bot will now jump from the server it's on if it is removed from the server list. (fixes a changing network bug)
 * Fix buffer overflow in DCC
+* When 'mdop' protection is on, re-op all previously opped clients automatically.
 
 * Fix crash related to slowpart
 * Properly honor exemptions when kicking matched RBL clients
