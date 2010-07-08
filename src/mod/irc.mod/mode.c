@@ -581,12 +581,16 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
 
       if (num == 4) {
         len = simple_snprintf(outbuf, sizeof(outbuf), "MODE %s -o %s\r\n", chan->name, mv->nick);
+        mv->flags |= SENTDEOP;
       } else if (num == 5) {
         len = simple_snprintf(outbuf, sizeof(outbuf), "MODE %s -o %s\r\n", chan->name, m->nick);
+        m->flags |= SENTDEOP;
       } else if (bitch && num == 6) {
         len = simple_snprintf(outbuf, sizeof(outbuf), "KICK %s %s :%s\r\n", chan->name, mv->nick, response(RES_BITCHOPPED));
+        mv->flags |= SENTKICK;
       } else if (bitch && num == 7) {
         len = simple_snprintf(outbuf, sizeof(outbuf), "KICK %s %s :%s\r\n", chan->name, m->nick, response(RES_BITCHOP));
+        m->flags |= SENTKICK;
       } else
         add_mode(chan, '-', 'o', mv->nick);
 
