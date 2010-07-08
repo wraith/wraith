@@ -31,6 +31,7 @@
 
 /* Reversing this mode? */
 static bool reversing = 0;
+static bool massop = 0;
 
 #  define PLUS    BIT0
 #  define MINUS   BIT1
@@ -541,8 +542,13 @@ static void
 got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
 {
   bool check_chan = 0;
-  bool me_opped = mv->is_me;
+  const bool me_opped = mv->is_me;
   bool meop = me_op(chan);
+  const bool was_op = chan_hasop(mv);
+
+  // No need to punish someone who was already opped.
+  if (massop && was_op)
+    return;
 
   /* Did *I* just get opped? */
   if (!meop && me_opped) {
@@ -1011,7 +1017,7 @@ gotmode(char *from, char *msg)
       memberlist *mv = NULL;
 
 
-      reversing = 0;
+      massop = reversing = 0;
 
       irc_log(chan, "%s!%s sets mode: %s", nick, from, msg);
       get_user_flagrec(u, &user, ch);
@@ -1108,6 +1114,8 @@ gotmode(char *from, char *msg)
               // Don't mass deop if protect is set, it'll happen anyway below
               if (!channel_protect(chan))
                 enforce_bitch(chan);        /* deop quick! */
+              else
+                reversing = massop = 1; // Reverse via got_op
             }
             if (channel_protect(chan))
               do_protect(chan, "Mass OP");
