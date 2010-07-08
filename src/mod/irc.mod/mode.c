@@ -31,6 +31,7 @@
 
 /* Reversing this mode? */
 static bool reversing = 0;
+static bool mdop_reversing = 1;
 
 #  define PLUS    BIT0
 #  define MINUS   BIT1
@@ -628,6 +629,10 @@ static void
 got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
 {
   char s1[UHOSTLEN] = "";
+  const bool was_op = chan_hasop(mv);
+
+  if (mdop_reversing && !was_op)
+    return;
   
   if (m)
     simple_snprintf(s1, sizeof(s1), "%s!%s", m->nick, m->userhost);
@@ -1085,6 +1090,7 @@ gotmode(char *from, char *msg)
                   deflag_user(u, DEFLAG_MDOP, tmp, chan);
                 }
               }
+              reversing = mdop_reversing = 1;
             }
             if (channel_protect(chan))
               do_protect(chan, "Mass Deop");
