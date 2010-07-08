@@ -8,6 +8,7 @@
 * Fix buffer overflow in DCC
 * When 'mdop' protection is on, re-op all previously opped clients automatically.
 * When 'mop' protection is on, deop all previously regular clients automatically.
+* Fix 'mop' causing a mass deop when -bitch
 
 * Fix crash related to slowpart
 * Properly honor exemptions when kicking matched RBL clients
