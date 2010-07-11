@@ -229,10 +229,13 @@ void dumplots(int idx, const char *prefix, const bd::String data)
       const size_t line_max = std::min(line.length() - 1, max_data_len);
       size_t pos = line_max;
 
-      while (pos != bd::String::npos && line[pos] != ' ')
+      while (pos != bd::String::npos && !strchr(",:; ", line[pos]))
         --pos;
       if (pos == bd::String::npos)
         pos = line_max;
+
+      if (strchr(",:;", line[pos]))
+        ++pos;
 
       if (bd::String(line(pos)).find("\n") != bd::String::npos) // Newline in remaining: dump it
         dprintf(idx, "%s%s\n", prefix, bd::String(line(pos)).c_str());
