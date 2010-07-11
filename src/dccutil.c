@@ -223,22 +223,27 @@ void dumplots(int idx, const char *prefix, const bd::String data)
 
   while (i < lines.length()) {
     bd::String line(lines[i]);
+
     if (line.length() > max_data_len) {
       // Truncate at last space if possible
-      size_t pos = std::min(line.length() - 1, max_data_len);
-      while (line.length() - pos > 0 && line[pos] != ' ')
+      const size_t line_max = std::min(line.length() - 1, max_data_len);
+      size_t pos = line_max;
+
+      while (pos != bd::String::npos && line[pos] != ' ')
         --pos;
-      // Trim out the space
-      if (line[pos] == ' ' && pos > 0 && pos < line.length())
-        ++pos;
+      if (pos == bd::String::npos)
+        pos = line_max;
 
       if (bd::String(line(pos)).find("\n") != bd::String::npos) // Newline in remaining: dump it
         dprintf(idx, "%s%s\n", prefix, bd::String(line(pos)).c_str());
-      else if (lines.length() - (i + 1) > 0) // Wrapped text: prepend to next line if possible
-        lines[i + 1] = line(pos) + lines[i + 1];
-      else // Wrapped text (last line): Add onto list of lines
-        lines << line(pos);
-      line = line(0, pos);
+      else {
+        const size_t tpos = line[pos] == ' ' ? pos + 1 : pos; // Trim out the space
+        if (lines.length() - (i + 1) > 0) // Wrapped text: prepend to next line if possible
+          lines[i + 1] = line(tpos) + lines[i + 1];
+        else // Wrapped text (last line): Add onto list of lines
+          lines << line(tpos);
+      }
+      line.resize(pos);
     }
     dprintf(idx, "%s%s\n", prefix, line.c_str());
     ++i;
