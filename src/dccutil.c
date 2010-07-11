@@ -248,7 +248,7 @@ void dumplots(int idx, const char *prefix, const bd::String data)
       }
       line.resize(pos);
     }
-    dprintf(idx, "%s'%s'\n", prefix, line.c_str());
+    dprintf(idx, "%s%s\n", prefix, line.c_str());
     ++i;
   }
 }
