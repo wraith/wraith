@@ -351,6 +351,8 @@ static bool set_gotshare(struct userrec *u, struct user_entry *e, char *buf, int
     var_set_by_name(conf.bot->nick, name, buf[0] ? buf : NULL);
     set_noshare = 0;
   /* var_set_by_name() called set_user(), no need to do it again... */
+    if (!conf.bot->hub && !strncmp(name, "servers", 7))
+      check_removed_server();
   } 
   /* not else if as the hub might have gotten a botset for itself */
   if (conf.bot->hub || conf.bot->localhub) {

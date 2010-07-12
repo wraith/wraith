@@ -655,6 +655,7 @@ void init_vars()
 }
 
 /* This is used to parse (GLOBAL) userfile var lines and changes via .set from a remote hub */
+// per-bot is set in userent.c: set_gotshare
 void var_userfile_share_line(char *line, int idx, bool share)
 {
   char *name = newsplit(&line);
@@ -671,6 +672,9 @@ void var_userfile_share_line(char *line, int idx, bool share)
   if (share && (conf.bot->hub || conf.bot->localhub))
     botnet_send_var_broad(idx, var);
   set_noshare = 0;
+
+  if (!conf.bot->hub && !strncmp(var->name, "servers", 7))
+    check_removed_server();
 }
 
 static const char *var_get_bot_data(struct userrec *u, const char *name)
