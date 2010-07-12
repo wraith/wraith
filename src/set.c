@@ -391,7 +391,7 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
     if (data)
       add_server(data);
 
-    curserv = 999; /* Will get updated after userfile is loaded */
+    check_removed_server(0);
   }
 
   if (datap)
