@@ -985,9 +985,21 @@ void check_removed_server() {
     bool found_server = 0;
 
     for (struct server_list *n = serverlist; n; n = n->next) {
+      // Check if server list contains a match to the 'real server name' we're connected to
+      // ie, irc.sucks.net -> irc.servercentral.net (expected (dcc) -> real (cursrvname))
       if (((n->port && n->port == curservport) || (!n->port && default_port == curservport)) &&
           !strcmp(n->name, cursrvname)) {
         found_server = 1;
+        break;
+        // Check if server list contains a match to the 'expected server name' we're connected to
+        // ie, irc.sucks.net -> irc.servercentral.net (expected (dcc) -> real (cursrvname))
+      } else if (servidx != -1 && ((n->port && n->port == dcc[servidx].port) || (!n->port && default_port == dcc[servidx].port)) &&
+          !strcmp(n->name, dcc[servidx].host)) {
+        found_server = 1;
+
+        // Update to this server
+        curserv = -1;
+        next_server(&curserv, dcc[servidx].host, &curservport, NULL);
         break;
       }
     }
