@@ -794,7 +794,7 @@ void clearq(struct server_list *xx)
 
 /* Set botserver to the next available server.
  *
- * -> if (*ptr == -1) then jump to that particular server
+ * -> if (*ptr == -1) then add that particular server
  */
 void next_server(int *ptr, char *servname, port_t *port, char *pass)
 {

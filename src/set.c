@@ -390,28 +390,8 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
 
     if (data)
       add_server(data);
-    
-    if (server_online) {
-      bool found_server = 0;
 
-      for (struct server_list *n = (*(struct server_list **)var->mem); n; n = n->next) {
-        if (((n->port && n->port == curservport) || (!n->port && default_port == curservport)) &&
-            !strcmp(n->name, cursrvname)) {
-          found_server = 1;
-          break;
-        }
-      }
-
-      if (!found_server) {
-        // Current server not found in new list, jump!
-        nuke_server("server removed");
-        cycle_time = 0;
-      } else {
-        // Update current server in list.
-        curserv = -1;
-        next_server(&curserv, cursrvname, &curservport, NULL);
-      }
-    }
+    curserv = 999; /* Will get updated after userfile is loaded */
   }
 
   if (datap)
@@ -675,6 +655,7 @@ void init_vars()
 }
 
 /* This is used to parse (GLOBAL) userfile var lines and changes via .set from a remote hub */
+// per-bot is set in userent.c: set_gotshare
 void var_userfile_share_line(char *line, int idx, bool share)
 {
   char *name = newsplit(&line);
@@ -691,6 +672,9 @@ void var_userfile_share_line(char *line, int idx, bool share)
   if (share && (conf.bot->hub || conf.bot->localhub))
     botnet_send_var_broad(idx, var);
   set_noshare = 0;
+
+  if (!conf.bot->hub && !strncmp(var->name, "servers", 7))
+    check_removed_server();
 }
 
 static const char *var_get_bot_data(struct userrec *u, const char *name)
