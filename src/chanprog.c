@@ -982,7 +982,7 @@ void notice(const char* target, const char* msg, int idx) {
 
 void check_removed_server(bool jump_no_match) {
   if (server_online) {
-    bool found_server = 0;
+    int found_server = 0;
 
     for (struct server_list *n = serverlist; n; n = n->next) {
       // Check if server list contains a match to the 'real server name' we're connected to
