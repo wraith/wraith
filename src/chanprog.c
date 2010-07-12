@@ -980,7 +980,7 @@ void notice(const char* target, const char* msg, int idx) {
 }
 
 
-void check_removed_server() {
+void check_removed_server(bool jump_no_match) {
   if (server_online) {
     bool found_server = 0;
 
@@ -1001,10 +1001,12 @@ void check_removed_server() {
     }
 
     if (!found_server) {
-      // Current server not found in new list, jump!
-      putlog(LOG_SERV, "*", "Server removed from list, jumping!");
-      nuke_server("server removed");
-      cycle_time = 0;
+      if (jump_no_match) {
+        // Current server not found in new list, jump!
+        putlog(LOG_SERV, "*", "Server removed from list, jumping!");
+        nuke_server("server removed");
+        cycle_time = 0;
+      }
     } else {
       // Update current server in list.
       curserv = -1;
