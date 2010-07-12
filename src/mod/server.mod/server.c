@@ -1123,7 +1123,7 @@ void server_report(int idx, int details)
     }
   }
   if ((trying_server || server_online) && (servidx != (-1))) {
-    dprintf(idx, "    Server %s:%d %s\n", dcc[servidx].host, dcc[servidx].port,
+    dprintf(idx, "    Server %s:%d %s\n", cursrvname, dcc[servidx].port,
 	    trying_server ? "(trying)" : s);
   } else
     dprintf(idx, "    No server currently.\n");

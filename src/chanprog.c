@@ -995,11 +995,7 @@ void check_removed_server() {
         // ie, irc.sucks.net -> irc.servercentral.net (expected (dcc) -> real (cursrvname))
       } else if (servidx != -1 && ((n->port && n->port == dcc[servidx].port) || (!n->port && default_port == dcc[servidx].port)) &&
           !strcmp(n->name, dcc[servidx].host)) {
-        found_server = 1;
-
-        // Update to this server
-        curserv = -1;
-        next_server(&curserv, dcc[servidx].host, &curservport, NULL);
+        found_server = 2;
         break;
       }
     }
@@ -1012,7 +1008,7 @@ void check_removed_server() {
     } else {
       // Update current server in list.
       curserv = -1;
-      next_server(&curserv, cursrvname, &curservport, NULL);
+      next_server(&curserv, found_server == 1 ? cursrvname : dcc[servidx].host, &curservport, NULL);
     }
   }
 }
