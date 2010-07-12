@@ -978,3 +978,29 @@ void notice(const char* target, const char* msg, int idx) {
   else
     dprintf(idx, "NOTICE %s :%s\n", target, msg);
 }
+
+
+void check_removed_server() {
+  if (server_online) {
+    bool found_server = 0;
+
+    for (struct server_list *n = serverlist; n; n = n->next) {
+      if (((n->port && n->port == curservport) || (!n->port && default_port == curservport)) &&
+          !strcmp(n->name, cursrvname)) {
+        found_server = 1;
+        break;
+      }
+    }
+
+    if (!found_server) {
+      // Current server not found in new list, jump!
+      putlog(LOG_SERV, "*", "Server removed from list, jumping!");
+      nuke_server("server removed");
+      cycle_time = 0;
+    } else {
+      // Update current server in list.
+      curserv = -1;
+      next_server(&curserv, cursrvname, &curservport, NULL);
+    }
+  }
+}
