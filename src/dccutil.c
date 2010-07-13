@@ -590,6 +590,11 @@ lostdcc(int n)
 
   if (n == uplink_idx)
     uplink_idx = -1;
+  else if (n == dns_idx)
+    dns_idx = -1;
+  else if (n == servidx)
+    servidx = -1;
+
 
   if (dcc[n].type && dcc[n].type->kill)
     dcc[n].type->kill(n, dcc[n].u.other);
