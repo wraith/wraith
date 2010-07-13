@@ -120,6 +120,20 @@ prand(int *seed, int range)
   return ((i1 * range) >> 32);
 }
 
+static void
+rotate_key(char* key, int& seed)
+{
+  if (seed) {
+    *(dword *) & key[0] = prand(&seed, 0xFFFFFFFF);
+    *(dword *) & key[4] = prand(&seed, 0xFFFFFFFF);
+    *(dword *) & key[8] = prand(&seed, 0xFFFFFFFF);
+    *(dword *) & key[12] = prand(&seed, 0xFFFFFFFF);
+
+    if (!seed)
+      seed++;
+  }
+}
+
 static int ghost_read(int snum, char *src, size_t *len)
 {
   char *line = decrypt_string(socklist[snum].ikey, src);
@@ -127,15 +141,7 @@ static int ghost_read(int snum, char *src, size_t *len)
   strcpy(src, line);
   OPENSSL_cleanse(line, strlen(line) + 1);
   free(line);
-  if (socklist[snum].iseed) {
-    *(dword *) & socklist[snum].ikey[0] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
-    *(dword *) & socklist[snum].ikey[4] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
-    *(dword *) & socklist[snum].ikey[8] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
-    *(dword *) & socklist[snum].ikey[12] = prand(&socklist[snum].iseed, 0xFFFFFFFF);
-
-    if (!socklist[snum].iseed)
-      socklist[snum].iseed++;
-  }
+  rotate_key(socklist[snum].ikey, socklist[snum].iseed);
 //  *len = strlen(src);
   return OK;
 }
@@ -144,54 +150,34 @@ static const char *ghost_write(int snum, const char *src, size_t *len)
 {
   static char buf[SGRAB + 14] = "";
   char *srcbuf = NULL, *line = NULL, *eol = NULL, *eline = NULL;
-  size_t bufpos = 0;
 
   const size_t bufsiz = *len + 9 + 1;
   srcbuf = (char *) my_calloc(1, bufsiz);
   strlcpy(srcbuf, src, bufsiz);
   line = srcbuf;
+  buf[0] = 0;
 
   eol = strchr(line, '\n');
   while (eol) {
     *eol++ = 0;
     eline = encrypt_string(socklist[snum].okey, line);
-    if (socklist[snum].oseed) {
-      *(dword *) & socklist[snum].okey[0] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
-      *(dword *) & socklist[snum].okey[4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
-      *(dword *) & socklist[snum].okey[8] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
-      *(dword *) & socklist[snum].okey[12] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
-
-      if (!socklist[snum].oseed)
-        socklist[snum].oseed++;
-    }
-//    buf = (char *) my_realloc(buf, bufpos + strlen(eline) + 1 + 9);
-    strcpy((char *) &buf[bufpos], eline);
+    rotate_key(socklist[snum].okey, socklist[snum].oseed);
+    strlcat(buf, eline, sizeof(buf));
     free(eline);
-    strcat(buf, "\n");
-    bufpos = strlen(buf);
+    *len = strlcat(buf, "\n", sizeof(buf));
     line = eol;
     eol = strchr(line, '\n');
   }
   if (line[0]) {
     eline = encrypt_string(socklist[snum].okey, line);
-    if (socklist[snum].oseed) {
-      *(dword *) & socklist[snum].okey[0] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
-      *(dword *) & socklist[snum].okey[4] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
-      *(dword *) & socklist[snum].okey[8] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
-      *(dword *) & socklist[snum].okey[12] = prand(&socklist[snum].oseed, 0xFFFFFFFF);
-
-      if (!socklist[snum].oseed)
-        socklist[snum].oseed++;
-    }
-//    buf = (char *) my_realloc(buf, bufpos + strlen(eline) + 1 + 9);
-    strcpy((char *) &buf[bufpos], eline);
+    rotate_key(socklist[snum].okey, socklist[snum].oseed);
+    strlcat(buf, eline, sizeof(buf));
     free(eline);
-    strcat(buf, "\n");
+    *len = strlcat(buf, "\n", sizeof(buf));
   }
   OPENSSL_cleanse(srcbuf, bufsiz);
   free(srcbuf);
 
-  *len = strlen(buf);
   return buf;
 }
 
