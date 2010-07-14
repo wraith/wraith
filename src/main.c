@@ -304,6 +304,9 @@ static void show_help()
   printf(STR("%s\n\n"), version);
   printf(STR("%s [options] [botnick[.conf]]\n"), binname);
   printf(STR("Not supplying any options will make all bots in the binary spawn.\n"));
+  printf(STR("\n"));
+  printf(STR("- http://wraith.botpack.net -\n"));
+  printf(STR("\n"));
   printf(format, STR("Option"), STR("Description"));
   printf(format, STR("------"), STR("-----------"));
   printf(format, STR("[-B] <botnick>"), STR("Starts the specified bot [deprecated]"));
@@ -332,7 +335,7 @@ static void show_help()
 
 // leaf: BkLP
 #define PARSE_FLAGS STR("0234:aB:cCd:De:EH:k:hnr:tu:U:v")
-#define FLAGS_CHECKPASS STR("cCdDeEhknrtuUv")
+#define FLAGS_CHECKPASS STR("cCdDeEknrtuU")
 static void dtx_arg(int& argc, char *argv[])
 {
   int i = 0, checked_pass = 0;
@@ -434,6 +437,7 @@ static void dtx_arg(int& argc, char *argv[])
         strftime(date, sizeof date, "%c %Z", gmtime(&buildts));
 	printf(STR("%s\nBuild Date: %s (%s%lu%s)\n"), version, date, BOLD(-1), buildts, BOLD_END(-1));
         printf(STR("BuildOS: %s%s%s BuildArch: %s%s%s\n"), BOLD(-1), BUILD_OS, BOLD_END(-1), BOLD(-1), BUILD_ARCH, BOLD_END(-1));
+        printf(STR("- http://wraith.botpack.net -\n"));
 #ifdef DEBUG
 	printf(STR("pack: %zu conf: %zu settings_t: %zu prefix: %zu pad: %zu needed padding: %zu\n"), SIZE_PACK, SIZE_CONF, sizeof(settings_t), PREFIXLEN, SIZE_PAD, (16 - ((sizeof(settings_t) - sizeof(settings.padding)) % 16)) % 16);
 #endif
