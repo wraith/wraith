@@ -60,7 +60,7 @@ dnsbl.ahbl.org
 dnsbl.proxybl.org
 rbl.efnetrbl.org
 tor.efnet.org
-dnsbl.swiftbl.net
+dnsbl.swiftbl.org
 xbl.spamhaus.org
 rbl.efnetpro.com
 
