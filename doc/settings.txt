@@ -42,7 +42,6 @@ irc.underworld.no
 #CA
 irc.arcti.ca
 irc.choopa.ca
-irc.igs.ca
 
 :servers6
 efnet.ipv6.port80.se
