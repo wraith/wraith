@@ -1256,6 +1256,7 @@ static int gotmode(char *from, char *msg)
 }
 
 static void end_burstmode();
+void irc_init();
 
 static void disconnect_server(int idx, int dolost)
 {
@@ -1291,6 +1292,8 @@ static void disconnect_server(int idx, int dolost)
     lostdcc(idx);
   }
   end_burstmode();
+  if (reset_chans == 2)
+    irc_init();
   reset_chans = 0;
   keepnick = 1;
   /* Invalidate the cmd_swhois cache callback data */
