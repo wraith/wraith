@@ -199,12 +199,11 @@ bin_checksum(const char *fname, int todo)
     if (!(todo & GET_CHECKSUM))
       OPENSSL_cleanse(hash, sizeof(hash));
 
+    if (ftruncate(newbin->fd, size)) goto fatal;
+
     /* Copy everything up to this point into the new binary (including the settings header/prefix) */
     outmap = (unsigned char*) mmap(0, size, PROT_READ|PROT_WRITE, MAP_SHARED, newbin->fd, 0);
     if ((void*)outmap == MAP_FAILED) goto fatal;
-
-    if (lseek(newbin->fd, size - 1, SEEK_SET) == -1) goto fatal;
-    if (write(newbin->fd, "", 1) != 1) goto fatal;
 
     offset += PREFIXLEN;
     memcpy(outmap, map, offset);
