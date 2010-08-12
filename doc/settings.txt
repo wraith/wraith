@@ -54,6 +54,18 @@ irc.ipv6.he.net
 irc.ipv6.homelien.no
 irc.paraphysics.net
 
+:servers_ssl
+efnet.xs4all.nl
+irc.blessed.net
+irc.choopa.ca
+irc.choopa.net
+irc.eversible.com
+irc.he.net
+irc.paraphysics.net
+irc.servercentral.net
+irc.shoutcast.com
+irc.umich.edu
+
 :rbl
 dnsbl.ahbl.org
 dnsbl.proxybl.org
