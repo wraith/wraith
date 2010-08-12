@@ -183,6 +183,10 @@ sdprintf(STR("GETIDX: auth: %s, idx: %d"), nick, idx);
   if (idx != -1) {
     if (!valid_idx(idx))
       idx = -1;
+    else if (!dcc[idx].irc || dcc[idx].simul == -1)
+      idx = -1;
+    else if (strcmp(dcc[idx].nick, handle))
+      idx = -1;
     else {
       sdprintf(STR("FIRST FOUND: %d"), idx);
       strlcpy(dcc[idx].simulbot, nick, sizeof(dcc[idx].simulbot));

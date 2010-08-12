@@ -10,6 +10,7 @@
 * Fix buffer overflow in DCC
 * Fix problems with changing IP
 * Fix bot going zombie if it jumps during a restart
+* Fix auth IRC lookups getting the wrong cached idx
 
 1.3 - http://wraith.botpack.net/milestone/1.3
 * Binary / shell / startup changes
