@@ -1048,13 +1048,29 @@ static void botlink_dns_callback(int id, void *client_data, const char *host, bd
 //    idx = dcc[i].u.dns->ibuf;
 //  }
 
-  if (!ips.size()) {
+  bd::String ip_from_dns;
+
+  if (ips.size()) {
+#ifdef USE_IPV6
+    /* If IPv6 is available use it, otherwise fall back on IPv4 */
+    if (conf.bot->net.v6)
+      ip_from_dns = dns_find_ip(ips, AF_INET6);
+    if (!ip_from_dns)
+#endif /* USE_IPV6 */
+    {
+      /* Use IPv4 if no ipv6 is available */
+      ip_from_dns = dns_find_ip(ips, AF_INET);
+    }
+  }
+
+  if (!ips.size() || !ip_from_dns) {
+    putlog(LOG_BOTS, "*", "Could not link to %s (DNS error).\n", dcc[i].nick);
     lostdcc(i);
     return;
   }
 
-  dcc[i].addr = inet_addr(bd::String(ips[0]).c_str());
-  strlcpy(dcc[i].host, bd::String(ips[0]).c_str(), sizeof(dcc[i].host));
+  dcc[i].addr = inet_addr(ip_from_dns.c_str());
+  strlcpy(dcc[i].host, ip_from_dns.c_str(), sizeof(dcc[i].host));
 
   botlink_real(i);
 }
@@ -1215,10 +1231,25 @@ static void tandem_relay_dns_callback(int id, void *client_data, const char *hos
     return;
   }
 
-  if (!ips.size()) {
+  bd::String ip_from_dns;
+
+  if (ips.size()) {
+#ifdef USE_IPV6
+    /* If IPv6 is available use it, otherwise fall back on IPv4 */
+    if (conf.bot->net.v6)
+      ip_from_dns = dns_find_ip(ips, AF_INET6);
+    if (!ip_from_dns)
+#endif /* USE_IPV6 */
+    {
+      /* Use IPv4 if no ipv6 is available */
+      ip_from_dns = dns_find_ip(ips, AF_INET);
+    }
+  }
+
+  if (!ips.size() || !ip_from_dns) {
     struct chat_info *ci = dcc[idx].u.relay->chat;
 
-    dprintf(idx, "Could not relay to %s.\n", dcc[i].nick);
+    dprintf(idx, "Could not relay to %s (DNS error).\n", dcc[i].nick);
     dcc[idx].status = dcc[idx].u.relay->old_status;
     free(dcc[idx].u.relay);
     dcc[idx].u.chat = ci;
@@ -1228,7 +1259,7 @@ static void tandem_relay_dns_callback(int id, void *client_data, const char *hos
   }
 
 #ifdef USE_IPV6
-  int af = is_dotted_ip(bd::String(ips[0]).c_str());
+  int af = is_dotted_ip(ip_from_dns.c_str());
 
   dcc[i].sock = getsock(SOCK_STRONGCONN | SOCK_VIRTUAL, af);
 #else
@@ -1244,7 +1275,7 @@ static void tandem_relay_dns_callback(int id, void *client_data, const char *hos
 
   changeover_dcc(i, &DCC_FORK_RELAY, sizeof(struct relay_info));
 
-  dcc[i].addr = inet_addr(bd::String(ips[0]).c_str());
+  dcc[i].addr = inet_addr(ip_from_dns.c_str());
 
   dcc[i].u.relay->chat = (struct chat_info *) my_calloc(1, sizeof(struct chat_info));
   dcc[i].u.relay->sock = dcc[idx].sock;
@@ -1261,7 +1292,7 @@ static void tandem_relay_dns_callback(int id, void *client_data, const char *hos
   dcc[i].u.relay->chat->current_lines = 0;
   dcc[i].timeval = now;
 
-  if (open_telnet_raw(dcc[i].sock, bd::String(ips[0]).c_str(), dcc[i].port, 0) < 0) {
+  if (open_telnet_raw(dcc[i].sock, ip_from_dns.c_str(), dcc[i].port, 0) < 0) {
     dcc[i].sock = -1;
     failed_tandem_relay(i);
   }
