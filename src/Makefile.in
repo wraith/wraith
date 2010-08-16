@@ -29,6 +29,7 @@ OBJS = auth.o \
 	dcc.o \
 	dccutil.o \
 	debug.o \
+	dl.o \
 	egg_timer.o \
 	enclink.o \
 	EncryptedStream.o \
