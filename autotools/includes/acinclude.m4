@@ -361,7 +361,7 @@ AC_DEFUN([EGG_CHECK_LIBS],
 [
   AC_CHECK_LIB(socket, socket)
 #  AC_CHECK_LIB(nsl, connect)
-#  AC_CHECK_LIB(dl, dlopen)
+  AC_CHECK_LIB(dl, dlopen)
 #  AC_CHECK_LIB(nsl, gethostbyname)
 #  AC_CHECK_LIB(dns, gethostbyname)
 
