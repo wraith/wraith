@@ -5354,7 +5354,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_crypto_AES_encrypt" >&5
 $as_echo "$ac_cv_lib_crypto_AES_encrypt" >&6; }
 if test "x$ac_cv_lib_crypto_AES_encrypt" = x""yes; then :
-  SSL_LIBS="$SSL_LIBS -lcrypto"
+  SSL_LIBS="$SSL_LIBS -Wl,-Bstatic -lcrypto -Wl,-Bdynamic"
 else
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found." >&5
