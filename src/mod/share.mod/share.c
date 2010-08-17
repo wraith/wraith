@@ -1154,7 +1154,7 @@ void
 sharein(int idx, char *msg)
 {
   char *code = newsplit(&msg);
-  const botcmd_t *cmd = search_botcmd_t((const botcmd_t*)&C_share, code, (sizeof(C_share)/sizeof(botcmd_t)) - 1);
+  const botcmd_t *cmd = search_botcmd_t((const botcmd_t*)&C_share, code, lengthof(C_share) - 1);
   if (cmd) {
     /* Found a match */
     (cmd->func) (idx, msg);

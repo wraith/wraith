@@ -500,7 +500,7 @@ static inline variable_t *var_get_var_by_name(const char *name)
 {
   variable_t key;
   key.name = name;
-  return (variable_t*) bsearch(&key, &vars, (sizeof(vars)/sizeof(variable_t)) - 1, sizeof(variable_t), comp_variable_t);
+  return (variable_t*) bsearch(&key, &vars, lengthof(vars) - 1, sizeof(variable_t), comp_variable_t);
 }
 
 void var_set(variable_t *var, const char *target, const char *datain)

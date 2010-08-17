@@ -230,7 +230,7 @@ static cmd_t update_bot[] = {
 void updatein(int idx, char *msg)
 {
   char *code = newsplit(&msg);
-  const botcmd_t *cmd = search_botcmd_t((const botcmd_t*)&C_update, code, (sizeof(C_update)/sizeof(botcmd_t)) - 1);
+  const botcmd_t *cmd = search_botcmd_t((const botcmd_t*)&C_update, code, lengthof(C_update) - 1);
   if (cmd) {
     /* Found a match */
     (cmd->func)(idx, msg);
