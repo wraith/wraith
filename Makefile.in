@@ -31,9 +31,10 @@ RESPONSESFILE = doc/responses.txt
 
 # defaults
 CXX = @CCACHE@ @DISTCC@ @CXX@ @STATIC@
-LD = @CXX@ @STATIC@
+LD_DYNAMIC = @CXX@
+LD_STATIC = @CXX@ @STATIC@
 CCDEBUG = @CCACHE@ @DISTCC@ @CXX@
-LDDEBUG = @CXX@
+LD_DEBUG = @CXX@
 STRIP = @STRIP@
 DIFF = @DIFF@
 
@@ -56,19 +57,24 @@ _CFLGS = -fno-strict-aliasing -W -Wformat \
 
 MAKEFLAGS = -s @MAKEJOBS@
 
-MAKE_BIN = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CXX)' 'LD=$(LD)' \
+MAKE_STATIC = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CXX)' 'LD=$(LD_STATIC)' \
 'CCDEPMODE=$(CCDEPMODE)' 'BRANCH=$(BRANCH)' 'COMMIT=$(COMMIT_SHORT)' 'BUILDTS=$(BUILDTS)' 'VERSION=$(VERSION)' \
-'STRIP=$(STRIP)' 'CFLGS=$(CFLGS)' \
+'STRIP=$(STRIP)' 'CFLGS=$(CFLGS) -DBIN_TYPE_STATIC' \
 'LIBS=$(LIBS)' 'EGGEXEC=$(BINEXEC)' 'EGGBUILD=(wraith)'
 
-MAKE_DEBUG = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CCDEBUG)' 'LD=$(LDDEBUG) -g' \
+MAKE_DYNAMIC = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CXX)' 'LD=$(LD_DYNAMIC)' \
 'CCDEPMODE=$(CCDEPMODE)' 'BRANCH=$(BRANCH)' 'COMMIT=$(COMMIT_SHORT)' 'BUILDTS=$(BUILDTS)' 'VERSION=$(VERSION)' \
-'STRIP=touch' 'CFLGS=$(CFLGS) $(DEBCXXFLAGS)' \
-'LIBS=$(LIBS)' 'EGGEXEC=$(BINEXEC)' 'EGGBUILD=(debug)' 
+'STRIP=$(STRIP)' 'CFLGS=$(CFLGS) -DBIN_TYPE_DYNAMIC' \
+'LIBS=$(LIBS)' 'EGGEXEC=$(BINEXEC)' 'EGGBUILD=(wraith)'
+
+MAKE_DEBUG = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CCDEBUG)' 'LD=$(LD_DEBUG) -g' \
+'CCDEPMODE=$(CCDEPMODE)' 'BRANCH=$(BRANCH)' 'COMMIT=$(COMMIT_SHORT)' 'BUILDTS=$(BUILDTS)' 'VERSION=$(VERSION)' \
+'STRIP=touch' 'CFLGS=$(CFLGS) $(DEBCXXFLAGS) -DBIN_TYPE_DYNAMIC' \
+'LIBS=$(LIBS)' 'EGGEXEC=$(BINEXEC)' 'EGGBUILD=(debug)'
 
 MAKE_UTILS = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CCDEBUG)' 'STRIP=touch' \
 'CCDEPMODE=$(CCDEPMODE)' \
-'CFLGS=$(CFLGS) $(DEBCXXFLAGS)' 'LIBS=$(LIBS)' 'LD=$(LDDEBUG) -g'
+'CFLGS=$(CFLGS) $(DEBCXXFLAGS)' 'LIBS=$(LIBS)' 'LD=$(LD_DEBUG) -g'
 
 MAKE_UTILS_NR = $(MAKE) 'CXX=$(CXX)' 'STRIP=touch' \
 'CCDEPMODE=$(CCDEPMODE)' \
@@ -76,9 +82,9 @@ MAKE_UTILS_NR = $(MAKE) 'CXX=$(CXX)' 'STRIP=touch' \
 
 MAKE_CONFIG = $(MAKE) 'MAKE=$(MAKE)'
 
-.PHONY: checkclean.wraith checkclean.debug lib wraith dwraith lib.debug debug check general crypto utils sorthelp makehelp makeset makeres stringfix set res help sort indent tar distrib distclean clean cleanutils test default
+.PHONY: checkclean.static checkclean.dynamic checkclean.debug lib wraith dwraith lib.debug debug check general crypto utils sorthelp makehelp makeset makeres stringfix set res help sort indent tar distrib distclean clean cleanutils test default dynamic static
 
-default: wraith
+default: dynamic
 
 test:
 
@@ -202,17 +208,24 @@ general: help res set
 
 check:
 
-.NOTPARALLEL: checkclean.wraith checkclean.debug
+.NOTPARALLEL: checkclean.static checkclean.dynamic checkclean.debug
 
-checkclean.wraith:
-	@(if test -f stamp.debug; then \
+checkclean.static:
+	@(if test -f stamp.dynamic -o -f stamp.debug; then \
 	echo "[*] Cleaning up alternate build"; \
 	$(MAKE) MAKEFLAGS=-s clean; \
 	fi)
-	@touch stamp.wraith
+	@touch stamp.static
+
+checkclean.dynamic:
+	@(if test -f stamp.static -o -f stamp.debug; then \
+	echo "[*] Cleaning up alternate build"; \
+	$(MAKE) MAKEFLAGS=-s clean; \
+	fi)
+	@touch stamp.dynamic
 
 checkclean.debug:
-	@(if test -f stamp.wraith; then \
+	@(if test -f stamp.static -o -f stamp.dynamic; then \
 	echo "[*] Cleaning up alternate build"; \
 	$(MAKE) MAKEFLAGS=-s clean; \
 	fi)
@@ -221,13 +234,22 @@ checkclean.debug:
 lib:
 	+@cd lib && $(MAKE)
 
-wraith:	checkclean.wraith lib general
+dynamic: checkclean.dynamic lib general
 	@echo ""
-	@echo "Making binary"
+	@echo "Making dynamic binary"
 	@echo ""
 	@echo ""
-	+@cd src/mod && $(MAKE_BIN) static
-	+@cd src && $(MAKE_BIN) $(BINEXEC)
+	+@cd src/mod && $(MAKE_DYNAMIC) static
+	+@cd src && $(MAKE_DYNAMIC) $(BINEXEC)
+	@echo ""
+
+static: checkclean.static lib general
+	@echo ""
+	@echo "Making static binary"
+	@echo ""
+	@echo ""
+	+@cd src/mod && $(MAKE_STATIC) static
+	+@cd src && $(MAKE_STATIC) $(BINEXEC)
 	@echo ""
 
 dwraith: debug
