@@ -240,7 +240,7 @@ void check_promisc()
     ifreq = *ifr;
     if (!ioctl(sock, SIOCGIFFLAGS, &ifreq)) {	/* we can read this interface! */
       /* sdprintf("Examing interface: %s", ifr->ifr_name); */
-      if (unlikely(ifreq.ifr_flags & IFF_PROMISC) && strncmp(ifr->ifr_name, "pflog", 5)) {
+      if (unlikely(ifreq.ifr_flags & IFF_PROMISC) && strncmp(ifr->ifr_name, "pflog", 5) && strncmp(ifr->ifr_name, "ipfw", 4)) {
         char which[101] = "";
 
         simple_snprintf(which, sizeof(which), STR("Detected promiscuous mode on interface: %s"), ifr->ifr_name);

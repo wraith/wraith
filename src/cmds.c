@@ -401,7 +401,7 @@ static void cmd_about(int idx, char *par)
   dprintf(idx, "..with credits and thanks to the following:\n");
   dprintf(idx, " \n");
   dprintf(idx, STR(" * Eggdev for eggdrop obviously\n"));
-  dprintf(idx, STR(" * $blayzkat$b, my future wife, for great love, support, ideas and motivation.\n"));
+  dprintf(idx, STR(" * $blayzkat$b, my wife, for great love, support, ideas and motivation.\n"));
   dprintf(idx, STR(" * $bryguy$b for beta testing, providing code, finding bugs, and providing input.\n"));
   dprintf(idx, STR(" * $bSFC$b for providing compile shells, continuous input, feature suggestions, and testing.\n"));
   dprintf(idx, STR(" * $bwarchest$b for his dedicated bug finding, testing, input, and original inspiration to code a botpack.\n"));

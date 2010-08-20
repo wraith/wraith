@@ -28,6 +28,7 @@ irc.umich.edu
 irc.wh.verio.net
 irc2.choopa.net
 #EU
+efnet.bredband2.se
 efnet.cs.hut.fi
 efnet.port80.se
 efnet.xs4all.nl
