@@ -34,9 +34,7 @@
 #ifdef HAVE_SYS_PTRACE_H
 # include <sys/ptrace.h>
 #endif /* HAVE_SYS_PTRACE_H */
-#ifndef CYGWIN_HACKS
-#  include <sys/wait.h>
-#endif /* !CYGWIN_HACKS */
+#include <sys/wait.h>
 #include <sys/types.h>
 #include <errno.h>
 #include <unistd.h>

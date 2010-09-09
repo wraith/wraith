@@ -1786,7 +1786,7 @@ static void cmd_conf(int idx, char *par)
       }
     }
   }
-#ifndef CYGWIN_HACKS
+
   if (!strcasecmp(cmd, "set")) {
     char *what = NULL;
     int show = 1, set = 0;
@@ -1825,7 +1825,6 @@ static void cmd_conf(int idx, char *par)
       if (!what || !strcasecmp(what, "autocron"))   dprintf(idx, "%sautocron: %d\n", ss, conf.autocron);
     }
   }
-#endif /* !CYGWIN_HACKS */
 
   if (listbot || !strcasecmp(cmd, "list")) {
     conf_checkpids(conf.bots);
@@ -4079,7 +4078,6 @@ static void cmd_netlast(int idx, char * par) {
 
 void crontab_show(struct userrec *u, int idx) {
   dprintf(idx, "Showing current crontab:\n");
-#ifndef CYGWIN_HACKS
   bd::Stream crontab;
   bd::String line;
   crontab_exists(&crontab);
@@ -4088,10 +4086,8 @@ void crontab_show(struct userrec *u, int idx) {
     line = crontab.getline();
     dprintf(idx, "%s\n", line.c_str());
   }
-#endif /* !CYGWIN_HACKS */
 }
 
-#ifndef CYGWIN_HACKS
 static void cmd_crontab(int idx, char *par) {
   putlog(LOG_CMDS, "*", "#%s# crontab %s", dcc[idx].nick, par);
 
@@ -4137,7 +4133,6 @@ static void cmd_crontab(int idx, char *par) {
     dprintf(idx, "Usage: crontab status|delete|show|new [interval]\n");
   }
 }
-#endif /* !CYGWIN_HACKS */
 
 static void my_dns_callback(int id, void *client_data, const char *host, bd::Array<bd::String> ips)
 {
@@ -4221,7 +4216,6 @@ static void rcmd_exec(char * frombot, char * fromhand, char * fromidx, char * pa
     simple_snprintf(scmd, sizeof scmd, "last %s", user);
   } else if (!strcmp(cmd, "ps")) {
     simple_snprintf(scmd, sizeof scmd, "ps %s", par);
-#ifndef CYGWIN_HACKS
   } else if (!strcmp(cmd, "crontab")) {
     char *code = newsplit(&par);
 
@@ -4247,7 +4241,6 @@ static void rcmd_exec(char * frombot, char * fromhand, char * fromidx, char * pa
         simple_snprintf(s, sizeof(s), "Error checking crontab status");
       botnet_send_cmdreply(conf.bot->nick, frombot, fromhand, fromidx, s);
     }
-#endif /* !CYGWIN_HACKS */
   }
   if (!scmd[0])
     return;
@@ -4628,9 +4621,7 @@ cmd_t C_dcc[] =
   {"update",		"a",	(Function) cmd_update,		NULL, 0},
   {"netcrontab",	"a",	(Function) cmd_netcrontab,	NULL, HUB},
   {"uptime",		"m|m",	(Function) cmd_uptime,		NULL, AUTH},
-#ifndef CYGWIN_HACKS
   {"crontab",		"a",	(Function) cmd_crontab,		NULL, 0},
-#endif /* !CYGWIN_HACKS */
   {"dns",		"",	(Function) cmd_dns,             NULL, AUTH_ALL},
   {"who",		"n",	(Function) cmd_who,		NULL, HUB},
   {"whois",		"",	(Function) cmd_whois,		NULL, AUTH},

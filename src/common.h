@@ -23,9 +23,6 @@
 #include "chan.h"
 #include "compat/compat.h"
 
-#ifdef CYGWIN_HACKS
-#  include <windows.h>
-#endif /* CYGWIN_HACKS */
 #include <sys/param.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -36,12 +33,6 @@
 #ifdef HAVE_STRINGS_H
 #  include <strings.h>
 #endif
-
-
-#ifdef WIN32
-# undef exit
-# define exit(x) ExitProcess(x)
-#endif /* WIN32 */
 
 
 #define BIT0    (uint32_t) 0x000000001

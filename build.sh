@@ -24,10 +24,10 @@ else
 fi
 
 # Convert timestamp into readable format
-rm -f ts ts.exe > /dev/null 2>&1
+rm -f ts > /dev/null 2>&1
 gcc -o ts src/timestamp.c > /dev/null 2>&1
 builddate=`./ts ${BUILDTS}`
-rm -f ts ts.exe > /dev/null 2>&1
+rm -f ts > /dev/null 2>&1
 
 #Display banner
 clear
@@ -112,7 +112,6 @@ case `uname` in
   OpenBSD) os=OpenBSD;;
   NetBSD) os=NetBSD;;
   SunOS) os=Solaris;;
-  CYGWIN*) os=Cygwin; extras="/bin/cygwin1.dll"; exe=".exe";;
 esac
 
 if test -z $os

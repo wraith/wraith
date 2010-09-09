@@ -1003,10 +1003,8 @@ listen_all(port_t lport, bool off, bool should_v6)
 void
 identd_open(const char *sourceIp, const char *destIp, int identd)
 {
-#ifndef CYGWIN_HACKS
-  // Only open identd socket if running as root or on cygwin.
+  // Only open identd socket if running as root
   if (!conf.uid)
-#endif
   {
     int idx;
     int i = -1;

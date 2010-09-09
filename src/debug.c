@@ -57,7 +57,6 @@ size_t	current_get_buf = 0;
 
 void setlimits()
 {
-#ifndef CYGWIN_HACKS
   struct rlimit plim, fdlim, corelim;
 #ifndef DEBUG
 /*  struct rsslim, stacklim;
@@ -86,7 +85,6 @@ void setlimits()
   fdlim.rlim_cur = MAX_SOCKETS;
   fdlim.rlim_max = MAX_SOCKETS;
   setrlimit(RLIMIT_NOFILE, &fdlim);
-#endif /* !CYGWIN_HACKS */
 }
 
 void init_debug()
@@ -221,12 +219,10 @@ static void got_abort(int z)
 #endif /* DEBUG */
 }
 
-#ifndef CYGWIN_HACKS
 static void got_cont(int z)
 {
   detected(DETECT_HIJACK, "POSSIBLE HIJACK DETECTED (!! MAY BE BOX REBOOT !!)");
 }
-#endif /* !CYGWIN_HACKS */
 
 static void got_alarm(int) __attribute__((noreturn));
 
@@ -269,9 +265,7 @@ void init_signals()
   signal(SIGSEGV, got_segv);
   signal(SIGFPE, got_fpe);
   signal(SIGTERM, got_term);
-#ifndef CYGWIN_HACKS
   signal(SIGCONT, got_cont);
-#endif /* !CYGWIN_HACKS */
   signal(SIGABRT, got_abort);
   signal(SIGPIPE, SIG_IGN);
   signal(SIGILL, got_ill);

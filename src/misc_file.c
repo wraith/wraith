@@ -51,11 +51,7 @@ int copyfile(const char *oldpath, const char *newpath)
 {
   int fi;
 
-#ifndef CYGWIN_HACKS
   fi = open(oldpath, O_RDONLY, 0);
-#else
-  fi = open(oldpath, O_RDONLY | O_BINARY, 0);
-#endif
   if (fi < 0)
     return 1;
 
@@ -296,14 +292,6 @@ static bool check_tempdir(bool do_mod)
 bool Tempfile::FindDir()
 {
   /* this is temporary until we make tmpdir customizable */
-#ifdef CYGWIN_HACKS
-  simple_snprintf(tempdir, DIRMAX, "./tmp/");
-  if (!check_tempdir(0)) {
-    clear_tmpdir = 0;
-    simple_snprintf(tempdir, DIRMAX, "./");
-  }
-  return OK;
-#else
 
   looking = 1;
 
@@ -342,5 +330,4 @@ bool Tempfile::FindDir()
   }
 
   return ERROR;
-#endif /* CYGWIN_HACKS */
 }

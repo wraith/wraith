@@ -686,7 +686,6 @@ static cmd_t myctcp[] =
 void ctcp_init()
 {
   char *p = NULL;
-#ifndef CYGWIN_HACKS
   struct utsname un;
 
   bzero(&un, sizeof(un));
@@ -695,7 +694,6 @@ void ctcp_init()
     strlcpy(cloak_osver, un.release, sizeof(cloak_osver));
     strlcpy(cloak_host, un.nodename, sizeof(cloak_host));
   } else {
-#endif /* !CYGWIN_HACKS */
     /* shit, we have to come up with something ourselves.. */
     switch (randint(2)) {
     case 0:
@@ -708,9 +706,7 @@ void ctcp_init()
       break;
     }
     strlcpy(cloak_host, "login", sizeof(cloak_host));
-#ifndef CYGWIN_HACKS
   }
-#endif /* !CYGWIN_HACKS */
   if ((p = strchr(cloak_host, '.')))
     *p = 0;
 

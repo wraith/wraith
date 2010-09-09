@@ -41,10 +41,8 @@ AC_ARG_ENABLE(ipv6, [  --disable-ipv6           disable IPv6 support],
   AC_MSG_RESULT($ac_cv_dipv6)
 ])
 
-if ! test "$EGG_CYGWIN" = "yes"; then
- if test "$ac_cv_dipv6" = "no"; then
-   AC_DEFINE(USE_IPV6, 1, [Define if you want ipv6 support])
- fi
+if test "$ac_cv_dipv6" = "no"; then
+  AC_DEFINE(USE_IPV6, 1, [Define if you want ipv6 support])
 fi
 ])
 
@@ -261,7 +259,6 @@ dnl
 dnl
 AC_DEFUN([EGG_CHECK_OS],
 [
-EGG_CYGWIN=no
 USE_STATIC=yes
 AC_CACHE_CHECK(system type, egg_cv_var_system_type, egg_cv_var_system_type=`$UNAME -s`)
 AC_CACHE_CHECK(system release, egg_cv_var_system_release, egg_cv_var_system_release=`$UNAME -r`)
@@ -273,14 +270,6 @@ USE_GENERIC_I486="yes"
 
 case "$egg_cv_var_system_type" in
   BSD/OS)
-  ;;
-  CYGWI*)
-    AC_PROG_CC_WIN32
-    CXX="$CXX $WIN32FLAGS"
-    EGG_CYGWIN="yes"
-    EGG_CYGWIN_BINMODE
-    AC_DEFINE(CYGWIN_HACKS, 1, [Define if running under cygwin])
-    AC_DEFINE(WIN32_LEAN_AND_MEAN, 1, [Define if windows])
   ;;
   IRIX)
   ;;
@@ -364,24 +353,6 @@ esac
 
 AC_SUBST(BUILDOS)dnl
 AC_SUBST(BUILDARCH)dnl
-])
-
-dnl EGG_CYGWIN_BINMODE
-dnl
-dnl Check for binmode.o on Cygwin.
-dnl
-AC_DEFUN([EGG_CYGWIN_BINMODE],
-[
-  if test $EGG_CYGWIN = "yes"; then
-    AC_MSG_CHECKING([for /usr/lib/binmode.o])
-    if test -r /usr/lib/binmode.o; then
-      AC_MSG_RESULT([yes])
-      LIBS="$LIBS /usr/lib/binmode.o"
-    else
-      AC_MSG_RESULT([no])
-      AC_MSG_WARN([Make sure the directory Eggdrop is installed into is mounted in binary mode.])
-    fi
-  fi
 ])
 
 dnl  EGG_CHECK_LIBS()
@@ -686,47 +657,6 @@ AC_DEFUN([EGG_SAVE_PARAMETERS],
 
   AC_SUBST(egg_ac_parameters)dnl
 ])
-
-
-AC_DEFUN([AC_PROG_CC_WIN32], 
-[
-AC_MSG_CHECKING([how to access the Win32 API])
-WIN32FLAGS=
-AC_TRY_COMPILE(,[
-#ifndef WIN32
-# ifndef _WIN32
-#  error WIN32 or _WIN32 not defined
-# endif
-#endif], [
-dnl found windows.h with the current config.
-AC_MSG_RESULT([present by default])
-], [
-dnl try -mwin32
-ac_compile_save="$ac_compile"
-dnl we change CC so config.log looks correct
-save_CXX="$CXX"
-ac_compile="$ac_compile -mwin32"
-CXX="$CXX -mwin32"
-AC_TRY_COMPILE(,[
-#ifndef WIN32
-# ifndef _WIN32
-#  error WIN32 or _WIN32 not defined
-# endif
-#endif], [
-dnl found windows.h using -mwin32
-AC_MSG_RESULT([found via -mwin32])
-ac_compile="$ac_compile_save"
-CXX="$save_CXX"
-WIN32FLAGS="-mwin32"
-], [
-ac_compile="$ac_compile_save"
-CXX="$save_CXX"
-AC_MSG_RESULT([not found])
-])
-])
-
-])
-
 
 AC_DEFUN([EGG_CHECK_RANDOM_MAX],
 [

@@ -887,9 +887,7 @@ int updatebin(int idx, char *par, int secs)
   char *path = (char *) my_calloc(1, path_siz);
   char *newbin = NULL, buf[DIRMAX] = "";
   const char* argv[5];
-#ifndef CYGWIN_HACKS
   int i;
-#endif /* !CYGWIN_HACKS */
 
   strlcpy(path, binname, path_siz);
   newbin = strrchr(path, '/');
@@ -906,14 +904,6 @@ int updatebin(int idx, char *par, int secs)
     return 1;
   }
   strcpy(newbin, par);
-#ifdef CYGWIN_HACKS
-  /* tack on the .exe */
-  if (!strstr(path, ".exe")) {
-    path = (char *) my_realloc(path, strlen(path) + 4 + 1);
-    strcat(path, ".exe");
-    path[strlen(path)] = 0;
-  }
-#endif /* CYGWIN_HACKS */
   if (!strcmp(path, binname)) {
     free(path);
     logidx(idx, STR("Can't update with the current binary"));
@@ -959,7 +949,6 @@ int updatebin(int idx, char *par, int secs)
   }
 
   /* The binary should return '2' when ran with -2, if not it's probably corrupt. */
-#ifndef CYGWIN_HACKS
   putlog(LOG_DEBUG, "*", STR("Running for update binary test: %s -2"), path);
   argv[0] = path;
   argv[1] = "-2";
@@ -970,10 +959,8 @@ int updatebin(int idx, char *par, int secs)
     delete conffile;
     return i;
   }
-#endif /* !CYGWIN_HACKS */
 
   /* now to send our config to the new binary */
-#ifndef CYGWIN_HACKS
   putlog(LOG_DEBUG, "*", STR("Running for update conf: %s -4 %s"), path, conffile->file);
   argv[0] = path;
   argv[1] = "-4";
@@ -985,19 +972,7 @@ int updatebin(int idx, char *par, int secs)
     logidx(idx, STR("Couldn't pass config to new binary (error %d)"), i);
     return i;
   }
-#endif /* !CYGWIN_HACKS */
 
-#ifdef CYGWIN_HACKS
-  {
-    size_t binsize = conffile->len + 7 + 1;
-    char *tmpbuf = (char *) my_calloc(1, binsize);
-
-    simple_snprintf(tmpbuf, binsize, "%sbin.old.exe", conffile->file);
-    tmpbuf[binsize - 1] = 0;
-    movefile(binname, tmpbuf);
-    free(tmpbuf);
-  }
-#endif /* CYGWIN_HACKS */  
   if (movefile(path, binname)) {
     logidx(idx, STR("Can't rename %s to %s"), path, binname);
     free(path);
