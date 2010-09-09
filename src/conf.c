@@ -37,9 +37,6 @@
 #  include <limits.h>
 #endif
 
-#ifdef CYGWIN_HACKS
-char cfile[DIRMAX] = "";
-#endif /* CYGWIN_HACKS */
 conf_t conf;                    /* global conf struct */
 
 static void
@@ -161,7 +158,6 @@ conf_killbot(conf_bot *bots, const char *botnick, conf_bot *bot, int signal, boo
   return ret;
 }
 
-#ifndef CYGWIN_HACKS
 static int
 my_gettime(struct timespec *ts)
 {
@@ -257,12 +253,7 @@ confedit()
       goto fatal;
     } else if (WIFSIGNALED(waiter)) {
       fprintf(stderr, STR("\"%s\" killed; signal %d (%score dumped)\n"), editor, WTERMSIG(waiter),
-#  ifdef CYGWIN_HACKS
-              0
-#  else
               WCOREDUMP(waiter)
-#  endif
-              /* CYGWIN_HACKS */
               ? "" : "no ");
       goto fatal;
     } else {
@@ -322,7 +313,6 @@ fatal:
   unlink(tmpconf.file);
   exit(1);
 }
-#endif /* !CYGWIN_HACKS */
 
 void
 init_conf()
@@ -334,11 +324,7 @@ init_conf()
   conf.bot = NULL;
 
   conf.localhub = NULL;
-#ifdef CYGWIN_HACKS
-  conf.autocron = 0;
-#else
   conf.autocron = 1;
-#endif /* !CYGWIN_HACKS */
 
   conf.features = 0;
   conf.portmin = 0;
@@ -588,14 +574,12 @@ parseconf(bool error)
   if (error && (!conf.username || !conf.username[0]))
     werr(ERR_NOUSERNAME);
 
-#ifndef CYGWIN_HACKS
   if (error && conf.uid != (signed) myuid) {
     sdprintf(STR("wrong uid, conf: %d :: %d"), conf.uid, myuid);
     werr(ERR_WRONGUID);
   } else if (!conf.uid)
     conf.uid = myuid;
 
-#endif /* !CYGWIN_HACKS */
   return 0;
 }
 
@@ -723,7 +707,6 @@ writeconf(char *filename, int fd, int bits)
 	  *stream << buf.printf(STR("%s\n"), text);	\
 } while(0)
 
-#ifndef CYGWIN_HACKS
   char *p = NULL;
 
   comment("");
@@ -803,7 +786,6 @@ writeconf(char *filename, int fd, int bits)
   comment("#bot5 * * ip:v6:ip:goes:here::");
   comment("### Hubs should have their own binary ###");
 
-#endif /* CYGWIN_HACKS */
   for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
     *stream << buf.printf(STR("%s%s %s %s%s"),
              bot->disabled ? "/" : "", bot->nick,

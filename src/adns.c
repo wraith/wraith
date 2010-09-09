@@ -20,6 +20,8 @@
 
 /* async dns
  *
+ * This is based on eggdrop1.9's dns code and not GNU adns.
+ *
  */
 
 

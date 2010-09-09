@@ -77,10 +77,6 @@
 #include "egg_timer.h"
 #include "core_binds.h"
 
-#ifdef CYGWIN_HACKS
-#include <getopt.h>
-#endif /* CYGWIN_HACKS */
-
 #ifndef _POSIX_SOURCE
 /* Solaris needs this */
 #define _POSIX_SOURCE
@@ -164,12 +160,6 @@ static char *getfullbinname(const char *argv_zero)
   str_redup(&bin, cwd);
 
 have_cwd:
-#ifdef CYGWIN_HACKS
-  /* tack on the .exe */
-  bin = (char *) my_realloc(bin, strlen(bin) + 4 + 1);
-  strcat(bin, ".exe");
-  bin[strlen(bin)] = 0;
-#endif /* CYGWIN_HACKS */
   /* Fix for symlinked binaries */
   if (!realpath(bin, buf))
     fatal(STR("realpath() failed on getting current working directory."), 0);
@@ -471,7 +461,6 @@ static struct tm	nowtm;
 
 void core_10secondly()
 {
-#ifndef CYGWIN_HACKS
   static int curcheck = 0;
 
   ++curcheck;
@@ -491,7 +480,6 @@ void core_10secondly()
     if (curcheck == 3)
       curcheck = 0;
   }
-#endif /* !CYGWIN_HACKS */
 }
 
 /* Traffic stats
@@ -619,22 +607,12 @@ static void startup_checks(int hack) {
    * if settings.homedir is NOT empty, just erase the conf file if it exists
    * otherwise, assume we're working only with the struct */
 
-#ifdef CYGWIN_HACKS
-  simple_snprintf(cfile, sizeof cfile, STR("./conf.txt"));
-
-  if (can_stat(cfile))
-    readconf(cfile, 0);	/* will read into &conf struct */
-  conf_checkpids(conf.bots);
-#endif /* CYGWIN_HACKS */
-
-#ifndef CYGWIN_HACKS
   /* Only error out with missing homedir when we aren't editing the binary */
   if (settings.dynamic_initialized[0])
     bin_to_conf(do_confedit ? 0 : 1);		/* read our memory from settings[] into conf[] */
 
   if (do_confedit)
     confedit();		/* this will exit() */
-#endif /* !CYGWIN_HACKS */
 
   if (!updating)
     parseconf(1);
@@ -705,9 +683,7 @@ int main(int argc, char **argv)
 {
 
 #ifndef DEBUG
-#ifndef CYGWIN_HACKS
   check_trace(1);
-#endif /* !CYGWIN_HACKS */
 #endif
 
   /* Initialize variables and stuff */
@@ -836,19 +812,13 @@ int main(int argc, char **argv)
   if (!conf.bot->hub && conf.bot->localhub)
     sdprintf(STR("I am localhub (%s)"), conf.bot->nick);
 
-#ifndef CYGWIN_HACKS
   if (conf.autocron && (conf.bot->hub || conf.bot->localhub))
     check_crontab();
-#endif /* !CYGWIN_HACKS */
 
   /* Move into background? */
-  /* we don't split cygwin because to run as a service the bot shouldn't exit.
-     confuses windows ;)
-   */
   use_stderr = 0;		/* stop writing to stderr now! */
 
   if (backgrd) {
-#ifndef CYGWIN_HACKS
     if (!socksfile) {
       mypid = do_fork();
   conf_setmypid(mypid);
@@ -861,10 +831,6 @@ int main(int argc, char **argv)
       writepid(conf.bot->pid_file, mypid);
     close_tty();
   } else {
-#endif /* !CYGWIN_HACKS */
-#ifdef CYGWIN_HACKS
-    FreeConsole();
-#endif /* CYGWIN_HACKS */
     if (!socksfile)
       printf(STR("%s[%s%s%s]%s -%s- initiated\n"), BOLD(-1), BOLD_END(-1), settings.packname, BOLD(-1), BOLD_END(-1), conf.bot->nick);
     writepid(conf.bot->pid_file, mypid);

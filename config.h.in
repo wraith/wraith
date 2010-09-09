@@ -13,9 +13,6 @@
 /* big endian */
 #undef B_ENDIAN
 
-/* Define if running under cygwin */
-#undef CYGWIN_HACKS
-
 /* Defines the current pack version */
 #undef EGG_VERSION
 
@@ -160,7 +157,7 @@
 /* Define to 1 if you have the `strncasecmp' function. */
 #undef HAVE_STRNCASECMP
 
-/* Define to 1 if `tm_zone' is member of `struct tm'. */
+/* Define to 1 if `tm_zone' is a member of `struct tm'. */
 #undef HAVE_STRUCT_TM_TM_ZONE
 
 /* Define to 1 if your struct stat has an st_mtim member */
@@ -271,6 +268,9 @@
 /* Define to the one symbol short name of this package. */
 #undef PACKAGE_TARNAME
 
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
+
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
@@ -337,9 +337,6 @@
 # undef __EXTENSIONS__
 #endif
 
-
-/* Define if windows */
-#undef WIN32_LEAN_AND_MEAN
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */

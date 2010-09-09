@@ -50,7 +50,6 @@ char *my_username();
 void expand_tilde(char **);
 int shell_exec(char *, char *, char **, char **, bool = 0);
 int simple_exec(const char* argv[]);
-#ifndef CYGWIN_HACKS
 void check_last();
 void check_promisc();
 void check_trace(int);
@@ -59,7 +58,6 @@ void crontab_del();
 int crontab_exists(bd::Stream* = NULL, bool = 0);
 void crontab_create(int);
 void detected(int, const char *);
-#endif /* !CYGWIN_HACKS */
 void suicide(const char *);
 void werr(int) __attribute__((noreturn));
 const char *werr_tostr(int);

@@ -10,11 +10,6 @@
 /makehelp
 /sorthelp
 /makeres
-/stringfix.exe
-/makehelp.exe
-/sorthelp.exe
-/makeres.exe
 /makeset
-/makeset.exe
 /set_default.h
 *.o

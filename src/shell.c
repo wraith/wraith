@@ -168,7 +168,6 @@ void check_mypid()
 }
 
 
-#ifndef CYGWIN_HACKS
 
 char last_buf[128] = "";
 
@@ -330,7 +329,6 @@ void check_trace(int start)
 #endif
   }
 }
-#endif /* !CYGWIN_HACKS */
 
 int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool simple)
 {
@@ -532,9 +530,7 @@ void suicide(const char *msg)
   //Not recursively clearing these dirs as they may be ~USER/ ..
   unlink(conf.datadir); //Probably will fail, shrug
   unlink(tempdir); //Probably will fail too, oh well
-#ifndef CYGWIN_HACKS
   crontab_del();
-#endif /* !CYGWIN_HACKS */
   fatal(msg, 0);
 }
 
@@ -671,13 +667,9 @@ char *homedir(bool useconf)
     if (conf.homedir && useconf)
       simple_snprintf(homedir_buf, sizeof homedir_buf, "%s", conf.homedir);
     else {
-#ifdef CYGWIN_HACKS
-      simple_snprintf(homedir_buf, sizeof homedir_buf, "%s", dirname(binname));
-#else /* !CYGWIN_HACKS */
     char *home = getenv("HOME");
     if (home && strlen(home))
       strlcpy(homedir_buf, home, sizeof(homedir_buf));
-#endif /* CYGWIN_HACKS */
     }
   }
   return homedir_buf[0] ? homedir_buf : NULL;
@@ -688,13 +680,9 @@ char *my_username()
   static char username[DIRMAX] = "";
 
   if (!username[0]) {
-#ifdef CYGWIN_HACKS
-    simple_snprintf(username, sizeof username, "cygwin");
-#else /* !CYGWIN_HACKS */
     char *user = getenv("USER");
     if (user && strlen(user))
       strlcpy(username, user, sizeof(username));
-#endif /* CYGWIN_HACKS */
   }
   return username[0] ? username : NULL;
 }
@@ -777,7 +765,6 @@ void crontab_del() {
     crontab_install(crontab);
 }
 
-#ifndef CYGWIN_HACKS
 int crontab_exists(bd::Stream* crontab, bool excludeSelf) {
   char *out = NULL;
   int ret = -1;
@@ -836,7 +823,6 @@ void crontab_create(int interval) {
   crontab << buf;
   crontab_install(crontab);
 }
-#endif /* !CYGWIN_HACKS */
 
 int det_translate(const char *word)
 {
