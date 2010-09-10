@@ -5,6 +5,9 @@
 * When 'mop' protection is on, deop all previously regular clients automatically.
 * Fix 'mop' causing a mass deop when -bitch
 * Properly honor exemptions when kicking matched RBL clients
+* Wraith is now linked dynamically. This should improve binary compat.
+  Compile on the oldest OS you want to support, and ensure newer ones have
+  all necessary compat libraries.
 
 1.3.1 - http://wraith.botpack.net/milestone/1.3.1
   * Fix crash related to slowpart
