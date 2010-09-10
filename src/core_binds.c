@@ -174,13 +174,13 @@ int check_bind_dcc(const char *cmd, int idx, const char *text)
 
 int real_check_bind_dcc(const char *cmd, int idx, const char *text, Auth *auth)
 {
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYCH, 0, 0, 0 };
   bind_entry_t *entry = NULL;
   bind_table_t *table = NULL;
   char *args = strdup(text);
   size_t args_siz = strlen(args) + 1;
 
-  get_user_flagrec(dcc[idx].user, &fr, dcc[idx].u.chat->con_chan);
+  get_user_flagrec(dcc[idx].user, &fr, NULL);
 
   table = bind_table_lookup("dcc");
   size_t cmdlen = strlen(cmd);
