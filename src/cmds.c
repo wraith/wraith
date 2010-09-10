@@ -630,7 +630,7 @@ findcmd(const char *lookup, bool care_about_type)
 {
   help_t key;
   key.cmd = (char*)lookup;
-  help_t *h_entry = (help_t *) bsearch(&key, &help, sizeof(help)/sizeof(help_t), sizeof(help_t), comp_help_t);
+  help_t *h_entry = (help_t *) bsearch(&key, &help, lengthof(help) - 1, sizeof(help_t), comp_help_t);
   if (h_entry && ((care_about_type && have_cmd(h_entry->cmd, h_entry->type)) || (!care_about_type)))
       return h_entry;
 

@@ -99,5 +99,6 @@
 #define unlikely(x)  (x)
 #endif
 
+#define lengthof(x) (sizeof(x)/sizeof(x[0]))
 
 #endif				/* _COMMON_H */
