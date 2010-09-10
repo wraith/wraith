@@ -8,6 +8,7 @@
 * Wraith is now linked dynamically. This should improve binary compat.
   Compile on the oldest OS you want to support, and ensure newer ones have
   all necessary compat libraries.
+* Fix partyline cmds for |m and |o users who do not have console set correctly. (.adduser)
 
 * 'make' on BSD will now redirect to gmake.
 
