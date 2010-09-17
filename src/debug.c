@@ -222,7 +222,7 @@ static void got_abort(int z)
   write_debug();
   fatal("GOT SIGABRT -- CRASHING!", 1);
 #ifdef DEBUG
-  raise(SIGSEGV);
+  raise(SIGABRT);
 #else
   exit(1);
 #endif /* DEBUG */
