@@ -193,6 +193,22 @@ static void got_segv(int z)
 }
 
 #ifndef DEBUG
+static void got_trap(int) __attribute__ ((noreturn));
+#endif /* DEBUG */
+
+static void got_trap(int z)
+{
+  signal(SIGTRAP, SIG_DFL);
+  write_debug();
+  fatal("SIGTRAP Received!", 1);
+#ifdef DEBUG
+  raise(SIGTRAP);
+#else
+  exit(1);
+#endif /* DEBUG */
+}
+
+#ifndef DEBUG
 static void got_fpe(int) __attribute__ ((noreturn));
 #endif /* DEBUG */
 
@@ -277,6 +293,7 @@ got_usr1(int z)
 void init_signals() 
 {
   signal(SIGBUS, got_bus);
+  signal(SIGTRAP, got_trap);
   signal(SIGSEGV, got_segv);
   signal(SIGFPE, got_fpe);
   signal(SIGTERM, got_term);

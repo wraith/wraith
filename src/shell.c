@@ -264,6 +264,7 @@ static void got_sigtrap(int z)
 
 void check_trace(int start)
 {
+  return;
   if (trace == DET_IGNORE || trace == DET_WARN)
     trace = DET_DIE;
 //    return;
