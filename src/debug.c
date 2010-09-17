@@ -195,7 +195,11 @@ static void got_fpe(int z)
 {
   write_debug();
   fatal("FLOATING POINT ERROR -- CRASHING!", 0);
-  exit(1);		/* for GCC noreturn */
+#ifdef DEBUG
+  raise(SIGFPE);
+#else
+  exit(1);
+#endif /* DEBUG */
 }
 
 static void got_term(int) __attribute__ ((noreturn));
