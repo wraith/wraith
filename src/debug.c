@@ -115,13 +115,49 @@ void sdprintf (const char *format, ...)
 #endif
 }
 
-static void write_debug()
+static void write_debug(bool fatal = 1)
 {
+  if (fatal) {
+    segfaulted = 1;
+    alarm(0);		/* dont let anything jump out of this signal! */
+  }
+
   putlog(LOG_MISC, "*", "** Paste to bryan:");
   const size_t cur_buf = (current_get_buf == 0) ? GET_BUFS - 1 : current_get_buf - 1;
   for (size_t i = 0; i < GET_BUFS; i++)
     putlog(LOG_MISC, "*", "%c %02zu: %s", i == cur_buf ? '*' : '_', i, get_buf[i]);
   putlog(LOG_MISC, "*", "** end");
+
+#ifdef DEBUG
+  if (fatal) {
+    /* Write GDB backtrace */
+    char gdb[1024] = "", btfile[256] = "", std_in[101] = "", *out = NULL;
+    unsigned int core = 0;
+
+    simple_snprintf(btfile, sizeof(btfile), ".gdb-backtrace-%d", getpid());
+
+    FILE *f = fopen(btfile, "w");
+
+    if (f) {
+      strlcpy(std_in, "bt 100\nbt 100 full\ndetach\nquit\n", sizeof(stdin));
+      //simple_snprintf(stdin, sizeof(stdin), "detach\n");
+      //simple_snprintf(stdin, sizeof(stdin), "q\n");
+
+      simple_snprintf(gdb, sizeof(gdb), "gdb %s %d", binname, getpid());
+      shell_exec(gdb, std_in, &out, NULL);
+      fprintf(f, "%s\n", out);
+      fclose(f);
+      free(out);
+    }
+
+    //enabling core dumps
+    struct rlimit limit;
+    if (!getrlimit(RLIMIT_CORE, &limit)) {
+      limit.rlim_cur = limit.rlim_max;
+      if(!setrlimit(RLIMIT_CORE, &limit)) core = limit.rlim_cur;
+    }
+  }
+#endif
 }
 
 #ifndef DEBUG
@@ -146,51 +182,30 @@ static void got_segv(int) __attribute__ ((noreturn));
 
 static void got_segv(int z)
 {
-  segfaulted = 1;
-  alarm(0);		/* dont let anything jump out of this signal! */
   signal(SIGSEGV, SIG_DFL);
   write_debug();
   fatal("SEGMENT VIOLATION -- CRASHING!", 1);
 #ifdef DEBUG
-  char gdb[1024] = "", btfile[256] = "", std_in[101] = "", *out = NULL;
-  unsigned int core = 0;
-
-  simple_snprintf(btfile, sizeof(btfile), ".gdb-backtrace-%d", getpid());
-
-  FILE *f = fopen(btfile, "w");
-
-  if (f) {
-    strlcpy(std_in, "bt 100\nbt 100 full\ndetach\nquit\n", sizeof(stdin));
-//    simple_snprintf(stdin, sizeof(stdin), "detach\n");
-//    simple_snprintf(stdin, sizeof(stdin), "q\n");
-
-    simple_snprintf(gdb, sizeof(gdb), "gdb %s %d", binname, getpid());
-    shell_exec(gdb, std_in, &out, NULL);
-    fprintf(f, "%s\n", out);
-    fclose(f);
-    free(out);
-  }
-
-  //enabling core dumps
-  struct rlimit limit;
-  if (!getrlimit(RLIMIT_CORE, &limit)) {
-    limit.rlim_cur = limit.rlim_max;
-    if(!setrlimit(RLIMIT_CORE, &limit)) core = limit.rlim_cur;
-  }
-
   raise(SIGSEGV);
 #else
   exit(1);
 #endif /* DEBUG */
 }
 
+#ifndef DEBUG
 static void got_fpe(int) __attribute__ ((noreturn));
+#endif /* DEBUG */
 
 static void got_fpe(int z)
 {
+  signal(SIGFPE, SIG_DFL);
   write_debug();
-  fatal("FLOATING POINT ERROR -- CRASHING!", 0);
-  exit(1);		/* for GCC noreturn */
+  fatal("FLOATING POINT ERROR -- CRASHING!", 1);
+#ifdef DEBUG
+  raise(SIGFPE);
+#else
+  exit(1);
+#endif /* DEBUG */
 }
 
 static void got_term(int) __attribute__ ((noreturn));
@@ -213,7 +228,7 @@ static void got_abort(int z)
   write_debug();
   fatal("GOT SIGABRT -- CRASHING!", 1);
 #ifdef DEBUG
-  raise(SIGSEGV);
+  raise(SIGABRT);
 #else
   exit(1);
 #endif /* DEBUG */
@@ -238,7 +253,7 @@ static void got_alarm(int z)
  */
 static void got_ill(int z)
 {
-  write_debug();
+  write_debug(0);
 }
 
 static void
