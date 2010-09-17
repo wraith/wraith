@@ -115,8 +115,13 @@ void sdprintf (const char *format, ...)
 #endif
 }
 
-static void write_debug(bool gdb_backtrace = 1)
+static void write_debug(bool fatal = 1)
 {
+  if (fatal) {
+    segfaulted = 1;
+    alarm(0);		/* dont let anything jump out of this signal! */
+  }
+
   putlog(LOG_MISC, "*", "** Paste to bryan:");
   const size_t cur_buf = (current_get_buf == 0) ? GET_BUFS - 1 : current_get_buf - 1;
   for (size_t i = 0; i < GET_BUFS; i++)
@@ -124,7 +129,7 @@ static void write_debug(bool gdb_backtrace = 1)
   putlog(LOG_MISC, "*", "** end");
 
 #ifdef DEBUG
-  if (gdb_backtrace) {
+  if (fatal) {
     /* Write GDB backtrace */
     char gdb[1024] = "", btfile[256] = "", std_in[101] = "", *out = NULL;
     unsigned int core = 0;
@@ -177,8 +182,6 @@ static void got_segv(int) __attribute__ ((noreturn));
 
 static void got_segv(int z)
 {
-  segfaulted = 1;
-  alarm(0);		/* dont let anything jump out of this signal! */
   signal(SIGSEGV, SIG_DFL);
   write_debug();
   fatal("SEGMENT VIOLATION -- CRASHING!", 1);
@@ -195,6 +198,7 @@ static void got_fpe(int) __attribute__ ((noreturn));
 
 static void got_fpe(int z)
 {
+  signal(SIGFPE, SIG_DFL);
   write_debug();
   fatal("FLOATING POINT ERROR -- CRASHING!", 1);
 #ifdef DEBUG
