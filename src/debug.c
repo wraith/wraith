@@ -189,12 +189,14 @@ static void got_segv(int z)
 #endif /* DEBUG */
 }
 
+#ifndef DEBUG
 static void got_fpe(int) __attribute__ ((noreturn));
+#endif /* DEBUG */
 
 static void got_fpe(int z)
 {
   write_debug();
-  fatal("FLOATING POINT ERROR -- CRASHING!", 0);
+  fatal("FLOATING POINT ERROR -- CRASHING!", 1);
 #ifdef DEBUG
   raise(SIGFPE);
 #else
