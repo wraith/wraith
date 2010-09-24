@@ -17,7 +17,6 @@ list set list
 irc.blessed.net
 irc.choopa.net
 irc.colosolutions.net
-irc.easynews.com
 irc.eversible.com
 irc.he.net
 irc.mzima.net
@@ -43,6 +42,7 @@ irc.underworld.no
 #CA
 irc.arcti.ca
 irc.choopa.ca
+irc.teksavvy.ca
 
 :servers6
 efnet.ipv6.port80.se
