@@ -9,6 +9,7 @@
   Compile on the oldest OS you want to support, and ensure newer ones have
   all necessary compat libraries.
 * Fix partyline cmds for |m and |o users who do not have console set correctly. (.adduser)
+* Allow simulated terminal (HQ) user to access owners (ie, .chpass owner)
 
 * 'make' on BSD will now redirect to gmake.
 

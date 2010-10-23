@@ -522,6 +522,11 @@ void load_internal_users()
     }
   }
 
+  // Add HQ in if needed
+  if (!backgrd && term_z) {
+    strlcat(owner, ",HQ", sizeof(owner));
+  }
+
 }
 
 static struct userrec* add_bot_userlist(char* bot) {
