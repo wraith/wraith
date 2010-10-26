@@ -954,18 +954,29 @@ void nicks_available(char* buf, char delim, bool buf_contains_available) {
   nick_available(is_jupe, is_orig);
 }
 
+void real_release_nick(void *data) {
+  if (match_my_nick(jupenick)) {
+    altnick_char = rolls = 0;
+    tried_nick = now;
+    dprintf(DP_MODE, "NICK %s\n", origbotname);
+    putlog(LOG_MISC, "*", "Releasing jupenick '%s' and switching back to nick '%s'", jupenick, origbotname);
+  }
+}
+
 void release_nick(const char* nick) {
   // Only do this if currently on a jupenick
   if (jupenick[0] && ((!nick && match_my_nick(jupenick)) || (nick && !rfc_casecmp(jupenick, nick)))) {
     keepnick = 0;
+
+    // Delay releasing nick for 2 seconds to allow botnet to receive orders and user to type /NICK
+    egg_timeval_t howlong;
+    howlong.sec = 2;
+    howlong.usec = 0;
+
     release_time = now;
 
-    if (match_my_nick(jupenick)) {
-      altnick_char = rolls = 0;
-      tried_nick = now;
-      dprintf(DP_MODE, "NICK %s\n", origbotname);
-      putlog(LOG_MISC, "*", "Releasing jupenick '%s' and switching back to nick '%s'", jupenick, origbotname);
-    }
+    timer_create(&howlong, "release_nick", (Function) real_release_nick);
+
   } else if (!nick)
     putlog(LOG_CMDS, "*", "Not releasing nickname. (Not currently on a jupenick)");
 }
@@ -1226,8 +1237,15 @@ static int gotnick(char *from, char *msg)
       }
     } else
       putlog(LOG_SERV | LOG_MISC, "*", "Nickname changed to '%s'???", msg);
-  } else if ((keepnick) && (rfc_casecmp(nick, msg))) { //Ignore case changes
-    nicks_available(nick);
+  } else if ((rfc_casecmp(nick, msg))) { //Ignore case changes
+    if (keepnick)
+      nicks_available(nick);
+    else if (keepnick && release_time) {
+      // Someone else has regained the nickname, revert to keeping the nick in case they lose it
+      // within the release_time window.
+      keepnick = 0;
+      release_time = 0;
+    }
   }
   free(buf_ptr);
   return 0;

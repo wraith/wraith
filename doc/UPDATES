@@ -1,3 +1,7 @@
+release
+  * Add an extra 2 second delay before releasing nick to aide in syncing and time to type /nick
+  * When a nick is released, start regaining as soon as it is witnessed to have been taken again
+
 maint
   * 'make' on BSD will now redirect to gmake.
 
