@@ -54,6 +54,7 @@ irc.efnet.nl
 irc.ipv6.he.net
 irc.ipv6.homelien.no
 irc.paraphysics.net
+irc.underworld.no
 
 :servers_ssl
 efnet.xs4all.nl
@@ -66,6 +67,7 @@ irc.paraphysics.net
 irc.servercentral.net
 irc.shoutcast.com
 irc.umich.edu
+irc.underworld.no
 
 :rbl
 dnsbl.ahbl.org
