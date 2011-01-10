@@ -56,7 +56,7 @@ See also: invites, -invite, stick, unstick
    have no flags, an optional hostmask, and a random pass/secpass.
    List as many hosts as needed.
  
-See also: -user, +host, -host, cleearhosts%{+ni}, newleaf%{-}
+See also: -user, +host, -host, clearhosts%{+ni}, newleaf%{-}
 ::-ban
 ###  $b-ban$b <banmask or number> [channel]
    Removes the specified ban from the list of bans stored on the bot. You may
