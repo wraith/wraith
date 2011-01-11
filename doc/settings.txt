@@ -14,7 +14,6 @@ list set list
 # From http://stats.efnet.org with hubs removed
 :servers
 #US
-irc.blessed.net
 irc.choopa.net
 irc.colosolutions.net
 irc.eversible.com
@@ -58,7 +57,6 @@ irc.underworld.no
 
 :servers_ssl
 efnet.xs4all.nl
-irc.blessed.net
 irc.choopa.ca
 irc.choopa.net
 irc.eversible.com
