@@ -361,7 +361,7 @@ AC_DEFUN([EGG_CHECK_LIBS],
 [
   AC_CHECK_LIB(socket, socket)
 #  AC_CHECK_LIB(nsl, connect)
-#  AC_CHECK_LIB(dl, dlopen)
+  AC_CHECK_LIB(dl, dlopen)
 #  AC_CHECK_LIB(nsl, gethostbyname)
 #  AC_CHECK_LIB(dns, gethostbyname)
 
@@ -529,7 +529,7 @@ AC_TRY_COMPILE([#include <openssl/opensslv.h>],[
 
 CXX="$CXX $SSL_LIBS"
 AC_CHECK_LIB(crypto, AES_encrypt,
-[SSL_LIBS="$SSL_LIBS -lcrypto"],
+[SSL_LIBS="$SSL_LIBS -Wl,-Bstatic -lcrypto -Wl,-Bdynamic"],
 [
   AC_MSG_RESULT([not found.])
   AC_MSG_ERROR([Libcrypto/openssl is required.], 1)
