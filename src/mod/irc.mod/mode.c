@@ -1263,10 +1263,15 @@ gotmode(char *from, char *msg)
           m->flags |= SENTKICK;
           reversing = 1;
         } else if (!chan_hasop(m) && !channel_nodesynch(chan)) {
-          putlog(LOG_MODES, ch, "Mode change by non-chanop on %s!  Reversing...", ch);
-          dprintf(DP_MODE, "KICK %s %s :%sAbusing desync\n", ch, m->nick, kickprefix);
-          m->flags |= SENTKICK;
-          reversing = 1;
+          if (u && u->bot && chk_op(user, chan)) {
+            putlog(LOG_MODES, ch, "Mode change by friendly non-chanop on %s!  Opping...", ch);
+            do_op(m->nick, chan, 0, 0);
+          } else {
+            putlog(LOG_MODES, ch, "Mode change by non-chanop on %s!  Reversing...", ch);
+            dprintf(DP_MODE, "KICK %s %s :%sAbusing desync\n", ch, m->nick, kickprefix);
+            m->flags |= SENTKICK;
+            reversing = 1;
+          }
         }
       }
 

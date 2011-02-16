@@ -4,6 +4,7 @@ next
   * When 'mop' protection is on, deop all previously regular clients automatically.
   * Fix 'mop' causing a mass deop when -bitch
   * Properly honor exemptions when kicking matched RBL clients
+  * Don't kick friendly bots that are desynced: op them.
 
 release
   * Add an extra 2 second delay before releasing nick to aide in syncing and time to type /nick
