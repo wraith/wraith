@@ -579,12 +579,16 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
       size_t len = 0;
 /* should kick the oppee first, then deal with the opper */
 
+#ifdef old
       if (num == 4) {
         len = simple_snprintf(outbuf, sizeof(outbuf), "MODE %s -o %s\r\n", chan->name, mv->nick);
         mv->flags |= SENTDEOP;
       } else if (num == 5) {
         len = simple_snprintf(outbuf, sizeof(outbuf), "MODE %s -o %s\r\n", chan->name, m->nick);
         m->flags |= SENTDEOP;
+#endif
+      if (num == 5) {
+        add_mode(chan, '-', 'o', m->nick);
       } else if (bitch && num == 6) {
         len = simple_snprintf(outbuf, sizeof(outbuf), "KICK %s %s :%s\r\n", chan->name, mv->nick, response(RES_BITCHOPPED));
         mv->flags |= SENTKICK;
