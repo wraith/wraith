@@ -44,6 +44,7 @@ irc.choopa.ca
 irc.teksavvy.ca
 
 :servers6
+efnet.bredband2.se
 efnet.ipv6.port80.se
 efnet.ipv6.xs4all.nl
 irc.ac.za
