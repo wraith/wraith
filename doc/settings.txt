@@ -51,6 +51,7 @@ irc.ac.za
 irc.choopa.ca
 irc.choopa.net
 irc.efnet.nl
+irc.inet.tele.dk
 irc.ipv6.he.net
 irc.ipv6.homelien.no
 irc.paraphysics.net
