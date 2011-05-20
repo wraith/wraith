@@ -320,7 +320,7 @@ static void start_sending_binary(int idx, bool streamable)
     dprintf(idx, "sb ls\n");
     bd::String buf;
     while (stream.tell() < stream.length()) {
-      buf = bd::base64Encode(stream.gets(1024));
+      buf = bd::base64Encode(stream.read(1024));
       ulsend(idx, buf.c_str(), buf.length());
     }
     dprintf(idx, "sb le\n");
