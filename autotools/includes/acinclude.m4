@@ -529,7 +529,13 @@ AC_TRY_COMPILE([#include <openssl/opensslv.h>],[
 
 CXX="$CXX $SSL_LIBS"
 AC_CHECK_LIB(crypto, AES_encrypt,
-[SSL_LIBS="$SSL_LIBS -Wl,-Bstatic -lcrypto -Wl,-Bdynamic"],
+[
+  if test "$USE_STATIC" = "yes"; then
+    SSL_LIBS="$SSL_LIBS -Wl,-Bstatic -lcrypto -Wl,-Bdynamic"
+  else
+    SSL_LIBS="$SSL_LIBS -lcrypto"
+  fi
+],
 [
   AC_MSG_RESULT([not found.])
   AC_MSG_ERROR([Libcrypto/openssl is required.], 1)
