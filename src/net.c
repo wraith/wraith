@@ -1088,9 +1088,9 @@ int sockgets(char *s, int *len)
           // Split off a line
           bd::String line(socklist[i].inbuf->substring(0, newline_index));
           strlcpy(s, line.c_str(), SGRAB + 1);
-          *(socklist[i].inbuf) += int(newline_index) + 1;
+          *(socklist[i].inbuf) += newline_index + 1;
           if (was_crlf)
-           *(socklist[i].inbuf) += 1;
+           *(socklist[i].inbuf) += static_cast<size_t>(1);
 
           if (s[0] && socklist[i].encstatus)
             link_read(i, s, (size_t *) len);
@@ -1113,7 +1113,7 @@ int sockgets(char *s, int *len)
 	  /* Split up into chunks of SGRAB bytes. */
 	  *len = SGRAB;
 	  memcpy(s, socklist[i].inbuf->data(), *len);
-          *(socklist[i].inbuf) += *len;
+          *(socklist[i].inbuf) += static_cast<size_t>(*len);
 	}
 	return socklist[i].sock;
       }
@@ -1167,7 +1167,7 @@ int sockgets(char *s, int *len)
     } else {
       // Take out an SGRAB sized chunk and advance the buffer
       strlcpy(xx, socklist[ret].inbuf->c_str(), SGRAB + 1);
-      *(socklist[ret].inbuf) += SGRAB;
+      *(socklist[ret].inbuf) += static_cast<size_t>(SGRAB);
       /* (leave the rest to be post-pended later) */
     }
   }
@@ -1386,7 +1386,7 @@ void dequeue_sockets()
 	delete socklist[i].outbuf;
 	socklist[i].outbuf = NULL;
       } else if (x > 0) {
-        *(socklist[i].outbuf) += x;
+        *(socklist[i].outbuf) += static_cast<size_t>(x);
       } else {
 	debug3("dequeue_sockets(): errno = %d (%s) on %d", errno, strerror(errno), socklist[i].sock);
       }
