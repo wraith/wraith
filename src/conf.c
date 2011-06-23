@@ -704,7 +704,7 @@ writeconf(char *filename, int fd, int bits)
 
 #define comment(text)	do {		\
 	if (bits & CONF_COMMENT)	\
-	  *stream << buf.printf(STR("%s\n"), text);	\
+	  *stream << bd::String::printf(STR("%s\n"), text);	\
 } while(0)
 
   char *p = NULL;
@@ -721,26 +721,26 @@ writeconf(char *filename, int fd, int bits)
 
   if ((bits & CONF_COMMENT) && conf.uid != (signed) myuid) {
     conf_com();
-    *stream << buf.printf(STR("%s! uid %d\n"), do_confedit == CONF_AUTO ? "" : "#", myuid);
-    *stream << buf.printf(STR("%s! uid %d\n"), do_confedit == CONF_STATIC ? "" : "#", conf.uid);
+    *stream << bd::String::printf(STR("%s! uid %d\n"), do_confedit == CONF_AUTO ? "" : "#", myuid);
+    *stream << bd::String::printf(STR("%s! uid %d\n"), do_confedit == CONF_STATIC ? "" : "#", conf.uid);
   } else
-    *stream << buf.printf(STR("! uid %d\n"), conf.uid);
+    *stream << bd::String::printf(STR("! uid %d\n"), conf.uid);
 
   comment("");
 
   if (conf.username && my_username() && strcmp(conf.username, my_username())) {
     conf_com();
-    *stream << buf.printf(STR("%s! username %s\n"), do_confedit == CONF_AUTO ? "" : "#", my_username());
-    *stream << buf.printf(STR("%s! username %s\n"), do_confedit == CONF_STATIC ? "" : "#", conf.username);
+    *stream << bd::String::printf(STR("%s! username %s\n"), do_confedit == CONF_AUTO ? "" : "#", my_username());
+    *stream << bd::String::printf(STR("%s! username %s\n"), do_confedit == CONF_STATIC ? "" : "#", conf.username);
   } else
-    *stream << buf.printf(STR("! username %s\n"), conf.username ? conf.username : my_username() ? my_username() : "");
+    *stream << bd::String::printf(STR("! username %s\n"), conf.username ? conf.username : my_username() ? my_username() : "");
 
   if (conf.homedir && homedir(0) && strcmp(conf.homedir, homedir(0))) {
     conf_com();
-    *stream << buf.printf(STR("%s! homedir %s\n"), do_confedit == CONF_AUTO ? "" : "#", homedir(0));
-    *stream << buf.printf(STR("%s! homedir %s\n"), do_confedit == CONF_STATIC ? "" : "#", conf.homedir);
+    *stream << bd::String::printf(STR("%s! homedir %s\n"), do_confedit == CONF_AUTO ? "" : "#", homedir(0));
+    *stream << bd::String::printf(STR("%s! homedir %s\n"), do_confedit == CONF_STATIC ? "" : "#", conf.homedir);
   } else 
-    *stream << buf.printf(STR("! homedir %s\n"), conf.homedir ? conf.homedir : homedir(0) ? homedir(0) : "");
+    *stream << bd::String::printf(STR("! homedir %s\n"), conf.homedir ? conf.homedir : homedir(0) ? homedir(0) : "");
 
   comment("");
 
@@ -749,20 +749,20 @@ writeconf(char *filename, int fd, int bits)
 
     if (homedir() && strstr(conf.datadir, homedir())) {
       p = replace(conf.datadir, homedir(), "~");
-      *stream << buf.printf(STR("! datadir %s\n"), p);
+      *stream << bd::String::printf(STR("! datadir %s\n"), p);
     } else if (conf.homedir && strstr(conf.datadir, conf.homedir)) { /* Could be an older homedir */
       p = replace(conf.datadir, conf.homedir, "~");
-      *stream << buf.printf(STR("! datadir %s\n"), p);
+      *stream << bd::String::printf(STR("! datadir %s\n"), p);
     } else
-      *stream << buf.printf(STR("! datadir %s\n"), conf.datadir);
+      *stream << bd::String::printf(STR("! datadir %s\n"), conf.datadir);
 
     comment("");
   }
 
   if (conf.portmin || conf.portmax) {
     comment("# portmin/max are for incoming connections (DCC) [0 for any] (These only make sense for HUBS)");
-    *stream << buf.printf(STR("! portmin %d\n"), conf.portmin);
-    *stream << buf.printf(STR("! portmax %d\n"), conf.portmax);
+    *stream << bd::String::printf(STR("! portmin %d\n"), conf.portmin);
+    *stream << bd::String::printf(STR("! portmax %d\n"), conf.portmax);
 
     comment("");
   }
@@ -770,7 +770,7 @@ writeconf(char *filename, int fd, int bits)
 
   if (conf.autocron == 0) {
     comment("# Automatically add the bot to crontab?");
-    *stream << buf.printf(STR("! autocron %d\n"), conf.autocron);
+    *stream << bd::String::printf(STR("! autocron %d\n"), conf.autocron);
 
     comment("");
   }
@@ -787,12 +787,12 @@ writeconf(char *filename, int fd, int bits)
   comment("### Hubs should have their own binary ###");
 
   for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
-    *stream << buf.printf(STR("%s%s %s %s%s"),
+    *stream << bd::String::printf(STR("%s%s %s %s%s"),
              bot->disabled ? "/" : "", bot->nick,
              bot->net.ip ? bot->net.ip : "*", bot->net.host6 ? "+" : "",
              bot->net.host ? bot->net.host : (bot->net.host6 ? bot->net.host6 : "*"));
     if (bot->net.ip6)
-      *stream << buf.printf(STR(" %s"), bot->net.ip6 ? bot->net.ip6 : "");
+      *stream << bd::String::printf(STR(" %s"), bot->net.ip6 ? bot->net.ip6 : "");
     *stream << "\n";
   }
 

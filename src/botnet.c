@@ -658,7 +658,7 @@ void tell_bottree(int idx)
           else
             color_str = (char *) NULL;
 
-          s.printf("%c%s%s%s (%s)", bot->share ? bot->share : '-', color_str ? color_str : "",
+          s = bd::String::printf("%c%s%s%s (%s)", bot->share ? bot->share : '-', color_str ? color_str : "",
                                                 bot->bot,
                                                 color_str ? COLOR_END(idx) : "",
                                                 bot->version);
@@ -700,7 +700,7 @@ void tell_bottree(int idx)
                   color_str = (char *) NULL;
 
 		bot2 = bot;
-                s.printf("%c%s%s%s (%s)", bot->share ? bot->share : '-', color_str ? color_str : "",
+                s = bd::String::printf("%c%s%s%s (%s)", bot->share ? bot->share : '-', color_str ? color_str : "",
                                                       bot->bot,
                                                       color_str ? COLOR_END(idx) : "",
                                                       bot->version);

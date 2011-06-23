@@ -1667,7 +1667,7 @@ static int got341(char *from, char *msg)
   }
   putlog(LOG_MISC, "*", "HIJACKED invite detected: %s to %s", nick, chan->dname);
   bd::String msg;
-  msg.printf("ALERT! \002%s was invited via a hijacked connection/process.\002", nick);
+  msg = bd::String::printf("ALERT! \002%s was invited via a hijacked connection/process.\002", nick);
   privmsg(chan->name, msg.c_str(), DP_MODE_NEXT);
   return 0;
 }
