@@ -348,7 +348,7 @@ irc_log(struct chanset_t *chan, const char *format, ...)
 
   if ((chan && strcasecmp(chan->dname, relay_chan)) || !chan) {
     bd::String msg;
-    msg.printf("[%s] %s", chan ? chan->dname : "*" , va_out);
+    msg = bd::String::printf("[%s] %s", chan ? chan->dname : "*" , va_out);
     privmsg(relay_chan, msg.c_str(), DP_HELP);
   }
 /*

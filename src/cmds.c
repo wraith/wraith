@@ -3933,7 +3933,7 @@ static void cmd_netrelease (int idx, char* par) {
   // so instead, tell all bots to release the specified nick.
   // Any bots trying to get it will stop for 7 seconds, and any bot on it will release it.
   bd::String str;
-  str.printf("rn %s", par);
+  str = bd::String::printf("rn %s", par);
   putallbots(str.c_str());
 }
 

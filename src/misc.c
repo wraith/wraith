@@ -786,37 +786,35 @@ restart(int idx)
     if (socklist[fd].sock != STDOUT)
       sock_write(stream, fd);
 
-  bd::String buf;
-
   if (server_online) {
     if (botname[0])
-      stream << buf.printf(STR("+botname %s\n"), botname);
+      stream << bd::String::printf(STR("+botname %s\n"), botname);
     if (rolls)
-      stream << buf.printf(STR("+rolls %d\n"), rolls);
+      stream << bd::String::printf(STR("+rolls %d\n"), rolls);
     if (altnick_char)
-      stream << buf.printf(STR("+altnick_char %c\n"), altnick_char);
+      stream << bd::String::printf(STR("+altnick_char %c\n"), altnick_char);
     if (burst)
-      stream << buf.printf(STR("+burst %d\n"), burst);
+      stream << bd::String::printf(STR("+burst %d\n"), burst);
     if (flood_count)
-      stream << buf.printf(STR("+flood_count %d\n"), flood_count);
+      stream << bd::String::printf(STR("+flood_count %d\n"), flood_count);
     if (my_cookie_counter)
-      stream << buf.printf(STR("+my_cookie_counter %lu\n"), my_cookie_counter);
-    stream << buf.printf(STR("+server_online %li\n"), server_online);
+      stream << bd::String::printf(STR("+my_cookie_counter %lu\n"), my_cookie_counter);
+    stream << bd::String::printf(STR("+server_online %li\n"), server_online);
     stream << buf.printf(STR("+cursrvname %s\n"), cursrvname);
   }
-  stream << buf.printf(STR("+online_since %li\n"), online_since);
+  stream << bd::String::printf(STR("+online_since %li\n"), online_since);
   if (floodless)
-    stream << buf.printf(STR("+server_floodless %d\n"), floodless);
+    stream << bd::String::printf(STR("+server_floodless %d\n"), floodless);
   if (in_deaf)
-    stream << buf.printf(STR("+in_deaf\n"));
+    stream << bd::String::printf(STR("+in_deaf\n"));
   if (in_callerid)
-    stream << buf.printf(STR("+in_callerid\n"));
+    stream << bd::String::printf(STR("+in_callerid\n"));
   for (struct chanset_t *chan = chanset; chan; chan = chan->next)
     if (shouldjoin(chan) && (channel_active(chan) || channel_pending(chan)))
-      stream << buf.printf(STR("+chan %s\n"), chan->dname);
-  stream << buf.printf(STR("+buildts %li\n"), buildts);
-  stream << buf.printf(STR("+ip4 %s\n"), myipstr(AF_INET));
-  stream << buf.printf(STR("+ip6 %s\n"), myipstr(AF_INET6));
+      stream << bd::String::printf(STR("+chan %s\n"), chan->dname);
+  stream << bd::String::printf(STR("+buildts %li\n"), buildts);
+  stream << bd::String::printf(STR("+ip4 %s\n"), myipstr(AF_INET));
+  stream << bd::String::printf(STR("+ip6 %s\n"), myipstr(AF_INET6));
   replay_cache(-1, &stream);
 
   stream.writeFile(socks->fd);
