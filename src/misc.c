@@ -784,8 +784,6 @@ restart(int idx)
     if (socklist[fd].sock != STDOUT)
       sock_write(stream, fd);
 
-  bd::String buf;
-
   if (server_online) {
     if (botname[0])
       stream << bd::String::printf(STR("+botname %s\n"), botname);

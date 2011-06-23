@@ -360,7 +360,6 @@ static void write_user(const struct userrec *u, bd::Stream& stream, int idx)
 {
   char s[181] = "";
   struct flag_record fr = {FR_GLOBAL, u->flags, 0, 0 };
-  bd::String buf;
 
   build_flags(s, &fr, NULL);
   stream << bd::String::printf("%s%s - %s\n", u->bot ? "-" : "", u->handle, s);
@@ -466,7 +465,6 @@ static void sort_userlist()
 void stream_writeuserfile(bd::Stream& stream, const struct userrec *bu, bool old) {
   time_t tt = now;
   char s1[81] = "";
-  bd::String buf;
 
   strcpy(s1, ctime(&tt));
 

@@ -572,7 +572,6 @@ static void tell_masks(const char type, int idx, bool show_inact, char *match, b
  */
 void write_bans(bd::Stream& stream, int idx)
 {
-  bd::String buf;
   if (global_ign)
     stream << bd::String::printf(IGNORE_NAME " - -\n");
 
@@ -624,8 +623,6 @@ void write_bans(bd::Stream& stream, int idx)
  */
 void write_exempts(bd::Stream& stream, int idx)
 {
-  bd::String buf;
-
   if (global_exempts)
     stream << bd::String::printf(EXEMPT_NAME " - -\n");
 
@@ -663,8 +660,6 @@ void write_exempts(bd::Stream& stream, int idx)
  */
 void write_invites(bd::Stream& stream, int idx)
 {
-  bd::String buf;
-
   if (global_invites)
     stream << bd::String::printf(INVITE_NAME " - -\n");
 
@@ -703,8 +698,6 @@ void write_invites(bd::Stream& stream, int idx)
  */
 static void write_chan(bd::Stream& stream, int idx, struct chanset_t* chan)
 {
-  bd::String buf;
-
   putlog(LOG_DEBUG, "*", "writing channel %s to userfile..", chan->dname);
 
   bool force_inactive = 0;
@@ -720,11 +713,10 @@ static void write_chan(bd::Stream& stream, int idx, struct chanset_t* chan)
 }
 
 bd::String channel_to_string(struct chanset_t* chan, bool force_inactive) {
-  bd::String buf;
   char w[1024] = "";
 
   get_mode_protect(chan, w, sizeof(w));
-  buf = bd::String::printf("\
+  return bd::String::printf("\
 chanmode { %s } bad-cookie %d manop %d mdop %d mop %d limit %d ban-type %d \
 flood-chan %d:%d flood-ctcp %d:%d flood-join %d:%d \
 flood-kick %d:%d flood-deop %d:%d flood-nick %d:%d flood-mjoin %d:%d \
@@ -799,15 +791,12 @@ flood-exempt %d flood-lock-time %d knock %d \
  *      PLSMNS(channel_temp(chan)),
  */
   );
-  return buf;
 }
 
 /* Write the channels to the userfile
  */
 void write_chans(bd::Stream& stream, int idx, bool old)
 {
-  bd::String buf;
-
   putlog(LOG_DEBUG, "*", "Writing channels..");
 
   stream << bd::String::printf(CHANS_NAME " - -\n");
@@ -824,8 +813,6 @@ void write_chans(bd::Stream& stream, int idx, bool old)
  */
 void write_chans_compat(bd::Stream& stream, int idx)
 {
-  bd::String buf;
-
   putlog(LOG_DEBUG, "*", "Writing channels..");
 
   stream << bd::String::printf(CHANS_NAME " - -\n");

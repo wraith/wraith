@@ -694,7 +694,6 @@ writeconf(char *filename, int fd, int bits)
   int autowrote = 0;
 
   bd::Stream* stream;
-  bd::String buf;
 
   if (bits & CONF_ENC) {
     const char salt1[] = SALT1;

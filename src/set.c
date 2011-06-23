@@ -871,8 +871,6 @@ static char *var_rem_list(const char *botnick, variable_t *var, const char *elem
 
 void write_vars_and_cmdpass(bd::Stream& stream, int idx)
 {
-  bd::String buf;
-
   putlog(LOG_DEBUG, "@", "Writing set entries...");
   stream << bd::String::printf(SET_NAME " - -\n");
 
