@@ -802,7 +802,7 @@ restart(int idx)
     if (my_cookie_counter)
       stream << buf.printf(STR("+my_cookie_counter %lu\n"), my_cookie_counter);
     stream << buf.printf(STR("+server_online %li\n"), server_online);
-    stream << buf.printf(STR("+cursrvname %s\n"), cursrvname);
+    stream << bd::String::printf(STR("+cursrvname %s\n"), cursrvname);
   }
   stream << buf.printf(STR("+online_since %li\n"), online_since);
   if (floodless)
