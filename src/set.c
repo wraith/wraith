@@ -871,10 +871,8 @@ static char *var_rem_list(const char *botnick, variable_t *var, const char *elem
 
 void write_vars_and_cmdpass(bd::Stream& stream, int idx)
 {
-  bd::String buf;
-
   putlog(LOG_DEBUG, "@", "Writing set entries...");
-  stream << buf.printf(SET_NAME " - -\n");
+  stream << bd::String::printf(SET_NAME " - -\n");
 
   int i = 0;
 
@@ -888,12 +886,12 @@ void write_vars_and_cmdpass(bd::Stream& stream, int idx)
           ((vars[i].flags & VAR_NOLDEF) && have_linked_to_hub))
          )) {
       /* send blanks if our variable isn't set, theirs MIGHT be set and needs to be UNSET */
-      stream << buf.printf("@ %s %s\n", vars[i].name, vars[i].gdata ? vars[i].gdata : "");
+      stream << bd::String::printf("@ %s %s\n", vars[i].name, vars[i].gdata ? vars[i].gdata : "");
     }
   }
 
   for (struct cmd_pass *cp = cmdpass; cp; cp = cp->next)
-    stream << buf.printf("- %s %s\n", cp->name, cp->pass);
+    stream << bd::String::printf("- %s %s\n", cp->name, cp->pass);
 }
 
 

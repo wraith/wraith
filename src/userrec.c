@@ -360,10 +360,9 @@ static void write_user(const struct userrec *u, bd::Stream& stream, int idx)
 {
   char s[181] = "";
   struct flag_record fr = {FR_GLOBAL, u->flags, 0, 0 };
-  bd::String buf;
 
   build_flags(s, &fr, NULL);
-  stream << buf.printf("%s%s - %s\n", u->bot ? "-" : "", u->handle, s);
+  stream << bd::String::printf("%s%s - %s\n", u->bot ? "-" : "", u->handle, s);
 
   struct chanset_t *cst = NULL;
 
@@ -377,7 +376,7 @@ static void write_user(const struct userrec *u, bd::Stream& stream, int idx)
       fr.match = FR_CHAN;
       fr.chan = ch->flags;
       build_flags(s, &fr, NULL);
-      stream << buf.printf("! %s %li %s %s\n", ch->channel, (long) ch->laston, s, ch->info ? ch->info : "");
+      stream << bd::String::printf("! %s %li %s %s\n", ch->channel, (long) ch->laston, s, ch->info ? ch->info : "");
     }
   }
   for (struct user_entry *ue = u->entries; ue; ue = ue->next) {
@@ -466,11 +465,10 @@ static void sort_userlist()
 void stream_writeuserfile(bd::Stream& stream, const struct userrec *bu, bool old) {
   time_t tt = now;
   char s1[81] = "";
-  bd::String buf;
 
   strcpy(s1, ctime(&tt));
 
-  stream << buf.printf("#4v: %s -- %s -- written %s", ver, conf.bot->nick, s1);
+  stream << bd::String::printf("#4v: %s -- %s -- written %s", ver, conf.bot->nick, s1);
   channels_writeuserfile(stream, old);
 
   for (const struct userrec *u = bu; u; u = u->next)

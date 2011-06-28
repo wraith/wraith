@@ -120,7 +120,7 @@ static void cmd_act(int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# (%s) act %s", dcc[idx].nick,
 	 chan->dname, par);
   bd::String msg;
-  msg.printf("\001ACTION %s\001", par);
+  msg = bd::String::printf("\001ACTION %s\001", par);
   privmsg(chan->name, msg.c_str(), DP_HELP);
   dprintf(idx, "Action to %s: %s\n", chan->dname, par);
 }
@@ -1761,7 +1761,7 @@ static void cmd_adduser(int idx, char *par)
     dprintf(idx, "%s's initial secpass set to \002%s\002\n", hand, s3);
 
     bd::String msg;
-    msg.printf("*** You've been add to this botnet as '%s' with the host '%s'. Ask a botnet admin for the msg cmds. Your initial password is: %s", hand, p1, s2);
+    msg = bd::String::printf("*** You've been add to this botnet as '%s' with the host '%s'. Ask a botnet admin for the msg cmds. Your initial password is: %s", hand, p1, s2);
     privmsg(nick, msg.c_str(), DP_HELP);
   } else {
     dprintf(idx, "Added hostmask %s to %s.\n", p1, u->handle);

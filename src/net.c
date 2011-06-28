@@ -312,16 +312,16 @@ sock_write(bd::Stream &stream, int fd)
   if (socklist[fd].sock > 0) {
     bd::String buf;
 
-    stream << buf.printf(STR("-sock\n"));
-    stream << buf.printf(STR("sock %d %d\n"), socklist[fd].sock, socklist[fd].flags);
+    stream << bd::String::printf(STR("-sock\n"));
+    stream << bd::String::printf(STR("sock %d %d\n"), socklist[fd].sock, socklist[fd].flags);
 #ifdef USE_IPV6
-    stream << buf.printf(STR("af %u\n"), socklist[fd].af);
+    stream << bd::String::printf(STR("af %u\n"), socklist[fd].af);
 #endif
     if (socklist[fd].host)
-      stream << buf.printf(STR("host %s\n"), socklist[fd].host);
+      stream << bd::String::printf(STR("host %s\n"), socklist[fd].host);
     if (socklist[fd].port)
-      stream << buf.printf(STR("port %d\n"), socklist[fd].port);
-    stream << buf.printf(STR("+sock\n"));
+      stream << bd::String::printf(STR("port %d\n"), socklist[fd].port);
+    stream << bd::String::printf(STR("+sock\n"));
   }    
 }
 

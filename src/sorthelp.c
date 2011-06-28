@@ -98,7 +98,7 @@ int parse_help(const bd::String& infile, const bd::String& outfile) {
     out << ":";
     if (cmdlist[i].leaf) out << "leaf";
     else if (cmdlist[i].hub) out << "hub";
-    out << buf.printf(":%s\n", cmdlist[i].name->c_str());
+    out << bd::String::printf(":%s\n", cmdlist[i].name->c_str());
     out << cmdlist[i].txt->sub("{NEWLINE}", "\n");
   }
 

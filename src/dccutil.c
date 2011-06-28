@@ -556,24 +556,24 @@ dcc_write(bd::Stream &stream, int idx)
   if (dcc[idx].sock > 0) {
     bd::String buf;
 
-    stream << buf.printf(STR("-dcc\n"));
+    stream << bd::String::printf(STR("-dcc\n"));
     if (dcc[idx].type)
-      stream << buf.printf(STR("type %s\n"), dcc[idx].type->name);
+      stream << bd::String::printf(STR("type %s\n"), dcc[idx].type->name);
 //  if (user)
-//  stream << buf.printf(STR("user %s\n"), dcc[idx].user->handle);
+//  stream << bd::String::printf(STR("user %s\n"), dcc[idx].user->handle);
     if (dcc[idx].addr)
-      stream << buf.printf(STR("addr %u\n"), dcc[idx].addr);
+      stream << bd::String::printf(STR("addr %u\n"), dcc[idx].addr);
     if (dcc[idx].status)
-      stream << buf.printf(STR("status %lu\n"), dcc[idx].status);
-    stream << buf.printf(STR("sock %d\n"), dcc[idx].sock);
-//  stream << buf.printf(STR("simul %d\n"), dcc[idx].simul);
+      stream << bd::String::printf(STR("status %lu\n"), dcc[idx].status);
+    stream << bd::String::printf(STR("sock %d\n"), dcc[idx].sock);
+//  stream << bd::String::printf(STR("simul %d\n"), dcc[idx].simul);
     if (dcc[idx].port)
-      stream << buf.printf(STR("port %d\n"), dcc[idx].port);
+      stream << bd::String::printf(STR("port %d\n"), dcc[idx].port);
     if (dcc[idx].nick[0])
-      stream << buf.printf(STR("nick %s\n"), dcc[idx].nick);
+      stream << bd::String::printf(STR("nick %s\n"), dcc[idx].nick);
     if (dcc[idx].host[0])
-      stream << buf.printf(STR("host %s\n"), dcc[idx].host);
-    stream << buf.printf(STR("+dcc\n"));
+      stream << bd::String::printf(STR("host %s\n"), dcc[idx].host);
+    stream << bd::String::printf(STR("+dcc\n"));
   }
 }
 
