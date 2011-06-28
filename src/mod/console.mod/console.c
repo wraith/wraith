@@ -108,9 +108,8 @@ console_write_userfile(bd::Stream& stream, const struct userrec *u, const struct
     return;
 
   struct console_info *i = (struct console_info *) e->u.extra;
-  bd::String buf;
 
-  stream << buf.printf("--CONSOLE %s %s %s %d %d %d %d %d %d %d %d\n",
+  stream << bd::String::printf("--CONSOLE %s %s %s %d %d %d %d %d %d %d %d\n",
                i->channel, masktype(i->conflags),
                stripmasktype(i->stripflags), i->echoflags,
                i->page, i->conchan, i->color, i->banner, i->channels, i->bots, i->whom);

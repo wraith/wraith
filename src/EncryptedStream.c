@@ -43,7 +43,7 @@ int EncryptedStream::loadFile (const int fd) {
 
   if (enc_flags & ENC_AES_256_CBC) {
     IV = in_buf(0, 16);
-    in_buf += 16;
+    in_buf += static_cast<size_t>(16);
   }
 
   if (enc_flags & ENC_KEEP_NEWLINES) {

@@ -510,8 +510,7 @@ void replay_cache(int idx, bd::Stream* stream) {
 
   for (r = cacheq.head; r; r = r->next) {
     if (stream) {
-      bd::String buf;
-      *stream << buf.printf(STR("+serv_cache %s\n"), r->msg);
+      *stream << bd::String::printf(STR("+serv_cache %s\n"), r->msg);
     } else {
       //Create temporary buffer since server_activity may squash the buffer
       p_ptr = p = strdup(r->msg);
