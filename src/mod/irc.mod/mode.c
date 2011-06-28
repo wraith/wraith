@@ -1110,7 +1110,7 @@ gotmode(char *from, char *msg)
                 }
               }
               // Don't mass deop if protect is set, it'll happen anyway below
-              if (!channel_protect(chan))
+              if (channel_bitch(chan) && !channel_protect(chan))
                 enforce_bitch(chan);        /* deop quick! */
             }
             if (channel_protect(chan))
