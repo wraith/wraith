@@ -618,7 +618,7 @@ static void cmd_mmode(int idx, char *par)
 {
   char *mode = newsplit(&par);
   if (strlen(mode) > 2 || !strchr("+-", mode[0]) || !par[0]) {
-    dprintf(idx, "Usage: mmode <(+|-)MODE> <#channel> <a|o|v|d|r> [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [simul] [local]\n");
+    dprintf(idx, "Usage: mmode <(+|-)MODE> <#channel> <a|o|v|d|r> [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [botbitch] [simul] [local]\n");
     dprintf(idx, "Ie. mmode -o #chan a\n");
     return;
   }
@@ -651,7 +651,7 @@ static void cmd_mmode(int idx, char *par)
     }
   }
   if (!chan || !chname || !chname[0]) {
-    dprintf(idx, "Usage: mmode <(+|-)MODE> <#channel> <a|o|v|d|r> [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [simul] [local]\n");
+    dprintf(idx, "Usage: mmode <(+|-)MODE> <#channel> <a|o|v|d|r> [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [botbitch] [simul] [local]\n");
     dprintf(idx, "Ie. mmode -o #chan a\n");
     return;
   }
@@ -659,7 +659,7 @@ static void cmd_mmode(int idx, char *par)
   char *who = newsplit(&par);
 
   if (strlen(who) > 1 || !strchr("aovdr", who[0])) {
-    dprintf(idx, "Usage: mmode <(+|-)MODE> <#channel> <a|o|v|d|r> [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [simul] [local]\n");
+    dprintf(idx, "Usage: mmode <(+|-)MODE> <#channel> <a|o|v|d|r> [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [botbitch] [simul] [local]\n");
     dprintf(idx, "Ie. mmode -o #chan a\n");
     dprintf(idx, "a = all.\n");
     dprintf(idx, "o = ops.\n");
@@ -716,7 +716,7 @@ static void cmd_mmode(int idx, char *par)
   }
 
   int force_bots = 0, force_alines = 0, force_slines = 0, force_overlap = 0;
-  bool bitch = 0, simul = 0, local = 0;
+  bool bitch = 0, botbitch = 0, simul = 0, local = 0;
 
   while (par && par[0]) {
     char *p = newsplit(&par);
@@ -766,6 +766,8 @@ static void cmd_mmode(int idx, char *par)
       }
     } else if (!strncasecmp(p, "bitch", 5)) {
       bitch = 1;
+    } else if (!strncasecmp(p, "botbitch", 8)) {
+      botbitch = 1;
     } else if (!strncasecmp(p, "simul", 5)) {
       simul = 1;
     } else if (!strncasecmp(p, "local", 5)) {
@@ -952,6 +954,10 @@ static void cmd_mmode(int idx, char *par)
   if (bitch && !simul) {
     chan->status |= CHAN_BITCH;
     do_chanset(NULL, chan, "+bitch", DO_LOCAL | DO_NET);
+  }
+  if (botbitch && !simul) {
+    chan->status |= CHAN_BOTBITCH;
+    do_chanset(NULL, chan, "+botbitch", DO_LOCAL | DO_NET);
   }
   free(targets);
   free(overlaps);
