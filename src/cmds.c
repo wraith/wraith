@@ -3525,11 +3525,12 @@ static void cmd_mns_user(int idx, char *par)
       check_this_user(handle, 1, NULL);
     if (deluser(handle)) {
       dprintf(idx, "Removed %s: %s.\n", u2->bot ? "bot" : "user", handle);
-      if (conf.bot->hub)
-        write_userfile(idx);
     } else
       dprintf(idx, "Failed to remove %s: %s.\n", u2->bot ? "bot" : "user", handle);
   }
+
+  if (conf.bot->hub)
+    write_userfile(idx);
 }
 
 static void cmd_pls_host(int idx, char *par)
