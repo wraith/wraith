@@ -1,3 +1,6 @@
+* cmd_mns_user now access multiple users (fixes #77)
+* Permanent owners can no longer be removed via cmd_mns_user
+
 release
   * Add an extra 2 second delay before releasing nick to aide in syncing and time to type /nick
   * When a nick is released, start regaining as soon as it is witnessed to have been taken again

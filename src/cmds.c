@@ -3474,7 +3474,7 @@ static void cmd_mns_user(int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# -user %s", dcc[idx].nick, par);
 
   if (!par[0]) {
-    dprintf(idx, "Usage: -user <hand>\n");
+    dprintf(idx, "Usage: -user <handle> [anotherhandle] ...\n");
     return;
   }
 
