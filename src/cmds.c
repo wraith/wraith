@@ -3478,50 +3478,58 @@ static void cmd_mns_user(int idx, char *par)
     return;
   }
 
-  char *handle = newsplit(&par);
-  struct userrec *u2 = get_user_by_handle(userlist, handle);
+  struct userrec *u2 = NULL;
 
-  if (!u2 || (u2 && !whois_access(dcc[idx].user, u2))) {
-    dprintf(idx, "No such user!\n");
-    return;
-  }
-  if ((u2->flags & USER_OWNER) && !(dcc[idx].user->flags & USER_OWNER)) {
-    dprintf(idx, "You can't remove a bot owner!\n");
-    return;
-  }
+  while (par[0]) {
+    char *handle = newsplit(&par);
+    u2 = get_user_by_handle(userlist, handle);
 
-  if (u2->bot) {
-    if (!(dcc[idx].user->flags & USER_OWNER)) {
-        dprintf(idx, "You can't remove bots.\n");
-        return;
+    if (!u2 || (u2 && !whois_access(dcc[idx].user, u2))) {
+      dprintf(idx, "No such user: %s\n", handle);
+      continue;
     }
-    if (!strcasecmp(u2->handle, conf.bot->nick)) {
-      dprintf(idx, "The 'suicide' cmd should be used instead.\n");
-      return;
+    if (isowner(handle)) {
+      dprintf(idx, "A hard-coded owner is unremoveable: %s\n", handle);
+      continue;
+    }
+    if ((u2->flags & USER_OWNER) && !(dcc[idx].user->flags & USER_OWNER)) {
+      dprintf(idx, "You can't remove a bot owner: %s\n", handle);
+      continue;
     }
 
-    int i = nextbot(handle);
+    if (u2->bot) {
+      if (!(dcc[idx].user->flags & USER_OWNER)) {
+          dprintf(idx, "You can't remove bots!");
+          continue;
+      }
+      if (!strcasecmp(u2->handle, conf.bot->nick)) {
+        dprintf(idx, "Use 'suicide' to kill me.\n");
+        continue;
+      }
 
-    if (i < 0)
-      botunlink(idx, handle, "Bot removed.");
-    else if (!strcasecmp(dcc[i].nick, handle))
-      botunlink(idx, handle, "Bot removed.");
-    else {
-      char x[40] = "";
+      int i = nextbot(handle);
 
-      simple_snprintf(x, sizeof(x), "%d:%s@%s", dcc[idx].sock, dcc[idx].nick, conf.bot->nick);
-      botnet_send_unlink(i, x, lastbot(handle), handle, "Bot removed.");
+      if (i < 0)
+        botunlink(idx, handle, "Bot removed.");
+      else if (!strcasecmp(dcc[i].nick, handle))
+        botunlink(idx, handle, "Bot removed.");
+      else {
+        char x[40] = "";
+
+        simple_snprintf(x, sizeof(x), "%d:%s@%s", dcc[idx].sock, dcc[idx].nick, conf.bot->nick);
+        botnet_send_unlink(i, x, lastbot(handle), handle, "Bot removed.");
+      }
     }
-  }
 
-  if (!conf.bot->hub)
-    check_this_user(handle, 1, NULL);
-  if (deluser(handle)) {
-    dprintf(idx, "Removed %s: %s.\n", u2->bot ? "bot" : "user", handle);
-    if (conf.bot->hub)
-      write_userfile(idx);
-  } else
-    dprintf(idx, "Failed.\n");
+    if (!conf.bot->hub)
+      check_this_user(handle, 1, NULL);
+    if (deluser(handle)) {
+      dprintf(idx, "Removed %s: %s.\n", u2->bot ? "bot" : "user", handle);
+      if (conf.bot->hub)
+        write_userfile(idx);
+    } else
+      dprintf(idx, "Failed to remove %s: %s.\n", u2->bot ? "bot" : "user", handle);
+  }
 }
 
 static void cmd_pls_host(int idx, char *par)
