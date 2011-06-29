@@ -3489,7 +3489,7 @@ static void cmd_mns_user(int idx, char *par)
       continue;
     }
     if (isowner(handle)) {
-      dprintf(idx, "An hard-coded owner is unremoveable: %s\n", handle);
+      dprintf(idx, "A hard-coded owner is unremoveable: %s\n", handle);
       continue;
     }
     if ((u2->flags & USER_OWNER) && !(dcc[idx].user->flags & USER_OWNER)) {
