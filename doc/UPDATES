@@ -4,7 +4,7 @@ next
   * When 'mop' protection is on, deop all previously regular clients automatically.
   * Properly honor exemptions when kicking matched RBL clients
   * Added botbitch to mmode (fixes #139)
-  * cmd_mns_user now access multiple users (fixes #77)
+  * cmd_mns_user now accepts multiple users (fixes #77)
   * Permanent owners can no longer be removed via cmd_mns_user
 
 1.3.2 - http://wraith.botpack.net/milestone/1.3.2
