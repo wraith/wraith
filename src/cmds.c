@@ -3488,6 +3488,10 @@ static void cmd_mns_user(int idx, char *par)
       dprintf(idx, "No such user: %s\n", handle);
       continue;
     }
+    if (isowner(handle)) {
+      dprintf(idx, "An hard-coded owner is unremoveable: %s\n", handle);
+      continue;
+    }
     if ((u2->flags & USER_OWNER) && !(dcc[idx].user->flags & USER_OWNER)) {
       dprintf(idx, "You can't remove a bot owner: %s\n", handle);
       continue;
