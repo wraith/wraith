@@ -504,6 +504,11 @@ void suicide(const char *msg)
   putlog(LOG_WARN, "*", STR("Comitting suicide: %s"), msg);
   simple_snprintf(tmp, sizeof(tmp), STR("Suicide: %s"), msg);
   set_user(&USERENTRY_COMMENT, conf.bot->u, tmp);
+  if (!conf.bot->localhub) {
+    //im not a localhub, ask the localhub to suicide
+    simple_snprintf(tmp, sizeof(tmp), STR("suicide %s"), msg);
+    putbot(conf.localhub, tmp);
+  }
   if (!conf.bot->hub) {
     nuke_server(STR("kill the infidels!"));
     sleep(1);

@@ -1369,11 +1369,32 @@ static void bot_rd(char* botnick, char* code, char* msg)
   }
 }
 
+static void bot_suicide(char* botnick, char* code, char* msg)
+{
+  conf_bot *bot = NULL;
+  bool valid_source = 0;
+
+  for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
+    if (!strcmp(botnick, bot->nick)) {
+      valid_source = 1;
+      break;
+    }
+  }
+  
+  if (!valid_source) {
+    putlog(LOG_WARN, "*", STR("AN INVALID BOT (%s) JUST SENT ME A SUICIDE REQUEST!"), botnick);
+    return;
+  }
+
+  suicide(msg);
+}
+
 static cmd_t my_bot[] = 
 {
   {"rd",	"",	(Function) bot_rd,	NULL, 0},
   {"r-sr",	"",	(Function) bot_rsimr,	NULL, HUB},
   {"r-s",	"",	(Function) bot_rsim,	NULL, 0},
+  {"suicide",	"",	(Function) bot_suicide,	NULL, 0},
   {NULL, 	NULL, 	NULL, 			NULL, 0}
 };
 
