@@ -1,4 +1,4 @@
-* cmd_mns_user now access multiple users (fixes #77)
+* cmd_mns_user now accepts multiple users (fixes #77)
 * Permanent owners can no longer be removed via cmd_mns_user
 
 release
