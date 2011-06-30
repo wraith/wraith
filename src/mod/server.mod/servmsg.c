@@ -1376,7 +1376,11 @@ static void server_activity(int idx, char *msg, int len)
 
   if (unlikely(trying_server)) {
     strlcpy(dcc[idx].nick, "(server)", sizeof(dcc[idx].nick));
-    putlog(LOG_SERV, "*", "Connected to %s", dcc[idx].host);
+    if (ssl_use) {
+      putlog(LOG_SERV, "*", "Connected to %s with SSL", dcc[idx].host);
+    } else {
+      putlog(LOG_SERV, "*", "Connected to %s", dcc[idx].host);
+    }
 
     trying_server = 0;
     /*
@@ -1924,7 +1928,12 @@ static void connect_server(void)
     }
 
     next_server(&curserv, botserver, &botserverport, pass);
-    putlog(LOG_SERV, "*", "Trying server %s:%d", botserver, botserverport);
+
+    if (ssl_use) {
+      putlog(LOG_SERV, "*", "Trying SSL server %s:%d", botserver, botserverport);
+    } else {
+      putlog(LOG_SERV, "*", "Trying server %s:%d", botserver, botserverport);
+    }
 
     dcc[newidx].port = botserverport;
     strlcpy(dcc[newidx].nick, "(server)", sizeof(dcc[newidx].nick));
