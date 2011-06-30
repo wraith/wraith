@@ -811,7 +811,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
   }
 
   if ((chan->status ^ old_status) & CHAN_TAKE)
-    chan->status |= (CHAN_FASTOP|CHAN_BITCH);		// to avoid bots still mass opping from +take from not using cookies
+    chan->status |= CHAN_BITCH;		// to avoid bots still mass opping from +take from not using cookies
 
   if (!conf.bot->hub && (chan != chanset_default)) {
     if ((old_status ^ chan->status) & (CHAN_INACTIVE | CHAN_BACKUP)) {
