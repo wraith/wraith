@@ -69,6 +69,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <dirent.h>
+#include "botmsg.h"
 
 bool clear_tmpdir = 0;
 
@@ -501,14 +502,27 @@ void suicide(const char *msg)
 {
   char tmp[512] = "";
 
-  putlog(LOG_WARN, "*", STR("Comitting suicide: %s"), msg);
-  simple_snprintf(tmp, sizeof(tmp), STR("Suicide: %s"), msg);
-  set_user(&USERENTRY_COMMENT, conf.bot->u, tmp);
   if (!conf.bot->localhub) {
     //im not a localhub, ask the localhub to suicide
     simple_snprintf(tmp, sizeof(tmp), STR("suicide %s"), msg);
     putbot(conf.localhub, tmp);
+    return;
+  } else {
+    //im the localhub, loop thru bots and kill 'em
+    putlog(LOG_WARN, "*", STR("Comitting suicide: %s"), msg);
+    crontab_del();
+    
+    conf_bot *bot = NULL;
+    for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
+      bot->pid = checkpid(bot->nick, bot);
+      if (!strcmp(conf.bot->nick,bot->nick))
+        continue; //skip myself or i wont be able to remove the rest
+      conf_killbot(conf.bots, NULL, bot, SIGKILL);
+      unlink(bot->pid_file);
+      deluser(bot->nick);
+    }
   }
+
   if (!conf.bot->hub) {
     nuke_server(STR("kill the infidels!"));
     sleep(1);
@@ -525,17 +539,16 @@ void suicide(const char *msg)
     simple_snprintf(tmp, sizeof(tmp), STR("%s/.u.1"), conf.datadir);
     unlink(tmp);
   }
-  unlink(binname);
 
-  if (conf.bot->localhub) {
-    conf_checkpids(conf.bots);
-    conf_killbot(conf.bots, NULL, NULL, SIGKILL);
-  }
-  unlink(conf.bot->pid_file);
+  unlink(binname);
   //Not recursively clearing these dirs as they may be ~USER/ ..
   unlink(conf.datadir); //Probably will fail, shrug
   unlink(tempdir); //Probably will fail too, oh well
-  crontab_del();
+
+  //now deal with myself after the rest of the conf.bots are gone
+  deluser(conf.bot->nick);
+  unlink(conf.bot->pid_file);
+  //and die in agony!
   fatal(msg, 0);
 }
 

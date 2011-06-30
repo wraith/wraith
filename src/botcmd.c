@@ -47,6 +47,7 @@
 #include "chan.h"
 #include "core_binds.h"
 #include "egg_timer.h"
+#include "shell.h"
 
 static char TBUF[1024] = "";		/* Static buffer for goofy bot stuff */
 
