@@ -547,6 +547,7 @@ LIBS="$save_LIBS"
 
 AC_SUBST(SSL_INCLUDES)
 AC_SUBST(SSL_LIBS)
+AC_DEFINE_UNQUOTED(EGG_SSL_EXT, 1, [Defines whether or not SSL is supported])dnl
 ])
 
 dnl  EGG_HEADER_STDC()
