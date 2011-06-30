@@ -83,12 +83,6 @@ port_t firewallport = 1080;    /* Default port of Sock4/5 firewalls        */
 #define PROXY_SUN     2
 #define PROXY_HTTP    3
 
-#ifdef EGG_SSL_EXT
-SSL_CTX *ssl_ctx = NULL;
-char	*tls_rand_file = NULL;
-#endif
-int     ssl_use = 0; /* kyotou */
-
 /* I need an UNSIGNED long for dcc type stuff
  */
 unsigned long my_atoul(const char *s)
@@ -144,50 +138,6 @@ static int get_ip(char *hostname, union sockaddr_union *so, int dns_type)
   return 0;
 }
 
-#ifdef EGG_SSL_EXT
-int seed_PRNG(void)
-{
-    char stackdata[1024];
-    static char rand_file[300];
-    FILE *fh;
-
-#if OPENSSL_VERSION_NUMBER >= 0x00905100
-    if (RAND_status())
-	return 0;     /* PRNG already good seeded */
-#endif
-    /* if the device '/dev/urandom' is present, OpenSSL uses it by default.
-     * check if it's present, else we have to make random data ourselfs.
-     */
-    if ((fh = fopen("/dev/urandom", "r"))) {
-	fclose(fh);
-        // Try /dev/random if urandom is unavailable
-        if ((fh = fopen("/dev/random", "r"))) {
-          fclose(fh);
-          return 0;
-        }
-    }
-    if (RAND_file_name(rand_file, sizeof(rand_file)))
-	tls_rand_file = rand_file;
-    else
-	return 1;
-    if (!RAND_load_file(rand_file, 1024)) {
-	/* no .rnd file found, create new seed */
-	unsigned int c;
-	c = time(NULL);
-	RAND_seed(&c, sizeof(c));
-	c = getpid();
-	RAND_seed(&c, sizeof(c));
-	RAND_seed(stackdata, sizeof(stackdata));
-    }
-#if OPENSSL_VERSION_NUMBER >= 0x00905100
-    if (!RAND_status())
-	return 2;   /* PRNG still badly seeded */
-#endif
-    return 0;
-}
-#endif
-
-
 /* Initialize the socklist
  */
 void init_net()
@@ -207,30 +157,7 @@ void init_net()
 #endif
     socklist[i].sock = -1;
   }
-#ifdef EGG_SSL_EXT
-  /* good place to init ssl stuff */
-  SSL_load_error_strings();
-  OpenSSL_add_ssl_algorithms();
-  ssl_ctx = SSL_CTX_new(SSLv23_client_method());
-  if (!ssl_ctx)
-    fatal("SSL_CTX_new() failed",0);
-  if (seed_PRNG())
-    fatal("Wasn't able to properly seed the PRNG!",0);
-#endif
 }
-
-#ifdef EGG_SSL_EXT
-/* cleanup mess when quiting */
-int clean_net() {
-  if (ssl_ctx) {
-    SSL_CTX_free(ssl_ctx);
-    ssl_ctx = NULL;
-  }
-  if (tls_rand_file)
-    RAND_write_file(tls_rand_file);
-  return 0;
-}
-#endif
 
 /* Get my ipv? ip
  */
@@ -695,6 +622,8 @@ int open_telnet_raw(int sock, const char *ipIn, port_t sport, bool proxy_on, int
 #ifdef EGG_SSL_EXT
 int net_switch_to_ssl(int sock) {
   int i = 0;
+
+  load_ssl();
 
   debug0("net_switch_to_ssl()");
   sleep(3); // Give some time to let the connect() go through.

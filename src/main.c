@@ -26,10 +26,6 @@
  *
  */
 
-#ifdef EGG_SSL_EXT
-int clean_net();
-#endif
-
 #include "common.h"
 #include "main.h"
 #include "userent.h"
@@ -201,7 +197,9 @@ void fatal(const char *s, int recoverable)
   }
 
 #ifdef EGG_SSL_EXT
-  clean_net();
+  if (ssl_use) {
+    unload_ssl();
+  }
 #endif
 
   if (!recoverable) {

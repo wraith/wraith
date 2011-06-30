@@ -48,6 +48,7 @@ OBJS = auth.o \
 	shell.o \
 	socket.o \
 	sprintf.o \
+	ssl.o \
 	userent.o \
 	userrec.o \
 	users.o
