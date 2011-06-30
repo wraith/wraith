@@ -123,6 +123,7 @@ static variable_t vars[] = {
  VAR("realname",	botrealname,		VAR_STRING|VAR_NOLHUB,				0, 0, "* I'm too lame to read BitchX.doc *"),
  VAR("server-port",	&default_port,		VAR_INT|VAR_SHORT|VAR_NOLHUB,			0, 65535, "6667"),
  VAR("server-port-ssl",	&default_port_ssl,	VAR_INT|VAR_SHORT|VAR_NOLHUB,			0, 65535, "6697"),
+ VAR("server-use-ssl",	&ssl_use,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "0"),
  VAR("servers",		&serverlist,		VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB|VAR_NOLDEF,	0, 0, DEFAULT_SERVERS),
  VAR("servers6",	&serverlist,		VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB|VAR_NOLDEF,	0, 0, DEFAULT_SERVERS6),
  VAR("trace",		&trace,			VAR_INT|VAR_DETECTED,				0, 4, "die"),

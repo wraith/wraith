@@ -1617,6 +1617,9 @@ See also: reload, backup
                           $bAliases may not reference other aliases.$b
 [N]  $bserver-port$b     Default port to use for server connections.
 [N]  $bserver-port-ssl$b Default port to use for SSL server connections.
+[B]  $bserver-use-ssl$b  Use SSL for IRC server connections?
+
+
 [B]  $bauth-chan$b       If set, auth cmds will work in channels as well as in msg, otherwise 
                           only in msg.
 [S]  $bauth-key$b        The authkey used during authing. Give to users if they need to auth. 
