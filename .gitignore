@@ -16,4 +16,6 @@
 /ts
 /...
 /.l-*
-.*.swp
+.*.sw*
+.hosts
+.resolv.conf
