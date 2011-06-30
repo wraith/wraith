@@ -86,8 +86,8 @@ port_t firewallport = 1080;    /* Default port of Sock4/5 firewalls        */
 #ifdef EGG_SSL_EXT
 SSL_CTX *ssl_ctx = NULL;
 char	*tls_rand_file = NULL;
-int     ssl_use = 0; /* kyotou */
 #endif
+int     ssl_use = 0; /* kyotou */
 
 /* I need an UNSIGNED long for dcc type stuff
  */
