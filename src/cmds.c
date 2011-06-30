@@ -4313,7 +4313,7 @@ static void rcmd_jump(char * frombot, char * fromhand, char * fromidx, char * pa
       }
 
       if (!port)
-        port = default_port;
+        port = (ssl_use ? default_port_ssl : default_port);
       strlcpy(newserver, other, 120); 
       newserverport = port; 
       strlcpy(newserverpass, par, 120); 
