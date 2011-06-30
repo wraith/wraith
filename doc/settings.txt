@@ -54,7 +54,7 @@ irc.efnet.nl
 irc.inet.tele.dk
 irc.ipv6.he.net
 irc.ipv6.homelien.no
-irc.paraphysics.net
+irc.ipv6.paraphysics.net
 irc.underworld.no
 
 :servers_ssl
@@ -67,6 +67,14 @@ irc.paraphysics.net
 irc.servercentral.net
 irc.shoutcast.com:8000
 irc.umich.edu:9999
+irc.underworld.no
+
+:servers6_ssl
+efnet.ipv6.xs4all.nl
+irc.choopa.ca:9999
+irc.choopa.net:9999
+irc.ipv6.he.net
+irc.ipv6.paraphysics.net
 irc.underworld.no
 
 :rbl

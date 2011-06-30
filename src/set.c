@@ -127,6 +127,7 @@ static variable_t vars[] = {
  VAR("servers",		&serverlist,		VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB|VAR_NOLDEF,	0, 0, DEFAULT_SERVERS),
  VAR("servers-ssl",	&serverlist,		VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB|VAR_NOLDEF,	0, 0, DEFAULT_SERVERS_SSL),
  VAR("servers6",	&serverlist,		VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB|VAR_NOLDEF,	0, 0, DEFAULT_SERVERS6),
+ VAR("servers6-ssl",	&serverlist,		VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB|VAR_NOLDEF,	0, 0, DEFAULT_SERVERS6_SSL),
  VAR("trace",		&trace,			VAR_INT|VAR_DETECTED,				0, 4, "die"),
  VAR("usermode",	&usermode,		VAR_WORD|VAR_NOLHUB,				0, 0, "+iws"),
  VAR(NULL,		NULL,			0,						0, 0, NULL)
@@ -143,7 +144,10 @@ static bool use_server_type(const char *name)
       if (ssl_use || (!conf.bot->net.host6 && !conf.bot->net.ip6)) /* we probably want to use the normal server list.. */
         return 0;
     } else if (!strcmp(name, "servers-ssl")) {
-      if (!ssl_use)
+      if (!ssl_use || conf.bot->net.host6 || conf.bot->net.ip6) /* we want to use the servers6-ssl entry. */
+        return 0;
+    } else if (!strcmp(name, "servers6-ssl")) {
+      if (!ssl_use || (!conf.bot->net.host6 && !conf.bot->net.ip6)) /* we probably want to use the normal servers-ssl list.. */
         return 0;
     }
   }
