@@ -12,6 +12,8 @@
 #include <setjmp.h>
 #include <bdlib/src/String.h>
 
+#include "ssl.h"
+
 namespace bd {
   class Stream;
 }
@@ -84,6 +86,9 @@ typedef struct {
   int iseed;                            /* botlink in seed */
   int gz; /* gzip compression */
   int enclink;				/* new encrypted botlink */
+#ifdef EGG_SSL_EXT
+  SSL *ssl;
+#endif
   bd::String* inbuf;
   bd::String* outbuf;
   char *host;
@@ -139,6 +144,7 @@ void init_net(void);
 int sock_read(bd::Stream&);
 void sock_write(bd::Stream&, int);
 bool socket_run();
+int net_switch_to_ssl(int sock);
 
 extern union sockaddr_union 		cached_myip4_so;
 #ifdef USE_IPV6

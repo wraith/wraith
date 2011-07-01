@@ -102,7 +102,7 @@ clean:  cleanutils
 
 distclean: clean
 	@rm -rf *-$(VERSION)/ autom4te.cache/ autoscan.log configure.scan
-	@rm -rf src/.deps/ src/compat/.deps/ src/strucutres/.deps/ src/mod/*.mod/.deps/ src/crypto/.deps
+	@rm -rf src/.deps/ src/compat/.deps/ src/strucutres/.deps/ src/mod/*.mod/.deps/ src/crypto/.deps src/.defs/
 	-+@cd lib && $(MAKE) distclean
 	@rm -f $(STATICMAKEFILES) $(CONFIGFILES)
 

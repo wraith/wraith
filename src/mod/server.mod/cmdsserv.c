@@ -39,7 +39,7 @@ static void cmd_servers(int idx, char *par)
     i = 0;
     for (; x; x = x->next) {
         simple_snprintf(s, sizeof s, "  %s:%d %s", x->name, 
-		     x->port ? x->port : default_port, 
+		     x->port ? x->port : (ssl_use ? default_port_ssl : default_port),
 		     (i == curserv) ? "<- I am here" : "");
       dprintf(idx, "%s\n", s);
       i++;
@@ -93,7 +93,7 @@ static void cmd_jump(int idx, char *par)
         port = atoi(p);
     }
     if (!port)
-      port = default_port;
+      port = (ssl_use ? default_port_ssl : default_port);
     putlog(LOG_CMDS, "*", "#%s# jump %s %d %s", dcc[idx].nick, other, port, par);
     strlcpy(newserver, other, sizeof newserver);
     newserverport = port;

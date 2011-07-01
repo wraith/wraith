@@ -87,6 +87,7 @@ struct server_list *serverlist = NULL;	/* old-style queue, still used by
 					   server list */
 interval_t cycle_time;			/* cycle time till next server connect */
 port_t default_port = 6667;		/* default IRC port */
+port_t default_port_ssl = 6697;		/* default IRC SSL port */
 bool trigger_on_ignore;	/* trigger bindings if user is ignored ? */
 int answer_ctcp = 1;		/* answer how many stacked ctcp's ? */
 static bool resolvserv;		/* in the process of resolving a server host */
@@ -820,7 +821,7 @@ void next_server(int *ptr, char *servname, port_t *port, char *pass)
 
     x->next = 0;
     x->name = strdup(servname);
-    x->port = *port ? *port : default_port;
+    x->port = *port ? *port : (ssl_use ? default_port_ssl : default_port);
     if (pass && pass[0]) {
       x->pass = strdup(pass);
     } else
@@ -844,7 +845,7 @@ void next_server(int *ptr, char *servname, port_t *port, char *pass)
     *ptr = 0;
   }				/* Start over at the beginning */
   strcpy(servname, x->name);
-  *port = x->port ? x->port : default_port;
+  *port = x->port ? x->port : (ssl_use ? default_port_ssl : default_port);
   if (x->pass)
     strcpy(pass, x->pass);
   else

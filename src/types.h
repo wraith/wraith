@@ -15,6 +15,7 @@
 
 /* It's used in so many places, let's put it here */
 typedef int (*Function) ();
+typedef intptr_t (*FunctionPtr) ();
 
 #if !HAVE_SOCKLEN_T
 typedef int socklen_t;
