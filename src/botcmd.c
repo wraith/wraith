@@ -1381,7 +1381,7 @@ static void bot_suicide(char* botnick, char* code, char* msg)
       break;
     }
   }
-  
+
   if (!valid_source) {
     putlog(LOG_WARN, "*", STR("AN INVALID BOT (%s) JUST SENT ME A SUICIDE REQUEST!"), botnick);
     return;

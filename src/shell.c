@@ -511,12 +511,12 @@ void suicide(const char *msg)
     //im the localhub, loop thru bots and kill 'em
     putlog(LOG_WARN, "*", STR("Comitting suicide: %s"), msg);
     crontab_del();
-    
+
     conf_bot *bot = NULL;
     for (bot = conf.bots; bot && bot->nick; bot = bot->next) {
-      bot->pid = checkpid(bot->nick, bot);
-      if (!strcmp(conf.bot->nick,bot->nick))
+      if (!strcmp(conf.bot->nick, bot->nick))
         continue; //skip myself or i wont be able to remove the rest
+      bot->pid = checkpid(bot->nick, bot);
       conf_killbot(conf.bots, NULL, bot, SIGKILL);
       unlink(bot->pid_file);
       deluser(bot->nick);
