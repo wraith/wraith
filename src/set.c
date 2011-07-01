@@ -134,24 +134,20 @@ static variable_t vars[] = {
 };
 
 
-static bool use_server_type(const char *name)
+static inline variable_t *var_get_var_by_name(const char *name);
+
+static const char* get_server_type()
 {
-  if (!conf.bot->hub) {
-    if (!strcmp(name, "servers")) {
-      if (ssl_use || conf.bot->net.host6 || conf.bot->net.ip6) /* we want to use the servers6 entry. */
-        return 0;
-    } else if (!strcmp(name, "servers6")) {
-      if (ssl_use || (!conf.bot->net.host6 && !conf.bot->net.ip6)) /* we probably want to use the normal server list.. */
-        return 0;
-    } else if (!strcmp(name, "servers-ssl")) {
-      if (!ssl_use || conf.bot->net.host6 || conf.bot->net.ip6) /* we want to use the servers6-ssl entry. */
-        return 0;
-    } else if (!strcmp(name, "servers6-ssl")) {
-      if (!ssl_use || (!conf.bot->net.host6 && !conf.bot->net.ip6)) /* we probably want to use the normal servers-ssl list.. */
-        return 0;
-    }
+  if (!ssl_use && !conf.bot->net.host6 && !conf.bot->net.ip6) {
+    return "servers";
+  } else if (!ssl_use && (conf.bot->net.host6 || conf.bot->net.ip6)) {
+    return "servers6";
+  } else if (ssl_use && !conf.bot->net.host6 && !conf.bot->net.ip6) {
+    return "servers-ssl";
+  } else if (ssl_use && (conf.bot->net.host6 || conf.bot->net.ip6)) {
+    return "servers6-ssl";
   }
-  return 1;
+  return "";
 }
 
 /* sanitize the variable data string */
@@ -392,7 +388,7 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
       --p;
       *p = ':';
     }
-  } else if ((var->flags & VAR_SERVERS) && use_server_type(var->name)) {
+  } else if ((var->flags & VAR_SERVERS) && !strcmp(get_server_type(), var->name)) {
     if (var->mem && *(struct server_list **)var->mem) {
       clearq(*(struct server_list **) var->mem);
       *(struct server_list **)var->mem = NULL;
@@ -405,6 +401,13 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
       curserv = -1;
       next_server(&curserv, cursrvname, &curservport, NULL);
     }
+  }
+
+  if (!strcmp(var->name, "server-use-ssl")) {
+    // Need to reload the server settings since we may want a different list now
+    sdprintf("server-use-ssl changed, reprocessing server list");
+    variable_t *servers = var_get_var_by_name(get_server_type());
+    var_set_mem(servers, servers->ldata ? servers->ldata : servers->gdata ? servers->gdata : NULL);
   }
 
   if (datap)
@@ -463,7 +466,7 @@ const char *var_string(variable_t *var)
   } else if (var->flags & VAR_SERVERS) {
     /* only bother setting/checking if we have 'serverlist' alloc'd */
     if (*(struct server_list **)var->mem) {
-      if (!use_server_type(var->name))
+      if (strcmp(var->name, get_server_type()))
         return NULL;
 
       struct server_list *n = NULL;
