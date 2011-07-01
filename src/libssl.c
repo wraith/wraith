@@ -19,7 +19,7 @@
  */
 
 /*
- * ssl.c -- handles:
+ * libssl.c -- handles:
  *   libssl handling
  *
  */
@@ -31,7 +31,7 @@
 #include <bdlib/src/String.h>
 #include <bdlib/src/Array.h>
 
-#include "ssl.h"
+#include "libssl.h"
 
 void *libssl_handle = NULL;
 #ifdef EGG_SSL_EXT
