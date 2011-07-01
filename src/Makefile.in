@@ -35,6 +35,7 @@ OBJS = auth.o \
 	EncryptedStream.o \
 	flags.o \
 	garble.o \
+	libcrypto.o \
 	libssl.o \
 	log.o \
 	main.o \
