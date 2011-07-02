@@ -57,6 +57,7 @@
 #include "socket.h"
 #include "traffic.h" /* egg_traffic_t */
 #include "core_binds.h"
+#include "libtcl.h"
 #include "src/mod/console.mod/console.h"
 #include "src/mod/server.mod/server.h"
 #include "src/mod/irc.mod/irc.h"
@@ -4527,6 +4528,22 @@ void cmd_test(int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# test", dcc[idx].nick);
 }
 
+void cmd_tcl(int idx, char *par)
+{
+  if (!isowner(dcc[idx].nick)) {
+    dprintf(idx, "tcl is only available to permanent owners.\n");
+    return;
+  }
+
+  putlog(LOG_CMDS, "*", "#%s# tcl", dcc[idx].nick);
+
+  bd::String result(tcl_eval(par));
+  if (dcc[idx].irc && strcmp(dcc[idx].u.chat->con_chan, "*")) {
+      privmsg(dcc[idx].u.chat->con_chan, tcl_eval(par).c_str(), DP_SERVER);
+  } else
+    dprintf(idx, result.c_str(), DP_SERVER);
+}
+
 void cmd_botlink(int idx, char *par)
 {
   putlog(LOG_CMDS, "*", "#%s# botlink %s", dcc[idx].nick, par);
@@ -4649,6 +4666,7 @@ cmd_t C_dcc[] =
   {"w", 		"n", 	(Function) cmd_w, 		NULL, 0},
   {"channels", 		"", 	(Function) cmd_channels, 	NULL, 0},
   {"test",		"",	(Function) cmd_test,		NULL, 0},
+  {"tcl",		"a",	(Function) cmd_tcl,		NULL, AUTH_ALL},
   {"botlink",		"a",	(Function) cmd_botlink,		NULL, 0},
   {"randstring", 	"", 	(Function) cmd_randstring, 	NULL, AUTH_ALL},
   {"hash",		"",	(Function) cmd_hash,		NULL, AUTH_ALL},
