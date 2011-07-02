@@ -29,7 +29,7 @@ typedef int (*SSL_library_init_t)(void);
 typedef void (*SSL_CTX_free_t)(SSL_CTX *);
 typedef SSL_CTX* (*SSL_CTX_new_t)(const SSL_METHOD *);
 
-#include ".defs/ssl_defs.h"
+#include ".defs/libssl_defs.h"
 
 int load_ssl();
 int unload_ssl();
