@@ -61,6 +61,8 @@
 
 #include <stdarg.h>
 
+#include <math.h>
+
 #define PRIO_DEOP 1
 #define PRIO_KICK 2
 
@@ -112,39 +114,29 @@ voice_ok(memberlist *m, struct chanset_t *chan)
 #include "cmdsirc.c"
 #include "msgcmds.c"
 
-#ifdef unfinished
-static void
+static int
 detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
 {
   struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
   struct userrec *u = m->user ? m->user : get_user_by_host(m->userhost);
+  int tot = (int)strlen(msg);
   int i = 0;
-
-  //size_t tot = strlen(msg);
-
   get_user_flagrec(u, &fr, chan->dname, chan);
 
-  for (; *msg; ++msg) {
-    if (egg_isupper(*msg))
-      i++;
+  /* caps control. */
+  if (tot > 5 && chan->capslimit) { /* the caller checks for doflood so no need to check again here */
+    while (msg && *msg) {
+      if (egg_isupper(*msg))
+        i++;
+      msg++;
+    }
+    if (i && tot) {
+      if (((float)(i/tot))*100 >= chan->capslimit)
+        return 1;
+    }
   }
-
-/*  if ((chan->capslimit)) { */
-  while (((msg) && *msg)) {
-    if (egg_isupper(*msg))
-      i++;
-    msg++;
-  }
-
-/*
-  if (chan->capslimit && ((i / tot) >= chan->capslimit)) {
-dprintf(DP_MODE, "PRIVMSG %s :flood stats for %s: %d/%d are CAP, percentage: %d\n", chan->name, nick, i, tot, (i/tot)*100);
-  if ((((i / tot) * 100) >= 50)) {
-dprintf(DP_HELP, "PRIVMSG %s :cap flood.\n", chan->dname);
-  }
-*/
+  return 0;
 }
-#endif
 
 void unlock_chan(struct chanset_t *chan)
 {

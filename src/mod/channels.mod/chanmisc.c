@@ -422,6 +422,20 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
         return ERROR;
       }
       chan->invite_time = atoi(item[i]);
+    } else if (!strcmp(item[i], "capslimit") || !strcmp(item[i], "caps-limit")) {
+      i++;
+      if (i >= items) {
+        if (result)
+          strlcpy(result, "channel capslimit needs argument", RESULT_LEN);
+        return ERROR;
+      }
+      int capslimit = atoi(item[i]);
+      if (capslimit > 100 || capslimit < 0 || item[i][0] == '-') {
+        if (result)
+          strlcpy(result, "channel capslimit out of range (0-100)", RESULT_LEN);
+        return ERROR;
+      }
+      chan->capslimit = capslimit;
     } else if (!strcmp(item[i], "closed-ban")) {
       i++;
       if (i >= items) {
@@ -1039,6 +1053,7 @@ int channel_add(char *result, const char *newname, char *options, bool isdefault
     chan->flood_nick_time = gfld_nick_time;
     chan->flood_mjoin_thr = 6;
     chan->flood_mjoin_time = 1;
+    chan->capslimit = 0;
     chan->limitraise = 20;
     chan->ban_time = global_ban_time;
     chan->exempt_time = global_exempt_time;

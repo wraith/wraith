@@ -1243,6 +1243,7 @@ static void cmd_chaninfo(int idx, char *par)
     SHOW_INT("Exempt-time: ", chan->exempt_time, NULL, "Forever");
     SHOW_INT("Flood-exempt: ", chan->flood_exempt_mode, F_STR(chan->flood_exempt_mode), "None");
     SHOW_INT("Flood-lock-time: ", chan->flood_lock_time, NULL, "Don't");
+    SHOW_INT("Caps-Limit(%): ", chan->capslimit, NULL, "None");
     SHOW_INT("Invite-time: ", chan->invite_time, NULL, "Forever");
     SHOW_INT("Knock: ", chan->knock_flags, F_STR(chan->knock_flags), "None");
     SHOW_INT("Limit raise (limit): ", chan->limitraise, NULL, "Disabled");
