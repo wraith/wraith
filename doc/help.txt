@@ -1307,7 +1307,7 @@ See also: randstring, sha1, sha256, hash, encrypt, encrypt_fish, decrypt, decryp
    Performs an action on the party line. This appears as "* bryan is leaving",
    etc.
 :leaf:mmode:
-###  $bmmode$b <(+|-)MODE> <#channel> <a|o|v|d|r> [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [simul] [local]
+###  $bmmode$b <(+|-)MODE> <#channel> <a|o|v|d|r> [bots=n] [alines=n] [slines=n] [overlap=n] [bitch] [botbitch] [simul] [local]
    For those of us who do not wish to be rocket scientists in the mass mode department, 
    a simple '%dmmode -o #channel o' will suffice.
  
@@ -1324,11 +1324,12 @@ See also: randstring, sha1, sha256, hash, encrypt, encrypt_fish, decrypt, decryp
      $bd$b = $bnon-ops.$b
      $br$b = $bregulars (-ov).$b
  
-     $bbitch$b   - set +bitch after finished with mmode.
-     $bsimul$b   - Simulates the mmode. IE: Gives you a practice run, will show who 
-                   does what in the dcc chat window.
-     $blocal$b   - Modes will not be distributed: Ran on local bot only.
-                   Use this with caution, and do not expect good results.
+     $bbitch$b    - set +bitch after finished with mmode.
+     $bbotbitch$b - set +bitch after finished with mmode.
+     $bsimul$b    - Simulates the mmode. IE: Gives you a practice run, will show who
+                    does what in the dcc chat window.
+     $blocal$b    - Modes will not be distributed: Ran on local bot only.
+                    Use this with caution, and do not expect good results.
  
      =============================================================================
      don't bother setting the following options unless you REALLY know what you're 
