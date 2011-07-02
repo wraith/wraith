@@ -37,6 +37,7 @@ OBJS = auth.o \
 	garble.o \
 	libcrypto.o \
 	libssl.o \
+	libtcl.o \
 	log.o \
 	main.o \
 	match.o \
