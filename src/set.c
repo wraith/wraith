@@ -400,7 +400,7 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
     check_removed_server(0);
   }
 
-  if (!strcmp(var->name, "server-use-ssl")) {
+  if (!conf.bot->hub && !strcmp(var->name, "server-use-ssl")) {
     // Need to reload the server settings since we may want a different list now
     sdprintf("server-use-ssl changed, reprocessing server list");
     variable_t *servers = var_get_var_by_name(get_server_type());

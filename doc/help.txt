@@ -1845,6 +1845,9 @@ See also: die, conf, botcmd
     -Users will not see channels that are +s or +p unless they have op access there
  
 See also: find
+::tcl
+###  $btcl$b script
+   Executes the given string and returns the result.
 :leaf:topic
 ###  $btopic$b <text>
    Changes the channel's topic, assuming the bot is a chanop or the
