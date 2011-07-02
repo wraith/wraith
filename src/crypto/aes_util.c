@@ -2,7 +2,7 @@
  *
  */
 
-#include "crypto.h"
+#include "src/libcrypto.h"
 #include "src/compat/compat.h"
 #include <bdlib/src/String.h>
 

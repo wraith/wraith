@@ -35,6 +35,8 @@ OBJS = auth.o \
 	EncryptedStream.o \
 	flags.o \
 	garble.o \
+	libcrypto.o \
+	libssl.o \
 	log.o \
 	main.o \
 	match.o \
@@ -48,7 +50,6 @@ OBJS = auth.o \
 	shell.o \
 	socket.o \
 	sprintf.o \
-	ssl.o \
 	userent.o \
 	userrec.o \
 	users.o

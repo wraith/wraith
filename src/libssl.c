@@ -19,7 +19,7 @@
  */
 
 /*
- * ssl.c -- handles:
+ * libssl.c -- handles:
  *   libssl handling
  *
  */
@@ -31,7 +31,7 @@
 #include <bdlib/src/String.h>
 #include <bdlib/src/Array.h>
 
-#include "ssl.h"
+#include "libssl.h"
 
 void *libssl_handle = NULL;
 #ifdef EGG_SSL_EXT
@@ -93,10 +93,15 @@ int load_ssl() {
   SSL_load_error_strings();
   OpenSSL_add_ssl_algorithms();
   ssl_ctx = SSL_CTX_new(SSLv23_client_method());
-  if (!ssl_ctx)
-    fatal("SSL_CTX_new() failed",0);
-  if (seed_PRNG())
-    fatal("Wasn't able to properly seed the PRNG!",0);
+  if (!ssl_ctx) {
+    sdprintf("SSL_CTX_new() failed");
+    return 1;
+  }
+
+  if (seed_PRNG()) {
+    sdprintf("Wasn't able to properly seed the PRNG!");
+    return 1;
+  }
 #endif
 
   return 0;

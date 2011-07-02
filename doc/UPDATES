@@ -8,6 +8,7 @@ next
   * Permanent owners can no longer be removed via cmd_mns_user
   * Added SSL support
     This includes new set options: 'servers-ssl', 'servers6-ssl', 'server-port-ssl', 'server-use-ssl'
+  * libcrypto (openssl) is now loaded at startup and is required.
   * Fix +take clearing -fastop (fixes #371)
   * Suicide will now remove all bots related to the binary being removed (fixes #435)
 

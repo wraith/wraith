@@ -11,7 +11,7 @@
 #include "settings.h"
 #include "misc.h"
 #include "base64.h"
-#include "src/crypto/crypto.h"
+#include "libcrypto.h"
 #include <stdarg.h>
 #include <bdlib/src/String.h>
 #include <bdlib/src/Stream.h>

@@ -1,5 +1,5 @@
-#ifndef _SSL_H
-#define _SSL_H
+#ifndef _LIBSSL_H
+#define _LIBSSL_H
 
 #include "common.h"
 #include "dl.h"
@@ -40,4 +40,4 @@ extern char *tls_rand_file;
 #endif
 extern int ssl_use;
 
-#endif /* !_SSL_H */
+#endif /* !_LIBSSL_H */
