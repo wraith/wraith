@@ -851,7 +851,7 @@ bool bot_shouldjoin(struct userrec* u, struct flag_record* fr, struct chanset_t*
   if (!strncmp(u->handle, "wtest", 5)) {
     if (!strcmp(chan->dname, "#skynet") || 
         !strcmp(chan->dname, "#bryan") || 
-        !strcmp(chan->dname, "#wraith"))
+        !strcmp(chan->dname, "#wraith-devel"))
       return 1;
     else
       return 0;
