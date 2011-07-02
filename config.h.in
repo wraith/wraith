@@ -204,6 +204,12 @@
 /* Define to 1 if you have <sys/wait.h> that is POSIX.1 compatible. */
 #undef HAVE_SYS_WAIT_H
 
+/* Define for Tcl that has Tcl_Free() (7.5p1 and later). */
+#undef HAVE_TCL_FREE
+
+/* Define for Tcl that has Tcl_SetNotifier() (8.2b1 and later). */
+#undef HAVE_TCL_SETNOTIFIER
+
 /* Define to 1 if you have struct timespec in sys/time.h */
 #undef HAVE_TIMESPEC
 
