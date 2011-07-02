@@ -4528,6 +4528,7 @@ void cmd_test(int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# test", dcc[idx].nick);
 }
 
+#ifdef HAVE_LIBTCL
 void cmd_tcl(int idx, char *par)
 {
   if (!isowner(dcc[idx].nick)) {
@@ -4543,6 +4544,7 @@ void cmd_tcl(int idx, char *par)
   } else
     dprintf(idx, result.c_str(), DP_SERVER);
 }
+#endif
 
 void cmd_botlink(int idx, char *par)
 {
@@ -4666,7 +4668,9 @@ cmd_t C_dcc[] =
   {"w", 		"n", 	(Function) cmd_w, 		NULL, 0},
   {"channels", 		"", 	(Function) cmd_channels, 	NULL, 0},
   {"test",		"",	(Function) cmd_test,		NULL, 0},
+#ifdef HAVE_LIBTCL
   {"tcl",		"a",	(Function) cmd_tcl,		NULL, AUTH_ALL},
+#endif
   {"botlink",		"a",	(Function) cmd_botlink,		NULL, 0},
   {"randstring", 	"", 	(Function) cmd_randstring, 	NULL, AUTH_ALL},
   {"hash",		"",	(Function) cmd_hash,		NULL, AUTH_ALL},

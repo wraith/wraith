@@ -28,19 +28,22 @@
 #include "common.h"
 #include "main.h"
 #include "dl.h"
-#include <tcl.h>
 #include <bdlib/src/String.h>
 #include <bdlib/src/Array.h>
 
 #include "libtcl.h"
 
+#ifdef HAVE_LIBTCL
 Tcl_Interp *global_interp = NULL;
+#endif
+
 void *libtcl_handle = NULL;
 static bd::Array<bd::String> my_symbols;
 
 void initialize_binds_tcl();
 
 static int load_symbols(void *handle) {
+#ifdef HAVE_LIBTCL
   const char *dlsym_error = NULL;
 
   DLSYM_GLOBAL(handle, Tcl_Eval);
@@ -51,14 +54,20 @@ static int load_symbols(void *handle) {
   DLSYM_GLOBAL(handle, Tcl_CreateInterp);
   DLSYM_GLOBAL(handle, Tcl_FindExecutable);
   DLSYM_GLOBAL(handle, Tcl_Init);
+#endif
 
   return 0;
 }
 
 int load_libtcl() {
+#ifndef HAVE_LIBTCL
+  sdprintf("Not compiled with TCL support");
+  return 1;
+#else
   if (global_interp) {
     return 0;
   }
+#endif
 
   bd::Array<bd::String> libs_list(bd::String("libtcl.so libtcl83.so libtcl8.3.so libtcl84.so libtcl8.4.so libtcl85.so libtcl8.5.so").split(' '));
 
@@ -74,6 +83,7 @@ int load_libtcl() {
 
   load_symbols(libtcl_handle);
 
+#ifdef HAVE_LIBTCL
   // create interp
   global_interp = Tcl_CreateInterp();
   Tcl_FindExecutable(binname);
@@ -84,9 +94,11 @@ int load_libtcl() {
   }
 
   initialize_binds_tcl();
-
+#endif
   return 0;
 }
+
+#ifdef HAVE_LIBTCL
 
 #include "chanprog.h"
 static int cmd_privmsg STDVAR {
@@ -103,12 +115,16 @@ void initialize_binds_tcl() {
   Tcl_CreateCommand(global_interp, "privmsg", (Tcl_CmdProc*) cmd_privmsg, NULL, NULL);
 }
 
+#endif
+
 int unload_libtcl() {
   if (libtcl_handle) {
+#ifdef HAVE_LIBTCL
     if (global_interp) {
       Tcl_DeleteInterp(global_interp);
       global_interp = NULL;
     }
+#endif
 
     // Cleanup symbol table
     for (size_t i = 0; i < my_symbols.length(); ++i) {
@@ -124,7 +140,7 @@ int unload_libtcl() {
   return 1;
 }
 
-
+#ifdef HAVE_LIBTCL
 bd::String tcl_eval(const bd::String& str) {
   load_libtcl();
   if (!global_interp) return bd::String();
@@ -134,4 +150,4 @@ bd::String tcl_eval(const bd::String& str) {
     return tcl_eval("set errorInfo");
   return bd::String();
 }
-
+#endif

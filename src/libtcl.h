@@ -4,6 +4,7 @@
 #include "common.h"
 #include "dl.h"
 #include <bdlib/src/String.h>
+#ifdef HAVE_LIBTCL
 #include <tcl.h>
 
 typedef int (*Tcl_Eval_t)(Tcl_Interp*, const char*);
@@ -28,10 +29,11 @@ typedef int (*Tcl_Init_t)(Tcl_Interp*);
 } while (0)
 
 extern Tcl_Interp *global_interp;
+bd::String tcl_eval(const bd::String&);
+#endif
 
 int load_libtcl();
 int unload_libtcl();
-bd::String tcl_eval(const bd::String&);
 
 
 #endif /* !_LIBTCL_H */

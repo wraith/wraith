@@ -388,16 +388,14 @@ configure: error:
 
   Tcl cannot be found on this system.
 
-  Eggdrop requires Tcl to compile. If you already have Tcl installed on
-  this system, and I just wasn't looking in the right place for it, re-run
-  ./configure using the --with-tcllib='/path/to/libtcl.so' and
-  --with-tclinc='/path/to/tcl.h' options.
-
-  See doc/COMPILE-GUIDE's 'Tcl Detection and Installation' section for more
-  information.
+  Tcl is not required. Wraith will be compiled without TCL support. If you
+  already have Tcl installed on this system, and I just wasn't looking in
+  the right place for it, re-run ./configure using the
+  --with-tcllib='/path/to/libtcl.so' and --with-tclinc='/path/to/tcl.h' options.
 
 EOF
-    exit 1
+  else
+    AC_DEFINE(HAVE_LIBTCL, 1, [Define if you have support for libtcl])
   fi
 ])
 
@@ -408,7 +406,7 @@ AC_DEFUN([EGG_TCL_CHECK_PRE70],
 [
   # Is this version of Tcl too old for us to use ?
   TCL_VER_PRE70=`echo $egg_cv_var_tcl_version | $AWK '{split([$]1, i, "."); if (i[[1]] < 7) print "yes"; else print "no"}'`
-  if test "$TCL_VER_PRE70" = yes; then
+  if test "$HAVE_LIBTCL" = 1 -a "$TCL_VER_PRE70" = yes; then
     cat << EOF >&2
 configure: error:
 
