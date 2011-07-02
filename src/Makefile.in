@@ -8,7 +8,7 @@ depcomp = /bin/sh $(top_srcdir)/autotools/depcomp
 
 @SET_MAKE@
 
-CXXFLAGS = @CXXFLAGS@ -I.. -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/pack @DEFS@ $(CFLGS) '-DCOMMIT="$(COMMIT)"' '-DBRANCH="$(BRANCH)"' -DBUILDTS=$(BUILDTS) '-DVERSION="$(VERSION)"'
+CXXFLAGS = @CXXFLAGS@ -I.. -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/pack @DEFS@ $(INCLUDES) $(CFLGS) '-DCOMMIT="$(COMMIT)"' '-DBRANCH="$(BRANCH)"' -DBUILDTS=$(BUILDTS) '-DVERSION="$(VERSION)"'
 CPPFLAGS = @CPPFLAGS@
 
 OBJCOPY = @OBJCOPY@
