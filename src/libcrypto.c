@@ -34,6 +34,7 @@
 #include "libcrypto.h"
 
 void *libcrypto_handle = NULL;
+static bd::Array<bd::String> my_symbols;
 
 static int load_symbols(void *handle) {
   const char *dlsym_error = NULL;
@@ -97,6 +98,13 @@ int load_libcrypto() {
 
 int unload_libcrypto() {
   if (libcrypto_handle) {
+    // Cleanup symbol table
+    for (size_t i = 0; i < my_symbols.length(); ++i) {
+      dl_symbol_table.remove(my_symbols[i]);
+      static_cast<bd::String>(my_symbols[i]).clear();
+    }
+    my_symbols.clear();
+
     dlclose(libcrypto_handle);
     libcrypto_handle = NULL;
     return 0;

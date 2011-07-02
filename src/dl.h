@@ -20,6 +20,7 @@
 #define DLSYM_GLOBAL(_handle, x) do { \
   dlerror(); \
   dl_symbol_table[#x] = (FunctionPtr) ((x##_t) dlsym(_handle, #x)); \
+  my_symbols << #x; \
   dlsym_error = dlerror(); \
   if (dlsym_error) { \
     sdprintf("%s", dlsym_error); \

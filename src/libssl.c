@@ -34,6 +34,7 @@
 #include "libssl.h"
 
 void *libssl_handle = NULL;
+static bd::Array<bd::String> my_symbols;
 #ifdef EGG_SSL_EXT
 SSL_CTX *ssl_ctx = NULL;
 char	*tls_rand_file = NULL;
@@ -118,6 +119,13 @@ int unload_ssl() {
     if (tls_rand_file)
       RAND_write_file(tls_rand_file);
 #endif
+
+    // Cleanup symbol table
+    for (size_t i = 0; i < my_symbols.length(); ++i) {
+      dl_symbol_table.remove(my_symbols[i]);
+      static_cast<bd::String>(my_symbols[i]).clear();
+    }
+    my_symbols.clear();
 
     dlclose(libssl_handle);
     libssl_handle = NULL;
