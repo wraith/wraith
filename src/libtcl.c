@@ -88,7 +88,19 @@ int load_libtcl() {
   return 0;
 }
 
+#include "chanprog.h"
+static int cmd_privmsg STDVAR {
+  BADARGS(3, 999, " channel string");
+  bd::String str = argv[2];
+  for (int i = 3; i < argc; ++i)
+    str += " " + bd::String(argv[i]);
+  privmsg(argv[1], str.c_str(), DP_SERVER);
+
+  return TCL_OK;
+}
+
 void initialize_binds_tcl() {
+  Tcl_CreateCommand(global_interp, "privmsg", (Tcl_CmdProc*) cmd_privmsg, NULL, NULL);
 }
 
 int unload_libtcl() {
