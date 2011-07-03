@@ -134,23 +134,36 @@ detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
   int tot = (int)strlen(msg);
   int caps_count = 0;
   int color_count = 0;
+  int hit_check = 0;
+  int hit_count = 0;
 
-  /* caps control. */
-  if (tot > 5 && (chan->capslimit || chan->colorlimit)) { /* the caller checks for doflood so no need to check again here */
-    while (msg && *msg) {
-      if (egg_isupper(*msg))
-        caps_count++;
-      else if (*msg == 3)
-        color_count++;
-      msg++;
+  if (tot >= 30) hit_check = tot/5; //check in-between for hits to save waste of cpu
+
+  while (msg && *msg) {
+    if (egg_isupper(*msg))
+      caps_count++;
+    else if (*msg == 3)
+      color_count++;
+
+    if (hit_check && !(hit_count%hit_check)) {
+      if (chan->capslimit && ((((float)caps_count)/((float)tot))*100 >= chan->capslimit)) break;
+      else if (chan->colorlimit && color_count >= chan->colorlimit) break;
+      hit_count++;
     }
-    if (chan->capslimit && caps_count) {
-      int cap_p = (((float)caps_count)/((float)tot))*100;
-      if (cap_p >= chan->capslimit)
-        return 1;
-    } else if (chan->colorlimit && color_count) {
-      if (color_count >= chan->colorlimit)
-        return 1;
+    msg++;
+  }
+  if (chan->capslimit && caps_count) {
+    int cap_p = (((float)caps_count)/((float)tot))*100;
+    if (cap_p >= chan->capslimit) {
+      dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, response(RES_FLOOD));
+      m->flags |= SENTKICK;
+      return 0;
+    }
+  } else if (chan->colorlimit && color_count) {
+    if (color_count >= chan->colorlimit) {
+      dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, response(RES_FLOOD));
+      m->flags |= SENTKICK;
+      return 0;
     }
   }
   return 0;
