@@ -201,7 +201,7 @@ void notice_invite(struct chanset_t *chan, char *handle, char *nick, char *uhost
   bd::String msg;
   msg = bd::String::printf("\001ACTION has invited %s(%s%s%s) to %s.%s\001",
     fhandle, nick, uhost ? "!" : "", uhost ? uhost : "", chan->dname, op ? ops : "");
-  privmsg(chan->name, msg.c_str(), DP_MODE);
+  privmsg(chan->name, msg, DP_MODE);
 }
 
 #ifdef CACHE

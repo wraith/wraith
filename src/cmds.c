@@ -4549,7 +4549,7 @@ void cmd_tcl(int idx, char *par)
 
   bd::String result(tcl_eval(par));
   if (dcc[idx].irc && strcmp(dcc[idx].u.chat->con_chan, "*")) {
-      privmsg(dcc[idx].u.chat->con_chan, tcl_eval(par).c_str(), DP_SERVER);
+      privmsg(dcc[idx].u.chat->con_chan, tcl_eval(par), DP_SERVER);
   } else
     dprintf(idx, result.c_str(), DP_SERVER);
 }
