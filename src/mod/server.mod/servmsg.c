@@ -155,7 +155,33 @@ static int check_bind_raw(char *from, char *code, char *msg)
   int ret = 0;
 
   myfrom = p1 = strdup(from);
-  mymsg = p2 = strdup(msg);
+
+  // Decrypt FiSH before processing
+  if (!strcmp(code, "PRIVMSG")) {
+    char* colon = strchr(msg, ':');
+    ++colon;
+    if (colon) {
+      if (!strncmp(colon, "+OK ", 4)) {
+        bd::String ciphertext(colon), sharedKey, nick;
+        char *p = strchr(from, '!');
+
+        nick = bd::String(from, p - from);
+
+        struct userrec *u = get_user_by_host(from);
+        if (u) {
+          sharedKey = static_cast<char*>(get_user(&USERENTRY_SECPASS, u));
+        }
+
+        if (sharedKey.length()) {
+          // Decrypt the message before passing along to the binds
+          bd::String cleartext(bd::String(msg, colon - msg) + egg_bf_decrypt(ciphertext, sharedKey));
+          mymsg = p2 = strdup(cleartext.c_str());
+        }
+      }
+    }
+  }
+  if (!p2)
+    mymsg = p2 = strdup(msg);
 
   ret = check_bind(BT_raw, code, NULL, myfrom, mymsg);
   free(p1);
