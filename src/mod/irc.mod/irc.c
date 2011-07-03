@@ -115,23 +115,27 @@ voice_ok(memberlist *m, struct chanset_t *chan)
 #include "msgcmds.c"
 
 static int
-detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
+detect_offense(memberlist* m, struct chanset_t *chan, char *msg) //prolly wanna remove the memberlist thing. its not needed imo.
 {
-  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
-  struct userrec *u = m->user ? m->user : get_user_by_host(m->userhost);
   int tot = (int)strlen(msg);
-  int i = 0;
-  get_user_flagrec(u, &fr, chan->dname, chan);
+  int caps_count = 0;
+  int color_count = 0;
 
   /* caps control. */
   if (tot > 5 && chan->capslimit) { /* the caller checks for doflood so no need to check again here */
     while (msg && *msg) {
       if (egg_isupper(*msg))
-        i++;
+        caps_count++;
+      else if (*msg == 3)
+        color_count++;
       msg++;
     }
-    if (i && tot) {
-      if (((float)(i/tot))*100 >= chan->capslimit) //messy with the floats, but otherwise i/tot is 0.nn which int will make simply a 0 
+    if (caps_count && tot) { //<- improve
+      int cap_p = (((float)caps_count)/((float)tot))*100;
+      //for debugging: dprintf(DP_MODE, "PRIVMSG #wraithtest :caps:%d col:%d capp:%d colp:%d\n", caps_count, color_count, cap_p, col_p);
+      if (cap_p >= chan->capslimit) //messy with the floats, but otherwise i/tot is 0.nn which int will make simply a 0 
+        return 1;
+      if (color_count >= chan->colorlimit)
         return 1;
     }
   }
