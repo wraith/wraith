@@ -117,6 +117,20 @@ voice_ok(memberlist *m, struct chanset_t *chan)
 static int
 detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
 {
+  if (!chan || !msg
+      || !(chan->capslimit && chan->colorlimit)
+      || chan_sentkick(m)) //sanity check
+    return 0;
+
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
+  struct userrec *u = m->user ? m->user : get_user_by_host(m->userhost);
+  get_user_flagrec(u, &fr, chan->dname, chan);
+
+  if (glob_bot(fr) ||
+      (m && chan->flood_exempt_mode == CHAN_FLAG_OP && chan_hasop(m)) ||
+      (m && chan->flood_exempt_mode == CHAN_FLAG_VOICE && (chan_hasvoice(m) || chan_hasop(m))))
+    return 0;
+
   int tot = (int)strlen(msg);
   int caps_count = 0;
   int color_count = 0;
