@@ -217,6 +217,8 @@ if [ "$GIT_REQUIRED" = "1" ]; then
 fi
 ]
 
+src/generate_defs.sh
+
 echo ""
 echo ""
 echo "------------ Configuring BDLIB ------------"

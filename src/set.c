@@ -122,26 +122,32 @@ static variable_t vars[] = {
  VAR("rbl-servers",	rbl_servers,		VAR_STRING|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB,	0, 0, DEFAULT_RBL),
  VAR("realname",	botrealname,		VAR_STRING|VAR_NOLHUB,				0, 0, "* I'm too lame to read BitchX.doc *"),
  VAR("server-port",	&default_port,		VAR_INT|VAR_SHORT|VAR_NOLHUB,			0, 65535, "6667"),
+ VAR("server-port-ssl",	&default_port_ssl,	VAR_INT|VAR_SHORT|VAR_NOLHUB,			0, 65535, "6697"),
+ VAR("server-use-ssl",	&ssl_use,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "0"),
  VAR("servers",		&serverlist,		VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB|VAR_NOLDEF,	0, 0, DEFAULT_SERVERS),
+ VAR("servers-ssl",	&serverlist,		VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB|VAR_NOLDEF,	0, 0, DEFAULT_SERVERS_SSL),
  VAR("servers6",	&serverlist,		VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB|VAR_NOLDEF,	0, 0, DEFAULT_SERVERS6),
+ VAR("servers6-ssl",	&serverlist,		VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB|VAR_NOLDEF,	0, 0, DEFAULT_SERVERS6_SSL),
  VAR("trace",		&trace,			VAR_INT|VAR_DETECTED,				0, 4, "die"),
  VAR("usermode",	&usermode,		VAR_WORD|VAR_NOLHUB,				0, 0, "+iws"),
  VAR(NULL,		NULL,			0,						0, 0, NULL)
 };
 
 
-static bool use_server_type(const char *name)
+static inline variable_t *var_get_var_by_name(const char *name);
+
+static const char* get_server_type()
 {
-  if (!conf.bot->hub) {
-    if (!strcmp(name, "servers")) {
-      if (conf.bot->net.host6 || conf.bot->net.ip6) /* we want to use the servers6 entry. */
-        return 0;
-    } else if (!strcmp(name, "servers6")) {
-      if (!conf.bot->net.host6 && !conf.bot->net.ip6) /* we probably want to use the normal server list.. */
-        return 0;
-    }
+  if (!ssl_use && !conf.bot->net.host6 && !conf.bot->net.ip6) {
+    return "servers";
+  } else if (!ssl_use && (conf.bot->net.host6 || conf.bot->net.ip6)) {
+    return "servers6";
+  } else if (ssl_use && !conf.bot->net.host6 && !conf.bot->net.ip6) {
+    return "servers-ssl";
+  } else if (ssl_use && (conf.bot->net.host6 || conf.bot->net.ip6)) {
+    return "servers6-ssl";
   }
-  return 1;
+  return "";
 }
 
 /* sanitize the variable data string */
@@ -382,7 +388,7 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
       --p;
       *p = ':';
     }
-  } else if ((var->flags & VAR_SERVERS) && use_server_type(var->name)) {
+  } else if ((var->flags & VAR_SERVERS) && !strcmp(get_server_type(), var->name)) {
     if (var->mem && *(struct server_list **)var->mem) {
       clearq(*(struct server_list **) var->mem);
       *(struct server_list **)var->mem = NULL;
@@ -395,6 +401,13 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
       curserv = -1;
       next_server(&curserv, cursrvname, &curservport, NULL);
     }
+  }
+
+  if (!conf.bot->hub && !strcmp(var->name, "server-use-ssl")) {
+    // Need to reload the server settings since we may want a different list now
+    sdprintf("server-use-ssl changed, reprocessing server list");
+    variable_t *servers = var_get_var_by_name(get_server_type());
+    var_set_mem(servers, servers->ldata ? servers->ldata : servers->gdata ? servers->gdata : NULL);
   }
 
   if (datap)
@@ -453,14 +466,14 @@ const char *var_string(variable_t *var)
   } else if (var->flags & VAR_SERVERS) {
     /* only bother setting/checking if we have 'serverlist' alloc'd */
     if (*(struct server_list **)var->mem) {
-      if (!use_server_type(var->name))
+      if (strcmp(var->name, get_server_type()))
         return NULL;
 
       struct server_list *n = NULL;
       char list[2048] = "", buf[101] = "";
 
       for (n = (*(struct server_list **)var->mem); n; n = n->next) {
-        if (n->port && n->port != default_port)
+        if (n->port && n->port != (ssl_use ? default_port_ssl : default_port))
           simple_snprintf(buf, sizeof(buf), "%s:%d", n->name, n->port);
         else
           strlcat(buf, n->name, sizeof(buf));

@@ -1617,6 +1617,10 @@ See also: reload, backup
                           after the alias is expanded. 
                           $bAliases may not reference other aliases.$b
 [N]  $bserver-port$b     Default port to use for server connections.
+[N]  $bserver-port-ssl$b Default port to use for SSL server connections.
+[B]  $bserver-use-ssl$b  Use SSL for IRC server connections?
+
+
 [B]  $bauth-chan$b       If set, auth cmds will work in channels as well as in msg, otherwise 
                           only in msg.
 [S]  $bauth-key$b        The authkey used during authing. Give to users if they need to auth. 
@@ -1649,7 +1653,9 @@ See also: reload, backup
 [D]  $bhijack$b          How to handle when a commonly used hijack method attempt is detected. 
  
 [L]  $bservers$b         Comma-separated list of servers the bot will use.
+[L]  $bservers-ssl$b     Comma-separated list of SSL servers to use if server-use-ssl is true.
 [L]  $bservers6$b        Comma-separated list of servers the bot will use (FOR IPv6).
+[L]  $bservers6-ssl$b    Comma-separated list of IPv6 SSL servers to use if server-use-ssl is true.
  
 [N]  $bmsgburst$b        How many messages to burst at once to server. (Too high will excess flood)
 [N]  $bmsgrate$b         How often (msecs) to dequeue msgs to the server. Only used on

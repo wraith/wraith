@@ -5379,6 +5379,10 @@ LIBS="$save_LIBS"
 
 
 
+cat >>confdefs.h <<_ACEOF
+#define EGG_SSL_EXT 1
+_ACEOF
+
 
 
 #AC_SUBST(ZLIB)dnl
@@ -9016,6 +9020,8 @@ if [ "$GIT_REQUIRED" = "1" ]; then
   fi
 fi
 
+
+src/generate_defs.sh
 
 echo ""
 echo ""

@@ -26,7 +26,6 @@
  *
  */
 
-
 #include "common.h"
 #include "main.h"
 #include "userent.h"
@@ -196,6 +195,12 @@ void fatal(const char *s, int recoverable)
       lostdcc(i);
     }
   }
+
+#ifdef EGG_SSL_EXT
+  if (ssl_use) {
+    unload_ssl();
+  }
+#endif
 
   if (!recoverable) {
 //    if (conf.bot && conf.bot->pid_file)
@@ -685,6 +690,10 @@ int main(int argc, char **argv)
 #ifndef DEBUG
   check_trace(1);
 #endif
+
+  if (load_libcrypto()) {
+    fatal("Unable to load libcrypto.", 0);
+  }
 
   /* Initialize variables and stuff */
   timer_update_now(&egg_timeval_now);

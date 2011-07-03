@@ -8,7 +8,7 @@
 #endif
 
 #include <sys/types.h>
-#include "src/crypto/crypto.h"
+#include "libcrypto.h"
 #include "users.h"
 
 #define SHA_HASH_LENGTH (SHA_DIGEST_LENGTH << 1)

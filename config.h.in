@@ -13,6 +13,9 @@
 /* big endian */
 #undef B_ENDIAN
 
+/* Defines whether or not SSL is supported */
+#undef EGG_SSL_EXT
+
 /* Defines the current pack version */
 #undef EGG_VERSION
 
