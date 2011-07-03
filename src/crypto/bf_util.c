@@ -32,8 +32,8 @@ static const char eggdrop_blowfish_base64_index[256] = {
 
 union bf_data {
   struct {
-    unsigned long left;
-    unsigned long right;
+    u_int32_t left;
+    u_int32_t right;
   } lr;
   BF_LONG bf_long;
 };
