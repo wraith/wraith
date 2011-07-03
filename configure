@@ -602,6 +602,13 @@ MOD_UPDIR
 NUMVER
 VERSION
 LIBOBJS
+TCL_LIBS
+TCL_REQS
+DEFAULT_MAKE
+TCLINCFN
+TCLINC
+TCLLIBFN
+TCLLIB
 SSL_LIBS
 SSL_INCLUDES
 MAKEJOBS
@@ -677,6 +684,8 @@ ac_user_opts='
 enable_option_checking
 enable_ipv6
 with_openssl
+with_tcllib
+with_tclinc
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1303,6 +1312,8 @@ Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-openssl=DIR      Path to OpenSSL
+  --with-tcllib=PATH      full path to Tcl library
+  --with-tclinc=PATH      full path to Tcl header
 
 Some influential environment variables:
   CXX         C++ compiler command
@@ -5384,6 +5395,685 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
+# TCL checks
+
+# Tcl version to recommend if no Tcl is found, and the site where it can be
+# found for download.
+tclrecommendver="8.5.X"
+tclrecommendsite="ftp://tcl.activestate.com/pub/tcl/tcl8_5/"
+
+# Tcl library filename prefixes, suffixes, and search paths.
+tcllibnames="tcl8.5 tcl85 tcl8.4 tcl84 tcl8.3 tcl83 tcl8.2 tcl82 \
+             tcl8.1 tcl81 tcl8.0 tcl80 tcl tcl7.6 tcl76 tcl7.5 tcl75 \
+             tcl7.4 tcl74 tcl7.3 tcl73 tcl7.2 tcl72 tcl7.1 tcl71 \
+             tcl7.0 tcl70"
+
+tcllibextensions=".so .so.1 .so.1.0 .so.1.2 .dll .dylib .sl .a"
+
+tcllibpaths="$HOME/lib $HOME/tcl/lib \
+             /usr/local/lib /usr/lib /lib /lib64 /usr/lib64 \
+             /usr/local/lib/tcl8.5 /usr/lib/tcl8.5 \
+             /usr/local/lib/tcl8.4 /usr/lib/tcl8.4 \
+             /usr/local/lib/tcl8.3 /usr/lib/tcl8.3 \
+             /usr/local/pkgs/tcl/lib /sys/lib /usr/pkg/lib \
+             /usr/i486-linuxaout/lib /beos/system/lib $HOME"
+
+# Tcl header filenames and search paths.
+tclheadernames="tcl.h"
+tclheaderpaths="$HOME/include $HOME/tcl/include \
+                /usr/local/include /usr/include \
+                /usr/local/include/tcl8.5 /usr/include/tcl8.5 \
+                /usr/local/include/tcl8.4 /usr/include/tcl8.4 \
+                /usr/local/include/tcl8.3 /usr/include/tcl8.3 \
+                /usr/local/pkgs/tcl/include /sys/include \
+                /usr/pkg/lib /beos/system/include /beos/devel/include $HOME"
+
+
+# Misc Tcl checks.
+
+
+# Check whether --with-tcllib was given.
+if test "${with_tcllib+set}" = set; then :
+  withval=$with_tcllib; tcllibname="$withval"
+fi
+
+
+# Check whether --with-tclinc was given.
+if test "${with_tclinc+set}" = set; then :
+  withval=$with_tclinc; tclincname="$withval"
+fi
+
+
+  WARN=0
+  # Make sure either both or neither $tcllibname and $tclincname are set
+  if test "x$tcllibname" != x; then
+    if test "x$tclincname" = x; then
+      WARN=1
+      tcllibname=""
+      TCLLIB=""
+      TCLINC=""
+    fi
+  else
+    if test "x$tclincname" != x; then
+      WARN=1
+      tclincname=""
+      TCLLIB=""
+      TCLINC=""
+    fi
+  fi
+
+  if test "$WARN" = 1; then
+    cat << 'EOF' >&2
+configure: WARNING:
+
+  You must specify both --with-tcllib and --with-tclinc for either to work.
+
+  configure will now attempt to autodetect both the Tcl library and header.
+
+EOF
+  fi
+
+
+  WARN=0
+  # Make sure either both or neither $TCLLIB and $TCLINC are set
+  if test "x$TCLLIB" != x; then
+    if test "x$TCLINC" = x; then
+      WARN=1
+      WVAR1=TCLLIB
+      WVAR2=TCLINC
+      TCLLIB=""
+    fi
+  else
+    if test "x$TCLINC" != x; then
+      WARN=1
+      WVAR1=TCLINC
+      WVAR2=TCLLIB
+      TCLINC=""
+    fi
+  fi
+
+  if test "$WARN" = 1; then
+    cat << EOF >&2
+configure: WARNING:
+
+  Environment variable $WVAR1 was set, but I did not detect ${WVAR2}.
+  Please set both TCLLIB and TCLINC correctly if you wish to use them.
+
+  configure will now attempt to autodetect both the Tcl library and header.
+
+EOF
+  fi
+
+
+  # Look for Tcl library: if $tcllibname is set, check there first
+  if test "x$tcllibname" != x; then
+    if test -f "$tcllibname" && test -r "$tcllibname"; then
+      TCLLIB=`echo $tcllibname | sed 's%/[^/][^/]*$%%'`
+      TCLLIBFN=`$BASENAME $tcllibname | cut -c4-`
+      TCLLIBEXT=".`echo $TCLLIBFN | $AWK '{j=split($1, i, "."); print i[j]}'`"
+      TCLLIBFNS=`$BASENAME $tcllibname $TCLLIBEXT | cut -c4-`
+    else
+      cat << EOF >&2
+configure: WARNING:
+
+  The file '$tcllibname' given to option --with-tcllib is not valid.
+
+  configure will now attempt to autodetect both the Tcl library and header.
+
+EOF
+      tcllibname=""
+      tclincname=""
+      TCLLIB=""
+      TCLLIBFN=""
+      TCLINC=""
+      TCLINCFN=""
+    fi
+  fi
+
+
+  # Look for Tcl header: if $tclincname is set, check there first
+  if test "x$tclincname" != x; then
+    if test -f "$tclincname" && test -r "$tclincname"; then
+      TCLINC=`echo $tclincname | sed 's%/[^/][^/]*$%%'`
+      TCLINCFN=`$BASENAME $tclincname`
+    else
+      cat << EOF >&2
+configure: WARNING:
+
+  The file '$tclincname' given to option --with-tclinc is not valid.
+
+  configure will now attempt to autodetect both the Tcl library and header.
+
+EOF
+      tcllibname=""
+      tclincname=""
+      TCLLIB=""
+      TCLLIBFN=""
+      TCLINC=""
+      TCLINCFN=""
+    fi
+  fi
+
+
+  # Look for Tcl library: if $TCLLIB is set, check there first
+  if test "x$TCLLIBFN" = x && test "x$TCLLIB" != x; then
+    if test -d "$TCLLIB"; then
+      for tcllibfns in $tcllibnames; do
+        for tcllibext in $tcllibextensions; do
+          if test -r "${TCLLIB}/lib${tcllibfns}${tcllibext}"; then
+            TCLLIBFN="${tcllibfns}${tcllibext}"
+            TCLLIBEXT="$tcllibext"
+            TCLLIBFNS="$tcllibfns"
+            break 2
+          fi
+        done
+      done
+    fi
+
+    if test "x$TCLLIBFN" = x; then
+      cat << 'EOF' >&2
+configure: WARNING:
+
+  Environment variable TCLLIB was set, but incorrectly.
+  Please set both TCLLIB and TCLINC correctly if you wish to use them.
+
+  configure will now attempt to autodetect both the Tcl library and header.
+
+EOF
+      TCLLIB=""
+      TCLLIBFN=""
+      TCLINC=""
+      TCLINCFN=""
+    fi
+  fi
+
+
+  # Look for Tcl header: if $TCLINC is set, check there first
+  if test "x$TCLINCFN" = x && test "x$TCLINC" != x; then
+    if test -d "$TCLINC"; then
+      for tclheaderfn in $tclheadernames; do
+        if test -r "${TCLINC}/${tclheaderfn}"; then
+          TCLINCFN="$tclheaderfn"
+          break
+        fi
+      done
+    fi
+
+    if test "x$TCLINCFN" = x; then
+      cat << 'EOF' >&2
+configure: WARNING:
+
+  Environment variable TCLINC was set, but incorrectly.
+  Please set both TCLLIB and TCLINC correctly if you wish to use them.
+
+  configure will now attempt to autodetect both the Tcl library and header.
+
+EOF
+      TCLLIB=""
+      TCLLIBFN=""
+      TCLINC=""
+      TCLINCFN=""
+    fi
+  fi
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Tcl library" >&5
+$as_echo_n "checking for Tcl library... " >&6; }
+
+  # Attempt autodetect for $TCLLIBFN if it's not set
+  if test "x$TCLLIBFN" != x; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: using ${TCLLIB}/lib${TCLLIBFN}" >&5
+$as_echo "using ${TCLLIB}/lib${TCLLIBFN}" >&6; }
+  else
+    for tcllibfns in $tcllibnames; do
+      for tcllibext in $tcllibextensions; do
+        for tcllibpath in $tcllibpaths; do
+          if test -r "${tcllibpath}/lib${tcllibfns}${tcllibext}"; then
+            { $as_echo "$as_me:${as_lineno-$LINENO}: result: found ${tcllibpath}/lib${tcllibfns}${tcllibext}" >&5
+$as_echo "found ${tcllibpath}/lib${tcllibfns}${tcllibext}" >&6; }
+            TCLLIB="$tcllibpath"
+            TCLLIBFN="${tcllibfns}${tcllibext}"
+            TCLLIBEXT="$tcllibext"
+            TCLLIBFNS="$tcllibfns"
+            break 3
+          fi
+        done
+      done
+    done
+  fi
+
+  # Show if $TCLLIBFN wasn't found
+  if test "x$TCLLIBFN" = x; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
+$as_echo "not found" >&6; }
+  fi
+
+
+
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Tcl header" >&5
+$as_echo_n "checking for Tcl header... " >&6; }
+
+  # Attempt autodetect for $TCLINCFN if it's not set
+  if test "x$TCLINCFN" != x; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: using ${TCLINC}/${TCLINCFN}" >&5
+$as_echo "using ${TCLINC}/${TCLINCFN}" >&6; }
+  else
+    for tclheaderpath in $tclheaderpaths; do
+      for tclheaderfn in $tclheadernames; do
+        if test -r "${tclheaderpath}/${tclheaderfn}"; then
+          { $as_echo "$as_me:${as_lineno-$LINENO}: result: found ${tclheaderpath}/${tclheaderfn}" >&5
+$as_echo "found ${tclheaderpath}/${tclheaderfn}" >&6; }
+          TCLINC="$tclheaderpath"
+          TCLINCFN="$tclheaderfn"
+          break 2
+        fi
+      done
+    done
+
+    # FreeBSD hack ...
+    if test "x$TCLINCFN" = x; then
+      for tcllibfns in $tcllibnames; do
+        for tclheaderpath in $tclheaderpaths; do
+          for tclheaderfn in $tclheadernames; do
+            if test -r "${tclheaderpath}/${tcllibfns}/${tclheaderfn}"; then
+              { $as_echo "$as_me:${as_lineno-$LINENO}: result: found ${tclheaderpath}/${tcllibfns}/${tclheaderfn}" >&5
+$as_echo "found ${tclheaderpath}/${tcllibfns}/${tclheaderfn}" >&6; }
+              TCLINC="${tclheaderpath}/${tcllibfns}"
+              TCLINCFN="$tclheaderfn"
+              break 3
+            fi
+          done
+        done
+      done
+    fi
+  fi
+
+  if test "x$TCLINCFN" = x; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
+$as_echo "not found" >&6; }
+  fi
+
+
+
+
+
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the Tcl system has changed" >&5
+$as_echo_n "checking whether the Tcl system has changed... " >&6; }
+  egg_tcl_changed="yes"
+  egg_tcl_id="${TCLLIB}:${TCLLIBFN}:${TCLINC}:${TCLINCFN}"
+  if test "$egg_tcl_id" != ":::"; then
+    egg_tcl_cached="yes"
+    if test "${egg_cv_var_tcl_id+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+
+      egg_cv_var_tcl_id="$egg_tcl_id"
+      egg_tcl_cached="no"
+
+fi
+
+    if test "$egg_tcl_cached" = yes; then
+      if test "x$egg_cv_var_tcl_id" = "x$egg_tcl_id"; then
+        egg_tcl_changed="no"
+      else
+        egg_cv_var_tcl_id="$egg_tcl_id"
+      fi
+    fi
+  fi
+
+  if test "$egg_tcl_changed" = yes; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+  else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+  fi
+
+
+  # Both TCLLIBFN & TCLINCFN must be set, or we bail
+  TCL_FOUND=0
+  if test "x$TCLLIBFN" != x && test "x$TCLINCFN" != x; then
+    TCL_FOUND=1
+
+    # Check Tcl's version
+    if test "$egg_tcl_changed" = yes; then
+      unset egg_cv_var_tcl_version
+    fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Tcl version" >&5
+$as_echo_n "checking for Tcl version... " >&6; }
+    if test "${egg_cv_var_tcl_version+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+
+      egg_cv_var_tcl_version=`grep TCL_VERSION $TCLINC/$TCLINCFN | $HEAD_1 | $AWK '{gsub(/\"/, "", $3); print $3}'`
+
+fi
+
+
+    if test "x$egg_cv_var_tcl_version" != x; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: $egg_cv_var_tcl_version" >&5
+$as_echo "$egg_cv_var_tcl_version" >&6; }
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
+$as_echo "not found" >&6; }
+      TCL_FOUND=0
+    fi
+
+    # Check Tcl's patch level (if available)
+    if test "$egg_tcl_changed" = yes; then
+      unset egg_cv_var_tcl_patch_level
+    fi
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Tcl patch level" >&5
+$as_echo_n "checking for Tcl patch level... " >&6; }
+    if test "${egg_cv_var_tcl_patch_level+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+
+      eval "egg_cv_var_tcl_patch_level=`grep TCL_PATCH_LEVEL $TCLINC/$TCLINCFN | $HEAD_1 | $AWK '{gsub(/\"/, "", $3); print $3}'`"
+
+fi
+
+
+    if test "x$egg_cv_var_tcl_patch_level" != x; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: $egg_cv_var_tcl_patch_level" >&5
+$as_echo "$egg_cv_var_tcl_patch_level" >&6; }
+    else
+      egg_cv_var_tcl_patch_level="unknown"
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: unknown" >&5
+$as_echo "unknown" >&6; }
+    fi
+  fi
+
+  # Check if we found Tcl's version
+  if test "$TCL_FOUND" = 0; then
+    cat << 'EOF' >&2
+configure: error:
+
+  Tcl cannot be found on this system.
+
+  Tcl is not required. Wraith will be compiled without TCL support. If you
+  already have Tcl installed on this system, and I just wasn't looking in
+  the right place for it, re-run ./configure using the
+  --with-tcllib='/path/to/libtcl.so' and --with-tclinc='/path/to/tcl.h' options.
+
+EOF
+  else
+
+$as_echo "#define HAVE_LIBTCL 1" >>confdefs.h
+
+  fi
+
+
+  # Is this version of Tcl too old for us to use ?
+  TCL_VER_PRE70=`echo $egg_cv_var_tcl_version | $AWK '{split($1, i, "."); if (i[1] < 7) print "yes"; else print "no"}'`
+  if test "$HAVE_LIBTCL" = 1 -a "$TCL_VER_PRE70" = yes; then
+    cat << EOF >&2
+configure: error:
+
+  Your Tcl version is much too old for Eggdrop to use. You should
+  download and compile a more recent version. The most reliable
+  current version is $tclrecommendver and can be downloaded from
+  ${tclrecommendsite}.
+
+  See doc/COMPILE-GUIDE's 'Tcl Detection and Installation' section
+  for more information.
+
+EOF
+    exit 1
+  fi
+
+
+  # Set variables for Tcl library tests
+  TCL_TEST_LIB="$TCLLIBFNS"
+  TCL_TEST_OTHERLIBS="-L$TCLLIB $EGG_MATH_LIB"
+  if test "x$ac_cv_lib_pthread" != x; then
+    TCL_TEST_OTHERLIBS="$TCL_TEST_OTHERLIBS $ac_cv_lib_pthread"
+  fi
+
+
+  if test "$egg_tcl_changed" = yes; then
+    unset egg_cv_var_tcl_free
+  fi
+
+  # Check for Tcl_Free()
+  as_ac_Lib=`$as_echo "ac_cv_lib_$TCL_TEST_LIB''_Tcl_Free" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Tcl_Free in -l$TCL_TEST_LIB" >&5
+$as_echo_n "checking for Tcl_Free in -l$TCL_TEST_LIB... " >&6; }
+if eval "test \"\${$as_ac_Lib+set}\"" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-l$TCL_TEST_LIB $TCL_TEST_OTHERLIBS $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char Tcl_Free ();
+int
+main ()
+{
+return Tcl_Free ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  eval "$as_ac_Lib=yes"
+else
+  eval "$as_ac_Lib=no"
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+eval ac_res=\$$as_ac_Lib
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
+  egg_cv_var_tcl_free="yes"
+else
+  egg_cv_var_tcl_free="no"
+fi
+
+
+  if test "$egg_cv_var_tcl_free" = yes; then
+
+$as_echo "#define HAVE_TCL_FREE 1" >>confdefs.h
+
+  fi
+
+#EGG_TCL_CHECK_GETCURRENTTHREAD
+#EGG_TCL_CHECK_GETTHREADDATA
+
+  if test "$egg_tcl_changed" = yes; then
+    unset egg_cv_var_tcl_setnotifier
+  fi
+
+  # Check for Tcl_SetNotifier()
+  as_ac_Lib=`$as_echo "ac_cv_lib_$TCL_TEST_LIB''_Tcl_SetNotifier" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Tcl_SetNotifier in -l$TCL_TEST_LIB" >&5
+$as_echo_n "checking for Tcl_SetNotifier in -l$TCL_TEST_LIB... " >&6; }
+if eval "test \"\${$as_ac_Lib+set}\"" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-l$TCL_TEST_LIB $TCL_TEST_OTHERLIBS $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char Tcl_SetNotifier ();
+int
+main ()
+{
+return Tcl_SetNotifier ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  eval "$as_ac_Lib=yes"
+else
+  eval "$as_ac_Lib=no"
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+eval ac_res=\$$as_ac_Lib
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
+  egg_cv_var_tcl_setnotifier="yes"
+else
+  egg_cv_var_tcl_setnotifier="no"
+fi
+
+  if test "$egg_cv_var_tcl_setnotifier" = yes; then
+
+$as_echo "#define HAVE_TCL_SETNOTIFIER 1" >>confdefs.h
+
+  fi
+
+
+  if test "$EGG_CYGWIN" = yes; then
+    TCL_REQS="${TCLLIB}/lib${TCLLIBFN}"
+    TCL_LIBS="-L$TCLLIB -l$TCLLIBFNS $EGG_MATH_LIB"
+  else
+    if test "$TCLLIBEXT" != ".a"; then
+      TCL_REQS="${TCLLIB}/lib${TCLLIBFN}"
+      TCL_LIBS="-L$TCLLIB -l$TCLLIBFNS $EGG_MATH_LIB"
+    else
+      # Set default make as static for unshared Tcl library
+      if test "$DEFAULT_MAKE" != static; then
+        cat << 'EOF' >&2
+configure: WARNING:
+
+  Your Tcl library is not a shared lib.
+  configure will now set default make type to static.
+
+EOF
+        DEFAULT_MAKE="static"
+
+      fi
+
+      # Are we using a pre 7.4 Tcl version ?
+      TCL_VER_PRE74=`echo $egg_cv_var_tcl_version | $AWK '{split($1, i, "."); if (((i[1] == 7) && (i[2] < 4)) || (i[1] < 7)) print "yes"; else print "no"}'`
+      if test "$TCL_VER_PRE74" = no; then
+
+        # Was the --with-tcllib option given ?
+        if test "x$tcllibname" != x; then
+          TCL_REQS="${TCLLIB}/lib${TCLLIBFN}"
+          TCL_LIBS="${TCLLIB}/lib${TCLLIBFN} $EGG_MATH_LIB"
+        else
+          TCL_REQS="${TCLLIB}/lib${TCLLIBFN}"
+          TCL_LIBS="-L$TCLLIB -l$TCLLIBFNS $EGG_MATH_LIB"
+        fi
+      else
+        cat << EOF >&2
+configure: WARNING:
+
+  Your Tcl version ($egg_cv_var_tcl_version) is older than 7.4.
+  There are known problems, but we will attempt to work around them.
+
+EOF
+        TCL_REQS="libtcle.a"
+        TCL_LIBS="-L`pwd` -ltcle $EGG_MATH_LIB"
+      fi
+    fi
+  fi
+
+
+
+
+
+cat >confcache <<\_ACEOF
+# This file is a shell script that caches the results of configure
+# tests run on this system so they can be shared between configure
+# scripts and configure runs, see configure's option --config-cache.
+# It is not useful on other systems.  If it contains results you don't
+# want to keep, you may remove or edit it.
+#
+# config.status only pays attention to the cache file if you give it
+# the --recheck option to rerun configure.
+#
+# `ac_cv_env_foo' variables (set or unset) will be overridden when
+# loading this file, other *unset* `ac_cv_foo' will be assigned the
+# following values.
+
+_ACEOF
+
+# The following way of writing the cache mishandles newlines in values,
+# but we know of no workaround that is simple, portable, and efficient.
+# So, we kill variables containing newlines.
+# Ultrix sh set writes to stderr and can't be redirected directly,
+# and sets the high bit in the cache file unless we assign to the vars.
+(
+  for ac_var in `(set) 2>&1 | sed -n 's/^\([a-zA-Z_][a-zA-Z0-9_]*\)=.*/\1/p'`; do
+    eval ac_val=\$$ac_var
+    case $ac_val in #(
+    *${as_nl}*)
+      case $ac_var in #(
+      *_cv_*) { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: cache variable $ac_var contains a newline" >&5
+$as_echo "$as_me: WARNING: cache variable $ac_var contains a newline" >&2;} ;;
+      esac
+      case $ac_var in #(
+      _ | IFS | as_nl) ;; #(
+      BASH_ARGV | BASH_SOURCE) eval $ac_var= ;; #(
+      *) { eval $ac_var=; unset $ac_var;} ;;
+      esac ;;
+    esac
+  done
+
+  (set) 2>&1 |
+    case $as_nl`(ac_space=' '; set) 2>&1` in #(
+    *${as_nl}ac_space=\ *)
+      # `set' does not quote correctly, so add quotes: double-quote
+      # substitution turns \\\\ into \\, and sed turns \\ into \.
+      sed -n \
+	"s/'/'\\\\''/g;
+	  s/^\\([_$as_cr_alnum]*_cv_[_$as_cr_alnum]*\\)=\\(.*\\)/\\1='\\2'/p"
+      ;; #(
+    *)
+      # `set' quotes correctly as required by POSIX, so do not add quotes.
+      sed -n "/^[_$as_cr_alnum]*_cv_[_$as_cr_alnum]*=/p"
+      ;;
+    esac |
+    sort
+) |
+  sed '
+     /^ac_cv_env_/b end
+     t clear
+     :clear
+     s/^\([^=]*\)=\(.*[{}].*\)$/test "${\1+set}" = set || &/
+     t end
+     s/^\([^=]*\)=\(.*\)$/\1=${\1=\2}/
+     :end' >>confcache
+if diff "$cache_file" confcache >/dev/null 2>&1; then :; else
+  if test -w "$cache_file"; then
+    test "x$cache_file" != "x/dev/null" &&
+      { $as_echo "$as_me:${as_lineno-$LINENO}: updating cache $cache_file" >&5
+$as_echo "$as_me: updating cache $cache_file" >&6;}
+    cat confcache >$cache_file
+  else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: not updating unwritable cache $cache_file" >&5
+$as_echo "$as_me: not updating unwritable cache $cache_file" >&6;}
+  fi
+fi
+rm -f confcache
 
 #AC_SUBST(ZLIB)dnl
 
