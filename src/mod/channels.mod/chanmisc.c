@@ -436,7 +436,15 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
         return ERROR;
       }
       chan->capslimit = capslimit;
-    } else if (!strcmp(item[i], "closed-ban")) {
+    } else if (!strcmp(item[i], "colorlimit") || !strcmp(item[i], "color-limit")) {
+      i++;
+      if (i >= items) {
+        if (result)
+          strlcpy(result, "channel colorlimit needs argument", RESULT_LEN);
+        return ERROR;
+      }
+      chan->colorlimit = atoi(item[i]);
+   } else if (!strcmp(item[i], "closed-ban")) {
       i++;
       if (i >= items) {
         if (result)
@@ -1054,6 +1062,7 @@ int channel_add(char *result, const char *newname, char *options, bool isdefault
     chan->flood_mjoin_thr = 6;
     chan->flood_mjoin_time = 1;
     chan->capslimit = 0;
+    chan->colorlimit = 0;
     chan->limitraise = 20;
     chan->ban_time = global_ban_time;
     chan->exempt_time = global_exempt_time;

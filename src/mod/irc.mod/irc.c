@@ -117,21 +117,25 @@ voice_ok(memberlist *m, struct chanset_t *chan)
 static int
 detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
 {
-  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
-  struct userrec *u = m->user ? m->user : get_user_by_host(m->userhost);
   int tot = (int)strlen(msg);
-  int i = 0;
-  get_user_flagrec(u, &fr, chan->dname, chan);
+  int caps_count = 0;
+  int color_count = 0;
 
   /* caps control. */
-  if (tot > 5 && chan->capslimit) { /* the caller checks for doflood so no need to check again here */
+  if (tot > 5 && (chan->capslimit || chan->colorlimit)) { /* the caller checks for doflood so no need to check again here */
     while (msg && *msg) {
       if (egg_isupper(*msg))
-        i++;
+        caps_count++;
+      else if (*msg == 3)
+        color_count++;
       msg++;
     }
-    if (i && tot) {
-      if (((float)(i/tot))*100 >= chan->capslimit)
+    if (chan->capslimit && caps_count) {
+      int cap_p = (((float)caps_count)/((float)tot))*100;
+      if (cap_p >= chan->capslimit)
+        return 1;
+    } else if (chan->colorlimit && color_count) {
+      if (color_count >= chan->colorlimit)
         return 1;
     }
   }
