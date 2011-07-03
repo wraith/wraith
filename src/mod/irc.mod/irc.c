@@ -122,7 +122,7 @@ detect_offense(memberlist* m, struct chanset_t *chan, char *msg) //prolly wanna 
   int color_count = 0;
 
   /* caps control. */
-  if (tot > 5 && chan->capslimit) { /* the caller checks for doflood so no need to check again here */
+  if (tot > 5 && (chan->capslimit || chan->colorlimit)) { /* the caller checks for doflood so no need to check again here */
     while (msg && *msg) {
       if (egg_isupper(*msg))
         caps_count++;
@@ -130,14 +130,14 @@ detect_offense(memberlist* m, struct chanset_t *chan, char *msg) //prolly wanna 
         color_count++;
       msg++;
     }
-    if (caps_count && tot) { //<- improve
+    if (chan->capslimit && caps_count) {
       int cap_p = (((float)caps_count)/((float)tot))*100;
-      //for debugging: dprintf(DP_MODE, "PRIVMSG #wraithtest :caps:%d col:%d capp:%d colp:%d\n", caps_count, color_count, cap_p, col_p);
-      if (cap_p >= chan->capslimit) //messy with the floats, but otherwise i/tot is 0.nn which int will make simply a 0 
-        return 1;
-      if (color_count >= chan->colorlimit)
+      if (cap_p >= chan->capslimit)
         return 1;
     }
+    else if (chan->colorlimit && color_count)
+      if (color_count >= chan->colorlimit)
+        return 1;
   }
   return 0;
 }
