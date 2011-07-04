@@ -954,34 +954,39 @@ samechans(const char *nick, const char *delim)
   return ret;
 }
 
-struct chanset_t* find_common_opped_chan(const char* nick) {
+struct chanset_t* find_common_opped_chan(bd::String nick) {
   for (struct chanset_t* chan = chanset; chan; chan = chan->next) {
     if (channel_active(chan) && (me_op(chan) || me_voice(chan))) {
-      if (ismember(chan, nick))
+      if (ismember(chan, nick.c_str()))
         return chan;
     }
   }
   return NULL;
 }
 
-void privmsg(const char* target, const char* msg, int idx) {
+void privmsg(bd::String target, bd::String msg, int idx) {
   struct chanset_t* chan = NULL;
   if (have_cprivmsg && !strchr(CHANMETA, target[0]))
     chan = find_common_opped_chan(target);
+
+  // Encrypt with FiSH?
+  if (!strchr(CHANMETA, target[0]) && FishKeys.contains(target) && FishKeys[target]->sharedKey.length()) {
+    msg = "+OK " + egg_bf_encrypt(msg, FishKeys[target]->sharedKey);
+  }
   if (chan)
-    dprintf(idx, "CPRIVMSG %s %s :%s\n", target, chan->name, msg);
+    dprintf(idx, "CPRIVMSG %s %s :%s\n", target.c_str(), chan->name, msg.c_str());
   else
-    dprintf(idx, "PRIVMSG %s :%s\n", target, msg);
+    dprintf(idx, "PRIVMSG %s :%s\n", target.c_str(), msg.c_str());
 }
 
-void notice(const char* target, const char* msg, int idx) {
+void notice(bd::String target, bd::String msg, int idx) {
   struct chanset_t* chan = NULL;
   if (have_cnotice && !strchr(CHANMETA, target[0]))
     chan = find_common_opped_chan(target);
   if (chan)
-    dprintf(idx, "CNOTICE %s %s :%s\n", target, chan->name, msg);
+    dprintf(idx, "CNOTICE %s %s :%s\n", target.c_str(), chan->name, msg.c_str());
   else
-    dprintf(idx, "NOTICE %s :%s\n", target, msg);
+    dprintf(idx, "NOTICE %s :%s\n", target.c_str(), msg.c_str());
 }
 
 

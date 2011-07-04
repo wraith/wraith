@@ -8,6 +8,7 @@
 #include <openssl/sha.h>
 #include "src/crypto/aes_util.h"
 #include "src/crypto/bf_util.h"
+#include "src/crypto/dh_util.h"
 
 #include "common.h"
 #include "dl.h"
@@ -43,6 +44,20 @@ typedef int (*SHA1_Update_t)(SHA_CTX*, const void*, size_t);
 typedef int (*SHA256_Final_t)(unsigned char*, SHA256_CTX *);
 typedef int (*SHA256_Init_t)(SHA256_CTX*);
 typedef int (*SHA256_Update_t)(SHA256_CTX*, const void*, size_t);
+
+typedef BIGNUM* (*BN_bin2bn_t)(const unsigned char*, int, BIGNUM*);
+typedef int (*BN_bn2bin_t)(BIGNUM*, unsigned char*);
+typedef void (*BN_clear_free_t)(BIGNUM*);
+typedef int (*BN_dec2bn_t)(BIGNUM**, const char*);
+typedef int (*BN_hex2bn_t)(BIGNUM**, const char*);
+typedef int (*BN_num_bits_t)(const BIGNUM*);
+
+typedef int (*DH_compute_key_t)(unsigned char*, const BIGNUM*, DH*);
+typedef void (*DH_free_t)(DH*);
+typedef int (*DH_generate_key_t)(DH*);
+typedef DH* (*DH_new_t)(void);
+typedef int (*DH_size_t)(const DH*);
+
 
 #include ".defs/libcrypto_defs.h"
 

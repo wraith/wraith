@@ -106,7 +106,7 @@ static int cmd_privmsg STDVAR {
   bd::String str = argv[2];
   for (int i = 3; i < argc; ++i)
     str += " " + bd::String(argv[i]);
-  privmsg(argv[1], str.c_str(), DP_SERVER);
+  privmsg(argv[1], str, DP_SERVER);
 
   return TCL_OK;
 }

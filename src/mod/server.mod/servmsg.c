@@ -155,7 +155,35 @@ static int check_bind_raw(char *from, char *code, char *msg)
   int ret = 0;
 
   myfrom = p1 = strdup(from);
-  mymsg = p2 = strdup(msg);
+
+  // Decrypt FiSH before processing
+  if (!strcmp(code, "PRIVMSG")) {
+    char* colon = strchr(msg, ':');
+    ++colon;
+    if (colon) {
+      if (!strncmp(colon, "+OK ", 4)) {
+        char *p = strchr(from, '!');
+        bd::String ciphertext(colon), sharedKey, nick(from, p - from);
+
+        if (FishKeys.contains(nick)) {
+          sharedKey = FishKeys[nick]->sharedKey;
+        } else {
+          struct userrec *u = get_user_by_host(from);
+          if (u) {
+            sharedKey = static_cast<char*>(get_user(&USERENTRY_SECPASS, u));
+          }
+        }
+
+        if (sharedKey.length()) {
+          // Decrypt the message before passing along to the binds
+          bd::String cleartext(bd::String(msg, colon - msg) + egg_bf_decrypt(ciphertext, sharedKey));
+          mymsg = p2 = strdup(cleartext.c_str());
+        }
+      }
+    }
+  }
+  if (!p2)
+    mymsg = p2 = strdup(msg);
 
   ret = check_bind(BT_raw, code, NULL, myfrom, mymsg);
   free(p1);
@@ -739,6 +767,48 @@ static int gotmsg(char *from, char *msg)
   return 0;
 }
 
+// Adapated from ZNC
+void handle_DH1080_init(const char* nick, const char* uhost, const char* from, struct userrec* u, const bd::String theirPublicKeyB64) {
+  bd::String myPublicKeyB64, myPrivateKey, sharedKey;
+
+  DH1080_gen(myPrivateKey, myPublicKeyB64);
+  if (!DH1080_comp(myPrivateKey, theirPublicKeyB64, sharedKey)) {
+    sdprintf("Error computing DH1080 for %s: %s", nick, sharedKey.c_str());
+    return;
+  }
+
+  putlog(LOG_MSGS, "*", "[FiSH] Received DH1080 public key from (%s!%s) - sending mine", nick, uhost);
+  notice(nick, "DH1080_FINISH " + myPublicKeyB64, DP_HELP);
+  fish_data_t* fishData = new fish_data_t;
+  fishData->myPublicKeyB64 = myPublicKeyB64;
+  fishData->myPrivateKey = myPrivateKey;
+  fishData->sharedKey = sharedKey;
+  fishData->timestamp = now;
+  FishKeys[nick] = fishData;
+  sdprintf("Set key for %s: %s", nick, sharedKey.c_str());
+  return;
+}
+
+void handle_DH1080_finish(const char* nick, const char* uhost, const char* from, struct userrec* u, const bd::String theirPublicKeyB64) {
+  if (!FishKeys.contains(nick)) {
+    putlog(LOG_MSGS, "*", "[FiSH] Unexpected DH1080_FINISH from (%s!%s) - ignoring", nick, uhost);
+    return;
+  }
+
+  fish_data_t* fishData = FishKeys[nick];
+  bd::String sharedKey;
+
+  if (!DH1080_comp(fishData->myPrivateKey, theirPublicKeyB64, sharedKey)) {
+    sdprintf("Error computing DH1080 for %s: %s", nick, sharedKey.c_str());
+    return;
+  }
+
+  putlog(LOG_MSGS, "*", "[FiSH] Key successfully set for (%s!%s)", nick, uhost);
+  fishData->sharedKey = sharedKey;
+  sdprintf("Set key for %s: %s", nick, sharedKey.c_str());
+  return;
+}
+
 /* Got a private notice.
  */
 static int gotnotice(char *from, char *msg)
@@ -817,7 +887,24 @@ static int gotnotice(char *from, char *msg)
       } else if (!ignoring) {
         detect_flood(nick, uhost, from, FLOOD_NOTICE);
         u = get_user_by_host(from);
-        putlog(LOG_MSGS, "*", "-%s (%s)- %s", nick, uhost, msg);
+
+        if (!strncmp(msg, "DH1080_INIT ", 12)) {
+          bd::String theirPublicKeyB64(msg + 12);
+          // Some FiSH implementations improperly encode their NULL terminator (A) on the end, just trim it off.
+          if (theirPublicKeyB64(-1, 1) == 'A' && theirPublicKeyB64.length() == 181) {
+            theirPublicKeyB64.resize(180, 0);
+          }
+          handle_DH1080_init(nick, uhost, from, u, theirPublicKeyB64);
+        } else if (!strncmp(msg, "DH1080_FINISH ", 14)) {
+          bd::String theirPublicKeyB64(msg + 14);
+          // Some FiSH implementations improperly encode their NULL terminator (A) on the end, just trim it off.
+          if (theirPublicKeyB64(-1, 1) == 'A' && theirPublicKeyB64.length() == 181) {
+            theirPublicKeyB64.resize(180, 0);
+          }
+          handle_DH1080_finish(nick, uhost, from, u, theirPublicKeyB64);
+        } else {
+          putlog(LOG_MSGS, "*", "-%s (%s)- %s", nick, uhost, msg);
+        }
       }
     }
   }

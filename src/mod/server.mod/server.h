@@ -9,6 +9,8 @@
 #include "src/binds.h"
 #include "src/dcc.h"
 #include "src/set.h"
+#include <bdlib/src/String.h>
+#include <bdlib/src/HashTable.h>
 
 #define DO_LOST 1
 #define NO_LOST 0
@@ -45,6 +47,13 @@ enum {
 	NETT_HYBRID_EFNET	= 4	/* new +e/+I Efnet hybrid.	  */
 };
 
+typedef struct {
+  bd::String sharedKey;
+  bd::String myPrivateKey;
+  bd::String myPublicKeyB64;
+  time_t timestamp;
+} fish_data_t;
+
 extern bind_table_t	*BT_ctcp, *BT_ctcr;
 extern size_t		nick_len;
 extern bool		trigger_on_ignore, floodless, keepnick, in_deaf, in_callerid, have_cprivmsg, have_cnotice;
@@ -58,6 +67,7 @@ extern char		cursrvname[120], botrealname[121], botuserhost[], ctcp_reply[1024],
 extern struct server_list *serverlist;
 extern struct dcc_table SERVER_SOCKET;
 extern rate_t		flood_msg, flood_ctcp, flood_callerid;
+extern bd::HashTable<bd::String, fish_data_t*> FishKeys;
 
 int check_bind_ctcpr(char *, char *, struct userrec *, char *, char *, char *, bind_table_t *);
 void nicks_available(char* buf, char delim = 0, bool buf_contains_available = 1);

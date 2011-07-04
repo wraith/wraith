@@ -65,6 +65,20 @@ static int load_symbols(void *handle) {
   DLSYM_GLOBAL(handle, SHA256_Init);
   DLSYM_GLOBAL(handle, SHA256_Update);
 
+  DLSYM_GLOBAL(handle, BN_bin2bn);
+  DLSYM_GLOBAL(handle, BN_bn2bin);
+  DLSYM_GLOBAL(handle, BN_clear_free);
+  DLSYM_GLOBAL(handle, BN_dec2bn);
+  DLSYM_GLOBAL(handle, BN_hex2bn);
+  DLSYM_GLOBAL(handle, BN_num_bits);
+
+  DLSYM_GLOBAL(handle, DH_compute_key);
+  DLSYM_GLOBAL(handle, DH_free);
+  DLSYM_GLOBAL(handle, DH_generate_key);
+  DLSYM_GLOBAL(handle, DH_new);
+  DLSYM_GLOBAL(handle, DH_size);
+
+
   return 0;
 }
 

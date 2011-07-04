@@ -112,6 +112,8 @@ bool in_callerid = 0;
 bool have_cprivmsg = 0;
 bool have_cnotice = 0;
 
+bd::HashTable<bd::String, fish_data_t*> FishKeys;
+
 static bool double_warned = 0;
 
 static void empty_msgq(void);

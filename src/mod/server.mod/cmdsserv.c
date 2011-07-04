@@ -105,6 +105,34 @@ static void cmd_jump(int idx, char *par)
   cycle_time = 0;
 }
 
+static void cmd_keyx(int idx, char *par) {
+  putlog(LOG_CMDS, "*", "#%s# keyx %s", dcc[idx].nick, par);
+
+  if (!par[0]) {
+    dprintf(idx, "Usage: keyx <nick>\n");
+    return;
+  }
+
+  if (!server_online) {
+    dprintf(idx, "Error: Not online.\n");
+    return;
+  }
+
+  char *nick = newsplit(&par);
+  bd::String myPublicKeyB64, myPrivateKey, sharedKey;
+
+  DH1080_gen(myPrivateKey, myPublicKeyB64);
+
+  putlog(LOG_MSGS, "*", "[FiSH] Initiating DH1080 key-exchange with %s - sending my public key", nick);
+  notice(nick, "DH1080_INIT " + myPublicKeyB64, DP_HELP);
+  fish_data_t* fishData = new fish_data_t;
+  fishData->myPublicKeyB64 = myPublicKeyB64;
+  fishData->myPrivateKey = myPrivateKey;
+  fishData->timestamp = now;
+  FishKeys[nick] = fishData;
+  return;
+}
+
 static void cmd_clearqueue(int idx, char *par)
 {
   int msgs;
@@ -167,6 +195,7 @@ static cmd_t C_dcc_serv[] =
   {"clearqueue",	"m",	(Function) cmd_clearqueue,	NULL, LEAF|AUTH},
   {"dump",		"a",	(Function) cmd_dump,		NULL, LEAF},
   {"jump",		"m",	(Function) cmd_jump,		NULL, LEAF},
+  {"keyx",		"o",	(Function) cmd_keyx,		NULL, LEAF},
   {"servers",		"m",	(Function) cmd_servers,		NULL, LEAF},
   {"umode",		"m",	(Function) cmd_umode,		NULL, LEAF},
   {NULL,		NULL,	NULL,				NULL, 0}

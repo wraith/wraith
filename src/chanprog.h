@@ -32,8 +32,8 @@ void add_child_bots();
 bool is_hub(const char*);
 void load_internal_users();
 void setup_HQ(int);
-void privmsg(const char* target, const char* msg, int idx);
-void notice(const char* target, const char* msg, int idx);
+void privmsg(bd::String target, bd::String msg, int idx);
+void notice(bd::String target, bd::String msg, int idx);
 void check_removed_server(bool = 1);
 
 extern struct chanset_t		*chanset, *chanset_default;
