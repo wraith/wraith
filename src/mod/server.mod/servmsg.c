@@ -26,6 +26,8 @@
 
 #include <netinet/tcp.h>
 
+bd::HashTable<bd::String, bd::String> FishKeys;
+
 char cursrvname[120] = "";
 char curnetwork[120] = "";
 static time_t last_ctcp    = (time_t) 0L;
@@ -162,14 +164,16 @@ static int check_bind_raw(char *from, char *code, char *msg)
     ++colon;
     if (colon) {
       if (!strncmp(colon, "+OK ", 4)) {
-        bd::String ciphertext(colon), sharedKey, nick;
         char *p = strchr(from, '!');
+        bd::String ciphertext(colon), sharedKey, nick(from, p - from);
 
-        nick = bd::String(from, p - from);
-
-        struct userrec *u = get_user_by_host(from);
-        if (u) {
-          sharedKey = static_cast<char*>(get_user(&USERENTRY_SECPASS, u));
+        if (FishKeys.contains(nick)) {
+          sharedKey = FishKeys[nick];
+        } else {
+          struct userrec *u = get_user_by_host(from);
+          if (u) {
+            sharedKey = static_cast<char*>(get_user(&USERENTRY_SECPASS, u));
+          }
         }
 
         if (sharedKey.length()) {
@@ -765,6 +769,23 @@ static int gotmsg(char *from, char *msg)
   return 0;
 }
 
+// Adapated from ZNC
+void handle_DH1080_init(const char* nick, const char* uhost, const char* from, struct userrec* u, const bd::String theirPublicKeyB64) {
+  bd::String myPublicKeyB64, myPrivateKey, sharedKey;
+
+  DH1080_gen(myPrivateKey, myPublicKeyB64);
+  if (!DH1080_comp(myPrivateKey, theirPublicKeyB64, sharedKey)) {
+    sdprintf("Error computing DH1080 for %s: %s", nick, sharedKey.c_str());
+    return;
+  }
+
+  putlog(LOG_MSGS, "*", "[FiSH] Received DH1080 public key from (%s!%s) - sending mine", nick, uhost);
+  notice(nick, "DH1080_FINISH " + myPublicKeyB64, DP_HELP);
+  FishKeys[nick] = sharedKey;
+  sdprintf("Set key for %s: %s", nick, sharedKey.c_str());
+  return;
+}
+
 /* Got a private notice.
  */
 static int gotnotice(char *from, char *msg)
@@ -843,7 +864,17 @@ static int gotnotice(char *from, char *msg)
       } else if (!ignoring) {
         detect_flood(nick, uhost, from, FLOOD_NOTICE);
         u = get_user_by_host(from);
-        putlog(LOG_MSGS, "*", "-%s (%s)- %s", nick, uhost, msg);
+
+        if (!strncmp(msg, "DH1080_INIT ", 12)) {
+          bd::String theirPublicKeyB64(msg + 12);
+          // Some FiSH implementations improperly encode their NULL terminator (A) on the end, just trim it off.
+          if (theirPublicKeyB64(-1, 1) == 'A' && theirPublicKeyB64.length() == 181) {
+            theirPublicKeyB64.resize(180, 0);
+          }
+          handle_DH1080_init(nick, uhost, from, u, theirPublicKeyB64);
+        } else {
+          putlog(LOG_MSGS, "*", "-%s (%s)- %s", nick, uhost, msg);
+        }
       }
     }
   }
