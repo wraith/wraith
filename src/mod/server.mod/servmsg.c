@@ -26,8 +26,6 @@
 
 #include <netinet/tcp.h>
 
-bd::HashTable<bd::String, bd::String> FishKeys;
-
 char cursrvname[120] = "";
 char curnetwork[120] = "";
 static time_t last_ctcp    = (time_t) 0L;
@@ -168,7 +166,7 @@ static int check_bind_raw(char *from, char *code, char *msg)
         bd::String ciphertext(colon), sharedKey, nick(from, p - from);
 
         if (FishKeys.contains(nick)) {
-          sharedKey = FishKeys[nick];
+          sharedKey = FishKeys[nick]->sharedKey;
         } else {
           struct userrec *u = get_user_by_host(from);
           if (u) {
@@ -781,7 +779,12 @@ void handle_DH1080_init(const char* nick, const char* uhost, const char* from, s
 
   putlog(LOG_MSGS, "*", "[FiSH] Received DH1080 public key from (%s!%s) - sending mine", nick, uhost);
   notice(nick, "DH1080_FINISH " + myPublicKeyB64, DP_HELP);
-  FishKeys[nick] = sharedKey;
+  fish_data_t* fishData = new fish_data_t;
+  fishData->myPublicKeyB64 = myPublicKeyB64;
+  fishData->myPrivateKey = myPrivateKey;
+  fishData->sharedKey = sharedKey;
+  fishData->timestamp = now;
+  FishKeys[nick] = fishData;
   sdprintf("Set key for %s: %s", nick, sharedKey.c_str());
   return;
 }
