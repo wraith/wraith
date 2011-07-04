@@ -14,7 +14,8 @@ depcomp = /bin/sh $(top_srcdir)/autotools/depcomp
 
 OBJS = \
        aes_util.o \
-       bf_util.o
+       bf_util.o \
+       dh_util.o
 
 doofus:
 	@echo ""

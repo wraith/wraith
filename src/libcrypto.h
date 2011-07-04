@@ -8,6 +8,7 @@
 #include <openssl/sha.h>
 #include "src/crypto/aes_util.h"
 #include "src/crypto/bf_util.h"
+#include "src/crypto/dh_util.h"
 
 #include "common.h"
 #include "dl.h"
