@@ -789,6 +789,26 @@ void handle_DH1080_init(const char* nick, const char* uhost, const char* from, s
   return;
 }
 
+void handle_DH1080_finish(const char* nick, const char* uhost, const char* from, struct userrec* u, const bd::String theirPublicKeyB64) {
+  if (!FishKeys.contains(nick)) {
+    putlog(LOG_MSGS, "*", "[FiSH] Unexpected DH1080_FINISH from (%s!%s) - ignoring", nick, uhost);
+    return;
+  }
+
+  fish_data_t* fishData = FishKeys[nick];
+  bd::String sharedKey;
+
+  if (!DH1080_comp(fishData->myPrivateKey, theirPublicKeyB64, sharedKey)) {
+    sdprintf("Error computing DH1080 for %s: %s", nick, sharedKey.c_str());
+    return;
+  }
+
+  putlog(LOG_MSGS, "*", "[FiSH] Key successfully set for (%s!%s)", nick, uhost);
+  fishData->sharedKey = sharedKey;
+  sdprintf("Set key for %s: %s", nick, sharedKey.c_str());
+  return;
+}
+
 /* Got a private notice.
  */
 static int gotnotice(char *from, char *msg)
@@ -875,6 +895,13 @@ static int gotnotice(char *from, char *msg)
             theirPublicKeyB64.resize(180, 0);
           }
           handle_DH1080_init(nick, uhost, from, u, theirPublicKeyB64);
+        } else if (!strncmp(msg, "DH1080_FINISH ", 14)) {
+          bd::String theirPublicKeyB64(msg + 14);
+          // Some FiSH implementations improperly encode their NULL terminator (A) on the end, just trim it off.
+          if (theirPublicKeyB64(-1, 1) == 'A' && theirPublicKeyB64.length() == 181) {
+            theirPublicKeyB64.resize(180, 0);
+          }
+          handle_DH1080_finish(nick, uhost, from, u, theirPublicKeyB64);
         } else {
           putlog(LOG_MSGS, "*", "-%s (%s)- %s", nick, uhost, msg);
         }
