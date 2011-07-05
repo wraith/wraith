@@ -61,6 +61,8 @@
 
 #include <stdarg.h>
 
+#include <math.h>
+
 #define PRIO_DEOP 1
 #define PRIO_KICK 2
 
@@ -112,39 +114,57 @@ voice_ok(memberlist *m, struct chanset_t *chan)
 #include "cmdsirc.c"
 #include "msgcmds.c"
 
-#ifdef unfinished
-static void
+static int
 detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
 {
+  if (!chan || !msg ||
+      !(chan->capslimit && chan->colorlimit)) //sanity check
+    return 0;
+
   struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
   struct userrec *u = m->user ? m->user : get_user_by_host(m->userhost);
-  int i = 0;
-
-  //size_t tot = strlen(msg);
-
   get_user_flagrec(u, &fr, chan->dname, chan);
 
-  for (; *msg; ++msg) {
-    if (egg_isupper(*msg))
-      i++;
-  }
+  if (glob_bot(fr) ||
+      (m && chan->flood_exempt_mode == CHAN_FLAG_OP && chan_hasop(m)) ||
+      (m && chan->flood_exempt_mode == CHAN_FLAG_VOICE && (chan_hasvoice(m) || chan_hasop(m))))
+    return 0;
 
-/*  if ((chan->capslimit)) { */
-  while (((msg) && *msg)) {
+  int tot = (int)strlen(msg);
+  int caps_count = 0;
+  int color_count = 0;
+  int hit_check = 0;
+  int hit_count = 0;
+
+  if (tot >= 30) hit_check = tot/5; //check in-between for hits to save waste of cpu
+
+  while (msg && *msg) {
     if (egg_isupper(*msg))
-      i++;
+      caps_count++;
+    else if (*msg == 3)
+      color_count++;
+
+    if (hit_check && !(hit_count%hit_check)) {
+      if (chan->capslimit && ((((float)caps_count)/((float)tot))*100 >= chan->capslimit)) break;
+      else if (chan->colorlimit && color_count >= chan->colorlimit) break;
+      hit_count++;
+    }
     msg++;
   }
-
-/*
-  if (chan->capslimit && ((i / tot) >= chan->capslimit)) {
-dprintf(DP_MODE, "PRIVMSG %s :flood stats for %s: %d/%d are CAP, percentage: %d\n", chan->name, nick, i, tot, (i/tot)*100);
-  if ((((i / tot) * 100) >= 50)) {
-dprintf(DP_HELP, "PRIVMSG %s :cap flood.\n", chan->dname);
+  if (chan->capslimit && caps_count) {
+    int cap_p = (((float)caps_count)/((float)tot))*100;
+    if (cap_p >= chan->capslimit) {
+      dprintf(DP_SERVER, "KICK %s %s :(caps-flood) %s\n", chan->name, m->nick, response(RES_FLOOD));
+      return 0;
+    }
   }
-*/
+  else if (chan->colorlimit && color_count)
+    if (color_count >= chan->colorlimit) {
+      dprintf(DP_SERVER, "KICK %s %s :(color-flood) %s\n", chan->name, m->nick, response(RES_FLOOD));
+      return 0;
+    }
+  return 0;
 }
-#endif
 
 void unlock_chan(struct chanset_t *chan)
 {
