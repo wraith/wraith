@@ -139,7 +139,7 @@ static void write_debug(bool fatal = 1)
     FILE *f = fopen(btfile, "w");
 
     if (f) {
-      strlcpy(std_in, "bt 100\nbt 100 full\ndetach\nquit\n", sizeof(stdin));
+      strlcpy(std_in, "bt 100\nbt 100 full\ndetach\nquit\n", sizeof(std_in));
       //simple_snprintf(stdin, sizeof(stdin), "detach\n");
       //simple_snprintf(stdin, sizeof(stdin), "q\n");
 
