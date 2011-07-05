@@ -54,6 +54,9 @@
 #include <sys/types.h>
 #include <pwd.h>
 #include <signal.h>
+#ifdef HAVE_SYS_PRCTL_H
+#include <sys/prctl.h>
+#endif
 #ifdef HAVE_SYS_PTRACE_H
 # include <sys/ptrace.h>
 #endif /* HAVE_SYS_PTRACE_H */
@@ -389,6 +392,12 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool
   if (x) {		/* Parent: wait for the child to complete */
     int st = 0;
     size_t fs = 0;
+
+#ifdef PR_SET_PTRACER
+    // Allow the child to debug the parent on Ubuntu
+    // https://wiki.ubuntu.com/SecurityTeam/Roadmap/KernelHardening#ptrace
+    prctl(PR_SET_PTRACER, x, 0, 0, 0);
+#endif
 
     waitpid(x, &st, 0);
     /* child is now complete, read the files into buffers */
