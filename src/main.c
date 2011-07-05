@@ -694,6 +694,7 @@ int main(int argc, char **argv)
   if (load_libcrypto()) {
     fatal("Unable to load libcrypto.", 0);
   }
+  DH1080_init();
 
   /* Initialize variables and stuff */
   timer_update_now(&egg_timeval_now);

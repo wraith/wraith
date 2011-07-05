@@ -1191,6 +1191,9 @@ See also: console, invite
    Jumping servers ALWAYS makes the bot lose ops! be careful!
  
 See also: botjump, servers, botserver
+:leaf:keyx
+### $bkeyx$b <nick>
+    Initiaite DH1080 key-exchange with nick for FiSH protocol.
 :leaf:kick
 ###  $bkick$b [channel|*] <nickname> [reason]
    Will kick a user off your current console channel (or specified

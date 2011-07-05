@@ -51,8 +51,8 @@ bd::String egg_bf_encrypt(bd::String in, const bd::String& key)
   /* No key, no encryption */
   if (!key.length()) return in;
 
-  bd::String out(size_t(in.length() * 1.5));
   size_t datalen = in.length();
+  bd::String out(static_cast<size_t>(datalen * 1.5));
   if (datalen % 8 != 0) {
     datalen += 8 - (datalen % 8);
     in.resize(datalen, 0);
@@ -94,7 +94,7 @@ bd::String egg_bf_decrypt(bd::String in, const bd::String& key)
   // Skip over '+OK '
   if (in(0, 4) == "+OK ")
     in += static_cast<size_t>(4);
-  bd::String out(size_t(in.length() * .9));
+  bd::String out(static_cast<size_t>(in.length() * .9));
   // Too small to process
   if (in.size() < 12) return out;
 

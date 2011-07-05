@@ -407,7 +407,7 @@ static int ctcp_FINGER(char *nick, char *uhost, struct userrec *u, char *object,
   bd::String msg;
   msg = bd::String::printf("\001%s %s (%s) Idle %d second%s\001", keyword, "",
                    botuserhost, (int) idletime, idletime == 1 ? "" : "s");
-  notice(nick, msg.c_str(), DP_HELP);
+  notice(nick, msg, DP_HELP);
   return BIND_RET_BREAK;
 }
 
@@ -418,7 +418,7 @@ static int ctcp_ECHO(char *nick, char *uhost, struct userrec *u, char *object, c
   strlcpy(reply, text, sizeof(reply));
   bd::String msg;
   msg = bd::String::printf("\001%s %s\001", keyword, reply);
-  notice(nick, msg.c_str(), DP_HELP);
+  notice(nick, msg, DP_HELP);
   return BIND_RET_BREAK;
 }
 static int ctcp_PING(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
@@ -426,7 +426,7 @@ static int ctcp_PING(char *nick, char *uhost, struct userrec *u, char *object, c
   if (strlen(text) <= 80) {       /* bitchx ignores > 80 */
     bd::String msg;
     msg = bd::String::printf("\001%s %s\001", keyword, text);
-    notice(nick, msg.c_str(), DP_HELP);
+    notice(nick, msg, DP_HELP);
   }
   return BIND_RET_BREAK;
 }
@@ -476,11 +476,11 @@ static int ctcp_VERSION(char *nick, char *uhost, struct userrec *u, char *object
 
   bd::String msg;
   msg = bd::String::printf("\001%s %s%s\001", keyword, ctcpversion, s);
-  notice(nick, msg.c_str(), queue);
+  notice(nick, msg, queue);
 
   if (ctcpversion2[0]) {
     msg = bd::String::printf("\001%s %s\001", keyword, ctcpversion2);
-    notice(nick, msg.c_str(), DP_HELP);
+    notice(nick, msg, DP_HELP);
   }
   return BIND_RET_BREAK;
 }
@@ -490,7 +490,7 @@ static int ctcp_WHOAMI(char *nick, char *uhost, struct userrec *u, char *object,
   if (cloak_script > 0 && cloak_script < 9) {
     bd::String msg;
     msg = bd::String::printf("\002BitchX\002: Access Denied");
-    notice(nick, msg.c_str(), DP_HELP);
+    notice(nick, msg, DP_HELP);
   }
   return BIND_RET_BREAK;
 }
@@ -506,7 +506,7 @@ static int ctcp_OP(char *nick, char *uhost, struct userrec *u, char *object, cha
       *p = 0;
     bd::String msg;
     msg = bd::String::printf("\002BitchX\002: I'm not on %s or I'm not opped", chan);
-    notice(nick, msg.c_str(), DP_HELP);
+    notice(nick, msg, DP_HELP);
   }
   return BIND_RET_BREAK;
 }
@@ -526,14 +526,14 @@ static int ctcp_INVITE_UNBAN(char *nick, char *uhost, struct userrec *u, char *o
       if (chan->ircnet_status & CHAN_ACTIVE) {
         if (!strcasecmp(chan->name, chname)) {
           msg = bd::String::printf("\002BitchX\002: Access Denied");
-          notice(nick, msg.c_str(), DP_HELP);
+          notice(nick, msg, DP_HELP);
           return BIND_RET_LOG;
         }
       }
       chan = chan->next;
     }
     msg = bd::String::printf("\002BitchX\002: I'm not on that channel");
-    notice(nick, msg.c_str(), DP_HELP);
+    notice(nick, msg, DP_HELP);
   }
   return BIND_RET_BREAK;
 }
@@ -548,7 +548,7 @@ static int ctcp_USERINFO(char *nick, char *uhost, struct userrec *u, char *objec
   }
   bd::String msg;
   msg = bd::String::printf("\001%s %s\001", keyword, ctcpuserinfo);
-  notice(nick, msg.c_str(), DP_HELP);
+  notice(nick, msg, DP_HELP);
   return BIND_RET_BREAK;
 }
 
@@ -610,11 +610,11 @@ static int ctcp_CLIENTINFO(char *nick, char *uhost, struct userrec *u, char *obj
     strlcpy(buf, "UPTIME my uptime", sizeof(buf));
   else {
     msg = bd::String::printf("\001ERRMSG %s is not a valid function\001", text);
-    notice(nick, msg.c_str(), DP_HELP);
+    notice(nick, msg, DP_HELP);
     return BIND_RET_LOG;
   }
   msg = bd::String::printf("\001%s %s\001", keyword, buf);
-  notice(nick, msg.c_str(), DP_HELP);
+  notice(nick, msg, DP_HELP);
   return BIND_RET_BREAK;
 }
 
@@ -625,7 +625,7 @@ static int ctcp_TIME(char *nick, char *uhost, struct userrec *u, char *object, c
   strlcpy(tms, ctime(&now), sizeof(tms));
   bd::String msg;
   msg = bd::String::printf("\001%s %s\001", keyword, tms);
-  notice(nick, msg.c_str(), DP_HELP);
+  notice(nick, msg, DP_HELP);
   return BIND_RET_BREAK;
 }
 
@@ -659,7 +659,7 @@ static int ctcp_CHAT(char *nick, char *uhost, struct userrec *u, char *object, c
        * -poptix 5/1/1997 */
       bd::String msg;
       msg = bd::String::printf("\001DCC CHAT chat %lu %u\001", iptolong(getmyip()), dcc[ix].port);
-      privmsg(nick, msg.c_str(), DP_SERVER);
+      privmsg(nick, msg, DP_SERVER);
     }
     return BIND_RET_BREAK;
 }

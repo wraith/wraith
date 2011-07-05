@@ -752,7 +752,7 @@ static void dcc_get_pending(int idx, char *buf, int len)
   if (dcc[idx].sock == -1) {
     bd::String msg;
     msg = bd::String::printf("Bad connection (%s)", strerror(errno));
-    notice(dcc[idx].nick, msg.c_str(), DP_HELP);
+    notice(dcc[idx].nick, msg, DP_HELP);
     putlog(LOG_FILES, "*", "DCC bad connection: GET %s (%s!%s)",
 	   dcc[idx].u.xfer->origname, dcc[idx].nick, dcc[idx].host);
     fclose(dcc[idx].u.xfer->f);
