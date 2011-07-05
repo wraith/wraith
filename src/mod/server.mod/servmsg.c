@@ -888,11 +888,14 @@ static int gotnotice(char *from, char *msg)
         detect_flood(nick, uhost, from, FLOOD_NOTICE);
         u = get_user_by_host(from);
 
-        if (!strncmp(msg, "DH1080_INIT ", 12)) {
-          bd::String theirPublicKeyB64(msg + 12);
+        bd::String smsg(msg);
+        bd::String which = newsplit(smsg);
+
+        if (which == "DH1080_INIT") {
+          bd::String theirPublicKeyB64(newsplit(smsg));
           handle_DH1080_init(nick, uhost, from, u, theirPublicKeyB64);
-        } else if (!strncmp(msg, "DH1080_FINISH ", 14)) {
-          bd::String theirPublicKeyB64(msg + 14);
+        } else if (which == "DH1080_FINISH") {
+          bd::String theirPublicKeyB64(newsplit(smsg));
           handle_DH1080_finish(nick, uhost, from, u, theirPublicKeyB64);
         } else {
           putlog(LOG_MSGS, "*", "-%s (%s)- %s", nick, uhost, msg);
