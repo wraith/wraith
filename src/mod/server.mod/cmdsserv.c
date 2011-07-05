@@ -113,6 +113,11 @@ static void cmd_keyx(int idx, char *par) {
     return;
   }
 
+  if (strchr(CHANMETA, par[0])) {
+    dprintf(idx, "Error: Cannot key-exchange with a channel.\n");
+    return;
+  }
+
   if (!server_online) {
     dprintf(idx, "Error: Not online.\n");
     return;
