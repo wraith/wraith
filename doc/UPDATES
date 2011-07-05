@@ -3,7 +3,6 @@ next
   * When 'mdop' protection is on, re-op all previously opped clients automatically.
   * When 'mop' protection is on, deop all previously regular clients automatically.
   * Properly honor exemptions when kicking matched RBL clients
-  * Suicide will now remove all bots related to the binary being removed (fixes #435)
   * FiSH message support added.
   * FiSH support for DH1080 key-exchange. 'keyx' command added to start from bot, and responds to key-exchanges.
 
@@ -29,6 +28,7 @@ next
   * libcrypto (openssl) is now loaded at startup and is required.
   * Added TCL support. This is *only* a .tcl command currently, no scripts are loadable yet.
   * Fix blowfish not working correctly on 64bit
+  * Suicide will now remove all bots related to the binary being removed (fixes #435)
 
 1.3.1 - http://wraith.botpack.net/milestone/1.3.1
   * Fix crash related to slowpart
