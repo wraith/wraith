@@ -890,17 +890,9 @@ static int gotnotice(char *from, char *msg)
 
         if (!strncmp(msg, "DH1080_INIT ", 12)) {
           bd::String theirPublicKeyB64(msg + 12);
-          // Some FiSH implementations improperly encode their NULL terminator (A) on the end, just trim it off.
-          if (theirPublicKeyB64(-1, 1) == 'A' && theirPublicKeyB64.length() == 181) {
-            theirPublicKeyB64.resize(180, 0);
-          }
           handle_DH1080_init(nick, uhost, from, u, theirPublicKeyB64);
         } else if (!strncmp(msg, "DH1080_FINISH ", 14)) {
           bd::String theirPublicKeyB64(msg + 14);
-          // Some FiSH implementations improperly encode their NULL terminator (A) on the end, just trim it off.
-          if (theirPublicKeyB64(-1, 1) == 'A' && theirPublicKeyB64.length() == 181) {
-            theirPublicKeyB64.resize(180, 0);
-          }
           handle_DH1080_finish(nick, uhost, from, u, theirPublicKeyB64);
         } else {
           putlog(LOG_MSGS, "*", "-%s (%s)- %s", nick, uhost, msg);
