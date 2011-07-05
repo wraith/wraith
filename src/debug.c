@@ -143,7 +143,7 @@ static void write_debug(bool fatal = 1)
       //simple_snprintf(stdin, sizeof(stdin), "detach\n");
       //simple_snprintf(stdin, sizeof(stdin), "q\n");
 
-      simple_snprintf(gdb, sizeof(gdb), "gdb %s %d", binname, getpid());
+      simple_snprintf(gdb, sizeof(gdb), "gdb --pid=%d %s", getpid(), binname);
       shell_exec(gdb, std_in, &out, NULL);
       fprintf(f, "%s\n", out);
       fclose(f);
