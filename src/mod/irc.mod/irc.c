@@ -117,8 +117,9 @@ voice_ok(memberlist *m, struct chanset_t *chan)
 static int
 detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
 {
-  if (!chan || !msg ||
-      !(chan->capslimit && chan->colorlimit)) //sanity check
+  if (!chan || !msg
+      || !(chan->capslimit && chan->colorlimit)
+      || chan_sentkick(m)) //sanity check
     return 0;
 
   struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
@@ -154,13 +155,15 @@ detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
   if (chan->capslimit && caps_count) {
     int cap_p = (((float)caps_count)/((float)tot))*100;
     if (cap_p >= chan->capslimit) {
-      dprintf(DP_SERVER, "KICK %s %s :(caps-flood) %s\n", chan->name, m->nick, response(RES_FLOOD));
+      dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, response(RES_FLOOD));
+      m->flags |= SENTKICK;
       return 0;
     }
   }
   else if (chan->colorlimit && color_count)
     if (color_count >= chan->colorlimit) {
-      dprintf(DP_SERVER, "KICK %s %s :(color-flood) %s\n", chan->name, m->nick, response(RES_FLOOD));
+      dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, response(RES_FLOOD));
+      m->flags |= SENTKICK;
       return 0;
     }
   return 0;
