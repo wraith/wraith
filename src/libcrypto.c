@@ -69,6 +69,7 @@ static int load_symbols(void *handle) {
   DLSYM_GLOBAL(handle, BN_bn2bin);
   DLSYM_GLOBAL(handle, BN_clear_free);
   DLSYM_GLOBAL(handle, BN_dec2bn);
+  DLSYM_GLOBAL(handle, BN_dup);
   DLSYM_GLOBAL(handle, BN_hex2bn);
   DLSYM_GLOBAL(handle, BN_num_bits);
 

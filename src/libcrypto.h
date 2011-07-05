@@ -46,11 +46,12 @@ typedef int (*SHA256_Init_t)(SHA256_CTX*);
 typedef int (*SHA256_Update_t)(SHA256_CTX*, const void*, size_t);
 
 typedef BIGNUM* (*BN_bin2bn_t)(const unsigned char*, int, BIGNUM*);
+typedef BIGNUM* (*BN_dup_t)(const BIGNUM*);
 typedef int (*BN_bn2bin_t)(BIGNUM*, unsigned char*);
-typedef void (*BN_clear_free_t)(BIGNUM*);
 typedef int (*BN_dec2bn_t)(BIGNUM**, const char*);
 typedef int (*BN_hex2bn_t)(BIGNUM**, const char*);
 typedef int (*BN_num_bits_t)(const BIGNUM*);
+typedef void (*BN_clear_free_t)(BIGNUM*);
 
 typedef int (*DH_compute_key_t)(unsigned char*, const BIGNUM*, DH*);
 typedef void (*DH_free_t)(DH*);
