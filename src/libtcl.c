@@ -32,6 +32,7 @@
 #include <bdlib/src/Array.h>
 
 #include "libtcl.h"
+#include ".defs/libtcl_defs.c"
 
 #ifdef HAVE_LIBTCL
 Tcl_Interp *global_interp = NULL;
@@ -50,7 +51,7 @@ static int load_symbols(void *handle) {
   DLSYM_GLOBAL(handle, Tcl_GetStringResult);
   DLSYM_GLOBAL(handle, Tcl_DeleteInterp);
   DLSYM_GLOBAL(handle, Tcl_CreateCommand);
-  DLSYM_GLOBAL(handle, Tcl_AppendResult);
+//  DLSYM_GLOBAL(handle, Tcl_AppendResult);
   DLSYM_GLOBAL(handle, Tcl_CreateInterp);
   DLSYM_GLOBAL(handle, Tcl_FindExecutable);
   DLSYM_GLOBAL(handle, Tcl_Init);
