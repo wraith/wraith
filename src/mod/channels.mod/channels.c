@@ -80,7 +80,7 @@ static int 			killed_bots = 0;
 
 #include "channels.h"
 #include "cmdschan.c"
-#include "tclchan.c"
+#include "chanmisc.c"
 #include "userchan.c"
 
 /* This will close channels if the HUB:leaf count is skewed from config setting */
