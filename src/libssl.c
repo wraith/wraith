@@ -61,6 +61,7 @@ static int load_symbols(void *handle) {
   DLSYM_GLOBAL(handle, SSL_shutdown);
   DLSYM_GLOBAL(handle, SSLv23_client_method);
   DLSYM_GLOBAL(handle, SSL_write);
+  DLSYM_GLOBAL(handle, SSL_CTX_ctrl);
 
   return 0;
 }
@@ -99,6 +100,9 @@ int load_ssl() {
     sdprintf("SSL_CTX_new() failed");
     return 1;
   }
+
+  // Disable insecure SSLv2
+  SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_SSLv2);
 
   if (seed_PRNG()) {
     sdprintf("Wasn't able to properly seed the PRNG!");

@@ -32,6 +32,7 @@ typedef void (*SSL_load_error_strings_t)(void);
 typedef int (*SSL_library_init_t)(void);
 typedef void (*SSL_CTX_free_t)(SSL_CTX*);
 typedef SSL_CTX* (*SSL_CTX_new_t)(const SSL_METHOD*);
+typedef long (*SSL_CTX_ctrl_t)(SSL_CTX*, int, long, void*);
 
 int load_ssl();
 int unload_ssl();
