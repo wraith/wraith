@@ -822,7 +822,7 @@ int main(int argc, char **argv)
   if (!conf.bot->hub && conf.bot->localhub)
     sdprintf(STR("I am localhub (%s)"), conf.bot->nick);
 
-  if (conf.autocron && (conf.bot->hub || conf.bot->localhub))
+  if (!sdebug && (conf.autocron && (conf.bot->hub || conf.bot->localhub)))
     check_crontab();
 
   /* Move into background? */
