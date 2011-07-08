@@ -647,10 +647,9 @@ int net_switch_to_ssl(int sock) {
   }
 
   SSL_set_fd(socklist[i].ssl, socklist[i].sock);
-  int err = SSL_connect(socklist[i].ssl);
-  int timeout = 0;
+  int err = 0, timeout = 0;
 
-  while (err <= 0) {
+  while ((err = SSL_connect(socklist[i].ssl)) <= 0) {
     if (timeout++ > 500) {
       err = 0;
       break;
@@ -658,19 +657,16 @@ int net_switch_to_ssl(int sock) {
     int errs = SSL_get_error(socklist[i].ssl,err);
     if ((errs != SSL_ERROR_WANT_READ) && (errs != SSL_ERROR_WANT_WRITE) && (errs != SSL_ERROR_WANT_X509_LOOKUP)) {
       putlog(LOG_DEBUG, "*", "SSL_connect() = %d, %s", err, (char *)ERR_error_string(ERR_get_error(), NULL));
-      SSL_shutdown(socklist[i].ssl);
-      SSL_free(socklist[i].ssl);
-      socklist[i].ssl = NULL;
-      return 0;
+      goto error;
     }
     usleep(1000);
-    err = SSL_connect(socklist[i].ssl);
   }
 
   if (err == 1) {
     debug0("SSL_connect() success");
     return 1;
   }
+error:
   debug0("Error while SSL_connect()");
   SSL_shutdown(socklist[i].ssl);
   SSL_free(socklist[i].ssl);
