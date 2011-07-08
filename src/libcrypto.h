@@ -47,7 +47,7 @@ typedef int (*SHA256_Update_t)(SHA256_CTX*, const void*, size_t);
 
 typedef BIGNUM* (*BN_bin2bn_t)(const unsigned char*, int, BIGNUM*);
 typedef BIGNUM* (*BN_dup_t)(const BIGNUM*);
-typedef int (*BN_bn2bin_t)(BIGNUM*, unsigned char*);
+typedef int (*BN_bn2bin_t)(const BIGNUM*, unsigned char*);
 typedef int (*BN_dec2bn_t)(BIGNUM**, const char*);
 typedef int (*BN_hex2bn_t)(BIGNUM**, const char*);
 typedef int (*BN_num_bits_t)(const BIGNUM*);
@@ -59,8 +59,6 @@ typedef int (*DH_generate_key_t)(DH*);
 typedef DH* (*DH_new_t)(void);
 typedef int (*DH_size_t)(const DH*);
 
-
-#include ".defs/libcrypto_defs.h"
 
 int load_libcrypto();
 int unload_libcrypto();
