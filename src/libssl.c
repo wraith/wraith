@@ -106,6 +106,8 @@ int load_ssl() {
 
   if (seed_PRNG()) {
     sdprintf("Wasn't able to properly seed the PRNG!");
+    SSL_CTX_free(ssl_ctx);
+    ssl_ctx = NULL;
     return 1;
   }
 #endif
