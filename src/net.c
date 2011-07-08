@@ -630,11 +630,7 @@ int net_switch_to_ssl(int sock) {
 
   debug0("net_switch_to_ssl()");
   sleep(3); // Give some time to let the connect() go through.
-  for (i = 0; i < MAXSOCKS; ++i) {
-    if (socklist[i].sock == sock && !(socklist[i].flags & SOCK_UNUSED)) {
-      break;
-    }
-  }
+  i = findanysnum(sock);
   if (i == MAXSOCKS) {
     debug0("Error while swithing to SSL - sock not found in list");
     return 0;
