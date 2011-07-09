@@ -14,7 +14,7 @@
 #include "dl.h"
 #include <bdlib/src/String.h>
 
-typedef void (*AES_cbc_encrypt_t)(const unsigned char*, unsigned char*, const unsigned long, const AES_KEY*, unsigned char*, const int);
+typedef void (*AES_cbc_encrypt_t)(const unsigned char*, unsigned char*, const size_t, const AES_KEY*, unsigned char*, const int);
 typedef void (*AES_decrypt_t)(const unsigned char*, unsigned char*, const AES_KEY*);
 typedef void (*AES_encrypt_t)(const unsigned char*, unsigned char*, const AES_KEY*);
 typedef int (*AES_set_decrypt_key_t)(const unsigned char*, const int, AES_KEY*);
