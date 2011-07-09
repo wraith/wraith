@@ -4,7 +4,7 @@ echo "Generating lib symbols"
 
 mkdir -p src/.defs > /dev/null 2>&1
 
-for file in $(git grep -l DLSYM_GLOBAL|grep "\.c$"); do
+for file in $(grep -l DLSYM_GLOBAL src/*.c|grep -v "src/_"); do
   defsFile_wrappers="src/.defs/$(basename $file .c)_defs.c"
   defsFile_pre="src/.defs/$(basename $file .c)_pre.h"
   defsFile_post="src/.defs/$(basename $file .c)_post.h"
