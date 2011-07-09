@@ -36,4 +36,6 @@ $returntype $name ($params_full) {
   return DLSYM_VAR($name)($param_names);
 }
 EOF
+
+  echo "$returntype $name ($params_full);" >&2
 done

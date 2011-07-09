@@ -5,7 +5,12 @@
 #include "dl.h"
 #include <bdlib/src/String.h>
 #ifdef HAVE_LIBTCL
+
+#include ".defs/libtcl_pre.h"
+
 #include <tcl.h>
+
+#include ".defs/libtcl_post.h"
 
 typedef int (*Tcl_Eval_t)(Tcl_Interp*, const char*);
 typedef Tcl_Command (*Tcl_CreateCommand_t)(Tcl_Interp*, const char*, Tcl_CmdProc*, ClientData, Tcl_CmdDeleteProc*);

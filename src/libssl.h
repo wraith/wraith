@@ -5,6 +5,8 @@
 #include "dl.h"
 #include <bdlib/src/String.h>
 
+#include ".defs/libssl_pre.h"
+
 #ifdef EGG_SSL_EXT
 # ifndef EGG_SSL_INCS
 #  include <openssl/ssl.h>
@@ -13,6 +15,8 @@
 #  define EGG_SSL_INCS 1
 # endif
 #endif
+
+#include ".defs/libssl_post.h"
 
 typedef int (*SSL_get_error_t)(const SSL*, int);
 typedef void (*SSL_free_t)(SSL*);

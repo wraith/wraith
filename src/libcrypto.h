@@ -1,11 +1,16 @@
 #ifndef _LIBCRYPTO_H
 #define _LIBCRYPTO_H
 
+#include ".defs/libcrypto_pre.h"
+
 #include <openssl/crypto.h>
 #include <openssl/aes.h>
 #include <openssl/blowfish.h>
 #include <openssl/md5.h>
 #include <openssl/sha.h>
+
+#include ".defs/libcrypto_post.h"
+
 #include "src/crypto/aes_util.h"
 #include "src/crypto/bf_util.h"
 #include "src/crypto/dh_util.h"
