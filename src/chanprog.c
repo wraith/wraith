@@ -968,10 +968,14 @@ void privmsg(bd::String target, bd::String msg, int idx) {
   struct chanset_t* chan = NULL;
   if (have_cprivmsg && !strchr(CHANMETA, target[0]))
     chan = find_common_opped_chan(target);
+  bool cleartextPrefix = (msg(0, 3) == "+p ");
 
   // Encrypt with FiSH?
-  if (!strchr(CHANMETA, target[0]) && FishKeys.contains(target) && FishKeys[target]->sharedKey.length()) {
+  if (!strchr(CHANMETA, target[0]) && !cleartextPrefix && FishKeys.contains(target) && FishKeys[target]->sharedKey.length()) {
     msg = "+OK " + egg_bf_encrypt(msg, FishKeys[target]->sharedKey);
+  }
+  if (cleartextPrefix) {
+    msg += static_cast<size_t>(3);
   }
   if (chan)
     dprintf(idx, "CPRIVMSG %s %s :%s\n", target.c_str(), chan->name, msg.c_str());

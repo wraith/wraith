@@ -658,7 +658,7 @@ static int ctcp_CHAT(char *nick, char *uhost, struct userrec *u, char *object, c
        * CTCP replies are NOTICE's this has to be a PRIVMSG
        * -poptix 5/1/1997 */
       bd::String msg;
-      msg = bd::String::printf("\001DCC CHAT chat %lu %u\001", iptolong(getmyip()), dcc[ix].port);
+      msg = bd::String::printf("+p \001DCC CHAT chat %lu %u\001", iptolong(getmyip()), dcc[ix].port);
       privmsg(nick, msg, DP_SERVER);
     }
     return BIND_RET_BREAK;
