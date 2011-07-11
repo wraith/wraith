@@ -291,7 +291,7 @@ void link_challenge_to(int idx, char *buf) {
     }
     free(tmpp);
 
-    sdprintf(STR("Choosing '%s' (%d/%d) for link"), enclink[i].name, enclink[i].type, i);
+    sdprintf(STR("Choosing '%s' (%d/%d) for link to %s"), enclink[i].name, enclink[i].type, i, dcc[idx].nick);
     link_hash(idx, rand);
     dprintf(-dcc[idx].sock, STR("neg %s %d %s\n"), dcc[idx].shahash, enclink[i].type, dcc[idx].nick);
     socklist[snum].enclink = i;
