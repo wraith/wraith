@@ -67,7 +67,7 @@ static int load_symbols(void *handle) {
 }
 
 
-int load_ssl() {
+int load_libssl() {
   if (ssl_ctx) {
     return 0;
   }
@@ -115,7 +115,7 @@ int load_ssl() {
   return 0;
 }
 
-int unload_ssl() {
+int unload_libssl() {
   if (libssl_handle) {
 #ifdef EGG_SSL_EXT
     /* cleanup mess when quiting */

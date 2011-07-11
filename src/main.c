@@ -198,7 +198,7 @@ void fatal(const char *s, int recoverable)
 
 #ifdef EGG_SSL_EXT
   if (ssl_use) {
-    unload_ssl();
+    unload_libssl();
   }
 #endif
 
