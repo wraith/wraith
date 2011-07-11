@@ -138,6 +138,40 @@ static void cmd_keyx(int idx, char *par) {
   return;
 }
 
+static void cmd_setkey(int idx, char *par) {
+  putlog(LOG_CMDS, "*", "#%s# setkey %s", dcc[idx].nick, par);
+
+  if (!par[0]) {
+    dprintf(idx, "Usage: setkey <nick|channel> [key]\n");
+    return;
+  }
+
+  char *target = newsplit(&par);
+  char *key = newsplit(&par);
+  bool have_key = FishKeys.contains(target);
+  fish_data_t* fishData = NULL;
+
+  if (!key[0]) {
+    // Clear the key
+    if (have_key) {
+      fishData = FishKeys[target];
+      FishKeys.remove(target);
+      delete fishData;
+      dprintf(idx, "Key cleared for '%s'\n", target);
+    } else {
+      dprintf(idx, "No key found for '%s'\n", target);
+    }
+  } else {
+    // Set the key
+    fishData = new fish_data_t;
+    fishData->sharedKey = key;
+    fishData->timestamp = now;
+    FishKeys[target] = fishData;
+    dprintf(idx, "Set key for '%s' to: %s", target, key);
+  }
+  return;
+}
+
 static void cmd_clearqueue(int idx, char *par)
 {
   int msgs;
@@ -202,6 +236,7 @@ static cmd_t C_dcc_serv[] =
   {"jump",		"m",	(Function) cmd_jump,		NULL, LEAF},
   {"keyx",		"o",	(Function) cmd_keyx,		NULL, LEAF},
   {"servers",		"m",	(Function) cmd_servers,		NULL, LEAF},
+  {"setkey",		"m",	(Function) cmd_setkey,		NULL, LEAF},
   {"umode",		"m",	(Function) cmd_umode,		NULL, LEAF},
   {NULL,		NULL,	NULL,				NULL, 0}
 };

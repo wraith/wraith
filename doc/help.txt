@@ -1194,6 +1194,8 @@ See also: botjump, servers, botserver
 :leaf:keyx
 ### $bkeyx$b <nick>
     Initiaite DH1080 key-exchange with nick for FiSH protocol.
+ 
+%{+m}See also: setkey%{-}
 :leaf:kick
 ###  $bkick$b [channel|*] <nickname> [reason]
    Will kick a user off your current console channel (or specified
@@ -1726,6 +1728,13 @@ See also: reload, backup
     '%dbotset wraith nick -'
  
 See also: botset
+:leaf:setkey
+### $bsetkey$b <nick|channel> [key]
+ 
+    Sets the FiSH key for the given target.
+    Use no key to clear the currently set key.
+ 
+See also: keyx
 ::sha1
 ###  $bsha1$b <string>
    Returns the SHA1 hash of the specified string.
