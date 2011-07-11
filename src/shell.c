@@ -292,7 +292,7 @@ void check_trace(int start)
     signal(SIGINT, got_sigtrap);
     traced = 1;
     raise(SIGINT);
-    signal(SIGINT, SIG_DFL);
+    signal(SIGINT, got_int);
   }
 
   if (traced) {

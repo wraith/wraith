@@ -37,4 +37,5 @@ void setlimits();
 void sdprintf (const char *, ...) __attribute__((format(printf, 1, 2)));
 void init_signals();
 void init_debug();
+void got_int(int z);
 #endif /* !_DEBUG_H */
