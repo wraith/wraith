@@ -1,6 +1,10 @@
 #ifndef _LIBSSL_H
 #define _LIBSSL_H
 
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
+
 #include "common.h"
 #include "dl.h"
 #include <bdlib/src/String.h>
@@ -10,8 +14,6 @@
 #ifdef EGG_SSL_EXT
 # ifndef EGG_SSL_INCS
 #  include <openssl/ssl.h>
-#  include <openssl/err.h>
-#  include <openssl/rand.h>
 #  define EGG_SSL_INCS 1
 # endif
 #endif
@@ -32,14 +34,9 @@ typedef void (*SSL_load_error_strings_t)(void);
 typedef int (*SSL_library_init_t)(void);
 typedef void (*SSL_CTX_free_t)(SSL_CTX*);
 typedef SSL_CTX* (*SSL_CTX_new_t)(const SSL_METHOD*);
+typedef long (*SSL_CTX_ctrl_t)(SSL_CTX*, int, long, void*);
 
-int load_ssl();
-int unload_ssl();
-
-#ifdef EGG_SSL_EXT
-extern SSL_CTX *ssl_ctx;
-extern char *tls_rand_file;
-#endif
-extern int ssl_use;
+int load_libssl();
+int unload_libssl();
 
 #endif /* !_LIBSSL_H */

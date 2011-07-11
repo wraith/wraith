@@ -196,13 +196,8 @@ void fatal(const char *s, int recoverable)
     }
   }
 
-#ifdef EGG_SSL_EXT
-  if (ssl_use) {
-    unload_ssl();
-  }
-#endif
-
   if (!recoverable) {
+//    uninit_openssl();
 //    if (conf.bot && conf.bot->pid_file)
 //      unlink(conf.bot->pid_file);
     exit(1);
@@ -691,10 +686,10 @@ int main(int argc, char **argv)
   check_trace(1);
 #endif
 
-  if (load_libcrypto()) {
-    fatal("Unable to load libcrypto.", 0);
+  if (init_openssl()) {
+    fprintf(stderr, "Unable to initialize/find OpenSSL.\n");
+    return 1;
   }
-  DH1080_init();
 
   /* Initialize variables and stuff */
   timer_update_now(&egg_timeval_now);
