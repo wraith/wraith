@@ -81,6 +81,9 @@ static int load_symbols(void *handle) {
   DLSYM_GLOBAL(handle, DH_new);
   DLSYM_GLOBAL(handle, DH_size);
 
+  DLSYM_GLOBAL(handle, EVP_cleanup);
+  DLSYM_GLOBAL(handle, CRYPTO_cleanup_all_ex_data);
+
 
   return 0;
 }
@@ -116,6 +119,8 @@ int load_libcrypto() {
 int unload_libcrypto() {
   if (libcrypto_handle) {
     ERR_free_strings();
+    EVP_cleanup();
+    CRYPTO_cleanup_all_ex_data();
 
     // Cleanup symbol table
     for (size_t i = 0; i < my_symbols.length(); ++i) {

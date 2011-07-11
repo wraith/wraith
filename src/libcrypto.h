@@ -65,6 +65,8 @@ typedef int (*DH_generate_key_t)(DH*);
 typedef DH* (*DH_new_t)(void);
 typedef int (*DH_size_t)(const DH*);
 
+typedef void (*EVP_cleanup_t)(void);
+typedef void (*CRYPTO_cleanup_all_ex_data_t)(void);
 
 int load_libcrypto();
 int unload_libcrypto();
