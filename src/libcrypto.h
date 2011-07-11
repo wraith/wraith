@@ -1,11 +1,16 @@
 #ifndef _LIBCRYPTO_H
 #define _LIBCRYPTO_H
 
+#include ".defs/libcrypto_pre.h"
+
 #include <openssl/crypto.h>
 #include <openssl/aes.h>
 #include <openssl/blowfish.h>
 #include <openssl/md5.h>
 #include <openssl/sha.h>
+
+#include ".defs/libcrypto_post.h"
+
 #include "src/crypto/aes_util.h"
 #include "src/crypto/bf_util.h"
 #include "src/crypto/dh_util.h"
@@ -14,7 +19,7 @@
 #include "dl.h"
 #include <bdlib/src/String.h>
 
-typedef void (*AES_cbc_encrypt_t)(const unsigned char*, unsigned char*, const unsigned long, const AES_KEY*, unsigned char*, const int);
+typedef void (*AES_cbc_encrypt_t)(const unsigned char*, unsigned char*, const size_t, const AES_KEY*, unsigned char*, const int);
 typedef void (*AES_decrypt_t)(const unsigned char*, unsigned char*, const AES_KEY*);
 typedef void (*AES_encrypt_t)(const unsigned char*, unsigned char*, const AES_KEY*);
 typedef int (*AES_set_decrypt_key_t)(const unsigned char*, const int, AES_KEY*);
@@ -47,7 +52,7 @@ typedef int (*SHA256_Update_t)(SHA256_CTX*, const void*, size_t);
 
 typedef BIGNUM* (*BN_bin2bn_t)(const unsigned char*, int, BIGNUM*);
 typedef BIGNUM* (*BN_dup_t)(const BIGNUM*);
-typedef int (*BN_bn2bin_t)(BIGNUM*, unsigned char*);
+typedef int (*BN_bn2bin_t)(const BIGNUM*, unsigned char*);
 typedef int (*BN_dec2bn_t)(BIGNUM**, const char*);
 typedef int (*BN_hex2bn_t)(BIGNUM**, const char*);
 typedef int (*BN_num_bits_t)(const BIGNUM*);
@@ -59,8 +64,6 @@ typedef int (*DH_generate_key_t)(DH*);
 typedef DH* (*DH_new_t)(void);
 typedef int (*DH_size_t)(const DH*);
 
-
-#include ".defs/libcrypto_defs.h"
 
 int load_libcrypto();
 int unload_libcrypto();
