@@ -623,11 +623,6 @@ int open_telnet_raw(int sock, const char *ipIn, port_t sport, bool proxy_on, int
 int net_switch_to_ssl(int sock) {
   int i = 0;
 
-  if (load_libssl()) {
-    debug0("Error while switching to SSL - error loading library");
-    return 0;
-  }
-
   debug0("net_switch_to_ssl()");
   sleep(3); // Give some time to let the connect() go through.
   i = findanysnum(sock);

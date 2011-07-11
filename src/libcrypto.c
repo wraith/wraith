@@ -118,10 +118,6 @@ int load_libcrypto() {
 
 int unload_libcrypto() {
   if (libcrypto_handle) {
-    ERR_free_strings();
-    EVP_cleanup();
-    CRYPTO_cleanup_all_ex_data();
-
     // Cleanup symbol table
     for (size_t i = 0; i < my_symbols.length(); ++i) {
       dl_symbol_table.remove(my_symbols[i]);

@@ -1,6 +1,10 @@
 #ifndef _LIBCRYPTO_H
 #define _LIBCRYPTO_H
 
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
+
 #include ".defs/libcrypto_pre.h"
 
 #include <openssl/crypto.h>
@@ -8,6 +12,8 @@
 #include <openssl/blowfish.h>
 #include <openssl/md5.h>
 #include <openssl/sha.h>
+#include <openssl/err.h>
+#include <openssl/rand.h>
 
 #include ".defs/libcrypto_post.h"
 
