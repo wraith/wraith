@@ -290,6 +290,20 @@ got_usr1(int z)
 //  reload_bin_data();
 }
 
+void got_int(int z)
+{
+  signal(SIGINT, SIG_DFL);
+  putlog(LOG_DEBUG, "*", "GOT SIGINT -- QUITTING");
+  fatal("Received SIGINT", 0);
+  sdprintf("HERE");
+  exit(1);
+#ifdef DEBUG
+  raise(SIGINT);
+#else
+  exit(1);
+#endif /* DEBUG */
+}
+
 void init_signals() 
 {
   signal(SIGBUS, got_bus);
@@ -304,4 +318,5 @@ void init_signals()
   signal(SIGALRM, got_alarm);
   signal(SIGHUP, got_hup);
   signal(SIGUSR1, got_usr1);
+  signal(SIGINT, got_int);
 }
