@@ -148,10 +148,8 @@ static int seed_PRNG(void)
   static char rand_file[300];
   FILE *fh;
 
-#if OPENSSL_VERSION_NUMBER >= 0x00905100
   if (RAND_status())
     return 0;     /* PRNG already good seeded */
-#endif
   /* if the device '/dev/urandom' is present, OpenSSL uses it by default.
    * check if it's present, else we have to make random data ourselfs.
    */
@@ -169,17 +167,12 @@ static int seed_PRNG(void)
     return 1;
   if (!RAND_load_file(rand_file, 1024)) {
     /* no .rnd file found, create new seed */
-    unsigned int c;
-    c = time(NULL);
-    RAND_seed(&c, sizeof(c));
-    c = getpid();
-    RAND_seed(&c, sizeof(c));
+    RAND_seed(&now, sizeof(time_t));
+    RAND_seed(&conf.bot->pid, sizeof(pid_t));
     RAND_seed(stackdata, sizeof(stackdata));
   }
-#if OPENSSL_VERSION_NUMBER >= 0x00905100
   if (!RAND_status())
     return 2;   /* PRNG still badly seeded */
-#endif
   return 0;
 }
 #endif
