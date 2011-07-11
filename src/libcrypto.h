@@ -30,6 +30,7 @@ typedef void (*BF_encrypt_t)(BF_LONG*, const BF_KEY*);
 typedef void (*BF_set_key_t)(BF_KEY*, int, const unsigned char*);
 
 typedef char* (*ERR_error_string_t)(unsigned long, char*);
+typedef void (*ERR_free_strings_t)(void);
 typedef unsigned long (*ERR_get_error_t)(void);
 
 typedef void (*OPENSSL_cleanse_t)(void*, size_t);

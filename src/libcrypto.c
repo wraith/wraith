@@ -49,6 +49,7 @@ static int load_symbols(void *handle) {
   DLSYM_GLOBAL(handle, BF_encrypt);
   DLSYM_GLOBAL(handle, BF_set_key);
   DLSYM_GLOBAL(handle, ERR_error_string);
+  DLSYM_GLOBAL(handle, ERR_free_strings);
   DLSYM_GLOBAL(handle, ERR_get_error);
   DLSYM_GLOBAL(handle, OPENSSL_cleanse);
   DLSYM_GLOBAL(handle, RAND_file_name);
@@ -114,6 +115,8 @@ int load_libcrypto() {
 
 int unload_libcrypto() {
   if (libcrypto_handle) {
+    ERR_free_strings();
+
     // Cleanup symbol table
     for (size_t i = 0; i < my_symbols.length(); ++i) {
       dl_symbol_table.remove(my_symbols[i]);
