@@ -166,6 +166,7 @@ static void cmd_setkey(int idx, char *par) {
     fishData = new fish_data_t;
     fishData->sharedKey = key;
     fishData->timestamp = now;
+    FishKeys[target] = fishData;
     dprintf(idx, "Set key for '%s' to: %s", target, key);
   }
   return;
