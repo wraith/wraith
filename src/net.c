@@ -1471,7 +1471,7 @@ void dequeue_sockets()
       errno = 0;
 #ifdef EGG_SSL_EXT
       if (socklist[i].ssl) {
-           x = write(socklist[i].sock, socklist[i].outbuf->data(), socklist[i].outbuf->length());
+           x = SSL_write(socklist[i].ssl, socklist[i].outbuf->data(), socklist[i].outbuf->length());
            if (x < 0) {
              int err = SSL_get_error(socklist[i].ssl, x);
              x = -1;
