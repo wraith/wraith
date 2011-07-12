@@ -42,6 +42,29 @@ int     ssl_use = 0; /* kyotou */
 
 static int seed_PRNG(void);
 
+#include "dhparam.c"
+
+static DH* tmp_dh_callback(SSL* ssl, int is_export, int keylength) {
+  DH *ret = NULL;
+
+  switch (keylength) {
+    case 2048:
+      ret = get_dh2048();
+      break;
+    case 1024:
+      ret = get_dh1024();
+      break;
+    case 512:
+      ret = get_dh512();
+      break;
+    default:
+      putlog(LOG_DEBUG, "*", "Missing DH key length: %d", keylength);
+      break;
+  }
+
+  return ret;
+}
+
 int init_openssl() {
   load_libcrypto();
   load_libssl();
@@ -57,8 +80,9 @@ int init_openssl() {
   }
 
   // Disable insecure SSLv2
-  SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_SSLv2);
+  SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_SSLv2|SSL_OP_SINGLE_DH_USE);
   SSL_CTX_set_mode(ssl_ctx, SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER|SSL_MODE_ENABLE_PARTIAL_WRITE);
+  SSL_CTX_set_tmp_dh_callback(ssl_ctx, tmp_dh_callback);
 
   if (seed_PRNG()) {
     sdprintf("Wasn't able to properly seed the PRNG!");

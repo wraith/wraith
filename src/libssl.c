@@ -55,6 +55,7 @@ static int load_symbols(void *handle) {
   DLSYM_GLOBAL(handle, SSLv23_client_method);
   DLSYM_GLOBAL(handle, SSL_write);
   DLSYM_GLOBAL(handle, SSL_CTX_ctrl);
+  DLSYM_GLOBAL(handle, SSL_CTX_set_tmp_dh_callback);
 
   return 0;
 }

@@ -18,6 +18,8 @@
 # endif
 #endif
 
+typedef DH* (*dh_callback_t)(SSL*, int, int);
+
 #include ".defs/libssl_post.h"
 
 typedef int (*SSL_get_error_t)(const SSL*, int);
@@ -35,6 +37,7 @@ typedef int (*SSL_library_init_t)(void);
 typedef void (*SSL_CTX_free_t)(SSL_CTX*);
 typedef SSL_CTX* (*SSL_CTX_new_t)(const SSL_METHOD*);
 typedef long (*SSL_CTX_ctrl_t)(SSL_CTX*, int, long, void*);
+typedef void (*SSL_CTX_set_tmp_dh_callback_t)(SSL_CTX*, dh_callback_t);
 
 int load_libssl();
 int unload_libssl();
