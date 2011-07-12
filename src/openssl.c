@@ -84,6 +84,12 @@ int init_openssl() {
   SSL_CTX_set_mode(ssl_ctx, SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER|SSL_MODE_ENABLE_PARTIAL_WRITE);
   SSL_CTX_set_tmp_dh_callback(ssl_ctx, tmp_dh_callback);
 
+  const char* ciphers = "HIGH:!MEDIUM:!LOW:!EXP:!SSLv2:!ADH:!aNULL:!eNULL:!NULL:@STRENGTH";
+  if (!SSL_CTX_set_cipher_list(ssl_ctx, ciphers)) {
+    sdprintf("Unable to load ciphers");
+    return 1;
+  }
+
   if (seed_PRNG()) {
     sdprintf("Wasn't able to properly seed the PRNG!");
     SSL_CTX_free(ssl_ctx);
