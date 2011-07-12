@@ -1063,13 +1063,12 @@ static int sockread(char *s, int *len)
               x = -1;
               switch (err) {
                 case SSL_ERROR_WANT_READ:
-                  errno = EAGAIN;
-                  break;
                 case SSL_ERROR_WANT_WRITE:
-                  errno = EAGAIN;
-                  break;
                 case SSL_ERROR_WANT_X509_LOOKUP:
                   errno = EAGAIN;
+                  break;
+                case SSL_ERROR_SSL:
+                  putlog(LOG_DEBUG, "*", "SSL_read() = %d, %s", err, (char *)ERR_error_string(ERR_get_error(), NULL));
                   break;
               }
             }
@@ -1369,13 +1368,12 @@ void tputs(register int z, const char *s, size_t len)
         x = -1;
         switch (err) {
           case SSL_ERROR_WANT_READ:
-            errno = EAGAIN;
-            break;
           case SSL_ERROR_WANT_WRITE:
-            errno = EAGAIN;
-            break;
           case SSL_ERROR_WANT_X509_LOOKUP:
             errno = EAGAIN;
+            break;
+          case SSL_ERROR_SSL:
+            putlog(LOG_DEBUG, "*", "SSL_write() = %d, %s", err, (char *)ERR_error_string(ERR_get_error(), NULL));
             break;
         }
       }
@@ -1473,19 +1471,18 @@ void dequeue_sockets()
       errno = 0;
 #ifdef EGG_SSL_EXT
       if (socklist[i].ssl) {
-           x = write(socklist[i].sock, socklist[i].outbuf->data(), socklist[i].outbuf->length());
+           x = SSL_write(socklist[i].ssl, socklist[i].outbuf->data(), socklist[i].outbuf->length());
            if (x < 0) {
              int err = SSL_get_error(socklist[i].ssl, x);
              x = -1;
              switch (err) {
                case SSL_ERROR_WANT_READ:
-                 errno = EAGAIN;
-                 break;
                case SSL_ERROR_WANT_WRITE:
-                 errno = EAGAIN;
-                 break;
                case SSL_ERROR_WANT_X509_LOOKUP:
                  errno = EAGAIN;
+                 break;
+               case SSL_ERROR_SSL:
+                 putlog(LOG_DEBUG, "*", "SSL_write()/dequeue_sockets() = %d, %s", err, (char *)ERR_error_string(ERR_get_error(), NULL));
                  break;
              }
            }
