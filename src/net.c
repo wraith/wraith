@@ -1058,7 +1058,7 @@ static int sockread(char *s, int *len)
 #ifdef EGG_SSL_EXT
         } else if (socklist[i].ssl) {
             x = SSL_read(socklist[i].ssl,s,grab);
-            if (x < 0) {
+            if (x <= 0) {
               int err = SSL_get_error(socklist[i].ssl, x);
               x = -1;
               switch (err) {
@@ -1066,6 +1066,20 @@ static int sockread(char *s, int *len)
                 case SSL_ERROR_WANT_WRITE:
                 case SSL_ERROR_WANT_X509_LOOKUP:
                   errno = EAGAIN;
+                  break;
+                case SSL_ERROR_SYSCALL:
+                  switch (ERR_get_error()) {
+                    case 0:
+                      // EOF
+                      break;
+                    case -1:
+                      // I/O error
+                      putlog(LOG_DEBUG, "*", "SSL_read() [IO] = %d, %s", err, (char *)ERR_error_string(ERR_get_error(), NULL));
+                      break;
+                    default:
+                      putlog(LOG_DEBUG, "*", "SSL_read() unknown error: %s", strerror(errno));
+                      break;
+                  }
                   break;
                 case SSL_ERROR_SSL:
                   putlog(LOG_DEBUG, "*", "SSL_read() = %d, %s", err, (char *)ERR_error_string(ERR_get_error(), NULL));
@@ -1363,7 +1377,7 @@ void tputs(register int z, const char *s, size_t len)
 #ifdef EGG_SSL_EXT
     if (socklist[i].ssl) {
       x = SSL_write(socklist[i].ssl,s,len);
-      if (x < 0) {
+      if (x <= 0) {
         int err = SSL_get_error(socklist[i].ssl, x);
         x = -1;
         switch (err) {
@@ -1371,6 +1385,20 @@ void tputs(register int z, const char *s, size_t len)
           case SSL_ERROR_WANT_WRITE:
           case SSL_ERROR_WANT_X509_LOOKUP:
             errno = EAGAIN;
+            break;
+          case SSL_ERROR_SYSCALL:
+            switch (ERR_get_error()) {
+              case 0:
+                // EOF
+                break;
+              case -1:
+                // I/O error
+                putlog(LOG_DEBUG, "*", "SSL_write() [IO] = %d, %s", err, (char *)ERR_error_string(ERR_get_error(), NULL));
+                break;
+              default:
+                putlog(LOG_DEBUG, "*", "SSL_write() unknown error: %s", strerror(errno));
+                break;
+            }
             break;
           case SSL_ERROR_SSL:
             putlog(LOG_DEBUG, "*", "SSL_write() = %d, %s", err, (char *)ERR_error_string(ERR_get_error(), NULL));
@@ -1472,7 +1500,7 @@ void dequeue_sockets()
 #ifdef EGG_SSL_EXT
       if (socklist[i].ssl) {
            x = SSL_write(socklist[i].ssl, socklist[i].outbuf->data(), socklist[i].outbuf->length());
-           if (x < 0) {
+           if (x <= 0) {
              int err = SSL_get_error(socklist[i].ssl, x);
              x = -1;
              switch (err) {
@@ -1480,6 +1508,20 @@ void dequeue_sockets()
                case SSL_ERROR_WANT_WRITE:
                case SSL_ERROR_WANT_X509_LOOKUP:
                  errno = EAGAIN;
+                 break;
+               case SSL_ERROR_SYSCALL:
+                 switch (ERR_get_error()) {
+                   case 0:
+                     // EOF
+                     break;
+                   case -1:
+                     // I/O error
+                     putlog(LOG_DEBUG, "*", "SSL_write()/dequeue_sockets() [IO] = %d, %s", err, (char *)ERR_error_string(ERR_get_error(), NULL));
+                     break;
+                   default:
+                     putlog(LOG_DEBUG, "*", "SSL_write() unknown error: %s", strerror(errno));
+                     break;
+                 }
                  break;
                case SSL_ERROR_SSL:
                  putlog(LOG_DEBUG, "*", "SSL_write()/dequeue_sockets() = %d, %s", err, (char *)ERR_error_string(ERR_get_error(), NULL));

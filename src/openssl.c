@@ -58,6 +58,7 @@ int init_openssl() {
 
   // Disable insecure SSLv2
   SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_SSLv2);
+  SSL_CTX_set_mode(ssl_ctx, SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER|SSL_MODE_ENABLE_PARTIAL_WRITE);
 
   if (seed_PRNG()) {
     sdprintf("Wasn't able to properly seed the PRNG!");
