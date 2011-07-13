@@ -11,7 +11,6 @@ next
     Compile on the oldest OS you want to support, and ensure newer ones have
     all necessary compat libraries.
   * Updated server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
-  * Don't kick friendly bots that are desynced: op them.
   * Change +bitch reaction to use normal queue for deopping opper/opped clients
   * cmd_mns_user now accepts multiple users (fixes #77)
   * Permanent owners can no longer be removed via cmd_mns_user
@@ -33,6 +32,7 @@ next
   * Allow simulated terminal (HQ) user to access owners (ie, .chpass owner)
   * Fix 'mop' causing a mass deop when -bitch
   * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
+  * Don't kick friendly bots that are desynced: op them.
 
 1.3.1 - http://wraith.botpack.net/milestone/1.3.1
   * Fix crash related to slowpart
