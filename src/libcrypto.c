@@ -49,6 +49,7 @@ static int load_symbols(void *handle) {
   DLSYM_GLOBAL(handle, BF_encrypt);
   DLSYM_GLOBAL(handle, BF_set_key);
   DLSYM_GLOBAL(handle, ERR_error_string);
+  DLSYM_GLOBAL(handle, ERR_free_strings);
   DLSYM_GLOBAL(handle, ERR_get_error);
   DLSYM_GLOBAL(handle, OPENSSL_cleanse);
   DLSYM_GLOBAL(handle, RAND_file_name);
@@ -79,6 +80,9 @@ static int load_symbols(void *handle) {
   DLSYM_GLOBAL(handle, DH_generate_key);
   DLSYM_GLOBAL(handle, DH_new);
   DLSYM_GLOBAL(handle, DH_size);
+
+  DLSYM_GLOBAL(handle, EVP_cleanup);
+  DLSYM_GLOBAL(handle, CRYPTO_cleanup_all_ex_data);
 
 
   return 0;

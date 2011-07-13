@@ -30,6 +30,11 @@ void DH1080_init() {
   }
 }
 
+void DH1080_uninit() {
+  BN_clear_free(b_prime);
+  BN_clear_free(b_generator);
+}
+
 /**
  * @brief Encode a string using FiSH's base64 algorithm (from FiSH/mIRC)
  * @note Any = padding is removed, and an 'A' is added if no padding was needed

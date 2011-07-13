@@ -12,7 +12,7 @@
 #include <setjmp.h>
 #include <bdlib/src/String.h>
 
-#include "libssl.h"
+#include "openssl.h"
 
 namespace bd {
   class Stream;

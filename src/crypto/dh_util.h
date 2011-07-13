@@ -18,4 +18,5 @@ bd::String fishBase64Decode(const bd::String& str);
 void DH1080_gen(bd::String& privateKey, bd::String& publicKeyB64);
 bool DH1080_comp(const bd::String privateKey, const bd::String theirPublicKeyB64, bd::String& sharedKey);
 void DH1080_init();
+void DH1080_uninit();
 #endif

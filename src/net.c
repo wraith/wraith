@@ -623,18 +623,9 @@ int open_telnet_raw(int sock, const char *ipIn, port_t sport, bool proxy_on, int
 int net_switch_to_ssl(int sock) {
   int i = 0;
 
-  if (load_ssl()) {
-    debug0("Error while switching to SSL - error loading library");
-    return 0;
-  }
-
   debug0("net_switch_to_ssl()");
   sleep(3); // Give some time to let the connect() go through.
-  for (i = 0; i < MAXSOCKS; ++i) {
-    if (socklist[i].sock == sock && !(socklist[i].flags & SOCK_UNUSED)) {
-      break;
-    }
-  }
+  i = findanysnum(sock);
   if (i == MAXSOCKS) {
     debug0("Error while swithing to SSL - sock not found in list");
     return 0;
@@ -651,10 +642,9 @@ int net_switch_to_ssl(int sock) {
   }
 
   SSL_set_fd(socklist[i].ssl, socklist[i].sock);
-  int err = SSL_connect(socklist[i].ssl);
-  int timeout = 0;
+  int err = 0, timeout = 0;
 
-  while (err <= 0) {
+  while ((err = SSL_connect(socklist[i].ssl)) <= 0) {
     if (timeout++ > 500) {
       err = 0;
       break;
@@ -662,19 +652,16 @@ int net_switch_to_ssl(int sock) {
     int errs = SSL_get_error(socklist[i].ssl,err);
     if ((errs != SSL_ERROR_WANT_READ) && (errs != SSL_ERROR_WANT_WRITE) && (errs != SSL_ERROR_WANT_X509_LOOKUP)) {
       putlog(LOG_DEBUG, "*", "SSL_connect() = %d, %s", err, (char *)ERR_error_string(ERR_get_error(), NULL));
-      SSL_shutdown(socklist[i].ssl);
-      SSL_free(socklist[i].ssl);
-      socklist[i].ssl = NULL;
-      return 0;
+      goto error;
     }
     usleep(1000);
-    err = SSL_connect(socklist[i].ssl);
   }
 
   if (err == 1) {
     debug0("SSL_connect() success");
     return 1;
   }
+error:
   debug0("Error while SSL_connect()");
   SSL_shutdown(socklist[i].ssl);
   SSL_free(socklist[i].ssl);
@@ -1071,18 +1058,31 @@ static int sockread(char *s, int *len)
 #ifdef EGG_SSL_EXT
         } else if (socklist[i].ssl) {
             x = SSL_read(socklist[i].ssl,s,grab);
-            if (x < 0) {
+            if (x <= 0) {
               int err = SSL_get_error(socklist[i].ssl, x);
               x = -1;
               switch (err) {
                 case SSL_ERROR_WANT_READ:
-                  errno = EAGAIN;
-                  break;
                 case SSL_ERROR_WANT_WRITE:
-                  errno = EAGAIN;
-                  break;
                 case SSL_ERROR_WANT_X509_LOOKUP:
                   errno = EAGAIN;
+                  break;
+                case SSL_ERROR_SYSCALL:
+                  switch (ERR_get_error()) {
+                    case 0:
+                      // EOF
+                      break;
+                    case -1:
+                      // I/O error
+                      putlog(LOG_DEBUG, "*", "SSL_read() [IO] = %d, %s", err, (char *)ERR_error_string(ERR_get_error(), NULL));
+                      break;
+                    default:
+                      putlog(LOG_DEBUG, "*", "SSL_read() unknown error: %s", strerror(errno));
+                      break;
+                  }
+                  break;
+                case SSL_ERROR_SSL:
+                  putlog(LOG_DEBUG, "*", "SSL_read() = %d, %s", err, (char *)ERR_error_string(ERR_get_error(), NULL));
                   break;
               }
             }
@@ -1377,18 +1377,31 @@ void tputs(register int z, const char *s, size_t len)
 #ifdef EGG_SSL_EXT
     if (socklist[i].ssl) {
       x = SSL_write(socklist[i].ssl,s,len);
-      if (x < 0) {
+      if (x <= 0) {
         int err = SSL_get_error(socklist[i].ssl, x);
         x = -1;
         switch (err) {
           case SSL_ERROR_WANT_READ:
-            errno = EAGAIN;
-            break;
           case SSL_ERROR_WANT_WRITE:
-            errno = EAGAIN;
-            break;
           case SSL_ERROR_WANT_X509_LOOKUP:
             errno = EAGAIN;
+            break;
+          case SSL_ERROR_SYSCALL:
+            switch (ERR_get_error()) {
+              case 0:
+                // EOF
+                break;
+              case -1:
+                // I/O error
+                putlog(LOG_DEBUG, "*", "SSL_write() [IO] = %d, %s", err, (char *)ERR_error_string(ERR_get_error(), NULL));
+                break;
+              default:
+                putlog(LOG_DEBUG, "*", "SSL_write() unknown error: %s", strerror(errno));
+                break;
+            }
+            break;
+          case SSL_ERROR_SSL:
+            putlog(LOG_DEBUG, "*", "SSL_write() = %d, %s", err, (char *)ERR_error_string(ERR_get_error(), NULL));
             break;
         }
       }
@@ -1486,19 +1499,32 @@ void dequeue_sockets()
       errno = 0;
 #ifdef EGG_SSL_EXT
       if (socklist[i].ssl) {
-           x = write(socklist[i].sock, socklist[i].outbuf->data(), socklist[i].outbuf->length());
-           if (x < 0) {
+           x = SSL_write(socklist[i].ssl, socklist[i].outbuf->data(), socklist[i].outbuf->length());
+           if (x <= 0) {
              int err = SSL_get_error(socklist[i].ssl, x);
              x = -1;
              switch (err) {
                case SSL_ERROR_WANT_READ:
-                 errno = EAGAIN;
-                 break;
                case SSL_ERROR_WANT_WRITE:
-                 errno = EAGAIN;
-                 break;
                case SSL_ERROR_WANT_X509_LOOKUP:
                  errno = EAGAIN;
+                 break;
+               case SSL_ERROR_SYSCALL:
+                 switch (ERR_get_error()) {
+                   case 0:
+                     // EOF
+                     break;
+                   case -1:
+                     // I/O error
+                     putlog(LOG_DEBUG, "*", "SSL_write()/dequeue_sockets() [IO] = %d, %s", err, (char *)ERR_error_string(ERR_get_error(), NULL));
+                     break;
+                   default:
+                     putlog(LOG_DEBUG, "*", "SSL_write() unknown error: %s", strerror(errno));
+                     break;
+                 }
+                 break;
+               case SSL_ERROR_SSL:
+                 putlog(LOG_DEBUG, "*", "SSL_write()/dequeue_sockets() = %d, %s", err, (char *)ERR_error_string(ERR_get_error(), NULL));
                  break;
              }
            }

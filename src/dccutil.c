@@ -635,12 +635,12 @@ tell_dcc(int idx)
   if (nicklen < 9)
     nicklen = 9;
 
-  simple_snprintf(format, sizeof format, "%%-4s %%-4s %%-8s %%-5s %%-%zus %%-40s %%s\n", nicklen);
-  dprintf(idx, format, "SOCK", "IDX", "ADDR", "PORT", "NICK", "HOST", "TYPE");
-  dprintf(idx, format, "----", "---", "--------", "-----", "---------",
+  simple_snprintf(format, sizeof format, "%%-4s %%-4s %%-4s %%-8s %%-5s %%-%zus %%-40s %%s\n", nicklen);
+  dprintf(idx, format, "SOCK", "IDX", "SSL", "ADDR", "PORT", "NICK", "HOST", "TYPE");
+  dprintf(idx, format, "----", "---", "---", "--------", "-----", "---------",
           "----------------------------------------", "----");
 
-  simple_snprintf(format, sizeof format, "%%-4d %%-4d %%08X %%5u %%-%zus %%-40s %%s\n", nicklen);
+  simple_snprintf(format, sizeof format, "%%-4d %%-4d %%-4s %%08X %%5u %%-%zus %%-40s %%s\n", nicklen);
 
   dprintf(idx, "dccn: %d, dcc_total: %d\n", dccn, dcc_total);
   dprintf(idx, "dns_idx: %d, servidx: %d\n", dns_idx, servidx);
@@ -657,7 +657,8 @@ tell_dcc(int idx)
         simple_snprintf(other, sizeof(other), "?:%lX  !! ERROR !!", (long) dcc[i].type);
         break;
       }
-      dprintf(idx, format, dcc[i].sock, i, dcc[i].addr, dcc[i].port, dcc[i].nick, dcc[i].host + j, other);
+      int snum = findanysnum(dcc[i].sock);
+      dprintf(idx, format, dcc[i].sock, i, (snum != -1 && socklist[snum].ssl) ? "yes" : "no", dcc[i].addr, dcc[i].port, dcc[i].nick, dcc[i].host + j, other);
     }
   }
 }

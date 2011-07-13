@@ -1,6 +1,10 @@
 #ifndef _LIBCRYPTO_H
 #define _LIBCRYPTO_H
 
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
+
 #include ".defs/libcrypto_pre.h"
 
 #include <openssl/crypto.h>
@@ -8,6 +12,8 @@
 #include <openssl/blowfish.h>
 #include <openssl/md5.h>
 #include <openssl/sha.h>
+#include <openssl/err.h>
+#include <openssl/rand.h>
 
 #include ".defs/libcrypto_post.h"
 
@@ -30,6 +36,7 @@ typedef void (*BF_encrypt_t)(BF_LONG*, const BF_KEY*);
 typedef void (*BF_set_key_t)(BF_KEY*, int, const unsigned char*);
 
 typedef char* (*ERR_error_string_t)(unsigned long, char*);
+typedef void (*ERR_free_strings_t)(void);
 typedef unsigned long (*ERR_get_error_t)(void);
 
 typedef void (*OPENSSL_cleanse_t)(void*, size_t);
@@ -64,6 +71,8 @@ typedef int (*DH_generate_key_t)(DH*);
 typedef DH* (*DH_new_t)(void);
 typedef int (*DH_size_t)(const DH*);
 
+typedef void (*EVP_cleanup_t)(void);
+typedef void (*CRYPTO_cleanup_all_ex_data_t)(void);
 
 int load_libcrypto();
 int unload_libcrypto();
