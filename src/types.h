@@ -6,6 +6,7 @@
 #endif
 
 #include <sys/types.h>
+#include <stdint.h>
 #include <netinet/in.h>
 
 /* For local console: */
