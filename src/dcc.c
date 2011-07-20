@@ -1022,6 +1022,8 @@ dcc_chat_pass(int idx, char *buf, int atr)
           return;
         }
 
+        sdprintf(STR("Using '%s' (%d/%d) for link with %s"), enclink[i].name, enclink[i].type, i, dcc[idx].nick);
+
         if (buf[0]) {
           const char *expected_nick = newsplit(&buf);
 
