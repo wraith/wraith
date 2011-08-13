@@ -631,11 +631,11 @@ int open_telnet(const char *ip, port_t port, bool proxy, int identd)
  * 'addr' is ignored if af_def is AF_INET6 -poptix (02/03/03)
  */
 #ifdef USE_IPV6
-int open_address_listen(const char* ip, int af_def, port_t *port)
+int open_address_listen(const char* ip, int af_def, port_t *port) {
 #else
-int open_address_listen(const char* ip, port_t *port)
+int open_address_listen(const char* ip, port_t *port) {
+   int af_def = AF_INET;
 #endif /* USE_IPV6 */
- {
 //  if (firewall[0]) {
 //    /* FIXME: can't do listen port thru firewall yet */
 //    putlog(LOG_MISC, "*", "!! Cant open a listen port (you are using a firewall)");
@@ -813,6 +813,8 @@ int answer(int sock, char *caller, in_addr_t *ip, port_t *port, int binary)
     addrlen = sizeof(from6);
     new_sock = accept(sock, (struct sockaddr *) &from6, &addrlen);
   } else {
+#else
+  int af_ty = 0;
 #endif /* USE_IPV6 */
     addrlen = sizeof(struct sockaddr);
     new_sock = accept(sock, (struct sockaddr *) &from, &addrlen);
