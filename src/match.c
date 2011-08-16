@@ -288,9 +288,7 @@ match_cidr(const char *m, const char *a)
   *ip++ = '\0';
 
   int ret = 0;
-#ifdef USE_IPV6
   int aftype = 0;
-#endif
 
   sockname_t ipaddr, maskaddr;
   bzero(&ipaddr, sizeof(ipaddr));
