@@ -22,6 +22,9 @@ next
   * FiSH message support added.
   * FiSH support for DH1080 key-exchange. 'keyx' command added to start from bot, and responds to key-exchanges.
 
+maint
+  * Fix --disable-ipv6 compiling
+
 1.3.2 - http://wraith.botpack.net/milestone/1.3.2
   * Misc bug fixes
   * 'make' on BSD will now redirect to gmake.
