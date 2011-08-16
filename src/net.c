@@ -804,8 +804,8 @@ int answer(int sock, char *caller, in_addr_t *ip, port_t *port, int binary)
   int new_sock;
   socklen_t addrlen;
   struct sockaddr_in from;
-#ifdef USE_IPV6
   int af_ty = sockprotocol(sock);
+#ifdef USE_IPV6
   struct sockaddr_in6 from6;
 
   bzero(&from6, sizeof(struct sockaddr_in6));
@@ -813,8 +813,6 @@ int answer(int sock, char *caller, in_addr_t *ip, port_t *port, int binary)
     addrlen = sizeof(from6);
     new_sock = accept(sock, (struct sockaddr *) &from6, &addrlen);
   } else {
-#else
-  int af_ty = 0;
 #endif /* USE_IPV6 */
     addrlen = sizeof(struct sockaddr);
     new_sock = accept(sock, (struct sockaddr *) &from, &addrlen);
