@@ -992,3 +992,18 @@ void notice(bd::String target, bd::String msg, int idx) {
   else
     dprintf(idx, "NOTICE %s :%s\n", target.c_str(), msg.c_str());
 }
+
+
+void keyx(const bd::String &target) {
+  bd::String myPublicKeyB64, myPrivateKey, sharedKey;
+
+  DH1080_gen(myPrivateKey, myPublicKeyB64);
+
+  putlog(LOG_MSGS, "*", "[FiSH] Initiating DH1080 key-exchange with %s - sending my public key", target.c_str());
+  notice(target, "DH1080_INIT " + myPublicKeyB64, DP_HELP);
+  fish_data_t* fishData = new fish_data_t;
+  fishData->myPublicKeyB64 = myPublicKeyB64;
+  fishData->myPrivateKey = myPrivateKey;
+  fishData->timestamp = now;
+  FishKeys[target] = fishData;
+}
