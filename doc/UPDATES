@@ -1,3 +1,5 @@
+* Auto FiSH key-exchange when accepting users via callerid
+
 1.4.0 - http://wraith.botpack.net/milestone/1.4.0
   * Add an extra 2 second delay before releasing nick to aide in syncing and time to type /nick
   * When a nick is released, start regaining as soon as it is witnessed to have been taken again
