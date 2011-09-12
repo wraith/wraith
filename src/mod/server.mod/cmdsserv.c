@@ -124,17 +124,7 @@ static void cmd_keyx(int idx, char *par) {
   }
 
   char *nick = newsplit(&par);
-  bd::String myPublicKeyB64, myPrivateKey, sharedKey;
-
-  DH1080_gen(myPrivateKey, myPublicKeyB64);
-
-  putlog(LOG_MSGS, "*", "[FiSH] Initiating DH1080 key-exchange with %s - sending my public key", nick);
-  notice(nick, "DH1080_INIT " + myPublicKeyB64, DP_HELP);
-  fish_data_t* fishData = new fish_data_t;
-  fishData->myPublicKeyB64 = myPublicKeyB64;
-  fishData->myPrivateKey = myPrivateKey;
-  fishData->timestamp = now;
-  FishKeys[nick] = fishData;
+  keyx(nick);
   return;
 }
 
