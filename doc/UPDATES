@@ -3,6 +3,7 @@ next
   * When 'mdop' protection is on, re-op all previously opped clients automatically.
   * When 'mop' protection is on, deop all previously regular clients automatically.
   * Properly honor exemptions when kicking matched RBL clients
+  * Auto FiSH key-exchange when accepting users via callerid
 
 1.4.0 - http://wraith.botpack.net/milestone/1.4.0
   * Add an extra 2 second delay before releasing nick to aide in syncing and time to type /nick
