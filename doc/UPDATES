@@ -1,3 +1,5 @@
+* Update cmd_mop to support console channel (so it works via Auth commands better)
+
 1.3.2 - http://wraith.botpack.net/milestone/1.3.2
   * Misc bug fixes
   * 'make' on BSD will now redirect to gmake.

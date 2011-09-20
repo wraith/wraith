@@ -1177,32 +1177,24 @@ static void cmd_getkey(int idx, char *par)
 
 static void cmd_mop(int idx, char *par)
 {
-  struct chanset_t *chan = NULL;
   bool found = 0, all = 0;
-  char *chname = NULL;
+  char *chname = newsplit(&par);
 
-  if (par[0] == '*' && !par[1]) {
+  struct chanset_t* chan = get_channel(idx, chname, 1, &all);
+
+  if (all) {
     get_user_flagrec(dcc[idx].user, &user, NULL);
     if (!glob_owner(user)) {
       dprintf(idx, "You do not have access to mop '*'\n");
       return;
     }
-    all = 1;
     chan = chanset;
-    newsplit(&par);
-  } else {
-    if (par[0] && (strchr(CHANMETA, par[0]) != NULL)) {
-      chname = newsplit(&par);
-      chan = get_channel(idx, chname, 0);
-    } else
-      chan = get_channel(idx, "", 0);
   }
 
-  if (!chan && !all && !chname) {
+  if (!chan && !all) {
     dprintf(idx, "Usage: mop <channel|*>\n");
     return;
-  } else if (!chan)
-    return;
+  }
 
   putlog(LOG_CMDS, "*", "#%s# (%s) mop %s", dcc[idx].nick, all ? "*" : chan->dname, par);
 
