@@ -17,7 +17,6 @@ list set list
 irc.choopa.net
 irc.colosolutions.net
 irc.eversible.com
-irc.he.net
 irc.mzima.net
 irc.paraphysics.net
 irc.servercentral.net
@@ -52,7 +51,6 @@ irc.choopa.ca
 irc.choopa.net
 irc.efnet.nl
 irc.inet.tele.dk
-irc.ipv6.he.net
 irc.ipv6.homelien.no
 irc.paraphysics.net
 irc.underworld.no
@@ -62,7 +60,6 @@ efnet.xs4all.nl
 irc.choopa.ca
 irc.choopa.net
 irc.eversible.com
-irc.he.net
 irc.paraphysics.net
 irc.servercentral.net
 irc.shoutcast.com
