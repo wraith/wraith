@@ -513,20 +513,13 @@ static void cmd_newpass(int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# newpass...", dcc[idx].nick);
 
   if (!strcmp(newpass, "rand")) {
-    pass = (char*)my_calloc(1, MAXPASSLEN);
+    pass = (char*)my_calloc(1, MAXPASSLEN + 1);
     make_rand_str(pass, MAXPASSLEN);
   } else {
-    if (strlen(newpass) < 6) {
-      dprintf(idx, "Please use at least 6 characters.\n");
+    if (!goodpass(newpass, idx, NULL)) {
       return;
-    } else {
-      pass = strdup(newpass);
     }
-  }
-
-  if (!goodpass(pass, idx, NULL)) {
-    free(pass);
-    return;
+    pass = strdup(newpass);
   }
 
   set_user(&USERENTRY_PASS, dcc[idx].user, pass);
@@ -1255,31 +1248,26 @@ static void cmd_chpass(int idx, char *par)
     set_user(&USERENTRY_PASS, u, NULL);
     dprintf(idx, "Removed password.\n");
   } else {
-    bool good = 0, randpass = 0;
-    char *newpass = newsplit(&par), pass[MAXPASSLEN + 1] = "";
-    size_t l = strlen(newpass);
+    bool randpass = 0;
+    char *newpass = newsplit(&par), *pass = NULL;
 
-    if (l > MAXPASSLEN)
-      newpass[MAXPASSLEN] = 0;
     if (!strcmp(newpass, "rand")) {
+      pass = (char*)my_calloc(1, MAXPASSLEN + 1);
       make_rand_str(pass, MAXPASSLEN);
       randpass = 1;
-      good = 1;
     } else {
-      if (goodpass(newpass, idx, NULL)) {
-        strlcpy(pass, newpass, sizeof(pass));
-        good = 1;
+      if (!goodpass(newpass, idx, NULL)) {
+        return;
       }
+      pass = strdup(newpass);
     }
-    if (strlen(pass) > MAXPASSLEN)
-      pass[MAXPASSLEN] = 0;
 
-    if (good) {
-      set_user(&USERENTRY_PASS, u, pass);
-      putlog(LOG_CMDS, "*", "#%s# chpass %s [%s]", dcc[idx].nick, handle, randpass ? "random" : "something");
-      dprintf(idx, "Password for '%s' changed to: %s\n", handle, pass);
-      write_userfile(idx);
-    }
+    set_user(&USERENTRY_PASS, u, pass);
+    putlog(LOG_CMDS, "*", "#%s# chpass %s [%s]", dcc[idx].nick, handle, randpass ? "random" : "something");
+    dprintf(idx, "Password for '%s' changed to: %s\n", handle, pass);
+    write_userfile(idx);
+
+    free(pass);
   }
 }
 
