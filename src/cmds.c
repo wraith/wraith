@@ -508,30 +508,32 @@ static void cmd_newpass(int idx, char *par)
     return;
   }
 
-  char *newpass = newsplit(&par), pass[MAXPASSLEN + 1] = "";
+  char *newpass = newsplit(&par), *pass = NULL;
 
   putlog(LOG_CMDS, "*", "#%s# newpass...", dcc[idx].nick);
 
   if (!strcmp(newpass, "rand")) {
+    pass = (char*)my_calloc(1, MAXPASSLEN);
     make_rand_str(pass, MAXPASSLEN);
   } else {
     if (strlen(newpass) < 6) {
       dprintf(idx, "Please use at least 6 characters.\n");
       return;
     } else {
-      strlcpy(pass, newpass, sizeof(pass));
+      pass = strdup(newpass);
     }
   }
-  if (strlen(pass) > MAXPASSLEN)
-    pass[MAXPASSLEN] = 0;
 
-  if (!goodpass(pass, idx, NULL))
+  if (!goodpass(pass, idx, NULL)) {
+    free(pass);
     return;
+  }
 
   set_user(&USERENTRY_PASS, dcc[idx].user, pass);
   dprintf(idx, "Changed your password to: %s\n", pass);
   if (conf.bot->hub)
     write_userfile(idx);
+  free(pass);
 }
 
 static void cmd_secpass(int idx, char *par)

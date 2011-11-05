@@ -1042,7 +1042,7 @@ int bot_aggressive_to(struct userrec *u)
     return 0;
 }
 
-int goodpass(char *pass, int idx, char *nick)
+int goodpass(const char *pass, int idx, char *nick)
 {
   if (!pass[0]) 
     return 0;
