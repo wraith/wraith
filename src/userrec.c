@@ -308,9 +308,6 @@ void convert_password(struct userrec *u)
     pass += 17;
     /* ----------------------------------------------------------------------- */
 
-    if (strlen(pass) > MAXPASSLEN)
-      pass[MAXPASSLEN] = 0;
-
     set_user(&USERENTRY_PASS, u, pass);
     OPENSSL_cleanse(passp, strlen(passp));
     free(passp);
