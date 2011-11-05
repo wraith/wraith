@@ -23,7 +23,7 @@ void shuffleArray(char **, size_t);
 void showhelp(int, struct flag_record *, const char *);
 char *replace(const char *, const char *, const char *);
 char *replace_vars(char*);
-int goodpass(char *, int, char *);
+int goodpass(const char *, int, char *);
 int bot_aggressive_to(struct userrec *);
 void readsocks(const char *);
 int updatebin(int, char *, int);
