@@ -56,7 +56,7 @@ See also: invites, -invite, stick, unstick
    have no flags, an optional hostmask, and a random pass/secpass.
    List as many hosts as needed.
  
-See also: -user, +host, -host, clearhosts%{+ni}, newleaf%{-}
+See also: -user, +host, -host, clearhosts%{+ni}, newleaf%{-}%{+a}, newhub%{-}
 ::-ban
 ###  $b-ban$b <banmask or number> [channel]
    Removes the specified ban from the list of bans stored on the bot. You may
@@ -68,7 +68,7 @@ See also: bans, +ban, stick, unstick
    This is exactly the same as $b'%d-user'$b (it removes a user record). It is
    included for convenience.
  
-See also: +user, -user%{+ni}, newleaf%{-}
+See also: +user, -user%{+ni}, newleaf%{-}%{+a}, newhub%{-}
 ::-chan
 ### $b-chan$b <channel>
    This removes ALL information about a channel from the bot. 
@@ -121,7 +121,7 @@ See also: invites, +invite, stick, unstick
 ###  $b-user$b <handle> [anotherhandle] ...
    Removes the specified handles user records.
  
-See also: +user%{+ai}, -bot%{-}%{+ni}, newleaf%{-}
+See also: +user%{+ai}, -bot%{-}%{+ni}, newleaf%{-}%{+a}, newhub%{-}
 ::about:
 ###  $babout$b
    If you feel you are missing from the list feel free to contact bryan.
@@ -354,7 +354,7 @@ See also: version, netversion, about%{+m|m}, status%{-}
    and update all bots instead.
 %{-}
  
-See also: link
+See also: link%{+a}, newhub%{-}
 ::chaninfo
 ###  $bchaninfo$b <channel>
    This lists all the settings for the bot on the given channel.
@@ -775,7 +775,7 @@ See also: console, echo, login, page, strip
                if you change any of the following: 
     $bhomedir$b, $bbinpath$b, $bbinname$b, $bportmin$b, $bportmax$b
  
-See also: newleaf
+See also: newleaf, newhub
 ::console:
 ###  $bconsole$b [channel] [modes]
    Changes your console level so that you will see only the types of console
@@ -1248,7 +1248,7 @@ See also: netlag
    Attempts to link to another hub.  This command is deprecated and not 
    recommended for use.
  
-See also: unlink%{+ni}, newleaf%{-}%{+a}, -bot%{-}
+See also: unlink%{+ni}, newleaf%{-}%{+a}, newhub, -bot%{-}
 ::login
 ###  $blogin$b <banner|bots|channels|whom> [on/off]
    Sets various login options.
@@ -1433,6 +1433,11 @@ See also: botversion, version, about%{+m|m}, status%{-}
    the results over DCC.
  
 See also: w
+:hub:newhub:
+###  $bnewhub$b <handle> <address> <port> [hublevel]
+    Add a new hub to the net.
+ 
+See also: chaddr, newleaf
 :hub:newleaf:
 ###  $bnewleaf$b <handle> [hostmask] [anotherhostmask] ...
    Adds a new leaf to the botnet with the specified handle and hostname.
@@ -1440,6 +1445,8 @@ See also: w
  
    The binary config botline will also be outputted, but should be
    checked for correctness.
+ 
+%{+a}See also: newhub%{-}
 ::newpass
 ###  $bnewpass$b <password|rand>
    Changes your password on the bot. This is similar to the '/msg <bot> pass'
@@ -1520,7 +1527,7 @@ See also: restart
    The local bot must, however, have a bot record for the bot you wish to
    relay to. Typing '%dquit' or "*bye*" on a line by itself will end the relay.
  
-See also: bots%{+n}, newleaf%{-}%{+a}, -bot%{-}
+See also: bots%{+n}, newleaf%{-}%{+a}, newhub, -bot%{-}
 :leaf:release
 ###  $brelease$b
    Releases the bot's nick if it is on the jupenick. It gives an estimated
@@ -1624,8 +1631,8 @@ See also: reload, backup
 [N]  $bserver-port$b     Default port to use for server connections.
 [N]  $bserver-port-ssl$b Default port to use for SSL server connections.
 [B]  $bserver-use-ssl$b  Use SSL for IRC server connections?
-
-
+ 
+ 
 [B]  $bauth-chan$b       If set, auth cmds will work in channels as well as in msg, otherwise 
                           only in msg.
 [S]  $bauth-key$b        The authkey used during authing. Give to users if they need to auth. 
@@ -1665,7 +1672,7 @@ See also: reload, backup
 [N]  $bmsgburst$b        How many messages to burst at once to server. (Too high will excess flood)
 [N]  $bmsgrate$b         How often (msecs) to dequeue msgs to the server. Only used on
                            non-ratbox servers. Too small a value can result in Excess Flood.
-
+ 
 [L]  $brbl-servers$b     Servers to use for RBL checking in channels that are +rbl.
  
 [S]  $brealname$b        The bot's "real name" when connecting. (supports '$n' expansion)
@@ -1896,7 +1903,7 @@ See also: dump
    to unlink them. If "*" is specified as the parameter, all bots will be
    unlinked.
  
-See also: %{+n}link, %{-}bots, downbots%{+n}, newleaf, bottree%{-}
+See also: %{+n}link, %{-}bots, downbots%{+n}, newleaf, bottree%{-}%{+a}, newhub%{-}
 ::unstick
 ###  $bunstick$b [ban/exempt/invite] <hostmask/number> [channel]
    Makes a "sticky" ban, exempt, or invite normal again.
