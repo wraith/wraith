@@ -118,8 +118,8 @@ See also: +ignore, ignores
  
 See also: invites, +invite, stick, unstick
 ::-user
-###  $b-user$b <handle>
-   Removes the specified handle's user record.
+###  $b-user$b <handle> [anotherhandle] ...
+   Removes the specified handles user records.
  
 See also: +user%{+ai}, -bot%{-}%{+nai}, newleaf%{-}
 ::about:
