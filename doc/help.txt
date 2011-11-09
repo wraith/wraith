@@ -68,7 +68,7 @@ See also: bans, +ban, stick, unstick
    This is exactly the same as $b'%d-user'$b (it removes a user record). It is
    included for convenience.
  
-See also: +user, -user%{+n}, newleaf%{-}
+See also: +user, -user%{+ni}, newleaf%{-}
 ::-chan
 ### $b-chan$b <channel>
    This removes ALL information about a channel from the bot. 
@@ -121,7 +121,7 @@ See also: invites, +invite, stick, unstick
 ###  $b-user$b <handle> [anotherhandle] ...
    Removes the specified handles user records.
  
-See also: +user%{+ai}, -bot%{-}%{+nai}, newleaf%{-}
+See also: +user%{+ai}, -bot%{-}%{+ni}, newleaf%{-}
 ::about:
 ###  $babout$b
    If you feel you are missing from the list feel free to contact bryan.
@@ -1248,7 +1248,7 @@ See also: netlag
    Attempts to link to another hub.  This command is deprecated and not 
    recommended for use.
  
-See also: unlink, newleaf%{+a}, -bot%{-}
+See also: unlink%{+ni}, newleaf%{-}%{+a}, -bot%{-}
 ::login
 ###  $blogin$b <banner|bots|channels|whom> [on/off]
    Sets various login options.
