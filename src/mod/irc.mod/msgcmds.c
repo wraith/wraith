@@ -105,8 +105,6 @@ static int msg_pass(char *nick, char *host, struct userrec *u, char *par)
   } else {
     mynew = old;
   }
-  if (strlen(mynew) > MAXPASSLEN)
-    mynew[MAXPASSLEN] = 0;
 
   if (!goodpass(mynew, 0, nick)) {
     putlog(LOG_CMDS, "*", "(%s!%s) !%s! $b!$bPASS...", nick, host, u->handle);

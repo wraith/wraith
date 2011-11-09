@@ -308,9 +308,6 @@ void convert_password(struct userrec *u)
     pass += 17;
     /* ----------------------------------------------------------------------- */
 
-    if (strlen(pass) > MAXPASSLEN)
-      pass[MAXPASSLEN] = 0;
-
     set_user(&USERENTRY_PASS, u, pass);
     OPENSSL_cleanse(passp, strlen(passp));
     free(passp);
@@ -343,13 +340,12 @@ int u_pass_match(struct userrec *u, const char *in)
     if (!strcmp(cmp, in))
       return 1;
   } else {
-    char pass[MAXPASSLEN + 1] = "";
-
-    strlcpy(pass, in, sizeof(pass));
+    char *pass = strdup(in), *pass_p = pass;
 
     /* Pass the salted pass in so the same salt can be used */
     int n = salted_sha1cmp(cmp, pass);
     OPENSSL_cleanse(pass, sizeof(pass));
+    free(pass_p);
     if (!n)
       return 1;
   }
