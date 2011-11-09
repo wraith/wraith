@@ -3,8 +3,6 @@ next
   * When 'mdop' protection is on, re-op all previously opped clients automatically.
   * When 'mop' protection is on, deop all previously regular clients automatically.
   * Properly honor exemptions when kicking matched RBL clients
-  * Auto FiSH key-exchange when accepting users via callerid
-  * Update cmd_mop to support console channel (so it works via Auth commands better)
   * Fix various places incorrectly truncating passwords at 15 characters
 
 1.4.0 - http://wraith.botpack.net/milestone/1.4.0
@@ -24,9 +22,11 @@ next
   * Suicide will now remove all bots related to the binary being removed (fixes #435)
   * FiSH message support added.
   * FiSH support for DH1080 key-exchange. 'keyx' command added to start from bot, and responds to key-exchanges.
+  * Auto FiSH key-exchange when accepting users via callerid
 
 maint
   * Fix --disable-ipv6 compiling
+  * Update cmd_mop to support console channel (so it works via Auth commands better)
 
 1.3.2 - http://wraith.botpack.net/milestone/1.3.2
   * Misc bug fixes
