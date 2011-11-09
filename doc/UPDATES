@@ -16,6 +16,7 @@
   * FiSH message support added.
   * FiSH support for DH1080 key-exchange. 'keyx' command added to start from bot, and responds to key-exchanges.
   * Auto FiSH key-exchange when accepting users via callerid
+  * When 'mdop' protection is on, re-op all previously opped clients automatically.
 
 maint
   * Fix --disable-ipv6 compiling
