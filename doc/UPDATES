@@ -25,6 +25,7 @@ maint
   * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
   * cmd_mns_user now accepts multiple users (fixes #77)
   * Permanent owners can no longer be removed via cmd_mns_user
+  * Fix various places incorrectly truncating passwords at 15 characters
 
 1.3.2 - http://wraith.botpack.net/milestone/1.3.2
   * Misc bug fixes

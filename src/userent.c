@@ -579,8 +579,6 @@ static bool pass_set(struct userrec *u, struct user_entry *e, void *buf)
     if (u->bot || (pass[0] == '+'))
       newpass = strdup(pass);
     else {
-      if (strlen(pass) > MAXPASSLEN)
-        pass[MAXPASSLEN] = 0;
       while (*p) {
         if ((*p <= 32) || (*p == 127))
           *p = '?';
