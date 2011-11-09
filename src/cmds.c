@@ -504,7 +504,7 @@ static void cmd_back(int idx, char *par)
 static void cmd_newpass(int idx, char *par)
 {
   if (!par[0]) {
-    dprintf(idx, "Usage: newpass <newpassword>\n");
+    dprintf(idx, "Usage: newpass <newpassword|rand>\n");
     return;
   }
 
@@ -1233,7 +1233,7 @@ static void cmd_handle(int idx, char *par)
 static void cmd_chpass(int idx, char *par)
 {
   if (!par[0]) {
-    dprintf(idx, "Usage: chpass <handle> [password]\n");
+    dprintf(idx, "Usage: chpass <handle> [password|rand]\n");
     return;
   }
   char *handle = newsplit(&par);
