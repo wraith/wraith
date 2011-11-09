@@ -539,7 +539,7 @@ int change_handle(struct userrec *u, char *newh)
   return 1;
 }
 
-struct userrec *adduser(struct userrec *bu, char *handle, char *host, char *pass, flag_t flags, int bot)
+struct userrec *adduser(struct userrec *bu, const char *handle, char *host, char *pass, flag_t flags, int bot)
 {
   struct userrec *u = NULL, *x = NULL;
   int oldshare = noshare;
