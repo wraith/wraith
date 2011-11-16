@@ -322,6 +322,7 @@ init_conf()
 //  conf.bots->next = NULL;
   conf.bots = NULL;
   conf.bot = NULL;
+  conf.hubs = bd::String(settings.hubs).split(',');
 
   conf.localhub = NULL;
   conf.autocron = 1;
@@ -465,7 +466,7 @@ conf_addbot(const char *nick, const char *ip, const char *host, const char *ip6)
 
 //  bot->pid = checkpid(nick, bot);
 
-  if (settings.hubs && is_hub(bot->nick))
+  if (is_hub(bot->nick))
     bot->hub = 1;
 
   /* not a hub 
@@ -536,6 +537,7 @@ free_conf()
     free(conf.datadir);
   if (conf.homedir)
     free(conf.homedir);
+  conf.hubs.clear();
   init_conf();
 }
 
@@ -602,9 +604,11 @@ readconf(const char *fname, int bits)
     fatal(STR("Cannot read config"), 0);
   }
 
+  conf.hubs.clear();
   free_conf_bots(conf.bots);
 
   bd::String line, option;
+  unsigned short hublevel = 0;
 
   while (stream->tell() < stream->length()) {
     line = stream->getline().chomp().trim();
@@ -654,6 +658,11 @@ readconf(const char *fname, int bits)
         if (str_isdigit(line.c_str()))
           conf.uid = atoi(line.c_str());
 
+      } else if (option == STR("hub")) {
+        if (line.split(' ').length() == 3) {
+          conf.hubs << bd::String::printf("%s %d", line.c_str(), ++hublevel);
+        }
+
       } else {
         putlog(LOG_MISC, "*", STR("Unrecognized config option '%s'"), option.c_str());
 
@@ -686,6 +695,20 @@ readconf(const char *fname, int bits)
 }
 
 char s1_9[3] = "",s1_5[3] = "",s1_1[3] = "";
+
+bool hubSort (bd::String hub1, bd::String hub2) {
+  bd::Array<bd::String> hub1params(static_cast<bd::String>(hub1).split(' '));
+  bd::Array<bd::String> hub2params(static_cast<bd::String>(hub2).split(' '));
+
+  unsigned short hub1level = 99, hub2level = 99;
+  if (hub1params.length() == 4) {
+    hub1level = atoi(static_cast<bd::String>(hub1params[3]).c_str());
+  }
+  if (hub2params.length() == 4) {
+    hub2level = atoi(static_cast<bd::String>(hub2params[3]).c_str());
+  }
+  return hub1level < hub2level;
+}
 
 int
 writeconf(char *filename, int fd, int bits)
@@ -771,6 +794,21 @@ writeconf(char *filename, int fd, int bits)
     comment("# Automatically add the bot to crontab?");
     *stream << bd::String::printf(STR("! autocron %d\n"), conf.autocron);
 
+    comment("");
+  }
+
+  if (conf.hubs.length()) {
+    comment("# Hubs this bot will connect to");
+    // Sort hub list by hublevel
+    bd::Array<bd::String> sortedhubs(conf.hubs);
+    std::sort(sortedhubs.begin(), sortedhubs.end(), hubSort);
+
+    for (size_t idx = 0; idx < sortedhubs.length(); ++idx) {
+      bd::Array<bd::String> hubparams(static_cast<bd::String>(sortedhubs[idx]).split(' '));
+      bd::String hubnick(hubparams[0]), address(hubparams[1]);
+      port_t port = atoi(static_cast<bd::String>(hubparams[2]).c_str());
+      *stream << bd::String::printf(STR("! hub %s %s %d\n"), hubnick.c_str(), address.c_str(), port);
+    }
     comment("");
   }
 

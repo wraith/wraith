@@ -6,6 +6,7 @@
 #include "types.h"
 #include "eggdrop.h"
 #include "settings.h"
+#include <bdlib/src/Array.h>
 
 typedef struct conf_net_b {
   char *host;
@@ -28,6 +29,7 @@ typedef struct conf_bot_b {
 } conf_bot;
 
 typedef struct conf_b {
+  bd::Array<bd::String> hubs;
   conf_bot *bots;       /* the list of bots */
   conf_bot *bot;        /* single bot (me) */
   int features;		/* Pack features (take, mdop, beta... etc..) */

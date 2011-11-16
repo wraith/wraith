@@ -674,7 +674,6 @@ void conf_to_bin(conf_t *in, bool move, int die)
 {
   conf_bot *bot = NULL;
   char *newbin = NULL;
-  char *hubs = strdup(settings.hubs);
 
   clear_settings();
   sdprintf("converting conf to bin\n");
@@ -700,8 +699,7 @@ void conf_to_bin(conf_t *in, bool move, int die)
                            bot->net.ip6 ? bot->net.ip6 : "");
     }
 
-  simple_snprintf(settings.hubs, sizeof(settings.hubs), "%s", hubs);
-  free(hubs);
+  simple_snprintf(settings.hubs, sizeof(settings.hubs), in->hubs.join(',').c_str());
 
   newbin = binname;
 //  tellconfig(&settings); 
