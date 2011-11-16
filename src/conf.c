@@ -1018,6 +1018,30 @@ bin_to_conf(bool error)
   tellconf();
 }
 
+void conf_update_hubs(struct userrec* list) {
+  bd::Array<bd::String> hubUsers;
+
+  // Count how many hubs there are
+  for (struct userrec *u = list; u; u = u->next) {
+    if (bot_hublevel(u) < 999) {
+      hubUsers << u->handle;
+    }
+  }
+
+  conf.hubs.clear();
+  conf.hubs.Reserve(hubUsers.length());
+  for (size_t idx = 0; idx < hubUsers.length(); ++idx) {
+    struct userrec *u = get_user_by_handle(list, const_cast<char*>(static_cast<bd::String>(hubUsers[idx]).c_str()));
+    struct bot_addr *bi = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, u);
+    conf.hubs << bd::String::printf("%s %s %d %d", u->handle, bi->address, bi->telnet_port, bi->hublevel);
+  }
+
+  if (conf.bot->hub || conf.bot->localhub) {
+    /* rewrite our binary */
+    conf_to_bin(&conf, 0, -1);
+  }
+}
+
 void conf_add_userlist_bots()
 {
   conf_bot *bot = NULL;

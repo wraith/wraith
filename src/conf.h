@@ -75,5 +75,6 @@ void deluser_removed_bots(conf_bot *, conf_bot *);
 conf_bot *conf_getlocalhub(conf_bot *);
 void conf_setmypid(pid_t);
 void conf_bot_dup(conf_bot *dest, conf_bot *src);
+void conf_update_hubs(struct userrec* list);
 
 #endif /* !_CONF_H */

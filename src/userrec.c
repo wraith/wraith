@@ -476,7 +476,13 @@ void stream_writeuserfile(bd::Stream& stream, const struct userrec *bu, bool old
  */
 int write_userfile(int idx)
 {
-  if (userlist == NULL || !conf.bot->hub)
+  if (!userlist) {
+    return 1;
+  }
+
+  conf_update_hubs(userlist);
+
+  if (!conf.bot->hub)
     return 1;			/* No point in saving userfile */
 
   if (idx >= 0)
