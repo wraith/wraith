@@ -670,6 +670,10 @@ share_change(int idx, char *par)
       }
       noshare = 0;
     }
+
+    if (uet == &USERENTRY_BOTADDR) {
+      write_userfile(-1);
+    }
   }
 }
 
