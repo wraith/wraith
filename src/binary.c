@@ -50,9 +50,9 @@
 settings_t settings = {
   SETTINGS_HEADER,
   /* -- STATIC -- */
-  "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "",
   /* -- DYNAMIC -- */
-  "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "",
   /* -- PADDING */
   ""
 };
@@ -482,7 +482,6 @@ static void edpack(settings_t *incfg, const char *in_hash, int what)
   dofield(incfg->dcc_prefix);
   dofield(incfg->features);
   dofield(incfg->owners);
-  dofield(incfg->hubs);
 
   dohash(incfg->salt1);
   dohash(incfg->salt2);
@@ -490,6 +489,7 @@ static void edpack(settings_t *incfg, const char *in_hash, int what)
 
   /* -- DYNAMIC -- */
   dofield(incfg->dynamic_initialized);
+  dofield(incfg->hubs);
   dofield(incfg->bots);
   dofield(incfg->uid);
   dofield(incfg->autocron);
@@ -518,11 +518,11 @@ tellconfig(settings_t *incfg)
   dofield(incfg->dcc_prefix);
   dofield(incfg->features);
   dofield(incfg->owners);
-  dofield(incfg->hubs);
 //  dofield(incfg->salt1);
 //  dofield(incfg->salt2);
   // -- DYNAMIC --
   dofield(incfg->dynamic_initialized);
+  dofield(incfg->hubs);
   dofield(incfg->bots);
   dofield(incfg->uid);
   dofield(incfg->autocron);
@@ -674,6 +674,7 @@ void conf_to_bin(conf_t *in, bool move, int die)
 {
   conf_bot *bot = NULL;
   char *newbin = NULL;
+  char *hubs = strdup(settings.hubs);
 
   clear_settings();
   sdprintf("converting conf to bin\n");
@@ -698,6 +699,9 @@ void conf_to_bin(conf_t *in, bool move, int die)
                            bot->net.host ? bot->net.host : (bot->net.host6 ? bot->net.host6 : "*"),
                            bot->net.ip6 ? bot->net.ip6 : "");
     }
+
+  simple_snprintf(settings.hubs, sizeof(settings.hubs), "%s", hubs);
+  free(hubs);
 
   newbin = binname;
 //  tellconfig(&settings); 

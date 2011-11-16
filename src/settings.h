@@ -18,13 +18,13 @@ typedef struct settings_struct {
   char packname[65];
   char shellhash[65];
   char owners[513];
-  char hubs[513];
   char salt1[33];
   char salt2[17];
   char dcc_prefix[17];
   char features[17];
   /* -- DYNAMIC -- */
   char dynamic_initialized[17];
+  char hubs[513];
   char bots[1025];
   char uid[17];
   char autocron[17];         /* should the bot auto crontab itself? */
@@ -46,10 +46,10 @@ typedef struct settings_struct {
 extern char s1_3[3],s1_2[3],s1_1[3],s2_7[3],s1_9[3],s1_13[3],s1_14[3],s2_2[3],s1_10[3],s2_4[3],s1_4[3],s2_3[3],s2_1[3],s2_6[3],s1_7[3],s1_12[3],s2_5[3],s1_5[3],s1_6[3],s1_11[3],s2_8[3],s1_8[3],s1_16[3],s1_15[3];
 
 #define SIZE_PACK sizeof(settings.hash) + sizeof(settings.packname) + sizeof(settings.shellhash) + \
-sizeof(settings.owners) + sizeof(settings.hubs) + \
+sizeof(settings.owners) + \
 sizeof(settings.salt1) + sizeof(settings.salt2) + sizeof(settings.dcc_prefix) + sizeof(settings.features)
 
-#define SIZE_CONF sizeof(settings.dynamic_initialized) + sizeof(settings.bots) + sizeof(settings.uid) + \
+#define SIZE_CONF sizeof(settings.dynamic_initialized) + sizeof(settings.hubs) + sizeof(settings.bots) + sizeof(settings.uid) + \
 sizeof(settings.autocron) + \
 sizeof(settings.username) + sizeof(settings.homedir) + \
 sizeof(settings.portmin) + sizeof(settings.portmin) + sizeof(settings.datadir)
