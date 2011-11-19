@@ -1,6 +1,8 @@
 next
   * Bot will now jump from the server it's on if it is removed from the server list. (fixes a changing network bug)
   * Properly honor exemptions when kicking matched RBL clients
+  * Add cmd_newhub for adding a new hub. All bots will add this to their config.
+  * Hubs can now be overridden inside the botconfig (-C)
 
 1.4.0 - http://wraith.botpack.net/milestone/1.4.0
   * Updated server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
