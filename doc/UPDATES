@@ -1,3 +1,6 @@
+* Add cmd_newhub for adding a new hub. All bots will add this to their config.
+* Hubs can now be overridden inside the botconfig (-C)
+
 1.4.0 - http://wraith.botpack.net/milestone/1.4.0
   * Updated server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
   * Change +bitch reaction to use normal queue for deopping opper/opped clients
