@@ -382,81 +382,48 @@ void reaffirm_owners()
 }
 
 bool is_hub(const char* nick) {
-  char *p = settings.hubs, *p2 = NULL, hubbuf[HANDLEN + 1] ="";
-  size_t len = 0;
-
-  while (p && *p) {
-    if ((p2 = strchr(p, ' '))) {
-
-      len = p2 - p + 1;
-      if (len > sizeof(hubbuf))
-        len = sizeof(hubbuf);
-      strlcpy(hubbuf, p, len);
-      if (!strncasecmp(nick, hubbuf, HANDLEN))
-        return 1;
+  for (size_t idx = 0; idx < conf.hubs.length(); ++idx) {
+    bd::String hub(conf.hubs[idx]);
+    if (!strncasecmp(nick, newsplit(hub).c_str(), HANDLEN)) {
+      return true;
     }
-    if ((p = strchr(p, ',')))
-      p++;
   }
-  return 0;
+  return false;
 }
 
 void load_internal_users()
 {
-  char *p = NULL, *ln = NULL, *hand = NULL, *ip = NULL, *port = NULL, *pass = NULL, *q = NULL;
+  char *p = NULL, *ln = NULL, *hand = NULL, *pass = NULL, *q = NULL;
   char *hosts = NULL, buf[2048] = "", *attr = NULL, tmp[51] = "";
-  int i, hublevel = 0;
-  struct bot_addr *bi = NULL;
+  int i;
   struct userrec *u = NULL;
 
   /* hubs */
-  strlcpy(buf, settings.hubs, sizeof(buf));
-  p = buf;
-  while (p) {
-    ln = p;
-    p = strchr(p, ',');
-    if (p)
-      *p++ = 0;
-    hand = ln;
-    ip = NULL;
-    port = NULL;
-    u = NULL;
-    for (i = 0; ln; i++) {
-      switch (i) {
-        case 0:
-          hand = ln;
-          break;
-        case 1:
-          ip = ln;
-          break;
-        case 2:
-          port = ln;
-          hublevel++;		/* We must increment this even if it is already added */
-          if (!get_user_by_handle(userlist, hand)) {
-            userlist = adduser(userlist, hand, "none", "-", USER_OP, 1);
-            u = get_user_by_handle(userlist, hand);
+  for (size_t idx = 0; idx < conf.hubs.length(); ++idx) {
+    bd::Array<bd::String> params(static_cast<bd::String>(conf.hubs[idx]).split(' '));
+    bd::String handle(params[0]);
+    if (!get_user_by_handle(userlist, const_cast<char*>(handle.c_str()))) {
+      bd::String address(params[1]);
+      port_t port = atoi(static_cast<bd::String>(params[2]).c_str());
+      unsigned short hublevel = params.length() == 4 ? atoi(static_cast<bd::String>(params[3]).c_str()) : (idx + 1);
 
-            simple_snprintf(tmp, sizeof(tmp), "%li [internal]", (long)now);
-            set_user(&USERENTRY_ADDED, u, tmp);
+      userlist = adduser(userlist, handle.c_str(), "none", "-", USER_OP, 1);
+      u = get_user_by_handle(userlist, const_cast<char*>(handle.c_str()));
 
-            bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
+      simple_snprintf(tmp, sizeof(tmp), "%li [internal]", (long)now);
+      set_user(&USERENTRY_ADDED, u, tmp);
 
-            bi->address = strdup(ip);
-            bi->telnet_port = atoi(port) ? atoi(port) : 0;
-            bi->relay_port = bi->telnet_port;
-            bi->hublevel = hublevel;
-            if (conf.bot->hub && (!bi->hublevel) && (!strcasecmp(hand, conf.bot->nick)))
-              bi->hublevel = 99;
-            bi->uplink = (char *) my_calloc(1, 1);
-            set_user(&USERENTRY_BOTADDR, u, bi);
-            /* set_user(&USERENTRY_PASS, get_user_by_handle(userlist, hand), SALT2); */
-          }
-          break;
-        default:
-          break;
+      struct bot_addr *bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
+
+      bi->address = strdup(address.c_str());
+      bi->telnet_port = bi->relay_port = port;
+      bi->hublevel = hublevel;
+      if (conf.bot->hub && (!bi->hublevel) && (!strcasecmp(handle.c_str(), conf.bot->nick))) {
+        bi->hublevel = 99;
       }
-      if (ln && (ln = strchr(ln, ' ')))
-        *ln++ = 0;
+      bi->uplink = (char *) my_calloc(1, 1);
+      set_user(&USERENTRY_BOTADDR, u, bi);
+      /* set_user(&USERENTRY_PASS, get_user_by_handle(userlist, handle.c_str()), SALT2); */
     }
   }
 

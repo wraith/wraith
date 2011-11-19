@@ -5,7 +5,7 @@ namespace bd {
   class Stream;
 }
 
-struct userrec *adduser(struct userrec *, char *, char *, char *, flag_t, int);
+struct userrec *adduser(struct userrec *, const char *, char *, char *, flag_t, int);
 void addhost_by_handle(char *, char *);
 void clear_masks(struct maskrec *);
 void clear_userlist(struct userrec *);
