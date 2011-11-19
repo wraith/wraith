@@ -322,7 +322,12 @@ init_conf()
 //  conf.bots->next = NULL;
   conf.bots = NULL;
   conf.bot = NULL;
-  conf.hubs = bd::String(settings.hubs).split(',');
+  // If conf_hubs is blank, revert to pack hubs
+  if (strlen(settings.conf_hubs)) {
+    conf.hubs = bd::String(settings.conf_hubs).split(',');
+  } else {
+    conf.hubs = bd::String(settings.hubs).split(',');
+  }
 
   conf.localhub = NULL;
   conf.autocron = 1;
