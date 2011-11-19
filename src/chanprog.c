@@ -405,7 +405,7 @@ void load_internal_users()
     if (!get_user_by_handle(userlist, const_cast<char*>(handle.c_str()))) {
       bd::String address(params[1]);
       port_t port = atoi(static_cast<bd::String>(params[2]).c_str());
-      unsigned short hublevel = atoi(static_cast<bd::String>(params[3]).c_str());
+      unsigned short hublevel = params.length() == 4 ? atoi(static_cast<bd::String>(params[3]).c_str()) : (idx + 1);
 
       userlist = adduser(userlist, handle.c_str(), "none", "-", USER_OP, 1);
       u = get_user_by_handle(userlist, const_cast<char*>(handle.c_str()));
