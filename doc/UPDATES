@@ -21,7 +21,7 @@ next
   * When 'mdop' protection is on, re-op all previously opped clients automatically.
   * When 'mop' protection is on, deop all previously regular clients automatically.
 
-maint
+1.3.3 - http://wraith.botpack.net/milestone/1.3.3
   * Fix --disable-ipv6 compiling
   * Update cmd_mop to support console channel (so it works via Auth commands better)
   * Add an extra 2 second delay before releasing nick to aide in syncing and time to type /nick
