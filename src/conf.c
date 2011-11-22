@@ -1024,6 +1024,10 @@ bin_to_conf(bool error)
 }
 
 void conf_update_hubs(struct userrec* list) {
+  if (!conf.bot->hub && !conf.bot->localhub) {
+    return;
+  }
+
   bd::Array<bd::String> hubUsers, oldhubs(conf.hubs);
 
   // Count how many hubs there are

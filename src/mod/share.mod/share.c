@@ -533,6 +533,7 @@ share_newuser(int idx, char *par)
       noshare = 0;
       if (conf.bot->hub)
         putlog(LOG_CMDS, "@", "%s: newuser %s %s", dcc[idx].nick, nick, s);
+      write_userfile(-1);
     }
   }
 }
@@ -551,6 +552,7 @@ share_killuser(int idx, char *par)
       shareout_but(idx, "k %s\n", par);
       if (conf.bot->hub)
         putlog(LOG_CMDS, "@", "%s: killuser %s", dcc[idx].nick, par);
+      write_userfile(-1);
     }
     noshare = 0;
   }
@@ -1449,6 +1451,8 @@ static void share_read_stream(int idx, bd::Stream& stream) {
     /* copy over any auth users */
     Auth::FillUsers();
   }
+
+  write_userfile(-1);
 
   cmdpass_free(old_cmdpass);
 
