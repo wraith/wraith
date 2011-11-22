@@ -1044,6 +1044,12 @@ void conf_update_hubs(struct userrec* list) {
   if (conf.bot->hub || conf.bot->localhub) {
     /* rewrite our binary */
     conf_to_bin(&conf, 0, -1);
+
+    /* Now signal all of the old bots with SIGUSR1
+     * They will auto die and determine new localhub, etc..
+     */
+    conf_checkpids(conf.bots);
+    conf_killbot(conf.bots, conf.bot->nick, NULL, SIGUSR1, 1); /* Don't kill me. */
   }
 }
 
