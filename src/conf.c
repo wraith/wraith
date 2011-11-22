@@ -1024,7 +1024,7 @@ bin_to_conf(bool error)
 }
 
 void conf_update_hubs(struct userrec* list) {
-  bd::Array<bd::String> hubUsers;
+  bd::Array<bd::String> hubUsers, oldhubs(conf.hubs);
 
   // Count how many hubs there are
   for (struct userrec *u = list; u; u = u->next) {
@@ -1041,9 +1041,20 @@ void conf_update_hubs(struct userrec* list) {
     conf.hubs << bd::String::printf("%s %s %d %d", u->handle, bi->address, bi->telnet_port, bi->hublevel);
   }
 
+  // Only rewrite binary / notify bots if the hubs changed
+  if (conf.hubs == oldhubs) {
+    return;
+  }
+
   if (conf.bot->hub || conf.bot->localhub) {
     /* rewrite our binary */
     conf_to_bin(&conf, 0, -1);
+
+    /* Now signal all of the old bots with SIGUSR1
+     * They will auto die and determine new localhub, etc..
+     */
+    conf_checkpids(conf.bots);
+    conf_killbot(conf.bots, conf.bot->nick, NULL, SIGUSR1, 1); /* Don't kill me. */
   }
 }
 
