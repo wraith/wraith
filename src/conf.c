@@ -1024,7 +1024,7 @@ bin_to_conf(bool error)
 }
 
 void conf_update_hubs(struct userrec* list) {
-  bd::Array<bd::String> hubUsers;
+  bd::Array<bd::String> hubUsers, oldhubs(conf.hubs);
 
   // Count how many hubs there are
   for (struct userrec *u = list; u; u = u->next) {
@@ -1039,6 +1039,11 @@ void conf_update_hubs(struct userrec* list) {
     struct userrec *u = get_user_by_handle(list, const_cast<char*>(static_cast<bd::String>(hubUsers[idx]).c_str()));
     struct bot_addr *bi = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, u);
     conf.hubs << bd::String::printf("%s %s %d %d", u->handle, bi->address, bi->telnet_port, bi->hublevel);
+  }
+
+  // Only rewrite binary / notify bots if the hubs changed
+  if (conf.hubs == oldhubs) {
+    return;
   }
 
   if (conf.bot->hub || conf.bot->localhub) {
