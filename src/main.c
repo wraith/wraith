@@ -98,6 +98,7 @@ bool     have_linked_to_hub = 0;  /* Have we ever been linked to a hub? */
 int	default_uflags = 0;	/* Default userdefinied flags for people
 				   who say 'hello' or for .adduser */
 int     do_restart = 0;
+int     do_write_userfile = 0;
 bool	backgrd = 1;		/* Run in the background? */
 uid_t   myuid;
 pid_t   mypid;
@@ -527,6 +528,10 @@ static void core_secondly()
   if (((conf.bot->localhub || conf.bot->hub) && (cnt % 30) == 0) || (cnt % 5) == 0) {
     autolink_cycle();         /* attempt autolinks */
     cnt = 0;
+  }
+
+  if (unlikely(do_write_userfile) && do_write_userfile-- == 1) {
+    real_write_userfile(-1);
   }
 
   memcpy(&nowtm, gmtime(&now), sizeof(struct tm));
