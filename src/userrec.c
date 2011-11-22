@@ -474,7 +474,7 @@ void stream_writeuserfile(bd::Stream& stream, const struct userrec *bu, bool old
 /* Rewrite the entire user file. Call USERFILE hook as well, probably
  * causing the channel file to be rewritten as well.
  */
-int write_userfile(int idx)
+int real_write_userfile(int idx)
 {
   if (userlist == NULL || !conf.bot->hub)
     return 1;			/* No point in saving userfile */
@@ -508,6 +508,16 @@ int write_userfile(int idx)
   delete new_userfile;
   return 0;
 }
+
+int write_userfile(int idx) {
+  if (idx >= 0) {
+    return real_write_userfile(idx);
+  }
+
+  ++do_write_userfile;
+  return 0;
+}
+
 
 int change_handle(struct userrec *u, char *newh)
 {
