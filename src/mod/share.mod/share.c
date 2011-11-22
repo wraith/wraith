@@ -1450,6 +1450,8 @@ static void share_read_stream(int idx, bd::Stream& stream) {
     Auth::FillUsers();
   }
 
+  write_userfile(-1);
+
   cmdpass_free(old_cmdpass);
 
   checkchans(1);                /* remove marked channels */
