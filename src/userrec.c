@@ -514,7 +514,12 @@ int write_userfile(int idx) {
     return real_write_userfile(idx);
   }
 
-  ++do_write_userfile;
+  if (!do_write_userfile) {
+    do_write_userfile = 3;
+  } else {
+    ++do_write_userfile;
+  }
+
   return 0;
 }
 
