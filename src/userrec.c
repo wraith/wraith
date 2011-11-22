@@ -516,6 +516,9 @@ int write_userfile(int idx) {
 
   if (!do_write_userfile) {
     do_write_userfile = 3;
+  } else if (do_write_userfile == 15) {
+    do_write_userfile = 0;
+    return real_write_userfile(idx);
   } else {
     ++do_write_userfile;
   }
