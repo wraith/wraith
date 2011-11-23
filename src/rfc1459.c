@@ -28,6 +28,7 @@
 #include "rfc1459.h"
 
 int (*rfc_casecmp) (const char *, const char *) = _rfc_casecmp;
+int (*rfc_ncasecmp) (const char *, const char *, size_t) = _rfc_ncasecmp;
 int (*rfc_toupper) (int) = _rfc_toupper;
 
 int
@@ -38,6 +39,26 @@ _rfc_casecmp(const char *s1, const char *s2)
   register int res;
 
   while (!(res = rfc_toupper(*str1) - rfc_toupper(*str2))) {
+    if (*str1 == '\0')
+      return 0;
+    str1++;
+    str2++;
+  }
+  return (res);
+}
+
+int
+_rfc_ncasecmp(const char *s1, const char *s2, size_t n)
+{
+  register unsigned char *str1 = (unsigned char *) s1;
+  register unsigned char *str2 = (unsigned char *) s2;
+  register int res;
+
+  if (!n) {
+    return 0;
+  }
+
+  while (--n && !(res = rfc_toupper(*str1) - rfc_toupper(*str2))) {
     if (*str1 == '\0')
       return 0;
     str1++;
