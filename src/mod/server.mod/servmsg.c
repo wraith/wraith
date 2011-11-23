@@ -899,13 +899,13 @@ static int gotpong(char *from, char *msg)
 }
 
 static int nick_which(const char* nick, bool& is_jupe, bool& is_orig) {
-  if (jupenick[0] && !rfc_casecmp(nick, jupenick)) {
+  if (jupenick[0] && !rfc_ncasecmp(nick, jupenick, nick_len)) {
     is_jupe = 1;
     // If some stupid reason they have the same jupenick/nick, make sure to mark it as on
-    if (!rfc_casecmp(nick, origbotname))
+    if (!rfc_ncasecmp(nick, origbotname, nick_len))
       is_orig = 1;
     return 1;
-  } else if (!rfc_casecmp(nick, origbotname)) {
+  } else if (!rfc_ncasecmp(nick, origbotname, nick_len)) {
     is_orig = 1;
   }
   return 0;
@@ -966,7 +966,7 @@ void real_release_nick(void *data) {
 
 void release_nick(const char* nick) {
   // Only do this if currently on a jupenick
-  if (jupenick[0] && ((!nick && match_my_nick(jupenick)) || (nick && !rfc_casecmp(jupenick, nick)))) {
+  if (jupenick[0] && ((!nick && match_my_nick(jupenick)) || (nick && !rfc_ncasecmp(jupenick, nick, nick_len)))) {
     keepnick = 0;
 
     // Delay releasing nick for 2 seconds to allow botnet to receive orders and user to type /NICK
@@ -1081,7 +1081,7 @@ static int got433(char *from, char *msg)
 
     if (tried_jupenick)
       jnick_juped = 0;
-    else if (!rfc_casecmp(tmp, origbotname))
+    else if (!rfc_ncasecmp(tmp, origbotname, nick_len))
       nick_juped = 0;
 
     tried_nick = 0;
@@ -1143,11 +1143,11 @@ static int got437(char *from, char *msg)
       }
     }
   } else if (server_online) {
-    if (!rfc_casecmp(s, origbotname)) {
+    if (!rfc_ncasecmp(s, origbotname, nick_len)) {
       if (!nick_juped)
         putlog(LOG_MISC, "*", "NICK IS TEMPORARILY UNAVAILABLE: '%s' (keeping '%s').", s, botname);
       nick_juped = 2;
-    } else if (jupenick[0] && !rfc_casecmp(s, jupenick)) {
+    } else if (jupenick[0] && !rfc_ncasecmp(s, jupenick, nick_len)) {
       if (!jnick_juped)
         putlog(LOG_MISC, "*", "JUPENICK IS TEMPORARILY UNAVAILABLE: '%s' (keeping '%s').", s, botname);
       jnick_juped = 2;
@@ -1218,12 +1218,12 @@ static int gotnick(char *from, char *msg)
     tried_jupenick = 0;
     tried_nick = 0;
 
-    if (jupenick[0] && !rfc_casecmp(msg, jupenick)) {
+    if (jupenick[0] && !rfc_ncasecmp(msg, jupenick, nick_len)) {
       altnick_char = rolls = 0;
       putlog(LOG_SERV | LOG_MISC, "*", "Regained jupenick '%s'.", msg);
       jnick_juped = 0;
       nick_juped = 0; // Unset this, no reason for it now.
-    } else if (!strcmp(msg, origbotname)) {
+    } else if (!strncmp(msg, origbotname, nick_len)) {
       altnick_char = rolls = 0;
       putlog(LOG_SERV | LOG_MISC, "*", "Regained nickname '%s'.", msg);
       nick_juped = 0;
