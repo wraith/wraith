@@ -28,8 +28,6 @@ next
   * Update cmd_mop to support console channel (so it works via Auth commands better)
   * Add an extra 2 second delay before releasing nick to aide in syncing and time to type /nick
   * When a nick is released, start regaining as soon as it is witnessed to have been taken again
-  * Add an extra 2 second delay before releasing nick to aide in syncing and time to type /nick
-  * When a nick is released, start regaining as soon as it is witnessed to have been taken again
   * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
   * cmd_mns_user now accepts multiple users (fixes #77)
   * Permanent owners can no longer be removed via cmd_mns_user
