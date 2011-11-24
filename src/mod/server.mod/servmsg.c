@@ -176,7 +176,7 @@ int check_bind_ctcpr(char *nick, char *uhost, struct userrec *u,
 
 bool match_my_nick(char *nick)
 {
-  return (!rfc_casecmp(nick, botname));
+  return (!rfc_ncasecmp(nick, botname, nick_len));
 }
 
 void rehash_monitor_list() {
