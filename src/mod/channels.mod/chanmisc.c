@@ -1006,6 +1006,7 @@ int channel_add(char *result, const char *newname, char *options, bool isdefault
 /* Chanint template
  *  chan->temp = 0;
  */
+    strlcpy(chan->groups, "main", sizeof(chan->groups));
     chan->protect_backup = 1;
     chan->knock_flags = 0;
     chan->flood_lock_time = 120;

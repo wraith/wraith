@@ -57,7 +57,7 @@
 #include <bdlib/src/Array.h>
 #include <bdlib/src/String.h>
 
-char *def_chanset = "+enforcebans +dynamicbans +userbans -bitch +cycle -inactive +userexempts -dynamicexempts +userinvites -dynamicinvites -nodesynch -closed -take -voice -private -fastop +meankicks ban-type 3 protect-backup 1";
+char *def_chanset = "+enforcebans +dynamicbans +userbans -bitch +cycle -inactive +userexempts -dynamicexempts +userinvites -dynamicinvites -nodesynch -closed -take -voice -private -fastop +meankicks ban-type 3 protect-backup 1 groups { main }";
 struct chanset_t 	*chanset = NULL;	/* Channel list			*/
 struct chanset_t	*chanset_default = NULL;	/* Default channel list */
 char 			admin[121] = "";	/* Admin info			*/
