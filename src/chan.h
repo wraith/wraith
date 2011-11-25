@@ -210,6 +210,7 @@ struct chanset_t {
   char pls[21];			/* positive mode changes		*/
   char mns[21];			/* negative mode changes		*/
   char key_prot[121];		/* desired password			*/
+  char groups[1024];		/* groups that should join */
 /* Chanchar template
  *char temp[121];
  */

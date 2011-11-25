@@ -336,6 +336,17 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
       }
       strlcpy(s, item[i], sizeof(s));
       set_mode_protect(chan, s);
+    } else if (!strcmp(item[i], "groups")) {
+      i++;
+      if (i >= items) {
+	if (result)
+	  strlcpy(result, "channel groups needs argument", RESULT_LEN);
+	return ERROR;
+      }
+      // Get string into right format
+      bd::String changroups(item[i]);
+      changroups.trim();
+      strlcpy(chan->groups, changroups.c_str(), sizeof(chan->groups));
     } else if (!strcmp(item[i], "topic")) {
       char *p = NULL;
 

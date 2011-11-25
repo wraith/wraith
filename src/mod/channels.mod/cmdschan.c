@@ -1228,6 +1228,7 @@ static void cmd_chaninfo(int idx, char *par)
 /* FIXME: SHOW_CHAR() here */
     get_mode_protect(chan, work, sizeof(work));
     dprintf(idx, "Protect modes (chanmode): %s\n", work[0] ? work : "None");
+    dprintf(idx, "Groups: %s\n", chan->groups[0] ? bd::String(chan->groups).c_str() : "None");
 //    dprintf(idx, "Protect topic (topic)   : %s\n", chan->topic[0] ? chan->topic : "");
 /* Chanchar template
  *  dprintf(idx, "String temp: %s\n", chan->temp[0] ? chan->temp : "NULL");
