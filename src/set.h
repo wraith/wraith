@@ -67,7 +67,7 @@ typedef struct rate_b {
  interval_t time;
 } rate_t;
 
-extern char		auth_key[], auth_prefix[2], motd[], alias[], rbl_servers[1024],
+extern char		auth_key[], auth_prefix[2], motd[], alias[], rbl_servers[1024], groups[1024],
 			msgident[], msginvite[], msgop[], msgpass[], msgrelease[],
                         homechan[], altchars[];
 extern bool		dccauth, auth_obscure, manop_warn, auth_chan, oidentd, ident_botnick, irc_autoaway, link_cleartext, use_deaf, use_callerid;

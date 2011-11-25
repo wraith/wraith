@@ -30,6 +30,7 @@ static bool parsing_botset = 0;
 char altchars[50] = "";
 char alias[1024] = "";
 char rbl_servers[1024] = "";
+char groups[1024] = "";
 bool auth_chan;
 char auth_key[51] = "";
 char auth_prefix[2] = "";
@@ -94,6 +95,7 @@ static variable_t vars[] = {
  VAR("flood-ctcp",	&flood_ctcp,		VAR_RATE|VAR_NOLHUB,				0, 0, "3:60"),
  VAR("flood-msg",	&flood_msg,		VAR_RATE|VAR_NOLHUB,				0, 0, "5:60"),
  VAR("fork-interval",	&fork_interval,		VAR_INT,					10, 0, "0"),
+ VAR("groups",		groups,			VAR_STRING|VAR_LIST|VAR_NOLHUB,			0, 0, "main"),
  VAR("hijack",		&hijack,		VAR_INT|VAR_DETECTED|VAR_PERM,			0, 4, "die"),
  VAR("homechan",	homechan,		VAR_WORD|VAR_NOLOC|VAR_HIDE,			0, 0, NULL),
  VAR("ident-botnick",   &ident_botnick,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "0"),
