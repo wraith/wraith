@@ -54,8 +54,10 @@
 #endif
 #endif
 #include <sys/utsname.h>
+#include <bdlib/src/Array.h>
+#include <bdlib/src/String.h>
 
-char *def_chanset = "+enforcebans +dynamicbans +userbans -bitch +cycle -inactive +userexempts -dynamicexempts +userinvites -dynamicinvites -nodesynch -closed -take -voice -private -fastop +meankicks ban-type 3 protect-backup 1";
+char *def_chanset = "+enforcebans +dynamicbans +userbans -bitch +cycle -inactive +userexempts -dynamicexempts +userinvites -dynamicinvites -nodesynch -closed -take -voice -private -fastop +meankicks ban-type 3 protect-backup 1 groups { main }";
 struct chanset_t 	*chanset = NULL;	/* Channel list			*/
 struct chanset_t	*chanset_default = NULL;	/* Default channel list */
 char 			admin[121] = "";	/* Admin info			*/
@@ -824,10 +826,26 @@ bool bot_shouldjoin(struct userrec* u, struct flag_record* fr, struct chanset_t*
       return 0;
   }
 #endif
+
+  // Am I in the groups that this channel has?
+  bd::Array<bd::String> my_groupsArray(bd::String(groups).split(','));
+  bool group_match = 0;
+
+  if (chan->groups && chan->groups->length()) {
+    for (size_t i = 0; i < my_groupsArray.length(); ++i) {
+      if (chan->groups->find(my_groupsArray[i]) != chan->groups->npos) {
+        group_match = 1;
+        break;
+      }
+    }
+  }
+
   // Ignore +inactive during cmd_slowjoin to ensure that +backup bots join
-  return (!glob_kick(*fr) && !chan_kick(*fr) &&
-      ((ignore_inactive || !channel_inactive(chan)) &&
-       (channel_backup(chan) || (!glob_backup(*fr) && !chan_backup(*fr)))));
+  return (!glob_kick(*fr) && !chan_kick(*fr) && // Not being kicked
+      ((ignore_inactive || !channel_inactive(chan)) && // Not inactive
+      ((channel_backup(chan) && (glob_backup(*fr) || chan_backup(*fr))) || (!channel_backup(chan) && !glob_backup(*fr) && !chan_backup(*fr)))) && // Is +backup and I'm B|B, or is -backup and I am not B|B
+      group_match // My group should join
+      );
 }
 
 bool shouldjoin(struct chanset_t *chan)

@@ -5,6 +5,8 @@ next
   * Hubs can now be overridden inside the botconfig (-C)
   * Optimize userfile writing by doing it asynchronously
   * Fix bot getting confusd when changing to long nicks
+  * Add [bot]set var 'groups' to configure what groups bots are in
+  * Add chanset 'groups' to take a list of groups that should join. 'chanset #chan groups { main backup }'
 
 1.4.0 - http://wraith.botpack.net/milestone/1.4.0
   * Updated server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.

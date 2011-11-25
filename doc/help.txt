@@ -359,8 +359,12 @@ See also: link%{+a}, newhub%{-}
 ###  $bchaninfo$b <channel>
    This lists all the settings for the bot on the given channel.
    It shows any of the following:
-        $bchanmode$b   These modes are enforced on the channel. Both + and -
-                   modes can be enforced.
+        $bchanmode$b         These modes are enforced on the channel.
+                          Both + and - modes can be enforced. Use {} to
+                          add a key. '%dchanset #chan chanmode { +nt key }'
+        $bgroups$b            List of groups that should join the channel.
+                          Use {} to add multiple groups. See also '%dhelp set'
+                          '%dchanset #chan groups { main alt }'
 %{+m|m}
         $bauto-delay$b        Amount of seconds to wait before auto opping,
                               or auto voicing a client based on flags or
@@ -1672,7 +1676,7 @@ See also: reload, backup
 [N]  $bmsgburst$b        How many messages to burst at once to server. (Too high will excess flood)
 [N]  $bmsgrate$b         How often (msecs) to dequeue msgs to the server. Only used on
                            non-ratbox servers. Too small a value can result in Excess Flood.
- 
+[L]  $bgroups$b          List of groups that the affected bots are a part of.
 [L]  $brbl-servers$b     Servers to use for RBL checking in channels that are +rbl.
  
 [S]  $brealname$b        The bot's "real name" when connecting. (supports '$n' expansion)
