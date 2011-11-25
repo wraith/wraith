@@ -861,13 +861,15 @@ bool bot_shouldjoin(struct userrec* u, struct flag_record* fr, struct chanset_t*
 #endif
 
   // Am I in the groups that this channel has?
-  bd::Array<bd::String> my_groupsArray(bd::String(groups).split(',')), channel_groupsArray(bd::String(chan->groups).split(' '));
+  bd::Array<bd::String> my_groupsArray(bd::String(groups).split(','));
   bool group_match = 0;
 
-  for (size_t i = 0; i < my_groupsArray.length(); ++i) {
-    if (channel_groupsArray.find(my_groupsArray[i]) != channel_groupsArray.npos) {
-      group_match = 1;
-      break;
+  if (chan->groups && chan->groups->length()) {
+    for (size_t i = 0; i < my_groupsArray.length(); ++i) {
+      if (chan->groups->find(my_groupsArray[i]) != chan->groups->npos) {
+        group_match = 1;
+        break;
+      }
     }
   }
 

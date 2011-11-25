@@ -8,6 +8,9 @@
 #ifndef _EGG_CHAN_H
 #define _EGG_CHAN_H
 
+#include <lib/bdlib/src/Array.h>
+#include <lib/bdlib/src/String.h>
+
 typedef struct memstruct {
   struct memstruct *next;
   struct userrec *user;
@@ -210,7 +213,7 @@ struct chanset_t {
   char pls[21];			/* positive mode changes		*/
   char mns[21];			/* negative mode changes		*/
   char key_prot[121];		/* desired password			*/
-  char groups[1024];		/* groups that should join */
+  bd::Array<bd::String> *groups;/* groups that should join */
 /* Chanchar template
  *char temp[121];
  */

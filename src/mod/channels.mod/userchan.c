@@ -732,7 +732,7 @@ flood-exempt %d flood-lock-time %d knock %d \
  *      temp,
  * also include temp %s in dprintf.
  */
-        chan->groups,
+        chan->groups && chan->groups->length() ? static_cast<bd::String>(chan->groups->join(" ")).c_str() : "",
 	chan->bad_cookie,
 	chan->manop,
 	chan->mdop,

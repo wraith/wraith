@@ -348,7 +348,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
       // Replace commas with spaces to be in proper format
       changroups.sub(",", " ");
       changroups.trim();
-      strlcpy(chan->groups, changroups.c_str(), sizeof(chan->groups));
+      *(chan->groups) = changroups.split(" ");
     } else if (!strcmp(item[i], "topic")) {
       char *p = NULL;
 
@@ -1008,7 +1008,8 @@ int channel_add(char *result, const char *newname, char *options, bool isdefault
 /* Chanint template
  *  chan->temp = 0;
  */
-    strlcpy(chan->groups, "main", sizeof(chan->groups));
+    chan->groups = new bd::Array<bd::String>;
+    *(chan->groups) << "main";
     chan->protect_backup = 1;
     chan->knock_flags = 0;
     chan->flood_lock_time = 120;
