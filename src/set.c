@@ -975,7 +975,7 @@ int cmd_set_real(const char *botnick, int idx, char *par)
   if (botnick) {
     botu = get_user_by_handle(userlist, (char *) botnick);
     if (data)
-      dprintf(idx, "%-10s:\n", botnick);
+      dprintf(idx, "%s:\n", botnick);
     ishub = bot_hublevel(botu) == 999 ? 0 : 1;
   }
 
