@@ -876,8 +876,8 @@ bool bot_shouldjoin(struct userrec* u, struct flag_record* fr, struct chanset_t*
   // Ignore +inactive during cmd_slowjoin to ensure that +backup bots join
   return (!glob_kick(*fr) && !chan_kick(*fr) && // Not being kicked
       ((ignore_inactive || !channel_inactive(chan)) && // Not inactive
-      ((channel_backup(chan) && (glob_backup(*fr) || chan_backup(*fr))) || (!channel_backup(chan) && !glob_backup(*fr) && !chan_backup(*fr)))) && // Is +backup and I'm B|B, or is -backup and I am not B|B
-      group_match // My group should join
+      ((channel_backup(chan) && (glob_backup(*fr) || chan_backup(*fr) || group_match)) || // Is +backup and I'm a backup bot or my group matches
+       (!channel_backup(chan) && !glob_backup(*fr) && !chan_backup(*fr) && group_match))) // is -backup and I am not a backup bot and my group matches
       );
 }
 
