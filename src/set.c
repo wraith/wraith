@@ -937,6 +937,17 @@ void write_vars_and_cmdpass(bd::Stream& stream, int idx)
     stream << bd::String::printf("- %s %s\n", cp->name, cp->pass);
 }
 
+static void display_set_value(int idx, const variable_t *var, const char *data, bool format = false)
+{
+  char buf[51] = "";
+
+  if (format) {
+    simple_snprintf(buf, sizeof(buf), "(%-6s) %-19s: ", var_type_name(var->flags), var->name);
+  } else {
+    simple_snprintf(buf, sizeof(buf), "(%s) %s: ", var_type_name(var->flags), var->name);
+  }
+  dumplots(idx, buf, data ? (char *) data : (char *) "(not set)");
+}
 
 #define LIST_ADD  1
 #define LIST_RM   2
@@ -1048,11 +1059,7 @@ int cmd_set_real(const char *botnick, int idx, char *par)
         else if (list && !data)
           dprintf(idx, "%s list not set.\n", var->name);
         else {
-          char buf[51] = "";
-
-          simple_snprintf(buf, sizeof(buf), "(%-6s)  %-19s:  ", var_type_name(var->flags), var->name);
-//        dprintf(idx, "   %-15s:   %s\n", var->name, data);
-          dumplots(idx, buf, data ? (char *) data : (char *) "(not set)");
+          display_set_value(idx, var, data, true);
         }
       }
       if (name && !wildcard)
@@ -1159,7 +1166,7 @@ int cmd_set_real(const char *botnick, int idx, char *par)
       if (botnick)
         var_set_userentry(botnick, name, data);
 
-      dprintf(idx, "%s: %s\n", name, botnick ? (!data || (data[0] == '-' && !data[1]) ? "(not set)" : data) : (var->gdata ? var->gdata : "(not set)"));
+      display_set_value(idx, var, data);
 
       if (sdata)
         free(sdata);
