@@ -910,6 +910,17 @@ void write_vars_and_cmdpass(bd::Stream& stream, int idx)
     stream << bd::String::printf("- %s %s\n", cp->name, cp->pass);
 }
 
+static void display_set_value(int idx, const variable_t *var, const char *data, bool format = false)
+{
+  char buf[51] = "";
+
+  if (format) {
+    simple_snprintf(buf, sizeof(buf), "(%-6s) %-19s: ", var_type_name(var->flags), var->name);
+  } else {
+    simple_snprintf(buf, sizeof(buf), "(%s) %s: ", var_type_name(var->flags), var->name);
+  }
+  dumplots(idx, buf, data ? (char *) data : (char *) "(not set)");
+}
 
 #define LIST_ADD  1
 #define LIST_RM   2
@@ -991,7 +1002,7 @@ int cmd_set_real(const char *botnick, int idx, char *par)
   if (botnick) {
     botu = get_user_by_handle(userlist, (char *) botnick);
     if (data)
-      dprintf(idx, "%-10s:\n", botnick);
+      dprintf(idx, "%s:\n", botnick);
     ishub = bot_hublevel(botu) == 999 ? 0 : 1;
   }
 
@@ -1021,11 +1032,7 @@ int cmd_set_real(const char *botnick, int idx, char *par)
         else if (list && !data)
           dprintf(idx, "%s list not set.\n", var->name);
         else {
-          char buf[51] = "";
-
-          simple_snprintf(buf, sizeof(buf), "(%-6s)  %-19s:  ", var_type_name(var->flags), var->name);
-//        dprintf(idx, "   %-15s:   %s\n", var->name, data);
-          dumplots(idx, buf, data ? (char *) data : (char *) "(not set)");
+          display_set_value(idx, var, data, true);
         }
       }
       if (name && !wildcard)
@@ -1094,6 +1101,7 @@ int cmd_set_real(const char *botnick, int idx, char *par)
           return 0;
         } else if (var_add_list(botnick, var, data)) {
           dprintf(idx, "Added '%s' to %s list.\n", data, var->name);
+          display_set_value(idx, var, data);
           return 1;
         }
       } else if (list == LIST_RM) {
@@ -1101,6 +1109,7 @@ int cmd_set_real(const char *botnick, int idx, char *par)
 
         if ((expanded_data = var_rem_list(botnick, var, data)) && expanded_data[0]) {
           dprintf(idx, "Removed '%s' from %s list.\n", expanded_data, var->name);
+          display_set_value(idx, var, botnick ? (!var->ldata || (var->ldata[0] == '-' && !var->ldata[1]) ? "(not set)" : data) : (var->gdata ? var->gdata : "(not set)"));
           return 1;
         } else if (!var_find_list(botnick, var, data)) {
           char *data_word = NULL;
@@ -1132,7 +1141,7 @@ int cmd_set_real(const char *botnick, int idx, char *par)
       if (botnick)
         var_set_userentry(botnick, name, data);
 
-      dprintf(idx, "%s: %s\n", name, botnick ? (!data || (data[0] == '-' && !data[1]) ? "(not set)" : data) : (var->gdata ? var->gdata : "(not set)"));
+      display_set_value(idx, var, data);
 
       if (sdata)
         free(sdata);
