@@ -1085,6 +1085,7 @@ int cmd_set_real(const char *botnick, int idx, char *par)
           return 0;
         } else if (var_add_list(botnick, var, data)) {
           dprintf(idx, "Added '%s' to %s list.\n", data, var->name);
+          display_set_value(idx, var, data);
           return 1;
         }
       } else if (list == LIST_RM) {
@@ -1092,6 +1093,7 @@ int cmd_set_real(const char *botnick, int idx, char *par)
 
         if ((expanded_data = var_rem_list(botnick, var, data)) && expanded_data[0]) {
           dprintf(idx, "Removed '%s' from %s list.\n", expanded_data, var->name);
+          display_set_value(idx, var, botnick ? (!var->ldata || (var->ldata[0] == '-' && !var->ldata[1]) ? "(not set)" : data) : (var->gdata ? var->gdata : "(not set)"));
           return 1;
         } else if (!var_find_list(botnick, var, data)) {
           char *data_word = NULL;
