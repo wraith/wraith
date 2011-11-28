@@ -14,6 +14,7 @@
 #include "misc.h"
 #include "net.h"
 #include "src/mod/server.mod/server.h"
+#include "src/mod/irc.mod/irc.h"
 #include "src/mod/channels.mod/channels.h"
 #include "src/mod/ctcp.mod/ctcp.h"
 #include "users.h"
@@ -407,6 +408,15 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
     sdprintf("server-use-ssl changed, reprocessing server list");
     variable_t *servers = var_get_var_by_name(get_server_type());
     var_set_mem(servers, servers->ldata ? servers->ldata : servers->gdata ? servers->gdata : NULL);
+  }
+
+  // Check if should part/join channels based on groups changing
+  if (!conf.bot->hub && !strcmp(var->name, "groups")) {
+    if (server_online && !restarting && !loading && !reset_chans) {
+      for (struct chanset_t* chan = chanset; chan; chan = chan->next) {
+        check_shouldjoin(chan);
+      }
+    }
   }
 
   if (datap)

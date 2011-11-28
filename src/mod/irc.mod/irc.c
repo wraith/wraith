@@ -1553,13 +1553,21 @@ raise_limit(struct chanset_t *chan)
 
 }
 
-static void
-check_expired_chanstuff(struct chanset_t *chan)
+void check_shouldjoin(struct chanset_t* chan)
 {
   if ((channel_active(chan) || channel_pending(chan)) && !shouldjoin(chan)) {
     sdprintf("Active/Pending in %s but I shouldn't be there, parting...", chan->dname);
-    dprintf(DP_MODE, "PART %s\n", chan->name[0] ? chan->name : chan->dname);
-  } else if (channel_active(chan)) {
+    dprintf(DP_SERVER, "PART %s\n", chan->name[0] ? chan->name : chan->dname);
+  } else if (shouldjoin(chan)) {
+    join_chan(chan);
+  }
+}
+
+static void
+check_expired_chanstuff(struct chanset_t *chan)
+{
+  check_shouldjoin(chan);
+  if (channel_active(chan) && shouldjoin(chan)) {
     masklist *b = NULL, *e = NULL;
     memberlist *m = NULL, *n = NULL;
     char s[UHOSTLEN] = "";
@@ -1670,8 +1678,7 @@ check_expired_chanstuff(struct chanset_t *chan)
     // Update minutely
     chan->channel.splitmembers = splitmembers;
     check_lonely_channel(chan);
-  } else if (shouldjoin(chan))
-    join_chan(chan);
+  }
 }
 
 void
