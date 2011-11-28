@@ -306,7 +306,7 @@ int SplitList(char *resultBuf, const char *list, int *argcPtr, const char ***arg
  */
 int channel_modify(char *result, struct chanset_t *chan, int items, char **item, bool cmd)
 {
-  bool error = 0;
+  bool error = 0, changed_groups = false;
   int old_status = chan->status,
       old_mode_mns_prot = chan->mode_mns_prot,
       old_mode_pls_prot = chan->mode_pls_prot;
@@ -349,6 +349,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
       changroups.sub(",", " ");
       changroups.trim();
       *(chan->groups) = changroups.split(" ");
+      changed_groups = true;
     } else if (!strcmp(item[i], "topic")) {
       char *p = NULL;
 
@@ -827,7 +828,8 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
     chan->status |= CHAN_BITCH;		// to avoid bots still mass opping from +take from not using cookies
 
   if (!conf.bot->hub && (chan != chanset_default)) {
-    if ((old_status ^ chan->status) & (CHAN_INACTIVE | CHAN_BACKUP)) {
+    // Check if groups changed or +/-backup set
+    if (changed_groups || ((old_status ^ chan->status) & (CHAN_INACTIVE | CHAN_BACKUP))) {
       if (!shouldjoin(chan) && (chan->ircnet_status & (CHAN_ACTIVE | CHAN_PEND))) {
         putlog(LOG_DEBUG, "*", "In %s, but I shouldn't be, parting...", chan->dname);
         dprintf(DP_SERVER, "PART %s\n", chan->name[0] ? chan->name : chan->dname);
