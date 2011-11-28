@@ -922,11 +922,13 @@ static void nick_available(bool is_jupe, bool is_orig) {
     // Don't switch to the nick if already on jupenick
   } else if (is_orig && !match_my_nick(origbotname) && (!jupenick[0] || !match_my_nick(jupenick))) {
     if (!tried_nick || ((now - tried_nick) > 2)) {
-      altnick_char = rolls = 0;
       tried_nick = now;
-      dprintf(DP_MODE_NEXT, "NICK %s\n", origbotname);
-      if (!nick_juped)
+      if (!nick_juped) {
+        // Only reset altnick if the nick isn't juped - perfectly fine staying on rotated nick if nick_delay is in effect
+        altnick_char = rolls = 0;
         putlog(LOG_MISC, "*", "Switching back to nick '%s'", origbotname);
+      }
+      dprintf(DP_MODE_NEXT, "NICK %s\n", origbotname);
     }
   }
 }
