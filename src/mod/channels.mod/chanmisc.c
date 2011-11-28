@@ -830,11 +830,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
   if (!conf.bot->hub && (chan != chanset_default)) {
     // Check if groups changed or +/-backup set
     if (changed_groups || ((old_status ^ chan->status) & (CHAN_INACTIVE | CHAN_BACKUP))) {
-      if (!shouldjoin(chan) && (chan->ircnet_status & (CHAN_ACTIVE | CHAN_PEND))) {
-        putlog(LOG_DEBUG, "*", "In %s, but I shouldn't be, parting...", chan->dname);
-        dprintf(DP_SERVER, "PART %s\n", chan->name[0] ? chan->name : chan->dname);
-      } else if (shouldjoin(chan))
-        join_chan(chan);
+      check_shouldjoin(chan);
     }
     if (me_op(chan)) {
       if ((old_status ^ chan->status) & (CHAN_ENFORCEBANS|CHAN_NOUSERBANS|CHAN_DYNAMICBANS|CHAN_NOUSEREXEMPTS|CHAN_NOUSERINVITES|CHAN_DYNAMICEXEMPTS|CHAN_DYNAMICINVITES)) {
