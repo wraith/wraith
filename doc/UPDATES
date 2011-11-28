@@ -7,7 +7,7 @@ next
   * Fix bot getting confusd when changing to long nicks
   * Add [bot]set var 'groups' to configure what groups bots are in
   * Add chanset 'groups' to take a list of groups that should join. 'chanset #chan groups { main backup }'
-  * Fix case where nick would rotated to NICK1 when already on NICK2 and NICK was unavailable
+  * Fix case where nick would rotate to NICK1 when already on NICK2 and NICK was unavailable
 
 1.4.0 - http://wraith.botpack.net/milestone/1.4.0
   * Updated server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
