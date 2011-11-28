@@ -829,7 +829,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
 
   if (!conf.bot->hub && (chan != chanset_default)) {
     // Check if groups changed or +/-backup set
-    if (changed_groups || ((old_status ^ chan->status) & (CHAN_INACTIVE | CHAN_BACKUP))) {
+    if (!restarting && !loading && (changed_groups || ((old_status ^ chan->status) & (CHAN_INACTIVE | CHAN_BACKUP)))) {
       check_shouldjoin(chan);
     }
     if (me_op(chan)) {
