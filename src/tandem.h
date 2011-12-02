@@ -14,7 +14,6 @@ typedef struct tand_t_struct {
   time_t buildts;
   int localhub;
   struct userrec* u;
-  char *not_chans;
   char commit[10];
   char bot[HANDLEN + 1];
   char version[151];

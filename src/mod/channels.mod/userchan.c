@@ -701,9 +701,6 @@ static void write_chan(bd::Stream& stream, int idx, struct chanset_t* chan)
   putlog(LOG_DEBUG, "*", "writing channel %s to userfile..", chan->dname);
 
   bool force_inactive = 0;
-  /* if a bot should explicitly NOT join, just set it +inactive ... */
-  if (idx >= 0 && !botshouldjoin(dcc[idx].user, chan))
-    force_inactive = 1;
 
   stream << bd::String::printf("+ channel add %s { ", chan->dname);
   if (chan != chanset_default)
@@ -826,12 +823,7 @@ void write_chans_compat(bd::Stream& stream, int idx)
     putlog(LOG_DEBUG, "*", "writing channel %s to userfile..", chan->dname);
     get_mode_protect(chan, w, sizeof(w));
 
-    /* if a bot should explicitly NOT join, just set it +inactive ... */
-    if (idx >= 0 && !botshouldjoin(dcc[idx].user, chan))
-      inactive = '+';
-    /* ... otherwise give the bot the *actual* setting */
-    else
-      inactive = PLSMNS(channel_inactive(chan));
+    inactive = PLSMNS(channel_inactive(chan));
 
     stream << bd::String::printf("\
 + channel add %s { chanmode { %s } addedby %s addedts %li \
