@@ -365,12 +365,13 @@ static bool set_gotshare(struct userrec *u, struct user_entry *e, char *buf, int
 static void set_write_userfile(bd::Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
 {
   int localhub = nextbot(u->handle);
-  /* only write if saving local, or if sending to hub, or if sending to same user as entry, or the localhub in the chain */
-  if (idx == -1 || dcc[idx].hub || dcc[idx].user == u || (localhub != -1 && idx == localhub)) {
-    struct xtra_key *x = (struct xtra_key *) e->u.extra;
+  struct xtra_key *x = (struct xtra_key *) e->u.extra;
 
-    for (; x; x = x->next)
+  for (; x; x = x->next) {
+    /* only write if saving local, or if sending to hub, or if sending to same user as entry, or the localhub in the chain, or sending 'groups' */
+    if (idx == -1 || dcc[idx].hub || dcc[idx].user == u || (localhub != -1 && idx == localhub) || !strcmp(x->key, "groups")) {
       stream << bd::String::printf("--%s %s %s\n", e->type->name, x->key, x->data ? x->data : "");
+    }
   }
 }
 
