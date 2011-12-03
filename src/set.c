@@ -702,7 +702,7 @@ void var_userfile_share_line(char *line, int idx, bool share)
     check_removed_server();
 }
 
-static const char *var_get_bot_data(struct userrec *u, const char *name)
+const char *var_get_bot_data(struct userrec *u, const char *name)
 {
   if (!u)
     return NULL;
