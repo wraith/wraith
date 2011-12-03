@@ -15,7 +15,7 @@ int count_users(struct userrec *);
 int deluser(char *);
 int change_handle(struct userrec *, char *);
 void correct_handle(char *);
-void stream_writeuserfile(bd::Stream&, const struct userrec *, bool = 0);
+void stream_writeuserfile(bd::Stream&, const struct userrec *, int idx, bool = 0);
 int real_write_userfile(int);
 int write_userfile(int);
 void touch_laston(struct userrec *, char *, time_t);
