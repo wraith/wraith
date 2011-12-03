@@ -45,6 +45,7 @@
 #include "userrec.h"
 #include "main.h"
 #include "debug.h"
+#include "set.h"
 #include "dccutil.h"
 #include "botmsg.h"
 #if HAVE_GETRUSAGE
@@ -798,8 +799,9 @@ bool bot_shouldjoin(struct userrec* u, struct flag_record* fr, struct chanset_t*
   }
 #endif
 
-  // Am I in the groups that this channel has?
-  bd::Array<bd::String> my_groupsArray(bd::String(groups).split(','));
+  // Is this bot in the groups that this channel has?
+  const char *botgroups = u == conf.bot->u ? groups : var_get_bot_data(u, "groups");
+  bd::Array<bd::String> my_groupsArray(bd::String(botgroups).split(','));
   bool group_match = 0;
 
   if (chan->groups && chan->groups->length()) {
