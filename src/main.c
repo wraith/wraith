@@ -321,12 +321,13 @@ static void show_help()
   printf(format, STR("-u <binary>"), STR("Update binary, Automatically kill/respawn bots"));
   printf(format, STR("-U <binary>"), STR("Update binary"));
   printf(format, STR("-v"), STR("Displays bot version"));
+  printf(format, STR("-V"), STR("Displays the pack.cfg being used"));
   exit(0);
 }
 
 // leaf: BkLP
-#define PARSE_FLAGS STR("0234:aB:cCd:De:EH:k:hnr:tu:U:v")
-#define FLAGS_CHECKPASS STR("cCdDeEknrtuU")
+#define PARSE_FLAGS STR("0234:aB:cCd:De:EH:k:hnr:tu:U:vV")
+#define FLAGS_CHECKPASS STR("cCdDeEknrtuUV")
 static void dtx_arg(int& argc, char *argv[])
 {
   int i = 0, checked_pass = 0;
@@ -446,6 +447,10 @@ static void dtx_arg(int& argc, char *argv[])
         }
 	exit(0);
       }
+      case 'V':
+        writecfg();
+        exit(0);
+        break;
       case '?':
       default:
         break;

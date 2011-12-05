@@ -38,6 +38,8 @@
 #include "botnet.h"
 #include "net.h"
 #include "userrec.h"
+#include <bdlib/src/Array.h>
+#include <bdlib/src/String.h>
 
 #include <sys/wait.h>
 #include <sys/types.h>
@@ -429,6 +431,25 @@ readcfg(const char *cfgfile, bool read_stdin)
   if (!read_stdin) printf(STR(" Success\n"));
   else printf("\n");
   return 1;
+}
+
+void writecfg() {
+  const char salt1[] = SALT1;
+  const char salt2[] = SALT2;
+  bd::Array<bd::String> owners(bd::String(settings.owners).split(","));
+  bd::Array<bd::String> hubs(bd::String(settings.hubs).split(","));
+
+  printf("PACKNAME %s\n", settings.packname);
+  printf("BINARYPASS %s\n", settings.shellhash);
+  printf("DCCPREFIX %s\n", settings.dcc_prefix);
+  for (size_t i = 0; i < owners.length(); ++i) {
+    printf("OWNER %s\n", static_cast<bd::String>(owners[i]).c_str());
+  }
+  for (size_t i = 0; i < hubs.length(); ++i) {
+    printf("HUB %s\n", static_cast<bd::String>(hubs[i]).c_str());
+  }
+  printf("SALT1 %s\n", salt1);
+  printf("SALT2 %s\n", salt2);
 }
 
 static void edpack(settings_t *incfg, const char *in_hash, int what)
