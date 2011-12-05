@@ -440,10 +440,18 @@ void writecfg() {
   bd::Array<bd::String> hubs(bd::String(settings.hubs).split(","));
 
   printf("PACKNAME %s\n", settings.packname);
-  printf("BINARYPASS %s\n", settings.shellhash);
+  // Display the shellhash as salted-sha1 if it is not already
+  bd::String shellhash(settings.shellhash);
+  printf("BINARYPASS %s\n", (shellhash.length() == 40 || shellhash.length() == 47) ? shellhash.c_str() : salted_sha1(shellhash.c_str()));
   printf("DCCPREFIX %s\n", settings.dcc_prefix);
   for (size_t i = 0; i < owners.length(); ++i) {
-    printf("OWNER %s\n", static_cast<bd::String>(owners[i]).c_str());
+    bd::Array<bd::String> ownerInfo(static_cast<bd::String>(owners[i]).split(" "));
+    // Ensure the pass is salted-sha1
+    const size_t ownerPassLength = static_cast<bd::String>(ownerInfo[1]).length();
+    if (ownerPassLength != 40 && ownerPassLength != 47) {
+      ownerInfo[1] = bd::String(salted_sha1(static_cast<bd::String>(ownerInfo[1]).c_str()));
+    }
+    printf("OWNER %s\n", ownerInfo.join(" ").c_str());
   }
   for (size_t i = 0; i < hubs.length(); ++i) {
     printf("HUB %s\n", static_cast<bd::String>(hubs[i]).c_str());
