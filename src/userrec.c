@@ -491,7 +491,7 @@ int write_userfile(int idx)
 
   const char salt1[] = SALT1;
   EncryptedStream stream(salt1);
-  stream_writeuserfile(stream, userlist, idx);
+  stream_writeuserfile(stream, userlist, -1);
   if (stream.writeFile(new_userfile->fd)) {
     putlog(LOG_MISC, "*", "ERROR writing user file. (%s)", strerror(errno));
     delete new_userfile;
