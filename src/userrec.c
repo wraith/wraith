@@ -459,6 +459,7 @@ static void sort_userlist()
 }
 
 void stream_writeuserfile(bd::Stream& stream, const struct userrec *bu, int idx, bool old) {
+  idx = -1;
   time_t tt = now;
   char s1[81] = "";
 
