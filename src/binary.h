@@ -17,4 +17,5 @@ int check_bin_initialized(const char *fname);
 bool check_bin_compat(const char *fname);
 void conf_to_bin(conf_t *, bool, int);
 void reload_bin_data();
+void writecfg();
 #endif /* !_BINARY_H */
