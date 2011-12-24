@@ -281,7 +281,7 @@ static int bind_entry_exec(bind_table_t *table, bind_entry_t *entry, void **al)
 	entry->nhits++;
 
 	/* Does the callback want client data? */
-	if (entry->flags & BIND_WANTS_CD) {
+	if (entry->cflags & BIND_WANTS_CD) {
 		*al = entry->client_data;
 	}
 	else al++;
