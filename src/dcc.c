@@ -1499,7 +1499,7 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, b
     int dns_type = DNS_LOOKUP_A;
     if (is_dotted_ip(iptostr(htonl(dcc[i].addr))) == AF_INET6)//Is this even valid?
       dns_type = DNS_LOOKUP_AAAA;
-    int dns_id = egg_dns_lookup(bd::String(hosts[0]).c_str(), 20, dcc_telnet_dns_forward_callback, (void *) (long) i);
+    int dns_id = egg_dns_lookup(bd::String(hosts[0]).c_str(), 20, dcc_telnet_dns_forward_callback, (void *) (long) i, dns_type);
     if (dns_id >= 0)
       dcc[i].dns_id = dns_id;
   } else {
