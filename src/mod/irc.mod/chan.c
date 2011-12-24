@@ -2486,10 +2486,8 @@ static int gottopic(char *from, char *msg)
 {
   char *chname = newsplit(&msg), *nick = NULL;
   struct chanset_t *chan = NULL;
-  struct userrec *u = NULL;
 
   fixcolon(msg);
-  u = get_user_by_host(from);
   nick = splitnick(&from);
   chan = findchan(chname);
   if (chan) {
@@ -2919,7 +2917,7 @@ static int gotkick(char *from, char *origmsg)
  */
 static int gotnick(char *from, char *msg)
 {
-  char *nick = NULL, *chname = NULL, s1[UHOSTLEN] = "", buf[UHOSTLEN] = "", *uhost = buf;
+  char *nick = NULL, s1[UHOSTLEN] = "", buf[UHOSTLEN] = "", *uhost = buf;
   memberlist *m = NULL, *mm = NULL;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
@@ -2941,7 +2939,6 @@ static int gotnick(char *from, char *msg)
   struct userrec *u = get_user_by_host(s1);
 
   for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
-    chname = chan->dname; 
     m = ismember(chan, nick);
 
     if (m) {

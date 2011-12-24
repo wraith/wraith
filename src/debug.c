@@ -132,7 +132,6 @@ static void write_debug(bool fatal = 1)
   if (fatal) {
     /* Write GDB backtrace */
     char gdb[1024] = "", btfile[256] = "", std_in[101] = "", *out = NULL;
-    unsigned int core = 0;
 
     simple_snprintf(btfile, sizeof(btfile), ".gdb-backtrace-%d", getpid());
 
@@ -154,7 +153,7 @@ static void write_debug(bool fatal = 1)
     struct rlimit limit;
     if (!getrlimit(RLIMIT_CORE, &limit)) {
       limit.rlim_cur = limit.rlim_max;
-      if(!setrlimit(RLIMIT_CORE, &limit)) core = limit.rlim_cur;
+      setrlimit(RLIMIT_CORE, &limit);
     }
   }
 #endif

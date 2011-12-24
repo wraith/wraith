@@ -397,7 +397,7 @@ bool is_hub(const char* nick) {
 void load_internal_users()
 {
   char *p = NULL, *ln = NULL, *hand = NULL, *pass = NULL, *q = NULL;
-  char *hosts = NULL, buf[2048] = "", *attr = NULL, tmp[51] = "";
+  char *hosts = NULL, buf[2048] = "", tmp[51] = "";
   int i;
   struct userrec *u = NULL;
 
@@ -442,7 +442,6 @@ void load_internal_users()
       *p++ = 0;
     hand = ln;
     pass = NULL;
-    attr = NULL;
     hosts = NULL;
     for (i = 0; ln; i++) {
       switch (i) {

@@ -863,7 +863,6 @@ static void bot_reject(int idx, char *par)
     *destbot++ = 0;
     if (!strcasecmp(destbot, conf.bot->nick)) {
       /* Kick someone here! */
-      int ok = 0;
 
       for (i = 0; i < dcc_total; i++) {
         if (dcc[i].type && dcc[i].simul == -1 && !strcasecmp(who, dcc[i].nick) && (dcc[i].type->flags & DCT_CHAT)) {
@@ -875,7 +874,6 @@ static void bot_reject(int idx, char *par)
             }
             do_boot(i, from, par);
             putlog(LOG_CMDS, "*", "#%s# boot %s (%s)", from, who, par[0] ? par : "No reason");
-            ok = 1;
           }
         }
       }
