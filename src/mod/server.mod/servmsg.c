@@ -1201,12 +1201,9 @@ static int goterror(char *from, char *msg)
 static int gotnick(char *from, char *msg)
 {
   char *nick = NULL, *buf = NULL, *buf_ptr = NULL;
-  struct userrec *u = NULL;
 
   //Done to prevent gotnick in irc.mod getting a mangled from
   buf = buf_ptr = strdup(from);
-  //Cache user
-  u = get_user_by_host(buf);
   nick = splitnick(&buf);
   fixcolon(msg);
 

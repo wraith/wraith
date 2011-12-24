@@ -145,7 +145,6 @@ void eof_dcc_fork_send(int idx)
 
 static void eof_dcc_send(int idx)
 {
-  int ok;
   char s[1024] = "";
 
   fflush(dcc[idx].u.xfer->f);
@@ -153,8 +152,6 @@ static void eof_dcc_send(int idx)
   
   fclose(dcc[idx].u.xfer->f);
   if (dcc[idx].u.xfer->length == dcc[idx].status) {
-    /* Success */
-    ok = 0;
     if (!strcmp(dcc[idx].nick, "*users")) {
       finish_share(idx);
       killsock(dcc[idx].sock);

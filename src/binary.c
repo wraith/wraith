@@ -67,13 +67,13 @@ static void tellconfig(settings_t *);
 
 int checked_bin_buf = 0;
 
-#define MMAP_LOOP(_offset, _block_len, _total, _len)	\
+#define MMAP_LOOP(_offset, _block_len, _total)		\
   for ((_offset) = 0; 					\
        (_offset) < (_total); 				\
-       (_offset) += (_block_len),			\
+       (_offset) += (_block_len)/*,			\
        (_len) = ((_total) - (_offset)) < (_block_len) ? \
               ((_total) - (_offset)) : 			\
-              (_block_len)				\
+              (_block_len)*/				\
       )
 
 #define MMAP_READ(_map, _dest, _offset, _len)	\
@@ -87,7 +87,7 @@ bin_checksum(const char *fname, int todo)
   static char hash[MD5_HASH_LENGTH + 1] = "";
   unsigned char md5out[MD5_HASH_LENGTH + 1] = "", buf[PREFIXLEN + 1] = "";
   int fd = -1;
-  size_t len = 0, offset = 0, size = 0, newpos = 0;
+  size_t offset = 0, size = 0, newpos = 0;
   unsigned char *map = NULL, *outmap = NULL;
   char *fname_bak = NULL;
   Tempfile *newbin = NULL;
@@ -106,7 +106,7 @@ bin_checksum(const char *fname, int todo)
     size = lseek(fd, 0, SEEK_END);
     map = (unsigned char*) mmap(0, size, PROT_READ, MAP_SHARED, fd, 0);
     if ((void*)map == MAP_FAILED) goto fatal;
-    MMAP_LOOP(offset, sizeof(buf) - 1, size, len) {
+    MMAP_LOOP(offset, sizeof(buf) - 1, size) {
       if (!memcmp(&map[offset], &settings.prefix, PREFIXLEN))
         break;
     }
@@ -132,7 +132,7 @@ bin_checksum(const char *fname, int todo)
     if ((void*)map == MAP_FAILED) goto fatal;
 
     /* Find the packdata */
-    MMAP_LOOP(offset, sizeof(buf) - 1, size, len) {
+    MMAP_LOOP(offset, sizeof(buf) - 1, size) {
       if (!memcmp(&map[offset], &settings.prefix, PREFIXLEN))
         break;
     }
@@ -179,7 +179,7 @@ bin_checksum(const char *fname, int todo)
     if ((void*)map == MAP_FAILED) goto fatal;
 
     /* Find settings struct in original binary */
-    MMAP_LOOP(offset, sizeof(buf) - 1, size, len) {
+    MMAP_LOOP(offset, sizeof(buf) - 1, size) {
       if (!memcmp(&map[offset], &settings.prefix, PREFIXLEN))
         break;
     }
