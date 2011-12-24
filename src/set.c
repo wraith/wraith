@@ -560,10 +560,7 @@ void var_set(variable_t *var, const char *target, const char *datain)
 //  }
 
   if (target) {
-    bool me = 0;
-
     if (!strcasecmp(conf.bot->nick, target)) {
-      me = 1;
       domem = 1;				/* always set the mem if it's local */
       if (var->ldata)
         free(var->ldata);

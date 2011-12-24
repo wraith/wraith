@@ -588,10 +588,8 @@ static void get_mode_protect(struct chanset_t *chan, char *s, size_t ssiz)
 {
   char *p = s, s1[121] = "";
   int tst;
-  bool ok = 0;
 
   for (int i = 0; i < 2; i++) {
-    ok = 0;
     if (i == 0) {
       tst = chan->mode_pls_prot;
       if ((tst) || (chan->limit_prot != 0) || (chan->key_prot[0]))
