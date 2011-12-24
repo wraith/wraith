@@ -145,13 +145,14 @@ static void bind_table_really_del(bind_table_t *table)
 {
 	bind_entry_t *entry = NULL, *next = NULL;
 
-	free(table->name);
 	for (entry = table->entries; entry; entry = next) {
 		next = entry->next;
 		if (entry->function_name) free(entry->function_name);
 		if (entry->mask) free(entry->mask);
 		free(entry);
 	}
+	if (table->name) free(table->name);
+	if (table->syntax) free(table->syntax);
 	free(table);
 }
 
