@@ -124,10 +124,10 @@ static void
 rotate_key(char* key, int& seed)
 {
   if (seed) {
-    *(dword *) & key[0] = prand(&seed, 0xFFFFFFFF);
-    *(dword *) & key[4] = prand(&seed, 0xFFFFFFFF);
-    *(dword *) & key[8] = prand(&seed, 0xFFFFFFFF);
-    *(dword *) & key[12] = prand(&seed, 0xFFFFFFFF);
+    *(uint32_t *) & key[0] = prand(&seed, 0xFFFFFFFF);
+    *(uint32_t *) & key[4] = prand(&seed, 0xFFFFFFFF);
+    *(uint32_t *) & key[8] = prand(&seed, 0xFFFFFFFF);
+    *(uint32_t *) & key[12] = prand(&seed, 0xFFFFFFFF);
 
     if (!seed)
       seed++;

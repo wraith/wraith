@@ -20,8 +20,6 @@ typedef int (*Function) ();
 typedef int socklen_t;
 #endif
 
-typedef uint32_t 		dword;
-
 /* port */
 typedef in_port_t		port_t;
 
