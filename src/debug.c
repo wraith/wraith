@@ -153,7 +153,6 @@ static void got_segv(int z)
   fatal("SEGMENT VIOLATION -- CRASHING!", 1);
 #ifdef DEBUG
   char gdb[1024] = "", btfile[256] = "", std_in[101] = "", *out = NULL;
-  unsigned int core = 0;
 
   simple_snprintf(btfile, sizeof(btfile), ".gdb-backtrace-%d", getpid());
 
@@ -175,7 +174,7 @@ static void got_segv(int z)
   struct rlimit limit;
   if (!getrlimit(RLIMIT_CORE, &limit)) {
     limit.rlim_cur = limit.rlim_max;
-    if(!setrlimit(RLIMIT_CORE, &limit)) core = limit.rlim_cur;
+    setrlimit(RLIMIT_CORE, &limit);
   }
 
   raise(SIGSEGV);

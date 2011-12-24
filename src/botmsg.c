@@ -449,7 +449,7 @@ void botnet_send_nkch_part(int butidx, int useridx, char *oldnick)
  */
 int add_note(char *to, char *from, char *msg, int idx, int echo)
 {
-  int status, i, sock;
+  int i, sock;
   char *p = NULL, botf[81] = "", ss[81] = "", ssf[81] = "";
   struct userrec *u;
 
@@ -510,8 +510,6 @@ int add_note(char *to, char *from, char *msg, int idx, int echo)
 
   if (is_bot(u))
     return NOTE_ERROR;
-
-  status = NOTE_ERROR;
 
   /* Online right now? */
   for (i = 0; i < dcc_total; i++) {

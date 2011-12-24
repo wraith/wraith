@@ -47,24 +47,24 @@ help_t help[] = \n\
 
     if (buffer[0] == ':') { /* New cmd */
       bd::String ifdef(buffer.length());
-      int cl = 0, doleaf = 0, dohub = 0;
+      int doleaf = 0, dohub = 0;
 
       ++buffer;
       ifdef = newsplit(buffer, ':');
 
       if (ifdef.length()) {
         if (ifdef == "leaf") {
-          if (hub) { cl = 1; hub = 0; }
+          if (hub) { hub = 0; }
           if (!leaf) {
             doleaf = leaf = 1;
           }
         } else if (ifdef == "hub") {
-          if (leaf) { cl = 1; hub = 0; }
+          if (leaf) { hub = 0; }
           if (!hub) {
             dohub = hub = 1;
           }
         }
-      } else { if (leaf || hub) { cl = 1; } leaf = 0; hub = 0;  }
+      } else { leaf = 0; hub = 0;  }
 
       if (cmd.length()) {		/* CLOSE LAST CMD */
         if (cmd.find(':') != bd::String::npos)		/* garbled */
