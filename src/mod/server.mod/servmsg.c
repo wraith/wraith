@@ -1980,7 +1980,7 @@ static void connect_server(void)
 {
   char pass[121] = "", botserver[UHOSTLEN] = "";
   int newidx;
-  port_t botserverport = 0;
+  in_port_t botserverport = 0;
 
   waiting_for_awake = 0;
   /* trying_server = now; */

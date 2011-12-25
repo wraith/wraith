@@ -92,7 +92,7 @@ typedef struct {
   bd::String* inbuf;
   bd::String* outbuf;
   char *host;
-  port_t port;
+  in_port_t port;
   short          flags;
   char okey[ENC_KEY_LEN + 1];                        /* botlink enckey: out */
   char ikey[ENC_KEY_LEN + 1];                        /* botlink enckey: in  */
@@ -119,20 +119,20 @@ int real_getsock(int, const char *, int);
 
 int sockprotocol(int);
 void real_killsock(int, const char *, int);
-int answer(int, char *, in_addr_t *, port_t *, int);
+int answer(int, char *, in_addr_t *, in_port_t *, int);
 int findanysnum(register int);
 int findanyidx(register int sock);
-int open_listen(port_t *);
-int open_listen_by_af(port_t *, int);
-int open_listen_addr_by_af(const char*, port_t *, int);
+int open_listen(in_port_t *);
+int open_listen_by_af(in_port_t *, int);
+int open_listen_addr_by_af(const char*, in_port_t *, int);
 #ifdef USE_IPV6
-int open_address_listen(const char*, int, port_t *);
+int open_address_listen(const char*, int, in_port_t *);
 #else
-int open_address_listen(const char*, port_t *);
+int open_address_listen(const char*, in_port_t *);
 #endif /* USE_IPV6 */
-int open_telnet(const char *, port_t, bool proxy = 0, int identd = 0);
+int open_telnet(const char *, in_port_t, bool proxy = 0, int identd = 0);
 int open_telnet_dcc(int, char *, char *);
-int open_telnet_raw(int, const char *, port_t, bool, int = 0);
+int open_telnet_raw(int, const char *, in_port_t, bool, int = 0);
 void tputs(int, const char *, size_t);
 void dequeue_sockets();
 int sockgets(char *, int *);
@@ -155,7 +155,7 @@ extern unsigned long			notalloc;
 extern char				firewall[], botuser[21];
 extern int				MAXSOCKS, socks_total;
 extern bool				identd_hack, cached_ip;
-extern port_t				firewallport;
+extern in_port_t				firewallport;
 extern jmp_buf				alarmret;
 extern sock_list			*socklist;
 

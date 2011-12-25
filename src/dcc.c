@@ -613,7 +613,7 @@ static void
 dcc_identd_connect(int idx, char *buf, int atr)
 {
   in_addr_t ip;
-  port_t port;
+  in_port_t port;
   int j, sock;
   char s[UHOSTLEN + 1] = "";
 
@@ -1375,7 +1375,7 @@ static void
 dcc_telnet(int idx, char *buf, int ii)
 {
   in_addr_t ip;
-  port_t port;
+  in_port_t port;
   char s[UHOSTLEN + 1] = "";
   int i;
   char x[1024] = "";
@@ -1421,11 +1421,7 @@ dcc_telnet(int idx, char *buf, int ii)
     return;
   }
 
-#if SIZEOF_SHORT == 2
-  if (port < 1024) {
-#else
-  if (port < 1024 || port > 65535) {
-#endif
+  if (port < 1024 || port > 65534) {
     putlog(LOG_BOTS, "*", "Refused %s/%d (bad src port)", s, port);
     killsock(sock);
     return;

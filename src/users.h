@@ -62,8 +62,8 @@ struct bot_addr {
   char *address;
   char *uplink;
   unsigned short hublevel;
-  port_t telnet_port;
-  port_t relay_port;
+  in_port_t telnet_port;
+  in_port_t relay_port;
 };
 
 struct user_entry {

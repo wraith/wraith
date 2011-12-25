@@ -28,7 +28,7 @@ typedef struct {
 //#define SOCKNAME_INADDR(x) (((x).family == AF_INET6) ? x.u.ipv6.sin6_addr : x.u.ipv4.sin_addr)
 //#define SOCKNAME_ADDR(x) (((x).family == AF_INET6) ? x.u.ipv6.sin6_addr.s6_addr : x.u.ipv4.sin_addr.s_addr)
 
-int socket_name(sockname_t *name, const char *ipaddr, port_t port);
+int socket_name(sockname_t *name, const char *ipaddr, in_port_t port);
 
 
 /* globals */

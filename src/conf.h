@@ -40,8 +40,8 @@ typedef struct conf_b {
   char *datadir;
   char *username;       /* shell username */
   char *homedir;        /* homedir */
-  port_t portmin;       /* for hubs, the reserved port range for incoming connections */
-  port_t portmax;       /* for hubs, the reserved port range for incoming connections */
+  in_port_t portmin;       /* for hubs, the reserved port range for incoming connections */
+  in_port_t portmax;       /* for hubs, the reserved port range for incoming connections */
 } conf_t;
 
 extern conf_t		conf;
