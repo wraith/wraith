@@ -1419,11 +1419,7 @@ dcc_telnet(int idx, char *buf, int ii)
     return;
   }
 
-#if SIZEOF_SHORT == 2
-  if (port < 1024) {
-#else
-  if (port < 1024 || port > 65535) {
-#endif
+  if (port < 1024 || port > 65534) {
     putlog(LOG_BOTS, "*", "Refused %s/%d (bad src port)", s, port);
     killsock(sock);
     return;
