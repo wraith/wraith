@@ -37,7 +37,7 @@ void notice(const char* target, const char* msg, int idx);
 
 extern struct chanset_t		*chanset, *chanset_default;
 extern char			admin[], origbotnick[HANDLEN + 1], origbotname[NICKLEN], jupenick[NICKLEN], botname[NICKLEN], *def_chanset;
-extern port_t			my_port;
+extern in_port_t			my_port;
 extern int			reset_chans;
 extern bool			cookies_disabled;
 

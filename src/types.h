@@ -20,9 +20,6 @@ typedef int (*Function) ();
 typedef int socklen_t;
 #endif
 
-/* port */
-typedef in_port_t		port_t;
-
 // Signed so that it can play nice with time_t
 typedef int			interval_t;
 

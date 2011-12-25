@@ -1507,7 +1507,7 @@ static void cmd_chaddr(int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# chaddr %s %s", dcc[idx].nick, handle, addr);
   dprintf(idx, "Changed bot's address.\n");
 
-  port_t telnet_port = 3333, relay_port = 3333;
+  in_port_t telnet_port = 3333, relay_port = 3333;
   char *p = NULL, *q = NULL;
 #ifdef USE_IPV6
   char *r = NULL;
@@ -4302,7 +4302,7 @@ static void rcmd_jump(char * frombot, char * fromhand, char * fromidx, char * pa
   if (!conf.bot->hub) {
     if (par[0]) {
       char *other = newsplit(&par), *p = NULL;
-      port_t port = atoi(newsplit(&par));
+      in_port_t port = atoi(newsplit(&par));
 
       if ((p = strchr(other, ':'))) {
         *p = 0;

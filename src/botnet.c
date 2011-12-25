@@ -985,7 +985,7 @@ int botlink(char *linker, int idx, char *nick)
       correct_handle(nick);
 
       char *address = NULL;
-      port_t port = 0;
+      in_port_t port = 0;
 
       if (unix_domain) {
         address = conf.localhub_socket;

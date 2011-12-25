@@ -77,7 +77,7 @@ jmp_buf	alarmret;		/* Env buffer for alarm() returns	    */
 
 /* This *MUST* be an ip */
 char   firewall[121] = "";     /* Socks server for firewall                */
-port_t firewallport = 1080;    /* Default port of Sock4/5 firewalls        */
+in_port_t firewallport = 1080;    /* Default port of Sock4/5 firewalls        */
 /* Types of proxy */
 #define PROXY_SOCKS   1
 #define PROXY_SUN     2
@@ -429,7 +429,7 @@ void real_killsock(register int sock, const char *file, int line)
 
 /* Send connection request to proxy
  */
-static int proxy_connect(int sock, const char *ip, port_t port, int proxy_type)
+static int proxy_connect(int sock, const char *ip, in_port_t port, int proxy_type)
 {
   sdprintf("proxy_connect(%d, %s, %d, %d)", sock, ip, port, proxy_type);
 #ifdef USE_IPV6
@@ -476,7 +476,7 @@ static int proxy_connect(int sock, const char *ip, port_t port, int proxy_type)
 }
 
 /* FIXME: REPLACE WITH SOCK_NAME() */
-void initialize_sockaddr(int af_type, const char *host, port_t port, union sockaddr_union *so)
+void initialize_sockaddr(int af_type, const char *host, in_port_t port, union sockaddr_union *so)
 {
     bzero(so, sizeof(*so));
 
@@ -513,9 +513,9 @@ void initialize_sockaddr(int af_type, const char *host, port_t port, union socka
  *   -1  strerror()/errno type error
  *   -2  can't resolve hostname
  */
-int open_telnet_raw(int sock, const char *ipIn, port_t sport, bool proxy_on, int identd)
+int open_telnet_raw(int sock, const char *ipIn, in_port_t sport, bool proxy_on, int identd)
 {
-  static port_t port = 0;
+  static in_port_t port = 0;
   union sockaddr_union so;
   char ip[121] = "";
   int is_resolved = 0;
@@ -611,7 +611,7 @@ int open_telnet_raw(int sock, const char *ipIn, port_t sport, bool proxy_on, int
 }
 
 /* Ordinary non-binary connection attempt */
-int open_telnet(const char *ip, port_t port, bool proxy, int identd)
+int open_telnet(const char *ip, in_port_t port, bool proxy, int identd)
 {
   int sock = -1;
   
@@ -631,9 +631,9 @@ int open_telnet(const char *ip, port_t port, bool proxy, int identd)
  * 'addr' is ignored if af_def is AF_INET6 -poptix (02/03/03)
  */
 #ifdef USE_IPV6
-int open_address_listen(const char* ip, int af_def, port_t *port) {
+int open_address_listen(const char* ip, int af_def, in_port_t *port) {
 #else
-int open_address_listen(const char* ip, port_t *port) {
+int open_address_listen(const char* ip, in_port_t *port) {
    int af_def = AF_INET;
 #endif /* USE_IPV6 */
 //  if (firewall[0]) {
@@ -750,7 +750,7 @@ int open_address_listen(const char* ip, port_t *port) {
 /* Returns a socket number for a listening socket that will accept any
  * connection -- port # is returned in port
  */
-int open_listen(port_t *port)
+int open_listen(in_port_t *port)
 {
 #ifdef USE_IPV6
   return open_address_listen(iptostr(getmyip()), AF_INET, port);
@@ -763,7 +763,7 @@ int open_listen(port_t *port)
  * the above is being left in for compatibility, and should NOT LONGER BE USED IN THE CORE CODE.
  */
 
-int open_listen_by_af(port_t *port, int af_def)
+int open_listen_by_af(in_port_t *port, int af_def)
 {
 #ifdef USE_IPV6
   return open_address_listen(iptostr(getmyip()), af_def, port);
@@ -772,7 +772,7 @@ int open_listen_by_af(port_t *port, int af_def)
 #endif /* USE_IPV6 */
 }
 
-int open_listen_addr_by_af(const char *ip, port_t *port, int af_def)
+int open_listen_addr_by_af(const char *ip, in_port_t *port, int af_def)
 {
   if (!ip)
     ip = iptostr(getmyip());
@@ -799,7 +799,7 @@ char *iptostr(in_addr_t ip)
  * by open_listen ... returns hostname of the caller & the new socket
  * does NOT dispose of old "public" socket!
  */
-int answer(int sock, char *caller, in_addr_t *ip, port_t *port, int binary)
+int answer(int sock, char *caller, in_addr_t *ip, in_port_t *port, int binary)
 {
   int new_sock;
   socklen_t addrlen;
@@ -881,7 +881,7 @@ int answer(int sock, char *caller, in_addr_t *ip, port_t *port, int binary)
  */
 int open_telnet_dcc(int sock, char *ip, char *port)
 {
-  port_t p;
+  in_port_t p;
   unsigned long addr;
   char sv[100] = "";
   unsigned char c[4] = "";

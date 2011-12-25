@@ -7,8 +7,8 @@
 
 /* Public structure for the listening port map */
 struct portmap {
-  port_t realport;
-  port_t mappedto;
+  in_port_t realport;
+  in_port_t mappedto;
   struct portmap *next;
 };
 
@@ -60,7 +60,7 @@ void do_boot(int, const char *, const char *);
 int detect_dcc_flood(time_t *, struct chat_info *, int);
 void identd_open(const char * = NULL, const char * = NULL, int identd = 1);
 void identd_close();
-int listen_all(port_t, bool, bool);
+int listen_all(in_port_t, bool, bool);
 bool valid_idx(int);
 int dcc_read(bd::Stream&);
 void dcc_write(bd::Stream&, int);

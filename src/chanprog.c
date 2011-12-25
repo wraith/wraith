@@ -63,7 +63,7 @@ char			origbotnick[HANDLEN + 1] = "";	/* from -B (placed into conf.bot->nick .. 
 char 			origbotname[NICKLEN] = "";	/* Nick to regain */
 char                    jupenick[NICKLEN] = "";
 char 			botname[NICKLEN] = "";	/* IRC nickname */
-port_t     		my_port = 0;
+in_port_t     		my_port = 0;
 int			reset_chans = 0;
 bool                    cookies_disabled = 0;
 char s2_4[3] = "",s1_6[3] = "",s1_11[3] = "";
@@ -605,7 +605,7 @@ void rehash_ip() {
     }
     if (!listening) {
       // Listen on the unix domain socket
-      port_t port;
+      in_port_t port;
       int i = open_listen_addr_by_af(conf.localhub_socket, &port, AF_UNIX);
       if (i < 0) {
         putlog(LOG_ERRORS, "*", "Can't listen on %s - %s", conf.localhub_socket, i == -1 ? "it's taken." : "couldn't assign file.");
