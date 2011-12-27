@@ -4,7 +4,6 @@ next
   * Add cmd_newhub for adding a new hub. All bots will add this to their config.
   * Hubs can now be overridden inside the botconfig (-C)
   * Optimize userfile writing by doing it asynchronously
-  * Fix bot getting confusd when changing to long nicks
   * Add [bot]set var 'groups' to configure what groups bots are in
   * Add chanset 'groups' to take a list of groups that should join. 'chanset #chan groups { main backup }'
   * Fix case where nick would rotate to NICK1 when already on NICK2 and NICK was unavailable
@@ -26,6 +25,10 @@ next
   * When 'mdop' protection is on, re-op all previously opped clients automatically.
   * When 'mop' protection is on, deop all previously regular clients automatically.
   * Add './wraith -V' which will display the packconfig that the bot is using.
+
+maint
+  * Fix various compile warnings with newer GCC
+  * Fix bot getting confused when changing to long nicks
 
 1.3.3 - http://wraith.botpack.net/milestone/1.3.3
   * Fix --disable-ipv6 compiling
