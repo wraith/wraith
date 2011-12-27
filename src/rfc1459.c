@@ -28,22 +28,29 @@
 #include "rfc1459.h"
 
 int (*rfc_casecmp) (const char *, const char *) = _rfc_casecmp;
+int (*rfc_ncasecmp) (const char *, const char *, size_t) = _rfc_ncasecmp;
 int (*rfc_toupper) (int) = _rfc_toupper;
 
 int
 _rfc_casecmp(const char *s1, const char *s2)
 {
-  register unsigned char *str1 = (unsigned char *) s1;
-  register unsigned char *str2 = (unsigned char *) s2;
-  register int res;
-
-  while (!(res = rfc_toupper(*str1) - rfc_toupper(*str2))) {
-    if (*str1 == '\0')
-      return 0;
-    str1++;
-    str2++;
+  while ((*s1) && (*s2) && (rfc_toupper(*s1) == rfc_toupper(*s2))) {
+    ++s1;
+    ++s2;
   }
-  return (res);
+  return rfc_toupper(*s1) - rfc_toupper(*s2);
+}
+
+int
+_rfc_ncasecmp(const char *s1, const char *s2, size_t n)
+{
+  if (!n)
+    return 0;
+  while (--n && (*s1) && (*s2) && (rfc_toupper(*s1) == rfc_toupper(*s2))) {
+    ++s1;
+    ++s2;
+  }
+  return rfc_toupper(*s1) - rfc_toupper(*s2);
 }
 
 unsigned char rfc_touppertab[] = { 0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa,
