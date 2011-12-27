@@ -16,6 +16,10 @@
   * When 'mop' protection is on, deop all previously regular clients automatically.
   * Add './wraith -V' which will display the packconfig that the bot is using.
 
+maint
+  * Fix various compile warnings with newer GCC
+  * Fix bot getting confused when changing to long nicks
+
 1.3.3 - http://wraith.botpack.net/milestone/1.3.3
   * Fix --disable-ipv6 compiling
   * Update cmd_mop to support console channel (so it works via Auth commands better)
