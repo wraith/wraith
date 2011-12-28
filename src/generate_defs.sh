@@ -25,10 +25,14 @@ for file in $(grep -l DLSYM_GLOBAL src/*.c|grep -v "src/_"); do
   pushd src >/dev/null 2>&1
   $CXX -E -I. -I.. -I../lib -I${INCLUDES} -DHAVE_CONFIG_H ../${file} > $TMPFILE
   # Fix wrapped prototypes
-  sed -i -e ':a;N;$!ba;s/,\n/,/g' $TMPFILE
+  SED=$(which gsed)
+  if [ $? -ne 0 ]; then
+    SED="sed"
+  fi
+  $SED -i -e ':a;N;$!ba;s/,\n/,/g' $TMPFILE
   popd >/dev/null 2>&1
 
-  for symbol in $(sed -n -e 's/.*DLSYM_GLOBAL(.*, \([^)]*\).*/\1/p' $file|sort -u); do
+  for symbol in $($SED -n -e 's/.*DLSYM_GLOBAL(.*, \([^)]*\).*/\1/p' $file|sort -u); do
     echo "#define ${symbol} ORIGINAL_SYMBOL_${symbol}" >> $defsFile_pre
     echo "#undef ${symbol}" >> $defsFile_post
     # Check if the typedef is already defined ...
@@ -36,7 +40,7 @@ for file in $(grep -l DLSYM_GLOBAL src/*.c|grep -v "src/_"); do
     # ... if not, generate it
     if [ -z "$typedef" ]; then
       # Trim off any extern "C", trim out the variable names, cleanup whitespace issues
-      typedef=$(sed -n -e "/\<${symbol}\>/p" $TMPFILE | head -n 1 | sed -e 's/extern "C" *//' -e "s/\(.*\) *${symbol} *(\(.*\));/typedef \1 (*${symbol}_t)(\2);/" -e 's/[_0-9A-Za-z]*\(,\)/\1/g' -e 's/[_0-9A-Za-z]*\();\)/\1/g' -e 's/  */ /g' -e 's/ \([,)]\)/\1/g' -e 's/ *()/(void)/g')
+      typedef=$($SED -n -e "/\<${symbol}\>/p" $TMPFILE | head -n 1 | $SED -e 's/extern "C" *//' -e "s/\(.*\) *${symbol} *(\(.*\));/typedef \1 (*${symbol}_t)(\2);/" -e 's/[_0-9A-Za-z]*\(,\)/\1/g' -e 's/[_0-9A-Za-z]*\();\)/\1/g' -e 's/  */ /g' -e 's/ \([,)]\)/\1/g' -e 's/ *()/(void)/g')
       echo "$typedef" >> $defsFile_post
     fi
 
