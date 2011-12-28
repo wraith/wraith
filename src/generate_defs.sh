@@ -25,7 +25,7 @@ for file in $(grep -l DLSYM_GLOBAL src/*.c|grep -v "src/_"); do
   pushd src >/dev/null 2>&1
   $CXX -E -I. -I.. -I../lib -I${INCLUDES} -DHAVE_CONFIG_H ../${file} > $TMPFILE
   # Fix wrapped prototypes
-  perl -p -i -e 's/,\n/,/' $TMPFILE
+  sed -i -e ':a;N;$!ba;s/,\n/,/g' $TMPFILE
   popd >/dev/null 2>&1
 
   for symbol in $(sed -n -e 's/.*DLSYM_GLOBAL(.*, \([^)]*\).*/\1/p' $file|sort -u); do
