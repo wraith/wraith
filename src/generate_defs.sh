@@ -1,5 +1,9 @@
 #! /bin/bash
 
+if [ -z "$SED" -o -z "$CXX" ]; then
+  echo "This must be ran by configure" >&2
+  exit 1
+fi
 echo "Generating lib symbols"
 INCLUDES="-I${TCLINC} ${SSL_INCLUDES}"
 
@@ -25,10 +29,6 @@ for file in $(grep -l DLSYM_GLOBAL src/*.c|grep -v "src/_"); do
   pushd src >/dev/null 2>&1
   $CXX -E -I. -I.. -I../lib ${INCLUDES} -DHAVE_CONFIG_H ../${file} > $TMPFILE
   # Fix wrapped prototypes
-  SED=$(which gsed)
-  if [ $? -ne 0 ]; then
-    SED="sed"
-  fi
   $SED -i -e ':a;N;$!ba;s/,\n/,/g' $TMPFILE
   popd >/dev/null 2>&1
 
