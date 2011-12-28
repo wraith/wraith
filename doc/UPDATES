@@ -17,6 +17,7 @@
   * Add './wraith -V' which will display the packconfig that the bot is using.
   * Add cmd_newhub for adding a new hub. All bots will add this to their config.
   * Hubs can now be overridden inside the botconfig (-C)
+  * Optimize userfile writing by doing it asynchronously
 
 maint
   * Fix various compile warnings with newer GCC
