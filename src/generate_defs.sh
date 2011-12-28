@@ -1,7 +1,7 @@
 #! /bin/bash
 
 echo "Generating lib symbols"
-INCLUDES="${TCLINC} ${SSL_INCLUDES}"
+INCLUDES="-I${TCLINC} ${SSL_INCLUDES}"
 
 mkdir -p src/.defs > /dev/null 2>&1
 TMPFILE=$(mktemp "/tmp/pre.XXXXXX")
@@ -23,7 +23,7 @@ for file in $(grep -l DLSYM_GLOBAL src/*.c|grep -v "src/_"); do
   echo "extern \"C\" {" > $defsFile_post
   touch $defsFile_pre
   pushd src >/dev/null 2>&1
-  $CXX -E -I. -I.. -I../lib -I${INCLUDES} -DHAVE_CONFIG_H ../${file} > $TMPFILE
+  $CXX -E -I. -I.. -I../lib ${INCLUDES} -DHAVE_CONFIG_H ../${file} > $TMPFILE
   # Fix wrapped prototypes
   SED=$(which gsed)
   if [ $? -ne 0 ]; then
