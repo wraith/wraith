@@ -3250,6 +3250,68 @@ static void cmd_newleaf(int idx, char *par)
   }
 }
 
+static void cmd_newhub(int idx, char *par)
+{
+  bd::Array<bd::String> params(bd::String(par).split(' '));
+  if (!par[0] || params.length() < 3) {
+    dprintf(idx, "Usage: newhub <handle> <address> <port> [hublevel]\n");
+    return;
+  }
+
+  putlog(LOG_CMDS, "*", "#%s# newhub %s", dcc[idx].nick, par);
+
+  bd::String handle(params[0]);
+
+  if (handle.length() > HANDLEN) {
+    handle.resize(HANDLEN);
+  }
+  if (get_user_by_handle(userlist, const_cast<char*>(handle.c_str()))) {
+    dprintf(idx, "Already got a %s hub\n", handle.c_str());
+    return;
+  } else if (strchr(BADHANDCHARS, handle[0]) != NULL) {
+    dprintf(idx, "You can't start a botnick with '%c'.\n", static_cast<char>(handle[0]));
+    return;
+  }
+
+  bd::String address(params[1]);
+  port_t port = atoi(static_cast<bd::String>(params[2]).c_str());
+
+  unsigned short hublevel = 0;
+  // Was a hublevel passed in?
+  if (params.length() == 4) {
+    hublevel = atoi(static_cast<bd::String>(params[3]).c_str());
+  } else {
+    // Find next available hublevel
+    for (struct userrec *u = userlist; u; u = u->next) {
+      unsigned short u_bot_hublevel = bot_hublevel(u);
+      if (u->bot && u_bot_hublevel < 999 && u_bot_hublevel > hublevel) {
+        hublevel = u_bot_hublevel;
+      }
+    }
+    ++hublevel;
+  }
+
+  struct bot_addr *bi = NULL;
+  struct userrec *u1 = NULL;
+  char tmp[81] = "";
+
+  userlist = adduser(userlist, handle.c_str(), "none", "-", USER_OP, 1);
+  u1 = get_user_by_handle(userlist, const_cast<char*>(handle.c_str()));
+  bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
+  bi->uplink = (char *) my_calloc(1, 1);
+  bi->address = strdup(address.c_str());
+  bi->telnet_port = port;
+  bi->relay_port = port;
+  bi->hublevel = hublevel;
+
+  set_user(&USERENTRY_BOTADDR, u1, bi);
+  simple_snprintf(tmp, sizeof(tmp), "%li %s", (long) now, dcc[idx].nick);
+  set_user(&USERENTRY_ADDED, u1, tmp);
+  dprintf(idx, "Added new hub: %s\n", handle.c_str());
+
+  write_userfile(idx);
+}
+
 static void cmd_nopass(int idx, char *par)
 {
   int cnt = 0;
@@ -4615,6 +4677,7 @@ cmd_t C_dcc[] =
   {"me",		"",	(Function) cmd_me,		NULL, 0},
   {"motd",		"",	(Function) cmd_motd,		NULL, 0},
   {"newleaf",		"n",	(Function) cmd_newleaf,		NULL, HUB},
+  {"newhub",		"a",	(Function) cmd_newhub,		NULL, HUB},
   {"nopass",		"m",	(Function) cmd_nopass,		NULL, HUB},
   {"newpass",		"",	(Function) cmd_newpass,		NULL, 0},
   {"secpass",		"",	(Function) cmd_secpass,		NULL, 0},

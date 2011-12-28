@@ -609,9 +609,8 @@ int str_isdigit(const char *str)
  */
 void kill_bot(char *s1, char *s2)
 {
-  if (conf.bot->hub)
-    write_userfile(-1);
-  else
+  write_userfile(-1);
+  if (!conf.bot->hub)
     server_die();
   chatout("*** %s\n", s1);
   botnet_send_chat(-1, conf.bot->nick, s1);
@@ -818,8 +817,7 @@ restart(int idx)
 
   socks->my_close();
 
-  if (conf.bot->hub)
-    write_userfile(idx);
+  write_userfile(idx);
 /*
   if (server_online) {
     do_chanset(NULL, NULL, STR("+inactive"), DO_LOCAL);

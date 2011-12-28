@@ -6,7 +6,7 @@
 #define PREFIXLEN sizeof(SETTINGS_HEADER)
 
 /* !!! THIS MUST BE CHANGED WHEN CHANGING THE PACK STRUCT OR ALGORITHMS !!! */
-#define SETTINGS_VER 2
+#define SETTINGS_VER 3
 
 #define DYNAMIC_HEADER dynamic_initialized
 
@@ -23,8 +23,10 @@ typedef struct settings_struct {
   char salt2[17];
   char dcc_prefix[17];
   char features[17];
+  char pack_padding[7];
   /* -- DYNAMIC -- */
   char dynamic_initialized[17];
+  char conf_hubs[513];
   char bots[1025];
   char uid[17];
   char autocron[17];         /* should the bot auto crontab itself? */
@@ -34,7 +36,7 @@ typedef struct settings_struct {
   char portmin[17];       /* for hubs, the reserved port range for incoming connections */
   char portmax[17];       /* for hubs, the reserved port range for incoming connections */
   /* -- PADDING -- */
-  char padding[14];        // (16 - (sizeof(settings_t) % 16)) % 16]
+  char padding[6];        // (16 - (sizeof(settings_t) % 16)) % 16]
 } settings_t;
 
 #define SALT1 {s1_1[0],s1_1[1],s1_5[0],s1_5[1],s1_8[0],s1_8[1],s1_4[0],s1_9[1],s1_2[0],s1_13[0],s1_6[0],s1_6[1],s1_7[0],s1_7[1],s1_3[0],s1_13[1],s1_16[1],s1_4[1],s1_15[0],s1_10[1],s1_14[0],s1_14[1],s1_12[0],s1_12[1],s1_2[1],s1_3[1],s1_11[0],s1_11[1],s1_10[0],s1_15[1],s1_16[0],s1_9[0],'\0'}
@@ -47,14 +49,16 @@ extern char s1_3[3],s1_2[3],s1_1[3],s2_7[3],s1_9[3],s1_13[3],s1_14[3],s2_2[3],s1
 
 #define SIZE_PACK sizeof(settings.hash) + sizeof(settings.packname) + sizeof(settings.shellhash) + \
 sizeof(settings.owners) + sizeof(settings.hubs) + \
-sizeof(settings.salt1) + sizeof(settings.salt2) + sizeof(settings.dcc_prefix) + sizeof(settings.features)
+sizeof(settings.salt1) + sizeof(settings.salt2) + sizeof(settings.dcc_prefix) + sizeof(settings.features) + sizeof(settings.pack_padding)
 
-#define SIZE_CONF sizeof(settings.dynamic_initialized) + sizeof(settings.bots) + sizeof(settings.uid) + \
+#define SIZE_CONF sizeof(settings.dynamic_initialized) + sizeof(settings.conf_hubs) + sizeof(settings.bots) + sizeof(settings.uid) + \
 sizeof(settings.autocron) + \
 sizeof(settings.username) + sizeof(settings.homedir) + \
 sizeof(settings.portmin) + sizeof(settings.portmin) + sizeof(settings.datadir)
 
+#define SIZE_PAD_ALIGN PREFIXLEN
 #define SIZE_PAD sizeof(settings.padding)
+#define SIZE_PAD_PACK sizeof(settings.pack_padding)
 
 #define SIZE_SETTINGS sizeof(settings_t)
 
