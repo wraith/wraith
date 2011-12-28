@@ -1,8 +1,7 @@
 #! /bin/bash
 
-CXX=g++
-INCLUDES=/usr/include/tcl8.5
 echo "Generating lib symbols"
+INCLUDES="${TCLINC} ${SSL_INCLUDES}"
 
 mkdir -p src/.defs > /dev/null 2>&1
 TMPFILE=$(mktemp "/tmp/pre.XXXXXX")

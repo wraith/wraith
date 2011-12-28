@@ -5768,7 +5768,7 @@ $as_echo_n "checking whether the Tcl system has changed... " >&6; }
   egg_tcl_id="${TCLLIB}:${TCLLIBFN}:${TCLINC}:${TCLINCFN}"
   if test "$egg_tcl_id" != ":::"; then
     egg_tcl_cached="yes"
-    if test "${egg_cv_var_tcl_id+set}" = set; then :
+    if ${egg_cv_var_tcl_id+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
@@ -5807,7 +5807,7 @@ $as_echo "no" >&6; }
 
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Tcl version" >&5
 $as_echo_n "checking for Tcl version... " >&6; }
-    if test "${egg_cv_var_tcl_version+set}" = set; then :
+    if ${egg_cv_var_tcl_version+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
@@ -5831,7 +5831,7 @@ $as_echo "not found" >&6; }
     fi
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Tcl patch level" >&5
 $as_echo_n "checking for Tcl patch level... " >&6; }
-    if test "${egg_cv_var_tcl_patch_level+set}" = set; then :
+    if ${egg_cv_var_tcl_patch_level+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
@@ -5905,7 +5905,7 @@ EOF
   as_ac_Lib=`$as_echo "ac_cv_lib_$TCL_TEST_LIB''_Tcl_Free" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Tcl_Free in -l$TCL_TEST_LIB" >&5
 $as_echo_n "checking for Tcl_Free in -l$TCL_TEST_LIB... " >&6; }
-if eval "test \"\${$as_ac_Lib+set}\"" = set; then :
+if eval \${$as_ac_Lib+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
@@ -5964,7 +5964,7 @@ $as_echo "#define HAVE_TCL_FREE 1" >>confdefs.h
   as_ac_Lib=`$as_echo "ac_cv_lib_$TCL_TEST_LIB''_Tcl_SetNotifier" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Tcl_SetNotifier in -l$TCL_TEST_LIB" >&5
 $as_echo_n "checking for Tcl_SetNotifier in -l$TCL_TEST_LIB... " >&6; }
-if eval "test \"\${$as_ac_Lib+set}\"" = set; then :
+if eval \${$as_ac_Lib+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
@@ -6127,10 +6127,21 @@ $as_echo "$as_me: WARNING: cache variable $ac_var contains a newline" >&2;} ;;
      :end' >>confcache
 if diff "$cache_file" confcache >/dev/null 2>&1; then :; else
   if test -w "$cache_file"; then
-    test "x$cache_file" != "x/dev/null" &&
+    if test "x$cache_file" != "x/dev/null"; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: updating cache $cache_file" >&5
 $as_echo "$as_me: updating cache $cache_file" >&6;}
-    cat confcache >$cache_file
+      if test ! -f "$cache_file" || test -h "$cache_file"; then
+	cat confcache >"$cache_file"
+      else
+        case $cache_file in #(
+        */* | ?:*)
+	  mv -f confcache "$cache_file"$$ &&
+	  mv -f "$cache_file"$$ "$cache_file" ;; #(
+        *)
+	  mv -f confcache "$cache_file" ;;
+	esac
+      fi
+    fi
   else
     { $as_echo "$as_me:${as_lineno-$LINENO}: not updating unwritable cache $cache_file" >&5
 $as_echo "$as_me: not updating unwritable cache $cache_file" >&6;}
@@ -9833,7 +9844,7 @@ if [ "$GIT_REQUIRED" = "1" ]; then
 fi
 
 
-src/generate_defs.sh
+CXX="$CXX" TCLINC="$TCLINC" SSL_INCLUDES="$SSL_INCLUDES" src/generate_defs.sh
 
 echo ""
 echo ""
