@@ -1,8 +1,6 @@
 next
   * Bot will now jump from the server it's on if it is removed from the server list. (fixes a changing network bug)
   * Properly honor exemptions when kicking matched RBL clients
-  * Add cmd_newhub for adding a new hub. All bots will add this to their config.
-  * Hubs can now be overridden inside the botconfig (-C)
   * Optimize userfile writing by doing it asynchronously
   * Add [bot]set var 'groups' to configure what groups bots are in
   * Add chanset 'groups' to take a list of groups that should join. 'chanset #chan groups { main backup }'
@@ -24,6 +22,8 @@ next
   * When 'mdop' protection is on, re-op all previously opped clients automatically.
   * When 'mop' protection is on, deop all previously regular clients automatically.
   * Add './wraith -V' which will display the packconfig that the bot is using.
+  * Add cmd_newhub for adding a new hub. All bots will add this to their config.
+  * Hubs can now be overridden inside the botconfig (-C)
 
 maint
   * Fix various compile warnings with newer GCC
