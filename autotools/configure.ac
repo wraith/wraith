@@ -38,6 +38,7 @@ AC_CACHE_SAVE
 
 # Checks for programs
 AC_PROG_MAKE_SET
+AC_PROG_SED
 EGG_PROG_HEAD_1
 EGG_PROG_AWK
 EGG_PROG_BASENAME
@@ -277,7 +278,7 @@ if [ "$GIT_REQUIRED" = "1" ]; then
 fi
 ]
 
-CXX="$CXX" TCLINC="$TCLINC" SSL_INCLUDES="$SSL_INCLUDES" src/generate_defs.sh
+CXX="$CXX" TCLINC="$TCLINC" SSL_INCLUDES="$SSL_INCLUDES" SED="$SED" src/generate_defs.sh
 [
 if [ $? -ne 0 ]; then
   exit 1
