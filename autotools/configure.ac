@@ -277,7 +277,12 @@ if [ "$GIT_REQUIRED" = "1" ]; then
 fi
 ]
 
-src/generate_defs.sh
+CXX="$CXX" TCLINC="$TCLINC" SSL_INCLUDES="$SSL_INCLUDES" src/generate_defs.sh
+[
+if [ $? -ne 0 ]; then
+  exit 1
+fi
+]
 
 echo ""
 echo ""
