@@ -299,23 +299,21 @@ static bool set_unpack(struct userrec *u, struct user_entry *e)
   head = curr = e->u.list;
   e->u.extra = NULL;
 
-  if (conf.bot->hub || conf.bot->localhub || !strcasecmp(conf.bot->nick, u->handle)) {
-    struct xtra_key *t = NULL;
-    char *key = NULL, *data = NULL;
+  struct xtra_key *t = NULL;
+  char *key = NULL, *data = NULL;
 
-    while (curr) {
-      t = (struct xtra_key *) my_calloc(1, sizeof(struct xtra_key));
-      data = curr->extra;
-      key = newsplit(&data);
-      if (data[0]) {
-        t->key = strdup(key);
-        t->data = strdup(data);
-        list_insert((struct xtra_key **) (&e->u.extra), t);
-      } else
-        free(t);
-      curr = curr->next;
-    }
-  } 
+  while (curr) {
+    t = (struct xtra_key *) my_calloc(1, sizeof(struct xtra_key));
+    data = curr->extra;
+    key = newsplit(&data);
+    if (data[0]) {
+      t->key = strdup(key);
+      t->data = strdup(data);
+      list_insert((struct xtra_key **) (&e->u.extra), t);
+    } else
+      free(t);
+    curr = curr->next;
+  }
 
   list_type_kill(head);
   return 1;
