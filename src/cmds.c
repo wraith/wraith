@@ -1335,7 +1335,7 @@ static void cmd_botcmd(int idx, char *par)
     cmd = newsplit(&par);
 
   if (!botm[0] || !cmd || (cmd && !cmd[0])) {
-    dprintf(idx, "Usage: botcmd <bot> <cmd> [params]\n");
+    dprintf(idx, "Usage: botcmd <bot|*|?|&|%%group> <cmd> [params]\n");
     return;
   }
 
@@ -1347,7 +1347,7 @@ static void cmd_botcmd(int idx, char *par)
     putlog(LOG_CMDS, "*", "#%s# botcmd %s %s ...", dcc[idx].nick, botm, cmd);
 
   // Restrict dangerous mass commands ('botcmd *' (any *) or 'botcmd &')
-  if ((strchr(botm, '*') && !findbot(botm)) || !strcmp(botm, "&")) {
+  if ((strchr(botm, '*') && !findbot(botm)) || !strcmp(botm, "&") || botm[0] == '%') {
     if (!strncasecmp(cmd, "di", 2) || (!strncasecmp(cmd, "res", 3) && strncasecmp(cmd, "reset", 5)) || !strncasecmp(cmd, "sui", 3) || !strncasecmp(cmd, "pl", 2) || !strncasecmp(cmd, "ac", 2) ||
         !strncasecmp(cmd, "j", 1) || (!strncasecmp(cmd, "dump", 4) && (!strncasecmp(par, "privmsg", 7) || !strncasecmp(par, "notice", 6) || !strncasecmp(par, "quit", 4)))) {
       dprintf(idx, "Not a good idea.\n");
@@ -1383,11 +1383,19 @@ static void cmd_botcmd(int idx, char *par)
   }
   
   for (tbot = tandbot; tbot; tbot = tbot->next) {
-    if ((rand_leaf && bot_hublevel(get_user_by_handle(userlist, tbot->bot)) != 999) ||
-        (all_localhub && (bot_hublevel(get_user_by_handle(userlist, tbot->bot)) != 999 || !tbot->localhub)))
+    struct userrec *botu = get_user_by_handle(userlist, tbot->bot);
+    if ((rand_leaf && bot_hublevel(botu) != 999) ||
+        (all_localhub && (bot_hublevel(botu) != 999 || !tbot->localhub)))
       continue;
     cnt++;
-    if ((rleaf != -1 && cnt == rleaf) || (rleaf == -1 && (all_localhub || wild_match(botm, tbot->bot)))) {
+    bool group_match = false;
+    if (botm[0] == '%') {
+      bd::String botgroups = var_get_bot_data(botu, "groups");
+      if (botgroups.split(',').find(botm + 1) != bd::String::npos) {
+        group_match = true;
+      }
+    }
+    if (group_match || (rleaf != -1 && cnt == rleaf) || (rleaf == -1 && (all_localhub || wild_match(botm, tbot->bot)))) {
       if (rleaf != -1)
         putlog(LOG_CMDS, "*", "#%s# botcmd %s %s ...", dcc[idx].nick, tbot->bot, cmd);
       send_remote_simul(idx, tbot->bot, cmd, par ? par : (char *) "");
