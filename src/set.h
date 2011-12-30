@@ -86,7 +86,7 @@ void var_parse_my_botset();
 void init_vars();
 void var_set_by_name(const char *, const char *, const char *);
 void var_set_userentry(const char *, const char *, const char *);
-const char *var_get_bot_data(struct userrec *u, const char *name);
+const char *var_get_bot_data(struct userrec *u, const char *name, bool useDefault = false);
 int cmd_set_real(const char *, int idx, char *);
 const char *var_get_str_by_name(const char *);
 

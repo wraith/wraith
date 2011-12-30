@@ -235,7 +235,7 @@ See also: -ban, +ban, console%{+m|m}, chanset, chaninfo%{-}, stick, unstick
    one. You can also specify a bot, and attempt to boot someone from another
    bot on the botnet. You can not boot a bot owner.
 :hub:botcmd:
-###  $bbotcmd$b <bot> <cmd> [params]
+###  $bbotcmd$b <bot|*|?|&|%%group> <cmd> [params]
    The specified cmd and optional parameters are executed on the specified bot, 
    all results are displayed back on DCC. For example:
      [19:29] #bryan# botcmd wtest whom ...
@@ -253,6 +253,7 @@ See also: -ban, +ban, console%{+m|m}, chanset, chaninfo%{-}, stick, unstick
  
    Just using '?' for 'bot' will choose a random leaf bot.
    Just using '&' for 'bot' will do the cmd on all localhub bots. (first bot in config).
+   Use '%%group' to match a specific group. (see also: '%dhelp set')
  
    This cmd cannot be chained over the botnet, ie, no: '%dbotcmd [bot] botcmd [bot2] ...'
  

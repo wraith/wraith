@@ -766,7 +766,7 @@ bool bot_shouldjoin(struct userrec* u, struct flag_record* fr, struct chanset_t*
 #endif
 
   // Is this bot in the groups that this channel has?
-  const char *botgroups = u == conf.bot->u ? groups : var_get_bot_data(u, "groups");
+  const char *botgroups = u == conf.bot->u ? groups : var_get_bot_data(u, "groups", true);
   bd::Array<bd::String> my_groupsArray(bd::String(botgroups).split(','));
   bool group_match = 0;
 
