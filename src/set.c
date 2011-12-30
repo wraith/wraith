@@ -701,7 +701,7 @@ void var_userfile_share_line(char *line, int idx, bool share)
   set_noshare = 0;
 }
 
-const char *var_get_bot_data(struct userrec *u, const char *name)
+const char *var_get_bot_data(struct userrec *u, const char *name, bool useDefault)
 {
   if (!u)
     return NULL;
@@ -712,7 +712,14 @@ const char *var_get_bot_data(struct userrec *u, const char *name)
   while (xk && strcmp(xk->key, name))
     xk = xk->next;
 
-  return xk ? xk->data : NULL;
+  if (xk) {
+    return xk->data;
+  }
+  if (useDefault) {
+    variable_t *var = var_get_var_by_name(name);
+    return var->def;
+  }
+  return NULL;
 }
 
 
