@@ -818,7 +818,7 @@ static int var_add_list(const char *botnick, variable_t *var, const char *elemen
   char *data = NULL, *olddata = NULL, *botdata = NULL;
 
   if (botnick) {                          //fetch data from bot's USERENTRY_SET
-    botdata = (char *) var_get_bot_data(get_user_by_handle(userlist, (char *) botnick), var->name);
+    botdata = (char *) var_get_bot_data(get_user_by_handle(userlist, (char *) botnick), var->name, true);
     olddata = botdata ? botdata : NULL;
   } else                                  //use global, no bot specified
     olddata = var->gdata ? var->gdata : NULL;
