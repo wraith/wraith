@@ -282,7 +282,9 @@ void deq_msg()
    * queue.
    */
   egg_timeval_t last_time_save = { last_time.sec, last_time.usec };
+#ifdef DEBUG
   bool bursted = 0;
+#endif
   // -1 here to avoid DP_CACHE
   for(size_t nq = 0; nq < (sizeof(qdsc) / sizeof(qdsc[0])) - 1; ++nq) {
     while (qdsc[nq].q->head &&
@@ -309,10 +311,13 @@ void deq_msg()
       free(qdsc[nq].q->head->msg);
       free(qdsc[nq].q->head);
       qdsc[nq].q->head = q;
-      if (qdsc[nq].burst)
-        bursted = 1;
-      else // Help Queue does not burst, push out 1 line then go to next queue.
+      if (!qdsc[nq].burst) {
+        // Help Queue does not burst, push out 1 line then go to next queue.
         break;
+      }
+#ifdef DEBUG
+      bursted = 1;
+#endif
     }
     if (!qdsc[nq].q->head)
       qdsc[nq].q->last = NULL;
