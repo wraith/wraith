@@ -633,6 +633,7 @@ OBJCOPY
 BASENAME
 AWK
 HEAD_1
+SED
 SET_MAKE
 GCC4DEB
 GCC3DEB
@@ -3840,6 +3841,75 @@ $as_echo "no" >&6; }
   SET_MAKE="MAKE=${MAKE-make}"
 fi
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for a sed that does not truncate output" >&5
+$as_echo_n "checking for a sed that does not truncate output... " >&6; }
+if ${ac_cv_path_SED+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+            ac_script=s/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb/
+     for ac_i in 1 2 3 4 5 6 7; do
+       ac_script="$ac_script$as_nl$ac_script"
+     done
+     echo "$ac_script" 2>/dev/null | sed 99q >conftest.sed
+     { ac_script=; unset ac_script;}
+     if test -z "$SED"; then
+  ac_path_SED_found=false
+  # Loop through the user's path and test for each of PROGNAME-LIST
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_prog in sed gsed; do
+    for ac_exec_ext in '' $ac_executable_extensions; do
+      ac_path_SED="$as_dir/$ac_prog$ac_exec_ext"
+      { test -f "$ac_path_SED" && $as_test_x "$ac_path_SED"; } || continue
+# Check for GNU ac_path_SED and select it if it is found.
+  # Check for GNU $ac_path_SED
+case `"$ac_path_SED" --version 2>&1` in
+*GNU*)
+  ac_cv_path_SED="$ac_path_SED" ac_path_SED_found=:;;
+*)
+  ac_count=0
+  $as_echo_n 0123456789 >"conftest.in"
+  while :
+  do
+    cat "conftest.in" "conftest.in" >"conftest.tmp"
+    mv "conftest.tmp" "conftest.in"
+    cp "conftest.in" "conftest.nl"
+    $as_echo '' >> "conftest.nl"
+    "$ac_path_SED" -f conftest.sed < "conftest.nl" >"conftest.out" 2>/dev/null || break
+    diff "conftest.out" "conftest.nl" >/dev/null 2>&1 || break
+    as_fn_arith $ac_count + 1 && ac_count=$as_val
+    if test $ac_count -gt ${ac_path_SED_max-0}; then
+      # Best one so far, save it but keep looking for a better one
+      ac_cv_path_SED="$ac_path_SED"
+      ac_path_SED_max=$ac_count
+    fi
+    # 10*(2^10) chars as input seems more than enough
+    test $ac_count -gt 10 && break
+  done
+  rm -f conftest.in conftest.tmp conftest.nl conftest.out;;
+esac
+
+      $ac_path_SED_found && break 3
+    done
+  done
+  done
+IFS=$as_save_IFS
+  if test -z "$ac_cv_path_SED"; then
+    as_fn_error $? "no acceptable sed could be found in \$PATH" "$LINENO" 5
+  fi
+else
+  ac_cv_path_SED=$SED
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_path_SED" >&5
+$as_echo "$ac_cv_path_SED" >&6; }
+ SED="$ac_cv_path_SED"
+  rm -f conftest.sed
+
 
 cat << 'EOF' > conftest.head
 a
@@ -5768,7 +5838,7 @@ $as_echo_n "checking whether the Tcl system has changed... " >&6; }
   egg_tcl_id="${TCLLIB}:${TCLLIBFN}:${TCLINC}:${TCLINCFN}"
   if test "$egg_tcl_id" != ":::"; then
     egg_tcl_cached="yes"
-    if test "${egg_cv_var_tcl_id+set}" = set; then :
+    if ${egg_cv_var_tcl_id+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
@@ -5807,7 +5877,7 @@ $as_echo "no" >&6; }
 
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Tcl version" >&5
 $as_echo_n "checking for Tcl version... " >&6; }
-    if test "${egg_cv_var_tcl_version+set}" = set; then :
+    if ${egg_cv_var_tcl_version+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
@@ -5831,7 +5901,7 @@ $as_echo "not found" >&6; }
     fi
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Tcl patch level" >&5
 $as_echo_n "checking for Tcl patch level... " >&6; }
-    if test "${egg_cv_var_tcl_patch_level+set}" = set; then :
+    if ${egg_cv_var_tcl_patch_level+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
@@ -5905,7 +5975,7 @@ EOF
   as_ac_Lib=`$as_echo "ac_cv_lib_$TCL_TEST_LIB''_Tcl_Free" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Tcl_Free in -l$TCL_TEST_LIB" >&5
 $as_echo_n "checking for Tcl_Free in -l$TCL_TEST_LIB... " >&6; }
-if eval "test \"\${$as_ac_Lib+set}\"" = set; then :
+if eval \${$as_ac_Lib+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
@@ -5964,7 +6034,7 @@ $as_echo "#define HAVE_TCL_FREE 1" >>confdefs.h
   as_ac_Lib=`$as_echo "ac_cv_lib_$TCL_TEST_LIB''_Tcl_SetNotifier" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Tcl_SetNotifier in -l$TCL_TEST_LIB" >&5
 $as_echo_n "checking for Tcl_SetNotifier in -l$TCL_TEST_LIB... " >&6; }
-if eval "test \"\${$as_ac_Lib+set}\"" = set; then :
+if eval \${$as_ac_Lib+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
@@ -6127,10 +6197,21 @@ $as_echo "$as_me: WARNING: cache variable $ac_var contains a newline" >&2;} ;;
      :end' >>confcache
 if diff "$cache_file" confcache >/dev/null 2>&1; then :; else
   if test -w "$cache_file"; then
-    test "x$cache_file" != "x/dev/null" &&
+    if test "x$cache_file" != "x/dev/null"; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: updating cache $cache_file" >&5
 $as_echo "$as_me: updating cache $cache_file" >&6;}
-    cat confcache >$cache_file
+      if test ! -f "$cache_file" || test -h "$cache_file"; then
+	cat confcache >"$cache_file"
+      else
+        case $cache_file in #(
+        */* | ?:*)
+	  mv -f confcache "$cache_file"$$ &&
+	  mv -f "$cache_file"$$ "$cache_file" ;; #(
+        *)
+	  mv -f confcache "$cache_file" ;;
+	esac
+      fi
+    fi
   else
     { $as_echo "$as_me:${as_lineno-$LINENO}: not updating unwritable cache $cache_file" >&5
 $as_echo "$as_me: not updating unwritable cache $cache_file" >&6;}
@@ -9833,7 +9914,12 @@ if [ "$GIT_REQUIRED" = "1" ]; then
 fi
 
 
-src/generate_defs.sh
+CXX="$CXX" TCLINC="$TCLINC" SSL_INCLUDES="$SSL_INCLUDES" SED="$SED" src/generate_defs.sh
+
+if [ $? -ne 0 ]; then
+  exit 1
+fi
+
 
 echo ""
 echo ""
