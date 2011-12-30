@@ -1008,29 +1008,6 @@ static void cmd_pls_chan(int idx, char *par)
   pls_chan(idx, par, NULL);
 }
 
-static void cmd_botjoin(int idx, char *par)
-{
-  char *bot = NULL;
-  struct userrec *botu = NULL;
-
-  putlog(LOG_CMDS, "*", "#%s# botjoin %s", dcc[idx].nick, par);
-
-  if (!par[0]) {
-    dprintf(idx, "Usage: botjoin <bot> [%s]<channel> [options]\n", CHANMETA);
-    return;
-  }
-  bot = newsplit(&par);
-  botu = get_user_by_handle(userlist, bot);
-  if (botu && botu->bot) {
-    pls_chan(idx, par, bot);
-  } else {
-    dprintf(idx, "Error: '%s' is not a bot.\n", bot);
-  }
-
-  dprintf(idx, "!!!! Warning: botjoin is an unfinished feature which will pretty much make all bots join the channel.\n");
-  dprintf(idx, "!!!! Warning: You should probably -chan the channel now to avoid problems/confusion later.\n");
-}
-
 static void mns_chan(int idx, char *par, char *bot)
 {
   char *chname = NULL, buf2[1024] = "";
@@ -1082,27 +1059,6 @@ static void mns_chan(int idx, char *par, char *bot)
 static void cmd_mns_chan(int idx, char *par)
 {
   mns_chan(idx, par, NULL);
-}
-
-static void cmd_botpart(int idx, char *par)
-{
-  char *bot = NULL;
-  struct userrec *botu = NULL;
-
-  putlog(LOG_CMDS, "*", "#%s# botpart %s", dcc[idx].nick, par);
-  
-  if (!par[0]) {
-    dprintf(idx, "Usage: botpart <bot> [%s]<channel> [options]\n", CHANMETA);
-    return;
-  }
-
-  bot = newsplit(&par);
-  botu = get_user_by_handle(userlist, bot);
-  if (botu && botu->bot) {
-    mns_chan(idx, par, bot);
-  } else {
-    dprintf(idx, "Error: '%s' is not a bot.\n", bot);
-  }
 }
 
 /* thanks Excelsior */
@@ -1420,8 +1376,6 @@ static cmd_t C_dcc_channels[] =
   {"-exempt",	"o|o",	(Function) cmd_mns_exempt,	NULL, AUTH},
   {"-invite",	"o|o",	(Function) cmd_mns_invite,	NULL, AUTH},
   {"bans",	"o|o",	(Function) cmd_bans,		NULL, 0},
-  {"botjoin",	"n",	(Function) cmd_botjoin,		NULL, 0},
-  {"botpart",	"n",	(Function) cmd_botpart,		NULL, 0},
   {"exempts",	"o|o",	(Function) cmd_exempts,		NULL, 0},
   {"invites",	"o|o",	(Function) cmd_invites,		NULL, 0},
   {"chaninfo",	"m|m",	(Function) cmd_chaninfo,	NULL, 0},
