@@ -717,7 +717,7 @@ const char *var_get_bot_data(struct userrec *u, const char *name, bool useDefaul
   }
   if (useDefault) {
     variable_t *var = var_get_var_by_name(name);
-    return var->def;
+    return var->gdata ? var->gdata : var->def;
   }
   return NULL;
 }
