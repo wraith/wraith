@@ -63,7 +63,7 @@ char			origbotnick[HANDLEN + 1] = "";	/* from -B (placed into conf.bot->nick .. 
 char 			origbotname[NICKLEN] = "";	/* Nick to regain */
 char                    jupenick[NICKLEN] = "";
 char 			botname[NICKLEN] = "";	/* IRC nickname */
-port_t     		my_port = 0;
+in_port_t     		my_port = 0;
 int			reset_chans = 0;
 bool                    cookies_disabled = 0;
 char s2_4[3] = "",s1_6[3] = "",s1_11[3] = "";
@@ -404,7 +404,7 @@ void load_internal_users()
     bd::String handle(params[0]);
     if (!get_user_by_handle(userlist, const_cast<char*>(handle.c_str()))) {
       bd::String address(params[1]);
-      port_t port = atoi(static_cast<bd::String>(params[2]).c_str());
+      in_port_t port = atoi(static_cast<bd::String>(params[2]).c_str());
       unsigned short hublevel = params.length() == 4 ? atoi(static_cast<bd::String>(params[3]).c_str()) : (idx + 1);
 
       userlist = adduser(userlist, handle.c_str(), "none", "-", USER_OP, 1);
@@ -572,7 +572,7 @@ void rehash_ip() {
     }
     if (!listening) {
       // Listen on the unix domain socket
-      port_t port;
+      in_port_t port;
       int i = open_listen_addr_by_af(conf.localhub_socket, &port, AF_UNIX);
       if (i < 0) {
         putlog(LOG_ERRORS, "*", "Can't listen on %s - %s", conf.localhub_socket, i == -1 ? "it's taken." : "couldn't assign file.");

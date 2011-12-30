@@ -35,7 +35,7 @@ struct server_list {
   struct server_list	*next;
   char			*name;
   char			*pass;
-  port_t		 port;
+  in_port_t		 port;
 };
 
 /* Available net types.  */
@@ -59,7 +59,7 @@ extern size_t		nick_len;
 extern bool		trigger_on_ignore, floodless, keepnick, in_deaf, in_callerid, have_cprivmsg, have_cnotice;
 extern int 		servidx, ctcp_mode, answer_ctcp, serv, curserv, default_alines, flood_count, burst;
 extern unsigned int     rolls;
-extern port_t		default_port, default_port_ssl, newserverport, curservport;
+extern in_port_t		default_port, default_port_ssl, newserverport, curservport;
 extern time_t		server_online, tried_jupenick, tried_nick, release_time, connect_bursting;
 extern interval_t	cycle_time;
 extern char		cursrvname[], botrealname[121], botuserhost[], ctcp_reply[1024],
@@ -90,7 +90,7 @@ void rehash_monitor_list();
 void replay_cache(int, bd::Stream*);
 void join_chans();
 void check_hostmask();
-void next_server(int *, char *, port_t *, char *);
+void next_server(int *, char *, in_port_t *, char *);
 void server_send_ison();
 void reset_flood();
 

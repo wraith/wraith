@@ -22,25 +22,6 @@ typedef intptr_t (*FunctionPtr) ();
 typedef int socklen_t;
 #endif
 
-/* 32 bit type */
-#if (SIZEOF_INT == 4)
-typedef unsigned int            u_32bit_t;
-#else
-#  if (SIZEOF_LONG == 4)
-typedef unsigned long           u_32bit_t;
-#  else
-#    include "cant/find/32bit/type"
-#  endif
-#endif
-
-typedef unsigned short int      u_16bit_t;
-typedef unsigned char           u_8bit_t;
-
-typedef u_32bit_t 		dword;
-
-/* port */
-typedef in_port_t		port_t;
-
 // Signed so that it can play nice with time_t
 typedef int			interval_t;
 

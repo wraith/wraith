@@ -58,12 +58,12 @@ int ctcp_mode;
 int serv = -1;		/* sock # of server currently */
 int servidx = -1;		/* idx of server */
 char newserver[121] = "";	/* new server? */
-port_t newserverport = 0;		/* new server port? */
+in_port_t newserverport = 0;		/* new server port? */
 char newserverpass[121] = "";	/* new server password? */
 static char serverpass[121] = "";
 static time_t trying_server;	/* trying to connect to a server right now? */
 int curserv = 999;		/* current position in server list: */
-port_t curservport = 0;
+in_port_t curservport = 0;
 rate_t flood_msg = { 5, 60 };
 rate_t flood_ctcp = { 3, 60 };
 char botuserhost[UHOSTLEN] = "";	/* bot's user@host (refreshed whenever the bot joins a channel) */
@@ -86,8 +86,8 @@ static const interval_t stoned_timeout = 500;
 struct server_list *serverlist = NULL;	/* old-style queue, still used by
 					   server list */
 interval_t cycle_time;			/* cycle time till next server connect */
-port_t default_port = 6667;		/* default IRC port */
-port_t default_port_ssl = 6697;		/* default IRC SSL port */
+in_port_t default_port = 6667;		/* default IRC port */
+in_port_t default_port_ssl = 6697;		/* default IRC SSL port */
 bool trigger_on_ignore;	/* trigger bindings if user is ignored ? */
 int answer_ctcp = 1;		/* answer how many stacked ctcp's ? */
 static bool resolvserv;		/* in the process of resolving a server host */
@@ -798,7 +798,7 @@ void clearq(struct server_list *xx)
  *
  * -> if (*ptr == -1) then jump to that particular server
  */
-void next_server(int *ptr, char *servname, port_t *port, char *pass)
+void next_server(int *ptr, char *servname, in_port_t *port, char *pass)
 {
   struct server_list *x = serverlist;
 

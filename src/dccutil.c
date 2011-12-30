@@ -879,10 +879,10 @@ do_boot(int idx, const char *by, const char *reason)
 }
 
 int
-listen_all(port_t lport, bool off, bool should_v6)
+listen_all(in_port_t lport, bool off, bool should_v6)
 {
   int idx = -1;
-  port_t port, realport;
+  in_port_t port, realport;
 
 #ifdef USE_IPV6
   int i6 = -1;
@@ -1009,7 +1009,7 @@ identd_open(const char *sourceIp, const char *destIp, int identd)
   {
     int idx;
     int i = -1;
-    port_t port = 113;
+    in_port_t port = 113;
 
     for (idx = 0; idx < dcc_total; idx++)
       if (dcc[idx].type == &DCC_IDENTD_CONNECT)

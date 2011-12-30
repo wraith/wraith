@@ -226,13 +226,13 @@ static void eof_dcc_send(int idx)
 
 /* Determine byte order. Used for resend DCC startup packets.
  */
-static inline u_8bit_t byte_order_test(void)
+static inline uint8_t byte_order_test(void)
 {
-  u_16bit_t test = TRANSFER_REGET_PACKETID;
+  uint16_t test = TRANSFER_REGET_PACKETID;
 
-  if (*((u_8bit_t *)&test) == ((TRANSFER_REGET_PACKETID & 0xff00) >> 8))
+  if (*((uint8_t *)&test) == ((TRANSFER_REGET_PACKETID & 0xff00) >> 8))
     return 0;
-  if (*((u_8bit_t *)&test) == (TRANSFER_REGET_PACKETID & 0x00ff))
+  if (*((uint8_t *)&test) == (TRANSFER_REGET_PACKETID & 0x00ff))
     return 1;
   return 0;
 }
@@ -737,7 +737,7 @@ struct dcc_table DCC_GET_PENDING =
 static void dcc_get_pending(int idx, char *buf, int len)
 {
   in_addr_t ip;
-  port_t port;
+  in_port_t port;
   int i;
   char s[UHOSTLEN] = "";
 
@@ -813,7 +813,7 @@ static int raw_dcc_resend_send(char *filename, char *nick, char *from, int resen
 {
   int zz = -1;
   int i;
-  port_t port;
+  in_port_t port;
   char *buf = NULL;
   long dccfilesize;
   FILE *f = NULL, *dccfile = NULL;

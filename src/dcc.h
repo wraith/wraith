@@ -61,7 +61,7 @@ struct dcc_t {
 //  int auth;
   bool whowas;
   int dns_id;
-  port_t port;
+  in_port_t port;
   char simulbot[HANDLEN + 1];       /* used for hub->leaf cmd simulation, holds bot that results should be sent to */
   char hash[MD5_HASH_LENGTH + 1];                /* used for dcc authing */
   char shahash[SHA_HASH_LENGTH + 1];
@@ -118,7 +118,7 @@ struct xfer_info {
 struct bot_info {
   int  numver;
   int  uff_flags;               /* user file feature flags              */
-  port_t port;		        /* base port                            */
+  in_port_t port;		        /* base port                            */
   char linker[NOTENAMELEN + 1]; /* who requested this link              */
   char sysname[121];
   char version[121];            /* channel/version info                 */
@@ -132,7 +132,7 @@ struct relay_info {
 #ifdef USE_IPV6
   int af;
 #endif /* USE_IPV6 */
-  port_t port;
+  in_port_t port;
 };
 
 struct dupwait_info {

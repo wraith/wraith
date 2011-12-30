@@ -811,7 +811,7 @@ writeconf(char *filename, int fd, int bits)
     for (size_t idx = 0; idx < sortedhubs.length(); ++idx) {
       bd::Array<bd::String> hubparams(static_cast<bd::String>(sortedhubs[idx]).split(' '));
       bd::String hubnick(hubparams[0]), address(hubparams[1]);
-      port_t port = atoi(static_cast<bd::String>(hubparams[2]).c_str());
+      in_port_t port = atoi(static_cast<bd::String>(hubparams[2]).c_str());
       *stream << bd::String::printf(STR("! hub %s %s %d\n"), hubnick.c_str(), address.c_str(), port);
     }
     comment("");
