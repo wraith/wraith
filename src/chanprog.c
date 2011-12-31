@@ -95,7 +95,7 @@ void rmspace(char *s)
 
 /* Returns memberfields if the nick is in the member list.
  */
-memberlist *ismember(struct chanset_t *chan, const char *nick)
+memberlist *ismember(const struct chanset_t *chan, const char *nick)
 {
   register memberlist	*x = NULL;
 
@@ -743,7 +743,7 @@ int isowner(char *name)
   }
 }
 
-bool bot_shouldjoin(struct userrec* u, struct flag_record* fr, struct chanset_t* chan, bool ignore_inactive)
+bool bot_shouldjoin(struct userrec* u, struct flag_record* fr, const struct chanset_t* chan, bool ignore_inactive)
 {
   // If restarting, keep this channel.
   if (restarting && (reset_chans == 2) && (channel_active(chan) || channel_pending(chan))) return 1;
@@ -787,7 +787,7 @@ bool bot_shouldjoin(struct userrec* u, struct flag_record* fr, struct chanset_t*
       );
 }
 
-bool shouldjoin(struct chanset_t *chan)
+bool shouldjoin(const struct chanset_t *chan)
 {
   struct flag_record fr = { FR_CHAN|FR_GLOBAL|FR_BOT, 0, 0, 0 };
   get_user_flagrec(conf.bot->u, &fr, chan->dname, chan);

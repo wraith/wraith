@@ -117,8 +117,8 @@ void notice_invite(struct chanset_t *, char *, char *, char *, bool);
 void real_add_mode(struct chanset_t *, const char, const char, const char *, bool);
 #define add_mode(chan, pls, mode, nick) real_add_mode(chan, pls, mode, nick, 0)
 #define add_cookie(chan, nick) real_add_mode(chan, '+', 'o', nick, 1)
-bool me_op(struct chanset_t *);
-bool me_voice(struct chanset_t *);
+bool me_op(const struct chanset_t *);
+bool me_voice(const struct chanset_t *);
 
 void check_this_ban(struct chanset_t *, char *, bool);
 void check_this_exempt(struct chanset_t *, char *, bool);
