@@ -1279,7 +1279,7 @@ killmember(struct chanset_t *chan, char *nick)
 /* Check if I am a chanop. Returns boolean 1 or 0.
  */
 bool
-me_op(struct chanset_t *chan)
+me_op(const struct chanset_t *chan)
 {
   memberlist *mx = ismember(chan, botname);
 
@@ -1294,7 +1294,7 @@ me_op(struct chanset_t *chan)
 /* Check whether I'm voice. Returns boolean 1 or 0.
  */
 bool
-me_voice(struct chanset_t *chan)
+me_voice(const struct chanset_t *chan)
 {
   memberlist *mx = ismember(chan, botname);
 

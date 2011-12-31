@@ -270,7 +270,7 @@ struct chanset_t {
 #define CHAN_STOP_CYCLE     BIT9	/* Some efnetservers have defined NO_CHANOPS_WHEN_SPLIT */
 
 /* prototypes */
-memberlist *ismember(struct chanset_t *, const char *);
+memberlist *ismember(const struct chanset_t *, const char *);
 struct chanset_t *findchan(const char *name);
 struct chanset_t *findchan_by_dname(const char *name);
 
