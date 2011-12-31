@@ -1389,7 +1389,7 @@ static void cmd_botcmd(int idx, char *par)
       continue;
     cnt++;
     bool group_match = false;
-    if (botm[0] == '%') {
+    if (botm[0] == '%' && bot_hublevel(botu) == 999) {
       bd::String botgroups = var_get_bot_data(botu, "groups", true);
       if (botgroups.split(',').find(botm + 1) != bd::String::npos) {
         group_match = true;
