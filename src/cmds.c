@@ -948,20 +948,22 @@ static void cmd_groups(int idx, char *par)
 static void cmd_channels(int idx, char *par) {
   putlog(LOG_CMDS, "*", "#%s# channels %s", dcc[idx].nick, par);
   if (par[0] && (dcc[idx].user->flags & USER_MASTER)) {
-    struct userrec *user = NULL;
-
-    user = get_user_by_handle(userlist, par);
-    if (user && whois_access(dcc[idx].user, user)) {
+    if (par[0] == '%') {
       show_channels(idx, par);
-    } else  {
-      dprintf(idx, "No such user.\n");
+    } else {
+      struct userrec *user = get_user_by_handle(userlist, par);
+      if (user && whois_access(dcc[idx].user, user)) {
+        show_channels(idx, par);
+      } else  {
+        dprintf(idx, "No such user.\n");
+      }
     }
   } else {
       show_channels(idx, NULL);
   }
 
   if ((dcc[idx].user->flags & USER_MASTER) && !(par && par[0]))
-    dprintf(idx, "You can also %schannels <user>\n", (dcc[idx].u.chat->channel >= 0) ? settings.dcc_prefix : "");
+    dprintf(idx, "You can also %schannels <user|%%group>\n", (dcc[idx].u.chat->channel >= 0) ? settings.dcc_prefix : "");
 }
 
 

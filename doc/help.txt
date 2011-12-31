@@ -583,13 +583,14 @@ See also: %{-}%{+n}+chan, -chan%{-}%{+m|m}, chanset%{-}
  
 See also: status, whois
 ::channels:
-###  $bchannels$b %{+m}[user]%{-}
+###  $bchannels$b %{+m}[user|%group]%{-}
    Displays channels that you have access to, and any important 
    flags that are set on them.
 %{+m}
    Masters: You can specify other users to see what channels their 
             flags grant them access to.%{-}
-See also: whois%{+m}, chattr, chaninfo%{-}
+   Special %%group to see what channels a particular group is in.
+See also: whois%{+m}, chattr, chaninfo, groups%{-}
 ::chanset
 ###  $bchanset$b [#&!+channel|*|default] <settings>
    Allows you to change the channel settings (see $b'chaninfo'$b for the
