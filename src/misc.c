@@ -475,7 +475,7 @@ void show_channels(int idx, char *handle)
     for (size_t i = 0; i < channelNames.length(); ++i) {
       const bd::String chname(channelNames[i]);
       const struct chanset_t* chan = channels[chname];
-      dprintf(idx, format, !conf.bot->hub && me_op(chan) ? '@' : ' ', chan->dname, !shouldjoin(chan) ? "(inactive) " : "", 
+      dprintf(idx, format, !conf.bot->hub && me_op(chan) ? '@' : ' ', chan->dname, ((conf.bot->hub && channel_inactive(chan)) || (!conf.bot->hub && !shouldjoin(chan))) ? "(inactive) " : "",
           channel_privchan(chan) ? "(private)  " : "", chan->manop ? "(no manop) " : "", 
           channel_bitch(chan) && !channel_botbitch(chan) ? "(bitch)    " : channel_botbitch(chan) ? "(botbitch) " : "",
           channel_closed(chan) ?  "(closed) " : "", channel_backup(chan) ? "(backup)" : "");
