@@ -528,6 +528,11 @@ static inline variable_t *var_get_var_by_name(const char *name)
   return (variable_t*) bsearch(&key, &vars, lengthof(vars) - 1, sizeof(variable_t), comp_variable_t);
 }
 
+const char *var_get_gdata(const char *name) {
+  variable_t* var = var_get_var_by_name(name);
+  return var && var->gdata ? var->gdata : NULL;
+}
+
 void var_set(variable_t *var, const char *target, const char *datain)
 {
   /* Don't set locally if the variable doesn't permit it. */

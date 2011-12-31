@@ -294,7 +294,7 @@ See also: netnick, nick
    Specifying a nodename will display all bots up/down on that nodename.
    Bots with a * preceeding its name is down.
  
-See also: downbots%{+n}, bottree%{-}
+See also: groups, downbots%{+n}, bottree%{-}
 :hub:botserver:
 ###  $bbotserver$b <bot>
    The bot will display its current server and lag over DCC.
@@ -325,7 +325,7 @@ See also: set
    Red: localhubs (first bot in binary, see '%dhelp conf')
    Other: normal leaf bots
  
-See also: bots, downbots
+See also: bots, downbots, groups
 ::botversion:
 ###  $bbotversion$b <bot>
    The bot will display its pack version and uname.
@@ -955,7 +955,7 @@ See also: cycle
    Example:
       Down bots: cEvin, ruthie, Killa1
  
-See also: bots
+See also: bots, groups
 :leaf:dump
 ###  $bdump$b <text>
    dumps the text to the server.  keep in mind that this bot doesn't
@@ -1052,6 +1052,11 @@ See also: -exempt, +exempt, console%{+m|m}, chanset, chaninfo%{-}, stick, unstic
    specified, your console channel is used.
  
 See also: console, channels%{+m}, status%{-}
+:hub:groups
+###  $bgroups$b
+   Shows the list of groups and which bots are in them.
+ 
+See also: bots, downbots%{+n}, bottree%{-}
 ::handle
 ###  $bhandle$b <new-handle>
    Changes your handle on the bot. This is the handle (nickname) that the
