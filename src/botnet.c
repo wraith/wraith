@@ -524,17 +524,27 @@ void answer_local_whom(int idx, int chan)
 }
 
 bool sortNodes(const bd::String nodeA, const bd::String nodeB) {
+  const bd::String unknown("(unknown)");
+  if (nodeA == unknown) {
+    return true;
+  } else if (nodeB == unknown) {
+    return false;
+  }
   // Reverse the domains
   const bd::Array<bd::String> partsA(nodeA.split("."));
   const bd::Array<bd::String> partsB(nodeB.split("."));
   bd::Array<bd::String> reversedPartsA, reversedPartsB;
   bd::String reversedNodeA, reversedNodeB;
 
-  for (size_t i = partsA.length() - 1; i > 0; --i) {
-    reversedPartsA << partsA[i - 1];
+  if (partsA.length()) {
+    for (size_t i = partsA.length() - 1; i > 0; --i) {
+      reversedPartsA << partsA[i - 1];
+    }
   }
-  for (size_t i = partsB.length() - 1; i > 0; --i) {
-    reversedPartsB << partsB[i - 1];
+  if (partsB.length()) {
+    for (size_t i = partsB.length() - 1; i > 0; --i) {
+      reversedPartsB << partsB[i - 1];
+    }
   }
   reversedNodeA = reversedPartsA.join(".");
   reversedNodeB = reversedPartsB.join(".");
@@ -569,7 +579,8 @@ tell_bots(int idx, int up, const char *nodename)
 
       // Include this bot?
       const bool group_match = group.length() && botgroups.find(group) != botgroups.npos;
-      const bd::String node((const char*) get_user(&USERENTRY_NODENAME, u));
+      const char *userNode = (const char*) get_user(&USERENTRY_NODENAME, u);
+      const bd::String node(userNode ? userNode : "(unknown)");
       const bool node_match = ((nodename && node.length() && wild_match(nodename, node.c_str())) || !nodename);
       const bool bot_found = findbot(u->handle);
       const bool up_down_match = (nodename || (!nodename && ((up && bot_found) || (!up && !bot_found))));
