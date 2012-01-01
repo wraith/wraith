@@ -905,7 +905,8 @@ static void cmd_groups(int idx, char *par)
 {
   struct userrec *u = NULL;
 
-  putlog(LOG_CMDS, "*", "#%s# groups", dcc[idx].nick);
+  putlog(LOG_CMDS, "*", "#%s# groups %s", dcc[idx].nick, par);
+  bd::String botnick(newsplit(&par));
 
   bd::Array<bd::String> globalgroups = bd::String(var_get_gdata("groups")).split(",");
   bd::Array<bd::String> allgroups;
@@ -934,11 +935,15 @@ static void cmd_groups(int idx, char *par)
     }
   }
 
-  // Display all groups and which bots are in them
-  for (size_t i = 0; i < allgroups.length(); ++i) {
-    const bd::String group(allgroups[i]);
-    const bd::Array<bd::String> bots(groupBots[group]);
-    dumplots(idx, bd::String::printf("%-*s: ", int(maxGroupLen), group.c_str()).c_str(), static_cast<bd::String>(bots.join(" ")).c_str());
+  if (botnick.length()) {
+    dprintf(idx, "%s is in groups: %s\n", botnick.c_str(), static_cast<bd::String>(botGroups[botnick].join(" ")).c_str());
+  } else {
+    // Display all groups and which bots are in them
+    for (size_t i = 0; i < allgroups.length(); ++i) {
+      const bd::String group(allgroups[i]);
+      const bd::Array<bd::String> bots(groupBots[group]);
+      dumplots(idx, bd::String::printf("%-*s: ", int(maxGroupLen), group.c_str()).c_str(), static_cast<bd::String>(bots.join(" ")).c_str());
+    }
   }
 
   dprintf(idx, "Total groups: %zu\n", allgroups.length());

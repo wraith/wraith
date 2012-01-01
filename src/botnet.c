@@ -49,6 +49,7 @@
 #include "core_binds.h"
 #include <bdlib/src/String.h>
 #include <bdlib/src/Array.h>
+#include <algorithm>
 
 tand_t			*tandbot = NULL;		/* Keep track of tandem bots on the
 							   botnet */
@@ -522,65 +523,89 @@ void answer_local_whom(int idx, int chan)
   dprintf(idx, "Total users: %d\n", total);
 }
 
+bool sortNodes(const bd::String nodeA, const bd::String nodeB) {
+  // Reverse the domains
+  const bd::Array<bd::String> partsA(nodeA.split("."));
+  const bd::Array<bd::String> partsB(nodeB.split("."));
+  bd::Array<bd::String> reversedPartsA, reversedPartsB;
+  bd::String reversedNodeA, reversedNodeB;
+
+  for (size_t i = partsA.length() - 1; i > 0; --i) {
+    reversedPartsA << partsA[i - 1];
+  }
+  for (size_t i = partsB.length() - 1; i > 0; --i) {
+    reversedPartsB << partsB[i - 1];
+  }
+  reversedNodeA = reversedPartsA.join(".");
+  reversedNodeB = reversedPartsB.join(".");
+  return reversedNodeA < reversedNodeB;
+}
+
 /* Show z a list of all bots connected
  */
 void
 tell_bots(int idx, int up, const char *nodename)
 {
-  struct userrec *u = NULL;
-  int cnt = 0, tot = 0, total = 1, mtot = 0;
-  char work[151] = "", *node = NULL;
+  size_t total = 0, maxNodeNameLength = 0;;
+  bd::Array<bd::String> nodes;
+  bd::HashTable<bd::String, bd::Array<bd::String> > nodeBots;
+  bd::Array<bd::String> bots;
+  bd::String group;
 
-  if (up) {
-    if (nodename)
-      node = (char *) get_user(&USERENTRY_NODENAME, conf.bot->u);    
-    if (!nodename || wild_match(nodename, node)) {
-      strlcat(work, conf.bot->nick, sizeof(work));
-      strlcat(work, " ", sizeof(work));
-      cnt++;
-      tot++;
-      if (nodename)
-        mtot++;
-    }
+  if (nodename && nodename[0] == '%') {
+    group = nodename + 1;
   }
 
-  for (u = userlist; u; u = u->next) {
+  // Gather a list of nodes and bots per node, as well as per domain
+  for (struct userrec* u = userlist; u; u = u->next) {
     if (u->bot) {
-      if (strcasecmp(u->handle, conf.bot->nick)) {
-        bool found = 0;
-        
-        if (findbot(u->handle))
-          found = 1;
-        total++;
-        if (nodename || (!nodename && ((!up && !found) || (up && found)))) {
-          if (nodename)
-            node = (char *) get_user(&USERENTRY_NODENAME, u);
-          if (!nodename || wild_match(nodename, node)) {
-            if (nodename && !found)
-              strlcat(work, "*", sizeof(work));
-            strlcat(work, u->handle, sizeof(work));
-            cnt++;
-            if (nodename)
-              mtot++;
-            if (!nodename || (nodename && found))
-              tot++;
-            if (cnt == 11) {
-              dprintf(idx, "%s bots: %s\n", nodename ? "Matching" : up ? "Up" : "Down", work);
-              work[0] = 0;
-              cnt = 0;
-            } else {
-              strlcat(work, " ", sizeof(work));
-            }
+      // If looking for groups, exclude hubs
+      if (group.length() && bot_hublevel(u) != 999) {
+        continue;
+      }
+      ++total;
+      bd::String botnick(u->handle);
+      const bd::Array<bd::String> botgroups(bd::String(var_get_bot_data(u, "groups", true)).split(","));
+
+      // Include this bot?
+      const bool group_match = group.length() && botgroups.find(group) != botgroups.npos;
+      const bd::String node((const char*) get_user(&USERENTRY_NODENAME, u));
+      const bool node_match = ((nodename && node.length() && wild_match(nodename, node.c_str())) || !nodename);
+      const bool bot_found = findbot(u->handle);
+      const bool up_down_match = (nodename || (!nodename && ((up && bot_found) || (!up && !bot_found))));
+      if (group_match || (group.length() == 0 && node_match && up_down_match)) {
+        if (nodes.find(node) == nodes.npos) {
+          nodes << node;
+          if (node.length() > maxNodeNameLength) {
+            maxNodeNameLength = node.length();
           }
         }
+        if ((group.length() || nodename) && !bot_found) {
+          botnick = '*' + botnick;
+        }
+        nodeBots[node] << botnick;
+        bots << botnick;
       }
     }
   }
-  if (work[0])
-    dprintf(idx, "%s bot%s: %s\n", nodename ? "Matching" : up ? "Up" : "Down", cnt > 1 ? "s" : "", work);
-  if (nodename)
-    dprintf(idx, "(Total Matching: %d/%d)\n", mtot, total);
-  dprintf(idx, "(Total %s: %d/%d)\n", nodename ? "up" : up ? "up" : "down", tot, nodename ? mtot : total);
+
+  if (group.length() == 0 && !nodename) {
+    dumplots(idx, nodename ? "Matching: " : (up ? "Up: " : "Down: "), static_cast<bd::String>(bots.join(" ")).c_str());
+  } else {
+    // Sort by nodes
+    std::sort(nodes.begin(), nodes.end(), sortNodes);
+    for (size_t i = 0; i < nodes.length(); ++i) {
+      const bd::String node(nodes[i]);
+      const bd::Array<bd::String> botsInNode(nodeBots[node]);
+      dumplots(idx, bd::String::printf("%*s: ", int(maxNodeNameLength), node.c_str()).c_str(), static_cast<bd::String>(botsInNode.join(" ")).c_str());
+    }
+  }
+
+  if (nodename || group.length()) {
+    dprintf(idx, "(Total Matching: %zu/%zu)\n", bots.length(), total);
+  } else {
+    dprintf(idx, "(Total %s: %zu/%zu)\n", up ? "up" : "down", bots.length(), total);
+  }
 }
 
 /* Show a simpleton bot tree
