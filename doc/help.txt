@@ -284,7 +284,7 @@ See also: msg%{+n}
  
 See also: netnick, nick
 :hub:bots
-###  $bbots$b [nodename]
+###  $bbots$b [nodename|%group]
    Shows the list of bots currently on the botnet.
    Example:
       Bots: cEvin, ruthie, Killa1
@@ -292,7 +292,8 @@ See also: netnick, nick
    bot. %{+n}Use $b'%dwho'$b or $b'%dbottree'$b for that information.%{-}
  
    Specifying a nodename will display all bots up/down on that nodename.
-   Bots with a * preceeding its name is down.
+   Bots with a * preceeding its name are down.
+   Specifying a %%group will only show bots in that group.
  
 See also: groups, downbots%{+n}, bottree%{-}
 :hub:botserver:

@@ -4,6 +4,7 @@
 * 'botjoin' and 'botpart' have been removed. Just use .+chan, .chanset, .botset to control groups.
 * Add command 'groups' to list all groups and which bots are in them.
 * Command 'channels' now accepts a '%group' param to show which channels a group are in.
+* Add '%group' support to 'bots' command.
 
 1.4.0 - http://wraith.botpack.net/milestone/1.4.0
   * Updated server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
