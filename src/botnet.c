@@ -530,11 +530,15 @@ bool sortNodes(const bd::String nodeA, const bd::String nodeB) {
   bd::Array<bd::String> reversedPartsA, reversedPartsB;
   bd::String reversedNodeA, reversedNodeB;
 
-  for (size_t i = partsA.length() - 1; i > 0; --i) {
-    reversedPartsA << partsA[i - 1];
+  if (partsA.length()) {
+    for (size_t i = partsA.length() - 1; i > 0; --i) {
+      reversedPartsA << partsA[i - 1];
+    }
   }
-  for (size_t i = partsB.length() - 1; i > 0; --i) {
-    reversedPartsB << partsB[i - 1];
+  if (partsB.length()) {
+    for (size_t i = partsB.length() - 1; i > 0; --i) {
+      reversedPartsB << partsB[i - 1];
+    }
   }
   reversedNodeA = reversedPartsA.join(".");
   reversedNodeB = reversedPartsB.join(".");
