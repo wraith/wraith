@@ -49,6 +49,7 @@
 #include "core_binds.h"
 #include <bdlib/src/String.h>
 #include <bdlib/src/Array.h>
+#include <algorithm>
 
 tand_t			*tandbot = NULL;		/* Keep track of tandem bots on the
 							   botnet */
@@ -522,12 +523,32 @@ void answer_local_whom(int idx, int chan)
   dprintf(idx, "Total users: %d\n", total);
 }
 
+bool sortNodes(const bd::String nodeA, const bd::String nodeB) {
+  // Reverse the domains
+  const bd::Array<bd::String> partsA(nodeA.split("."));
+  const bd::Array<bd::String> partsB(nodeB.split("."));
+  bd::Array<bd::String> reversedPartsA, reversedPartsB;
+  bd::String reversedNodeA, reversedNodeB;
+
+  for (size_t i = partsA.length() - 1; i > 0; --i) {
+    reversedPartsA << partsA[i - 1];
+  }
+  for (size_t i = partsB.length() - 1; i > 0; --i) {
+    reversedPartsB << partsB[i - 1];
+  }
+  reversedNodeA = reversedPartsA.join(".");
+  reversedNodeB = reversedPartsB.join(".");
+  return reversedNodeA < reversedNodeB;
+}
+
 /* Show z a list of all bots connected
  */
 void
 tell_bots(int idx, int up, const char *nodename)
 {
-  size_t total = 0;
+  size_t total = 0, maxNodeNameLength = 0;;
+  bd::Array<bd::String> nodes;
+  bd::HashTable<bd::String, bd::Array<bd::String> > nodeBots;
   bd::Array<bd::String> bots;
   bd::String group;
 
@@ -553,7 +574,13 @@ tell_bots(int idx, int up, const char *nodename)
       const bool bot_found = findbot(u->handle);
       const bool up_down_match = (nodename || (!nodename && ((up && bot_found) || (!up && !bot_found))));
       if (group_match || (group.length() == 0 && node_match && up_down_match)) {
-        if ((group.length() || nodename) && !up && !bot_found) {
+        if (nodes.find(node) == nodes.npos) {
+          nodes << node;
+          if (node.length() > maxNodeNameLength) {
+            maxNodeNameLength = node.length();
+          }
+        }
+        if ((group.length() || nodename) && !bot_found) {
           botnick = '*' + botnick;
         }
         nodeBots[node] << botnick;
@@ -562,7 +589,17 @@ tell_bots(int idx, int up, const char *nodename)
     }
   }
 
-  dumplots(idx, nodename ? "Matching: " : (up ? "Up: " : "Down: "), static_cast<bd::String>(bots.join(" ")).c_str());
+  if (group.length() == 0 && !nodename) {
+    dumplots(idx, nodename ? "Matching: " : (up ? "Up: " : "Down: "), static_cast<bd::String>(bots.join(" ")).c_str());
+  } else {
+    // Sort by nodes
+    std::sort(nodes.begin(), nodes.end(), sortNodes);
+    for (size_t i = 0; i < nodes.length(); ++i) {
+      const bd::String node(nodes[i]);
+      const bd::Array<bd::String> botsInNode(nodeBots[node]);
+      dumplots(idx, bd::String::printf("%*s: ", int(maxNodeNameLength), node.c_str()).c_str(), static_cast<bd::String>(botsInNode.join(" ")).c_str());
+    }
+  }
 
   if (nodename || group.length()) {
     dprintf(idx, "(Total Matching: %zu/%zu)\n", bots.length(), total);
