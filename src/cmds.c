@@ -901,23 +901,74 @@ static void cmd_userlist(int idx, char *par)
   return;
 }
 
+static void cmd_groups(int idx, char *par)
+{
+  struct userrec *u = NULL;
+
+  putlog(LOG_CMDS, "*", "#%s# groups %s", dcc[idx].nick, par);
+  bd::String botnick(newsplit(&par));
+
+  bd::Array<bd::String> globalgroups = bd::String(var_get_gdata("groups")).split(",");
+  bd::Array<bd::String> allgroups;
+  bd::HashTable<bd::String, bd::Array<bd::String> > groupBots;
+  bd::HashTable<bd::String, bd::Array<bd::String> > botGroups;
+  size_t maxGroupLen = 0;
+
+  // Need to loop over every bot and make a list of all groups and bots which are in those groups
+  for (u = userlist; u; u = u->next) {
+    if (u->bot && bot_hublevel(u) == 999) {
+      // Gather all the groups for this bot
+      botGroups[u->handle] = bd::String(var_get_bot_data(u, "groups", true)).split(",");
+      for (size_t i = 0; i < botGroups[u->handle].length(); ++i) {
+        const bd::String group(botGroups[u->handle][i]);
+        if (group.length() > maxGroupLen) {
+          maxGroupLen = group.length();
+        }
+        // Add their groups into the master list
+        if (allgroups.find(group) == allgroups.npos) {
+          allgroups << group;
+        }
+        // Add them to the list for this group
+        groupBots[group] << u->handle;
+
+      }
+    }
+  }
+
+  if (botnick.length()) {
+    dprintf(idx, "%s is in groups: %s\n", botnick.c_str(), static_cast<bd::String>(botGroups[botnick].join(" ")).c_str());
+  } else {
+    // Display all groups and which bots are in them
+    for (size_t i = 0; i < allgroups.length(); ++i) {
+      const bd::String group(allgroups[i]);
+      const bd::Array<bd::String> bots(groupBots[group]);
+      dumplots(idx, bd::String::printf("%-*s: ", int(maxGroupLen), group.c_str()).c_str(), static_cast<bd::String>(bots.join(" ")).c_str());
+    }
+  }
+
+  dprintf(idx, "Total groups: %zu\n", allgroups.length());
+  return;
+}
+
 static void cmd_channels(int idx, char *par) {
   putlog(LOG_CMDS, "*", "#%s# channels %s", dcc[idx].nick, par);
   if (par[0] && (dcc[idx].user->flags & USER_MASTER)) {
-    struct userrec *user = NULL;
-
-    user = get_user_by_handle(userlist, par);
-    if (user && whois_access(dcc[idx].user, user)) {
+    if (par[0] == '%') {
       show_channels(idx, par);
-    } else  {
-      dprintf(idx, "No such user.\n");
+    } else {
+      struct userrec *user = get_user_by_handle(userlist, par);
+      if (user && whois_access(dcc[idx].user, user)) {
+        show_channels(idx, par);
+      } else  {
+        dprintf(idx, "No such user.\n");
+      }
     }
   } else {
       show_channels(idx, NULL);
   }
 
   if ((dcc[idx].user->flags & USER_MASTER) && !(par && par[0]))
-    dprintf(idx, "You can also %schannels <user>\n", (dcc[idx].u.chat->channel >= 0) ? settings.dcc_prefix : "");
+    dprintf(idx, "You can also %schannels <user|%%group>\n", (dcc[idx].u.chat->channel >= 0) ? settings.dcc_prefix : "");
 }
 
 
@@ -1335,7 +1386,7 @@ static void cmd_botcmd(int idx, char *par)
     cmd = newsplit(&par);
 
   if (!botm[0] || !cmd || (cmd && !cmd[0])) {
-    dprintf(idx, "Usage: botcmd <bot> <cmd> [params]\n");
+    dprintf(idx, "Usage: botcmd <bot|*|?|&|%%group> <cmd> [params]\n");
     return;
   }
 
@@ -1347,7 +1398,7 @@ static void cmd_botcmd(int idx, char *par)
     putlog(LOG_CMDS, "*", "#%s# botcmd %s %s ...", dcc[idx].nick, botm, cmd);
 
   // Restrict dangerous mass commands ('botcmd *' (any *) or 'botcmd &')
-  if ((strchr(botm, '*') && !findbot(botm)) || !strcmp(botm, "&")) {
+  if ((strchr(botm, '*') && !findbot(botm)) || !strcmp(botm, "&") || botm[0] == '%') {
     if (!strncasecmp(cmd, "di", 2) || (!strncasecmp(cmd, "res", 3) && strncasecmp(cmd, "reset", 5)) || !strncasecmp(cmd, "sui", 3) || !strncasecmp(cmd, "pl", 2) || !strncasecmp(cmd, "ac", 2) ||
         !strncasecmp(cmd, "j", 1) || (!strncasecmp(cmd, "dump", 4) && (!strncasecmp(par, "privmsg", 7) || !strncasecmp(par, "notice", 6) || !strncasecmp(par, "quit", 4)))) {
       dprintf(idx, "Not a good idea.\n");
@@ -1383,11 +1434,19 @@ static void cmd_botcmd(int idx, char *par)
   }
   
   for (tbot = tandbot; tbot; tbot = tbot->next) {
-    if ((rand_leaf && bot_hublevel(get_user_by_handle(userlist, tbot->bot)) != 999) ||
-        (all_localhub && (bot_hublevel(get_user_by_handle(userlist, tbot->bot)) != 999 || !tbot->localhub)))
+    struct userrec *botu = get_user_by_handle(userlist, tbot->bot);
+    if ((rand_leaf && bot_hublevel(botu) != 999) ||
+        (all_localhub && (bot_hublevel(botu) != 999 || !tbot->localhub)))
       continue;
     cnt++;
-    if ((rleaf != -1 && cnt == rleaf) || (rleaf == -1 && (all_localhub || wild_match(botm, tbot->bot)))) {
+    bool group_match = false;
+    if (botm[0] == '%' && bot_hublevel(botu) == 999) {
+      bd::String botgroups = var_get_bot_data(botu, "groups", true);
+      if (botgroups.split(',').find(botm + 1) != bd::String::npos) {
+        group_match = true;
+      }
+    }
+    if (group_match || (rleaf != -1 && cnt == rleaf) || (rleaf == -1 && (all_localhub || wild_match(botm, tbot->bot)))) {
       if (rleaf != -1)
         putlog(LOG_CMDS, "*", "#%s# botcmd %s %s ...", dcc[idx].nick, tbot->bot, cmd);
       send_remote_simul(idx, tbot->bot, cmd, par ? par : (char *) "");
@@ -4721,6 +4780,7 @@ cmd_t C_dcc[] =
   {"version", 		"o", 	(Function) cmd_version, 	NULL, 0},
   {"netversion", 	"o", 	(Function) cmd_netversion, 	NULL, HUB},
   {"userlist", 		"m", 	(Function) cmd_userlist, 	NULL, 0},
+  {"groups", 		"m", 	(Function) cmd_groups, 		NULL, HUB},
   {"ps", 		"n", 	(Function) cmd_ps, 		NULL, 0},
   {"last", 		"n", 	(Function) cmd_last, 		NULL, 0},
   {"exec", 		"a", 	(Function) cmd_exec, 		NULL, 0},

@@ -45,6 +45,7 @@
 #include "userrec.h"
 #include "main.h"
 #include "debug.h"
+#include "set.h"
 #include "dccutil.h"
 #include "botmsg.h"
 #if HAVE_GETRUSAGE
@@ -54,8 +55,10 @@
 #endif
 #endif
 #include <sys/utsname.h>
+#include <bdlib/src/Array.h>
+#include <bdlib/src/String.h>
 
-char *def_chanset = "+enforcebans +dynamicbans +userbans -bitch +cycle -inactive +userexempts -dynamicexempts +userinvites -dynamicinvites -nodesynch -closed -take -voice -private -fastop +meankicks ban-type 3 protect-backup 1";
+char *def_chanset = "+enforcebans +dynamicbans +userbans -bitch +cycle -inactive +userexempts -dynamicexempts +userinvites -dynamicinvites -nodesynch -closed -take -voice -private -fastop +meankicks ban-type 3 protect-backup 1 groups { main }";
 struct chanset_t 	*chanset = NULL;	/* Channel list			*/
 struct chanset_t	*chanset_default = NULL;	/* Default channel list */
 char 			admin[121] = "";	/* Admin info			*/
@@ -92,7 +95,7 @@ void rmspace(char *s)
 
 /* Returns memberfields if the nick is in the member list.
  */
-memberlist *ismember(struct chanset_t *chan, const char *nick)
+memberlist *ismember(const struct chanset_t *chan, const char *nick)
 {
   register memberlist	*x = NULL;
 
@@ -740,69 +743,7 @@ int isowner(char *name)
   }
 }
 
-/* this method is slow, but is only called when sharing and adding/removing chans */
-
-int 
-botshouldjoin(struct userrec *u, struct chanset_t *chan)
-{
-  /* just return 1 for now */
-  return 1;
-/*
-  char *chans = NULL;
-  struct userrec *u = NULL;
- 
-  u = get_user_by_handle(userlist, bot);
-  if (!u)
-    return;
-  chans = get_user(&USERENTRY_CHANS, u);
-*/
-}
-/* future use ?
-void
-chans_addbot(const char *bot, struct chanset_t *chan)
-{
-  char *chans = NULL;
-  struct userrec *u = NULL;
- 
-  u = get_user_by_handle(userlist, bot);
-  if (!u)
-    return;
-  chans = get_user(&USERENTRY_CHANS, u);
-  if (!botshouldjoin(u, chan)) {		
-    size_t size;
-    char *buf = NULL;
-   
-    size = strlen(chans) + strlen(chan->dname) + 2;
-    buf = (char *) my_calloc(1, size);
-    simple_snprintf(buf, size, "%s %s", chans, chan->dname);
-    set_user(&USERENTRY_CHANS, u, buf);
-    free(buf);
-  }
-}
-
-void 
-chans_delbot(const char *bot, struct chanset_t *chan)
-{
-  char *chans = NULL;
-  struct userrec *u = NULL;
- 
-  u = get_user_by_handle(userlist, bot);
-  if (!u)
-    return;
- 
-  if (botshouldjoin(u, chan)) {			
-    char *chans = NULL, *buf = NULL;
-    size_t size;
-
-    chans = get_user(&USERENTRY_CHANS, u);
-    size = strlen(chans) - strlen(chan->dname) + 2;
-
-    
-  }
-}
-*/
-
-bool bot_shouldjoin(struct userrec* u, struct flag_record* fr, struct chanset_t* chan, bool ignore_inactive)
+bool bot_shouldjoin(struct userrec* u, struct flag_record* fr, const struct chanset_t* chan, bool ignore_inactive)
 {
   // If restarting, keep this channel.
   if (restarting && (reset_chans == 2) && (channel_active(chan) || channel_pending(chan))) return 1;
@@ -823,13 +764,30 @@ bool bot_shouldjoin(struct userrec* u, struct flag_record* fr, struct chanset_t*
       return 0;
   }
 #endif
+
+  // Is this bot in the groups that this channel has?
+  const char *botgroups = u == conf.bot->u ? groups : var_get_bot_data(u, "groups", true);
+  bd::Array<bd::String> my_groupsArray(bd::String(botgroups).split(','));
+  bool group_match = 0;
+
+  if (chan->groups && chan->groups->length()) {
+    for (size_t i = 0; i < my_groupsArray.length(); ++i) {
+      if (chan->groups->find(my_groupsArray[i]) != chan->groups->npos) {
+        group_match = 1;
+        break;
+      }
+    }
+  }
+
   // Ignore +inactive during cmd_slowjoin to ensure that +backup bots join
-  return (!glob_kick(*fr) && !chan_kick(*fr) &&
-      ((ignore_inactive || !channel_inactive(chan)) &&
-       (channel_backup(chan) || (!glob_backup(*fr) && !chan_backup(*fr)))));
+  return (!glob_kick(*fr) && !chan_kick(*fr) && // Not being kicked
+      ((ignore_inactive || !channel_inactive(chan)) && // Not inactive
+      ((channel_backup(chan) && (glob_backup(*fr) || chan_backup(*fr) || group_match)) || // Is +backup and I'm a backup bot or my group matches
+       (!channel_backup(chan) && !glob_backup(*fr) && !chan_backup(*fr) && group_match))) // is -backup and I am not a backup bot and my group matches
+      );
 }
 
-bool shouldjoin(struct chanset_t *chan)
+bool shouldjoin(const struct chanset_t *chan)
 {
   struct flag_record fr = { FR_CHAN|FR_GLOBAL|FR_BOT, 0, 0, 0 };
   get_user_flagrec(conf.bot->u, &fr, chan->dname, chan);

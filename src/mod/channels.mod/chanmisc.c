@@ -306,7 +306,7 @@ int SplitList(char *resultBuf, const char *list, int *argcPtr, const char ***arg
  */
 int channel_modify(char *result, struct chanset_t *chan, int items, char **item, bool cmd)
 {
-  bool error = 0;
+  bool error = 0, changed_groups = false;
   int old_status = chan->status,
       old_mode_mns_prot = chan->mode_mns_prot,
       old_mode_pls_prot = chan->mode_pls_prot;
@@ -336,6 +336,20 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
       }
       strlcpy(s, item[i], sizeof(s));
       set_mode_protect(chan, s);
+    } else if (!strcmp(item[i], "groups")) {
+      i++;
+      if (i >= items) {
+	if (result)
+	  strlcpy(result, "channel groups needs argument", RESULT_LEN);
+	return ERROR;
+      }
+      // Get string into right format
+      bd::String changroups(item[i]);
+      // Replace commas with spaces to be in proper format
+      changroups.sub(",", " ");
+      changroups.trim();
+      *(chan->groups) = changroups.split(" ");
+      changed_groups = true;
     } else if (!strcmp(item[i], "topic")) {
       char *p = NULL;
 
@@ -814,12 +828,9 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
     chan->status |= CHAN_BITCH;		// to avoid bots still mass opping from +take from not using cookies
 
   if (!conf.bot->hub && (chan != chanset_default)) {
-    if ((old_status ^ chan->status) & (CHAN_INACTIVE | CHAN_BACKUP)) {
-      if (!shouldjoin(chan) && (chan->ircnet_status & (CHAN_ACTIVE | CHAN_PEND))) {
-        putlog(LOG_DEBUG, "*", "In %s, but I shouldn't be, parting...", chan->dname);
-        dprintf(DP_SERVER, "PART %s\n", chan->name[0] ? chan->name : chan->dname);
-      } else if (shouldjoin(chan))
-        join_chan(chan);
+    // Check if groups changed or +/-backup set
+    if (!restarting && !loading && (changed_groups || ((old_status ^ chan->status) & (CHAN_INACTIVE | CHAN_BACKUP)))) {
+      check_shouldjoin(chan);
     }
     if (me_op(chan)) {
       if ((old_status ^ chan->status) & (CHAN_ENFORCEBANS|CHAN_NOUSERBANS|CHAN_DYNAMICBANS|CHAN_NOUSEREXEMPTS|CHAN_NOUSERINVITES|CHAN_DYNAMICEXEMPTS|CHAN_DYNAMICINVITES)) {
@@ -995,6 +1006,8 @@ int channel_add(char *result, const char *newname, char *options, bool isdefault
 /* Chanint template
  *  chan->temp = 0;
  */
+    chan->groups = new bd::Array<bd::String>;
+    *(chan->groups) << "main";
     chan->protect_backup = 1;
     chan->knock_flags = 0;
     chan->flood_lock_time = 120;

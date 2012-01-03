@@ -299,23 +299,21 @@ static bool set_unpack(struct userrec *u, struct user_entry *e)
   head = curr = e->u.list;
   e->u.extra = NULL;
 
-  if (conf.bot->hub || conf.bot->localhub || !strcasecmp(conf.bot->nick, u->handle)) {
-    struct xtra_key *t = NULL;
-    char *key = NULL, *data = NULL;
+  struct xtra_key *t = NULL;
+  char *key = NULL, *data = NULL;
 
-    while (curr) {
-      t = (struct xtra_key *) my_calloc(1, sizeof(struct xtra_key));
-      data = curr->extra;
-      key = newsplit(&data);
-      if (data[0]) {
-        t->key = strdup(key);
-        t->data = strdup(data);
-        list_insert((struct xtra_key **) (&e->u.extra), t);
-      } else
-        free(t);
-      curr = curr->next;
-    }
-  } 
+  while (curr) {
+    t = (struct xtra_key *) my_calloc(1, sizeof(struct xtra_key));
+    data = curr->extra;
+    key = newsplit(&data);
+    if (data[0]) {
+      t->key = strdup(key);
+      t->data = strdup(data);
+      list_insert((struct xtra_key **) (&e->u.extra), t);
+    } else
+      free(t);
+    curr = curr->next;
+  }
 
   list_type_kill(head);
   return 1;
@@ -365,12 +363,13 @@ static bool set_gotshare(struct userrec *u, struct user_entry *e, char *buf, int
 static void set_write_userfile(bd::Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
 {
   int localhub = nextbot(u->handle);
-  /* only write if saving local, or if sending to hub, or if sending to same user as entry, or the localhub in the chain */
-  if (idx == -1 || dcc[idx].hub || dcc[idx].user == u || (localhub != -1 && idx == localhub)) {
-    struct xtra_key *x = (struct xtra_key *) e->u.extra;
+  struct xtra_key *x = (struct xtra_key *) e->u.extra;
 
-    for (; x; x = x->next)
+  for (; x; x = x->next) {
+    /* only write if saving local, or if sending to hub, or if sending to same user as entry, or the localhub in the chain, or sending 'groups' */
+    if (idx == -1 || dcc[idx].hub || dcc[idx].user == u || (localhub != -1 && idx == localhub) || !strcmp(x->key, "groups")) {
       stream << bd::String::printf("--%s %s %s\n", e->type->name, x->key, x->data ? x->data : "");
+    }
   }
 }
 

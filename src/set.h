@@ -67,7 +67,7 @@ typedef struct rate_b {
  interval_t time;
 } rate_t;
 
-extern char		auth_key[], auth_prefix[2], motd[], alias[], rbl_servers[1024],
+extern char		auth_key[], auth_prefix[2], motd[], alias[], rbl_servers[1024], groups[1024],
 			msgident[], msginvite[], msgop[], msgpass[], msgrelease[],
                         homechan[], altchars[];
 extern bool		dccauth, auth_obscure, manop_warn, auth_chan, oidentd, ident_botnick, irc_autoaway, link_cleartext, use_deaf, use_callerid;
@@ -86,6 +86,8 @@ void var_parse_my_botset();
 void init_vars();
 void var_set_by_name(const char *, const char *, const char *);
 void var_set_userentry(const char *, const char *, const char *);
+const char *var_get_bot_data(struct userrec *u, const char *name, bool useDefault = false);
+const char *var_get_gdata(const char *name);
 int cmd_set_real(const char *, int idx, char *);
 const char *var_get_str_by_name(const char *);
 

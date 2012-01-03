@@ -14,6 +14,7 @@
 #include "misc.h"
 #include "net.h"
 #include "src/mod/server.mod/server.h"
+#include "src/mod/irc.mod/irc.h"
 #include "src/mod/channels.mod/channels.h"
 #include "src/mod/ctcp.mod/ctcp.h"
 #include "users.h"
@@ -30,6 +31,7 @@ static bool parsing_botset = 0;
 char altchars[50] = "";
 char alias[1024] = "";
 char rbl_servers[1024] = "";
+char groups[1024] = "";
 bool auth_chan;
 char auth_key[51] = "";
 char auth_prefix[2] = "";
@@ -94,6 +96,7 @@ static variable_t vars[] = {
  VAR("flood-ctcp",	&flood_ctcp,		VAR_RATE|VAR_NOLHUB,				0, 0, "3:60"),
  VAR("flood-msg",	&flood_msg,		VAR_RATE|VAR_NOLHUB,				0, 0, "5:60"),
  VAR("fork-interval",	&fork_interval,		VAR_INT,					10, 0, "0"),
+ VAR("groups",		groups,			VAR_STRING|VAR_LIST|VAR_NOLHUB,			0, 0, "main"),
  VAR("hijack",		&hijack,		VAR_INT|VAR_DETECTED|VAR_PERM,			0, 4, "die"),
  VAR("homechan",	homechan,		VAR_WORD|VAR_NOLOC|VAR_HIDE,			0, 0, NULL),
  VAR("ident-botnick",   &ident_botnick,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "0"),
@@ -410,6 +413,15 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
     var_set_mem(servers, servers->ldata ? servers->ldata : servers->gdata ? servers->gdata : NULL);
   }
 
+  // Check if should part/join channels based on groups changing
+  if (!conf.bot->hub && !strcmp(var->name, "groups")) {
+    if (server_online && !restarting && !loading && !reset_chans) {
+      for (struct chanset_t* chan = chanset; chan; chan = chan->next) {
+        check_shouldjoin(chan);
+      }
+    }
+  }
+
   if (datap)
     free(datap);
 
@@ -514,6 +526,11 @@ static inline variable_t *var_get_var_by_name(const char *name)
   variable_t key;
   key.name = name;
   return (variable_t*) bsearch(&key, &vars, lengthof(vars) - 1, sizeof(variable_t), comp_variable_t);
+}
+
+const char *var_get_gdata(const char *name) {
+  variable_t* var = var_get_var_by_name(name);
+  return var && var->gdata ? var->gdata : NULL;
 }
 
 void var_set(variable_t *var, const char *target, const char *datain)
@@ -686,7 +703,7 @@ void var_userfile_share_line(char *line, int idx, bool share)
   set_noshare = 0;
 }
 
-static const char *var_get_bot_data(struct userrec *u, const char *name)
+const char *var_get_bot_data(struct userrec *u, const char *name, bool useDefault)
 {
   if (!u)
     return NULL;
@@ -697,7 +714,14 @@ static const char *var_get_bot_data(struct userrec *u, const char *name)
   while (xk && strcmp(xk->key, name))
     xk = xk->next;
 
-  return xk ? xk->data : NULL;
+  if (xk) {
+    return xk->data;
+  }
+  if (useDefault) {
+    variable_t *var = var_get_var_by_name(name);
+    return var->gdata ? var->gdata : var->def;
+  }
+  return NULL;
 }
 
 
@@ -796,7 +820,7 @@ static int var_add_list(const char *botnick, variable_t *var, const char *elemen
   char *data = NULL, *olddata = NULL, *botdata = NULL;
 
   if (botnick) {                          //fetch data from bot's USERENTRY_SET
-    botdata = (char *) var_get_bot_data(get_user_by_handle(userlist, (char *) botnick), var->name);
+    botdata = (char *) var_get_bot_data(get_user_by_handle(userlist, (char *) botnick), var->name, true);
     olddata = botdata ? botdata : NULL;
   } else                                  //use global, no bot specified
     olddata = var->gdata ? var->gdata : NULL;

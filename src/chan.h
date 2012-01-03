@@ -8,6 +8,9 @@
 #ifndef _EGG_CHAN_H
 #define _EGG_CHAN_H
 
+#include <lib/bdlib/src/Array.h>
+#include <lib/bdlib/src/String.h>
+
 typedef struct memstruct {
   struct memstruct *next;
   struct userrec *user;
@@ -210,6 +213,7 @@ struct chanset_t {
   char pls[21];			/* positive mode changes		*/
   char mns[21];			/* negative mode changes		*/
   char key_prot[121];		/* desired password			*/
+  bd::Array<bd::String> *groups;/* groups that should join */
 /* Chanchar template
  *char temp[121];
  */
@@ -266,7 +270,7 @@ struct chanset_t {
 #define CHAN_STOP_CYCLE     BIT9	/* Some efnetservers have defined NO_CHANOPS_WHEN_SPLIT */
 
 /* prototypes */
-memberlist *ismember(struct chanset_t *, const char *);
+memberlist *ismember(const struct chanset_t *, const char *);
 struct chanset_t *findchan(const char *name);
 struct chanset_t *findchan_by_dname(const char *name);
 

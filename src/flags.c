@@ -380,7 +380,7 @@ set_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chname)
 /* Always pass the dname (display name) to this function for chname <cybah>
  */
 void
-get_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chname, struct chanset_t* chan)
+get_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chname, const struct chanset_t* chan)
 {
   fr->bot = 0;
   if (!u) {

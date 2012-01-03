@@ -721,6 +721,9 @@ void remove_channel(struct chanset_t *chan)
      free(chan->key);
    if (chan->rmkey)
      free(chan->rmkey);
+   if (chan->groups) {
+     delete(chan->groups);
+   }
    free(chan);
 }
 

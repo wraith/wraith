@@ -235,7 +235,7 @@ See also: -ban, +ban, console%{+m|m}, chanset, chaninfo%{-}, stick, unstick
    one. You can also specify a bot, and attempt to boot someone from another
    bot on the botnet. You can not boot a bot owner.
 :hub:botcmd:
-###  $bbotcmd$b <bot> <cmd> [params]
+###  $bbotcmd$b <bot|*|?|&|%%group> <cmd> [params]
    The specified cmd and optional parameters are executed on the specified bot, 
    all results are displayed back on DCC. For example:
      [19:29] #bryan# botcmd wtest whom ...
@@ -253,6 +253,7 @@ See also: -ban, +ban, console%{+m|m}, chanset, chaninfo%{-}, stick, unstick
  
    Just using '?' for 'bot' will choose a random leaf bot.
    Just using '&' for 'bot' will do the cmd on all localhub bots. (first bot in config).
+   Use '%%group' to match a specific group. (see also: '%dhelp set')
  
    This cmd cannot be chained over the botnet, ie, no: '%dbotcmd [bot] botcmd [bot2] ...'
  
@@ -261,15 +262,6 @@ See also: -ban, +ban, console%{+m|m}, chanset, chaninfo%{-}, stick, unstick
      bl -> botcmd ?
  
 See also: cmdpass
-::botjoin
-###  $bbotjoin$b <bot> <channel> [options]
-   Adds a channel to the bot's channel list. If options are specified, the 
-   channel will be configured with the options.
- 
-   $bTHIS CMD IS CURRENTLY EXPERIMENTAL AND WILL NOT ACTUALLY SAVE STATE$b
-   $bMEANING, ALL BOTS WILL JOIN EVENTUALLY AFTER DOING BOTJOIN$b
- 
-See also: botpart, +chan, -chan, chanset, chaninfo
 :hub:botjump:
 ###  $bbotjump$b <bot> [server [port [pass]]]
    Makes the bot jump to another server. If you don't specify a
@@ -291,13 +283,8 @@ See also: msg%{+n}
    The specified bot will display its current nick over DCC.
  
 See also: netnick, nick
-::botpart
-###  $bbotpart$b <bot> <channel>
-   Removes bot from the specified channel
- 
-See also: botjoin, +chan, -chan, chanset, chaninfo
 :hub:bots
-###  $bbots$b [nodename]
+###  $bbots$b [nodename|%group]
    Shows the list of bots currently on the botnet.
    Example:
       Bots: cEvin, ruthie, Killa1
@@ -305,9 +292,10 @@ See also: botjoin, +chan, -chan, chanset, chaninfo
    bot. %{+n}Use $b'%dwho'$b or $b'%dbottree'$b for that information.%{-}
  
    Specifying a nodename will display all bots up/down on that nodename.
-   Bots with a * preceeding its name is down.
+   Bots with a * preceeding its name are down.
+   Specifying a %%group will only show bots in that group.
  
-See also: downbots%{+n}, bottree%{-}
+See also: groups, downbots%{+n}, bottree%{-}
 :hub:botserver:
 ###  $bbotserver$b <bot>
    The bot will display its current server and lag over DCC.
@@ -338,7 +326,7 @@ See also: set
    Red: localhubs (first bot in binary, see '%dhelp conf')
    Other: normal leaf bots
  
-See also: bots, downbots
+See also: bots, downbots, groups
 ::botversion:
 ###  $bbotversion$b <bot>
    The bot will display its pack version and uname.
@@ -359,8 +347,12 @@ See also: link%{+a}, newhub%{-}
 ###  $bchaninfo$b <channel>
    This lists all the settings for the bot on the given channel.
    It shows any of the following:
-        $bchanmode$b   These modes are enforced on the channel. Both + and -
-                   modes can be enforced.
+        $bchanmode$b         These modes are enforced on the channel.
+                          Both + and - modes can be enforced. Use {} to
+                          add a key. '%dchanset #chan chanmode { +nt key }'
+        $bgroups$b            List of groups that should join the channel.
+                          Use {} to add multiple groups. See also '%dhelp set'
+                          '%dchanset #chan groups { main alt }'
 %{+m|m}
         $bauto-delay$b        Amount of seconds to wait before auto opping,
                               or auto voicing a client based on flags or
@@ -592,13 +584,14 @@ See also: %{-}%{+n}+chan, -chan%{-}%{+m|m}, chanset%{-}
  
 See also: status, whois
 ::channels:
-###  $bchannels$b %{+m}[user]%{-}
+###  $bchannels$b %{+m}[user|%group]%{-}
    Displays channels that you have access to, and any important 
    flags that are set on them.
 %{+m}
    Masters: You can specify other users to see what channels their 
             flags grant them access to.%{-}
-See also: whois%{+m}, chattr, chaninfo%{-}
+   Special %%group to see what channels a particular group is in.
+See also: whois%{+m}, chattr, chaninfo, groups%{-}
 ::chanset
 ###  $bchanset$b [#&!+channel|*|default] <settings>
    Allows you to change the channel settings (see $b'chaninfo'$b for the
@@ -649,8 +642,8 @@ See also: whois
 :hub:checkchannels
 ###  $bcheckchannels$b
    This will make all leaf bots display which channels they are currently
-   not in but *should* be in.  This command will not show channels which
-   the bot is not active in due to '$bbotpart$b'.
+   not in but *should* be in.  This will only shows channels that contain
+   the groups the bot are in.
  
 See also: botcmd, channels, channel, status
 :hub:chhandle
@@ -964,7 +957,7 @@ See also: cycle
    Example:
       Down bots: cEvin, ruthie, Killa1
  
-See also: bots
+See also: bots, groups
 :leaf:dump
 ###  $bdump$b <text>
    dumps the text to the server.  keep in mind that this bot doesn't
@@ -1061,6 +1054,13 @@ See also: -exempt, +exempt, console%{+m|m}, chanset, chaninfo%{-}, stick, unstic
    specified, your console channel is used.
  
 See also: console, channels%{+m}, status%{-}
+:hub:groups
+###  $bgroups$b [bot]
+   Shows the list of groups and which bots are in them.
+
+   Specify a bot to only show which groups it is in.
+ 
+See also: bots, downbots%{+n}, bottree%{-}
 ::handle
 ###  $bhandle$b <new-handle>
    Changes your handle on the bot. This is the handle (nickname) that the
@@ -1672,7 +1672,7 @@ See also: reload, backup
 [N]  $bmsgburst$b        How many messages to burst at once to server. (Too high will excess flood)
 [N]  $bmsgrate$b         How often (msecs) to dequeue msgs to the server. Only used on
                            non-ratbox servers. Too small a value can result in Excess Flood.
- 
+[L]  $bgroups$b          List of groups that the affected bots are a part of.
 [L]  $brbl-servers$b     Servers to use for RBL checking in channels that are +rbl.
  
 [S]  $brealname$b        The bot's "real name" when connecting. (supports '$n' expansion)

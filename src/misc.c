@@ -431,45 +431,62 @@ void show_motd(int idx)
 
 void show_channels(int idx, char *handle)
 {
-  struct chanset_t *chan = NULL;
-  struct flag_record fr = { FR_CHAN | FR_GLOBAL, 0, 0, 0 };
   struct userrec *u = NULL;
-  int first = 0, total = 0;
-  size_t l = 0;
-  char format[120] = "";
+  size_t maxChannelLength = 0;
+  bd::Array<bd::String> channelNames;
+  bd::HashTable<bd::String, struct chanset_t*> channels;
+  bd::String group;
 
-  if (handle)
+  if (handle && handle[0] != '%') {
     u = get_user_by_handle(userlist, handle);
-  else
+  } else {
     u = dcc[idx].user;
-
-  for (chan = chanset;chan ;chan = chan->next) {
-    get_user_flagrec(u, &fr, chan->dname);
-    if (l < strlen(chan->dname)) {
-      l = strlen(chan->dname);
-    }
-    if (real_chk_op(fr, chan, 0))
-      total++;
-  }
-
-  simple_snprintf(format, sizeof(format), "  %%c%%-%zus %%-s%%-s%%-s%%-s%%-s%%-s\n", (l+2));
-
-  for (chan = chanset;chan;chan = chan->next) {
-    get_user_flagrec(u, &fr, chan->dname);
-    if (real_chk_op(fr, chan, 0)) {
-        if (!first) { 
-          dprintf(idx, "%s %s access to %d channel%s:\n", handle ? u->handle : "You", handle ? "has" : "have", total, (total > 1) ? "s" : "");
-          
-          first = 1;
-        }
-        dprintf(idx, format, !conf.bot->hub && me_op(chan) ? '@' : ' ', chan->dname, !shouldjoin(chan) ? "(inactive) " : "", 
-           channel_privchan(chan) ? "(private)  " : "", chan->manop ? "(no manop) " : "", 
-           channel_bitch(chan) && !channel_botbitch(chan) ? "(bitch)    " : channel_botbitch(chan) ? "(botbitch) " : "",
-           channel_closed(chan) ?  "(closed) " : "", channel_backup(chan) ? "(backup)" : "");
+    if (handle && handle[0] == '%') {
+      group = handle + 1;
     }
   }
-  if (!first)
-    dprintf(idx, "%s %s not have access to any channels.\n", handle ? u->handle : "You", handle ? "does" : "do");
+
+  for (struct chanset_t* chan = chanset; chan; chan = chan->next) {
+    struct flag_record fr = { FR_CHAN | FR_GLOBAL, 0, 0, 0 };
+    const bd::String chname(chan->dname);
+    // If a group was passed, ensure it matches
+    if (group.length() && chan->groups->find(group) == chan->groups->npos) {
+      continue;
+    }
+    get_user_flagrec(u, &fr, chan->dname);
+    if (group.length() || real_chk_op(fr, chan, 0)) {
+      if (maxChannelLength < chname.length()) {
+        maxChannelLength = chname.length();
+      }
+      channelNames << chname;
+      channels[chname] = chan;
+    }
+  }
+
+  if (channelNames.length()) {
+    char format[120] = "";
+    simple_snprintf(format, sizeof(format), "  %%c%%-%zus %%-s%%-s%%-s%%-s%%-s%%-s\n", (maxChannelLength+2));
+    if (group.length()) {
+      dprintf(idx, "group '%s' is in %zu channel%s:\n", group.c_str(), channelNames.length(), (channelNames.length() > 1) ? "s" : "");
+    } else {
+      dprintf(idx, "%s %s access to %zu channel%s:\n", handle ? u->handle : "You", handle ? "has" : "have", channelNames.length(), (channelNames.length() > 1) ? "s" : "");
+    }
+
+    for (size_t i = 0; i < channelNames.length(); ++i) {
+      const bd::String chname(channelNames[i]);
+      const struct chanset_t* chan = channels[chname];
+      dprintf(idx, format, !conf.bot->hub && me_op(chan) ? '@' : ' ', chan->dname, ((conf.bot->hub && channel_inactive(chan)) || (!conf.bot->hub && !shouldjoin(chan))) ? "(inactive) " : "",
+          channel_privchan(chan) ? "(private)  " : "", chan->manop ? "(no manop) " : "", 
+          channel_bitch(chan) && !channel_botbitch(chan) ? "(bitch)    " : channel_botbitch(chan) ? "(botbitch) " : "",
+          channel_closed(chan) ?  "(closed) " : "", channel_backup(chan) ? "(backup)" : "");
+    }
+  } else {
+    if (group.length()) {
+      dprintf(idx, "No channels found for group '%s'\n", group.c_str());
+    } else {
+      dprintf(idx, "%s %s not have access to any channels.\n", handle ? u->handle : "You", handle ? "does" : "do");
+    }
+  }
 }
 
 /* Create a string with random letters and digits
