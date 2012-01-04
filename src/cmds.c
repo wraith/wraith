@@ -908,8 +908,13 @@ static void cmd_groups(int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# groups %s", dcc[idx].nick, par);
   bd::String botnick(newsplit(&par));
 
-  if (botnick.length() && !get_user_by_handle(userlist, botnick.c_str())) {
+  if (botnick.length() && !(u = get_user_by_handle(userlist, botnick.c_str()))) {
     dprintf(idx, "No such bot.\n");
+    return;
+  }
+
+  if (u && !u->bot) {
+    dprintf(idx, "%s is not a bot.\n", botnick.c_str());
     return;
   }
 
