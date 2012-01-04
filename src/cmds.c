@@ -947,7 +947,7 @@ static void cmd_groups(int idx, char *par)
 
   if (botnick.length()) {
     dprintf(idx, "%s is in groups: %s\n", botnick.c_str(), static_cast<bd::String>(botGroups[botnick].join(" ")).c_str());
-    dprintf(idx, "Total groups: %zu\n", botGroups[botnick].length());
+    dprintf(idx, "Total groups: %zu/%zu\n", botGroups[botnick].length(), allgroups.length());
   } else {
     // Display all groups and which bots are in them
     for (size_t i = 0; i < allgroups.length(); ++i) {
