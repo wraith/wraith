@@ -908,6 +908,11 @@ static void cmd_groups(int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# groups %s", dcc[idx].nick, par);
   bd::String botnick(newsplit(&par));
 
+  if (botnick.length() && !get_user_by_handle(userlist, botnick.c_str())) {
+    dprintf(idx, "No such bot.\n");
+    return;
+  }
+
   bd::Array<bd::String> globalgroups = bd::String(var_get_gdata("groups")).split(",");
   bd::Array<bd::String> allgroups;
   bd::HashTable<bd::String, bd::Array<bd::String> > groupBots;
