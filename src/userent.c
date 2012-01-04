@@ -728,10 +728,8 @@ static bool laston_set(struct userrec *u, struct user_entry *e, void *buf)
     e->u.extra = (struct laston_info *) buf;
   }
 
-  /* FIXME: laston sharing is disabled until a better solution is found
   if (!noshare)
     shareout("c LASTON %s %s %li\n", u->handle, li->lastonplace ? li->lastonplace : "-", li->laston);
-  */
 
   return 1;
 }
