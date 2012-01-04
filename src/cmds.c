@@ -908,6 +908,16 @@ static void cmd_groups(int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# groups %s", dcc[idx].nick, par);
   bd::String botnick(newsplit(&par));
 
+  if (botnick.length() && !(u = get_user_by_handle(userlist, botnick.c_str()))) {
+    dprintf(idx, "No such bot.\n");
+    return;
+  }
+
+  if (u && !u->bot) {
+    dprintf(idx, "%s is not a bot.\n", botnick.c_str());
+    return;
+  }
+
   bd::Array<bd::String> globalgroups = bd::String(var_get_gdata("groups")).split(",");
   bd::Array<bd::String> allgroups;
   bd::HashTable<bd::String, bd::Array<bd::String> > groupBots;
@@ -937,7 +947,7 @@ static void cmd_groups(int idx, char *par)
 
   if (botnick.length()) {
     dprintf(idx, "%s is in groups: %s\n", botnick.c_str(), static_cast<bd::String>(botGroups[botnick].join(" ")).c_str());
-    dprintf(idx, "Total groups: %zu\n", botGroups[botnick].length());
+    dprintf(idx, "Total groups: %zu/%zu\n", botGroups[botnick].length(), allgroups.length());
   } else {
     // Display all groups and which bots are in them
     for (size_t i = 0; i < allgroups.length(); ++i) {
