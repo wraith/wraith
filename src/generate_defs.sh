@@ -29,7 +29,9 @@ for file in $(grep -l DLSYM_GLOBAL src/*.c|grep -v "src/_"); do
   cd src >/dev/null 2>&1
   $CXX -E -I. -I.. -I../lib ${INCLUDES} -DHAVE_CONFIG_H ../${file} > $TMPFILE
   # Fix wrapped prototypes
-  $SED -i -e ':a;N;$!ba;s/,\n/,/g' $TMPFILE
+  $SED -e :a -e N -e '$!ba' -e 's/,\n/,/g' $TMPFILE > $TMPFILE.sed
+  mv $TMPFILE.sed $TMPFILE
+
   cd .. >/dev/null 2>&1
 
   for symbol in $($SED -n -e 's/.*DLSYM_GLOBAL(.*, \([^)]*\).*/\1/p' $file|sort -u); do
