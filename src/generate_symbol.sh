@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/sh
 
 # X="typedef int (*Tcl_Eval_t)(Tcl_Interp*, const char*);"
 
@@ -12,10 +12,13 @@ while read line; do
   params_full=""
   param_names=""
 
+  # Set params to $1,$2, etc
   set $params
   paramCount=$#
+  lastParam=$(expr $paramCount - 1)
+  i=0
 
-  for (( i=0; i < $paramCount; i++)); do
+  while [ $i -lt $paramCount ]; do
     x="x${i}"
     if [ $1 = "void" ]; then
       params_full="void"
@@ -23,12 +26,13 @@ while read line; do
     else
       params_full="${params_full}${1} ${x}"
       param_names="${param_names}${x}"
-      if ! [[ $i = $(expr $paramCount - 1) ]]; then
+      if [ $i -ne $lastParam ]; then
         params_full="${params_full},"
         param_names="${param_names}, "
       fi
     fi
     shift
+    i=$((i + 1))
   done
 
   cat << EOF
