@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/sh
 
 if [ -z "$SED" -o -z "$CXX" ]; then
   echo "This must be ran by configure" >&2
@@ -26,11 +26,11 @@ for file in $(grep -l DLSYM_GLOBAL src/*.c|grep -v "src/_"); do
   echo "extern \"C\" {" > $defsFile_wrappers
   echo "extern \"C\" {" > $defsFile_post
   touch $defsFile_pre
-  pushd src >/dev/null 2>&1
+  cd src >/dev/null 2>&1
   $CXX -E -I. -I.. -I../lib ${INCLUDES} -DHAVE_CONFIG_H ../${file} > $TMPFILE
   # Fix wrapped prototypes
   $SED -i -e ':a;N;$!ba;s/,\n/,/g' $TMPFILE
-  popd >/dev/null 2>&1
+  cd .. >/dev/null 2>&1
 
   for symbol in $($SED -n -e 's/.*DLSYM_GLOBAL(.*, \([^)]*\).*/\1/p' $file|sort -u); do
     echo "#define ${symbol} ORIGINAL_SYMBOL_${symbol}" >> $defsFile_pre
