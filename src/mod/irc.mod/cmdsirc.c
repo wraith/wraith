@@ -1349,7 +1349,7 @@ static void do_invite(int idx, char *par, bool op)
   char *nick = newsplit(&par), *chname = newsplit(&par);
 
   if (!nick[0]) {
-    dprintf(idx, "Missing parameters. Syntax: invite <nickname> [channel|*]\n");
+    dprintf(idx, "Usage: invite <nickname> [channel|*]\n");
     return;
   }
 
