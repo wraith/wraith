@@ -750,7 +750,7 @@ flood-exempt %d flood-lock-time %d knock %d \
  */
         chan->closed_invite,
         chan->closed_private,
-	chan->closed_exempt_mode,
+        chan->closed_exempt_mode,
         chan->ban_time,
         chan->exempt_time,
         chan->invite_time,

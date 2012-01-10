@@ -749,8 +749,12 @@ static void do_closed_kick(struct chanset_t *chan, memberlist *m)
 
   simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
 
-  if ((m && chan->closed_exempt_mode == CHAN_FLAG_OP) ||
-       (m && chan->closed_exempt_mode == CHAN_FLAG_VOICE))
+  struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
+  struct userrec *u = m->user ? m->user : get_user_by_host(m->userhost);
+  get_user_flagrec(u, &fr, chan->dname, chan);
+
+  if ((m && chan->closed_exempt_mode == CHAN_FLAG_OP && chk_op(fr, chan)) ||
+       (m && chan->closed_exempt_mode == CHAN_FLAG_VOICE && chk_voice(fr, chan)))
     return;
 
   if (!(use_exempts &&
