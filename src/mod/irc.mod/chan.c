@@ -749,6 +749,10 @@ static void do_closed_kick(struct chanset_t *chan, memberlist *m)
 
   simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
 
+  if ((m && chan->closed_exempt_mode == CHAN_FLAG_OP) ||
+       (m && chan->closed_exempt_mode == CHAN_FLAG_VOICE))
+    return;
+
   if (!(use_exempts &&
         (u_match_mask(global_exempts,s) ||
          u_match_mask(chan->exempts, s)))) {
