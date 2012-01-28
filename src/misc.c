@@ -364,20 +364,21 @@ void days(time_t mynow, time_t then, char *out, size_t outsiz)
  */
 void daysdur(time_t mynow, time_t then, char *out, size_t outsiz, bool useFor)
 {
+  size_t startIndex = 0;
+  out[0] = 0;
+  if (useFor) {
+    strlcpy(out, "for ", outsiz);
+    startIndex = 4;
+  }
   if (mynow - then > 86400) {
     int mydays = (mynow - then) / 86400;
 
-    if (useFor) {
-      simple_snprintf(out, outsiz, "for %d day%s", mydays, (mydays == 1) ? "" : "s");
-    } else {
-      simple_snprintf(out, outsiz, "%d day%s", mydays, (mydays == 1) ? "" : "s");
-    }
+    simple_snprintf(&out[startIndex], outsiz - startIndex, "%d day%s", mydays, (mydays == 1) ? "" : "s");
     return;
   }
 
   char s[81] = "";
 
-  strlcpy(out, "for ", outsiz);
   mynow -= then;
   int hrs = (int) (mynow / 3600);
   int mins = (int) ((mynow - (hrs * 3600)) / 60);
