@@ -1070,7 +1070,7 @@ static void cmd_kick(int idx, char *par)
   char *nick = newsplit(&par);
 
   if (!par[0])
-    par = "request";
+    par = "requested";
   if (match_my_nick(nick)) {
     dprintf(idx, "I'm not going to kick myself.\n");
     return;
