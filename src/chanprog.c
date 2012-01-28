@@ -262,7 +262,7 @@ void tell_verbose_uptime(int idx)
 # endif
 #endif /* HAVE_GETRUSAGE */
 
-  daysdur(now, online_since, s, sizeof(s));
+  daysdur(now, online_since, s, sizeof(s), false);
 
   if (backgrd)
     strlcpy(s1, "background", sizeof(s1));
@@ -274,7 +274,7 @@ void tell_verbose_uptime(int idx)
   }
   simple_snprintf(outbuf, sizeof(outbuf), "Online for %s", s);
   if (restart_time) {
-    daysdur(now, restart_time, s, sizeof(s));
+    daysdur(now, restart_time, s, sizeof(s), false);
     size_t olen = strlen(outbuf);
     simple_snprintf(&outbuf[olen], sizeof(outbuf) - olen, " (%s %s ago)", restart_was_update ? "updated" : "restarted", s);
   }
