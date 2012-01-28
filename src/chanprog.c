@@ -273,7 +273,7 @@ void tell_verbose_uptime(int idx)
   if (restart_time) {
     daysdur(now, restart_time, s, sizeof(s));
     size_t olen = strlen(outbuf);
-    simple_snprintf(&outbuf[olen], sizeof(outbuf) - olen, " (%s %s)", restart_was_update ? "updated" : "restarted", s);
+    simple_snprintf(&outbuf[olen], sizeof(outbuf) - olen, " (%s %s ago)", restart_was_update ? "updated" : "restarted", s);
   }
 
 #if HAVE_GETRUSAGE

@@ -362,12 +362,16 @@ void days(time_t mynow, time_t then, char *out, size_t outsiz)
 /* Convert an interval (in seconds) to one of:
  * "for 19 days", "for 1 day", "for 09:10"
  */
-void daysdur(time_t mynow, time_t then, char *out, size_t outsiz)
+void daysdur(time_t mynow, time_t then, char *out, size_t outsiz, bool useFor)
 {
   if (mynow - then > 86400) {
     int mydays = (mynow - then) / 86400;
 
-    simple_snprintf(out, outsiz, "for %d day%s", mydays, (mydays == 1) ? "" : "s");
+    if (useFor) {
+      simple_snprintf(out, outsiz, "for %d day%s", mydays, (mydays == 1) ? "" : "s");
+    } else {
+      simple_snprintf(out, outsiz, "%d day%s", mydays, (mydays == 1) ? "" : "s");
+    }
     return;
   }
 
