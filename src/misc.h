@@ -41,7 +41,7 @@ char *splitnick(char **);
 void stridx(char *, char *, int);
 void daysago(time_t, time_t, char *, size_t);
 void days(time_t, time_t, char *, size_t);
-void daysdur(time_t, time_t, char *, size_t);
+void daysdur(time_t, time_t, char *, size_t, bool = true);
 void show_motd(int);
 void show_channels(int, char *);
 void show_banner(int);
