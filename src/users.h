@@ -147,7 +147,7 @@ extern struct igrec *global_ign;
  * Note: Flags are in eggdrop.h
  */
 
-struct userrec *get_user_by_handle(struct userrec *, char *);
+struct userrec *get_user_by_handle(struct userrec *, const char *);
 struct userrec *get_user_by_host(char *);
 struct userrec *check_chanlist(const char *);
 struct userrec *check_chanlist_hand(const char *);

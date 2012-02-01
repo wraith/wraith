@@ -33,6 +33,7 @@ void load_internal_users();
 void setup_HQ(int);
 void privmsg(bd::String target, bd::String msg, int idx);
 void notice(bd::String target, bd::String msg, int idx);
+void check_removed_server(bool = 1);
 void keyx(const bd::String& target);
 
 extern struct chanset_t		*chanset, *chanset_default;

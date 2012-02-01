@@ -192,6 +192,22 @@ static void got_segv(int z)
 }
 
 #ifndef DEBUG
+static void got_trap(int) __attribute__ ((noreturn));
+#endif /* DEBUG */
+
+static void got_trap(int z)
+{
+  signal(SIGTRAP, SIG_DFL);
+  write_debug();
+  fatal("SIGTRAP Received!", 1);
+#ifdef DEBUG
+  raise(SIGTRAP);
+#else
+  exit(1);
+#endif /* DEBUG */
+}
+
+#ifndef DEBUG
 static void got_fpe(int) __attribute__ ((noreturn));
 #endif /* DEBUG */
 
@@ -272,9 +288,24 @@ got_usr1(int z)
 //  reload_bin_data();
 }
 
+void got_int(int z)
+{
+  signal(SIGINT, SIG_DFL);
+  putlog(LOG_DEBUG, "*", "GOT SIGINT -- QUITTING");
+  fatal("Received SIGINT", 0);
+  sdprintf("HERE");
+  exit(1);
+#ifdef DEBUG
+  raise(SIGINT);
+#else
+  exit(1);
+#endif /* DEBUG */
+}
+
 void init_signals() 
 {
   signal(SIGBUS, got_bus);
+  signal(SIGTRAP, got_trap);
   signal(SIGSEGV, got_segv);
   signal(SIGFPE, got_fpe);
   signal(SIGTERM, got_term);
@@ -285,4 +316,5 @@ void init_signals()
   signal(SIGALRM, got_alarm);
   signal(SIGHUP, got_hup);
   signal(SIGUSR1, got_usr1);
+  signal(SIGINT, got_int);
 }

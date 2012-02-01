@@ -801,7 +801,7 @@ void clearq(struct server_list *xx)
 
 /* Set botserver to the next available server.
  *
- * -> if (*ptr == -1) then jump to that particular server
+ * -> if (*ptr == -1) then add that particular server
  */
 void next_server(int *ptr, char *servname, in_port_t *port, char *pass)
 {
@@ -815,7 +815,7 @@ void next_server(int *ptr, char *servname, in_port_t *port, char *pass)
   /* -1  -->  Go to specified server */
   if (*ptr == (-1)) {
     for (; x; x = x->next) {
-      if (x->port == *port) {
+      if ((x->port && x->port == *port) || (!x->port && default_port == *port)) {
 	if (!strcasecmp(x->name, servname)) {
 	  *ptr = i;
 	  return;
@@ -1130,7 +1130,7 @@ void server_report(int idx, int details)
     }
   }
   if ((trying_server || server_online) && (servidx != (-1))) {
-    dprintf(idx, "    Server %s:%d %s\n", dcc[servidx].host, dcc[servidx].port,
+    dprintf(idx, "    Server %s:%d %s\n", cursrvname, dcc[servidx].port,
 	    trying_server ? "(trying)" : s);
   } else
     dprintf(idx, "    No server currently.\n");

@@ -77,7 +77,7 @@ int count_users(struct userrec *bu)
   return tot;
 }
 
-static struct userrec *check_dcclist_hand(char *handle)
+static struct userrec *check_dcclist_hand(const char *handle)
 {
   for (int i = 0; i < dcc_total; i++)
     if (dcc[i].type && !strcasecmp(dcc[i].nick, handle))
@@ -103,13 +103,11 @@ struct userrec *host_conflicts(char *host)
   return NULL;
 }
 
-struct userrec *get_user_by_handle(struct userrec *bu, char *handle)
+struct userrec *get_user_by_handle(struct userrec *bu, const char *handle)
 {
   if (!handle)
     return NULL;
 
-  /* FIXME: This should be done outside of this function. */
-  rmspace(handle);
   if (!handle[0] || (handle[0] == '*'))
     return NULL;
 
@@ -458,7 +456,8 @@ static void sort_userlist()
   }
 }
 
-void stream_writeuserfile(bd::Stream& stream, const struct userrec *bu, bool old) {
+void stream_writeuserfile(bd::Stream& stream, const struct userrec *bu, int idx, bool old) {
+  idx = -1;
   time_t tt = now;
   char s1[81] = "";
 
@@ -468,7 +467,7 @@ void stream_writeuserfile(bd::Stream& stream, const struct userrec *bu, bool old
   channels_writeuserfile(stream, old);
 
   for (const struct userrec *u = bu; u; u = u->next)
-    write_user(u, stream, -1);
+    write_user(u, stream, idx);
 }
 
 /* Rewrite the entire user file. Call USERFILE hook as well, probably
@@ -497,7 +496,7 @@ int real_write_userfile(int idx)
 
   const char salt1[] = SALT1;
   EncryptedStream stream(salt1);
-  stream_writeuserfile(stream, userlist);
+  stream_writeuserfile(stream, userlist, -1);
   if (stream.writeFile(new_userfile->fd)) {
     putlog(LOG_MISC, "*", "ERROR writing user file. (%s)", strerror(errno));
     delete new_userfile;

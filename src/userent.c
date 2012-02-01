@@ -347,6 +347,8 @@ static bool set_gotshare(struct userrec *u, struct user_entry *e, char *buf, int
     var_set_by_name(conf.bot->nick, name, buf[0] ? buf : NULL);
     set_noshare = 0;
   /* var_set_by_name() called set_user(), no need to do it again... */
+    if (!conf.bot->hub && !strncmp(name, "servers", 7))
+      check_removed_server();
   } 
   /* not else if as the hub might have gotten a botset for itself */
   if (conf.bot->hub || conf.bot->localhub) {
@@ -727,10 +729,8 @@ static bool laston_set(struct userrec *u, struct user_entry *e, void *buf)
     e->u.extra = (struct laston_info *) buf;
   }
 
-  /* FIXME: laston sharing is disabled until a better solution is found
   if (!noshare)
     shareout("c LASTON %s %s %li\n", u->handle, li->lastonplace ? li->lastonplace : "-", li->laston);
-  */
 
   return 1;
 }

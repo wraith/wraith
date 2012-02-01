@@ -673,6 +673,8 @@ readsocks(const char *fname)
       online_since = strtol(str.c_str(), NULL, 10);
     else if (type == STR("+server_online"))
       server_online = strtol(str.c_str(), NULL, 10);
+    else if (type == STR("+cursrvname"))
+      strlcpy(cursrvname, str.c_str(), sizeof(cursrvname));
     else if (type == STR("+server_floodless"))
       floodless = 1;
     else if (type == STR("+in_deaf"))
@@ -747,7 +749,7 @@ readsocks(const char *fname)
       keepnick = 0; /* Wait to change nicks until relinking, fixes nick/jupenick switching issues during restart */
       reset_flood();
       if (!server_online) server_online = now;
-      rehash_server(dcc[servidx].host, nick);
+      rehash_server(cursrvname[0] ? cursrvname : dcc[servidx].host, nick);
       if (cached_005)
         replay_cache(servidx, NULL);
       else
@@ -819,6 +821,7 @@ restart(int idx)
     if (my_cookie_counter)
       stream << bd::String::printf(STR("+my_cookie_counter %lu\n"), my_cookie_counter);
     stream << bd::String::printf(STR("+server_online %li\n"), server_online);
+    stream << bd::String::printf(STR("+cursrvname %s\n"), cursrvname);
   }
   stream << bd::String::printf(STR("+online_since %li\n"), online_since);
   if (floodless)

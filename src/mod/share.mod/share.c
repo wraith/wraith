@@ -1431,6 +1431,8 @@ static void share_read_stream(int idx, bd::Stream& stream) {
    */
   clear_userlist(ou);
 
+  check_removed_server();
+
   /* The userfile we received may just be bogus or missing important users */
   load_internal_users();
   add_myself_to_userlist();
@@ -1504,7 +1506,7 @@ stream_send_users(int idx)
   /* FIXME: Remove after 1.2.15 */
   if (idx != -1 && !(dcc[idx].u.bot->uff_flags & UFF_CHDEFAULT)) /* channel 'default' */
     old = 2;
-  stream_writeuserfile(stream, userlist, old);
+  stream_writeuserfile(stream, userlist, idx, old);
   stream.seek(0, SEEK_SET);
   dprintf(idx, "s ls\n");
   bd::String buf;
@@ -1540,7 +1542,7 @@ start_sending_users(int idx)
 
   const char salt1[] = SALT1;
   EncryptedStream stream(salt1);
-  stream_writeuserfile(stream, userlist, old);
+  stream_writeuserfile(stream, userlist, idx, old);
   stream.setFlags(ENC_KEEP_NEWLINES|ENC_AES_256_ECB|ENC_BASE64_BROKEN|ENC_NO_HEADER);
   if (stream.writeFile(share_file)) {
     putlog(LOG_MISC, "*", "ERROR writing user file to transfer.");

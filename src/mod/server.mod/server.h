@@ -62,7 +62,7 @@ extern unsigned int     rolls;
 extern in_port_t		default_port, default_port_ssl, newserverport, curservport;
 extern time_t		server_online, tried_jupenick, tried_nick, release_time, connect_bursting;
 extern interval_t	cycle_time;
-extern char		cursrvname[], botrealname[121], botuserhost[], ctcp_reply[1024],
+extern char		cursrvname[120], botrealname[121], botuserhost[], ctcp_reply[1024],
 			newserver[], newserverpass[], curnetwork[], botuserip[], altnick_char, deaf_char, callerid_char;
 extern struct server_list *serverlist;
 extern struct dcc_table SERVER_SOCKET;

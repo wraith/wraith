@@ -918,6 +918,41 @@ void notice(bd::String target, bd::String msg, int idx) {
 }
 
 
+void check_removed_server(bool jump_no_match) {
+  if (server_online) {
+    int found_server = 0;
+
+    for (struct server_list *n = serverlist; n; n = n->next) {
+      // Check if server list contains a match to the 'real server name' we're connected to
+      // ie, irc.sucks.net -> irc.servercentral.net (expected (dcc) -> real (cursrvname))
+      if (((n->port && n->port == curservport) || (!n->port && default_port == curservport)) &&
+          !strcmp(n->name, cursrvname)) {
+        found_server = 1;
+        break;
+        // Check if server list contains a match to the 'expected server name' we're connected to
+        // ie, irc.sucks.net -> irc.servercentral.net (expected (dcc) -> real (cursrvname))
+      } else if (servidx != -1 && ((n->port && n->port == dcc[servidx].port) || (!n->port && default_port == dcc[servidx].port)) &&
+          !strcmp(n->name, dcc[servidx].host)) {
+        found_server = 2;
+        break;
+      }
+    }
+
+    if (!found_server) {
+      if (jump_no_match) {
+        // Current server not found in new list, jump!
+        putlog(LOG_SERV, "*", "Server removed from list, jumping!");
+        nuke_server("server removed");
+        cycle_time = 0;
+      }
+    } else {
+      // Update current server in list.
+      curserv = -1;
+      next_server(&curserv, found_server == 1 ? cursrvname : dcc[servidx].host, &curservport, NULL);
+    }
+  }
+}
+
 void keyx(const bd::String &target) {
   bd::String myPublicKeyB64, myPrivateKey, sharedKey;
 
