@@ -233,7 +233,7 @@ See also: -ban, +ban, console%{+m|m}, chanset, chaninfo%{-}, stick, unstick
 ###  $bboot$b <handle[@bot]> [reason]
    Kicks a user off the party line and displays the reason, if you specify
    one. You can also specify a bot, and attempt to boot someone from another
-   bot on the botnet. You can not boot a bot owner.
+   bot on the botnet. You cannot boot a bot owner.
 :hub:botcmd:
 ###  $bbotcmd$b <bot> <cmd> [params]
    The specified cmd and optional parameters are executed on the specified bot, 
@@ -248,7 +248,7 @@ See also: -ban, +ban, console%{+m|m}, chanset, chaninfo%{-}, stick, unstick
      [wtest] Total users: 3
  
    The bot specified can also have wildcards in it. '*' for 1 or more chars, and
-   '?' for exactly 1 char. Use this cmd carefuly, and even think about placing
+   '?' for exactly 1 char. Use this cmd carefully, and even think about placing
    a cmdpass on it.
  
    Just using '?' for 'bot' will choose a random leaf bot.
@@ -305,7 +305,7 @@ See also: botjoin, +chan, -chan, chanset, chaninfo
    bot. %{+n}Use $b'%dwho'$b or $b'%dbottree'$b for that information.%{-}
  
    Specifying a nodename will display all bots up/down on that nodename.
-   Bots with a * preceeding its name is down.
+   Bots with a * preceding its name ares down.
  
 See also: downbots%{+n}, bottree%{-}
 :hub:botserver:
@@ -350,7 +350,7 @@ See also: version, netversion, about%{+m|m}, status%{-}
    connect to when linking. If the bot has a separate port for bots and users,
    they should be separated  by a slash (/).
 %{+a}
-   It is not recommneded that this is used, you should change your source,
+   It is not recommended that this is used, you should change your source,
    and update all bots instead.
 %{-}
  
@@ -366,7 +366,7 @@ See also: link
                               or auto voicing a client based on flags or
                               +voice
         $blimit$b             If this is set, the +l bot will raise the limit 
-                          to the users in the channel + this ammount. Set to 
+                          to the users in the channel + this amount. Set to
                           0 to disable.
         $bclosed-ban$b        Set this to 1 to ban users who join +closed 
                           channels. This is probably not needed though, as
@@ -432,7 +432,7 @@ See also: link
         $bvoice-non-ident$b   If channel is +voice, clients without an ident will 
                           be voiced. Set to 0 to not voice clients without ident.
  
-   The following options chose how to respond to specific events.
+   The following options choose how to respond to specific events.
         Each can be set as any of the specified options.
         ignore/0           Ignore
         deop/1             Deop (chattr +d)
@@ -463,8 +463,8 @@ See also: link
                        themselves with +o-b bot *!*@fjdifgjdsgiufufdhgfudghfdgfdg,
                        but, with -fastop (cookie-ops enabled), opping is much
                        more secure and the chances of someone hijacking the bot
-                       for ops in your channel are much much less. This is
-                       highly recommened to always be set. 
+                       for ops in your channel are much less. This is
+                       highly recommeneded to always be set.
                        
         $binactive$b       This prevents the bot from joining the channel (or
                        makes it leave the channel if it is already there). It
@@ -602,7 +602,7 @@ See also: whois%{+m}, chattr, chaninfo%{-}
 ::chanset
 ###  $bchanset$b [#&!+channel|*|default] <settings>
    Allows you to change the channel settings (see $b'chaninfo'$b for the
-   settings) for one specific channel or all channels. Use '*' to to apply the
+   settings) for one specific channel or all channels. Use '*' to apply the
    change to all channels.
    Changes are used until the next restart, and are saved
    whenever the userfile is saved.
@@ -680,7 +680,7 @@ See: chhandle
    join the party line, etc. If the newpassword is 'rand', a random password
    will be used.
  
-   This has no affect on bots.
+   This has no effect on bots.
  
 See also: chhandle%{+n}, chsecpass%{-}
 :hub:chsecpass:
@@ -767,8 +767,8 @@ See also: console, echo, login, page, strip
     'list' shows all the bots currently in the config.
  
     'set' allows changing some variables in the config.
-      Using with no parameters will show all changable options.
-      Simply specifiy the option and new setting as follows:
+      Using with no parameters will show all changeable options.
+      Simply specify the option and new setting as follows:
       set <what> [option]
       WARNING: Options changed MAY OR MAY NOT affect bots already running,
                it is a good idea to restart all bots on the shell
@@ -1184,7 +1184,7 @@ See also: console, invite
 :leaf:jump
 ###  $bjump$b [server [port [pass]]]
    Makes the bot jump to another server. If you don't specify a
-   server, it will jump to the next server in it'ss internal list (see
+   server, it will jump to the next server in its internal list (see
    $b'%dhelp set'$b). If you specify a server, it will jump to that
    server (default port is 6667), and if that server is not in the
    internal list already, it will add it (until the bot relinks).
@@ -1312,7 +1312,7 @@ See also: randstring, sha1, sha256, hash, encrypt, encrypt_fish, decrypt, decryp
    a simple '%dmmode -o #channel o' will suffice.
  
    This is a distributed mass mode command.
-   The modes will be distributed among the necesary bots to accomplish the task.
+   The modes will be distributed among the necessary bots to accomplish the task.
    **Remember, unless specified with [local], the bot you mmode on will never participate.**
  
    options:
@@ -1366,7 +1366,7 @@ See also: whois
 ###  $bmotd$b %{+m}<message>%{-}
    This redisplays the partyline Message Of The Day, which was shown when you
    first joined the partyline.
-%{+m}+m: Inclue a message to set the motd.%{-}
+%{+m}+m: Include a message to set the motd.%{-}
 :leaf:msg
 ###  $bmsg$b <nickname> <text>
    Sends a private message to someone from the bot, just as if the
@@ -1560,7 +1560,7 @@ See also: resetbans, resetinvites
 See also: resetbans, resetinvites
 ::restart
 ###  $brestart$b
-   Makes the bot restart, but keeps it's connection to IRC active.
+   Makes the bot restart, but keeps its connection to IRC active.
  
 See also: rehash, reload, save
 :hub:save
@@ -1608,7 +1608,7 @@ See also: reload, backup
    $uN$u:    Number
    $uL$u:    List
    $uR$u:    Rate. Set as 'number:interval', ie, '1:5'
-   $uD$u:    Detected vars have the folloing options: $bignore$b/0, $bwarn$b/1, $breject$b/2, 
+   $uD$u:    Detected vars have the following options: $bignore$b/0, $bwarn$b/1, $breject$b/2,
                                                       $bdie$b/3, $bsuicide$b/4
  
 [L] $balias$b            List of dcc aliases in format '<alias> <cmd> [parms]'. First
@@ -1796,7 +1796,7 @@ See also: bans, exempts, invites, unstick, +ban, +exempt, +invite
 See also: console
 ::strip
 ###  $bstrip$b [modes]
-   Allows you to remove embedded 'attribute' codes your partyline output. Valid
+   Allows you to remove embedded 'attribute' codes from your partyline output. Valid
    options are:
       $bb$b - remove all boldface codes
       $bc$b - remove all color codes
@@ -1821,7 +1821,7 @@ See also: fixcodes, color, echo, login, page
    user's password. $b%dquit$b returns you to your original handle.
 ::suicide
 ###  $bsuicide$b [reason]
-   Makes bot remove itself and then dies. If bot is first bot in it's binary
+   Makes bot remove itself and then dies. If bot is first bot in its binary
    it will kill all bots running for that binary.
  
 See also: die, conf, botcmd
