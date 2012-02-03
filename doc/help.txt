@@ -1560,7 +1560,7 @@ See also: resetbans, resetinvites
 See also: resetbans, resetinvites
 ::restart
 ###  $brestart$b
-   Makes the bot restart, but keeps it's connection to IRC active.
+   Makes the bot restart, but keeps its connection to IRC active.
  
 See also: rehash, reload, save
 :hub:save
@@ -1821,7 +1821,7 @@ See also: fixcodes, color, echo, login, page
    user's password. $b%dquit$b returns you to your original handle.
 ::suicide
 ###  $bsuicide$b [reason]
-   Makes bot remove itself and then dies. If bot is first bot in it's binary
+   Makes bot remove itself and then dies. If bot is first bot in its binary
    it will kill all bots running for that binary.
  
 See also: die, conf, botcmd
