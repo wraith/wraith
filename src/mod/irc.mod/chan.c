@@ -449,7 +449,10 @@ static void priority_do(struct chanset_t * chan, bool opsonly, int action, bool 
                   flush_mode(chan, QUICK);
                 return;
               }
-            } else if ((action == PRIO_KICK) && !chan_sentkick(m)) {
+            } else if ((action == PRIO_KICK) && !chan_sentkick(m) &&
+                // Check closed-exempt
+                !((chan_hasop(m) && chan->closed_exempt_mode == CHAN_FLAG_OP) ||
+                  (chan_hasvoice(m) && chan->closed_exempt_mode == CHAN_FLAG_VOICE))) {
               ++actions;
               ++sent;
               if (chan->closed_ban)
@@ -748,10 +751,6 @@ static void do_closed_kick(struct chanset_t *chan, memberlist *m)
   char s[UHOSTLEN] = "", *s1 = NULL;
 
   simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
-
-  if ((m && chan->closed_exempt_mode == CHAN_FLAG_OP) ||
-       (m && chan->closed_exempt_mode == CHAN_FLAG_VOICE))
-    return;
 
   if (!(use_exempts &&
         (u_match_mask(global_exempts,s) ||
