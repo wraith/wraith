@@ -4,6 +4,7 @@ maint
   * Fix case where nick would rotate to NICK1 when already on NICK2 and NICK was unavailable
   * Documentation cleanups
   * Fixed 'request' kick msg with cmd_kick
+  * Enforce cmd_invite syntax
 
 1.3.3 - http://wraith.botpack.net/milestone/1.3.3
   * Fix --disable-ipv6 compiling
