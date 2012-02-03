@@ -1347,6 +1347,12 @@ static void cmd_find(int idx, char *par)
 static void do_invite(int idx, char *par, bool op)
 {
   char *nick = newsplit(&par), *chname = newsplit(&par);
+
+  if (!nick[0]) {
+    dprintf(idx, "Usage: invite <nickname> [channel|*]\n");
+    return;
+  }
+
   if (strchr(CHANMETA, nick[0]) || (!chname[0] && !strcmp(nick, "*")))
     std::swap(nick, chname);
   bool all = 0;
