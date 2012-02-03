@@ -1240,6 +1240,7 @@ static void cmd_chaninfo(int idx, char *par)
     SHOW_INT("Closed-ban: ", chan->closed_ban, NULL, "Don't!");
     SHOW_INT("Closed-invite:", chan->closed_invite, NULL, "Don't!");
     SHOW_INT("Closed-Private:", chan->closed_private, NULL, "Don't!");
+    SHOW_INT("Closed-Exempt:", chan->closed_exempt_mode, F_STR(chan->closed_exempt_mode), "None");
     SHOW_INT("Exempt-time: ", chan->exempt_time, NULL, "Forever");
     SHOW_INT("Flood-exempt: ", chan->flood_exempt_mode, F_STR(chan->flood_exempt_mode), "None");
     SHOW_INT("Flood-lock-time: ", chan->flood_lock_time, NULL, "Don't");

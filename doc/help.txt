@@ -408,6 +408,12 @@ See also: link%{+a}, newhub%{-}
                               None/0         Stick to regular checking (+x)
                               Op/1           Ops are exempt from flood checks
                               Voice/2        Voices are exempt from flood checks
+        $bclosed-exempt$b     Should clients be exempt from +closed kicks based
+                              on their channel status?
+                              Valid values are:
+                              None/0         Stick to regular user checking (+o)
+                              Op/1           Ops are exempt from +closed kicks
+                              Voice/2        Voices are exempt from +closed kicks
  
         $bflood-lock-time$b   How long in seconds to keep the channel locked
                          during drone floods.
