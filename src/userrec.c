@@ -77,7 +77,7 @@ int count_users(struct userrec *bu)
   return tot;
 }
 
-static struct userrec *check_dcclist_hand(char *handle)
+static struct userrec *check_dcclist_hand(const char *handle)
 {
   for (int i = 0; i < dcc_total; i++)
     if (dcc[i].type && !strcasecmp(dcc[i].nick, handle))
@@ -103,13 +103,11 @@ struct userrec *host_conflicts(char *host)
   return NULL;
 }
 
-struct userrec *get_user_by_handle(struct userrec *bu, char *handle)
+struct userrec *get_user_by_handle(struct userrec *bu, const char *handle)
 {
   if (!handle)
     return NULL;
 
-  /* FIXME: This should be done outside of this function. */
-  rmspace(handle);
   if (!handle[0] || (handle[0] == '*'))
     return NULL;
 

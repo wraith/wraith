@@ -582,7 +582,7 @@ tell_bots(int idx, int up, const char *nodename)
       const char *userNode = (const char*) get_user(&USERENTRY_NODENAME, u);
       const bd::String node(userNode ? userNode : "(unknown)");
       const bool node_match = ((nodename && node.length() && wild_match(nodename, node.c_str())) || !nodename);
-      const bool bot_found = findbot(u->handle);
+      const bool bot_found = u == conf.bot->u || findbot(u->handle);
       const bool up_down_match = (nodename || (!nodename && ((up && bot_found) || (!up && !bot_found))));
       if (group_match || (group.length() == 0 && node_match && up_down_match)) {
         if (nodes.find(node) == nodes.npos) {
