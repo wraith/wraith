@@ -20,12 +20,7 @@ All official sites, documentation, support venues, repositories and source urls 
 For official release announcements send an email to: wraith-announce-subscribe@botpack.net
 
 Download: http://wraith.botpack.net/wiki/Download
-
-Official Git repositories:
-  git://git.shatow.net/wraith.git
-  git://github.com/bdrewery/wraith.git
-  git://gitorious.org/wraith/mainline.git
-  git://repo.or.cz/wraith.git
+Git: git://github.com/bdrewery/wraith.git
 
 See git for a list of Contributors: git shortlog -sen master
 
