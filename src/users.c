@@ -457,7 +457,7 @@ void tell_user_ident(int idx, char *id)
     simple_snprintf(format, sizeof format, "%%-%us FLAGS    LAST\n", HANDLEN);
     dprintf(idx, format, "BOTNICK");
   } else {
-    simple_snprintf(format, sizeof format, "%%-%us PASS FLAGS           LAST\n", HANDLEN);
+    simple_snprintf(format, sizeof format, "%%-%us PASS  FLAGS           LAST\n", HANDLEN);
     dprintf(idx, format, "HANDLE");
   }
   tell_user(idx, u);
