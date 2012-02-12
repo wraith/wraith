@@ -2013,10 +2013,10 @@ See also: whom
       $bLAST$b    - the time or date that the user was last on irc or the partyline
  
    Valid flags:
-      $bd$b = deop (user cannot gain ops in any channel)
+      $bd$b = deop (user cannot be opped)
       $bk$b = autokick (user is kicked and banned automatically)
-      $bo$b = op (user has op access to all of the bot's channels)
-      $bq$b = quiet (user cannot gain voice on any channel)
+      $bo$b = op (user has op access; this is not auto-op)
+      $bq$b = quiet (user cannot be voiced)
       $bv$b = voice (user gets +v automatically from +y bots)
  
    Valid user-only flags:
@@ -2026,7 +2026,7 @@ See also: whom
       $bj$b - leaf access (user has leaf DCC access)
       $bm$b = master (user has more access to the botnet cmds than a normal user)
       $bn$b = owner (user has just about full access to bot)
-      $bO$b = autoop (user is auto-opped in all channels)
+      $bO$b = autoop (user is auto-opped; this does not require any identification)
       $bp$b - partyline-chat (user can speak on partyline. [$brequires +j or +i$b])
       $bx$b = flood-exempt (user is exempt from flood kicks)
  
