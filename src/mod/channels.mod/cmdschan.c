@@ -897,7 +897,7 @@ static void cmd_cycle(int idx, char *par)
   chname = newsplit(&par);
   chan = findchan_by_dname(chname);
   if (!chan) {
-    dprintf(idx, "%s it not a valid channel.\n", chname);
+    dprintf(idx, "%s is not a valid channel.\n", chname);
     return;
   }
   if (par[0])
@@ -931,7 +931,7 @@ static void cmd_down(int idx, char *par)
   chname = newsplit(&par);
   chan = findchan_by_dname(chname);
   if (!chan) {
-    dprintf(idx, "%s it not a valid channel.\n", chname);
+    dprintf(idx, "%s is not a valid channel.\n", chname);
     return;
   }
   
