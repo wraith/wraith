@@ -1997,7 +1997,7 @@ See also: whom
       $bj$b - leaf access (user has leaf DCC access)
       $bm$b = master (user has more access to the botnet cmds than a normal user)
       $bn$b = owner (user has just about full access to bot)
-      $bO$b = autoop (user is auto-opped; this does not require any identification)
+      $bO$b = autoop (user is auto-opped; this does not require any authentication)
       $bp$b - partyline-chat (user can speak on partyline. [$brequires +j or +i$b])
       $bx$b = flood-exempt (user is exempt from flood kicks)
  
