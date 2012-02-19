@@ -389,9 +389,9 @@ configure: error:
   Tcl cannot be found on this system.
 
   Tcl is not required. Wraith will be compiled without TCL support. If you
-  already have Tcl installed on this system, and I just wasn't looking in
-  the right place for it, re-run ./configure using the
-  --with-tcllib='/path/to/libtcl.so' and --with-tclinc='/path/to/tcl.h' options.
+  already have Tcl installed on this system, please specify the path by
+  rerunning ./configure using the --with-tcllib='/path/to/libtcl.so' and
+  --with-tclinc='/path/to/tcl.h' options.
 
 EOF
   else
