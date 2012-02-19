@@ -48,15 +48,13 @@ for file in $(grep -l DLSYM_GLOBAL src/*.c|grep -v "src/_"); do
 
     if [ "${typedef%;}" = "${typedef}" ]; then
       echo "Error: Unable to generate typedef for: ${symbol}" >&2
-      echo "$typedef" >&2
+      test -n "$typedef" && echo "$typedef" >&2
       rm -rf $TMPFILE
       exit 1
     fi
 
     #pipe typedef into generate_symbol.sh
-    if [ -n "$typedef" ]; then
-      echo "$typedef"
-    fi
+    test -n "$typedef" && echo "$typedef"
   done | src/generate_symbol.sh >> $defsFile_wrappers 2>> $defsFile_post
 
   echo "}" >> $defsFile_wrappers
