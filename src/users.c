@@ -397,7 +397,7 @@ tell_user(int idx, struct userrec *u)
       strftime(s1, 6, "%H:%M", gmtime(&li->laston));
   }
   if (!u->bot) {
-    simple_snprintf(format, sizeof format, "%%-%us %%-5s %%-15s %%s (%%-10.10s)\n", HANDLEN);
+    simple_snprintf(format, sizeof format, "%%-%us %%-4s %%-15s %%s (%%-10.10s)\n", HANDLEN);
     dprintf(idx, format, u->handle, get_user(&USERENTRY_PASS, u) ? "yes" : "no", s, s1, (li && li->lastonplace) ? li->lastonplace : "nowhere");
   } else {	/* BOT */
     simple_snprintf(format, sizeof format, "%%-%us %%-8s %%s (%%-10.10s)\n", HANDLEN);
@@ -457,7 +457,7 @@ void tell_user_ident(int idx, char *id)
     simple_snprintf(format, sizeof format, "%%-%us FLAGS    LAST\n", HANDLEN);
     dprintf(idx, format, "BOTNICK");
   } else {
-    simple_snprintf(format, sizeof format, "%%-%us PASS  FLAGS           LAST\n", HANDLEN);
+    simple_snprintf(format, sizeof format, "%%-%us PASS FLAGS           LAST\n", HANDLEN);
     dprintf(idx, format, "HANDLE");
   }
   tell_user(idx, u);
