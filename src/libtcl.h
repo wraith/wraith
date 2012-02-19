@@ -4,7 +4,7 @@
 #include "common.h"
 #include "dl.h"
 #include <bdlib/src/String.h>
-#ifdef HAVE_LIBTCL
+#ifdef USE_SCRIPT_TCL
 
 #include ".defs/libtcl_pre.h"
 

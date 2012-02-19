@@ -124,7 +124,7 @@ tclheaderpaths="$HOME/include $HOME/tcl/include \
 
 
 # Misc Tcl checks.
-EGG_TCL_ARG_WITH
+EGG_TCL_OPTIONS
 EGG_TCL_ENV
 EGG_TCL_WITH_TCLLIB
 EGG_TCL_WITH_TCLINC
@@ -258,6 +258,13 @@ AH_BOTTOM([/*
 #    ifndef HAVE_GETIPNODEBYNAME
 #      undef USE_IPV6
 #    endif
+#  endif
+#endif
+
+/* TCL sanity check */
+#ifdef USE_SCRIPT_TCL
+#  ifndef HAVE_LIBTCL
+#    undef USE_SCRIPT_TCL
 #  endif
 #endif
 ])

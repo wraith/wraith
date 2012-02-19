@@ -313,6 +313,9 @@
 /* Define if you want ipv6 support */
 #undef USE_IPV6
 
+/* Define if you want TCL Script support */
+#undef USE_SCRIPT_TCL
+
 /* Enable extensions on AIX 3, Interix.  */
 #ifndef _ALL_SOURCE
 # undef _ALL_SOURCE
@@ -465,6 +468,13 @@
 #    ifndef HAVE_GETIPNODEBYNAME
 #      undef USE_IPV6
 #    endif
+#  endif
+#endif
+
+/* TCL sanity check */
+#ifdef USE_SCRIPT_TCL
+#  ifndef HAVE_LIBTCL
+#    undef USE_SCRIPT_TCL
 #  endif
 #endif
 
