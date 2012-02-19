@@ -3,6 +3,65 @@ dnl   macros autoconf uses when building configure from configure.in
 dnl
 dnl
 
+AC_DEFUN([MY_ARG_WITH], [
+  AC_ARG_WITH(m4_translit([[$1]], [_], [-]),
+     [AS_HELP_STRING([--with-m4_translit([$1], [_], [-])],
+                     [use $1 (default is $2)])],
+     [with_[]$1=$withval],
+     [with_[]$1=$2])
+])
+
+AC_DEFUN([MY_ARG_WITH_PATH], [
+  AC_ARG_WITH(m4_translit([[$1]], [_], [-]),
+     [AS_HELP_STRING([--with-m4_translit([$1], [_], [-])=PATH],
+                     [$2])],
+     [with_[]$1_path=$withval],
+     [with_[]$1_path=$3])
+])
+
+AC_DEFUN([MY_ARG_ENABLE], [
+  AC_MSG_CHECKING([whether $2 is enabled])
+  AC_ARG_ENABLE(m4_translit([[$1]], [_], [-]),
+     [AS_HELP_STRING([--enable-m4_translit([$1], [_], [-])],
+                     [enable $2 support])],
+     [
+       enable_[]$1=$enableval
+       AC_MSG_RESULT([$enableval])
+       AC_DEFINE(m4_translit([[USE_$1]], [a-z], [A-Z]), 1, [Define if you want $2 support])
+     ],
+     [
+       # default if not given is DISABLED
+       if test "x$enableval" = "x"; then
+         enableval="no"
+       fi
+       enable_[]$1=$enableval
+       AC_MSG_RESULT([$enableval])
+     ]
+  )
+])
+
+AC_DEFUN([MY_ARG_DISABLE], [
+  AC_MSG_CHECKING([whether $2 is enabled])
+  AC_ARG_ENABLE(m4_translit([[$1]], [_], [-]),
+     [AS_HELP_STRING([--disable-m4_translit([$1], [_], [-])],
+                     [disable $2 support])],
+     [
+       enable_[]$1=$enableval
+       AC_MSG_RESULT([$enableval])
+     ],
+     [
+       # default if not given is ENABLED
+       if test "x$enableval" = "x"; then
+         enableval="yes"
+       fi
+       enable_[]$1=$enableval
+       AC_MSG_RESULT([$enableval])
+       AC_DEFINE(m4_translit([[USE_$1]], [a-z], [A-Z]), 1, [Define if you want $2 support])
+     ]
+  )
+])
+
+
 dnl  EGG_CHECK_CC()
 dnl
 AC_DEFUN([EGG_CHECK_CC], 
