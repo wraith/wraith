@@ -25,9 +25,9 @@ irc.umich.edu
 irc.wh.verio.net
 irc2.choopa.net
 #EU
-efnet.bredband2.se
 efnet.cs.hut.fi
 efnet.port80.se
+efnet.portlane.se
 efnet.xs4all.nl
 irc.ac.za
 irc.du.se
@@ -43,9 +43,9 @@ irc.choopa.ca
 irc.teksavvy.ca
 
 :servers6
-efnet.bredband2.se
 efnet.ipv6.port80.se
 efnet.ipv6.xs4all.nl
+efnet.portlane.se
 irc.ac.za
 irc.choopa.ca
 irc.choopa.net
