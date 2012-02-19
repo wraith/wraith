@@ -7,8 +7,8 @@ dnl EGG_TCL_ARG_WITH()
 dnl
 AC_DEFUN([EGG_TCL_ARG_WITH],
 [
-  AC_ARG_WITH(tcllib, [  --with-tcllib=PATH      full path to Tcl library], [tcllibname="$withval"])
-  AC_ARG_WITH(tclinc, [  --with-tclinc=PATH      full path to Tcl header],  [tclincname="$withval"])
+  AC_ARG_WITH(tcllib, [AS_HELP_STRING([--with-tcllib=PATH],[full path to Tcl library])], [tcllibname="$withval"])
+  AC_ARG_WITH(tclinc, [AS_HELP_STRING([--with-tclinc=PATH],[full path to Tcl header])],  [tclincname="$withval"])
 
   WARN=0
   # Make sure either both or neither $tcllibname and $tclincname are set
