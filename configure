@@ -614,7 +614,7 @@ TCL_LIBS
 TCL_REQS
 DEFAULT_MAKE
 TCLINCFN
-TCLINC
+TCL_INCLUDES
 TCLLIBFN
 TCLLIB
 SSL_LIBS
@@ -5772,6 +5772,11 @@ $as_echo "found ${tclheaderpath}/${tcllibfns}/${tclheaderfn}" >&6; }
     fi
   fi
 
+  TCL_INCLUDES=""
+  if ! test "x$TCLINC" = x; then
+    TCL_INCLUDES="-I$TCLINC"
+  fi
+
   if test "x$TCLINCFN" = x; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
 $as_echo "not found" >&6; }
@@ -9874,7 +9879,7 @@ if [ "$GIT_REQUIRED" = "1" ]; then
 fi
 
 
-CXX="$CXX" TCLINC="$TCLINC" SSL_INCLUDES="$SSL_INCLUDES" SED="$SED" src/generate_defs.sh
+CXX="$CXX" TCL_INCLUDES="$TCL_INCLUDES" SSL_INCLUDES="$SSL_INCLUDES" SED="$SED" src/generate_defs.sh
 
 if [ $? -ne 0 ]; then
   exit 1

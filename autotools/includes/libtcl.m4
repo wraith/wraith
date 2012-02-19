@@ -283,11 +283,16 @@ AC_DEFUN([EGG_TCL_CHECK_HEADER],
     fi
   fi
 
+  TCL_INCLUDES=""
+  if ! test "x$TCLINC" = x; then
+    TCL_INCLUDES="-I$TCLINC"
+  fi
+
   if test "x$TCLINCFN" = x; then
     AC_MSG_RESULT([not found])
   fi
 
-  AC_SUBST(TCLINC)
+  AC_SUBST(TCL_INCLUDES)
   AC_SUBST(TCLINCFN)
 ])
 

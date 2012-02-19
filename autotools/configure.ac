@@ -278,7 +278,7 @@ if [ "$GIT_REQUIRED" = "1" ]; then
 fi
 ]
 
-CXX="$CXX" TCLINC="$TCLINC" SSL_INCLUDES="$SSL_INCLUDES" SED="$SED" src/generate_defs.sh
+CXX="$CXX" TCL_INCLUDES="$TCL_INCLUDES" SSL_INCLUDES="$SSL_INCLUDES" SED="$SED" src/generate_defs.sh
 [
 if [ $? -ne 0 ]; then
   exit 1

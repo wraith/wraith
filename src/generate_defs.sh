@@ -5,7 +5,7 @@ if [ -z "$SED" -o -z "$CXX" ]; then
   exit 1
 fi
 echo "Generating lib symbols"
-INCLUDES="-I${TCLINC} ${SSL_INCLUDES}"
+INCLUDES="${TCL_INCLUDES} ${SSL_INCLUDES}"
 
 mkdir -p src/.defs > /dev/null 2>&1
 TMPFILE=$(mktemp "/tmp/pre.XXXXXX")
