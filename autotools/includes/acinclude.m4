@@ -72,7 +72,7 @@ then
 configure: error:
 
   This system does not appear to have a working C compiler.
-  A working C compiler is required to compile Eggdrop.
+  A working C compiler is required to compile Wraith.
 
 EOF
   exit 1
@@ -248,7 +248,7 @@ then
 configure: error:
 
   This system seems to lack a working 'head -1' or 'head -n 1' command.
-  A working 'head -1' (or equivalent) command is required to compile Eggdrop.
+  A working 'head -1' (or equivalent) command is required to compile Wraith.
 
 EOF
   exit 1
@@ -271,7 +271,7 @@ then
 configure: error:
 
   This system seems to lack a working 'awk' command.
-  A working 'awk' command is required to compile Eggdrop.
+  A working 'awk' command is required to compile Wraith.
 
 EOF
   exit 1
@@ -291,7 +291,7 @@ then
 configure: error:
 
   This system seems to lack a working 'basename' command.
-  A working 'basename' command is required to compile Eggdrop.
+  A working 'basename' command is required to compile Wraith.
 
 EOF
   exit 1

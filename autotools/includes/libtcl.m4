@@ -417,7 +417,7 @@ AC_DEFUN([EGG_TCL_CHECK_PRE70],
     cat << EOF >&2
 configure: error:
 
-  Your Tcl version is much too old for Eggdrop to use. You should
+  Your Tcl version is much too old for Wraith to use. You should
   download and compile a more recent version. The most reliable
   current version is $tclrecommendver and can be downloaded from
   ${tclrecommendsite}.
