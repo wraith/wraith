@@ -27,6 +27,7 @@
     * Command 'channels' now accepts a '%group' param to show which channels a group are in.
     * Add '%group' support to 'bots' command.
   * Improve output of 'bots' command by displaying and sorting nodename
+  * Minus chrec if .chattr set no flags
 
 maint
   * Fix various compile warnings with newer GCC

@@ -2665,8 +2665,10 @@ static void cmd_chattr(int idx, char *par)
       build_flags(work, &user, NULL);
       if (work[0] != '-')
         dprintf(idx, "Channel flags for %s on %s are now +%s.\n", hand, chan->dname, work);
-      else
+      else {
         dprintf(idx, "No flags for %s on %s.\n", hand, chan->dname);
+        del_chanrec(u2, chan->dname);
+      }
     }
   }
   if (chg && !conf.bot->hub)
