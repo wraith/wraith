@@ -30,7 +30,7 @@ dnl
 AC_DEFUN([EGG_IPV6_OPTIONS], 
 [
 AC_MSG_CHECKING(whether or not you disabled IPv6 support)
-AC_ARG_ENABLE(ipv6, [  --disable-ipv6           disable IPv6 support],
+AC_ARG_ENABLE(ipv6, [AS_HELP_STRING([--disable-ipv6], [disable IPv6 support])],
 [ ac_cv_dipv6="yes"
   AC_MSG_RESULT(yes)
 ],
