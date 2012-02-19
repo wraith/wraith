@@ -519,16 +519,12 @@ AC_DEFUN([CHECK_SSL],
 dnl Adapted from Ratbox configure.ac
 dnl OpenSSL support
 AC_MSG_CHECKING(for path to OpenSSL)
-AC_ARG_WITH(openssl,
-[AS_HELP_STRING([--with-openssl=DIR],[Path to OpenSSL])],
-[cf_with_openssl=$withval],
-[cf_with_openssl="auto"]
-)
+MY_ARG_WITH_PATH(openssl, [Path to OpenSSL], [auto])
 
 cf_openssl_basedir=""
-if test "$cf_with_openssl" != "auto"; then
+if test "$with_openssl_path" != "auto"; then
   dnl Support for --with-openssl=/some/place
-  cf_openssl_basedir="`echo ${cf_with_openssl} | sed 's/\/$//'`"
+  cf_openssl_basedir="`echo ${with_openssl_path} | sed 's/\/$//'`"
 else
   dnl Do the auto-probe here.  Check some common directory paths.
   for dirs in /usr/local/ssl /usr/pkg /usr/local /usr/local/openssl; do

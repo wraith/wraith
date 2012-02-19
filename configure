@@ -1322,7 +1322,7 @@ Optional Features:
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
-  --with-openssl=DIR      Path to OpenSSL
+  --with-openssl=PATH     Path to OpenSSL
   --with-tcllib=PATH      full path to Tcl library
   --with-tclinc=PATH      full path to Tcl header
 
@@ -5331,18 +5331,19 @@ rm -f confcache
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for path to OpenSSL" >&5
 $as_echo_n "checking for path to OpenSSL... " >&6; }
 
+
 # Check whether --with-openssl was given.
 if test "${with_openssl+set}" = set; then :
-  withval=$with_openssl; cf_with_openssl=$withval
+  withval=$with_openssl; with_openssl_path=$withval
 else
-  cf_with_openssl="auto"
-
+  with_openssl_path=auto
 fi
 
 
+
 cf_openssl_basedir=""
-if test "$cf_with_openssl" != "auto"; then
-    cf_openssl_basedir="`echo ${cf_with_openssl} | sed 's/\/$//'`"
+if test "$with_openssl_path" != "auto"; then
+    cf_openssl_basedir="`echo ${with_openssl_path} | sed 's/\/$//'`"
 else
     for dirs in /usr/local/ssl /usr/pkg /usr/local /usr/local/openssl; do
     if test -f "${dirs}/include/openssl/opensslv.h" ; then
