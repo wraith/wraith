@@ -310,7 +310,7 @@
 /* Define to 1 if your <sys/time.h> declares `struct tm'. */
 #undef TM_IN_SYS_TIME
 
-/* Define if you want ipv6 support */
+/* Define if you want IPv6 support */
 #undef USE_IPV6
 
 /* Define if you want TCL Script support */

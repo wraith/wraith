@@ -88,21 +88,7 @@ dnl  EGG_IPV6_OPTIONS()
 dnl
 AC_DEFUN([EGG_IPV6_OPTIONS], 
 [
-AC_MSG_CHECKING(whether or not you disabled IPv6 support)
-AC_ARG_ENABLE(ipv6, [AS_HELP_STRING([--disable-ipv6], [disable IPv6 support])],
-[ ac_cv_dipv6="yes"
-  AC_MSG_RESULT(yes)
-],
-[ ac_cv_dipv6="no"
-  if test "$egg_cv_ipv6_supported" = "no"; then
-    ac_cv_dipv6="no"
-  fi
-  AC_MSG_RESULT($ac_cv_dipv6)
-])
-
-if test "$ac_cv_dipv6" = "no"; then
-  AC_DEFINE(USE_IPV6, 1, [Define if you want ipv6 support])
-fi
+MY_ARG_DISABLE(ipv6, [IPv6])
 ])
 
 

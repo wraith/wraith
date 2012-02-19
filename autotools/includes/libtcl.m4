@@ -10,20 +10,7 @@ AC_DEFUN([EGG_TCL_OPTIONS],
   AC_ARG_WITH(tcllib, [AS_HELP_STRING([--with-tcllib=PATH],[full path to Tcl library])], [tcllibname="$withval"])
   AC_ARG_WITH(tclinc, [AS_HELP_STRING([--with-tclinc=PATH],[full path to Tcl header])],  [tclincname="$withval"])
 
-  AC_MSG_CHECKING(whether TCL Script is enabled)
-  AC_ARG_ENABLE(script_tcl,
-    [AS_HELP_STRING([--disable-script-tcl], [disable TCL Script support])],
-    [ enable_script_tcl="yes"
-      AC_MSG_RESULT(no)
-    ],
-    [ enable_script_tcl="no"
-      AC_MSG_RESULT(yes)
-    ]
-  )
-
-  if test "$enable_script_tcl" = "no"; then
-    AC_DEFINE(USE_SCRIPT_TCL, 1, [Define if you want TCL Script support])
-  fi
+  MY_ARG_DISABLE([script_tcl], [TCL Script])
 
   WARN=0
   # Make sure either both or neither $tcllibname and $tclincname are set

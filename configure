@@ -4378,30 +4378,33 @@ esac
 # Check for IPv6 support
 #EGG_IPV6_SUPPORTED
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether or not you disabled IPv6 support" >&5
-$as_echo_n "checking whether or not you disabled IPv6 support... " >&6; }
-# Check whether --enable-ipv6 was given.
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether IPv6 is enabled" >&5
+$as_echo_n "checking whether IPv6 is enabled... " >&6; }
+  # Check whether --enable-ipv6 was given.
 if test "${enable_ipv6+set}" = set; then :
-  enableval=$enable_ipv6;  ac_cv_dipv6="yes"
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
+  enableval=$enable_ipv6;
+       enable_ipv6=$enableval
+       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $enableval" >&5
+$as_echo "$enableval" >&6; }
 
 else
-   ac_cv_dipv6="no"
-  if test "$egg_cv_ipv6_supported" = "no"; then
-    ac_cv_dipv6="no"
-  fi
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_dipv6" >&5
-$as_echo "$ac_cv_dipv6" >&6; }
 
-fi
-
-
-if test "$ac_cv_dipv6" = "no"; then
+       # default if not given is ENABLED
+       if test "x$enableval" = "x"; then
+         enableval="yes"
+       fi
+       enable_ipv6=$enableval
+       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $enableval" >&5
+$as_echo "$enableval" >&6; }
 
 $as_echo "#define USE_IPV6 1" >>confdefs.h
 
+
+
 fi
+
+
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for socklen_t" >&5
@@ -5529,28 +5532,33 @@ if test "${with_tclinc+set}" = set; then :
 fi
 
 
+
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether TCL Script is enabled" >&5
 $as_echo_n "checking whether TCL Script is enabled... " >&6; }
-  # Check whether --enable-script_tcl was given.
+  # Check whether --enable-script-tcl was given.
 if test "${enable_script_tcl+set}" = set; then :
-  enableval=$enable_script_tcl;  enable_script_tcl="yes"
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
+  enableval=$enable_script_tcl;
+       enable_script_tcl=$enableval
+       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $enableval" >&5
+$as_echo "$enableval" >&6; }
 
 else
-   enable_script_tcl="no"
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
+
+       # default if not given is ENABLED
+       if test "x$enableval" = "x"; then
+         enableval="yes"
+       fi
+       enable_script_tcl=$enableval
+       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $enableval" >&5
+$as_echo "$enableval" >&6; }
+
+$as_echo "#define USE_SCRIPT_TCL 1" >>confdefs.h
+
 
 
 fi
 
 
-  if test "$enable_script_tcl" = "no"; then
-
-$as_echo "#define USE_SCRIPT_TCL 1" >>confdefs.h
-
-  fi
 
   WARN=0
   # Make sure either both or neither $tcllibname and $tclincname are set
