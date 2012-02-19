@@ -124,7 +124,7 @@ tclheaderpaths="$HOME/include $HOME/tcl/include \
 
 
 # Misc Tcl checks.
-EGG_TCL_ARG_WITH
+EGG_TCL_OPTIONS
 EGG_TCL_ENV
 EGG_TCL_WITH_TCLLIB
 EGG_TCL_WITH_TCLINC
@@ -260,6 +260,13 @@ AH_BOTTOM([/*
 #    endif
 #  endif
 #endif
+
+/* TCL sanity check */
+#ifdef USE_SCRIPT_TCL
+#  ifndef HAVE_LIBTCL
+#    undef USE_SCRIPT_TCL
+#  endif
+#endif
 ])
 
 [
@@ -278,7 +285,7 @@ if [ "$GIT_REQUIRED" = "1" ]; then
 fi
 ]
 
-CXX="$CXX" TCLINC="$TCLINC" SSL_INCLUDES="$SSL_INCLUDES" SED="$SED" src/generate_defs.sh
+CXX="$CXX" TCL_INCLUDES="$TCL_INCLUDES" SSL_INCLUDES="$SSL_INCLUDES" SED="$SED" src/generate_defs.sh
 [
 if [ $? -ne 0 ]; then
   exit 1

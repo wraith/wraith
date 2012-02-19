@@ -34,7 +34,7 @@
 #include "libtcl.h"
 #include ".defs/libtcl_defs.c"
 
-#ifdef HAVE_LIBTCL
+#ifdef USE_SCRIPT_TCL
 Tcl_Interp *global_interp = NULL;
 #endif
 
@@ -44,7 +44,7 @@ static bd::Array<bd::String> my_symbols;
 void initialize_binds_tcl();
 
 static int load_symbols(void *handle) {
-#ifdef HAVE_LIBTCL
+#ifdef USE_SCRIPT_TCL
   const char *dlsym_error = NULL;
 
   DLSYM_GLOBAL(handle, Tcl_Eval);
@@ -60,7 +60,7 @@ static int load_symbols(void *handle) {
 }
 
 int load_libtcl() {
-#ifndef HAVE_LIBTCL
+#ifndef USE_SCRIPT_TCL
   sdprintf("Not compiled with TCL support");
   return 1;
 #else
@@ -83,7 +83,7 @@ int load_libtcl() {
 
   load_symbols(libtcl_handle);
 
-#ifdef HAVE_LIBTCL
+#ifdef USE_SCRIPT_TCL
   // create interp
   global_interp = Tcl_CreateInterp();
   Tcl_FindExecutable(binname);
@@ -98,7 +98,7 @@ int load_libtcl() {
   return 0;
 }
 
-#ifdef HAVE_LIBTCL
+#ifdef USE_SCRIPT_TCL
 
 #include "chanprog.h"
 static int cmd_privmsg STDVAR {
@@ -118,7 +118,7 @@ void initialize_binds_tcl() {
 
 int unload_libtcl() {
   if (libtcl_handle) {
-#ifdef HAVE_LIBTCL
+#ifdef USE_SCRIPT_TCL
     if (global_interp) {
       Tcl_DeleteInterp(global_interp);
       global_interp = NULL;
@@ -139,7 +139,7 @@ int unload_libtcl() {
   return 1;
 }
 
-#ifdef HAVE_LIBTCL
+#ifdef USE_SCRIPT_TCL
 bd::String tcl_eval(const bd::String& str) {
   load_libtcl();
   if (!global_interp) return bd::String();

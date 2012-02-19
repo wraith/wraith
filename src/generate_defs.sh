@@ -5,7 +5,7 @@ if [ -z "$SED" -o -z "$CXX" ]; then
   exit 1
 fi
 echo "Generating lib symbols"
-INCLUDES="-I${TCLINC} ${SSL_INCLUDES}"
+INCLUDES="${TCL_INCLUDES} ${SSL_INCLUDES}"
 
 mkdir -p src/.defs > /dev/null 2>&1
 TMPFILE=$(mktemp "/tmp/pre.XXXXXX")
@@ -27,7 +27,7 @@ for file in $(grep -l DLSYM_GLOBAL src/*.c|grep -v "src/_"); do
   echo "extern \"C\" {" > $defsFile_post
   touch $defsFile_pre
   cd src >/dev/null 2>&1
-  $CXX -E -I. -I.. -I../lib ${INCLUDES} -DHAVE_CONFIG_H ../${file} > $TMPFILE
+  $CXX -E -I. -I.. -I../lib ${INCLUDES} -DHAVE_CONFIG_H ../${file} > $TMPFILE 2> /dev/null
   # Fix wrapped prototypes
   $SED -e :a -e N -e '$!ba' -e 's/,\n/,/g' $TMPFILE > $TMPFILE.sed
   mv $TMPFILE.sed $TMPFILE
@@ -48,14 +48,13 @@ for file in $(grep -l DLSYM_GLOBAL src/*.c|grep -v "src/_"); do
 
     if [ "${typedef%;}" = "${typedef}" ]; then
       echo "Error: Unable to generate typedef for: ${symbol}" >&2
-      echo "$typedef"
-      rm -rf $TMPFILE
-      exit 1
+      test -n "$typedef" && echo "$typedef" >&2
+      continue
     fi
 
     #pipe typedef into generate_symbol.sh
-    echo "$typedef" | src/generate_symbol.sh >> $defsFile_wrappers 2>> $defsFile_post
-  done
+    test -n "$typedef" && echo "$typedef"
+  done | src/generate_symbol.sh >> $defsFile_wrappers 2>> $defsFile_post
 
   echo "}" >> $defsFile_wrappers
   echo "}" >> $defsFile_post
