@@ -13,9 +13,9 @@ CCDEPMODE = @CCDEPMODE@
 BINEXEC = wraith@EXEEXT@
 
 STATICMAKEFILES = lib/Makefile src/mod/Makefile src/crypto/Makefile src/compat/Makefile src/Makefile Makefile
-CONFIGFILES = config.cache config.log config.status config.h src/buildinfo.h
+CONFIGFILES = build/config.cache build/config.log build/config.status src/config.h src/buildinfo.h
 
-DISTROFILES = README LICENSE config.h.in build doc scripts lib Makefile.in build.sh configure src BSDmakefile
+DISTROFILES = README LICENSE build doc scripts lib Makefile.in build.sh configure src BSDmakefile
 EXCLUDES = $(CONFIGFILES) $(STATICMAKEFILES)
 
 COMMIT_FULL 	:= $(shell git log -1 --pretty=format:%H HEAD)
@@ -185,7 +185,7 @@ res: makeres
 	cp -f src/responses.h~ src/responses.h; \
 	fi)
 
-stringfix: src/stringfix.c config.h
+stringfix: src/stringfix.c src/config.h
 	+@cd src && ${MAKE_UTILS} stringfix
 
 makeres: src/makeres.c
