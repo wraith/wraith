@@ -575,7 +575,7 @@ tell_bots(int idx, int up, const char *nodename)
       }
       ++total;
       bd::String botnick(u->handle);
-      const bd::Array<bd::String> botgroups(bd::String(var_get_bot_data(u, "groups", true)).split(","));
+      const bd::Array<bd::String> botgroups((bd::String(var_get_bot_data(u, "groups", true))).split(","));
 
       // Include this bot?
       const bool group_match = group.length() && botgroups.find(group) != botgroups.npos;
