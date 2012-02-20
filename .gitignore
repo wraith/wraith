@@ -5,7 +5,7 @@
 /src/config.h
 /build/config.log
 /build/config.status
-/stamp.*
+/build/stamp.*
 /build/autotools/src
 /*.tgz
 /leaf

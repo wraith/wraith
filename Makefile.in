@@ -98,7 +98,7 @@ clean:  cleanutils
 	+@cd src/crypto && $(MAKE) clean
 	+@cd src/mod && $(MAKE) distclean
 	-+@cd lib && $(MAKE) clean
-	@rm -f $(BINEXEC) stamp.* *~ src/*~ configure.temp .mangled
+	@rm -f $(BINEXEC) build/stamp.* *~ src/*~ configure.temp .mangled
 	@rm -f src/help.h src/response.h src/responses.h utctime@EXEEXT@ ts@EXEEXT@
 
 distclean: clean
@@ -212,25 +212,25 @@ check:
 .NOTPARALLEL: checkclean.static checkclean.dynamic checkclean.debug
 
 checkclean.static:
-	@(if test -f stamp.dynamic -o -f stamp.debug; then \
+	@(if test -f build/stamp.dynamic -o -f build/stamp.debug; then \
 	echo "[*] Cleaning up alternate build"; \
 	$(MAKE) MAKEFLAGS=-s clean; \
 	fi)
-	@touch stamp.static
+	@touch build/stamp.static
 
 checkclean.dynamic:
-	@(if test -f stamp.static -o -f stamp.debug; then \
+	@(if test -f build/stamp.static -o -f build/stamp.debug; then \
 	echo "[*] Cleaning up alternate build"; \
 	$(MAKE) MAKEFLAGS=-s clean; \
 	fi)
-	@touch stamp.dynamic
+	@touch build/stamp.dynamic
 
 checkclean.debug:
-	@(if test -f stamp.static -o -f stamp.dynamic; then \
+	@(if test -f build/stamp.static -o -f build/stamp.dynamic; then \
 	echo "[*] Cleaning up alternate build"; \
 	$(MAKE) MAKEFLAGS=-s clean; \
 	fi)
-	@touch stamp.debug
+	@touch build/stamp.debug
 
 lib:
 	+@cd lib && $(MAKE)
