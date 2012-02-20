@@ -8,7 +8,7 @@ CPPFLAGS = @CPPFLAGS@
 STRIP = @STRIP@
 
 VPATH = @srcdir@
-depcomp = /bin/sh $(top_srcdir)/autotools/depcomp
+depcomp = /bin/sh $(top_srcdir)/build/autotools/depcomp
 
 @SET_MAKE@
 

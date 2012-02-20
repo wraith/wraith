@@ -15,7 +15,7 @@ BINEXEC = wraith@EXEEXT@
 STATICMAKEFILES = lib/Makefile src/mod/Makefile src/crypto/Makefile src/compat/Makefile src/Makefile Makefile
 CONFIGFILES = config.cache config.log config.status config.h src/buildinfo.h
 
-DISTROFILES = README LICENSE config.h.in autotools doc scripts lib Makefile.in build.sh configure src BSDmakefile
+DISTROFILES = README LICENSE config.h.in build doc scripts lib Makefile.in build.sh configure src BSDmakefile
 EXCLUDES = $(CONFIGFILES) $(STATICMAKEFILES)
 
 COMMIT_FULL 	:= $(shell git log -1 --pretty=format:%H HEAD)
