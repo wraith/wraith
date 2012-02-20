@@ -100,7 +100,7 @@ int load_libcrypto() {
 
   for (size_t i = 0; i < libs_list.length(); ++i) {
     dlerror(); // Clear Errors
-    libcrypto_handle = dlopen(bd::String(libs_list[i]).c_str(), RTLD_LAZY);
+    libcrypto_handle = dlopen(bd::String(libs_list[i]).c_str(), RTLD_LAZY|RTLD_GLOBAL);
     if (libcrypto_handle) {
       sdprintf("Found libcrypto: %s", bd::String(libs_list[i]).c_str());
       break;
