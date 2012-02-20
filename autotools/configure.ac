@@ -285,6 +285,13 @@ if [ "$GIT_REQUIRED" = "1" ]; then
 fi
 ]
 
+[
+if test -d .git; then
+  git submodule init
+  git submodule update
+fi
+]
+
 CXX="$CXX" TCL_INCLUDES="$TCL_INCLUDES" SSL_INCLUDES="$SSL_INCLUDES" SED="$SED" src/generate_defs.sh
 [
 if [ $? -ne 0 ]; then
@@ -295,10 +302,4 @@ fi
 echo ""
 echo ""
 echo "------------ Configuring BDLIB ------------"
-[
-if test -d .git; then
-  git submodule init
-  git submodule update
-fi
-]
 test -f lib/bdlib/configure && cd lib/bdlib && MAKEJOBS="$MAKEJOBS" ./configure
