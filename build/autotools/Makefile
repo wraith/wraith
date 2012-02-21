@@ -18,13 +18,11 @@ autoconf:
 	@rm -rf ../../configure
 	@echo "Autoconf...."
 	@autoconf
-	@echo "Fixing configure for cache_file"
+	@echo "Fixing configure temp paths"
 	@(if ! sed configure \
-	  -e 's:^cache_file=/dev/null:cache_file=build/config.cache:' \
 	  -e 's:config\.log:build/config.log:g' \
 	  -e 's:config\.status:build/config.status:g' \
 	  -e 's:confdefs\.h:build/confdefs.h:g' \
-	  -e 's:&& echo "updating cache .cache_file"::' \
 	  > ../../configure; then \
 	  echo "FAILED TO FIX configure" >&2; \
           cp configure ../../configure; \
