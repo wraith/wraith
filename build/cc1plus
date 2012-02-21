@@ -1,0 +1,45 @@
+#! /bin/sh
+
+# This file intercepts the pre-processor and runs 'stringfix' on the source file before it is processed.
+# This avoids the need for the old _*.c temp files.
+
+# Only capture pre-processing
+if [ $1 != "-E" -o -z "$stringfix" ]; then
+  exec $(${COLLECT_GCC} --print-prog-name=cc1plus) $@
+fi
+
+
+# Check for '-MD' as this may be the 'depcomp' call
+depcomp=0
+for arg; do
+  case "$arg" in
+    -MD)
+      depcomp=1
+      ;;
+    *)
+      ;;
+  esac
+done
+
+# Running in depcomp, bail out
+if [ $depcomp -eq 1 ]; then
+  exec $(${COLLECT_GCC} --print-prog-name=cc1plus) $@
+fi
+
+
+# Save the original
+cp -fp $source $source.real
+
+# Trap exit signals to restore the original source file
+trap restore_source EXIT TERM HUP INT QUIT ABRT KILL
+restore_source() {
+  # Restore the original file
+  cp -fp $source.real $source
+  rm -f $source.real
+}
+
+# 'stringfix' the source file into a temporary
+$stringfix $source.real $source
+
+$(${COLLECT_GCC} --print-prog-name=cc1plus) $@
+exit $?
