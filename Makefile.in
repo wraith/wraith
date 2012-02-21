@@ -58,19 +58,21 @@ _CFLGS = -fno-strict-aliasing -W -Wformat \
 
 MAKEFLAGS = -s @MAKEJOBS@
 
+STRINGFIX = src/stringfix
+
 MAKE_STATIC = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CXX)' 'LD=$(LD_STATIC)' 'INCLUDES=$(INCLUDES)' \
 'CCDEPMODE=$(CCDEPMODE)' 'BRANCH=$(BRANCH)' 'COMMIT=$(COMMIT_SHORT)' 'BUILDTS=$(BUILDTS)' 'VERSION=$(VERSION)' \
-'STRIP=$(STRIP)' 'CFLGS=$(CFLGS) -DBIN_TYPE_STATIC' \
+'STRIP=$(STRIP)' 'CFLGS=$(CFLGS) -DBIN_TYPE_STATIC' 'STRINGFIX=$(STRINGFIX)' \
 'LIBS=$(LIBS)' 'EGGEXEC=$(BINEXEC)' 'EGGBUILD=(wraith)'
 
 MAKE_DYNAMIC = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CXX)' 'LD=$(LD_DYNAMIC)' 'INCLUDES=$(INCLUDES)' \
 'CCDEPMODE=$(CCDEPMODE)' 'BRANCH=$(BRANCH)' 'COMMIT=$(COMMIT_SHORT)' 'BUILDTS=$(BUILDTS)' 'VERSION=$(VERSION)' \
-'STRIP=$(STRIP)' 'CFLGS=$(CFLGS) -DBIN_TYPE_DYNAMIC' \
+'STRIP=$(STRIP)' 'CFLGS=$(CFLGS) -DBIN_TYPE_DYNAMIC' 'STRINGFIX=$(STRINGFIX)' \
 'LIBS=$(LIBS)' 'EGGEXEC=$(BINEXEC)' 'EGGBUILD=(wraith)'
 
 MAKE_DEBUG = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CCDEBUG)' 'LD=$(LD_DEBUG) -g' 'INCLUDES=$(INCLUDES)' \
 'CCDEPMODE=$(CCDEPMODE)' 'BRANCH=$(BRANCH)' 'COMMIT=$(COMMIT_SHORT)' 'BUILDTS=$(BUILDTS)' 'VERSION=$(VERSION)' \
-'STRIP=touch' 'CFLGS=$(CFLGS) $(DEBCXXFLAGS) -DBIN_TYPE_DYNAMIC' \
+'STRIP=touch' 'CFLGS=$(CFLGS) $(DEBCXXFLAGS) -DBIN_TYPE_DYNAMIC' 'STRINGFIX=' \
 'LIBS=$(LIBS)' 'EGGEXEC=$(BINEXEC)' 'EGGBUILD=(debug)'
 
 MAKE_UTILS = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CCDEBUG)' 'STRIP=touch' 'INCLUDES=$(INCLUDES)' \
@@ -90,7 +92,7 @@ default: dynamic
 test:
 
 cleanutils:
-	@rm -f src/stringfix@EXEEXT@ src/sorthelp@EXEEXT@ src/makehelp@EXEEXT@ src/makeres@EXEEXT@ src/makeset@EXEEXT@
+	@rm -f $(STRINGFIX) src/sorthelp@EXEEXT@ src/makehelp@EXEEXT@ src/makeres@EXEEXT@ src/makeset@EXEEXT@
 
 clean:  cleanutils
 	+@cd src && $(MAKE) clean
@@ -155,7 +157,7 @@ help: makehelp stringfix
 	@(if [ ! -f src/help.h ]; then \
 	touch src/help.h; \
 	fi)
-	@src/stringfix@EXEEXT@ src/help.h.tmp~ src/help.h~ 1
+	@$(STRINGFIX) src/help.h.tmp~ src/help.h~ 1
 	@(if test "x`$(DIFF) -qurN src/help.h~ src/help.h`" != "x"; then \
 	cp -f src/help.h~ src/help.h; \
 	fi)

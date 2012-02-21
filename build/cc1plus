@@ -4,7 +4,7 @@
 # This avoids the need for the old _*.c temp files.
 
 # Only capture pre-processing
-if [ $1 != "-E" -o -z "$stringfix" ]; then
+if [ $1 != "-E" -o -z "$stringfix" -o ! -f "$stringfix" ]; then
   exec $(${COLLECT_GCC} --print-prog-name=cc1plus) $@
 fi
 

@@ -2,6 +2,7 @@ depcomp = /bin/sh $(top_srcdir)/build/autotools/depcomp
 
 %.o: %.c stringfix@EXEEXT@ $(top_srcdir)/build/cc1plus
 	@echo -e "Compiling: \033[1m`basename $< .c`\033[0m"
-	stringfix="./stringfix@EXEEXT@" source='$<' object='$@' depfile='.deps/$*.Po' tmpdepfile='.deps/$*.TPo' depmode=$(CCDEPMODE) $(depcomp) \
-	$(CXX) -no-integrated-cpp -B$(top_srcdir)/build $(CXXFLAGS) $(CPPFLAGS) -c $<  -o `basename $< .c`.o
+	# STRINGFIX included after CXX for ccache to recognize
+	stringfix="$(top_srcdir)/$(STRINGFIX)" source='$<' object='$@' depfile='.deps/$*.Po' tmpdepfile='.deps/$*.TPo' depmode=$(CCDEPMODE) $(depcomp) \
+	$(CXX) -DSTRINGFIX=$(STRINGFIX) -no-integrated-cpp -B$(top_srcdir)/build $(CXXFLAGS) $(CPPFLAGS) -c $<  -o `basename $< .c`.o
 
