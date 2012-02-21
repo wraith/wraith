@@ -45,6 +45,6 @@ ifeq ($(CCDEPMODE),gcc3)
 	else rm -f '.deps/$*.Tpo'; exit 1; \
 	fi
 else
-	source='$<' object='$@' depfile='.deps/$*.Po' tmpdepfile='.deps/$*.TPo' depmode=$(CCDEPMODE) $(depcomp) \
+	libtool=no source='$<' object='$@' depfile='.deps/$*.Po' tmpdepfile='.deps/$*.TPo' depmode=$(CCDEPMODE) $(depcomp) \
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
 endif

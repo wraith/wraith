@@ -139,6 +139,6 @@ ifeq ($(CCDEPMODE),gcc3)
 	fi
 else
 	# STRINGFIX included after CXX for ccache to recognize
-	STRINGFIX="$(top_srcdir)/$(STRINGFIX)" source='$<' object='$@' depfile='.deps/$*.Po' tmpdepfile='.deps/$*.TPo' depmode=$(CCDEPMODE) $(depcomp) \
+	STRINGFIX="$(top_srcdir)/$(STRINGFIX)" libtool=no source='$<' object='$@' depfile='.deps/$*.Po' tmpdepfile='.deps/$*.TPo' depmode=$(CCDEPMODE) $(depcomp) \
 	$(CXX) -DSTRINGFIX=$(STRINGFIX) -B$(top_srcdir)/build $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
 endif
