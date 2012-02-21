@@ -30,7 +30,7 @@ SETTINGSFILE = doc/settings.txt
 RESPONSESFILE = doc/responses.txt
 
 # defaults
-CXX = @CCACHE@ @DISTCC@ @CXX@ @STATIC@
+CXX = @CCACHE@ @DISTCC@ @CXX@ @STATIC@ -no-integrated-cpp
 LD_DYNAMIC = @CXX@
 LD_STATIC = @CXX@ @STATIC@
 CCDEBUG = @CCACHE@ @DISTCC@ @CXX@
