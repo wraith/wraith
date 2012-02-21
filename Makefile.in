@@ -12,7 +12,7 @@ VPATH = @srcdir@
 CCDEPMODE = @CCDEPMODE@
 BINEXEC = wraith@EXEEXT@
 
-STATICMAKEFILES = lib/Makefile src/mod/Makefile src/crypto/Makefile src/compat/Makefile src/Makefile Makefile
+STATICMAKEFILES = lib/Makefile src/mod/Makefile src/crypto/Makefile src/compat/Makefile src/Makefile Makefile build/build.mk
 CONFIGFILES = build/config.cache build/config.log build/config.status src/config.h src/buildinfo.h
 
 DISTROFILES = README LICENSE build doc scripts lib Makefile.in build.sh configure src BSDmakefile
