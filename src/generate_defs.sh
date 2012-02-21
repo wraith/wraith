@@ -1,5 +1,8 @@
 #! /bin/sh
 
+### Export LC_ALL=C sort(1) stays consistent
+export LC_ALL=C
+
 if [ -z "$SED" -o -z "$CXX" ]; then
   echo "This must be ran by configure" >&2
   exit 1
@@ -25,7 +28,7 @@ for file in $(grep -l DLSYM_GLOBAL src/*.c|grep -v "src/_"); do
 
   echo "extern \"C\" {" > $defsFile_wrappers
   echo "extern \"C\" {" > $defsFile_post
-  touch $defsFile_pre
+
   cd src >/dev/null 2>&1
   $CXX -E -I. -I.. -I../lib ${INCLUDES} -DHAVE_CONFIG_H ../${file} > $TMPFILE 2> /dev/null
   # Fix wrapped prototypes
@@ -35,15 +38,15 @@ for file in $(grep -l DLSYM_GLOBAL src/*.c|grep -v "src/_"); do
   cd .. >/dev/null 2>&1
 
   for symbol in $($SED -n -e 's/.*DLSYM_GLOBAL(.*, \([^)]*\).*/\1/p' $file|sort -u); do
-    echo "#define ${symbol} ORIGINAL_SYMBOL_${symbol}" >> $defsFile_pre
-    echo "#undef ${symbol}" >> $defsFile_post
     # Check if the typedef is already defined ...
     typedef=$(grep "^typedef .*(\*${symbol}_t)" $(dirname $file)/$(basename $file .c).h)
     # ... if not, generate it
     if [ -z "$typedef" ]; then
       # Trim off any extern "C", trim out the variable names, cleanup whitespace issues
       typedef=$(grep -w "${symbol}" $TMPFILE | head -n 1 | $SED -e 's/extern "C" *//' -e "s/\(.*\) *${symbol} *(\(.*\)).*/typedef \1 (*${symbol}_t)(\2);/" -e 's/[_0-9A-Za-z]*\(,\)/\1/g' -e 's/[_0-9A-Za-z]*\();\)/\1/g' -e 's/  */ /g' -e 's/ \([,)]\)/\1/g' -e 's/ *()/(void)/g')
-      echo "$typedef" >> $defsFile_post
+      existing_typedef=0
+    else
+      existing_typedef=1
     fi
 
     if [ "${typedef%;}" = "${typedef}" ]; then
@@ -53,8 +56,8 @@ for file in $(grep -l DLSYM_GLOBAL src/*.c|grep -v "src/_"); do
     fi
 
     #pipe typedef into generate_symbol.sh
-    test -n "$typedef" && echo "$typedef"
-  done | src/generate_symbol.sh >> $defsFile_wrappers 2>> $defsFile_post
+    test -n "$typedef" && echo "${symbol} ${existing_typedef} ${typedef}"
+  done | src/generate_symbol.sh $defsFile_wrappers $defsFile_pre $defsFile_post
 
   echo "}" >> $defsFile_wrappers
   echo "}" >> $defsFile_post
