@@ -21,8 +21,8 @@ for arg; do
   esac
 done
 
-# Running in depcomp, bail out
-if [ $depcomp -eq 1 ]; then
+# Only continue if running in depcomp (avoiding a 2nd pass for -dD/-g3)
+if [ $depcomp -eq 0 ]; then
   exec $(${COLLECT_GCC} --print-prog-name=cc1plus) $@
 fi
 
