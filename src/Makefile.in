@@ -137,6 +137,7 @@ include ./.deps/includes
 	@./stringfix@EXEEXT@ $< _$< || cp -f $< _$<
 	source='$<' object='$@' depfile='.deps/$*.Po' tmpdepfile='.deps/$*.TPo' depmode=$(CCDEPMODE) $(depcomp) \
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c _$<  -o `basename $< .c`.o 2> >(sed -e "s:_$<:$<:")
+	@rm -f _$<
 
 #safety hash
 
