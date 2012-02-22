@@ -132,16 +132,16 @@ static void cmd_setkey(int idx, char *par) {
   putlog(LOG_CMDS, "*", "#%s# setkey %s", dcc[idx].nick, par);
 
   if (!par[0]) {
-    dprintf(idx, "Usage: setkey <nick|channel> [key]\n");
+    dprintf(idx, "Usage: setkey <nick|channel> [key|rand]\n");
     return;
   }
 
   char *target = newsplit(&par);
-  char *key = newsplit(&par);
+  char *newkey = newsplit(&par), *key = NULL;
   bool have_key = FishKeys.contains(target);
   fish_data_t* fishData = NULL;
 
-  if (!key[0]) {
+  if (!newkey[0]) {
     // Clear the key
     if (have_key) {
       fishData = FishKeys[target];
@@ -152,6 +152,14 @@ static void cmd_setkey(int idx, char *par) {
       dprintf(idx, "No key found for '%s'\n", target);
     }
   } else {
+    if (!strcmp(newkey, "rand")) {
+      // Set a RANDOM key
+      key = (char*)my_calloc(1, 32+1);
+      make_rand_str(key, 32);
+    } else {
+      key = strdup(newkey);
+    }
+
     // Set the key
     fishData = new fish_data_t;
     fishData->sharedKey = key;
