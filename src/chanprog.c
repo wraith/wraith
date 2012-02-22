@@ -890,17 +890,20 @@ struct chanset_t* find_common_opped_chan(bd::String nick) {
 
 void privmsg(bd::String target, bd::String msg, int idx) {
   struct chanset_t* chan = NULL;
-  if (have_cprivmsg && !strchr(CHANMETA, target[0]))
+  bool talking_to_chan = strchr(CHANMETA, target[0]);
+  if (have_cprivmsg && !talking_to_chan)
     chan = find_common_opped_chan(target);
   bool cleartextPrefix = (msg(0, 3) == "+p ");
 
   // Encrypt with FiSH?
-  if (!strchr(CHANMETA, target[0]) && !cleartextPrefix && FishKeys.contains(target) && FishKeys[target]->sharedKey.length()) {
+  if (!cleartextPrefix && FishKeys.contains(target) && FishKeys[target]->sharedKey.length()) {
     msg = "+OK " + egg_bf_encrypt(msg, FishKeys[target]->sharedKey);
   }
+
   if (cleartextPrefix) {
     msg += static_cast<size_t>(3);
   }
+
   if (chan)
     dprintf(idx, "CPRIVMSG %s %s :%s\n", target.c_str(), chan->name, msg.c_str());
   else
@@ -909,8 +912,19 @@ void privmsg(bd::String target, bd::String msg, int idx) {
 
 void notice(bd::String target, bd::String msg, int idx) {
   struct chanset_t* chan = NULL;
-  if (have_cnotice && !strchr(CHANMETA, target[0]))
+  bool talking_to_chan = strchr(CHANMETA, target[0]);
+  if (have_cnotice && !talking_to_chan)
     chan = find_common_opped_chan(target);
+  bool cleartextPrefix = (msg(0, 3) == "+p ");
+
+  if (!cleartextPrefix && FishKeys.contains(target) && FishKeys[target]->sharedKey.length()) {
+    msg = "+OK " + egg_bf_encrypt(msg, FishKeys[target]->sharedKey);
+  }
+
+  if (cleartextPrefix) {
+    msg += static_cast<size_t>(3);
+  }
+
   if (chan)
     dprintf(idx, "CNOTICE %s %s :%s\n", target.c_str(), chan->name, msg.c_str());
   else
