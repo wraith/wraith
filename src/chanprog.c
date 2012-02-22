@@ -932,3 +932,30 @@ void keyx(const bd::String &target) {
   fishData->timestamp = now;
   FishKeys[target] = fishData;
 }
+
+void set_fish_key(char *target, char *key)
+{
+  fish_data_t* fishData = NULL;
+  fishData = FishKeys[target];
+
+  if (!key || !key[0]) { //remove key
+    FishKeys.remove(target);
+    delete fishData;
+  } else { //set key
+    fishData = new fish_data_t;
+
+    if (!strcmp(key, "rand")) {
+      // Set a RANDOM key
+      char *rand_key = (char*)my_calloc(1, 32+1);
+      make_rand_str(rand_key, 32);
+      fishData->sharedKey = rand_key;
+      free(rand_key);
+    } else {
+      fishData->sharedKey = key;
+    }
+
+    // Set the key
+    fishData->timestamp = now;
+    FishKeys[target] = fishData;
+  }
+}
