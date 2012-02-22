@@ -7,7 +7,7 @@
 /build/config.status
 /build/stamp.*
 /build/autotools/src
-/build/build.mk
+/src/mod/mod.mk
 /*.tgz
 /leaf
 /hub

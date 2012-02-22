@@ -7,6 +7,7 @@ depcomp = /bin/sh ../../../build/autotools/depcomp
 OBJS = console.o
 
 include ./.deps/includes
+include ../mod.mk
 
 doofus:
 	@echo ""
@@ -15,13 +16,6 @@ doofus:
 	@cd ../../../ && make
 
 static: ../console.o
-
-../console.o:
-	@echo -e "Compiling: \033[1mconsole\033[0m"
-	source='console.c' object='$@' depfile='.deps/console.Po' tmpdepfile='.deps/console.TPo' depmode=$(CCDEPMODE) $(depcomp) \
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $(srcdir)/console.c
-	@rm -f ../console.o
-	@mv console.o ../
 
 clean:
 	@rm -f .depend *.o *~

@@ -8611,7 +8611,7 @@ $as_echo X"$mf" |
 done
 
 
-ac_config_files="$ac_config_files Makefile lib/Makefile src/Makefile src/compat/Makefile src/crypto/Makefile src/mod/Makefile src/buildinfo.h build/build.mk"
+ac_config_files="$ac_config_files Makefile lib/Makefile src/Makefile src/compat/Makefile src/crypto/Makefile src/mod/Makefile src/buildinfo.h src/mod/mod.mk"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -9324,7 +9324,7 @@ do
     "src/crypto/Makefile") CONFIG_FILES="$CONFIG_FILES src/crypto/Makefile" ;;
     "src/mod/Makefile") CONFIG_FILES="$CONFIG_FILES src/mod/Makefile" ;;
     "src/buildinfo.h") CONFIG_FILES="$CONFIG_FILES src/buildinfo.h" ;;
-    "build/build.mk") CONFIG_FILES="$CONFIG_FILES build/build.mk" ;;
+    "src/mod/mod.mk") CONFIG_FILES="$CONFIG_FILES src/mod/mod.mk" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac

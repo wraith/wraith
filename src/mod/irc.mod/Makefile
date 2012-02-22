@@ -8,6 +8,7 @@ depcomp = /bin/sh ../../../build/autotools/depcomp
 OBJS = irc.o
 
 include ./.deps/includes
+include ../mod.mk
 
 doofus:
 	@echo ""
@@ -16,14 +17,6 @@ doofus:
 	@cd ../../../ && make
 
 static: ../irc.o
-
-../irc.o:
-	@echo -e "Compiling: \033[1mirc\033[0m"
-	source='irc.c' object='$@' depfile='.deps/irc.Po' tmpdepfile='.deps/irc.TPo' depmode=$(CCDEPMODE) $(depcomp) \
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $(srcdir)/irc.c
-	@rm -f ../irc.o
-	@mv irc.o ../
-
 
 clean:
 	@rm -f .depend *.o *~
