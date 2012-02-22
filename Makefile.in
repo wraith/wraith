@@ -206,7 +206,7 @@ utils: stringfix makehelp
 crypto:
 	+@cd src/crypto && ${MAKE_UTILS} crypto
 
-general: help res set
+general: help res set stringfix
 
 check:
 

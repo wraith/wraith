@@ -26,21 +26,4 @@ if [ $depcomp -eq 0 ]; then
   exec $(${COLLECT_GCC} --print-prog-name=cc1plus) $@
 fi
 
-TMPFILE=`(umask 077 && mktemp ".sfXXXXXX")`
-# Trap exit signals to cleanup
-trap cleanup_temp EXIT TERM HUP INT QUIT ABRT KILL
-cleanup_temp() {
-  rm -f $TMPFILE $TMPFILE.garbled > /dev/null 2>&1
-}
-
-$(${COLLECT_GCC} --print-prog-name=cc1plus) $@ > $TMPFILE
-stat=$?
-
-if [ $stat -eq 0 ]; then
-  $stringfix $TMPFILE $TMPFILE.garbled
-  cat $TMPFILE.garbled
-else
-  cat $TMPFILE
-fi
-
-exit $stat
+exec $(${COLLECT_GCC} --print-prog-name=cc1plus) $@ | $stringfix
