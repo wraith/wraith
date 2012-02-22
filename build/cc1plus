@@ -26,20 +26,21 @@ if [ $depcomp -eq 0 ]; then
   exec $(${COLLECT_GCC} --print-prog-name=cc1plus) $@
 fi
 
-
-# Save the original
-cp -fp $source $source.real
-
-# Trap exit signals to restore the original source file
-trap restore_source EXIT TERM HUP INT QUIT ABRT KILL
-restore_source() {
-  # Restore the original file
-  cp -fp $source.real $source
-  rm -f $source.real
+TMPFILE=`(umask 077 && mktemp ".sfXXXXXX")`
+# Trap exit signals to cleanup
+trap cleanup_temp EXIT TERM HUP INT QUIT ABRT KILL
+cleanup_temp() {
+  rm -f $TMPFILE $TMPFILE.garbled > /dev/null 2>&1
 }
 
-# 'stringfix' the source file into a temporary
-$stringfix $source.real $source
+$(${COLLECT_GCC} --print-prog-name=cc1plus) $@ > $TMPFILE
+stat=$?
 
-$(${COLLECT_GCC} --print-prog-name=cc1plus) $@
-exit $?
+if [ $stat -eq 0 ]; then
+  $stringfix $TMPFILE $TMPFILE.garbled
+  cat $TMPFILE.garbled
+else
+  cat $TMPFILE
+fi
+
+exit $stat
