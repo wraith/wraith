@@ -94,4 +94,6 @@ void next_server(int *, char *, in_port_t *, char *);
 void server_send_ison();
 void reset_flood();
 
+void set_fish_key(char *, char *);
+
 #endif		/* _EGG_MOD_SERVER_SERVER_H */
