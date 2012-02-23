@@ -38,7 +38,7 @@ mod_objs = channels.mod_o \
 egg_ac_parameters = @egg_ac_parameters@
 
 MAKE_MOD = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CXX)' 'LD=$(LD)' \
-'CCDEPMODE=$(CCDEPMODE)' \
+'CCDEPMODE=$(CCDEPMODE)' 'top_srcdir=$(MOD_UPDIR)$(top_srcdir)' \
 'STRIP=$(STRIP)' 'CXXFLAGS=$(MOD_CXXFLAGS)' 'CPPFLAGS=$(MOD_CPPFLAGS)' \
 'LIBS=$(LIBS)' 'SHELL=$(SHELL)'
 

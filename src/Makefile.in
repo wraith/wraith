@@ -4,12 +4,13 @@ SHELL = @SHELL@
 top_srcdir = @top_srcdir@
 srcdir = @srcdir@
 VPATH = @srcdir@
-depcomp = /bin/sh $(top_srcdir)/autotools/depcomp
 
 @SET_MAKE@
 
-CXXFLAGS = @CXXFLAGS@ -I.. -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/pack @DEFS@ $(INCLUDES) $(CFLGS) '-DCOMMIT="$(COMMIT)"' '-DBRANCH="$(BRANCH)"' -DBUILDTS=$(BUILDTS) '-DVERSION="$(VERSION)"'
+CXXFLAGS = @CXXFLAGS@ -I. -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/pack @DEFS@ $(INCLUDES) $(CFLGS) '-DCOMMIT="$(COMMIT)"' '-DBRANCH="$(BRANCH)"' -DBUILDTS=$(BUILDTS) '-DVERSION="$(VERSION)"'
 CPPFLAGS = @CPPFLAGS@
+
+depcomp = /bin/sh $(top_srcdir)/build/autotools/depcomp
 
 OBJCOPY = @OBJCOPY@
 
@@ -75,25 +76,25 @@ blah:
 
 makeres: makeres.c ../lib/bdlib/src/libbdlib.a
 	@echo -e "Compiling: \033[1mmakeres\033[0m"
-	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makeres.c ../lib/bdlib/src/libbdlib.a -o makeres
+	@$(CXX) $(CXXFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CPPFLAGS) makeres.c ../lib/bdlib/src/libbdlib.a -o makeres
 	@$(STRIP) makeres@EXEEXT@
 
 makeset: makeset.c ../lib/bdlib/src/libbdlib.a
 	@echo -e "Compiling: \033[1mmakeset\033[0m"
-	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makeset.c ../lib/bdlib/src/libbdlib.a -o makeset
+	@$(CXX) $(CXXFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CPPFLAGS) makeset.c ../lib/bdlib/src/libbdlib.a -o makeset
 	@$(STRIP) makeset@EXEEXT@
 
 makehelp: makehelp.c ../lib/bdlib/src/libbdlib.a
 	@echo -e "Compiling: \033[1mmakehelp\033[0m"
-	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) makehelp.c ../lib/bdlib/src/libbdlib.a -o makehelp
+	@$(CXX) $(CXXFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CPPFLAGS) makehelp.c ../lib/bdlib/src/libbdlib.a -o makehelp
 	@$(STRIP) makehelp@EXEEXT@
 
 sorthelp: sorthelp.c ../lib/bdlib/src/libbdlib.a
 	@echo -e "Compiling: \033[1msorthelp\033[0m"
-	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) sorthelp.c ../lib/bdlib/src/libbdlib.a -o sorthelp
+	@$(CXX) $(CXXFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CPPFLAGS) sorthelp.c ../lib/bdlib/src/libbdlib.a -o sorthelp
 	@$(STRIP) sorthelp@EXEEXT@
 
-stringfix: stringfix.c common.h ../config.h eggdrop.h
+stringfix: stringfix.c common.h config.h eggdrop.h
 	@echo -e "Compiling: \033[1mstringfix\033[0m"
 	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) stringfix.c -o stringfix
 	@$(STRIP) stringfix@EXEEXT@
@@ -129,14 +130,15 @@ mycrypto:
 
 include ./.deps/includes
 
-.SUFFIXES:
-.SUFFIXES: .c .h .o
-
-.c.o: stringfix
-	@echo -e "Compiling: \033[1m`basename $< .c`\033[0m"
-	@./stringfix@EXEEXT@ $< _$< || cp -f $< _$<
-	source='$<' object='$@' depfile='.deps/$*.Po' tmpdepfile='.deps/$*.TPo' depmode=$(CCDEPMODE) $(depcomp) \
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c _$<  -o `basename $< .c`.o
-
-#safety hash
-
+%.o: %.c stringfix@EXEEXT@ $(top_srcdir)/build/cc1plus
+	@echo -e "Compiling: \033[1m$*\033[0m"
+ifeq ($(CCDEPMODE),gcc3)
+	if STRINGFIX='$(top_srcdir)/$(STRINGFIX)' $(CXX) -MT '$@' -MD -MP -MF '.deps/$*.TPo' -DSTRINGFIX=$(STRINGFIX) -B$(top_srcdir)/build $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@; then \
+	mv '.deps/$*.TPo' '.deps/$*.Po'; \
+	else rm -f '.deps/$*.Tpo'; exit 1; \
+	fi
+else
+	# STRINGFIX included after CXX for ccache to recognize
+	STRINGFIX="$(top_srcdir)/$(STRINGFIX)" libtool=no source='$<' object='$@' depfile='.deps/$*.Po' tmpdepfile='.deps/$*.TPo' depmode=$(CCDEPMODE) $(depcomp) \
+	$(CXX) -DSTRINGFIX=$(STRINGFIX) -B$(top_srcdir)/build $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
+endif

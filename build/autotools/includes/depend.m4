@@ -57,7 +57,6 @@ for mf in $files; do
       fi
     fi
     echo "include .deps/$base.Po" >> "$dirpart/.deps/includes"
-    echo "_$base.c:" >> "$dirpart/.deps/includes"
   done
 done
 ])

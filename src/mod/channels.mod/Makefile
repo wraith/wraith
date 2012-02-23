@@ -1,12 +1,13 @@
 # Makefile for src/mod/channels.mod/
 
 srcdir = .
-depcomp = /bin/sh ../../../autotools/depcomp
+depcomp = /bin/sh ../../../build/autotools/depcomp
 
 #This line is simply for configure to generate .deps/
 OBJS = channels.o
 
 include ./.deps/includes
+include ../mod.mk
 
 doofus:
 	@echo ""
@@ -15,14 +16,6 @@ doofus:
 	@cd ../../../ && make
 
 static: ../channels.o
-
-../channels.o:
-	@echo -e "Compiling: \033[1mchannels\033[0m"
-	source='channels.c' object='$@' depfile='.deps/channels.Po' tmpdepfile='.deps/channels.TPo' depmode=$(CCDEPMODE) $(depcomp) \
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $(srcdir)/channels.c
-	@rm -f ../channels.o
-	@mv channels.o ../
-
 
 clean:
 	@rm -f .depend *.o *~

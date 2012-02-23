@@ -5,8 +5,8 @@ dnl
 AC_PREREQ(2.59)
 AC_INIT([wraith],[],[wraith@botpack.net])
 AC_CONFIG_SRCDIR(src/eggdrop.h)
-AC_CONFIG_HEADER(config.h)
-AC_COPYRIGHT([Copyright (c) 2003 - 2010 Bryan Drewery])
+AC_CONFIG_HEADER(src/config.h)
+AC_COPYRIGHT([Copyright (c) Bryan Drewery])
 AC_REVISION($Revision$)
 
 EGG_SAVE_PARAMETERS
@@ -220,7 +220,7 @@ EGG_SUBST_VERSION
 EGG_SUBST_MOD_UPDIR
 DO_DEPS
 
-AC_CONFIG_FILES([Makefile lib/Makefile src/Makefile src/compat/Makefile src/crypto/Makefile src/mod/Makefile src/buildinfo.h])
+AC_CONFIG_FILES([Makefile lib/Makefile src/Makefile src/compat/Makefile src/crypto/Makefile src/mod/Makefile src/buildinfo.h src/mod/mod.mk])
 AC_OUTPUT
 
 AH_TEMPLATE(HAVE_ST_MTIM, [Define to 1 if your struct stat has an st_mtim member])

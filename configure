@@ -12,7 +12,7 @@
 # This configure script is free software; the Free Software Foundation
 # gives unlimited permission to copy, distribute and modify it.
 #
-# Copyright (c) 2003 - 2010 Bryan Drewery
+# Copyright (c) Bryan Drewery
 ## -------------------- ##
 ## M4sh Initialization. ##
 ## -------------------- ##
@@ -716,7 +716,7 @@ ac_unrecognized_opts=
 ac_unrecognized_sep=
 # The variables have the same names as the options, with
 # dashes changed to underlines.
-cache_file=./config.cache
+cache_file=/dev/null
 exec_prefix=NONE
 no_create=
 no_recursion=
@@ -1409,7 +1409,7 @@ Copyright (C) 2010 Free Software Foundation, Inc.
 This configure script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it.
 
-Copyright (c) 2003 - 2010 Bryan Drewery
+Copyright (c) Bryan Drewery
 _ACEOF
   exit
 fi
@@ -1514,8 +1514,8 @@ else
   # Is the header compilable?
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking $2 usability" >&5
 $as_echo_n "checking $2 usability... " >&6; }
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 $4
 #include <$2>
 _ACEOF
@@ -1531,8 +1531,8 @@ $as_echo "$ac_header_compiler" >&6; }
 # Is the header present?
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking $2 presence" >&5
 $as_echo_n "checking $2 presence... " >&6; }
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #include <$2>
 _ACEOF
 if ac_fn_cxx_try_cpp "$LINENO"; then :
@@ -1634,8 +1634,8 @@ $as_echo_n "checking for $2... " >&6; }
 if eval \${$3+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 $4
 #include <$2>
 _ACEOF
@@ -1712,8 +1712,8 @@ if eval \${$3+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   eval "$3=no"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 $4
 int
 main ()
@@ -1725,8 +1725,8 @@ if (sizeof ($2))
 }
 _ACEOF
 if ac_fn_cxx_try_compile "$LINENO"; then :
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 $4
 int
 main ()
@@ -1770,8 +1770,8 @@ else
      # than half of the expected target width.
      for ac_type in int$2_t 'int' 'long int' \
 	 'long long int' 'short int' 'signed char'; do
-       cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+       cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 $ac_includes_default
 	     enum { N = $2 / 2 - 1 };
 int
@@ -1785,8 +1785,8 @@ test_array [0] = 0
 }
 _ACEOF
 if ac_fn_cxx_try_compile "$LINENO"; then :
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 $ac_includes_default
 	        enum { N = $2 / 2 - 1 };
 int
@@ -1844,8 +1844,8 @@ else
      # than half of the expected target width.
      for ac_type in uint$2_t 'unsigned int' 'unsigned long int' \
 	 'unsigned long long int' 'unsigned short int' 'unsigned char'; do
-       cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+       cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 $ac_includes_default
 int
 main ()
@@ -1892,8 +1892,8 @@ $as_echo_n "checking for $2.$3... " >&6; }
 if eval \${$4+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 $5
 int
 main ()
@@ -1908,8 +1908,8 @@ _ACEOF
 if ac_fn_cxx_try_compile "$LINENO"; then :
   eval "$4=yes"
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 $5
 int
 main ()
@@ -1951,8 +1951,8 @@ $as_echo_n "checking whether $as_decl_name is declared... " >&6; }
 if eval \${$3+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 $4
 int
 main ()
@@ -1994,8 +1994,8 @@ $as_echo_n "checking for $2... " >&6; }
 if eval \${$3+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 /* Define $2 to an innocuous variant, in case <limits.h> declares $2.
    For example, HP-UX 11i <limits.h> declares gettimeofday.  */
 #define $2 innocuous_$2
@@ -2049,7 +2049,7 @@ $as_echo "$ac_res" >&6; }
   eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
 
 } # ac_fn_cxx_check_func
-cat >config.log <<_ACEOF
+cat >build/config.log <<_ACEOF
 This file contains any messages produced by compilers while
 running configure, to aid debugging if configure makes a mistake.
 
@@ -2059,7 +2059,7 @@ generated by GNU Autoconf 2.68.  Invocation command line was
   $ $0 $@
 
 _ACEOF
-exec 5>>config.log
+exec 5>>build/config.log
 {
 cat <<_ASUNAME
 ## --------- ##
@@ -2155,12 +2155,12 @@ done
 { ac_configure_args1=; unset ac_configure_args1;}
 
 # When interrupted or exit'd, cleanup temporary files, and complete
-# config.log.  We remove comments because anyway the quotes in there
+# build/config.log.  We remove comments because anyway the quotes in there
 # would cause problems or look ugly.
 # WARNING: Use '\'' to represent an apostrophe within the trap.
 # WARNING: Do not start the trap code with a newline, due to a FreeBSD 4.0 bug.
 trap 'exit_status=$?
-  # Save into config.log some information that might help in debugging.
+  # Save into build/config.log some information that might help in debugging.
   {
     echo
 
@@ -2230,12 +2230,12 @@ $as_echo "$as_me: WARNING: cache variable $ac_var contains a newline" >&2;} ;;
       echo
     fi
 
-    if test -s confdefs.h; then
+    if test -s build/confdefs.h; then
       $as_echo "## ----------- ##
-## confdefs.h. ##
+## build/confdefs.h. ##
 ## ----------- ##"
       echo
-      cat confdefs.h
+      cat build/confdefs.h
       echo
     fi
     test "$ac_signal" != 0 &&
@@ -2251,34 +2251,34 @@ for ac_signal in 1 2 13 15; do
 done
 ac_signal=0
 
-# confdefs.h avoids OS command line length limits that DEFS can exceed.
-rm -f -r conftest* confdefs.h
+# build/confdefs.h avoids OS command line length limits that DEFS can exceed.
+rm -f -r conftest* build/confdefs.h
 
-$as_echo "/* confdefs.h */" > confdefs.h
+$as_echo "/* build/confdefs.h */" > build/confdefs.h
 
 # Predefined preprocessor variables.
 
-cat >>confdefs.h <<_ACEOF
+cat >>build/confdefs.h <<_ACEOF
 #define PACKAGE_NAME "$PACKAGE_NAME"
 _ACEOF
 
-cat >>confdefs.h <<_ACEOF
+cat >>build/confdefs.h <<_ACEOF
 #define PACKAGE_TARNAME "$PACKAGE_TARNAME"
 _ACEOF
 
-cat >>confdefs.h <<_ACEOF
+cat >>build/confdefs.h <<_ACEOF
 #define PACKAGE_VERSION "$PACKAGE_VERSION"
 _ACEOF
 
-cat >>confdefs.h <<_ACEOF
+cat >>build/confdefs.h <<_ACEOF
 #define PACKAGE_STRING "$PACKAGE_STRING"
 _ACEOF
 
-cat >>confdefs.h <<_ACEOF
+cat >>build/confdefs.h <<_ACEOF
 #define PACKAGE_BUGREPORT "$PACKAGE_BUGREPORT"
 _ACEOF
 
-cat >>confdefs.h <<_ACEOF
+cat >>build/confdefs.h <<_ACEOF
 #define PACKAGE_URL "$PACKAGE_URL"
 _ACEOF
 
@@ -2312,7 +2312,7 @@ $as_echo "$as_me: loading site script $ac_site_file" >&6;}
       || { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error $? "failed to load site script $ac_site_file
-See \`config.log' for more details" "$LINENO" 5; }
+See \`build/config.log' for more details" "$LINENO" 5; }
   fi
 done
 
@@ -2376,7 +2376,7 @@ $as_echo "$as_me:   former value:  \`$ac_old_val'" >&2;}
 $as_echo "$as_me:   current value: \`$ac_new_val'" >&2;}
       fi;;
   esac
-  # Pass precious variables to config.status.
+  # Pass precious variables to build/config.status.
   if test "$ac_new_set" = set; then
     case $ac_new_val in
     *\'*) ac_arg=$ac_var=`$as_echo "$ac_new_val" | sed "s/'/'\\\\\\\\''/g"` ;;
@@ -2407,7 +2407,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-ac_config_headers="$ac_config_headers config.h"
+ac_config_headers="$ac_config_headers src/config.h"
 
 
 
@@ -2585,8 +2585,8 @@ $as_echo "$ac_try_echo"; } >&5
   test $ac_status = 0; }
 done
 
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 
 int
 main ()
@@ -2673,7 +2673,7 @@ sed 's/^/| /' conftest.$ac_ext >&5
 { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error 77 "C++ compiler cannot create executables
-See \`config.log' for more details" "$LINENO" 5; }
+See \`build/config.log' for more details" "$LINENO" 5; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
@@ -2716,7 +2716,7 @@ else
   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error $? "cannot compute suffix of executables: cannot compile and link
-See \`config.log' for more details" "$LINENO" 5; }
+See \`build/config.log' for more details" "$LINENO" 5; }
 fi
 rm -f conftest conftest$ac_cv_exeext
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_exeext" >&5
@@ -2725,8 +2725,8 @@ $as_echo "$ac_cv_exeext" >&6; }
 rm -f conftest.$ac_ext
 EXEEXT=$ac_cv_exeext
 ac_exeext=$EXEEXT
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #include <stdio.h>
 int
 main ()
@@ -2775,7 +2775,7 @@ $as_echo "$ac_try_echo"; } >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error $? "cannot run C++ compiled programs.
 If you meant to cross compile, use \`--host'.
-See \`config.log' for more details" "$LINENO" 5; }
+See \`build/config.log' for more details" "$LINENO" 5; }
     fi
   fi
 fi
@@ -2789,8 +2789,8 @@ $as_echo_n "checking for suffix of object files... " >&6; }
 if ${ac_cv_objext+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 
 int
 main ()
@@ -2827,7 +2827,7 @@ sed 's/^/| /' conftest.$ac_ext >&5
 { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error $? "cannot compute suffix of object files: cannot compile
-See \`config.log' for more details" "$LINENO" 5; }
+See \`build/config.log' for more details" "$LINENO" 5; }
 fi
 rm -f conftest.$ac_cv_objext conftest.$ac_ext
 fi
@@ -2840,8 +2840,8 @@ $as_echo_n "checking whether we are using the GNU C++ compiler... " >&6; }
 if ${ac_cv_cxx_compiler_gnu+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 
 int
 main ()
@@ -2881,8 +2881,8 @@ else
    ac_cxx_werror_flag=yes
    ac_cv_prog_cxx_g=no
    CXXFLAGS="-g"
-   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+   cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 
 int
 main ()
@@ -2896,8 +2896,8 @@ if ac_fn_cxx_try_compile "$LINENO"; then :
   ac_cv_prog_cxx_g=yes
 else
   CXXFLAGS=""
-      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+      cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 
 int
 main ()
@@ -2912,8 +2912,8 @@ if ac_fn_cxx_try_compile "$LINENO"; then :
 else
   ac_cxx_werror_flag=$ac_save_cxx_werror_flag
 	 CXXFLAGS="-g"
-	 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+	 cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 
 int
 main ()
@@ -3000,8 +3000,8 @@ do
   # <limits.h> exists even on freestanding compilers.
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp. "Syntax error" is here to catch this case.
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #ifdef __STDC__
 # include <limits.h>
 #else
@@ -3019,8 +3019,8 @@ rm -f conftest.err conftest.i conftest.$ac_ext
 
   # OK, works on sane cases.  Now check whether nonexistent headers
   # can be detected and how.
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #include <ac_nonexistent.h>
 _ACEOF
 if ac_fn_cxx_try_cpp "$LINENO"; then :
@@ -3059,8 +3059,8 @@ do
   # <limits.h> exists even on freestanding compilers.
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp. "Syntax error" is here to catch this case.
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #ifdef __STDC__
 # include <limits.h>
 #else
@@ -3078,8 +3078,8 @@ rm -f conftest.err conftest.i conftest.$ac_ext
 
   # OK, works on sane cases.  Now check whether nonexistent headers
   # can be detected and how.
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #include <ac_nonexistent.h>
 _ACEOF
 if ac_fn_cxx_try_cpp "$LINENO"; then :
@@ -3101,7 +3101,7 @@ else
   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error $? "C++ preprocessor \"$CXXCPP\" fails sanity check
-See \`config.log' for more details" "$LINENO" 5; }
+See \`build/config.log' for more details" "$LINENO" 5; }
 fi
 
 ac_ext=cpp
@@ -3246,8 +3246,8 @@ $as_echo_n "checking for ANSI C header files... " >&6; }
 if ${ac_cv_header_stdc+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
@@ -3270,8 +3270,8 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
 if test $ac_cv_header_stdc = yes; then
   # SunOS 4.x string.h does not declare mem*, contrary to ANSI.
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #include <string.h>
 
 _ACEOF
@@ -3287,8 +3287,8 @@ fi
 
 if test $ac_cv_header_stdc = yes; then
   # ISC 2.0.2 stdlib.h does not declare free, contrary to ANSI.
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #include <stdlib.h>
 
 _ACEOF
@@ -3307,8 +3307,8 @@ if test $ac_cv_header_stdc = yes; then
   if test "$cross_compiling" = yes; then :
   :
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #include <ctype.h>
 #include <stdlib.h>
 #if ((' ' & 0x0FF) == 0x020)
@@ -3349,7 +3349,7 @@ fi
 $as_echo "$ac_cv_header_stdc" >&6; }
 if test $ac_cv_header_stdc = yes; then
 
-$as_echo "#define STDC_HEADERS 1" >>confdefs.h
+$as_echo "#define STDC_HEADERS 1" >>build/confdefs.h
 
 fi
 
@@ -3361,7 +3361,7 @@ do :
 ac_fn_cxx_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default
 "
 if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
+  cat >>build/confdefs.h <<_ACEOF
 #define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
 _ACEOF
 
@@ -3381,13 +3381,13 @@ fi
 
   if test "$MINIX" = yes; then
 
-$as_echo "#define _POSIX_SOURCE 1" >>confdefs.h
+$as_echo "#define _POSIX_SOURCE 1" >>build/confdefs.h
 
 
-$as_echo "#define _POSIX_1_SOURCE 2" >>confdefs.h
+$as_echo "#define _POSIX_1_SOURCE 2" >>build/confdefs.h
 
 
-$as_echo "#define _MINIX 1" >>confdefs.h
+$as_echo "#define _MINIX 1" >>build/confdefs.h
 
   fi
 
@@ -3397,8 +3397,8 @@ $as_echo_n "checking whether it is safe to define __EXTENSIONS__... " >&6; }
 if ${ac_cv_safe_to_define___extensions__+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 
 #	  define __EXTENSIONS__ 1
 	  $ac_includes_default
@@ -3420,15 +3420,15 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_safe_to_define___extensions__" >&5
 $as_echo "$ac_cv_safe_to_define___extensions__" >&6; }
   test $ac_cv_safe_to_define___extensions__ = yes &&
-    $as_echo "#define __EXTENSIONS__ 1" >>confdefs.h
+    $as_echo "#define __EXTENSIONS__ 1" >>build/confdefs.h
 
-  $as_echo "#define _ALL_SOURCE 1" >>confdefs.h
+  $as_echo "#define _ALL_SOURCE 1" >>build/confdefs.h
 
-  $as_echo "#define _GNU_SOURCE 1" >>confdefs.h
+  $as_echo "#define _GNU_SOURCE 1" >>build/confdefs.h
 
-  $as_echo "#define _POSIX_PTHREAD_SEMANTICS 1" >>confdefs.h
+  $as_echo "#define _POSIX_PTHREAD_SEMANTICS 1" >>build/confdefs.h
 
-  $as_echo "#define _TANDEM_SOURCE 1" >>confdefs.h
+  $as_echo "#define _TANDEM_SOURCE 1" >>build/confdefs.h
 
 
 
@@ -3438,8 +3438,8 @@ if ${ac_cv_search_strerror+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 
 /* Override any GCC internal prototype to avoid an error.
    Use char because int might match the return type of a GCC
@@ -3498,7 +3498,7 @@ cat >confcache <<\_ACEOF
 # It is not useful on other systems.  If it contains results you don't
 # want to keep, you may remove or edit it.
 #
-# config.status only pays attention to the cache file if you give it
+# build/config.status only pays attention to the cache file if you give it
 # the --recheck option to rerun configure.
 #
 # `ac_cv_env_foo' variables (set or unset) will be overridden when
@@ -3588,8 +3588,8 @@ else
 
       ac_old_CXXFLAGS="$CXXFLAGS"
       CXXFLAGS="$CXXFLAGS -Wall"
-       cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+       cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 
          int main ()
          {
@@ -3628,8 +3628,8 @@ else
 
         ac_old_CXX="$CXX"
         CXX="$CXX -pipe"
-        cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+        cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 
           int main ()
           {
@@ -3681,7 +3681,7 @@ cat >confcache <<\_ACEOF
 # It is not useful on other systems.  If it contains results you don't
 # want to keep, you may remove or edit it.
 #
-# config.status only pays attention to the cache file if you give it
+# build/config.status only pays attention to the cache file if you give it
 # the --recheck option to rerun configure.
 #
 # `ac_cv_env_foo' variables (set or unset) will be overridden when
@@ -4283,7 +4283,7 @@ case "$egg_cv_var_system_type" in
   ;;
   HP-UX)
 
-$as_echo "#define MD32_XARRAY 1" >>confdefs.h
+$as_echo "#define MD32_XARRAY 1" >>build/confdefs.h
 
   ;;
   Ultrix)
@@ -4309,19 +4309,19 @@ $as_echo "#define MD32_XARRAY 1" >>confdefs.h
       ;;
       1.0|1.1|1.2)
 
-$as_echo "#define OSF1_HACKS 1" >>confdefs.h
+$as_echo "#define OSF1_HACKS 1" >>build/confdefs.h
       ;;
       1.*)
 
-$as_echo "#define OSF1_HACKS 1" >>confdefs.h
+$as_echo "#define OSF1_HACKS 1" >>build/confdefs.h
       ;;
       *)
       ;;
     esac
 
-$as_echo "#define STOP_UAC 1" >>confdefs.h
+$as_echo "#define STOP_UAC 1" >>build/confdefs.h
 
-$as_echo "#define BROKEN_SNPRINTF 1" >>confdefs.h
+$as_echo "#define BROKEN_SNPRINTF 1" >>build/confdefs.h
   ;;
   SunOS)
     SUNOS="yes"
@@ -4342,7 +4342,7 @@ $as_echo_n "checking if system is Mach based... " >&6; }
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 
-$as_echo "#define BORGCUBES 1" >>confdefs.h
+$as_echo "#define BORGCUBES 1" >>build/confdefs.h
     else
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
@@ -4398,7 +4398,7 @@ else
        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $enableval" >&5
 $as_echo "$enableval" >&6; }
 
-$as_echo "#define USE_IPV6 1" >>confdefs.h
+$as_echo "#define USE_IPV6 1" >>build/confdefs.h
 
 
 
@@ -4416,8 +4416,8 @@ else
   if test "$cross_compiling" = yes; then :
   egg_cv_socklen_t=no
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 
 #include <unistd.h>
 #include <sys/types.h>
@@ -4446,7 +4446,7 @@ fi
 
 if test "$egg_cv_socklen_t" = "yes"; then
 
-$as_echo "#define HAVE_SOCKLEN_T 1" >>confdefs.h
+$as_echo "#define HAVE_SOCKLEN_T 1" >>build/confdefs.h
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
@@ -4472,7 +4472,7 @@ $as_echo_n "checking for random limit... " >&6; }
 $as_echo "$RMAX" >&6; }
 
 
-cat >>confdefs.h <<_ACEOF
+cat >>build/confdefs.h <<_ACEOF
 #define RANDOM_MAX $RMAX
 _ACEOF
 
@@ -4489,8 +4489,8 @@ $as_echo_n "checking whether the compiler understands -static... " >&6; }
 if ${egg_cv_var_ccstatic+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-        cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+        cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 
 int
 main ()
@@ -4538,7 +4538,7 @@ cat >confcache <<\_ACEOF
 # It is not useful on other systems.  If it contains results you don't
 # want to keep, you may remove or edit it.
 #
-# config.status only pays attention to the cache file if you give it
+# build/config.status only pays attention to the cache file if you give it
 # the --recheck option to rerun configure.
 #
 # `ac_cv_env_foo' variables (set or unset) will be overridden when
@@ -4626,8 +4626,8 @@ if ${ac_cv_lib_socket_socket+:} false; then :
 else
   ac_check_lib_save_LIBS=$LIBS
 LIBS="-lsocket  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 
 /* Override any GCC internal prototype to avoid an error.
    Use char because int might match the return type of a GCC
@@ -4656,7 +4656,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_socket_socket" >&5
 $as_echo "$ac_cv_lib_socket_socket" >&6; }
 if test "x$ac_cv_lib_socket_socket" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
+  cat >>build/confdefs.h <<_ACEOF
 #define HAVE_LIBSOCKET 1
 _ACEOF
 
@@ -4672,8 +4672,8 @@ if ${ac_cv_lib_dl_dlopen+:} false; then :
 else
   ac_check_lib_save_LIBS=$LIBS
 LIBS="-ldl  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 
 /* Override any GCC internal prototype to avoid an error.
    Use char because int might match the return type of a GCC
@@ -4702,7 +4702,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_dl_dlopen" >&5
 $as_echo "$ac_cv_lib_dl_dlopen" >&6; }
 if test "x$ac_cv_lib_dl_dlopen" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
+  cat >>build/confdefs.h <<_ACEOF
 #define HAVE_LIBDL 1
 _ACEOF
 
@@ -4737,8 +4737,8 @@ if ${ac_cv_lib_dl_main+:} false; then :
 else
   ac_check_lib_save_LIBS=$LIBS
 LIBS="-ldl  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 
 
 int
@@ -4761,7 +4761,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_dl_main" >&5
 $as_echo "$ac_cv_lib_dl_main" >&6; }
 if test "x$ac_cv_lib_dl_main" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
+  cat >>build/confdefs.h <<_ACEOF
 #define HAVE_LIBDL 1
 _ACEOF
 
@@ -4776,8 +4776,8 @@ if ${ac_cv_lib_socket_main+:} false; then :
 else
   ac_check_lib_save_LIBS=$LIBS
 LIBS="-lsocket  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 
 
 int
@@ -4800,7 +4800,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_socket_main" >&5
 $as_echo "$ac_cv_lib_socket_main" >&6; }
 if test "x$ac_cv_lib_socket_main" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
+  cat >>build/confdefs.h <<_ACEOF
 #define HAVE_LIBSOCKET 1
 _ACEOF
 
@@ -4815,8 +4815,8 @@ if ${ac_cv_lib_nsl_main+:} false; then :
 else
   ac_check_lib_save_LIBS=$LIBS
 LIBS="-lnsl  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 
 
 int
@@ -4839,7 +4839,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_nsl_main" >&5
 $as_echo "$ac_cv_lib_nsl_main" >&6; }
 if test "x$ac_cv_lib_nsl_main" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
+  cat >>build/confdefs.h <<_ACEOF
 #define HAVE_LIBNSL 1
 _ACEOF
 
@@ -4860,8 +4860,8 @@ $as_echo_n "checking for $ac_hdr that defines DIR... " >&6; }
 if eval \${$as_ac_Header+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #include <sys/types.h>
 #include <$ac_hdr>
 
@@ -4885,7 +4885,7 @@ eval ac_res=\$$as_ac_Header
 	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 $as_echo "$ac_res" >&6; }
 if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
+  cat >>build/confdefs.h <<_ACEOF
 #define `$as_echo "HAVE_$ac_hdr" | $as_tr_cpp` 1
 _ACEOF
 
@@ -4901,8 +4901,8 @@ if ${ac_cv_search_opendir+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 
 /* Override any GCC internal prototype to avoid an error.
    Use char because int might match the return type of a GCC
@@ -4958,8 +4958,8 @@ if ${ac_cv_search_opendir+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 
 /* Override any GCC internal prototype to avoid an error.
    Use char because int might match the return type of a GCC
@@ -5015,8 +5015,8 @@ $as_echo_n "checking for sys/wait.h that is POSIX.1 compatible... " >&6; }
 if ${ac_cv_header_sys_wait_h+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #include <sys/types.h>
 #include <sys/wait.h>
 #ifndef WEXITSTATUS
@@ -5047,7 +5047,7 @@ fi
 $as_echo "$ac_cv_header_sys_wait_h" >&6; }
 if test $ac_cv_header_sys_wait_h = yes; then
 
-$as_echo "#define HAVE_SYS_WAIT_H 1" >>confdefs.h
+$as_echo "#define HAVE_SYS_WAIT_H 1" >>build/confdefs.h
 
 fi
 
@@ -5056,8 +5056,8 @@ $as_echo_n "checking whether time.h and sys/time.h may both be included... " >&6
 if ${ac_cv_header_time+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #include <sys/types.h>
 #include <sys/time.h>
 #include <time.h>
@@ -5082,7 +5082,7 @@ fi
 $as_echo "$ac_cv_header_time" >&6; }
 if test $ac_cv_header_time = yes; then
 
-$as_echo "#define TIME_WITH_SYS_TIME 1" >>confdefs.h
+$as_echo "#define TIME_WITH_SYS_TIME 1" >>build/confdefs.h
 
 fi
 
@@ -5091,8 +5091,8 @@ $as_echo_n "checking whether stat file-mode macros are broken... " >&6; }
 if ${ac_cv_header_stat_broken+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -5124,7 +5124,7 @@ fi
 $as_echo "$ac_cv_header_stat_broken" >&6; }
 if test $ac_cv_header_stat_broken = yes; then
 
-$as_echo "#define STAT_MACROS_BROKEN 1" >>confdefs.h
+$as_echo "#define STAT_MACROS_BROKEN 1" >>build/confdefs.h
 
 fi
 
@@ -5136,7 +5136,7 @@ cat >confcache <<\_ACEOF
 # It is not useful on other systems.  If it contains results you don't
 # want to keep, you may remove or edit it.
 #
-# config.status only pays attention to the cache file if you give it
+# build/config.status only pays attention to the cache file if you give it
 # the --recheck option to rerun configure.
 #
 # `ac_cv_env_foo' variables (set or unset) will be overridden when
@@ -5219,7 +5219,7 @@ do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_cxx_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
 if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
+  cat >>build/confdefs.h <<_ACEOF
 #define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
 _ACEOF
 
@@ -5232,7 +5232,7 @@ do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_cxx_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
 if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
+  cat >>build/confdefs.h <<_ACEOF
 #define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
 _ACEOF
 
@@ -5249,7 +5249,7 @@ cat >confcache <<\_ACEOF
 # It is not useful on other systems.  If it contains results you don't
 # want to keep, you may remove or edit it.
 #
-# config.status only pays attention to the cache file if you give it
+# build/config.status only pays attention to the cache file if you give it
 # the --recheck option to rerun configure.
 #
 # `ac_cv_env_foo' variables (set or unset) will be overridden when
@@ -5387,8 +5387,8 @@ LIBS="$LIBS $SSL_LIBS"
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for OpenSSL version" >&5
 $as_echo_n "checking for OpenSSL version... " >&6; }
 
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #include <openssl/opensslv.h>
 int
 main ()
@@ -5425,8 +5425,8 @@ if ${ac_cv_lib_crypto_AES_encrypt+:} false; then :
 else
   ac_check_lib_save_LIBS=$LIBS
 LIBS="-lcrypto  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 
 /* Override any GCC internal prototype to avoid an error.
    Use char because int might match the return type of a GCC
@@ -5478,7 +5478,7 @@ LIBS="$save_LIBS"
 
 
 
-cat >>confdefs.h <<_ACEOF
+cat >>build/confdefs.h <<_ACEOF
 #define EGG_SSL_EXT 1
 _ACEOF
 
@@ -5552,7 +5552,7 @@ else
        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $enableval" >&5
 $as_echo "$enableval" >&6; }
 
-$as_echo "#define USE_SCRIPT_TCL 1" >>confdefs.h
+$as_echo "#define USE_SCRIPT_TCL 1" >>build/confdefs.h
 
 
 
@@ -5930,7 +5930,7 @@ configure: error:
 EOF
     else
 
-$as_echo "#define HAVE_LIBTCL 1" >>confdefs.h
+$as_echo "#define HAVE_LIBTCL 1" >>build/confdefs.h
 
     fi
   fi
@@ -5979,8 +5979,8 @@ if eval \${$as_ac_Lib+:} false; then :
 else
   ac_check_lib_save_LIBS=$LIBS
 LIBS="-l$TCL_TEST_LIB $TCL_TEST_OTHERLIBS $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 
 /* Override any GCC internal prototype to avoid an error.
    Use char because int might match the return type of a GCC
@@ -6018,7 +6018,7 @@ fi
 
     if test "$egg_cv_var_tcl_free" = yes; then
 
-$as_echo "#define HAVE_TCL_FREE 1" >>confdefs.h
+$as_echo "#define HAVE_TCL_FREE 1" >>build/confdefs.h
 
     fi
   fi
@@ -6040,8 +6040,8 @@ if eval \${$as_ac_Lib+:} false; then :
 else
   ac_check_lib_save_LIBS=$LIBS
 LIBS="-l$TCL_TEST_LIB $TCL_TEST_OTHERLIBS $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 
 /* Override any GCC internal prototype to avoid an error.
    Use char because int might match the return type of a GCC
@@ -6078,7 +6078,7 @@ fi
 
     if test "$egg_cv_var_tcl_setnotifier" = yes; then
 
-$as_echo "#define HAVE_TCL_SETNOTIFIER 1" >>confdefs.h
+$as_echo "#define HAVE_TCL_SETNOTIFIER 1" >>build/confdefs.h
 
     fi
   fi
@@ -6144,7 +6144,7 @@ cat >confcache <<\_ACEOF
 # It is not useful on other systems.  If it contains results you don't
 # want to keep, you may remove or edit it.
 #
-# config.status only pays attention to the cache file if you give it
+# build/config.status only pays attention to the cache file if you give it
 # the --recheck option to rerun configure.
 #
 # `ac_cv_env_foo' variables (set or unset) will be overridden when
@@ -6231,7 +6231,7 @@ if test "x$ac_cv_type_pid_t" = xyes; then :
 
 else
 
-cat >>confdefs.h <<_ACEOF
+cat >>build/confdefs.h <<_ACEOF
 #define pid_t int
 _ACEOF
 
@@ -6242,7 +6242,7 @@ if test "x$ac_cv_type_size_t" = xyes; then :
 
 else
 
-cat >>confdefs.h <<_ACEOF
+cat >>build/confdefs.h <<_ACEOF
 #define size_t unsigned int
 _ACEOF
 
@@ -6253,8 +6253,8 @@ $as_echo_n "checking for uid_t in sys/types.h... " >&6; }
 if ${ac_cv_type_uid_t+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #include <sys/types.h>
 
 _ACEOF
@@ -6271,10 +6271,10 @@ fi
 $as_echo "$ac_cv_type_uid_t" >&6; }
 if test $ac_cv_type_uid_t = no; then
 
-$as_echo "#define uid_t int" >>confdefs.h
+$as_echo "#define uid_t int" >>build/confdefs.h
 
 
-$as_echo "#define gid_t int" >>confdefs.h
+$as_echo "#define gid_t int" >>build/confdefs.h
 
 fi
 
@@ -6286,8 +6286,8 @@ $as_echo_n "checking for working volatile... " >&6; }
 if ${ac_cv_c_volatile+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 
 int
 main ()
@@ -6311,7 +6311,7 @@ fi
 $as_echo "$ac_cv_c_volatile" >&6; }
 if test $ac_cv_c_volatile = no; then
 
-$as_echo "#define volatile /**/" >>confdefs.h
+$as_echo "#define volatile /**/" >>build/confdefs.h
 
 fi
 
@@ -6322,8 +6322,8 @@ if ${ac_cv_c_bigendian+:} false; then :
 else
   ac_cv_c_bigendian=unknown
     # See if we're dealing with a universal compiler.
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+    cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #ifndef __APPLE_CC__
 	       not a universal capable compiler
 	     #endif
@@ -6357,8 +6357,8 @@ fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     if test $ac_cv_c_bigendian = unknown; then
       # See if sys/param.h defines the BYTE_ORDER macro.
-      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+      cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #include <sys/types.h>
 	     #include <sys/param.h>
 
@@ -6377,8 +6377,8 @@ main ()
 _ACEOF
 if ac_fn_cxx_try_compile "$LINENO"; then :
   # It does; now see whether it defined to BIG_ENDIAN or not.
-	 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+	 cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #include <sys/types.h>
 		#include <sys/param.h>
 
@@ -6404,8 +6404,8 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     fi
     if test $ac_cv_c_bigendian = unknown; then
       # See if <limits.h> defines _LITTLE_ENDIAN or _BIG_ENDIAN (e.g., Solaris).
-      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+      cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #include <limits.h>
 
 int
@@ -6421,8 +6421,8 @@ main ()
 _ACEOF
 if ac_fn_cxx_try_compile "$LINENO"; then :
   # It does; now see whether it defined to _BIG_ENDIAN or not.
-	 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+	 cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #include <limits.h>
 
 int
@@ -6449,8 +6449,8 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
       # Compile a test program.
       if test "$cross_compiling" = yes; then :
   # Try to guess by grepping values from an object file.
-	 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+	 cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 short int ascii_mm[] =
 		  { 0x4249, 0x4765, 0x6E44, 0x6961, 0x6E53, 0x7953, 0 };
 		short int ascii_ii[] =
@@ -6490,8 +6490,8 @@ if ac_fn_cxx_try_compile "$LINENO"; then :
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 $ac_includes_default
 int
 main ()
@@ -6526,15 +6526,15 @@ $as_echo "$ac_cv_c_bigendian" >&6; }
  case $ac_cv_c_bigendian in #(
    yes)
 
-$as_echo "#define B_ENDIAN 1" >>confdefs.h
+$as_echo "#define B_ENDIAN 1" >>build/confdefs.h
 ;; #(
    no)
 
-$as_echo "#define L_ENDIAN 1" >>confdefs.h
+$as_echo "#define L_ENDIAN 1" >>build/confdefs.h
  ;; #(
    universal)
 
-$as_echo "#define AC_APPLE_UNIVERSAL_BUILD 1" >>confdefs.h
+$as_echo "#define AC_APPLE_UNIVERSAL_BUILD 1" >>build/confdefs.h
 
      ;; #(
    *)
@@ -6548,8 +6548,8 @@ $as_echo_n "checking whether char is unsigned... " >&6; }
 if ${ac_cv_c_char_unsigned+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 $ac_includes_default
 int
 main ()
@@ -6571,7 +6571,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_c_char_unsigned" >&5
 $as_echo "$ac_cv_c_char_unsigned" >&6; }
 if test $ac_cv_c_char_unsigned = yes && test "$GCC" != yes; then
-  $as_echo "#define __CHAR_UNSIGNED__ 1" >>confdefs.h
+  $as_echo "#define __CHAR_UNSIGNED__ 1" >>build/confdefs.h
 
 fi
 
@@ -6586,7 +6586,7 @@ cat >confcache <<\_ACEOF
 # It is not useful on other systems.  If it contains results you don't
 # want to keep, you may remove or edit it.
 #
-# config.status only pays attention to the cache file if you give it
+# build/config.status only pays attention to the cache file if you give it
 # the --recheck option to rerun configure.
 #
 # `ac_cv_env_foo' variables (set or unset) will be overridden when
@@ -6671,7 +6671,7 @@ if test "x$ac_cv_type_pid_t" = xyes; then :
 
 else
 
-cat >>confdefs.h <<_ACEOF
+cat >>build/confdefs.h <<_ACEOF
 #define pid_t int
 _ACEOF
 
@@ -6682,7 +6682,7 @@ if test "x$ac_cv_type_size_t" = xyes; then :
 
 else
 
-cat >>confdefs.h <<_ACEOF
+cat >>build/confdefs.h <<_ACEOF
 #define size_t unsigned int
 _ACEOF
 
@@ -6693,8 +6693,8 @@ $as_echo_n "checking for uid_t in sys/types.h... " >&6; }
 if ${ac_cv_type_uid_t+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #include <sys/types.h>
 
 _ACEOF
@@ -6711,10 +6711,10 @@ fi
 $as_echo "$ac_cv_type_uid_t" >&6; }
 if test $ac_cv_type_uid_t = no; then
 
-$as_echo "#define uid_t int" >>confdefs.h
+$as_echo "#define uid_t int" >>build/confdefs.h
 
 
-$as_echo "#define gid_t int" >>confdefs.h
+$as_echo "#define gid_t int" >>build/confdefs.h
 
 fi
 
@@ -6724,8 +6724,8 @@ $as_echo_n "checking for long long int... " >&6; }
 if ${ac_cv_type_long_long_int+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 
   /* For now, do not test the preprocessor; as of 2007 there are too many
          implementations with broken preprocessors.  Perhaps this can
@@ -6760,8 +6760,8 @@ if ac_fn_cxx_try_link "$LINENO"; then :
                           if test "$cross_compiling" = yes; then :
   ac_cv_type_long_long_int=yes
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #include <limits.h>
                #ifndef LLONG_MAX
                # define HALF \
@@ -6805,7 +6805,7 @@ fi
 $as_echo "$ac_cv_type_long_long_int" >&6; }
   if test $ac_cv_type_long_long_int = yes; then
 
-$as_echo "#define HAVE_LONG_LONG_INT 1" >>confdefs.h
+$as_echo "#define HAVE_LONG_LONG_INT 1" >>build/confdefs.h
 
   fi
 
@@ -6814,7 +6814,7 @@ case $ac_cv_c_int8_t in #(
   no|yes) ;; #(
   *)
 
-cat >>confdefs.h <<_ACEOF
+cat >>build/confdefs.h <<_ACEOF
 #define int8_t $ac_cv_c_int8_t
 _ACEOF
 ;;
@@ -6825,10 +6825,10 @@ case $ac_cv_c_uint8_t in #(
   no|yes) ;; #(
   *)
 
-$as_echo "#define _UINT8_T 1" >>confdefs.h
+$as_echo "#define _UINT8_T 1" >>build/confdefs.h
 
 
-cat >>confdefs.h <<_ACEOF
+cat >>build/confdefs.h <<_ACEOF
 #define uint8_t $ac_cv_c_uint8_t
 _ACEOF
 ;;
@@ -6839,7 +6839,7 @@ case $ac_cv_c_int16_t in #(
   no|yes) ;; #(
   *)
 
-cat >>confdefs.h <<_ACEOF
+cat >>build/confdefs.h <<_ACEOF
 #define int16_t $ac_cv_c_int16_t
 _ACEOF
 ;;
@@ -6851,7 +6851,7 @@ case $ac_cv_c_uint16_t in #(
   *)
 
 
-cat >>confdefs.h <<_ACEOF
+cat >>build/confdefs.h <<_ACEOF
 #define uint16_t $ac_cv_c_uint16_t
 _ACEOF
 ;;
@@ -6862,7 +6862,7 @@ case $ac_cv_c_int32_t in #(
   no|yes) ;; #(
   *)
 
-cat >>confdefs.h <<_ACEOF
+cat >>build/confdefs.h <<_ACEOF
 #define int32_t $ac_cv_c_int32_t
 _ACEOF
 ;;
@@ -6873,10 +6873,10 @@ case $ac_cv_c_uint32_t in #(
   no|yes) ;; #(
   *)
 
-$as_echo "#define _UINT32_T 1" >>confdefs.h
+$as_echo "#define _UINT32_T 1" >>build/confdefs.h
 
 
-cat >>confdefs.h <<_ACEOF
+cat >>build/confdefs.h <<_ACEOF
 #define uint32_t $ac_cv_c_uint32_t
 _ACEOF
 ;;
@@ -6887,7 +6887,7 @@ case $ac_cv_c_int64_t in #(
   no|yes) ;; #(
   *)
 
-cat >>confdefs.h <<_ACEOF
+cat >>build/confdefs.h <<_ACEOF
 #define int64_t $ac_cv_c_int64_t
 _ACEOF
 ;;
@@ -6898,10 +6898,10 @@ case $ac_cv_c_uint64_t in #(
   no|yes) ;; #(
   *)
 
-$as_echo "#define _UINT64_T 1" >>confdefs.h
+$as_echo "#define _UINT64_T 1" >>build/confdefs.h
 
 
-cat >>confdefs.h <<_ACEOF
+cat >>build/confdefs.h <<_ACEOF
 #define uint64_t $ac_cv_c_uint64_t
 _ACEOF
 ;;
@@ -6914,8 +6914,8 @@ $as_echo_n "checking whether struct tm is in sys/time.h or time.h... " >&6; }
 if ${ac_cv_struct_tm+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #include <sys/types.h>
 #include <time.h>
 
@@ -6940,7 +6940,7 @@ fi
 $as_echo "$ac_cv_struct_tm" >&6; }
 if test $ac_cv_struct_tm = sys/time.h; then
 
-$as_echo "#define TM_IN_SYS_TIME 1" >>confdefs.h
+$as_echo "#define TM_IN_SYS_TIME 1" >>build/confdefs.h
 
 fi
 
@@ -6950,7 +6950,7 @@ ac_fn_cxx_check_member "$LINENO" "struct tm" "tm_zone" "ac_cv_member_struct_tm_t
 "
 if test "x$ac_cv_member_struct_tm_tm_zone" = xyes; then :
 
-cat >>confdefs.h <<_ACEOF
+cat >>build/confdefs.h <<_ACEOF
 #define HAVE_STRUCT_TM_TM_ZONE 1
 _ACEOF
 
@@ -6959,7 +6959,7 @@ fi
 
 if test "$ac_cv_member_struct_tm_tm_zone" = yes; then
 
-$as_echo "#define HAVE_TM_ZONE 1" >>confdefs.h
+$as_echo "#define HAVE_TM_ZONE 1" >>build/confdefs.h
 
 else
   ac_fn_cxx_check_decl "$LINENO" "tzname" "ac_cv_have_decl_tzname" "#include <time.h>
@@ -6970,7 +6970,7 @@ else
   ac_have_decl=0
 fi
 
-cat >>confdefs.h <<_ACEOF
+cat >>build/confdefs.h <<_ACEOF
 #define HAVE_DECL_TZNAME $ac_have_decl
 _ACEOF
 
@@ -6979,8 +6979,8 @@ $as_echo_n "checking for tzname... " >&6; }
 if ${ac_cv_var_tzname+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #include <time.h>
 #if !HAVE_DECL_TZNAME
 extern char *tzname[];
@@ -7006,7 +7006,7 @@ fi
 $as_echo "$ac_cv_var_tzname" >&6; }
   if test $ac_cv_var_tzname = yes; then
 
-$as_echo "#define HAVE_TZNAME 1" >>confdefs.h
+$as_echo "#define HAVE_TZNAME 1" >>build/confdefs.h
 
   fi
 fi
@@ -7016,8 +7016,8 @@ $as_echo_n "checking whether struct tm is in sys/time.h or time.h... " >&6; }
 if ${ac_cv_struct_tm+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #include <sys/types.h>
 #include <time.h>
 
@@ -7042,7 +7042,7 @@ fi
 $as_echo "$ac_cv_struct_tm" >&6; }
 if test $ac_cv_struct_tm = sys/time.h; then
 
-$as_echo "#define TM_IN_SYS_TIME 1" >>confdefs.h
+$as_echo "#define TM_IN_SYS_TIME 1" >>build/confdefs.h
 
 fi
 
@@ -7052,7 +7052,7 @@ for ac_header in vfork.h
 do :
   ac_fn_cxx_check_header_mongrel "$LINENO" "vfork.h" "ac_cv_header_vfork_h" "$ac_includes_default"
 if test "x$ac_cv_header_vfork_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
+  cat >>build/confdefs.h <<_ACEOF
 #define HAVE_VFORK_H 1
 _ACEOF
 
@@ -7065,7 +7065,7 @@ do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_cxx_check_func "$LINENO" "$ac_func" "$as_ac_var"
 if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
+  cat >>build/confdefs.h <<_ACEOF
 #define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
 
@@ -7081,8 +7081,8 @@ else
   if test "$cross_compiling" = yes; then :
   ac_cv_func_fork_works=cross
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 $ac_includes_default
 int
 main ()
@@ -7134,8 +7134,8 @@ else
   if test "$cross_compiling" = yes; then :
   ac_cv_func_vfork_works=cross
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 /* Thanks to Paul Eggert for this test.  */
 $ac_includes_default
 #include <sys/wait.h>
@@ -7248,16 +7248,16 @@ fi
 
 if test "x$ac_cv_func_vfork_works" = xyes; then
 
-$as_echo "#define HAVE_WORKING_VFORK 1" >>confdefs.h
+$as_echo "#define HAVE_WORKING_VFORK 1" >>build/confdefs.h
 
 else
 
-$as_echo "#define vfork fork" >>confdefs.h
+$as_echo "#define vfork fork" >>build/confdefs.h
 
 fi
 if test "x$ac_cv_func_fork_works" = xyes; then
 
-$as_echo "#define HAVE_WORKING_FORK 1" >>confdefs.h
+$as_echo "#define HAVE_WORKING_FORK 1" >>build/confdefs.h
 
 fi
 
@@ -7272,8 +7272,8 @@ if test "$as_ln_s" = "ln -s" && ln -s conftest.file conftest.sym; then
   if test "$cross_compiling" = yes; then :
   ac_cv_func_lstat_dereferences_slashed_symlink=no
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 $ac_includes_default
 int
 main ()
@@ -7309,7 +7309,7 @@ $as_echo "$ac_cv_func_lstat_dereferences_slashed_symlink" >&6; }
 
 test $ac_cv_func_lstat_dereferences_slashed_symlink = yes &&
 
-cat >>confdefs.h <<_ACEOF
+cat >>build/confdefs.h <<_ACEOF
 #define LSTAT_FOLLOWS_SLASHED_SYMLINK 1
 _ACEOF
 
@@ -7331,8 +7331,8 @@ else
   if test "$cross_compiling" = yes; then :
   ac_cv_func_lstat_empty_string_bug=yes
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 $ac_includes_default
 int
 main ()
@@ -7363,7 +7363,7 @@ if test $ac_cv_func_lstat_empty_string_bug = yes; then
 esac
 
 
-cat >>confdefs.h <<_ACEOF
+cat >>build/confdefs.h <<_ACEOF
 #define HAVE_LSTAT_EMPTY_STRING_BUG 1
 _ACEOF
 
@@ -7380,8 +7380,8 @@ if test "$as_ln_s" = "ln -s" && ln -s conftest.file conftest.sym; then
   if test "$cross_compiling" = yes; then :
   ac_cv_func_lstat_dereferences_slashed_symlink=no
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 $ac_includes_default
 int
 main ()
@@ -7417,7 +7417,7 @@ $as_echo "$ac_cv_func_lstat_dereferences_slashed_symlink" >&6; }
 
 test $ac_cv_func_lstat_dereferences_slashed_symlink = yes &&
 
-cat >>confdefs.h <<_ACEOF
+cat >>build/confdefs.h <<_ACEOF
 #define LSTAT_FOLLOWS_SLASHED_SYMLINK 1
 _ACEOF
 
@@ -7435,7 +7435,7 @@ for ac_header in stdlib.h
 do :
   ac_fn_cxx_check_header_mongrel "$LINENO" "stdlib.h" "ac_cv_header_stdlib_h" "$ac_includes_default"
 if test "x$ac_cv_header_stdlib_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
+  cat >>build/confdefs.h <<_ACEOF
 #define HAVE_STDLIB_H 1
 _ACEOF
 
@@ -7451,8 +7451,8 @@ else
   if test "$cross_compiling" = yes; then :
   ac_cv_func_malloc_0_nonnull=no
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #if defined STDC_HEADERS || defined HAVE_STDLIB_H
 # include <stdlib.h>
 #else
@@ -7481,10 +7481,10 @@ fi
 $as_echo "$ac_cv_func_malloc_0_nonnull" >&6; }
 if test $ac_cv_func_malloc_0_nonnull = yes; then :
 
-$as_echo "#define HAVE_MALLOC 1" >>confdefs.h
+$as_echo "#define HAVE_MALLOC 1" >>build/confdefs.h
 
 else
-  $as_echo "#define HAVE_MALLOC 0" >>confdefs.h
+  $as_echo "#define HAVE_MALLOC 0" >>build/confdefs.h
 
    case " $LIBOBJS " in
   *" malloc.$ac_objext "* ) ;;
@@ -7493,7 +7493,7 @@ else
 esac
 
 
-$as_echo "#define malloc rpl_malloc" >>confdefs.h
+$as_echo "#define malloc rpl_malloc" >>build/confdefs.h
 
 fi
 
@@ -7507,7 +7507,7 @@ do :
 ac_fn_cxx_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default
 "
 if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
+  cat >>build/confdefs.h <<_ACEOF
 #define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
 _ACEOF
 
@@ -7527,7 +7527,7 @@ do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_cxx_check_func "$LINENO" "$ac_func" "$as_ac_var"
 if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
+  cat >>build/confdefs.h <<_ACEOF
 #define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
 
@@ -7546,8 +7546,8 @@ else
   if test "$cross_compiling" = yes; then :
   ac_cv_func_working_mktime=no
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 /* Test program from Paul Eggert and Tony Leneis.  */
 #ifdef TIME_WITH_SYS_TIME
 # include <sys/time.h>
@@ -7770,7 +7770,7 @@ for ac_func in getpagesize
 do :
   ac_fn_cxx_check_func "$LINENO" "getpagesize" "ac_cv_func_getpagesize"
 if test "x$ac_cv_func_getpagesize" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
+  cat >>build/confdefs.h <<_ACEOF
 #define HAVE_GETPAGESIZE 1
 _ACEOF
 
@@ -7785,8 +7785,8 @@ else
   if test "$cross_compiling" = yes; then :
   ac_cv_func_mmap_fixed_mapped=no
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 $ac_includes_default
 /* malloc might have been renamed as rpl_malloc. */
 #undef malloc
@@ -7938,7 +7938,7 @@ fi
 $as_echo "$ac_cv_func_mmap_fixed_mapped" >&6; }
 if test $ac_cv_func_mmap_fixed_mapped = yes; then
 
-$as_echo "#define HAVE_MMAP 1" >>confdefs.h
+$as_echo "#define HAVE_MMAP 1" >>build/confdefs.h
 
 fi
 rm -f conftest.mmap conftest.txt
@@ -7947,7 +7947,7 @@ for ac_header in stdlib.h
 do :
   ac_fn_cxx_check_header_mongrel "$LINENO" "stdlib.h" "ac_cv_header_stdlib_h" "$ac_includes_default"
 if test "x$ac_cv_header_stdlib_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
+  cat >>build/confdefs.h <<_ACEOF
 #define HAVE_STDLIB_H 1
 _ACEOF
 
@@ -7963,8 +7963,8 @@ else
   if test "$cross_compiling" = yes; then :
   ac_cv_func_realloc_0_nonnull=no
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #if defined STDC_HEADERS || defined HAVE_STDLIB_H
 # include <stdlib.h>
 #else
@@ -7993,10 +7993,10 @@ fi
 $as_echo "$ac_cv_func_realloc_0_nonnull" >&6; }
 if test $ac_cv_func_realloc_0_nonnull = yes; then :
 
-$as_echo "#define HAVE_REALLOC 1" >>confdefs.h
+$as_echo "#define HAVE_REALLOC 1" >>build/confdefs.h
 
 else
-  $as_echo "#define HAVE_REALLOC 0" >>confdefs.h
+  $as_echo "#define HAVE_REALLOC 0" >>build/confdefs.h
 
    case " $LIBOBJS " in
   *" realloc.$ac_objext "* ) ;;
@@ -8005,7 +8005,7 @@ else
 esac
 
 
-$as_echo "#define realloc rpl_realloc" >>confdefs.h
+$as_echo "#define realloc rpl_realloc" >>build/confdefs.h
 
 fi
 
@@ -8018,8 +8018,8 @@ else
   if test "$cross_compiling" = yes; then :
   ac_cv_func_stat_empty_string_bug=yes
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 $ac_includes_default
 int
 main ()
@@ -8050,7 +8050,7 @@ if test $ac_cv_func_stat_empty_string_bug = yes; then
 esac
 
 
-cat >>confdefs.h <<_ACEOF
+cat >>build/confdefs.h <<_ACEOF
 #define HAVE_STAT_EMPTY_STRING_BUG 1
 _ACEOF
 
@@ -8062,7 +8062,7 @@ ac_fn_cxx_check_type "$LINENO" "struct timespec" "ac_cv_type_struct_timespec" "#
 #include <time.h>
 "
 if test "x$ac_cv_type_struct_timespec" = xyes; then :
-  $as_echo "#define HAVE_TIMESPEC 1" >>confdefs.h
+  $as_echo "#define HAVE_TIMESPEC 1" >>build/confdefs.h
 
 fi
 
@@ -8070,12 +8070,12 @@ fi
 if test X"$ac_cv_type_struct_timespec" != X"no"; then
  ac_fn_cxx_check_member "$LINENO" "struct stat" "st_mtim" "ac_cv_member_struct_stat_st_mtim" "$ac_includes_default"
 if test "x$ac_cv_member_struct_stat_st_mtim" = xyes; then :
-  $as_echo "#define HAVE_ST_MTIM 1" >>confdefs.h
+  $as_echo "#define HAVE_ST_MTIM 1" >>build/confdefs.h
 
 else
   ac_fn_cxx_check_member "$LINENO" "struct stat" "st_mtimespec" "ac_cv_member_struct_stat_st_mtimespec" "$ac_includes_default"
 if test "x$ac_cv_member_struct_stat_st_mtimespec" = xyes; then :
-  $as_echo "#define HAVE_ST_MTIMESPEC 1" >>confdefs.h
+  $as_echo "#define HAVE_ST_MTIMESPEC 1" >>build/confdefs.h
 
 fi
 
@@ -8083,8 +8083,8 @@ fi
 
  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for two-parameter timespecsub" >&5
 $as_echo_n "checking for two-parameter timespecsub... " >&6; }
- cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+ cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 #include <sys/types.h>
 #include <sys/time.h>
 int
@@ -8101,7 +8101,7 @@ timespecsub(&ts1, &ts2);
 }
 _ACEOF
 if ac_fn_cxx_try_compile "$LINENO"; then :
-  $as_echo "#define HAVE_TIMESPECSUB2 1" >>confdefs.h
+  $as_echo "#define HAVE_TIMESPECSUB2 1" >>build/confdefs.h
 
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
@@ -8116,7 +8116,7 @@ for ac_func in strftime
 do :
   ac_fn_cxx_check_func "$LINENO" "strftime" "ac_cv_func_strftime"
 if test "x$ac_cv_func_strftime" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
+  cat >>build/confdefs.h <<_ACEOF
 #define HAVE_STRFTIME 1
 _ACEOF
 
@@ -8129,8 +8129,8 @@ if ${ac_cv_lib_intl_strftime+:} false; then :
 else
   ac_check_lib_save_LIBS=$LIBS
 LIBS="-lintl  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
 
 /* Override any GCC internal prototype to avoid an error.
    Use char because int might match the return type of a GCC
@@ -8159,7 +8159,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_intl_strftime" >&5
 $as_echo "$ac_cv_lib_intl_strftime" >&6; }
 if test "x$ac_cv_lib_intl_strftime" = xyes; then :
-  $as_echo "#define HAVE_STRFTIME 1" >>confdefs.h
+  $as_echo "#define HAVE_STRFTIME 1" >>build/confdefs.h
 
 LIBS="-lintl $LIBS"
 fi
@@ -8176,7 +8176,7 @@ cat >confcache <<\_ACEOF
 # It is not useful on other systems.  If it contains results you don't
 # want to keep, you may remove or edit it.
 #
-# config.status only pays attention to the cache file if you give it
+# build/config.status only pays attention to the cache file if you give it
 # the --recheck option to rerun configure.
 #
 # `ac_cv_env_foo' variables (set or unset) will be overridden when
@@ -8259,7 +8259,7 @@ do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_cxx_check_func "$LINENO" "$ac_func" "$as_ac_var"
 if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
+  cat >>build/confdefs.h <<_ACEOF
 #define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
 
@@ -8271,7 +8271,7 @@ do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_cxx_check_func "$LINENO" "$ac_func" "$as_ac_var"
 if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
+  cat >>build/confdefs.h <<_ACEOF
 #define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
 
@@ -8286,7 +8286,7 @@ cat >confcache <<\_ACEOF
 # It is not useful on other systems.  If it contains results you don't
 # want to keep, you may remove or edit it.
 #
-# config.status only pays attention to the cache file if you give it
+# build/config.status only pays attention to the cache file if you give it
 # the --recheck option to rerun configure.
 #
 # `ac_cv_env_foo' variables (set or unset) will be overridden when
@@ -8369,7 +8369,7 @@ do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_cxx_check_func "$LINENO" "$ac_func" "$as_ac_var"
 if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
+  cat >>build/confdefs.h <<_ACEOF
 #define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
 
@@ -8387,7 +8387,7 @@ for ac_func in vsprintf
 do :
   ac_fn_cxx_check_func "$LINENO" "vsprintf" "ac_cv_func_vsprintf"
 if test "x$ac_cv_func_vsprintf" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
+  cat >>build/confdefs.h <<_ACEOF
 #define HAVE_VSPRINTF 1
 _ACEOF
 
@@ -8411,7 +8411,7 @@ for ac_func in uname
 do :
   ac_fn_cxx_check_func "$LINENO" "uname" "ac_cv_func_uname"
 if test "x$ac_cv_func_uname" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
+  cat >>build/confdefs.h <<_ACEOF
 #define HAVE_UNAME 1
 _ACEOF
 
@@ -8454,7 +8454,7 @@ cat >confcache <<\_ACEOF
 # It is not useful on other systems.  If it contains results you don't
 # want to keep, you may remove or edit it.
 #
-# config.status only pays attention to the cache file if you give it
+# build/config.status only pays attention to the cache file if you give it
 # the --recheck option to rerun configure.
 #
 # `ac_cv_env_foo' variables (set or unset) will be overridden when
@@ -8537,7 +8537,7 @@ rm -f confcache
 VERSION=`grep "char" $srcdir/src/main.c | $AWK '/egg_version/ {print $5}' | sed -e 's/\"//g' | sed -e 's/\;//g'`
 version_num=`echo $VERSION | $AWK 'BEGIN {FS = "."} {printf("%d%02d%02d", $1, $2, $3)}'`
 
-cat >>confdefs.h <<_ACEOF
+cat >>build/confdefs.h <<_ACEOF
 #define EGG_VERSION $version_num
 _ACEOF
 
@@ -8607,12 +8607,11 @@ $as_echo X"$mf" |
       fi
     fi
     echo "include .deps/$base.Po" >> "$dirpart/.deps/includes"
-    echo "_$base.c:" >> "$dirpart/.deps/includes"
   done
 done
 
 
-ac_config_files="$ac_config_files Makefile lib/Makefile src/Makefile src/compat/Makefile src/crypto/Makefile src/mod/Makefile src/buildinfo.h"
+ac_config_files="$ac_config_files Makefile lib/Makefile src/Makefile src/compat/Makefile src/crypto/Makefile src/mod/Makefile src/buildinfo.h src/mod/mod.mk"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -8621,7 +8620,7 @@ cat >confcache <<\_ACEOF
 # It is not useful on other systems.  If it contains results you don't
 # want to keep, you may remove or edit it.
 #
-# config.status only pays attention to the cache file if you give it
+# build/config.status only pays attention to the cache file if you give it
 # the --recheck option to rerun configure.
 #
 # `ac_cv_env_foo' variables (set or unset) will be overridden when
@@ -8725,7 +8724,7 @@ LTLIBOBJS=$ac_ltlibobjs
 
 
 
-: "${CONFIG_STATUS=./config.status}"
+: "${CONFIG_STATUS=./build/config.status}"
 ac_write_fail=0
 ac_clean_files_save=$ac_clean_files
 ac_clean_files="$ac_clean_files $CONFIG_STATUS"
@@ -8737,7 +8736,7 @@ cat >$CONFIG_STATUS <<_ASEOF || as_write_fail=1
 # Generated by $as_me.
 # Run this file to recreate the current configuration.
 # Compiler output produced by configure, useful for debugging
-# configure, is in config.log if it exists.
+# configure, is in build/config.log if it exists.
 
 debug=false
 ac_cs_recheck=false
@@ -9157,7 +9156,7 @@ esac
 
 
 cat >>$CONFIG_STATUS <<_ACEOF || ac_write_fail=1
-# Files that config.status was made for.
+# Files that build/config.status was made for.
 config_files="$ac_config_files"
 config_headers="$ac_config_headers"
 
@@ -9195,12 +9194,12 @@ _ACEOF
 cat >>$CONFIG_STATUS <<_ACEOF || ac_write_fail=1
 ac_cs_config="`$as_echo "$ac_configure_args" | sed 's/^ //; s/[\\""\`\$]/\\\\&/g'`"
 ac_cs_version="\\
-config.status
+build/config.status
 configured by $0, generated by GNU Autoconf 2.68,
   with options \\"\$ac_cs_config\\"
 
 Copyright (C) 2010 Free Software Foundation, Inc.
-This config.status script is free software; the Free Software Foundation
+This build/config.status script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it."
 
 ac_pwd='$ac_pwd'
@@ -9298,7 +9297,7 @@ fi
 
 _ACEOF
 cat >>$CONFIG_STATUS <<\_ACEOF || ac_write_fail=1
-exec 5>>config.log
+exec 5>>build/config.log
 {
   echo
   sed 'h;s/./-/g;s/^.../## /;s/...$/ ##/;p;x;p;x' <<_ASBOX
@@ -9317,7 +9316,7 @@ cat >>$CONFIG_STATUS <<\_ACEOF || ac_write_fail=1
 for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
-    "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
+    "src/config.h") CONFIG_HEADERS="$CONFIG_HEADERS src/config.h" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "lib/Makefile") CONFIG_FILES="$CONFIG_FILES lib/Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
@@ -9325,6 +9324,7 @@ do
     "src/crypto/Makefile") CONFIG_FILES="$CONFIG_FILES src/crypto/Makefile" ;;
     "src/mod/Makefile") CONFIG_FILES="$CONFIG_FILES src/mod/Makefile" ;;
     "src/buildinfo.h") CONFIG_FILES="$CONFIG_FILES src/buildinfo.h" ;;
+    "src/mod/mod.mk") CONFIG_FILES="$CONFIG_FILES src/mod/mod.mk" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
@@ -9369,7 +9369,7 @@ ac_tmp=$tmp
 
 # Set up the scripts for CONFIG_FILES section.
 # No need to generate them if there are no CONFIG_FILES.
-# This happens for instance with `./config.status config.h'.
+# This happens for instance with `./build/config.status config.h'.
 if test -n "$CONFIG_FILES"; then
 
 
@@ -9527,21 +9527,21 @@ fi # test -n "$CONFIG_FILES"
 
 # Set up the scripts for CONFIG_HEADERS section.
 # No need to generate them if there are no CONFIG_HEADERS.
-# This happens for instance with `./config.status Makefile'.
+# This happens for instance with `./build/config.status Makefile'.
 if test -n "$CONFIG_HEADERS"; then
 cat >"$ac_tmp/defines.awk" <<\_ACAWK ||
 BEGIN {
 _ACEOF
 
-# Transform confdefs.h into an awk script `defines.awk', embedded as
-# here-document in config.status, that substitutes the proper values into
+# Transform build/confdefs.h into an awk script `defines.awk', embedded as
+# here-document in build/config.status, that substitutes the proper values into
 # config.h.in to produce config.h.
 
-# Create a delimiter string that does not exist in confdefs.h, to ease
+# Create a delimiter string that does not exist in build/confdefs.h, to ease
 # handling of long lines.
 ac_delim='%!_!# '
 for ac_last_try in false false :; do
-  ac_tt=`sed -n "/$ac_delim/p" confdefs.h`
+  ac_tt=`sed -n "/$ac_delim/p" build/confdefs.h`
   if test -z "$ac_tt"; then
     break
   elif $ac_last_try; then
@@ -9591,7 +9591,7 @@ d
 :bsnlc
 s/["\\]/\\&/g; s/^/"/; s/$/\\\\\\n"\\/p
 b cont
-' <confdefs.h | sed '
+' <build/confdefs.h | sed '
 s/'"$ac_delim"'/"\\\
 "/g' >>$CONFIG_STATUS || ac_write_fail=1
 
@@ -9679,7 +9679,7 @@ do
 
     # Let's still pretend it is `configure' which instantiates (i.e., don't
     # use $as_me), people would be surprised to read:
-    #    /* config.h.  Generated by config.status.  */
+    #    /* config.h.  Generated by build/config.status.  */
     configure_input='Generated from '`
 	  $as_echo "$*" | sed 's|^[^:]*/||;s|:[^:]*/|, |g'
 	`' by configure.'
@@ -9881,13 +9881,13 @@ test $ac_write_fail = 0 ||
   as_fn_error $? "write failure creating $CONFIG_STATUS" "$LINENO" 5
 
 
-# configure is writing to config.log, and then calls config.status.
-# config.status does its own redirection, appending to config.log.
-# Unfortunately, on DOS this fails, as config.log is still kept open
-# by configure, so config.status won't be able to write to it; its
+# configure is writing to build/config.log, and then calls build/config.status.
+# build/config.status does its own redirection, appending to build/config.log.
+# Unfortunately, on DOS this fails, as build/config.log is still kept open
+# by configure, so build/config.status won't be able to write to it; its
 # output is simply discarded.  So we exec the FD to /dev/null,
-# effectively closing config.log, so it can be properly (re)opened and
-# appended to by config.status.  When coming back to configure, we
+# effectively closing build/config.log, so it can be properly (re)opened and
+# appended to by build/config.status.  When coming back to configure, we
 # need to make the FD available again.
 if test "$no_create" != yes; then
   ac_cs_success=:
@@ -9896,7 +9896,7 @@ if test "$no_create" != yes; then
     ac_config_status_args="$ac_config_status_args --quiet"
   exec 5>/dev/null
   $SHELL $CONFIG_STATUS $ac_config_status_args || ac_cs_success=false
-  exec 5>>config.log
+  exec 5>>build/config.log
   # Use ||, not &&, to avoid exiting from the if with $? = 1, which
   # would make configure fail if this is the last instruction.
   $ac_cs_success || as_fn_exit 1
