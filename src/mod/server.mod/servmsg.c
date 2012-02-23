@@ -167,6 +167,7 @@ static int check_bind_raw(char *from, char *code, char *msg)
 
         if (FishKeys.contains(nick)) {
           sharedKey = FishKeys[nick]->sharedKey;
+          FishKeys[nick]->timestamp = now;
         } else {
           struct userrec *u = get_user_by_host(from);
           if (u) {
