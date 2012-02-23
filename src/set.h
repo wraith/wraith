@@ -70,7 +70,7 @@ typedef struct rate_b {
 extern char		auth_key[], auth_prefix[2], motd[], alias[], rbl_servers[1024], groups[1024],
 			msgident[], msginvite[], msgop[], msgpass[], msgrelease[],
                         homechan[], altchars[];
-extern bool		dccauth, auth_obscure, manop_warn, auth_chan, oidentd, ident_botnick, irc_autoaway, link_cleartext, use_deaf, use_callerid, fish_auto_keyx;
+extern bool		dccauth, auth_obscure, manop_warn, auth_chan, oidentd, ident_botnick, irc_autoaway, link_cleartext, use_deaf, use_callerid, fish_auto_keyx, fish_paranoid;
 extern int		cloak_script, fight_threshold, fork_interval, in_bots, set_noshare, dcc_autoaway,
 			kill_threshold, lag_threshold, op_bots, hijack, login, promisc, trace,
                         ison_time, msgrate, msgburst;

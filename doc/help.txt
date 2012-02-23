@@ -1686,7 +1686,10 @@ See also: reload, backup
                            known users. Note that this will break msg-ident.
 [B]  $bfish-auto-keyx$b  Whether to automatically do a DH1010 FiSH Key exchange when
                            accepting users. This is only supported if using callerid.
- 
+
+[B]  $bfish-paranoid$b   Whether to automatically re-keyexchange after every message. This
+                           mitigates replay attacks.
+
 [S]  $baltchars$b        Define string of characters to cycle when generating alternative
                           nicks when nick is taken. Ie: _-`[].
 [S]  $bjupenick$b        The bot will attempt to jupe this nick. It will never use a variation
