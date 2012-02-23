@@ -1915,7 +1915,9 @@ static int got718(char *from, char *msg)
         putlog(LOG_WALL, "*", "(CALLERID) !%s! (%s!%s) %s (Accepting user)", u->handle, nick, uhost, msg);
         dprintf(DP_HELP, "ACCEPT %s\n", nick);
         dprintf(DP_HELP, "PRIVMSG %s :You have been accepted. Please send your message again.\n", nick);
-        keyx(nick);
+        if (fish_auto_keyx) {
+          keyx(nick);
+        }
       } else {
         putlog(LOG_WALL, "*", "(CALLERID) !%s! (%s!%s) %s (User is not +o or +v)", u->handle, nick, uhost, msg);
       }

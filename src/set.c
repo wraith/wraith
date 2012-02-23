@@ -74,6 +74,7 @@ int trace;
 bool manop_warn;
 char homechan[51] = "";
 char usermode[15] = "";
+bool fish_auto_keyx = 0;
 
 ////// THIS MUST REMAIN SORTED: !LC_ALL=C sort
 // VAR("bad-process",	&badprocess,		VAR_INT|VAR_DETECTED,				0, 4, "ignore"),
@@ -92,6 +93,7 @@ static variable_t vars[] = {
  VAR("dccauth",		&dccauth,		VAR_INT|VAR_BOOL,				0, 1, "0"),
  VAR("deaf",		&use_deaf,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "1"),
  VAR("fight-threshold",	&fight_threshold,	VAR_INT|VAR_NOLOC,				0, 0, "0"),
+ VAR("fish-auto-keyx",	&fish_auto_keyx,	VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "1"),
  VAR("flood-callerid",	&flood_callerid,	VAR_RATE|VAR_NOLHUB,				0, 0, "6:2"),
  VAR("flood-ctcp",	&flood_ctcp,		VAR_RATE|VAR_NOLHUB,				0, 0, "3:60"),
  VAR("flood-msg",	&flood_msg,		VAR_RATE|VAR_NOLHUB,				0, 0, "5:60"),
