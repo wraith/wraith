@@ -787,7 +787,7 @@ void handle_DH1080_init(const char* nick, const char* uhost, const char* from, s
 
   putlog(LOG_MSGS, "*", "[FiSH] Received DH1080 public key from (%s!%s) - sending mine", nick, uhost);
   notice(nick, "DH1080_FINISH " + myPublicKeyB64, DP_HELP);
-  fish_data_t* fishData = new fish_data_t;
+  fish_data_t* fishData = FishKeys.contains(nick) ? FishKeys[nick] : new fish_data_t;
   fishData->myPublicKeyB64 = myPublicKeyB64;
   fishData->myPrivateKey = myPrivateKey;
   fishData->sharedKey = sharedKey;
