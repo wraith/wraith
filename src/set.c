@@ -75,7 +75,7 @@ bool manop_warn;
 char homechan[51] = "";
 char usermode[15] = "";
 
-////// THIS MUST REMAIN SORTED
+////// THIS MUST REMAIN SORTED: !LC_ALL=C sort
 // VAR("bad-process",	&badprocess,		VAR_INT|VAR_DETECTED,				0, 4, "ignore"),
 // VAR("process-list",	process_list,		VAR_STRING|VAR_LIST,				0, 0, NULL),
 static variable_t vars[] = {
