@@ -762,6 +762,13 @@ static int gotmsg(char *from, char *msg)
         }
         if (doit)
           check_bind_msg(my_code, nick, uhost, my_u, msg);
+
+        if (my_u && FishKeys.contains(nick)) {
+          // FiSH paranoid mode. Invalidate the current key and re-key-exchange with the user.
+          if (fish_paranoid) {
+            keyx(nick);
+          }
+        }
       }
     }
   }
