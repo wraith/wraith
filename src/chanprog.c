@@ -960,7 +960,8 @@ void keyx(const bd::String &target) {
 
   putlog(LOG_MSGS, "*", "[FiSH] Initiating DH1080 key-exchange with %s - sending my public key", target.c_str());
   notice(target, "DH1080_INIT " + myPublicKeyB64, DP_HELP);
-  fish_data_t* fishData = new fish_data_t;
+  fish_data_t* fishData = FishKeys.contains(target) ? FishKeys[target] : new fish_data_t;
+  fishData->sharedKey.clear();
   fishData->myPublicKeyB64 = myPublicKeyB64;
   fishData->myPrivateKey = myPrivateKey;
   fishData->timestamp = now;

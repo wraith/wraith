@@ -17,7 +17,8 @@ next
   * Suicide will now remove all bots related to the binary being removed (fixes #435)
   * FiSH message support added.
   * FiSH support for DH1080 key-exchange. 'keyx' command added to start from bot, and responds to key-exchanges.
-  * Auto FiSH key-exchange when accepting users via callerid
+  * Auto FiSH key-exchange when accepting users via callerid (controllable with set 'fish-auto-keyx')
+  * Automatic re-key exchange after every message to avoid replay attacks (controllable with set 'fish-paranoid')
   * When 'mdop' protection is on, re-op all previously opped clients automatically.
   * When 'mop' protection is on, deop all previously regular clients automatically.
   * Add './wraith -V' which will display the packconfig that the bot is using.

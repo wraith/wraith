@@ -167,6 +167,7 @@ static int check_bind_raw(char *from, char *code, char *msg)
 
         if (FishKeys.contains(nick)) {
           sharedKey = FishKeys[nick]->sharedKey;
+          FishKeys[nick]->timestamp = now;
         } else {
           struct userrec *u = get_user_by_host(from);
           if (u) {
@@ -762,6 +763,13 @@ static int gotmsg(char *from, char *msg)
         }
         if (doit)
           check_bind_msg(my_code, nick, uhost, my_u, msg);
+
+        if (my_u && FishKeys.contains(nick)) {
+          // FiSH paranoid mode. Invalidate the current key and re-key-exchange with the user.
+          if (fish_paranoid) {
+            keyx(nick);
+          }
+        }
       }
     }
   }
@@ -780,7 +788,7 @@ void handle_DH1080_init(const char* nick, const char* uhost, const char* from, s
 
   putlog(LOG_MSGS, "*", "[FiSH] Received DH1080 public key from (%s!%s) - sending mine", nick, uhost);
   notice(nick, "DH1080_FINISH " + myPublicKeyB64, DP_HELP);
-  fish_data_t* fishData = new fish_data_t;
+  fish_data_t* fishData = FishKeys.contains(nick) ? FishKeys[nick] : new fish_data_t;
   fishData->myPublicKeyB64 = myPublicKeyB64;
   fishData->myPrivateKey = myPrivateKey;
   fishData->sharedKey = sharedKey;
@@ -1915,7 +1923,9 @@ static int got718(char *from, char *msg)
         putlog(LOG_WALL, "*", "(CALLERID) !%s! (%s!%s) %s (Accepting user)", u->handle, nick, uhost, msg);
         dprintf(DP_HELP, "ACCEPT %s\n", nick);
         dprintf(DP_HELP, "PRIVMSG %s :You have been accepted. Please send your message again.\n", nick);
-        keyx(nick);
+        if (fish_auto_keyx) {
+          keyx(nick);
+        }
       } else {
         putlog(LOG_WALL, "*", "(CALLERID) !%s! (%s!%s) %s (User is not +o or +v)", u->handle, nick, uhost, msg);
       }
