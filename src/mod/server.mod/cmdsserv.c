@@ -132,34 +132,51 @@ static void cmd_setkey(int idx, char *par) {
   putlog(LOG_CMDS, "*", "#%s# setkey %s", dcc[idx].nick, par);
 
   if (!par[0]) {
-    dprintf(idx, "Usage: setkey <nick|channel> [key]\n");
+    dprintf(idx, "Usage: setkey <nick> [key|rand]\n");
     return;
   }
 
   char *target = newsplit(&par);
-  char *key = newsplit(&par);
+  char *newkey = newsplit(&par), *key = NULL;
   bool have_key = FishKeys.contains(target);
-  fish_data_t* fishData = NULL;
 
-  if (!key[0]) {
+  if (!newkey[0]) {
     // Clear the key
     if (have_key) {
-      fishData = FishKeys[target];
-      FishKeys.remove(target);
-      delete fishData;
+      set_fish_key(target, "");
       dprintf(idx, "Key cleared for '%s'\n", target);
     } else {
       dprintf(idx, "No key found for '%s'\n", target);
     }
   } else {
-    // Set the key
+    if (!strcmp(newkey, "rand")) {
+      // Set a RANDOM key
+      key = (char*)my_calloc(1, 32+1);
+      make_rand_str(key, 32);
+    } else {
+      key = strdup(newkey);
+    }
+
+    set_fish_key(target, key);
+    dprintf(idx, "Set key for '%s' to: %s", target, key);
+  }
+  return;
+}
+
+void set_fish_key(char *target, char *key)
+{
+  fish_data_t* fishData = NULL;
+
+  if (!key || !key[0]) { //remove key
+    fishData = FishKeys[target];
+    FishKeys.remove(target);
+    delete fishData;
+  } else { //set key
     fishData = new fish_data_t;
     fishData->sharedKey = key;
     fishData->timestamp = now;
     FishKeys[target] = fishData;
-    dprintf(idx, "Set key for '%s' to: %s", target, key);
   }
-  return;
 }
 
 static void cmd_clearqueue(int idx, char *par)
