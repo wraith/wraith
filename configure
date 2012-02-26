@@ -9929,9 +9929,6 @@ if [ "$GIT_REQUIRED" = "1" ]; then
 fi
 
 
-echo ""
-echo ""
-echo "------------ Configuring BDLIB ------------"
 
 if test -d .git; then
   git submodule init
@@ -9946,4 +9943,7 @@ if [ $? -ne 0 ]; then
 fi
 
 
+echo ""
+echo ""
+echo "------------ Configuring BDLIB ------------"
 test -f lib/bdlib/configure && cd lib/bdlib && MAKEJOBS="$MAKEJOBS" ./configure
