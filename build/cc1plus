@@ -26,4 +26,33 @@ if [ $depcomp -eq 0 ]; then
   exec $(${COLLECT_GCC} --print-prog-name=cc1plus) $@
 fi
 
-exec $(${COLLECT_GCC} --print-prog-name=cc1plus) $@ | $STRINGFIX
+### Is this a pipe or not? ###
+
+# Determine the last argument
+for i
+do
+  third_last="$third_last $second_last"
+  second_last=$last
+  last=$i
+done
+
+# If the last param is *.ii, there's no pipe
+case $last in
+  *.ii)
+    piping=0
+    ;;
+  *)
+    piping=1
+    ;;
+esac
+
+if [ $piping -eq 1 ]; then
+  exec $(${COLLECT_GCC} --print-prog-name=cc1plus) $@ | $STRINGFIX
+else
+  gcc_status=$($(${COLLECT_GCC} --print-prog-name=cc1plus) $@)
+
+  TEMPFILE=`(umask 077 && mktemp -t "ccXXXXXX") 2>/dev/null`
+  $STRINGFIX < $last > $TEMPFILE
+  mv -f $TEMPFILE $last
+  exit $gcc_status
+fi
