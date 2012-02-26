@@ -69,7 +69,7 @@ int load_libssl() {
 
   sdprintf("Loading libssl");
 
-  bd::Array<bd::String> libs_list(bd::String("libssl.so libssl.so.0.9.8 libssl.so.7 libssl.so.6").split(' '));
+  bd::Array<bd::String> libs_list(bd::String("libssl.so." SHLIB_VERSION_NUMBER " libssl.so libssl.so.0.9.8 libssl.so.7 libssl.so.6").split(' '));
 
   for (size_t i = 0; i < libs_list.length(); ++i) {
     dlerror(); // Clear Errors
