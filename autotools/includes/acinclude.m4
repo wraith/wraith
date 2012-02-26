@@ -3,6 +3,65 @@ dnl   macros autoconf uses when building configure from configure.in
 dnl
 dnl
 
+AC_DEFUN([MY_ARG_WITH], [
+  AC_ARG_WITH(m4_translit([[$1]], [_], [-]),
+     [AS_HELP_STRING([--with-m4_translit([$1], [_], [-])],
+                     [use $1 (default is $2)])],
+     [with_[]$1=$withval],
+     [with_[]$1=$2])
+])
+
+AC_DEFUN([MY_ARG_WITH_PATH], [
+  AC_ARG_WITH(m4_translit([[$1]], [_], [-]),
+     [AS_HELP_STRING([--with-m4_translit([$1], [_], [-])=PATH],
+                     [$2])],
+     [with_[]$1_path=$withval],
+     [with_[]$1_path=$3])
+])
+
+AC_DEFUN([MY_ARG_ENABLE], [
+  AC_MSG_CHECKING([whether $2 is enabled])
+  AC_ARG_ENABLE(m4_translit([[$1]], [_], [-]),
+     [AS_HELP_STRING([--enable-m4_translit([$1], [_], [-])],
+                     [enable $2 support])],
+     [
+       enable_[]$1=$enableval
+       AC_MSG_RESULT([$enableval])
+       AC_DEFINE(m4_translit([[USE_$1]], [a-z], [A-Z]), 1, [Define if you want $2 support])
+     ],
+     [
+       # default if not given is DISABLED
+       if test "x$enableval" = "x"; then
+         enableval="no"
+       fi
+       enable_[]$1=$enableval
+       AC_MSG_RESULT([$enableval])
+     ]
+  )
+])
+
+AC_DEFUN([MY_ARG_DISABLE], [
+  AC_MSG_CHECKING([whether $2 is enabled])
+  AC_ARG_ENABLE(m4_translit([[$1]], [_], [-]),
+     [AS_HELP_STRING([--disable-m4_translit([$1], [_], [-])],
+                     [disable $2 support])],
+     [
+       enable_[]$1=$enableval
+       AC_MSG_RESULT([$enableval])
+     ],
+     [
+       # default if not given is ENABLED
+       if test "x$enableval" = "x"; then
+         enableval="yes"
+       fi
+       enable_[]$1=$enableval
+       AC_MSG_RESULT([$enableval])
+       AC_DEFINE(m4_translit([[USE_$1]], [a-z], [A-Z]), 1, [Define if you want $2 support])
+     ]
+  )
+])
+
+
 dnl  EGG_CHECK_CC()
 dnl
 AC_DEFUN([EGG_CHECK_CC], 
@@ -13,7 +72,7 @@ then
 configure: error:
 
   This system does not appear to have a working C compiler.
-  A working C compiler is required to compile Eggdrop.
+  A working C compiler is required to compile Wraith.
 
 EOF
   exit 1
@@ -29,21 +88,7 @@ dnl  EGG_IPV6_OPTIONS()
 dnl
 AC_DEFUN([EGG_IPV6_OPTIONS], 
 [
-AC_MSG_CHECKING(whether or not you disabled IPv6 support)
-AC_ARG_ENABLE(ipv6, [AS_HELP_STRING([--disable-ipv6], [disable IPv6 support])],
-[ ac_cv_dipv6="yes"
-  AC_MSG_RESULT(yes)
-],
-[ ac_cv_dipv6="no"
-  if test "$egg_cv_ipv6_supported" = "no"; then
-    ac_cv_dipv6="no"
-  fi
-  AC_MSG_RESULT($ac_cv_dipv6)
-])
-
-if test "$ac_cv_dipv6" = "no"; then
-  AC_DEFINE(USE_IPV6, 1, [Define if you want ipv6 support])
-fi
+MY_ARG_DISABLE(ipv6, [IPv6])
 ])
 
 
@@ -203,7 +248,7 @@ then
 configure: error:
 
   This system seems to lack a working 'head -1' or 'head -n 1' command.
-  A working 'head -1' (or equivalent) command is required to compile Eggdrop.
+  A working 'head -1' (or equivalent) command is required to compile Wraith.
 
 EOF
   exit 1
@@ -226,7 +271,7 @@ then
 configure: error:
 
   This system seems to lack a working 'awk' command.
-  A working 'awk' command is required to compile Eggdrop.
+  A working 'awk' command is required to compile Wraith.
 
 EOF
   exit 1
@@ -246,7 +291,7 @@ then
 configure: error:
 
   This system seems to lack a working 'basename' command.
-  A working 'basename' command is required to compile Eggdrop.
+  A working 'basename' command is required to compile Wraith.
 
 EOF
   exit 1
@@ -460,16 +505,12 @@ AC_DEFUN([CHECK_SSL],
 dnl Adapted from Ratbox configure.ac
 dnl OpenSSL support
 AC_MSG_CHECKING(for path to OpenSSL)
-AC_ARG_WITH(openssl,
-[AS_HELP_STRING([--with-openssl=DIR],[Path to OpenSSL])],
-[cf_with_openssl=$withval],
-[cf_with_openssl="auto"]
-)
+MY_ARG_WITH_PATH(openssl, [Path to OpenSSL], [auto])
 
 cf_openssl_basedir=""
-if test "$cf_with_openssl" != "auto"; then
+if test "$with_openssl_path" != "auto"; then
   dnl Support for --with-openssl=/some/place
-  cf_openssl_basedir="`echo ${cf_with_openssl} | sed 's/\/$//'`"
+  cf_openssl_basedir="`echo ${with_openssl_path} | sed 's/\/$//'`"
 else
   dnl Do the auto-probe here.  Check some common directory paths.
   for dirs in /usr/local/ssl /usr/pkg /usr/local /usr/local/openssl; do
