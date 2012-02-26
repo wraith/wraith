@@ -1213,6 +1213,7 @@ static void cmd_chaninfo(int idx, char *par)
       SHOW_FLAG("take",		channel_take(chan));
     SHOW_FLAG("voice",		channel_voice(chan));
     SHOW_FLAG("voicebitch",		channel_voicebitch(chan));
+    SHOW_FLAG("floodban", channel_floodban(chan));
     SHOW_FLAG("", 0);
     SHOW_FLAG("dynamicbans",	channel_dynamicbans(chan));
     SHOW_FLAG("userbans",	!channel_nouserbans(chan));
