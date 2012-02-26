@@ -8,7 +8,7 @@ CPPFLAGS = @CPPFLAGS@
 STRIP = @STRIP@
 
 VPATH = @srcdir@
-depcomp = /bin/sh $(top_srcdir)/autotools/depcomp
+depcomp = /bin/sh $(top_srcdir)/build/autotools/depcomp
 
 @SET_MAKE@
 
@@ -30,13 +30,14 @@ crypto: $(OBJS)
 
 include ./.deps/includes
 
-.SUFFIXES:
-.SUFFIXES: .c .o .h
-
-.c.o:
-	@echo -e "Compiling: \033[1m`basename $< .c`\033[0m"
-	source='$<' object='$@' depfile='.deps/$*.Po' tmpdepfile='.deps/$*.TPo' depmode=$(CCDEPMODE) $(depcomp) \
-	$(CXX) $(CXXFLAGS) -I../.. -I$(top_srcdir) -I$(top_srcdir)/src $(CPPFLAGS) -c $<
-
-
-
+%.o: %.c
+	@echo -e "Compiling: \033[1m$*\033[0m"
+ifeq ($(CCDEPMODE),gcc3)
+	if $(CXX) -MT '$@' -MD -MP -MF '.deps/$*.TPo' $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@; then \
+	mv '.deps/$*.TPo' '.deps/$*.Po'; \
+	else rm -f '.deps/$*.Tpo'; exit 1; \
+	fi
+else
+	libtool=no source='$<' object='$@' depfile='.deps/$*.Po' tmpdepfile='.deps/$*.TPo' depmode=$(CCDEPMODE) $(depcomp) \
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
+endif

@@ -13,7 +13,7 @@
 #include "config.h"
 #endif
 
-#define WTF 52768
+#define WTF 1524
 int help = 0;
 
 void garble(char **inptr, char **outptr)
@@ -96,11 +96,10 @@ void garble(char **inptr, char **outptr)
   *inptr = in;
 }
 
-char *outbuf = NULL;
-
 void processline(char *line)
 {
   char tmpin[WTF] = "", tmpout[WTF] = "", *in = NULL, *out = NULL;
+  size_t outlen = 0;
 
   strcpy(tmpin, line); 
   memset((char *) &tmpin[strlen(tmpin)], 0, 20);
@@ -118,54 +117,21 @@ void processline(char *line)
     *out = 0;
   } else
     tmpout[0] = 0;
+  outlen = strlen(tmpout);
 
-  if (outbuf)
-    outbuf = (char *) realloc(outbuf, strlen(outbuf) + strlen(tmpout) + 10);
-  else {
-    outbuf = (char *) calloc(1, strlen(tmpout) + 10);
-  }
-  strcat(outbuf, tmpout);
-  strcat(outbuf, "\n");
+  fwrite(tmpout, outlen, 1, stdout);
 }
 
 int main(int argc, char *argv[])
 {
-  FILE *f = NULL;
-  char *ln = NULL, *nln = NULL, *buf = NULL;
-  size_t insize;
-
-  if (argc != 3 && argc != 4)
-    return 1;
-  if (argc == 4)
+  if (argc == 2)
     help = 1;
-  if (!(f = fopen(argv[1], "r")))
-    return 1;
-  fseek(f, 0, SEEK_END);
-  insize = ftell(f);
-  fseek(f, 0, SEEK_SET);
-  buf = (char *) calloc(1, insize + 1);
-  if (!fread(buf, 1, insize, f)) {
-    ;
-  }
-  fclose(f);
-  buf[insize] = 0;
-
-  ln = buf;
-  while (ln) {
-    nln = strchr(ln, '\n');
-    if (nln)
-      *nln++ = 0;
-    processline(ln);
-
-    ln = nln;
-  }
-
-  if ((f = fopen(argv[2], "w"))) {
-    if (!fwrite(outbuf, strlen(outbuf), 1, f)) {
-      ;
+  char tempBuf[1024] = "";
+  while (!feof(stdin)) {
+    if (fgets(tempBuf, sizeof(tempBuf), stdin) && !feof(stdin)) {
+      processline(tempBuf);
     }
-    fclose(f);
   }
-  /*  printf(outbuf); */
+
   return 0;
 }

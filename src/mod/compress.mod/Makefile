@@ -1,12 +1,13 @@
 # Makefile for src/mod/compress.mod/
 
 srcdir = .
-depcomp = /bin/sh ../../../autotools/depcomp
+depcomp = /bin/sh ../../../build/autotools/depcomp
 
 #This line is simply for configure to generate .deps/
 OBJS = compress.o
 
 include ./.deps/includes
+include ../mod.mk
 
 doofus:
 	@echo ""
@@ -15,13 +16,6 @@ doofus:
 	@cd ../../../ && make
 
 static: ../compress.o
-
-../compress.o:
-	@echo -e "Compiling: \033[1mcompress\033[0m"
-	source='compress.c' object='$@' depfile='.deps/compress.Po' tmpdepfile='.deps/compress.TPo' depmode=$(CCDEPMODE) $(depcomp) \
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $(srcdir)/compress.c
-	@rm -f ../compress.o
-	@mv compress.o ../
 
 clean:
 	@rm -f .depend *.o *~
