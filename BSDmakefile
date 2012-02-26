@@ -14,5 +14,5 @@ clean: check_gmake
 	@gmake clean
 distclean: check_gmake
 	@gmake distclean
-test:
+test: check_gmake
 	@gmake test
