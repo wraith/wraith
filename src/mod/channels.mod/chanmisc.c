@@ -580,6 +580,10 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
     }
 
 
+    else if (!strcmp(item[i], "+floodban"))
+      chan->status |= CHAN_FLOODBAN;
+    else if (!strcmp(item[i], "-floodban"))
+      chan->status &= ~CHAN_FLOODBAN;
     else if (!strcmp(item[i], "+enforcebans"))
       chan->status |= CHAN_ENFORCEBANS;
     else if (!strcmp(item[i], "-enforcebans"))
