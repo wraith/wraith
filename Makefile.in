@@ -82,9 +82,9 @@ MAKE_UTILS_NR = $(MAKE) 'CXX=$(CXX)' 'STRIP=touch' \
 
 MAKE_CONFIG = $(MAKE) 'MAKE=$(MAKE)'
 
-.PHONY: checkclean.static checkclean.dynamic checkclean.debug lib wraith dwraith lib.debug debug check general crypto utils sorthelp makehelp makeset makeres stringfix set res help sort indent tar distrib distclean clean cleanutils test default dynamic static
+.PHONY: checkclean.static checkclean.dynamic checkclean.debug lib wraith dwraith lib.debug debug test general crypto utils sorthelp makehelp makeset makeres stringfix set res help sort indent tar distrib distclean clean cleanutils test all dynamic static
 
-default: dynamic
+all: dynamic
 
 test:
 
@@ -205,8 +205,6 @@ crypto:
 	+@cd src/crypto && ${MAKE_UTILS} crypto
 
 general: help res set
-
-check:
 
 .NOTPARALLEL: checkclean.static checkclean.dynamic checkclean.debug
 
