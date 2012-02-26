@@ -1,4 +1,4 @@
-.PHONY: default check_gmake debug static dynamic clean distclean check
+.PHONY: default check_gmake debug static dynamic clean distclean test
 
 default: check_gmake
 	@gmake
@@ -14,5 +14,5 @@ clean: check_gmake
 	@gmake clean
 distclean: check_gmake
 	@gmake distclean
-check:
-	@gmake check
+test:
+	@gmake test

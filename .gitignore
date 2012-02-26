@@ -21,3 +21,4 @@
 .*.sw*
 .hosts
 .resolv.conf
+.buildbot
