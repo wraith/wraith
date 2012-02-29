@@ -961,8 +961,9 @@ void set_fish_key(char *target, char *key)
 
     if (!strcmp(key, "rand")) {
       // Set a RANDOM key
-      char *rand_key = (char*)my_calloc(1, 32+1);
-      make_rand_str(rand_key, 32);
+      const size_t randomKeyLength = 32;
+      char *rand_key = (char*)my_calloc(1, randomKeyLength+1);
+      make_rand_str(rand_key, randomKeyLength);
       fishData->sharedKey = rand_key;
       free(rand_key);
     } else {
