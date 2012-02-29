@@ -158,7 +158,6 @@ static int check_bind_raw(char *from, char *code, char *msg)
 
   // Decrypt FiSH before processing
   if (!strcmp(code, "PRIVMSG") || !strcmp(code, "NOTICE")) {
-    putlog(LOG_MISC, "*", "code: %s", code);
     char* colon = strchr(msg, ':'), *first_word = strchr(msg, ' ');
     bd::String target(msg, first_word - msg);
 
