@@ -394,8 +394,10 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
           strlcpy(result, "channel fish-key needs argument", RESULT_LEN);
         return ERROR;
       }
-      set_fish_key(chan->dname, item[i]);
-      strlcpy(chan->fish_key, item[i], sizeof(chan->fish_key));
+      bd::String key(item[i]);
+      key.trim();
+      set_fish_key(chan->dname, key);
+      strlcpy(chan->fish_key, key.c_str(), sizeof(chan->fish_key));
 /*
     } else if (!strcmp(item[i], "revenge-mode")) {
       i++;
