@@ -1185,6 +1185,7 @@ static void cmd_chaninfo(int idx, char *par)
     get_mode_protect(chan, work, sizeof(work));
     dprintf(idx, "Protect modes (chanmode): %s\n", work[0] ? work : "None");
     dprintf(idx, "Groups: %s\n", chan->groups && chan->groups->length() ? static_cast<bd::String>(chan->groups->join(" ")).c_str() : "None");
+    dprintf(idx, "FiSH Key: %s\n", chan->fish_key[0] ? chan->fish_key : "not set");
 //    dprintf(idx, "Protect topic (topic)   : %s\n", chan->topic[0] ? chan->topic : "");
 /* Chanchar template
  *  dprintf(idx, "String temp: %s\n", chan->temp[0] ? chan->temp : "NULL");
@@ -1255,8 +1256,6 @@ static void cmd_chaninfo(int idx, char *par)
 //    SHOW_INT("Revenge-mode: ", chan->revenge_mode, NULL, NULL);
     SHOW_INT("Protect-backup: ", chan->protect_backup, "Do!", "Don't!");
     SHOW_INT("Voice-non-ident: ", chan->voice_non_ident, "Do!", "Don't!");
-
-    dprintf(idx, "FiSH Key: %s\n", FishKeys.contains(chan->dname) && FishKeys[chan->dname]->sharedKey.length() ? FishKeys[chan->dname]->sharedKey.c_str() : "not set");
 
     dprintf(idx, "Flood settings:   chan ctcp join kick deop nick mjoin\n");
     dprintf(idx, "  number:          %3d  %3d  %3d  %3d  %3d  %3d  %3d\n",

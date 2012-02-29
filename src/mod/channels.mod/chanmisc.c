@@ -387,6 +387,15 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
       }
       chan->limitraise = atoi(item[i]);
       chan->limit_prot = 0;
+    } else if (!strcmp(item[i], "fish-key")) {
+      i++;
+      if (i >= items) {
+        if (result)
+          strlcpy(result, "channel fish-key needs argument", RESULT_LEN);
+        return ERROR;
+      }
+      set_fish_key(chan->dname, item[i]);
+      strlcpy(chan->fish_key, item[i], sizeof(chan->fish_key));
 /*
     } else if (!strcmp(item[i], "revenge-mode")) {
       i++;
@@ -565,14 +574,6 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
         return ERROR;
       }
       chan->protect_backup = atoi(item[i]);
-    } else if (!strcmp(item[i], "fish-key")) {
-      i++;
-      if (i >= items) {
-        set_fish_key(chan->dname, "");
-        return ERROR;
-      }
-      set_fish_key(chan->dname, item[i]);
-      strlcpy(chan->fish_key, item[i], sizeof(chan->fish_key));
     }
 
 /* Chanint template
