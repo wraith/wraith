@@ -131,8 +131,13 @@ static void cmd_keyx(int idx, char *par) {
 static void cmd_setkey(int idx, char *par) {
   putlog(LOG_CMDS, "*", "#%s# setkey %s", dcc[idx].nick, par);
 
-  if (!par[0]) {
+  const bool target_is_chan = par[0] && strchr(CHANMETA, par[0]);
+
+  if (!par[0] || target_is_chan) {
     dprintf(idx, "Usage: setkey <nick> [key|rand]\n");
+    if (target_is_chan) {
+      dprintf(idx, "Use 'chanset fish-key' to set a key for a channel.\n");
+    }
     return;
   }
 
