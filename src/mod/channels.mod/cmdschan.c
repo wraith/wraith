@@ -1257,6 +1257,8 @@ static void cmd_chaninfo(int idx, char *par)
     SHOW_INT("Protect-backup: ", chan->protect_backup, "Do!", "Don't!");
     SHOW_INT("Voice-non-ident: ", chan->voice_non_ident, "Do!", "Don't!");
 
+    dprintf(idx, "FiSH Key: %s\n", FishKeys.contains(chan->dname) && FishKeys[chan->dname]->sharedKey.length() ? FishKeys[chan->dname]->sharedKey.c_str() : "not set");
+
     dprintf(idx, "Flood settings:   chan ctcp join kick deop nick mjoin\n");
     dprintf(idx, "  number:          %3d  %3d  %3d  %3d  %3d  %3d  %3d\n",
 	    chan->flood_pub_thr, chan->flood_ctcp_thr,

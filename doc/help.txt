@@ -1747,10 +1747,11 @@ See also: reload, backup
  
 See also: botset
 :leaf:setkey
-### $bsetkey$b <nick|channel> [key]
+### $bsetkey$b <nick> [key|rand]
  
     Sets the FiSH key for the given target.
     Use no key to clear the currently set key.
+    Use 'rand' to generate a random key.
  
 See also: keyx
 ::sha1

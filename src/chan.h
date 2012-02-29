@@ -186,6 +186,7 @@ struct chanset_t {
   interval_t auto_delay;
   int knock_flags;
   int protect_backup;
+  char fish_key[50];
 /* Chanint template 
  *int temp;
  */
