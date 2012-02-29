@@ -5,7 +5,7 @@
 
 # Only capture pre-processing
 if [ $1 != "-E" -o -z "$STRINGFIX" -o ! -f "$STRINGFIX" ]; then
-  exec $(${COLLECT_GCC} --print-prog-name=cc1plus) $@
+  exec $(${COLLECT_GCC} --print-prog-name=cc1plus) "$@"
 fi
 
 
@@ -23,7 +23,7 @@ done
 
 # Only continue if running in depcomp (avoiding a 2nd pass for -dD/-g3)
 if [ $depcomp -eq 0 ]; then
-  exec $(${COLLECT_GCC} --print-prog-name=cc1plus) $@
+  exec $(${COLLECT_GCC} --print-prog-name=cc1plus) "$@"
 fi
 
 ### Is this a pipe or not? ###
@@ -47,9 +47,9 @@ case $last in
 esac
 
 if [ $piping -eq 1 ]; then
-  exec $(${COLLECT_GCC} --print-prog-name=cc1plus) $@ | $STRINGFIX
+  exec $(${COLLECT_GCC} --print-prog-name=cc1plus) "$@" | $STRINGFIX
 else
-  gcc_status=$($(${COLLECT_GCC} --print-prog-name=cc1plus) $@)
+  gcc_status=$($(${COLLECT_GCC} --print-prog-name=cc1plus) "$@")
 
   TEMPFILE=`(umask 077 && mktemp -t "ccXXXXXX") 2>/dev/null`
   $STRINGFIX < $last > $TEMPFILE
