@@ -947,11 +947,11 @@ void keyx(const bd::String &target) {
   FishKeys[target] = fishData;
 }
 
-void set_fish_key(char *target, char *key)
+void set_fish_key(char *target, bd::String key)
 {
   fish_data_t* fishData = FishKeys.contains(target) ? FishKeys[target] : NULL;
 
-  if (!key || !key[0]) { //remove key
+  if (!key.length()) { //remove key
     if (fishData) {
       FishKeys.remove(target);
       delete fishData;
@@ -959,7 +959,7 @@ void set_fish_key(char *target, char *key)
   } else { //set key
     fishData = new fish_data_t;
 
-    if (!strcmp(key, "rand")) {
+    if (key == "rand") {
       // Set a RANDOM key
       const size_t randomKeyLength = 32;
       char *rand_key = (char*)my_calloc(1, randomKeyLength+1);
