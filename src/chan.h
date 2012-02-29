@@ -176,6 +176,7 @@ struct chanset_t {
   int closed_ban;
   int closed_private;
   int closed_invite;
+  int closed_exempt_mode;
   int bad_cookie;
   int manop;
   int mdop;
