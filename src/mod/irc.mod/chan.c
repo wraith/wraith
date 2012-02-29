@@ -665,11 +665,19 @@ static bool detect_chan_flood(char *floodnick, char *floodhost, char *from,
     case FLOOD_CTCP:
       /* Flooding chan! either by public or notice */
       if (!chan_sentkick(m) && me_op(chan)) {
-	putlog(LOG_MODES, chan->dname, "Channel flood from %s -- kicking", floodnick);
-        dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, floodnick, kickprefix, response(RES_FLOOD));
-	m->flags |= SENTKICK;
+        if (channel_floodban(chan)) {
+            putlog(LOG_MODES, chan->dname, "Channel flood from %s -- banning", floodnick);
+            char s[UHOSTLEN] = "", *s1 = NULL;
+            simple_snprintf(s, sizeof(s), "%s!%s", floodnick, floodhost);
+            s1 = quickban(chan, s);
+            u_addmask('b', chan, s1, conf.bot->nick, "channel flood", now + (60 * chan->ban_time), 0);
+        } else {
+          putlog(LOG_MODES, chan->dname, "Channel flood from %s -- kicking", floodnick);
+          dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, floodnick, kickprefix, response(RES_FLOOD));
+          m->flags |= SENTKICK;
+        }
+        return 1;
       }
-      return 1;
     case FLOOD_JOIN:
     case FLOOD_PART:
     case FLOOD_NICK:
