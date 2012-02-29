@@ -1889,7 +1889,7 @@ static void cmd_play(int idx, char *par)
   if (!chan)
     return;
 
-  if (!par[0]) {
+  if (chname && !par[0]) {
     dprintf(idx, "Usage: play [channel] <file>\n");
     return;
   }
