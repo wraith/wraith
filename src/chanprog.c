@@ -949,12 +949,13 @@ void keyx(const bd::String &target) {
 
 void set_fish_key(char *target, char *key)
 {
-  fish_data_t* fishData = NULL;
-  fishData = FishKeys[target];
+  fish_data_t* fishData = FishKeys.contains(target) ? FishKeys[target] : NULL;
 
   if (!key || !key[0]) { //remove key
-    FishKeys.remove(target);
-    delete fishData;
+    if (fishData) {
+      FishKeys.remove(target);
+      delete fishData;
+    }
   } else { //set key
     fishData = new fish_data_t;
 
