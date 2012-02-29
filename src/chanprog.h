@@ -35,7 +35,7 @@ void privmsg(bd::String target, bd::String msg, int idx);
 void notice(bd::String target, bd::String msg, int idx);
 void check_removed_server(bool = 1);
 void keyx(const bd::String& target);
-void set_fish_key(char *, char *);
+void set_fish_key(char *, bd::String);
 
 extern struct chanset_t		*chanset, *chanset_default;
 extern char			admin[], origbotnick[HANDLEN + 1], origbotname[NICKLEN], jupenick[NICKLEN], botname[NICKLEN], *def_chanset;
