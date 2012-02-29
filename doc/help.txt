@@ -411,6 +411,8 @@ See also: link%{+a}, newhub%{-}
  
         $bflood-lock-time$b   How long in seconds to keep the channel locked
                          during drone floods.
+        $bfish-key$b          The key to use for FiSH encryption. Use '{ key }'
+                          to set and '{}' to unset.
  
         $binvite-time$b       Set here how long temporary invites will last (in
                           minutes). If you set this setting to 0, the bot will
