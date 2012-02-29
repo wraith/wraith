@@ -157,17 +157,17 @@ static int check_bind_raw(char *from, char *code, char *msg)
   myfrom = p1 = strdup(from);
 
   // Decrypt FiSH before processing
-  if (!strcmp(code, "PRIVMSG")) {
+  if (!strcmp(code, "PRIVMSG") || !strcmp(code, "NOTICE")) {
     char* colon = strchr(msg, ':');
     ++colon;
     if (colon) {
       if (!strncmp(colon, "+OK ", 4)) {
         char *p = strchr(from, '!');
-        bd::String ciphertext(colon), sharedKey, nick(from, p - from);
+        bd::String ciphertext(colon), sharedKey, target(from, p - from);
 
-        if (FishKeys.contains(nick)) {
-          sharedKey = FishKeys[nick]->sharedKey;
-          FishKeys[nick]->timestamp = now;
+        if (FishKeys.contains(target)) {
+          sharedKey = FishKeys[target]->sharedKey;
+          FishKeys[target]->timestamp = now;
         } else {
           struct userrec *u = get_user_by_host(from);
           if (u) {
