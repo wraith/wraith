@@ -719,7 +719,7 @@ flood-chan %d:%d flood-ctcp %d:%d flood-join %d:%d \
 flood-kick %d:%d flood-deop %d:%d flood-nick %d:%d flood-mjoin %d:%d \
 closed-ban %d closed-invite %d closed-private %d closed-exempt %d ban-time %d \
 exempt-time %d invite-time %d voice-non-ident %d auto-delay %d \
-flood-exempt %d flood-lock-time %d knock %d fish_key { %s } \
+flood-exempt %d flood-lock-time %d knock %d fish-key { %s } \
 %cmeankicks %cenforcebans %cdynamicbans %cuserbans %cbitch \
 %cprivate %ccycle %cinactive %cdynamicexempts %cuserexempts \
 %cdynamicinvites %cuserinvites %cnodesynch %cclosed %cvoice \
