@@ -387,6 +387,17 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
       }
       chan->limitraise = atoi(item[i]);
       chan->limit_prot = 0;
+    } else if (!strcmp(item[i], "fish-key")) {
+      i++;
+      if (i >= items) {
+        if (result)
+          strlcpy(result, "channel fish-key needs argument", RESULT_LEN);
+        return ERROR;
+      }
+      bd::String key(item[i]);
+      key.trim();
+      set_fish_key(chan->dname, key);
+      strlcpy(chan->fish_key, key.c_str(), sizeof(chan->fish_key));
 /*
     } else if (!strcmp(item[i], "revenge-mode")) {
       i++;
@@ -565,7 +576,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
         return ERROR;
       }
       chan->protect_backup = atoi(item[i]);
-     
+    }
 
 /* Chanint template
  *  } else if (!strcmp(item[i], "temp")) {
@@ -577,8 +588,6 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
  *    }
  *    chan->temp = atoi(item[i]);
  */
-    }
-
 
     else if (!strcmp(item[i], "+enforcebans"))
       chan->status |= CHAN_ENFORCEBANS;
@@ -1009,6 +1018,7 @@ int channel_add(char *result, const char *newname, char *options, bool isdefault
     chan->groups = new bd::Array<bd::String>;
     *(chan->groups) << "main";
     chan->protect_backup = 1;
+    chan->fish_key[0] = 0;
     chan->knock_flags = 0;
     chan->flood_lock_time = 120;
     chan->flood_exempt_mode = 0;

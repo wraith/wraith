@@ -214,6 +214,7 @@ struct chanset_t {
   char mns[21];			/* negative mode changes		*/
   char key_prot[121];		/* desired password			*/
   bd::Array<bd::String> *groups;/* groups that should join */
+  char fish_key[50];
 /* Chanchar template
  *char temp[121];
  */

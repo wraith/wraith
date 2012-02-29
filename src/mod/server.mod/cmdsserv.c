@@ -131,33 +131,33 @@ static void cmd_keyx(int idx, char *par) {
 static void cmd_setkey(int idx, char *par) {
   putlog(LOG_CMDS, "*", "#%s# setkey %s", dcc[idx].nick, par);
 
-  if (!par[0]) {
-    dprintf(idx, "Usage: setkey <nick|channel> [key]\n");
+  const bool target_is_chan = par[0] && strchr(CHANMETA, par[0]);
+
+  if (!par[0] || target_is_chan) {
+    dprintf(idx, "Usage: setkey <nick> [key|rand]\n");
+    if (target_is_chan) {
+      dprintf(idx, "Use 'chanset fish-key' to set a key for a channel.\n");
+    }
     return;
   }
 
   char *target = newsplit(&par);
-  char *key = newsplit(&par);
+  char *newkey = newsplit(&par);
   bool have_key = FishKeys.contains(target);
-  fish_data_t* fishData = NULL;
 
-  if (!key[0]) {
+  if (!newkey[0]) {
     // Clear the key
     if (have_key) {
-      fishData = FishKeys[target];
-      FishKeys.remove(target);
-      delete fishData;
+      set_fish_key(target, "");
       dprintf(idx, "Key cleared for '%s'\n", target);
     } else {
       dprintf(idx, "No key found for '%s'\n", target);
     }
   } else {
-    // Set the key
-    fishData = new fish_data_t;
-    fishData->sharedKey = key;
-    fishData->timestamp = now;
-    FishKeys[target] = fishData;
-    dprintf(idx, "Set key for '%s' to: %s", target, key);
+    // Set a new key
+    set_fish_key(target, newkey);
+    fish_data_t* fishData = FishKeys[target];
+    dprintf(idx, "Set key for '%s' to: %s", target, fishData->sharedKey.c_str());
   }
   return;
 }

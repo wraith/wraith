@@ -890,17 +890,20 @@ struct chanset_t* find_common_opped_chan(bd::String nick) {
 
 void privmsg(bd::String target, bd::String msg, int idx) {
   struct chanset_t* chan = NULL;
-  if (have_cprivmsg && !strchr(CHANMETA, target[0]))
+  bool talking_to_chan = strchr(CHANMETA, target[0]);
+  if (have_cprivmsg && !talking_to_chan)
     chan = find_common_opped_chan(target);
   bool cleartextPrefix = (msg(0, 3) == "+p ");
 
   // Encrypt with FiSH?
-  if (!strchr(CHANMETA, target[0]) && !cleartextPrefix && FishKeys.contains(target) && FishKeys[target]->sharedKey.length()) {
+  if (!cleartextPrefix && FishKeys.contains(target) && FishKeys[target]->sharedKey.length()) {
     msg = "+OK " + egg_bf_encrypt(msg, FishKeys[target]->sharedKey);
   }
+
   if (cleartextPrefix) {
     msg += static_cast<size_t>(3);
   }
+
   if (chan)
     dprintf(idx, "CPRIVMSG %s %s :%s\n", target.c_str(), chan->name, msg.c_str());
   else
@@ -909,8 +912,19 @@ void privmsg(bd::String target, bd::String msg, int idx) {
 
 void notice(bd::String target, bd::String msg, int idx) {
   struct chanset_t* chan = NULL;
-  if (have_cnotice && !strchr(CHANMETA, target[0]))
+  bool talking_to_chan = strchr(CHANMETA, target[0]);
+  if (have_cnotice && !talking_to_chan)
     chan = find_common_opped_chan(target);
+  bool cleartextPrefix = (msg(0, 3) == "+p ");
+
+  if (!cleartextPrefix && FishKeys.contains(target) && FishKeys[target]->sharedKey.length()) {
+    msg = "+OK " + egg_bf_encrypt(msg, FishKeys[target]->sharedKey);
+  }
+
+  if (cleartextPrefix) {
+    msg += static_cast<size_t>(3);
+  }
+
   if (chan)
     dprintf(idx, "CNOTICE %s %s :%s\n", target.c_str(), chan->name, msg.c_str());
   else
@@ -923,12 +937,41 @@ void keyx(const bd::String &target) {
 
   DH1080_gen(myPrivateKey, myPublicKeyB64);
 
-  putlog(LOG_MSGS, "*", "[FiSH] Initiating DH1080 key-exchange with %s - sending my public key", target.c_str());
-  notice(target, "DH1080_INIT " + myPublicKeyB64, DP_HELP);
   fish_data_t* fishData = FishKeys.contains(target) ? FishKeys[target] : new fish_data_t;
   fishData->sharedKey.clear();
+  putlog(LOG_MSGS, "*", "[FiSH] Initiating DH1080 key-exchange with %s - sending my public key", target.c_str());
+  notice(target, "DH1080_INIT " + myPublicKeyB64, DP_HELP);
   fishData->myPublicKeyB64 = myPublicKeyB64;
   fishData->myPrivateKey = myPrivateKey;
   fishData->timestamp = now;
   FishKeys[target] = fishData;
+}
+
+void set_fish_key(char *target, bd::String key)
+{
+  fish_data_t* fishData = FishKeys.contains(target) ? FishKeys[target] : NULL;
+
+  if (!key.length()) { //remove key
+    if (fishData) {
+      FishKeys.remove(target);
+      delete fishData;
+    }
+  } else { //set key
+    fishData = new fish_data_t;
+
+    if (key == "rand") {
+      // Set a RANDOM key
+      const size_t randomKeyLength = 32;
+      char *rand_key = (char*)my_calloc(1, randomKeyLength+1);
+      make_rand_str(rand_key, randomKeyLength);
+      fishData->sharedKey = rand_key;
+      free(rand_key);
+    } else {
+      fishData->sharedKey = key;
+    }
+
+    // Set the key
+    fishData->timestamp = now;
+    FishKeys[target] = fishData;
+  }
 }
