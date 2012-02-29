@@ -158,16 +158,27 @@ static int check_bind_raw(char *from, char *code, char *msg)
 
   // Decrypt FiSH before processing
   if (!strcmp(code, "PRIVMSG") || !strcmp(code, "NOTICE")) {
-    char* colon = strchr(msg, ':');
+    putlog(LOG_MISC, "*", "code: %s", code);
+    char* colon = strchr(msg, ':'), *first_word = strchr(msg, ' ');
+    bd::String target(msg, first_word - msg);
+
     ++colon;
     if (colon) {
       if (!strncmp(colon, "+OK ", 4)) {
         char *p = strchr(from, '!');
-        bd::String ciphertext(colon), sharedKey, target(from, p - from);
+        bd::String ciphertext(colon), sharedKey, nick(from, p - from), key_target;
 
-        if (FishKeys.contains(target)) {
-          sharedKey = FishKeys[target]->sharedKey;
-          FishKeys[target]->timestamp = now;
+        // If this is a channel msg, decrypt with the channel key
+        if (strchr(CHANMETA, target[0])) {
+          key_target = target;
+        } else {
+          // Otherwise decrypt with the nick's key
+          key_target = nick;
+        }
+
+        if (FishKeys.contains(key_target)) {
+          sharedKey = FishKeys[key_target]->sharedKey;
+          FishKeys[key_target]->timestamp = now;
         } else {
           struct userrec *u = get_user_by_host(from);
           if (u) {
