@@ -678,7 +678,7 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
            */
           (reversing && (!chan_bitch(chan) || chk_op(victim, chan))) ||
           /* Reop bots to avoid them needing to ask */
-          (mv->user && mv->user->bot && chk_op(victim, chan))
+          (role == 3 && mv->user && mv->user->bot && chk_op(victim, chan))
         )
        ) {
       /* Then we'll bless the victim */
