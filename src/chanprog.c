@@ -753,18 +753,6 @@ bool bot_shouldjoin(struct userrec* u, struct flag_record* fr, const struct chan
   // No user record, can't make any safe assumptions really
   if (!u) return 0;
 
-#ifdef DEBUG
-  /* Force debugging bots to only join 3 channels */
-  if (!strncmp(u->handle, "wtest", 5)) {
-    if (!strcmp(chan->dname, "#skynet") || 
-        !strcmp(chan->dname, "#bryan") || 
-        !strcmp(chan->dname, "#wraith-devel"))
-      return 1;
-    else
-      return 0;
-  }
-#endif
-
   // Is this bot in the groups that this channel has?
   const char *botgroups = u == conf.bot->u ? groups : var_get_bot_data(u, "groups", true);
   bd::Array<bd::String> my_groupsArray(bd::String(botgroups).split(','));
