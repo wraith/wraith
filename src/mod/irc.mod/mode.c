@@ -670,8 +670,8 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
   if (me_op(chan)) {
     /* do we want to reop victim? */
     if (
-        /* I didn't deop them and they didn't deop themselves. */
-        ((m && !m->is_me && mv != m) || (!m)) && (
+        /* I didn't deop them, another bot didn't deop them and they didn't deop themselves. */
+        ((m && !m->is_me && mv != m && !(m->user && m->user->bot)) || (!m)) && (
           /*
            * reversing
            * They are either an op or this chan is -bitch
