@@ -1801,23 +1801,10 @@ static cmd_t irc_bot[] = {
   {NULL, NULL, NULL, NULL, 0}
 };
 
-static void
-getin_5secondly()
-{
-  if (!server_online)
-    return;
-
-  for (register struct chanset_t *chan = chanset; chan; chan = chan->next) {
-    if ((!channel_pending(chan) && channel_active(chan)) && !me_op(chan))
-      request_op(chan);
-  }
-}
-
 void
 irc_init()
 {
   timer_create_secs(60, "irc_minutely", (Function) irc_minutely);
-  timer_create_secs(5, "getin_5secondly", (Function) getin_5secondly);
 
   /* Add our commands to the imported tables. */
   add_builtins("dcc", irc_dcc);
