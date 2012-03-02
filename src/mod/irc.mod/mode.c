@@ -666,12 +666,18 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
   /* Deop'd someone on my oplist? */
   if (me_op(chan)) {
     /* do we want to reop victim? */
-    if ((reversing) && 
-        ((m && !m->is_me && rfc_casecmp(mv->nick, m->nick)) || (!m)) &&
-        !mv->is_me &&
-        (chk_op(victim, chan) || !chan_bitch(chan)))
+    if (
+        /*
+         * reversing
+         * I didn't deop the victim
+         * They didn't deop themselves
+         * They are either an op or this chan is -bitch
+         */
+        (reversing && ((m && !m->is_me && mv != m) || (!m)) && (!chan_bitch(chan) || chk_op(victim, chan)))
+       ) {
       /* Then we'll bless the victim */
       do_op(mv->nick, chan, 0, 0);
+    }
   }
 
   if (isserver[0])		/* !m */
