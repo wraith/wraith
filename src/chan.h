@@ -172,7 +172,8 @@ struct chanset_t {
   interval_t flood_mjoin_time;
   int flood_mjoin_thr;
   int limitraise;
-  int checklimit;
+  int limittimer;
+  int limitcnt;
   int closed_ban;
   int closed_private;
   int closed_invite;

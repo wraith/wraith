@@ -396,44 +396,28 @@ check_slowjoinpart(struct chanset_t *chan)
   return 0;
 }
 
-static void 
-check_limitraise(struct chanset_t *chan) {
-  /* only check every other time for now */
-  chan->checklimit++;
-  if (chan->checklimit == 2) {
-    chan->checklimit = 0;
-    if (chan->limitraise && dolimit(chan))
-      raise_limit(chan);
-  }
-}
-
 static void
 channels_timers()
 {
-  static int cnt = 0;
-  struct chanset_t *chan_n = NULL, *chan = NULL;
-  bool reset = 0;
+  if (!conf.bot->hub)
+    return;
 
-  cnt += 10;		/* function is called every 10 seconds */
-  
+  struct chanset_t *chan_n = NULL, *chan = NULL;
+
   for (chan = chanset; chan; chan = chan_n) {
     chan_n = chan->next;
+ 
+    if (check_slowjoinpart(chan))	/* if 1 is returned, chan was removed. */
+      continue;
 
-    if ((cnt % 10) == 0) {
-      /* 10 seconds */
-      if (!conf.bot->hub && check_slowjoinpart(chan))	/* if 1 is returned, chan was removed. */
-        continue;
-    }
-    if ((cnt % 60) == 0) {
-      /* 60 seconds */
-      reset = 1;
-      if (!conf.bot->hub)
-        check_limitraise(chan);
+    chan->limitcnt += 10;
+
+    if (chan->limittimer && chan->limitraise && ((chan->limitcnt % (chan->limittimer * 60)) == 0)) {
+      chan->limitcnt = 0;
+      if (dolimit(chan))
+        raise_limit(chan);
     }
   }
-
-  if (reset)
-    cnt = 0;
 }
 
 static void got_sj(int idx, char *code, char *par) 
