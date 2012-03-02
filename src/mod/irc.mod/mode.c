@@ -647,11 +647,14 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
 
   if (mdop_reversing && !was_op)
     return;
-  
+
+  /* m is NULL if a server made the change */
   if (m)
     simple_snprintf(s1, sizeof(s1), "%s!%s", m->nick, m->userhost);
 
-  get_user_flagrec(mv->user, &victim, chan->dname, chan);
+  if (mv->user) {
+    get_user_flagrec(mv->user, &victim, chan->dname, chan);
+  }
 
   /* Flags need to be set correctly right from the beginning now, so that
    * add_mode() doesn't get irritated.
@@ -667,13 +670,16 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
   if (me_op(chan)) {
     /* do we want to reop victim? */
     if (
-        /*
-         * reversing
-         * I didn't deop the victim
-         * They didn't deop themselves
-         * They are either an op or this chan is -bitch
-         */
-        (reversing && ((m && !m->is_me && mv != m) || (!m)) && (!chan_bitch(chan) || chk_op(victim, chan)))
+        /* I didn't deop them and they didn't deop themselves. */
+        ((m && !m->is_me && mv != m) || (!m)) && (
+          /*
+           * reversing
+           * They are either an op or this chan is -bitch
+           */
+          (reversing && (!chan_bitch(chan) || chk_op(victim, chan))) ||
+          /* Reop bots to avoid them needing to ask */
+          (mv->user && mv->user->bot && chk_op(victim, chan))
+        )
        ) {
       /* Then we'll bless the victim */
       do_op(mv->nick, chan, 0, 0);
