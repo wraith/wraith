@@ -1248,6 +1248,7 @@ static void cmd_chaninfo(int idx, char *par)
     SHOW_INT("Invite-time: ", chan->invite_time, NULL, "Forever");
     SHOW_INT("Knock: ", chan->knock_flags, F_STR(chan->knock_flags), "None");
     SHOW_INT("Limit raise (limit): ", chan->limitraise, NULL, "Disabled");
+    SHOW_INT("Limit raise (timer): ", chan->limittimer, NULL, "None");
     deflag = chan->manop;
     SHOW_INT("Manop: ", chan->manop, P_STR, "Ignore");
     deflag = chan->mdop;

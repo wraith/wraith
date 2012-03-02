@@ -387,6 +387,14 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
       }
       chan->limitraise = atoi(item[i]);
       chan->limit_prot = 0;
+    } else if (!strcmp(item[i], "limit-timer")) {
+      i++;
+      if (i >= items) {
+        if (result)
+          strlcpy(result, "channel limit-timer needs argument", RESULT_LEN);
+        return ERROR;
+      }
+      chan->limittimer = atoi(item[i]);
     } else if (!strcmp(item[i], "fish-key")) {
       i++;
       if (i >= items) {
@@ -1042,6 +1050,7 @@ int channel_add(char *result, const char *newname, char *options, bool isdefault
     chan->flood_mjoin_time = 1;
 //    chan->revenge_mode = global_revenge_mode;
     chan->limitraise = 20;
+    chan->limittimer = 2;
     chan->ban_time = global_ban_time;
     chan->exempt_time = global_exempt_time;
     chan->invite_time = global_invite_time;
