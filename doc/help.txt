@@ -459,7 +459,8 @@ See also: link%{+a}, newhub%{-}
                        more secure and the chances of someone hijacking the bot
                        for ops in your channel are much less. This is
                        highly recommeneded to always be set.
-                       
+        $bfloodban$b   If a channel flood (public, notice or ctcp) is detected, the
+                       flooder will also be banned, in accordance with ban-type.
         $binactive$b       This prevents the bot from joining the channel (or
                        makes it leave the channel if it is already there). It
                        can be useful to make the bot leave a channel without

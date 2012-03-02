@@ -258,6 +258,7 @@ struct chanset_t {
 #define CHAN_AUTOOP         BIT23
 #define CHAN_MEANKICKS      BIT24	/* use mean/offensive kicks/bans */
 #define CHAN_VOICEBITCH     BIT25
+#define CHAN_FLOODBAN       BIT26
 
 #define CHAN_ASKED_EXEMPTS  BIT0
 #define CHAN_ASKED_INVITES  BIT1
@@ -293,6 +294,7 @@ struct chanset_t *findchan_by_dname(const char *name);
 #define channel_backup(chan) (chan->status & CHAN_BACKUP)
 #define channel_bitch(chan) (chan->status & CHAN_BITCH)
 #define chan_bitch(chan) (chan->status & (CHAN_BITCH|CHAN_BOTBITCH))
+#define channel_floodban(chan) (chan->status & CHAN_FLOODBAN)
 #define channel_botbitch(chan) (chan->status & CHAN_BOTBITCH)
 #define channel_nodesynch(chan) (chan->status & CHAN_NODESYNCH)
 #define channel_enforcebans(chan) (chan->status & CHAN_ENFORCEBANS)
