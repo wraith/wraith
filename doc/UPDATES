@@ -36,6 +36,7 @@ next
     * Add '%group' support to 'bots' command.
   * Improve output of 'bots' command by displaying and sorting nodename
   * Minus chrec if .chattr set no flags
+  * Added 'chanset +floodban' to ban clients that violate 'flood-chan' and 'flood-ctcp'
 
 maint
   * Fix various compile warnings with newer GCC
