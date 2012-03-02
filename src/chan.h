@@ -174,7 +174,6 @@ struct chanset_t {
   int limitraise;
   int limittimer;
   int limitcnt;
-  int checklimit;
   int closed_ban;
   int closed_private;
   int closed_invite;

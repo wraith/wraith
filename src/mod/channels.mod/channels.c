@@ -396,17 +396,6 @@ check_slowjoinpart(struct chanset_t *chan)
   return 0;
 }
 
-static void 
-check_limitraise(struct chanset_t *chan) {
-  /* only check every other time for now */
-  chan->checklimit++;
-  if (chan->checklimit == 2) {
-    chan->checklimit = 0;
-    if (chan->limitraise && dolimit(chan))
-      raise_limit(chan);
-  }
-}
-
 static void
 channels_timers()
 {
