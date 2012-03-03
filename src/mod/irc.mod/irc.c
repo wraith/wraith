@@ -1409,8 +1409,6 @@ check_lonely_channel(struct chanset_t *chan)
       !shouldjoin(chan) || (chan->channel.mode & CHANANON))
     return;
 
-  memberlist *m = NULL;
-  char s[UHOSTLEN] = "";
   static int whined = 0;
 
   if ((chan->channel.members - chan->channel.splitmembers) == 1 && channel_cycle(chan) && !channel_stop_cycle(chan)) {
@@ -1428,9 +1426,6 @@ check_lonely_channel(struct chanset_t *chan)
     /* Other people here, but none are ops. If there are other bots make
      * them LEAVE!
      */
-    bool ok = 1;
-    struct userrec *u = NULL;
-
     if (!whined) {
       /* + is opless. Complaining about no ops when without special
        * help(services), we cant get them - Raist
@@ -1439,10 +1434,14 @@ check_lonely_channel(struct chanset_t *chan)
         putlog(LOG_MISC, "*", "%s is active but has no ops :(", chan->dname);
       whined = 1;
     }
+#ifdef disabled
+    memberlist *m = NULL;
+    bool ok = 1;
+
     for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-      simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
-      u = get_user_by_host(s);
-      if (!m->is_me && (!u || !u->bot)) {
+      member_getuser(m, 0);
+
+      if (!m->is_me && (!m->user || !m->user->bot)) {
         ok = 0;
         break;
       }
@@ -1455,6 +1454,7 @@ check_lonely_channel(struct chanset_t *chan)
 	  dprintf(DP_SERVER, "PRIVMSG %s :go %s\n", m->nick, chan->dname);
 */
     }
+#endif
   }
 }
 
