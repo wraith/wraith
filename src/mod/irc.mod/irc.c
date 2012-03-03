@@ -1468,10 +1468,6 @@ check_lonely_channel(struct chanset_t *chan)
 	if (!m->is_me)
 	  dprintf(DP_SERVER, "PRIVMSG %s :go %s\n", m->nick, chan->dname);
 */
-    } else {
-      /* Some humans on channel, but still op-less */
-      request_op(chan);
-/* need: op */
     }
   }
 }
