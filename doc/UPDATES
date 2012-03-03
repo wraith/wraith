@@ -5,6 +5,7 @@ next
   * Add chanset 'closed-exempt' which will allow exempting non-users (who are opped or voice) from being kicked. (fixes #171)
   * Bots now auto-reop other bots that get deopped
   * Bots now ask for ops quicker if another bot is opped
+  * Bots now request/join +ilk channels much quicker
 
 1.4.0 - http://wraith.botpack.net/milestone/1.4.0
   * Updated server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.

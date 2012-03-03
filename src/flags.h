@@ -142,7 +142,7 @@ struct flag_record {
 #define chan_doflood(x)				((x).chan & BOT_FLOODBOT)
 
 void init_flags(void);
-void get_user_flagrec(struct userrec *, struct flag_record *, const char *, const struct chanset_t* = NULL);
+void get_user_flagrec(const struct userrec *, struct flag_record *, const char *, const struct chanset_t* = NULL);
 void set_user_flagrec(struct userrec *, struct flag_record *, const char *);
 void break_down_flags(const char *, struct flag_record *, struct flag_record *);
 int build_flags(char *, struct flag_record *, struct flag_record *);
@@ -151,12 +151,12 @@ int flagrec_ok(struct flag_record *, struct flag_record *);
 flag_t sanity_check(flag_t, int);
 flag_t chan_sanity_check(flag_t, int);
 char geticon(int);
-int privchan(struct flag_record, struct chanset_t *, int);
+int privchan(const struct flag_record, const struct chanset_t *, int);
 #define chk_op(fr, chan) real_chk_op(fr, chan, 1)
-int real_chk_op(struct flag_record, struct chanset_t *, bool);
-int chk_autoop(struct flag_record, struct chanset_t *);
+int real_chk_op(const struct flag_record, const struct chanset_t *, bool);
+int chk_autoop(const struct flag_record, const struct chanset_t *);
 #define chk_deop(fr, chan) real_chk_deop(fr, chan, 1)
-int real_chk_deop(struct flag_record, struct chanset_t *, bool);
+int real_chk_deop(const struct flag_record, const struct chanset_t *, bool);
 #define chk_voice(fr, chan) (\
     (\
      (!chan || (!privchan(fr, chan, PRIV_VOICE) && !chk_devoice(fr))) \
@@ -166,10 +166,10 @@ int real_chk_deop(struct flag_record, struct chanset_t *, bool);
 #define chk_devoice(fr) ((chan_quiet(fr) || (glob_quiet(fr) && !chan_voice(fr))) ? 1 : 0)
 #define isupdatehub() ((conf.bot->hub && conf.bot->u && (conf.bot->u->flags & BOT_UPDATEHUB)) ? 1 : 0)
 #define ischanhub() ((!conf.bot->hub && conf.bot->u && (conf.bot->u->flags & BOT_CHANHUB)) ? 1 : 0)
-int doresolv(struct chanset_t *);
-int dovoice(struct chanset_t *);
-int doflood(struct chanset_t *);
-int dolimit(struct chanset_t *);
+int doresolv(const struct chanset_t *);
+int dovoice(const struct chanset_t *);
+int doflood(const struct chanset_t *);
+int dolimit(const struct chanset_t *);
 int whois_access(struct userrec *, struct userrec *);
 void deflag_user(struct userrec *, int, char *, struct chanset_t *);
 int deflag_translate(const char *);

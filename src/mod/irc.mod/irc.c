@@ -598,8 +598,6 @@ getin_request(char *botnick, char *code, char *par)
 
   if (what[0] != 'K') {
     if (!(channel_pending(chan) || channel_active(chan))) {
-      putlog(LOG_GETIN, "*", "%sreq from %s/%s %s %s - I'm not on %s right now.", type, botnick, nick, desc, 
-                             chan->dname, chan->dname);
       return;
     }
   }
@@ -719,6 +717,27 @@ getin_request(char *botnick, char *code, char *par)
 
     if (!me_op(chan)) {
       putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - I haven't got ops", botnick, nick, chan->dname);
+      return;
+    }
+
+    // Should I respond to this request?
+    // If there's 18 eligible bots in the channel, and in-bots is 2, I have a 2/18 chance of replying.
+    int eligible_bots = 0;
+    for (memberlist* m = chan->channel.member; m && m->nick[0]; m = m->next) {
+      if (chan_hasop(m)) {
+        member_getuser(m, 0);
+        if (m->user && m->user->bot) {
+          ++eligible_bots;
+        }
+      }
+    }
+
+    if (!eligible_bots) {
+      return;
+    }
+
+    if (!((randint(eligible_bots) + 1) <= in_bots)) {
+      // Not my turn
       return;
     }
 
@@ -987,15 +1006,17 @@ request_in(struct chanset_t *chan)
   }
 
   int foundBots = 0;
-  char* botops[MAX_BOTS];
+//  char* botops[MAX_BOTS];
 
   for (tand_t* bot = tandbot; bot && (foundBots < MAX_BOTS); bot = bot->next) {
     if (bot->hub || !bot->u)
       continue;
 
     get_user_flagrec(bot->u, &fr, chan->dname, chan);
-    if (bot_shouldjoin(bot->u, &fr, chan) && chk_op(fr, chan))
-      botops[foundBots++] = bot->bot;
+    if (bot_shouldjoin(bot->u, &fr, chan) && chk_op(fr, chan)) {
+      ++foundBots;
+//      botops[foundBots++] = bot->bot;
+    }
   }
 
   if (!foundBots) {
@@ -1003,23 +1024,9 @@ request_in(struct chanset_t *chan)
     return;
   }
 
-  int cnt = foundBots < in_bots ? foundBots : in_bots;
-  char s[255] = "";
-  char l[1024] = "";
-  size_t len = 0;
-
-  simple_snprintf(s, sizeof(s), "gi i %s %s %s!%s %s", chan->dname, botname, botname, botuserhost, botuserip);
-
-  shuffleArray(botops, foundBots);
-  for (int n = 0; n < cnt; ++n) {
-    putbot(botops[n], s);
-
-    if (l[0])
-      len += strlcpy(l + len, ", ", sizeof(l) - len);
-    len += strlcpy(l + len, botops[n], sizeof(l) - len);
-  }
-  l[len] = 0;
-  putlog(LOG_GETIN, "*", "Requested help to join %s from %s", chan->dname, l);
+  bd::String request(bd::String::printf("gi i %s %s %s!%s %s", chan->dname, botname, botname, botuserhost, botuserip));
+  putallbots(request.c_str());
+  putlog(LOG_GETIN, "*", "Requested help to join %s", chan->dname);
 }
 
 
