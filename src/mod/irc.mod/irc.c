@@ -816,8 +816,10 @@ getin_request(char *botnick, char *code, char *par)
 static void
 request_op(struct chanset_t *chan)
 {
-  if (!chan || (chan && (channel_pending(chan) || !shouldjoin(chan) || !channel_active(chan) || me_op(chan))))
+  if (!chan || (chan && (channel_pending(chan) || !shouldjoin(chan) || !channel_active(chan) || me_op(chan)))) {
+    chan->channel.do_opreq = 0;
     return;
+  }
 
   if (chan->channel.no_op) {
     if (chan->channel.no_op > now)      /* dont op until this time has passed */
@@ -826,7 +828,6 @@ request_op(struct chanset_t *chan)
       chan->channel.no_op = 0;
   }
 
-  chan->channel.do_opreq = 0;
   /* check server lag */
   if (server_lag > lag_threshold) {
     putlog(LOG_GETIN, "*", "Not asking for ops on %s - I'm too lagged", chan->dname);
@@ -1276,21 +1277,6 @@ killmember(struct chanset_t *chan, char *nick)
   return 1;
 }
 
-/* Check if I am a chanop. Returns boolean 1 or 0.
- */
-bool
-me_op(const struct chanset_t *chan)
-{
-  memberlist *mx = ismember(chan, botname);
-
-  if (!mx)
-    return 0;
-  if (chan_hasop(mx))
-    return 1;
-  else
-    return 0;
-}
-
 /* Check whether I'm voice. Returns boolean 1 or 0.
  */
 bool
@@ -1423,8 +1409,6 @@ check_lonely_channel(struct chanset_t *chan)
       !shouldjoin(chan) || (chan->channel.mode & CHANANON))
     return;
 
-  memberlist *m = NULL;
-  char s[UHOSTLEN] = "";
   static int whined = 0;
 
   if ((chan->channel.members - chan->channel.splitmembers) == 1 && channel_cycle(chan) && !channel_stop_cycle(chan)) {
@@ -1436,15 +1420,10 @@ check_lonely_channel(struct chanset_t *chan)
     }
   } else if (any_ops(chan)) {
     whined = 0;
-    request_op(chan);
-/* need: op */
   } else {
     /* Other people here, but none are ops. If there are other bots make
      * them LEAVE!
      */
-    bool ok = 1;
-    struct userrec *u = NULL;
-
     if (!whined) {
       /* + is opless. Complaining about no ops when without special
        * help(services), we cant get them - Raist
@@ -1453,10 +1432,14 @@ check_lonely_channel(struct chanset_t *chan)
         putlog(LOG_MISC, "*", "%s is active but has no ops :(", chan->dname);
       whined = 1;
     }
+#ifdef disabled
+    memberlist *m = NULL;
+    bool ok = 1;
+
     for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-      simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
-      u = get_user_by_host(s);
-      if (!m->is_me && (!u || !u->bot)) {
+      member_getuser(m, 0);
+
+      if (!m->is_me && (!m->user || !m->user->bot)) {
         ok = 0;
         break;
       }
@@ -1468,11 +1451,8 @@ check_lonely_channel(struct chanset_t *chan)
 	if (!m->is_me)
 	  dprintf(DP_SERVER, "PRIVMSG %s :go %s\n", m->nick, chan->dname);
 */
-    } else {
-      /* Some humans on channel, but still op-less */
-      request_op(chan);
-/* need: op */
     }
+#endif
   }
 }
 
@@ -1622,10 +1602,11 @@ check_expired_chanstuff(struct chanset_t *chan)
       }
     } /* me_op */
 
-//    for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-    int splitmembers = 0;
+    size_t splitmembers = 0, bot_ops = 0;
+    const bool im_opped = me_op(chan);
     for (m = chan->channel.member; m && m->nick[0]; m = n) {
       n = m->next;
+      // Update split members
       if (m->split) {
         ++splitmembers;
         if (now - m->split > wait_split) {
@@ -1648,7 +1629,7 @@ check_expired_chanstuff(struct chanset_t *chan)
         }
       }
 
-      if (me_op(chan)) {
+      if (im_opped) {
         if (dovoice(chan) && !loading) {      /* autovoice of +v users if bot is +y */
           if (!chan_hasop(m) && !chan_hasvoice(m) && !chan_sentvoice(m)) {
             member_getuser(m, 1);
@@ -1673,11 +1654,17 @@ check_expired_chanstuff(struct chanset_t *chan)
           }
         }
       }
+      if (m->user && m->user->bot) {
+        ++bot_ops;
+      }
       m = n;
     }
     // Update minutely
     chan->channel.splitmembers = splitmembers;
     check_lonely_channel(chan);
+    if (bot_ops && !im_opped) {
+      request_op(chan);
+    }
   }
 }
 
@@ -1801,23 +1788,10 @@ static cmd_t irc_bot[] = {
   {NULL, NULL, NULL, NULL, 0}
 };
 
-static void
-getin_5secondly()
-{
-  if (!server_online)
-    return;
-
-  for (register struct chanset_t *chan = chanset; chan; chan = chan->next) {
-    if ((!channel_pending(chan) && channel_active(chan)) && !me_op(chan))
-      request_op(chan);
-  }
-}
-
 void
 irc_init()
 {
   timer_create_secs(60, "irc_minutely", (Function) irc_minutely);
-  timer_create_secs(5, "getin_5secondly", (Function) getin_5secondly);
 
   /* Add our commands to the imported tables. */
   add_builtins("dcc", irc_dcc);

@@ -557,7 +557,14 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
     meop = 1;
   }
 
-  get_user_flagrec(mv->user, &victim, chan->dname, chan);
+  if (mv->user) {
+    get_user_flagrec(mv->user, &victim, chan->dname, chan);
+
+    // Did some other bot just get opped, and I'm not opped yet?
+    if (mv->user->bot && !me_opped && !meop) {
+      chan->channel.do_opreq = 1;
+    }
+  }
   /* Flags need to be set correctly right from the beginning now, so that
    * add_mode() doesn't get irritated.
    */
@@ -647,11 +654,14 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
 
   if (mdop_reversing && !was_op)
     return;
-  
+
+  /* m is NULL if a server made the change */
   if (m)
     simple_snprintf(s1, sizeof(s1), "%s!%s", m->nick, m->userhost);
 
-  get_user_flagrec(mv->user, &victim, chan->dname, chan);
+  if (mv->user) {
+    get_user_flagrec(mv->user, &victim, chan->dname, chan);
+  }
 
   /* Flags need to be set correctly right from the beginning now, so that
    * add_mode() doesn't get irritated.
@@ -666,12 +676,21 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
   /* Deop'd someone on my oplist? */
   if (me_op(chan)) {
     /* do we want to reop victim? */
-    if ((reversing) && 
-        ((m && !m->is_me && rfc_casecmp(mv->nick, m->nick)) || (!m)) &&
-        !mv->is_me &&
-        (chk_op(victim, chan) || !chan_bitch(chan)))
+    if (
+        /* I didn't deop them, another bot didn't deop them and they didn't deop themselves. */
+        (was_op && ((m && !m->is_me && mv != m && !(m->user && m->user->bot)) || (!m))) && (
+          /*
+           * reversing
+           * They are either an op or this chan is -bitch
+           */
+          (reversing && (!chan_bitch(chan) || chk_op(victim, chan))) ||
+          /* Reop bots to avoid them needing to ask */
+          (role == 3 && mv->user && mv->user->bot && chk_op(victim, chan))
+        )
+       ) {
       /* Then we'll bless the victim */
       do_op(mv->nick, chan, 0, 0);
+    }
   }
 
   if (isserver[0])		/* !m */
