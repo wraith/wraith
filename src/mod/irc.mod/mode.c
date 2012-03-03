@@ -720,12 +720,14 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
     if (!m)
       putlog(LOG_MODES, chan->dname, "TS resync deopped me on %s :(", chan->dname);
   }
+#ifdef revenge
   if (m) {
     char s[UHOSTLEN] = "";
 
     simple_snprintf(s, sizeof(s), "%s!%s", mv->nick, mv->userhost);
 //    maybe_revenge(chan, s1, s, REVENGE_DEOP);
   }
+#endif
 }
 
 static void
