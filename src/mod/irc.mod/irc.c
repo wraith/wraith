@@ -598,8 +598,6 @@ getin_request(char *botnick, char *code, char *par)
 
   if (what[0] != 'K') {
     if (!(channel_pending(chan) || channel_active(chan))) {
-      putlog(LOG_GETIN, "*", "%sreq from %s/%s %s %s - I'm not on %s right now.", type, botnick, nick, desc, 
-                             chan->dname, chan->dname);
       return;
     }
   }
@@ -719,6 +717,27 @@ getin_request(char *botnick, char *code, char *par)
 
     if (!me_op(chan)) {
       putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - I haven't got ops", botnick, nick, chan->dname);
+      return;
+    }
+
+    // Should I respond to this request?
+    // If there's 18 eligible bots in the channel, and in-bots is 2, I have a 2/18 chance of replying.
+    int eligible_bots = 0;
+    for (memberlist* m = chan->channel.member; m && m->nick[0]; m = m->next) {
+      if (chan_hasop(m)) {
+        member_getuser(m, 0);
+        if (m->user && m->user->bot) {
+          ++eligible_bots;
+        }
+      }
+    }
+
+    if (!eligible_bots) {
+      return;
+    }
+
+    if (!((randint(eligible_bots) + 1) <= in_bots)) {
+      // Not my turn
       return;
     }
 
