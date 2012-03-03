@@ -380,7 +380,7 @@ set_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chname)
 /* Always pass the dname (display name) to this function for chname <cybah>
  */
 void
-get_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chname, const struct chanset_t* chan)
+get_user_flagrec(const struct userrec *u, struct flag_record *fr, const char *chname, const struct chanset_t* chan)
 {
   fr->bot = 0;
   if (!u) {
@@ -427,7 +427,7 @@ get_user_flagrec(struct userrec *u, struct flag_record *fr, const char *chname, 
  * restricted by +private for the channel
  */
 int
-privchan(struct flag_record fr, struct chanset_t *chan, int type)
+privchan(const struct flag_record fr, const struct chanset_t *chan, int type)
 {
   if (!chan || !channel_privchan(chan) || glob_bot(fr) || glob_owner(fr))
     return 0;                   /* user is implicitly not restricted by +private, they may however be lacking other flags */
@@ -444,7 +444,7 @@ privchan(struct flag_record fr, struct chanset_t *chan, int type)
 }
 
 int
-real_chk_op(struct flag_record fr, struct chanset_t *chan, bool botbitch)
+real_chk_op(const struct flag_record fr, const struct chanset_t *chan, bool botbitch)
 {
   if (!chan && glob_op(fr))
     return 1;
@@ -459,7 +459,7 @@ real_chk_op(struct flag_record fr, struct chanset_t *chan, bool botbitch)
 }
 
 int
-chk_autoop(struct flag_record fr, struct chanset_t *chan)
+chk_autoop(const struct flag_record fr, const struct chanset_t *chan)
 {
   if (glob_bot(fr))
     return 0;
@@ -471,7 +471,7 @@ chk_autoop(struct flag_record fr, struct chanset_t *chan)
 }
 
 int
-real_chk_deop(struct flag_record fr, struct chanset_t *chan, bool botbitch)
+real_chk_deop(const struct flag_record fr, const struct chanset_t *chan, bool botbitch)
 {
   if (chan && botbitch && channel_botbitch(chan) && !glob_bot(fr))
     return 1;
@@ -483,7 +483,7 @@ real_chk_deop(struct flag_record fr, struct chanset_t *chan, bool botbitch)
 }
 
 int
-doresolv(struct chanset_t *chan)
+doresolv(const struct chanset_t *chan)
 {
   if (!chan)
     return 0;
@@ -497,7 +497,7 @@ doresolv(struct chanset_t *chan)
 }
 
 int
-dovoice(struct chanset_t *chan)
+dovoice(const struct chanset_t *chan)
 {
   if (!chan)
     return 0;
@@ -511,7 +511,7 @@ dovoice(struct chanset_t *chan)
 }
 
 int
-doflood(struct chanset_t *chan)
+doflood(const struct chanset_t *chan)
 {
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_BOT, 0, 0, 0 };
   if (!chan)
@@ -524,7 +524,7 @@ doflood(struct chanset_t *chan)
 }
 
 int
-dolimit(struct chanset_t *chan)
+dolimit(const struct chanset_t *chan)
 {
   if (!chan)
     return 0;

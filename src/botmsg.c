@@ -299,7 +299,7 @@ void putallbots(const char *par)
   return;
 }
 
-void putbot(const char *bot, char *par)
+void putbot(const char *bot, const char *par)
 {
   if (!bot || !par || !bot[0] || !par[0])
     return;
