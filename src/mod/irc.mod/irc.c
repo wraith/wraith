@@ -1420,8 +1420,6 @@ check_lonely_channel(struct chanset_t *chan)
     }
   } else if (any_ops(chan)) {
     whined = 0;
-    request_op(chan);
-/* need: op */
   } else {
     /* Other people here, but none are ops. If there are other bots make
      * them LEAVE!
@@ -1604,10 +1602,11 @@ check_expired_chanstuff(struct chanset_t *chan)
       }
     } /* me_op */
 
-//    for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-    int splitmembers = 0;
+    size_t splitmembers = 0, bot_ops = 0;
+    const bool im_opped = me_op(chan);
     for (m = chan->channel.member; m && m->nick[0]; m = n) {
       n = m->next;
+      // Update split members
       if (m->split) {
         ++splitmembers;
         if (now - m->split > wait_split) {
@@ -1630,7 +1629,7 @@ check_expired_chanstuff(struct chanset_t *chan)
         }
       }
 
-      if (me_op(chan)) {
+      if (im_opped) {
         if (dovoice(chan) && !loading) {      /* autovoice of +v users if bot is +y */
           if (!chan_hasop(m) && !chan_hasvoice(m) && !chan_sentvoice(m)) {
             member_getuser(m, 1);
@@ -1655,11 +1654,17 @@ check_expired_chanstuff(struct chanset_t *chan)
           }
         }
       }
+      if (m->user && m->user->bot) {
+        ++bot_ops;
+      }
       m = n;
     }
     // Update minutely
     chan->channel.splitmembers = splitmembers;
     check_lonely_channel(chan);
+    if (bot_ops && !im_opped) {
+      request_op(chan);
+    }
   }
 }
 
