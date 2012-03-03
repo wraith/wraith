@@ -816,8 +816,10 @@ getin_request(char *botnick, char *code, char *par)
 static void
 request_op(struct chanset_t *chan)
 {
-  if (!chan || (chan && (channel_pending(chan) || !shouldjoin(chan) || !channel_active(chan) || me_op(chan))))
+  if (!chan || (chan && (channel_pending(chan) || !shouldjoin(chan) || !channel_active(chan) || me_op(chan)))) {
+    chan->channel.do_opreq = 0;
     return;
+  }
 
   if (chan->channel.no_op) {
     if (chan->channel.no_op > now)      /* dont op until this time has passed */
@@ -826,7 +828,6 @@ request_op(struct chanset_t *chan)
       chan->channel.no_op = 0;
   }
 
-  chan->channel.do_opreq = 0;
   /* check server lag */
   if (server_lag > lag_threshold) {
     putlog(LOG_GETIN, "*", "Not asking for ops on %s - I'm too lagged", chan->dname);
