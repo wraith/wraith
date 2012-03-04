@@ -63,7 +63,7 @@ tellconf()
              bot->net.host ? bot->net.host : "", bot->net.ip6 ? bot->net.ip6 : "", bot->net.host6 ? bot->net.host6 : "", 
              bot->net.v6,
              bot->hub,
-             bot->pid);
+             (int)bot->pid);
   }
   if (conf.bot && ((bot = conf.bot))) {
     sdprintf(STR("me:\n"));
@@ -74,7 +74,7 @@ tellconf()
              bot->net.host ? bot->net.host : "", bot->net.ip6 ? bot->net.ip6 : "", bot->net.host6 ? bot->net.host6 : "", 
              bot->net.v6,
              bot->hub,
-             bot->pid);
+             (int)bot->pid);
   }
 }
 
@@ -113,7 +113,7 @@ spawnbots(conf_bot *bots, bool rehashed)
      */
     } else if ((conf.bot && !strcasecmp(bot->nick, conf.bot->nick) &&
                (updating == UPDATE_AUTO || rehashed)) || (bot->pid && !updating)) {
-      sdprintf(STR(" ... skipping. Updating: %d, pid: %d"), updating, bot->pid);
+      sdprintf(STR(" ... skipping. Updating: %d, pid: %d"), updating, (int)bot->pid);
       continue;
     } else {
       /* if we are updating with -u then we need to restart ALL bots */
