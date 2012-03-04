@@ -1014,6 +1014,7 @@ int channel_add(char *result, const char *newname, char *options, bool isdefault
     chan->voice_non_ident = 1;
     chan->auto_delay = 5;
     chan->ban_type = 3;
+    chan->revenge = DEFLAG_REACT;
 /* Chanint template
  *  chan->temp = 0;
  */
