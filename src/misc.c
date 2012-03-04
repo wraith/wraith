@@ -802,9 +802,9 @@ restart(int idx)
       stream << bd::String::printf(STR("+flood_count %d\n"), flood_count);
     if (my_cookie_counter)
       stream << bd::String::printf(STR("+my_cookie_counter %lu\n"), my_cookie_counter);
-    stream << bd::String::printf(STR("+server_online %li\n"), server_online);
+    stream << bd::String::printf(STR("+server_online %li\n"), (long)server_online);
   }
-  stream << bd::String::printf(STR("+online_since %li\n"), online_since);
+  stream << bd::String::printf(STR("+online_since %li\n"), (long)online_since);
   if (floodless)
     stream << bd::String::printf(STR("+server_floodless %d\n"), floodless);
   if (in_deaf)
@@ -814,7 +814,7 @@ restart(int idx)
   for (struct chanset_t *chan = chanset; chan; chan = chan->next)
     if (shouldjoin(chan) && (channel_active(chan) || channel_pending(chan)))
       stream << bd::String::printf(STR("+chan %s\n"), chan->dname);
-  stream << bd::String::printf(STR("+buildts %li\n"), buildts);
+  stream << bd::String::printf(STR("+buildts %li\n"), (long)buildts);
   stream << bd::String::printf(STR("+ip4 %s\n"), myipstr(AF_INET));
   stream << bd::String::printf(STR("+ip6 %s\n"), myipstr(AF_INET6));
   replay_cache(-1, &stream);
