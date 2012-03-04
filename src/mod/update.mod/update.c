@@ -207,7 +207,7 @@ static void got_nu(char *botnick, char *code, char *par)
 /* needupdate? curver */
    time_t newbuildts = atol(newsplit(&par)); //newts
    newsplit(&par); //Not used (old svn revision)
-   const char *newcommit = newsplit(&par);
+   newsplit(&par); //Not used (new commit)
 
    if (newbuildts > buildts) {
      if (!conf.bot->hub) {
