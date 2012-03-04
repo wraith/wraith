@@ -2872,7 +2872,7 @@ static int gotkick(char *from, char *origmsg)
   }
   if (channel_active(chan)) {
     char *whodid = NULL, s1[UHOSTLEN] = "", buf[UHOSTLEN] = "", *uhost = buf;
-    memberlist *m = NULL, *m_victim = NULL;
+    memberlist *m = NULL, *mv = NULL;
     struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
     fixcolon(msg);
@@ -2899,12 +2899,12 @@ static int gotkick(char *from, char *origmsg)
       chan->channel.fighting++;
     }
 
-    m_victim = ismember(chan, nick);
+    mv = ismember(chan, nick);
 
-    member_getuser(m_victim);
-    if (m_victim->user) {
+    member_getuser(mv);
+    if (mv->user) {
       // Revenge kick clients that kick our bots
-      if (chan->revenge && !m_victim->is_me && m && m_victim->user->bot) {
+      if (chan->revenge && !mv->is_me && m && mv->user->bot) {
         if (role < 5 && !chan_sentkick(m) && me_op(chan)) {
           m->flags |= SENTKICK;
           dprintf(DP_MODE_NEXT, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_REVENGE));
@@ -2917,11 +2917,11 @@ static int gotkick(char *from, char *origmsg)
         }
       }
 
-      set_handle_laston(chan->dname, m_victim->user, now);
+      set_handle_laston(chan->dname, mv->user, now);
     }
     irc_log(chan, "%s was kicked by %s (%s)", s1, from, msg);
     /* Kicked ME?!? the sods! */
-    if (m_victim->is_me) {
+    if (mv->is_me) {
       check_rejoin(chan);
     } else {
       killmember(chan, nick);
