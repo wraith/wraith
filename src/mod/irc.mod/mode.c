@@ -1122,7 +1122,7 @@ gotmode(char *from, char *msg)
               } else {
                 if (u) {
                   simple_snprintf(tmp, sizeof(tmp), "Mass deop on %s by %s", chan->dname, m->nick);
-                  deflag_user(u, DEFLAG_MDOP, tmp, chan);
+                  deflag_user(u, DEFLAG_EVENT_MDOP, tmp, chan);
                 }
               }
               reversing = mdop_reversing = 1;
@@ -1142,7 +1142,7 @@ gotmode(char *from, char *msg)
                 } else { 
                   if (u) {
                     simple_snprintf(tmp, sizeof(tmp), "Mass op on %s by %s", chan->dname, m->nick);
-                    deflag_user(u, DEFLAG_MOP, tmp, chan);
+                    deflag_user(u, DEFLAG_EVENT_MOP, tmp, chan);
                   }
                 }
               }
@@ -1210,7 +1210,7 @@ gotmode(char *from, char *msg)
                   dprintf_real(DP_MODE_NEXT, tmp, len, sizeof(tmp));
                 }
                 simple_snprintf(tmp, sizeof(tmp), "%s!%s MODE %s %s", m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
-                deflag_user(u, DEFLAG_BADCOOKIE, tmp, chan);
+                deflag_user(u, DEFLAG_EVENT_BADCOOKIE, tmp, chan);
               }
               /* Do the logging last as it can slow down the KICK pushing */
               putlog(LOG_WARNING, "*", "%s opped in %s with bad cookie(%d): %s", m->nick, chan->dname, isbadop, msg);
@@ -1249,7 +1249,7 @@ gotmode(char *from, char *msg)
                     m->flags |= SENTKICK;
                   }
                   simple_snprintf(tmp, sizeof(tmp), "%s!%s MODE %s %s", m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
-                  deflag_user(u, DEFLAG_MANUALOP, tmp, chan);
+                  deflag_user(u, DEFLAG_EVENT_MANUALOP, tmp, chan);
                 }
                 break;
               default:

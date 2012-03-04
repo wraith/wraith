@@ -737,7 +737,7 @@ static bool detect_chan_flood(char *floodnick, char *floodhost, char *from,
         char s[256] = "";
 
         simple_snprintf(s, sizeof(s), "Mass deop on %s by %s", chan->dname, from);
-        deflag_user(u, DEFLAG_MDOP, s, chan);
+        deflag_user(u, DEFLAG_EVENT_MDOP, s, chan);
       }
       if (channel_protect(chan))
         do_protect(chan, "Mass Deop");

@@ -1135,7 +1135,7 @@ static void show_int(int idx, char *work, int *cnt, const char *desc, int state,
 
 #define SHOW_FLAG(name, state) show_flag(idx, work, &cnt, name, state, sizeof(work))
 #define SHOW_INT(desc, state, yes, no) show_int(idx, work, &cnt, desc, state, yes, no, sizeof(work))
-#define P_STR deflag == P_KICK ? "Kick" : (deflag == P_DEOP ? "Deop" : (deflag == P_DELETE ? "Remove" : NULL))
+#define DEFLAG_STR deflag == DEFLAG_KICK ? "Kick" : (deflag == DEFLAG_DEOP ? "Deop" : (deflag == DEFLAG_DELETE ? "Remove" : NULL))
 #define F_STR(x) x == CHAN_FLAG_OP ? "Op" : (x == CHAN_FLAG_VOICE ? "Voice" : (x == CHAN_FLAG_USER ? "User" : NULL))
 static void cmd_chaninfo(int idx, char *par)
 {
@@ -1234,7 +1234,7 @@ static void cmd_chaninfo(int idx, char *par)
     dprintf(idx, "Channel settings:\n");
     deflag = chan->bad_cookie;
     SHOW_INT("Auto-delay: ", chan->auto_delay, NULL, "None");
-    SHOW_INT("Bad-cookie:" , chan->bad_cookie, P_STR, "Ignore");
+    SHOW_INT("Bad-cookie:" , chan->bad_cookie, DEFLAG_STR, "Ignore");
     SHOW_INT("Ban-time: ", chan->ban_time, NULL, "Forever");
     SHOW_INT("Ban-type: ", chan->ban_type, NULL, "3");
     SHOW_INT("Closed-ban: ", chan->closed_ban, NULL, "Don't!");
@@ -1247,13 +1247,13 @@ static void cmd_chaninfo(int idx, char *par)
     SHOW_INT("Knock: ", chan->knock_flags, F_STR(chan->knock_flags), "None");
     SHOW_INT("Limit raise (limit): ", chan->limitraise, NULL, "Disabled");
     deflag = chan->manop;
-    SHOW_INT("Manop: ", chan->manop, P_STR, "Ignore");
+    SHOW_INT("Manop: ", chan->manop, DEFLAG_STR, "Ignore");
     deflag = chan->mdop;
-    SHOW_INT("Mdop: ", chan->mdop, P_STR, "Ignore");
+    SHOW_INT("Mdop: ", chan->mdop, DEFLAG_STR, "Ignore");
     deflag = chan->mop;
-    SHOW_INT("Mop: ", chan->mop, P_STR, "Ignore");
+    SHOW_INT("Mop: ", chan->mop, DEFLAG_STR, "Ignore");
     deflag = chan->revenge;
-    SHOW_INT("Revenge: ", chan->revenge, P_STR, "Ignore");
+    SHOW_INT("Revenge: ", chan->revenge, DEFLAG_STR, "Ignore");
     SHOW_INT("Protect-backup: ", chan->protect_backup, "Do!", "Don't!");
     SHOW_INT("Voice-non-ident: ", chan->voice_non_ident, "Do!", "Don't!");
 
