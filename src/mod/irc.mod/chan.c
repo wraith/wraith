@@ -2899,17 +2899,33 @@ static int gotkick(char *from, char *origmsg)
       chan->channel.fighting++;
     }
 
+    const bool kicked_me = match_my_nick(nick);
+
     if ((m_victim = ismember(chan, nick))) {
       member_getuser(m_victim);
-      if (m_victim->user)
+      if (m_victim->user) {
+        // Revenge kick clients that kick our bots
+        if (chan->revenge && !kicked_me && m && m_victim->user->bot) {
+          if (role < 5 && !chan_sentkick(m) && me_op(chan)) {
+            m->flags |= SENTKICK;
+            dprintf(DP_MODE_NEXT, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_REVENGE));
+          } else {
+            if (m->user) {
+              char tmp[128] = "";
+              simple_snprintf(tmp, sizeof(tmp), "Kicked bot %s on %s", m->nick, chan->dname);
+              deflag_user(m->user, DEFLAG_EVENT_REVENGE_KICK, tmp, chan);
+            }
+          }
+        }
+
         set_handle_laston(chan->dname, m_victim->user, now);
-//      maybe_revenge(chan, from, s1, REVENGE_KICK);
+      }
     } else {
       simple_snprintf(s1, sizeof(s1), "%s!*@could.not.loookup.hostname", nick);
     }
     irc_log(chan, "%s was kicked by %s (%s)", s1, from, msg);
     /* Kicked ME?!? the sods! */
-    if (match_my_nick(nick)) {
+    if (kicked_me) {
       check_rejoin(chan);
     } else {
       killmember(chan, nick);
