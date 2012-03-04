@@ -1208,8 +1208,6 @@ static void cmd_chaninfo(int idx, char *par)
     SHOW_FLAG("private",	channel_privchan(chan));
     SHOW_FLAG("protect",	channel_protect(chan));
     SHOW_FLAG("rbl",		channel_rbl(chan));
-//    SHOW_FLAG("revengebot",	channel_revengebot(chan));
-//    SHOW_FLAG("revenge",	channel_revenge(chan));
     if (HAVE_TAKE)
       SHOW_FLAG("take",		channel_take(chan));
     SHOW_FLAG("voice",		channel_voice(chan));
@@ -1254,7 +1252,6 @@ static void cmd_chaninfo(int idx, char *par)
     SHOW_INT("Mdop: ", chan->mdop, P_STR, "Ignore");
     deflag = chan->mop;
     SHOW_INT("Mop: ", chan->mop, P_STR, "Ignore");
-//    SHOW_INT("Revenge-mode: ", chan->revenge_mode, NULL, NULL);
     SHOW_INT("Protect-backup: ", chan->protect_backup, "Do!", "Don't!");
     SHOW_INT("Voice-non-ident: ", chan->voice_non_ident, "Do!", "Don't!");
 

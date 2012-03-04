@@ -189,9 +189,6 @@ struct chanset_t {
  *int temp;
  */
   int flood_exempt_mode;
-#ifdef REVENGE
-  int revenge_mode;
-#endif
   interval_t ban_time;
   interval_t invite_time;
   interval_t exempt_time;
@@ -303,12 +300,6 @@ struct chanset_t *findchan_by_dname(const char *name);
 #define channel_secret(chan) (chan->status & CHAN_SECRET)
 #define channel_cycle(chan) (chan->status & CHAN_CYCLE)
 #define channel_inactive(chan) (chan->status & CHAN_INACTIVE)
-
-
-#ifdef REVENGE
-#define channel_revenge(chan) (chan->status & CHAN_REVENGE)
-#define channel_revengebot(chan) (chan->status & CHAN_REVENGEBOT)
-#endif 
 
 #define channel_closed(chan) (chan->status & CHAN_CLOSED)
 #define channel_take(chan) (chan->status & CHAN_TAKE)

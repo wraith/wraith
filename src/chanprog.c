@@ -22,7 +22,6 @@
  * chanprog.c -- handles:
  *   rmspace()
  *   maintaining the server list
- *   revenge punishment
  *   timers, utimers
  *   telling the current programmed settings
  *   initializing a lot of stuff and loading the tcl scripts

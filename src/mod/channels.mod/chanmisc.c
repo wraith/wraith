@@ -398,16 +398,6 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
       key.trim();
       set_fish_key(chan->dname, key);
       strlcpy(chan->fish_key, key.c_str(), sizeof(chan->fish_key));
-/*
-    } else if (!strcmp(item[i], "revenge-mode")) {
-      i++;
-      if (i >= items) {
-        if (result)
-          strlcpy(result, "channel revenge-mode needs argument", RESULT_LEN);
-        return ERROR;
-      }
-      chan->revenge_mode = atoi(item[i]);
-*/
     } else if (!strcmp(item[i], "ban-time")) {
       i++;
       if (i >= items) {
@@ -1040,7 +1030,6 @@ int channel_add(char *result, const char *newname, char *options, bool isdefault
     chan->flood_nick_time = gfld_nick_time;
     chan->flood_mjoin_thr = 6;
     chan->flood_mjoin_time = 1;
-//    chan->revenge_mode = global_revenge_mode;
     chan->limitraise = 20;
     chan->ban_time = global_ban_time;
     chan->exempt_time = global_exempt_time;

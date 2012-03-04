@@ -11,9 +11,6 @@
 
 enum { BC_NOCOOKIE = 1, BC_SLACK, BC_HASH, BC_COUNTER };
 
-//#define REVENGE_KICK 1		/* Kicked victim	*/
-//#define REVENGE_DEOP 2		/* Took op		*/
-
 #define PRIO_DEOP 1
 #define PRIO_KICK 2
 
@@ -85,7 +82,6 @@ static void do_protect(struct chanset_t* chan, const char* reason);
 static bool do_op(char *, struct chanset_t *, bool, bool);
 static void request_op(struct chanset_t *);
 static void request_in(struct chanset_t *);
-//static void maybe_revenge(struct chanset_t *, char *, char *, int);
 static bool detect_chan_flood(char *, char *, char *, struct chanset_t *, int,
 			     char *);
 static bool new_mask(masklist *, char *, char *);
