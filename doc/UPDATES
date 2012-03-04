@@ -1,3 +1,5 @@
+* Add 'chanset revenge' which will react/kick/ban/remove users who kick/ban/deop bots.
+
 1.4.0 - http://wraith.botpack.net/milestone/1.4.0
   * Updated server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
   * Change +bitch reaction to use normal queue for deopping opper/opped clients

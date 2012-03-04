@@ -429,14 +429,15 @@ See also: link%{+a}, newhub%{-}
    The following options choose how to respond to specific events.
         Each can be set as any of the specified options.
         ignore/0           Ignore
-        deop/1             Deop (chattr +d)
-        kick/2             Kick (chattr +k)
+        deop/1             Deop user (chattr +d)
+        kick/2             Kick user (chattr +k)
         delete/remove/3    Remove user
       
       $bbad-cookie$b             Missing or invalid cookie in bot op line.
       $bmanop$b                  Users who op manually.
       $bmdop$b                   Users who mass deop.
       $bmop$b                    Users who mass op in a -mop chan.
+      $brevenge$b                Users who kick/ban/deop bots.
  
    The following can be set + or - (e.g. '%dchanset #channel -enforcebans')
         $bautoop$b         Bots that are +y will auto-op all users with 
