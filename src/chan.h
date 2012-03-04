@@ -66,6 +66,7 @@ enum deflag_t {
   DEFLAG_DEOP = 1,
   DEFLAG_KICK = 2,
   DEFLAG_DELETE = 3,
+  DEFLAG_REACT = 4,
 };
 
 /* Why duplicate this struct for exempts and invites only under another

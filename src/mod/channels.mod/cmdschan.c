@@ -1135,7 +1135,7 @@ static void show_int(int idx, char *work, int *cnt, const char *desc, int state,
 
 #define SHOW_FLAG(name, state) show_flag(idx, work, &cnt, name, state, sizeof(work))
 #define SHOW_INT(desc, state, yes, no) show_int(idx, work, &cnt, desc, state, yes, no, sizeof(work))
-#define DEFLAG_STR deflag == DEFLAG_KICK ? "Kick" : (deflag == DEFLAG_DEOP ? "Deop" : (deflag == DEFLAG_DELETE ? "Remove" : NULL))
+#define DEFLAG_STR deflag == DEFLAG_KICK ? "Kick" : (deflag == DEFLAG_DEOP ? "Deop" : (deflag == DEFLAG_DELETE ? "Remove" : (deflag == DEFLAG_REACT ? "React" : NULL)))
 #define F_STR(x) x == CHAN_FLAG_OP ? "Op" : (x == CHAN_FLAG_VOICE ? "Voice" : (x == CHAN_FLAG_USER ? "User" : NULL))
 static void cmd_chaninfo(int idx, char *par)
 {
