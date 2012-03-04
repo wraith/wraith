@@ -596,20 +596,18 @@ void deflag_user(struct userrec *u, deflag_event_t why, const char *msg, const s
     strlcpy(tmp, STR("Manual op in -manop channel"), sizeof(tmp));
     which = chan->manop;
     break;
-#ifdef G_MEAN
-  case DEFLAG_EVENT_MEAN_DEOP:
-    strlcpy(tmp, STR("Deopped bot in +mean channel"), sizeof(tmp));
-    ent = &CFG_MEANDEOP;
+  case DEFLAG_EVENT_REVENGE_DEOP:
+    strlcpy(tmp, STR("Deopped bot in +revenge channel"), sizeof(tmp));
+    which = chan->revenge;
     break;
-  case DEFLAG_EVENT_MEAN_KICK:
-    strlcpy(tmp, STR("Kicked bot in +mean channel"), sizeof(tmp));
-    ent = &CFG_MEANDEOP;
+  case DEFLAG_EVENT_REVENGE_KICK:
+    strlcpy(tmp, STR("Kicked bot in +revenge channel"), sizeof(tmp));
+    which = chan->revenge;
     break;
-  case DEFLAG_EVENT_MEAN_BAN:
-    strlcpy(tmp, STR("Banned bot in +mean channel"), sizeof(tmp));
-    ent = &CFG_MEANDEOP;
+  case DEFLAG_EVENT_REVENGE_BAN:
+    strlcpy(tmp, STR("Banned bot in +revenge channel"), sizeof(tmp));
+    which = chan->revenge;
     break;
-#endif /* G_MEAN */
   case DEFLAG_EVENT_MDOP:
     strlcpy(tmp, "Mass deop", sizeof(tmp));
     which = chan->mdop;
