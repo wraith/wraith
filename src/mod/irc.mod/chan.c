@@ -2872,14 +2872,10 @@ static int gotkick(char *from, char *origmsg)
   }
   if (channel_active(chan)) {
     char *whodid = NULL, s1[UHOSTLEN] = "", buf[UHOSTLEN] = "", *uhost = buf;
-    memberlist *m = NULL;
-    struct userrec *u = NULL;
+    memberlist *m = NULL, *m_victim = NULL;
     struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
     fixcolon(msg);
-    u = get_user_by_host(from);
-    if (!u || (u && !u->bot))
-      chan->channel.fighting++;
     strlcpy(uhost, from, sizeof(buf));
     whodid = splitnick(&uhost);
     detect_chan_flood(whodid, uhost, from, chan, FLOOD_KICK, nick);
@@ -2889,20 +2885,24 @@ static int gotkick(char *from, char *origmsg)
       return 0;     
 
     m = ismember(chan, whodid);
-    if (m)
+    if (m) {
       m->last = now;
-    /* This _needs_ to use chan->dname <cybah> */
-    get_user_flagrec(u, &fr, chan->dname, chan);
-    set_handle_laston(chan->dname, u, now);
- 
-    chan = findchan(chname);
-    if (!chan)
-      return 0;
-
-    if ((m = ismember(chan, nick))) {
       member_getuser(m);
-      if (m->user)
+      if (m->user) {
+        /* This _needs_ to use chan->dname <cybah> */
+        get_user_flagrec(m->user, &fr, chan->dname, chan);
         set_handle_laston(chan->dname, m->user, now);
+      }
+    }
+
+    if ((!m || !m->user) || (m && m->user && !m->user->bot)) {
+      chan->channel.fighting++;
+    }
+
+    if ((m_victim = ismember(chan, nick))) {
+      member_getuser(m_victim);
+      if (m_victim->user)
+        set_handle_laston(chan->dname, m_victim->user, now);
 //      maybe_revenge(chan, from, s1, REVENGE_KICK);
     } else {
       simple_snprintf(s1, sizeof(s1), "%s!*@could.not.loookup.hostname", nick);
