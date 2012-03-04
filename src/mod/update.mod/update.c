@@ -216,8 +216,7 @@ static void got_nu(char *botnick, char *code, char *par)
        botunlink(-2, dcc[uplink_idx].nick, "Restructure for update.");
        usleep(1000 * 500);
        botlink("", -3, botnick);
-     } else 
-       putlog(LOG_MISC, "*", "I need to be updated with %li/%s", (long) newbuildts, newcommit);
+     }
    }  
 }
 
