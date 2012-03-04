@@ -427,7 +427,7 @@ static void dtx_arg(int& argc, char *argv[])
         char date[50] = "";
 
         strftime(date, sizeof date, "%c %Z", gmtime(&buildts));
-	printf(STR("%s\nBuild Date: %s (%s%lu%s)\n"), version, date, BOLD(-1), buildts, BOLD_END(-1));
+	printf(STR("%s\nBuild Date: %s (%s%li%s)\n"), version, date, BOLD(-1), (long)buildts, BOLD_END(-1));
         printf(STR("BuildOS: %s%s%s BuildArch: %s%s%s\n"), BOLD(-1), BUILD_OS, BOLD_END(-1), BOLD(-1), BUILD_ARCH, BOLD_END(-1));
         printf(STR("- http://wraith.botpack.net -\n"));
 #ifdef DEBUG
@@ -776,13 +776,13 @@ int main(int argc, char **argv)
 
   /* Version info! */
   simple_snprintf(ver, sizeof(ver), STR("[%s] Wraith %s"), settings.packname, egg_version);
-  simple_snprintf(version, sizeof(version), STR("%s%s (%lu)"), ver,
+  simple_snprintf(version, sizeof(version), STR("%s%s (%li)"), ver,
 #ifdef DEBUG
       "(d)",
 #else
       "",
 #endif
-      buildts);
+      (long)buildts);
 
   memcpy(&nowtm, gmtime(&now), sizeof(struct tm));
   lastmin = nowtm.tm_min;
@@ -794,14 +794,14 @@ int main(int argc, char **argv)
     if (settings.prefix[i] != SETTINGS_HEADER[0])
       werr(ERR_BADPASS);
 
-  sdprintf(STR("my euid: %d my uuid: %d, my ppid: %d my pid: %d"), myuid, getuid(), getppid(), mypid);
+  sdprintf(STR("my euid: %d my uuid: %d, my ppid: %d my pid: %d"), myuid, getuid(), (int)getppid(), (int)mypid);
 
   /* Check and load conf file */
   startup_checks(0);
 
   if (!socksfile && ((conf.bot->localhub && !updating) || !conf.bot->localhub)) {
     if ((conf.bot->pid > 0) && conf.bot->pid_file) {
-      sdprintf(STR("%s is already running, pid: %d"), conf.bot->nick, conf.bot->pid);
+      sdprintf(STR("%s is already running, pid: %d"), conf.bot->nick, (int)conf.bot->pid);
       exit(1);
     }
   }
@@ -849,7 +849,7 @@ int main(int argc, char **argv)
 
     printf(STR("%s[%s%s%s]%s -%s- initiated %s(%s%d%s)%s\n"),
            BOLD(-1), BOLD_END(-1), settings.packname, BOLD(-1), BOLD_END(-1), conf.bot->nick,
-           BOLD(-1), BOLD_END(-1), mypid, BOLD(-1), BOLD_END(-1));
+           BOLD(-1), BOLD_END(-1), (int)mypid, BOLD(-1), BOLD_END(-1));
 
     } else
       writepid(conf.bot->pid_file, mypid);
