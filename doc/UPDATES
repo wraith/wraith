@@ -31,6 +31,9 @@
   * Improve output of 'bots' command by displaying and sorting nodename
   * Minus chrec if .chattr set no flags
   * Added 'chanset +floodban' to ban clients that violate 'flood-chan' and 'flood-ctcp'
+  * Bots now auto-reop other bots that get deopped
+  * Bots now ask for ops quicker if another bot is opped
+  * Bots now request/join +ilk channels much quicker
 
 maint
   * Fix various compile warnings with newer GCC

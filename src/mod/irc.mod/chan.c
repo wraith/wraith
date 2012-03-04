@@ -1950,6 +1950,11 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
       resolve_to_rbl(chan, m->userip);
   }
 
+  // If there's an opped bot, queue op to request_op
+  if (m->user && m->user->bot && chan_hasop(m)) {
+    chan->channel.do_opreq = 1;
+  }
+
   return 0;
 }
 
@@ -2064,8 +2069,9 @@ static int got315(char *from, char *msg)
       recheck_channel(chan, 2);
     else if (chan->channel.members == 1)
       chan->ircnet_status |= CHAN_STOP_CYCLE;
-    else if (any_ops(chan))
+    else if (chan->channel.do_opreq) {
       request_op(chan);
+    }
   }
   /* do not check for i-lines here. */
   return 0;
