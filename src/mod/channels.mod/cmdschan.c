@@ -1252,6 +1252,8 @@ static void cmd_chaninfo(int idx, char *par)
     SHOW_INT("Mdop: ", chan->mdop, P_STR, "Ignore");
     deflag = chan->mop;
     SHOW_INT("Mop: ", chan->mop, P_STR, "Ignore");
+    deflag = chan->revenge;
+    SHOW_INT("Revenge: ", chan->revenge, P_STR, "Ignore");
     SHOW_INT("Protect-backup: ", chan->protect_backup, "Do!", "Don't!");
     SHOW_INT("Voice-non-ident: ", chan->voice_non_ident, "Do!", "Don't!");
 

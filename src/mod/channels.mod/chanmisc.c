@@ -490,6 +490,14 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
         return ERROR;
       }
       chan->mop = deflag_translate(item[i]);
+    } else if (!strcmp(item[i], "revenge")) {
+      i++;
+      if (i >= items) {
+        if (result)
+          strlcpy(result, "channel revenge needs argument", RESULT_LEN);
+        return ERROR;
+      }
+      chan->revenge = deflag_translate(item[i]);
     } else if (!strcmp(item[i], "knock")) {
       i++;
       if (i >= items) {

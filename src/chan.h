@@ -180,6 +180,7 @@ struct chanset_t {
   int manop;
   int mdop;
   int mop;
+  int revenge;
   int voice_non_ident;
   int ban_type;
   interval_t auto_delay;
