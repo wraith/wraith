@@ -133,7 +133,7 @@ static void write_debug(bool fatal = 1)
     /* Write GDB backtrace */
     char gdb[1024] = "", btfile[256] = "", std_in[101] = "", *out = NULL;
 
-    simple_snprintf(btfile, sizeof(btfile), ".gdb-backtrace-%d", getpid());
+    simple_snprintf(btfile, sizeof(btfile), ".gdb-backtrace-%d", (int)getpid());
 
     FILE *f = fopen(btfile, "w");
 
@@ -142,7 +142,7 @@ static void write_debug(bool fatal = 1)
       //simple_snprintf(stdin, sizeof(stdin), "detach\n");
       //simple_snprintf(stdin, sizeof(stdin), "q\n");
 
-      simple_snprintf(gdb, sizeof(gdb), "gdb --pid=%d %s", getpid(), binname);
+      simple_snprintf(gdb, sizeof(gdb), "gdb --pid=%d %s", (int)getpid(), binname);
       shell_exec(gdb, std_in, &out, NULL);
       fprintf(f, "%s\n", out);
       fclose(f);
