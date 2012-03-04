@@ -736,7 +736,7 @@ getin_request(char *botnick, char *code, char *par)
       return;
     }
 
-    if (!((randint(eligible_bots) + 1) <= in_bots)) {
+    if (!((randint(eligible_bots) + 1) <= static_cast<unsigned int>(in_bots))) {
       // Not my turn
       return;
     }
