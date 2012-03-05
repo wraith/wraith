@@ -577,6 +577,8 @@ deflag_t deflag_translate(const char *buf)
     return DEFLAG_KICK;
   else if (!strcasecmp(buf, "delete") || !strcasecmp(buf, "remove"))
     return DEFLAG_DELETE;
+  else if (!strcasecmp(buf, "react"))
+    return DEFLAG_REACT;
   return DEFLAG_IGNORE;
 }
 
