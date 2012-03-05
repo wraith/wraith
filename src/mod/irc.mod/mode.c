@@ -797,20 +797,15 @@ got_ban(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
     }
     /* remove bans on ops unless a master/bot set it */
 
-    for (memberlist *mv = chan->channel.member; mv && mv->nick[0]; mv = mv->next) {
-      simple_snprintf(s1, sizeof s1, "%s!%s", mv->nick, mv->userhost);
-      if ((wild_match(mask, s1) || match_cidr(mask, s1)) && !isexempted(chan, s1)) {
-        member_getuser(mv);
-        if (mv->user) {
-          get_user_flagrec(mv->user, &victim, chan->dname, chan);
-          if (!(glob_kick(victim) || chan_kick(victim)) && 
-              (((chk_op(victim, chan) && !chan_master(user) && !glob_master(user) && !glob_bot(user)) || 
-              (mv->user->bot && findbot(mv->user->handle))))) {
-            /* if (target_priority(chan, m, 0)) */
-            add_mode(chan, '-', 'b', mask);
-            return;
-          }
-        }
+    for (size_t n = 0; n < matchedUserMembers.size(); ++n) {
+      const memberlist *mv = matchedUserMembers[n];
+      get_user_flagrec(mv->user, &victim, chan->dname, chan);
+      if (!(glob_kick(victim) || chan_kick(victim)) &&
+          (((chk_op(victim, chan) && !chan_master(user) && !glob_master(user) && !glob_bot(user)) ||
+            (mv->user->bot && findbot(mv->user->handle))))) {
+        /* if (target_priority(chan, m, 0)) */
+        add_mode(chan, '-', 'b', mask);
+        return;
       }
     }
   }
