@@ -2915,7 +2915,7 @@ static int gotkick(char *from, char *origmsg)
     member_getuser(mv);
     if (mv->user) {
       // Revenge kick clients that kick our bots
-      if (chan->revenge && !mv->is_me && m && mv->user->bot) {
+      if (chan->revenge && !mv->is_me && m && m != mv && mv->user->bot) {
         if (role < 5 && !chan_sentkick(m) && me_op(chan)) {
           m->flags |= SENTKICK;
           dprintf(DP_MODE_NEXT, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_REVENGE));
