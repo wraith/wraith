@@ -721,7 +721,7 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
       putlog(LOG_MODES, chan->dname, "TS resync deopped me on %s :(", chan->dname);
   } else {
     // Revenge kick clients that deop our bots
-    if (chan->revenge && m && mv->user && mv->user->bot) {
+    if (chan->revenge && m && m != mv && mv->user && mv->user->bot) {
       if (role < 5 && !chan_sentkick(m) && me_op(chan)) {
         m->flags |= SENTKICK;
         dprintf(DP_MODE_NEXT, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_REVENGE));
@@ -760,7 +760,7 @@ got_ban(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
     if (mv->user) {
       simple_snprintf(s1, sizeof s1, "%s!%s", mv->nick, mv->userhost);
       if ((wild_match(mask, s1) || match_cidr(mask, s1))) {
-        if (!matched_bot && mv->user->bot) {
+        if (!matched_bot && mv != m && mv->user->bot) {
           matched_bot = true;
         }
         if (mv->user && !isexempted(chan, s1)) {
