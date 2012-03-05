@@ -748,7 +748,7 @@ static bool detect_chan_flood(char *floodnick, char *floodhost, char *from,
         char s[256] = "";
 
         simple_snprintf(s, sizeof(s), "Mass deop on %s by %s", chan->dname, from);
-        deflag_user(u, DEFLAG_MDOP, s, chan);
+        deflag_user(u, DEFLAG_EVENT_MDOP, s, chan);
       }
       if (channel_protect(chan))
         do_protect(chan, "Mass Deop");
@@ -2883,14 +2883,10 @@ static int gotkick(char *from, char *origmsg)
   }
   if (channel_active(chan)) {
     char *whodid = NULL, s1[UHOSTLEN] = "", buf[UHOSTLEN] = "", *uhost = buf;
-    memberlist *m = NULL;
-    struct userrec *u = NULL;
+    memberlist *m = NULL, *mv = NULL;
     struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
     fixcolon(msg);
-    u = get_user_by_host(from);
-    if (!u || (u && !u->bot))
-      chan->channel.fighting++;
     strlcpy(uhost, from, sizeof(buf));
     whodid = splitnick(&uhost);
     detect_chan_flood(whodid, uhost, from, chan, FLOOD_KICK, nick);
@@ -2900,27 +2896,43 @@ static int gotkick(char *from, char *origmsg)
       return 0;     
 
     m = ismember(chan, whodid);
-    if (m)
+    if (m) {
       m->last = now;
-    /* This _needs_ to use chan->dname <cybah> */
-    get_user_flagrec(u, &fr, chan->dname, chan);
-    set_handle_laston(chan->dname, u, now);
- 
-    chan = findchan(chname);
-    if (!chan)
-      return 0;
-
-    if ((m = ismember(chan, nick))) {
       member_getuser(m);
-      if (m->user)
+      if (m->user) {
+        /* This _needs_ to use chan->dname <cybah> */
+        get_user_flagrec(m->user, &fr, chan->dname, chan);
         set_handle_laston(chan->dname, m->user, now);
-//      maybe_revenge(chan, from, s1, REVENGE_KICK);
-    } else {
-      simple_snprintf(s1, sizeof(s1), "%s!*@could.not.loookup.hostname", nick);
+      }
+    }
+
+    if ((!m || !m->user) || (m && m->user && !m->user->bot)) {
+      chan->channel.fighting++;
+    }
+
+    mv = ismember(chan, nick);
+
+    member_getuser(mv);
+    if (mv->user) {
+      // Revenge kick clients that kick our bots
+      if (chan->revenge && !mv->is_me && m && mv->user->bot) {
+        if (role < 5 && !chan_sentkick(m) && me_op(chan)) {
+          m->flags |= SENTKICK;
+          dprintf(DP_MODE_NEXT, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_REVENGE));
+        } else {
+          if (m->user) {
+            char tmp[128] = "";
+            simple_snprintf(tmp, sizeof(tmp), "Kicked bot %s on %s", m->nick, chan->dname);
+            deflag_user(m->user, DEFLAG_EVENT_REVENGE_KICK, tmp, chan);
+          }
+        }
+      }
+
+      set_handle_laston(chan->dname, mv->user, now);
     }
     irc_log(chan, "%s was kicked by %s (%s)", s1, from, msg);
     /* Kicked ME?!? the sods! */
-    if (match_my_nick(nick)) {
+    if (mv->is_me) {
       check_rejoin(chan);
     } else {
       killmember(chan, nick);

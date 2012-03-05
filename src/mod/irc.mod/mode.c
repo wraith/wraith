@@ -719,15 +719,21 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
 /* need: op */
     if (!m)
       putlog(LOG_MODES, chan->dname, "TS resync deopped me on %s :(", chan->dname);
+  } else {
+    // Revenge kick clients that deop our bots
+    if (chan->revenge && m && mv->user->bot) {
+      if (role < 5 && !chan_sentkick(m) && me_op(chan)) {
+        m->flags |= SENTKICK;
+        dprintf(DP_MODE_NEXT, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_REVENGE));
+      } else {
+        if (m->user) {
+          char tmp[128] = "";
+          simple_snprintf(tmp, sizeof(tmp), "Deopped bot %s on %s", m->nick, chan->dname);
+          deflag_user(m->user, DEFLAG_EVENT_REVENGE_DEOP, tmp, chan);
+        }
+      }
+    }
   }
-#ifdef revenge
-  if (m) {
-    char s[UHOSTLEN] = "";
-
-    simple_snprintf(s, sizeof(s), "%s!%s", mv->nick, mv->userhost);
-//    maybe_revenge(chan, s1, s, REVENGE_DEOP);
-  }
-#endif
 }
 
 static void
@@ -1122,7 +1128,7 @@ gotmode(char *from, char *msg)
               } else {
                 if (u) {
                   simple_snprintf(tmp, sizeof(tmp), "Mass deop on %s by %s", chan->dname, m->nick);
-                  deflag_user(u, DEFLAG_MDOP, tmp, chan);
+                  deflag_user(u, DEFLAG_EVENT_MDOP, tmp, chan);
                 }
               }
               reversing = mdop_reversing = 1;
@@ -1142,7 +1148,7 @@ gotmode(char *from, char *msg)
                 } else { 
                   if (u) {
                     simple_snprintf(tmp, sizeof(tmp), "Mass op on %s by %s", chan->dname, m->nick);
-                    deflag_user(u, DEFLAG_MOP, tmp, chan);
+                    deflag_user(u, DEFLAG_EVENT_MOP, tmp, chan);
                   }
                 }
               }
@@ -1210,7 +1216,7 @@ gotmode(char *from, char *msg)
                   dprintf_real(DP_MODE_NEXT, tmp, len, sizeof(tmp));
                 }
                 simple_snprintf(tmp, sizeof(tmp), "%s!%s MODE %s %s", m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
-                deflag_user(u, DEFLAG_BADCOOKIE, tmp, chan);
+                deflag_user(u, DEFLAG_EVENT_BADCOOKIE, tmp, chan);
               }
               /* Do the logging last as it can slow down the KICK pushing */
               putlog(LOG_WARNING, "*", "%s opped in %s with bad cookie(%d): %s", m->nick, chan->dname, isbadop, msg);
@@ -1249,7 +1255,7 @@ gotmode(char *from, char *msg)
                     m->flags |= SENTKICK;
                   }
                   simple_snprintf(tmp, sizeof(tmp), "%s!%s MODE %s %s", m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
-                  deflag_user(u, DEFLAG_MANUALOP, tmp, chan);
+                  deflag_user(u, DEFLAG_EVENT_MANUALOP, tmp, chan);
                 }
                 break;
               default:

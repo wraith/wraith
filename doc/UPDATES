@@ -3,6 +3,7 @@ next
   * Properly honor exemptions when kicking matched RBL clients
   * Fix LASTON not being shared
   * Add chanset 'closed-exempt' which will allow exempting non-users (who are opped or voice) from being kicked. (fixes #171)
+  * Add 'chanset revenge' which will react/kick/ban/remove users who kick/ban/deop bots.
 
 1.4.0 - http://wraith.botpack.net/milestone/1.4.0
   * Updated server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
