@@ -779,7 +779,7 @@ got_ban(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
       if (m->user) {
         char tmp[128] = "";
         simple_snprintf(tmp, sizeof(tmp), "Banned bot %s (%s) on %s", m->nick, mask, chan->dname);
-        deflag_user(m->user, DEFLAG_EVENT_REVENGE_DEOP, tmp, chan);
+        deflag_user(m->user, DEFLAG_EVENT_REVENGE_BAN, tmp, chan);
       }
     }
   }
