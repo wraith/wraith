@@ -797,15 +797,15 @@ got_ban(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
     }
     /* remove bans on ops unless a master/bot set it */
 
-    for (memberlist *m2 = chan->channel.member; m2 && m2->nick[0]; m2 = m2->next) {
-      simple_snprintf(s1, sizeof s1, "%s!%s", m2->nick, m2->userhost);
-      if ((wild_match(mask, s1) || match_cidr(mask, s1))
-          && !isexempted(chan, s1)) {
-        if (m2->user || (!m2->user && (m2->user = get_user_by_host(s1)))) {
-          get_user_flagrec(m2->user, &victim, chan->dname, chan);
+    for (memberlist *mv = chan->channel.member; mv && mv->nick[0]; mv = mv->next) {
+      simple_snprintf(s1, sizeof s1, "%s!%s", mv->nick, mv->userhost);
+      if ((wild_match(mask, s1) || match_cidr(mask, s1)) && !isexempted(chan, s1)) {
+        member_getuser(mv);
+        if (mv->user) {
+          get_user_flagrec(mv->user, &victim, chan->dname, chan);
           if (!(glob_kick(victim) || chan_kick(victim)) && 
               (((chk_op(victim, chan) && !chan_master(user) && !glob_master(user) && !glob_bot(user)) || 
-              (m2->user->bot && findbot(m2->user->handle))) && !isexempted(chan, s1))) {
+              (mv->user->bot && findbot(mv->user->handle))) && !isexempted(chan, s1))) {
             /* if (target_priority(chan, m, 0)) */
             add_mode(chan, '-', 'b', mask);
             return;
