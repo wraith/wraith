@@ -750,6 +750,40 @@ got_ban(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
   if (channel_pending(chan) || !me_op(chan))
     return;
 
+  // Make an array of all matching users
+  bd::Array<memberlist*> matchedUserMembers;
+  bool matched_bot = false;
+  char s1[UHOSTLEN] = "";
+
+  for (memberlist *mv = chan->channel.member; mv && mv->nick[0]; mv = mv->next) {
+    member_getuser(mv);
+    if (mv->user) {
+      simple_snprintf(s1, sizeof s1, "%s!%s", mv->nick, mv->userhost);
+      if ((wild_match(mask, s1) || match_cidr(mask, s1))) {
+        if (!matched_bot && mv->user->bot) {
+          matched_bot = true;
+        }
+        if (mv->user && !isexempted(chan, s1)) {
+          matchedUserMembers << mv;
+        }
+      }
+    }
+  }
+
+  // Revenge kick clients that ban our bots
+  if (chan->revenge && m && matched_bot) {
+    if (role < 5 && !chan_sentkick(m)) {
+      m->flags |= SENTKICK;
+      dprintf(DP_MODE_NEXT, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_REVENGE));
+    } else {
+      if (m->user) {
+        char tmp[128] = "";
+        simple_snprintf(tmp, sizeof(tmp), "Banned bot %s (%s) on %s", m->nick, mask, chan->dname);
+        deflag_user(m->user, DEFLAG_EVENT_REVENGE_DEOP, tmp, chan);
+      }
+    }
+  }
+
   if ((wild_match(mask, me) || match_cidr(mask, meip)) && !isexempted(chan, me)) {
     add_mode(chan, '-', 'b', mask);
     reversing = 1;
@@ -762,22 +796,16 @@ got_ban(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
       return;
     }
     /* remove bans on ops unless a master/bot set it */
-    char s1[UHOSTLEN] = "";
 
-    for (memberlist *m2 = chan->channel.member; m2 && m2->nick[0]; m2 = m2->next) {
-      simple_snprintf(s1, sizeof s1, "%s!%s", m2->nick, m2->userhost);
-      if ((wild_match(mask, s1) || match_cidr(mask, s1))
-          && !isexempted(chan, s1)) {
-        if (m2->user || (!m2->user && (m2->user = get_user_by_host(s1)))) {
-          get_user_flagrec(m2->user, &victim, chan->dname, chan);
-          if (!(glob_kick(victim) || chan_kick(victim)) && 
-              (((chk_op(victim, chan) && !chan_master(user) && !glob_master(user) && !glob_bot(user)) || 
-              (m2->user->bot && findbot(m2->user->handle))) && !isexempted(chan, s1))) {
-            /* if (target_priority(chan, m, 0)) */
-            add_mode(chan, '-', 'b', mask);
-            return;
-          }
-        }
+    for (size_t n = 0; n < matchedUserMembers.size(); ++n) {
+      const memberlist *mv = matchedUserMembers[n];
+      get_user_flagrec(mv->user, &victim, chan->dname, chan);
+      if (!(glob_kick(victim) || chan_kick(victim)) &&
+          (((chk_op(victim, chan) && !chan_master(user) && !glob_master(user) && !glob_bot(user)) ||
+            (mv->user->bot && findbot(mv->user->handle))))) {
+        /* if (target_priority(chan, m, 0)) */
+        add_mode(chan, '-', 'b', mask);
+        return;
       }
     }
   }
