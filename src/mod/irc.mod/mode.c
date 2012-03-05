@@ -805,7 +805,7 @@ got_ban(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
           get_user_flagrec(mv->user, &victim, chan->dname, chan);
           if (!(glob_kick(victim) || chan_kick(victim)) && 
               (((chk_op(victim, chan) && !chan_master(user) && !glob_master(user) && !glob_bot(user)) || 
-              (mv->user->bot && findbot(mv->user->handle))) && !isexempted(chan, s1))) {
+              (mv->user->bot && findbot(mv->user->handle))))) {
             /* if (target_priority(chan, m, 0)) */
             add_mode(chan, '-', 'b', mask);
             return;
