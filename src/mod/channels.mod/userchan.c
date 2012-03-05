@@ -714,7 +714,7 @@ bd::String channel_to_string(struct chanset_t* chan, bool force_inactive) {
 
   get_mode_protect(chan, w, sizeof(w));
   return bd::String::printf("\
-chanmode { %s } groups { %s } bad-cookie %d manop %d mdop %d mop %d limit revenge %d %d ban-type %d \
+chanmode { %s } groups { %s } bad-cookie %d manop %d mdop %d mop %d limit %d revenge %d ban-type %d \
 flood-chan %d:%d flood-ctcp %d:%d flood-join %d:%d \
 flood-kick %d:%d flood-deop %d:%d flood-nick %d:%d flood-mjoin %d:%d \
 closed-ban %d closed-invite %d closed-private %d closed-exempt %d ban-time %d \
