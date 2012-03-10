@@ -15,6 +15,7 @@
     * Automatic re-key exchange after every message to avoid replay attacks (controllable with set 'fish-paranoid')
     * Set FiSH key via cmd_setkey and 'chanset fish-key'
     * Bot expires key exchange if there's no response in 7 seconds.
+    * Bot expires key-exchanged keys after 60 minutes.
   * When 'mdop' protection is on, re-op all previously opped clients automatically.
   * When 'mop' protection is on, deop all previously regular clients automatically.
   * Add './wraith -V' which will display the packconfig that the bot is using.

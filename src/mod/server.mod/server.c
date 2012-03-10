@@ -1056,8 +1056,16 @@ static void server_secondly()
       for (size_t i = 0; i < fish_targets.length(); ++i) {
         const bd::String target(fish_targets[i]);
         fish_data_t* fishData = FishKeys[target];
+        bool should_delete = false;
         if (fishData->timestamp && !fishData->sharedKey && ((now - 7) >= fishData->timestamp)) {
           putlog(LOG_DEBUG, "*", "Deleting expired DH1080 FiSH exchange with %s", target.c_str());
+          should_delete = true;
+        } else if (fishData->timestamp && fishData->sharedKey.length() && ((now - 3600) >= fishData->timestamp)) {
+          putlog(LOG_DEBUG, "*", "Deleting expired (60 min) FiSH key with %s", target.c_str());
+          should_delete = true;
+        }
+
+        if (should_delete) {
           FishKeys.remove(target);
           delete fishData;
         }
