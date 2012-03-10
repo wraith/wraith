@@ -813,7 +813,7 @@ void handle_DH1080_init(const char* nick, const char* uhost, const char* from, s
   fishData->myPublicKeyB64 = myPublicKeyB64;
   fishData->myPrivateKey = myPrivateKey;
   fishData->sharedKey = sharedKey;
-  fishData->timestamp = now;
+  fishData->key_created_at = now;
   FishKeys[nick] = fishData;
   sdprintf("Set key for %s: %s", nick, sharedKey.c_str());
   return;

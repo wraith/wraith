@@ -930,7 +930,7 @@ void keyx(const bd::String &target) {
   notice(target, "DH1080_INIT " + myPublicKeyB64, DP_HELP);
   fishData->myPublicKeyB64 = myPublicKeyB64;
   fishData->myPrivateKey = myPrivateKey;
-  fishData->timestamp = now;
+  fishData->key_created_at = now;
   FishKeys[target] = fishData;
 }
 
