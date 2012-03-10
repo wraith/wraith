@@ -61,10 +61,13 @@ typedef struct memstruct {
 #define chan_wasop(x) (x->flags & WASOP)
 #define chan_stopcheck(x) (x->flags & STOPCHECK)
 
-#define P_IGNORE	0
-#define P_DEOP		1
-#define P_KICK		2
-#define P_DELETE	3
+enum deflag_t {
+  DEFLAG_IGNORE = 0,
+  DEFLAG_DEOP = 1,
+  DEFLAG_KICK = 2,
+  DEFLAG_DELETE = 3,
+  DEFLAG_REACT = 4,
+};
 
 /* Why duplicate this struct for exempts and invites only under another
  * name? <cybah>
@@ -176,10 +179,11 @@ struct chanset_t {
   int closed_ban;
   int closed_private;
   int closed_invite;
-  int bad_cookie;
-  int manop;
-  int mdop;
-  int mop;
+  deflag_t bad_cookie;
+  deflag_t manop;
+  deflag_t mdop;
+  deflag_t mop;
+  deflag_t revenge;
   int voice_non_ident;
   int ban_type;
   interval_t auto_delay;
@@ -189,9 +193,6 @@ struct chanset_t {
  *int temp;
  */
   int flood_exempt_mode;
-#ifdef REVENGE
-  int revenge_mode;
-#endif
   interval_t ban_time;
   interval_t invite_time;
   interval_t exempt_time;
@@ -303,12 +304,6 @@ struct chanset_t *findchan_by_dname(const char *name);
 #define channel_secret(chan) (chan->status & CHAN_SECRET)
 #define channel_cycle(chan) (chan->status & CHAN_CYCLE)
 #define channel_inactive(chan) (chan->status & CHAN_INACTIVE)
-
-
-#ifdef REVENGE
-#define channel_revenge(chan) (chan->status & CHAN_REVENGE)
-#define channel_revengebot(chan) (chan->status & CHAN_REVENGEBOT)
-#endif 
 
 #define channel_closed(chan) (chan->status & CHAN_CLOSED)
 #define channel_take(chan) (chan->status & CHAN_TAKE)

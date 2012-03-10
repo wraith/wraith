@@ -564,64 +564,64 @@ whois_access(struct userrec *user, struct userrec *whois_user)
   return 1;
 }
 
-int deflag_translate(const char *buf)
+deflag_t deflag_translate(const char *buf)
 {
   if (str_isdigit(buf))
-    return (atoi(buf));
+    return (static_cast<deflag_t>(atoi(buf)));
 
   if (!strcasecmp(buf, "ignore"))
-    return P_IGNORE;
+    return DEFLAG_IGNORE;
   else if (!strcasecmp(buf, "deop"))
-    return P_DEOP;
+    return DEFLAG_DEOP;
   else if (!strcasecmp(buf, "kick"))
-    return P_KICK;
+    return DEFLAG_KICK;
   else if (!strcasecmp(buf, "delete") || !strcasecmp(buf, "remove"))
-    return P_DELETE;
-  return P_IGNORE;
+    return DEFLAG_DELETE;
+  else if (!strcasecmp(buf, "react"))
+    return DEFLAG_REACT;
+  return DEFLAG_IGNORE;
 }
 
 
-void deflag_user(struct userrec *u, int why, char *msg, struct chanset_t *chan)
+void deflag_user(struct userrec *u, deflag_event_t why, const char *msg, const struct chanset_t *chan)
 {
   char tmp[30] = "", tmp2[1024] = "";
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
   int which = 0;
 
   switch (why) {
-  case DEFLAG_BADCOOKIE:
+  case DEFLAG_EVENT_BADCOOKIE:
     strlcpy(tmp, "Bad op cookie", sizeof(tmp));
     which = chan->bad_cookie;
     break;
-  case DEFLAG_MANUALOP:
+  case DEFLAG_EVENT_MANUALOP:
     strlcpy(tmp, STR("Manual op in -manop channel"), sizeof(tmp));
     which = chan->manop;
     break;
-#ifdef G_MEAN
-  case DEFLAG_MEAN_DEOP:
-    strlcpy(tmp, STR("Deopped bot in +mean channel"), sizeof(tmp));
-    ent = &CFG_MEANDEOP;
+  case DEFLAG_EVENT_REVENGE_DEOP:
+    strlcpy(tmp, STR("Deopped bot in +revenge channel"), sizeof(tmp));
+    which = chan->revenge;
     break;
-  case DEFLAG_MEAN_KICK:
-    strlcpy(tmp, STR("Kicked bot in +mean channel"), sizeof(tmp));
-    ent = &CFG_MEANDEOP;
+  case DEFLAG_EVENT_REVENGE_KICK:
+    strlcpy(tmp, STR("Kicked bot in +revenge channel"), sizeof(tmp));
+    which = chan->revenge;
     break;
-  case DEFLAG_MEAN_BAN:
-    strlcpy(tmp, STR("Banned bot in +mean channel"), sizeof(tmp));
-    ent = &CFG_MEANDEOP;
+  case DEFLAG_EVENT_REVENGE_BAN:
+    strlcpy(tmp, STR("Banned bot in +revenge channel"), sizeof(tmp));
+    which = chan->revenge;
     break;
-#endif /* G_MEAN */
-  case DEFLAG_MDOP:
+  case DEFLAG_EVENT_MDOP:
     strlcpy(tmp, "Mass deop", sizeof(tmp));
     which = chan->mdop;
     break;
-  case DEFLAG_MOP:
+  case DEFLAG_EVENT_MOP:
     strlcpy(tmp, "Mass op", sizeof(tmp));
     which = chan->mop;
     break;
   default:
     simple_snprintf(tmp, sizeof(tmp), "Reason #%i", why);
   }
-  if (which == P_DEOP) {
+  if (which == DEFLAG_DEOP) {
     putlog(LOG_WARN, "*",  "Setting %s +d (%s): %s", u->handle, tmp, msg);
     simple_snprintf(tmp2, sizeof(tmp2), "+d: %s (%s)", tmp, msg);
     set_user(&USERENTRY_COMMENT, u, tmp2);
@@ -640,7 +640,7 @@ void deflag_user(struct userrec *u, int why, char *msg, struct chanset_t *chan)
     /* did anything change? */
     if (fr.match)
       set_user_flagrec(u, &fr, chan->dname);
-  } else if (which == P_KICK) {
+  } else if (which == DEFLAG_KICK) {
     putlog(LOG_WARN, "*",  "Setting %s +dk (%s): %s", u->handle, tmp, msg);
     simple_snprintf(tmp2, sizeof(tmp2), "+dk: %s (%s)", tmp, msg);
     set_user(&USERENTRY_COMMENT, u, tmp2);
@@ -659,7 +659,7 @@ void deflag_user(struct userrec *u, int why, char *msg, struct chanset_t *chan)
     /* did anything change */
     if (fr.match)
       set_user_flagrec(u, &fr, chan->dname);
-  } else if (which == P_DELETE) {
+  } else if (which == DEFLAG_DELETE) {
     putlog(LOG_WARN, "*",  "Deleting %s (%s): %s", u->handle, tmp, msg);
     deluser(u->handle);
   } else {

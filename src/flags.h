@@ -48,16 +48,15 @@ struct flag_record {
  *   unused letters: bchijpstw
  */
 
-#define DEFLAG_BADCOOKIE   1
-#define DEFLAG_MANUALOP    2
-#ifdef G_MEAN
-#  define DEFLAG_MEAN_DEOP   3
-#  define DEFLAG_MEAN_KICK   4
-#  define DEFLAG_MEAN_BAN    5
-#endif /* G_MEAN */
-#define DEFLAG_MDOP        6
-#define DEFLAG_MOP	   7
-
+enum deflag_event_t {
+  DEFLAG_EVENT_BADCOOKIE = 1,
+  DEFLAG_EVENT_MANUALOP,
+  DEFLAG_EVENT_REVENGE_DEOP,
+  DEFLAG_EVENT_REVENGE_KICK,
+  DEFLAG_EVENT_REVENGE_BAN,
+  DEFLAG_EVENT_MDOP,
+  DEFLAG_EVENT_MOP,
+};
 
 #define USER_DEFAULT	0
 
@@ -171,8 +170,8 @@ int dovoice(const struct chanset_t *);
 int doflood(const struct chanset_t *);
 int dolimit(const struct chanset_t *);
 int whois_access(struct userrec *, struct userrec *);
-void deflag_user(struct userrec *, int, char *, struct chanset_t *);
-int deflag_translate(const char *);
+void deflag_user(struct userrec *, deflag_event_t, const char *, const struct chanset_t *);
+deflag_t deflag_translate(const char *);
 
 
 #endif				/* _EGG_FLAGS_H */

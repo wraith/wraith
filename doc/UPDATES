@@ -34,6 +34,7 @@
   * Bots now auto-reop other bots that get deopped
   * Bots now ask for ops quicker if another bot is opped
   * Bots now request/join +ilk channels much quicker
+  * Add 'chanset revenge' which will react/kick/ban/remove users who kick/ban/deop bots.
 
 maint
   * Fix various compile warnings with newer GCC
