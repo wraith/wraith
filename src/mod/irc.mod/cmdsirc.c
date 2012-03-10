@@ -294,7 +294,7 @@ static void cmd_kickban(int idx, char *par)
       dprintf(idx, "%s is a %s master.\n", nick, chan->dname);
       return;
     }
-    if (glob_bot(victim) && !(glob_owner(user) || chan_owner(user))) {
+    if (glob_bot(victim)) {
       if (all) goto next;
       dprintf(idx, "%s is another channel bot!\n", nick);
       return;
@@ -1032,6 +1032,10 @@ static void cmd_deop(int idx, char *par)
       if (all) goto next;  
       return;
     }
+    if (glob_bot(victim)) {
+      dprintf(idx, "%s is another channel bot!\n", nick);
+      return;
+    }
     if (chk_op(victim, chan) && !(chan_master(user) || glob_master(user))) {
       dprintf(idx, "%s has the op flag for %s.\n", m->nick, chan->dname);
       if (all) goto next;  
@@ -1127,7 +1131,7 @@ static void cmd_kick(int idx, char *par)
       dprintf(idx, "%s is a %s master.\n", nick, chan->dname);
       return;
     }
-    if (glob_bot(victim) && !(glob_owner(user) || chan_owner(user))) {
+    if (glob_bot(victim)) {
       dprintf(idx, "%s is another channel bot!\n", nick);
       return;
     }
