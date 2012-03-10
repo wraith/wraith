@@ -165,17 +165,20 @@ static int check_bind_raw(char *from, char *code, char *msg)
     if (colon) {
       if (!strncmp(colon, "+OK ", 4)) {
         char *p = strchr(from, '!');
+        const bool target_is_chan = strchr(CHANMETA, target[0]);
         bd::String ciphertext(colon), sharedKey, nick(from, p - from), key_target;
 
         // If this is a channel msg, decrypt with the channel key
-        if (strchr(CHANMETA, target[0])) {
+        if (target_is_chan) {
           key_target = target;
         } else {
           // Otherwise decrypt with the nick's key
           key_target = nick;
         }
 
-        if (FishKeys.contains(key_target)) {
+        const bool have_shared_key = FishKeys.contains(key_target);
+
+        if (have_shared_key) {
           sharedKey = FishKeys[key_target]->sharedKey;
         } else {
           struct userrec *u = get_user_by_host(from);
@@ -198,6 +201,11 @@ static int check_bind_raw(char *from, char *code, char *msg)
           if (isValidCipherText) {
             bd::String cleartext(bd::String(msg, colon - msg) + decrypted);
             mymsg = p2 = strdup(cleartext.c_str());
+          } else if (!target_is_chan && have_shared_key) {
+            // Delete the shared key
+            fish_data_t* fishData = FishKeys[key_target];
+            FishKeys.remove(key_target);
+            delete fishData;
           }
         }
       }
