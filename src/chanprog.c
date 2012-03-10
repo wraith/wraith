@@ -958,7 +958,6 @@ void set_fish_key(char *target, bd::String key)
     }
 
     // Set the key
-    fishData->timestamp = now;
     FishKeys[target] = fishData;
   }
 }

@@ -177,7 +177,6 @@ static int check_bind_raw(char *from, char *code, char *msg)
 
         if (FishKeys.contains(key_target)) {
           sharedKey = FishKeys[key_target]->sharedKey;
-          FishKeys[key_target]->timestamp = now;
         } else {
           struct userrec *u = get_user_by_host(from);
           if (u) {
