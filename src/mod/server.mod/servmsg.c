@@ -165,19 +165,21 @@ static int check_bind_raw(char *from, char *code, char *msg)
     if (colon) {
       if (!strncmp(colon, "+OK ", 4)) {
         char *p = strchr(from, '!');
+        const bool target_is_chan = strchr(CHANMETA, target[0]);
         bd::String ciphertext(colon), sharedKey, nick(from, p - from), key_target;
 
         // If this is a channel msg, decrypt with the channel key
-        if (strchr(CHANMETA, target[0])) {
+        if (target_is_chan) {
           key_target = target;
         } else {
           // Otherwise decrypt with the nick's key
           key_target = nick;
         }
 
-        if (FishKeys.contains(key_target)) {
+        const bool have_shared_key = FishKeys.contains(key_target);
+
+        if (have_shared_key) {
           sharedKey = FishKeys[key_target]->sharedKey;
-          FishKeys[key_target]->timestamp = now;
         } else {
           struct userrec *u = get_user_by_host(from);
           if (u) {
@@ -187,8 +189,24 @@ static int check_bind_raw(char *from, char *code, char *msg)
 
         if (sharedKey.length()) {
           // Decrypt the message before passing along to the binds
-          bd::String cleartext(bd::String(msg, colon - msg) + egg_bf_decrypt(ciphertext, sharedKey));
-          mymsg = p2 = strdup(cleartext.c_str());
+          const bd::String decrypted(egg_bf_decrypt(ciphertext, sharedKey));
+          // Does the decrypted text make sense? If not, the key is probably invalid, reset it.
+          bool isValidCipherText = true;
+          for (size_t i = 0; i < decrypted.length(); ++i) {
+            if (!isprint(decrypted[i])) {
+              isValidCipherText = false;
+              break;
+            }
+          }
+          if (isValidCipherText) {
+            bd::String cleartext(bd::String(msg, colon - msg) + decrypted);
+            mymsg = p2 = strdup(cleartext.c_str());
+          } else if (!target_is_chan && have_shared_key) {
+            // Delete the shared key
+            fish_data_t* fishData = FishKeys[key_target];
+            FishKeys.remove(key_target);
+            delete fishData;
+          }
         }
       }
     }
@@ -803,7 +821,7 @@ void handle_DH1080_init(const char* nick, const char* uhost, const char* from, s
   fishData->myPublicKeyB64 = myPublicKeyB64;
   fishData->myPrivateKey = myPrivateKey;
   fishData->sharedKey = sharedKey;
-  fishData->timestamp = now;
+  fishData->key_created_at = now;
   FishKeys[nick] = fishData;
   sdprintf("Set key for %s: %s", nick, sharedKey.c_str());
   return;
