@@ -187,8 +187,19 @@ static int check_bind_raw(char *from, char *code, char *msg)
 
         if (sharedKey.length()) {
           // Decrypt the message before passing along to the binds
-          bd::String cleartext(bd::String(msg, colon - msg) + egg_bf_decrypt(ciphertext, sharedKey));
-          mymsg = p2 = strdup(cleartext.c_str());
+          const bd::String decrypted(egg_bf_decrypt(ciphertext, sharedKey));
+          // Does the decrypted text make sense? If not, the key is probably invalid, reset it.
+          bool isValidCipherText = true;
+          for (size_t i = 0; i < decrypted.length(); ++i) {
+            if (!isprint(decrypted[i])) {
+              isValidCipherText = false;
+              break;
+            }
+          }
+          if (isValidCipherText) {
+            bd::String cleartext(bd::String(msg, colon - msg) + decrypted);
+            mymsg = p2 = strdup(cleartext.c_str());
+          }
         }
       }
     }
