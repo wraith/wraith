@@ -302,4 +302,4 @@ fi
 echo ""
 echo ""
 echo "------------ Configuring BDLIB ------------"
-test -f lib/bdlib/configure && cd lib/bdlib && MAKEJOBS="$MAKEJOBS" ./configure
+test -f lib/bdlib/configure && cd lib/bdlib && CXX="$CXX" MAKEJOBS="$MAKEJOBS" ./configure
