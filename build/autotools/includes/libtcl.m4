@@ -408,6 +408,7 @@ configure: error:
   --with-tclinc='/path/to/tcl.h' options.
 
 EOF
+    enable_script_tcl="no"
     else
       AC_DEFINE(HAVE_LIBTCL, 1, [Define if you have support for libtcl])
     fi

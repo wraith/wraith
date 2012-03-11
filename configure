@@ -5928,6 +5928,7 @@ configure: error:
   --with-tclinc='/path/to/tcl.h' options.
 
 EOF
+    enable_script_tcl="no"
     else
 
 $as_echo "#define HAVE_LIBTCL 1" >>build/confdefs.h
