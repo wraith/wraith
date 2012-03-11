@@ -36,7 +36,7 @@
   * Bots now request/join +ilk channels much quicker
   * Add 'chanset revenge' which will react/kick/ban/remove users who kick/ban/deop bots.
 
-maint
+1.3.4 - http://wraith.botpack.net/milestone/1.3.4
   * Fix various compile warnings with newer GCC
   * Fix bot getting confused when changing to long nicks
   * Fix case where nick would rotate to NICK1 when already on NICK2 and NICK was unavailable
