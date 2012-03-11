@@ -100,14 +100,14 @@ clean:  cleanutils
 	+@cd src/crypto && $(MAKE) clean
 	+@cd src/mod && $(MAKE) distclean
 	-+@cd lib && $(MAKE) clean
-	@rm -f $(BINEXEC) build/stamp.* *~ src/*~ configure.temp .mangled
+	@rm -f $(BINEXEC) build/stamp.* *~ src/*~ configure.temp .mangled stamp.*
 	@rm -f src/help.h src/response.h src/responses.h utctime@EXEEXT@ ts@EXEEXT@
 
 distclean: clean
 	@rm -rf *-$(VERSION)/ autom4te.cache/ autoscan.log configure.scan
 	@rm -rf src/.deps/ src/compat/.deps/ src/strucutres/.deps/ src/mod/*.mod/.deps/ src/crypto/.deps src/.defs/
 	-+@cd lib && $(MAKE) distclean
-	@rm -f $(STATICMAKEFILES) $(CONFIGFILES)
+	@rm -f $(STATICMAKEFILES) $(CONFIGFILES) config.h config.log config.status config.cache
 
 
 distrib: clean
