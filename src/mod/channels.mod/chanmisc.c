@@ -346,7 +346,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
       // Get string into right format
       bd::String changroups(item[i]);
       // Replace commas with spaces to be in proper format
-      changroups.sub(",", " ");
+      changroups = changroups.sub(",", " ");
       changroups.trim();
       *(chan->groups) = changroups.split(" ");
       changed_groups = true;
