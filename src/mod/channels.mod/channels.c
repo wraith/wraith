@@ -803,7 +803,7 @@ void channels_report(int idx, int details)
           strlcat(s2, "p", sizeof(s2));
       }
 
-      if (shouldjoin(chan)) {
+      if (conf.bot->hub || shouldjoin(chan)) {
 	if (channel_active(chan)) {
 	  /* If it's a !chan, we want to display it's unique name too <cybah> */
 	  if (chan->dname[0]=='!') {
