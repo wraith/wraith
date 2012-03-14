@@ -1,6 +1,7 @@
 :alias
 bc botcmd
 bl botcmd ?
+gc botcmd *
 bm botmsg
 bs botset 
 op botcmd ? op
