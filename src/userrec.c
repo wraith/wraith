@@ -342,7 +342,7 @@ int u_pass_match(struct userrec *u, const char *in)
 
     /* Pass the salted pass in so the same salt can be used */
     int n = salted_sha1cmp(cmp, pass);
-    OPENSSL_cleanse(pass, sizeof(pass));
+    OPENSSL_cleanse(pass, strlen(pass));
     free(pass_p);
     if (!n)
       return 1;
