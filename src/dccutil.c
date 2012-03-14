@@ -210,52 +210,47 @@ colorbuf(char *buf, size_t len, int idx, size_t bufsiz)
 
 /* Dump a potentially super-long string of text.
  */
-void dumplots(int idx, const char *prefix, const char *data)
+void dumplots(int idx, const char *prefix, const bd::String data)
 {
   if (unlikely(!*data)) {
     dprintf(idx, "%s\n", prefix);
     return;
   }
 
-  char *p = (char*)data, *q = NULL, *n = NULL, c = 0;
   const size_t max_data_len = 120 - strlen(prefix);
+  bd::Array<bd::String> lines = data.split('\n');
+  size_t i = 0;
 
-  while ((strlen(p) - ansi_len(p)) > max_data_len) {
-    q = p + max_data_len;
-    /* Search for embedded linefeed first */
-    n = strchr(p, '\n');
-    if (n && n < q) {
-      /* Great! dump that first line then start over */
-      *n = 0;
-      dprintf(idx, "%s%s\n", prefix, p);
-      *n = '\n';
-      p = n + 1;
-    } else {
-      /* Search backwards for the last space */
-      while (*q != ' ' && q != p)
-        q--;
-      if (q == p)
-        q = p + max_data_len;
-      c = *q;
-      *q = 0;
-      dprintf(idx, "%s%s\n", prefix, p);
-      *q = c;
-      p = q;
-      if (c == ' ')
-        p++;
+  while (i < lines.length()) {
+    bd::String line(lines[i]);
+
+    if (line.length() > max_data_len) {
+      // Truncate at last space if possible
+      const size_t line_max = std::min(line.length() - 1, max_data_len);
+      size_t pos = line_max;
+
+      while (pos != bd::String::npos && !strchr(",:; ", line[pos]))
+        --pos;
+      if (pos == bd::String::npos)
+        pos = line_max;
+
+      if (strchr(",:;", line[pos]))
+        ++pos;
+
+      if (bd::String(line(pos)).find("\n") != bd::String::npos) // Newline in remaining: dump it
+        dprintf(idx, "%s%s\n", prefix, bd::String(line(pos)).c_str());
+      else {
+        const size_t tpos = line[pos] == ' ' ? pos + 1 : pos; // Trim out the space
+        if (lines.length() - (i + 1) > 0) // Wrapped text: prepend to next line if possible
+          lines[i + 1] = line(tpos) + lines[i + 1];
+        else // Wrapped text (last line): Add onto list of lines
+          lines << line(tpos);
+      }
+      line.resize(pos);
     }
+    dprintf(idx, "%s%s\n", prefix, line.c_str());
+    ++i;
   }
-  /* Last trailing bit: split by linefeeds if possible */
-  n = strchr(p, '\n');
-  while (n) {
-    *n = 0;
-    dprintf(idx, "%s%s\n", prefix, p);
-    *n = '\n';
-    p = n + 1;
-    n = strchr(p, '\n');
-  }
-  if (*p)
-    dprintf(idx, "%s%s\n", prefix, p);  /* Last trailing bit */
 }
 
 void
