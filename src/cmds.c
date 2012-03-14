@@ -1390,18 +1390,27 @@ static void cmd_botcmd(int idx, char *par)
     return;
   }
 
-  char *botm = newsplit(&par), *cmd = NULL;
+  char *botm = newsplit(&par), *group = NULL, *cmd = NULL;
   bool rand_leaf = 0, all_localhub = 0;
   
-  if (par[0])
+  if (par[0]) {
+    // Group specified
+    if (par[0] == '%') {
+      group = newsplit(&par);
+      ++group;
+    }
+  }
+  if (par[0]) {
     cmd = newsplit(&par);
+  }
 
   if (!botm[0] || !cmd || (cmd && !cmd[0])) {
-    dprintf(idx, "Usage: botcmd <bot|*|?|&|%%group> <cmd> [params]\n");
+    dprintf(idx, "Usage: botcmd <bot|*|?|&> [%%group] <cmd> [params]\n");
     return;
   }
 
   int cnt = 0, rleaf = -1, tbots = 0, found = 0;
+  bool group_match = false;
   tand_t *tbot = NULL;
 
   /* the rest of the cmd will be logged remotely */
@@ -1424,8 +1433,17 @@ static void cmd_botcmd(int idx, char *par)
   if (!strcmp(botm, "?")) {
     rand_leaf = 1;
     for (tbot = tandbot; tbot; tbot = tbot->next) {
-      if (bot_hublevel(get_user_by_handle(userlist, tbot->bot)) == 999)
-        tbots++;
+      if (bot_hublevel(tbot->u) == 999) {
+        group_match = false;
+        if (group) {
+          group_match = bd::String(var_get_bot_data(tbot->u, "groups", true)).split(',').find(group) != bd::String::npos;
+        } else {
+          group_match = true;
+        }
+        if (group_match) {
+          tbots++;
+        }
+      }
     }
     if (tbots)
       rleaf = 1 + randint(tbots);		/* 1 <--> tbots */
@@ -1439,29 +1457,38 @@ static void cmd_botcmd(int idx, char *par)
     }
     all_localhub = 1;
     for (tbot = tandbot; tbot; tbot = tbot->next) {
-      if (bot_hublevel(get_user_by_handle(userlist, tbot->bot)) == 999 && tbot->localhub)
-        tbots++;
+      if (bot_hublevel(tbot->u) == 999 && tbot->localhub) {
+        group_match = false;
+        if (group) {
+          group_match = bd::String(var_get_bot_data(tbot->u, "groups", true)).split(',').find(group) != bd::String::npos;
+        } else {
+          group_match = true;
+        }
+        if (group_match) {
+          tbots++;
+        }
+      }
     }
   }
   
   for (tbot = tandbot; tbot; tbot = tbot->next) {
-    struct userrec *botu = get_user_by_handle(userlist, tbot->bot);
-    if ((rand_leaf && bot_hublevel(botu) != 999) ||
-        (all_localhub && (bot_hublevel(botu) != 999 || !tbot->localhub)))
+    if ((rand_leaf && bot_hublevel(tbot->u) != 999) ||
+        (all_localhub && (bot_hublevel(tbot->u) != 999 || !tbot->localhub)))
       continue;
-    cnt++;
-    bool group_match = false;
-    if (botm[0] == '%' && bot_hublevel(botu) == 999) {
-      bd::String botgroups = var_get_bot_data(botu, "groups", true);
-      if (botgroups.split(',').find(botm + 1) != bd::String::npos) {
-        group_match = true;
-      }
+    group_match = false;
+    if (group && bot_hublevel(tbot->u) == 999) {
+      group_match = bd::String(var_get_bot_data(tbot->u, "groups", true)).split(',').find(group) != bd::String::npos;
+    } else if (!group) {
+      group_match = true;
     }
-    if (group_match || (rleaf != -1 && cnt == rleaf) || (rleaf == -1 && (all_localhub || wild_match(botm, tbot->bot)))) {
-      if (rleaf != -1)
-        putlog(LOG_CMDS, "*", "#%s# botcmd %s %s ...", dcc[idx].nick, tbot->bot, cmd);
-      send_remote_simul(idx, tbot->bot, cmd, par ? par : (char *) "");
-      found++;
+    if (group_match) {
+      cnt++;
+      if ((rleaf != -1 && cnt == rleaf) || (rleaf == -1 && (all_localhub || wild_match(botm, tbot->bot)))) {
+        if (rleaf != -1)
+          putlog(LOG_CMDS, "*", "#%s# botcmd %s %s ...", dcc[idx].nick, tbot->bot, cmd);
+        send_remote_simul(idx, tbot->bot, cmd, par ? par : (char *) "");
+        found++;
+      }
     }
   }
 
