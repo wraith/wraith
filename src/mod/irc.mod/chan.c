@@ -542,7 +542,7 @@ static void do_mask(struct chanset_t *chan, masklist *m, char *mask, char Mode)
 /* This is a clone of detect_flood, but works for channel specificity now
  * and handles kick & deop as well.
  */
-static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t *chan, int which, const char *victim, const char *msg)
+static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t *chan, int which, const char *msg)
 {
   /* Do not punish non-existant channel members and IRC services like
    * ChanServ
@@ -640,21 +640,12 @@ static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t 
     chan->floodnum[which] = 1;
     return 0;
   }
-  /* Deop'n the same person, sillyness ;) - so just ignore it */
-  if (which == FLOOD_DEOP) {
-    if (!rfc_casecmp(chan->deopd, victim))
-      return 0;
-    else
-      strlcpy(chan->deopd, victim, sizeof(chan->deopd));
-  }
   chan->floodnum[which]++;
   if (chan->floodnum[which] >= thr) {	/* FLOOD */
     /* Reset counters */
     chan->floodnum[which] = 0;
     chan->floodtime[which] = 0;
     chan->floodwho[which][0] = 0;
-    if (which == FLOOD_DEOP)
-      chan->deopd[0] = 0;
     switch (which) {
     case FLOOD_PRIVMSG:
     case FLOOD_NOTICE:
@@ -2676,7 +2667,7 @@ static int gotjoin(char *from, char *chname)
  	    reset_chan_info(chan);
 	} else {
           irc_log(chan, "Join: %s (%s)", nick, uhost);
-          detect_chan_flood(m, from, chan, FLOOD_JOIN, NULL);
+          detect_chan_flood(m, from, chan, FLOOD_JOIN);
 	  set_handle_laston(chan->dname, m->user, now);
 	}
       }
@@ -2829,7 +2820,7 @@ static int gotpart(char *from, char *msg)
     set_handle_laston(chan->dname, u, now);
 
     if (m) {
-      detect_chan_flood(m, from, chan, FLOOD_PART, NULL);
+      detect_chan_flood(m, from, chan, FLOOD_PART);
       killmember(chan, nick);
     }
     if (msg[0])
@@ -2880,7 +2871,7 @@ static int gotkick(char *from, char *origmsg)
 
     m = ismember(chan, whodid);
     if (m) {
-      detect_chan_flood(m, from, chan, FLOOD_KICK, nick);
+      detect_chan_flood(m, from, chan, FLOOD_KICK);
 
       m->last = now;
       member_getuser(m);
@@ -2973,7 +2964,7 @@ static int gotnick(char *from, char *msg)
 
       memberlist_reposition(chan, m);
 
-      detect_chan_flood(m, from, chan, FLOOD_NICK, NULL);
+      detect_chan_flood(m, from, chan, FLOOD_NICK);
 
       /* don't fill the serverqueue with modes or kicks in a nickflood */
       if (chan_sentkick(m) || chan_sentdeop(m) || chan_sentop(m) ||
@@ -3194,7 +3185,7 @@ static int gotmsg(char *from, char *msg)
       strlcpy(ctcp, p1, sizeof(buf2));
       strcpy(p1 - 1, p + 1);
       if (m) {
-        detect_chan_flood(m, from, chan, strncmp(ctcp, "ACTION ", 7) ? FLOOD_CTCP : FLOOD_PRIVMSG, NULL);
+        detect_chan_flood(m, from, chan, strncmp(ctcp, "ACTION ", 7) ? FLOOD_CTCP : FLOOD_PRIVMSG);
       }
 
       /* Respond to the first answer_ctcp */
@@ -3245,7 +3236,7 @@ static int gotmsg(char *from, char *msg)
 #endif
 
     if (m) {
-      detect_chan_flood(m, from, chan, FLOOD_PRIVMSG, NULL);
+      detect_chan_flood(m, from, chan, FLOOD_PRIVMSG);
     }
     
     if (auth_chan) {
@@ -3341,7 +3332,7 @@ static int gotnotice(char *from, char *msg)
       strcpy(p1 - 1, p + 1);
       p = strchr(msg, 1);
       if (m) {
-        detect_chan_flood(m, from, chan, strncmp(ctcp, "ACTION ", 7) ? FLOOD_CTCP : FLOOD_PRIVMSG, NULL);
+        detect_chan_flood(m, from, chan, strncmp(ctcp, "ACTION ", 7) ? FLOOD_CTCP : FLOOD_PRIVMSG);
       }
 
       if (ctcp[0] != ' ') {
@@ -3360,7 +3351,7 @@ static int gotnotice(char *from, char *msg)
   }
   if (msg[0]) {
     if (m) {
-      detect_chan_flood(m, from, chan, FLOOD_NOTICE, NULL);
+      detect_chan_flood(m, from, chan, FLOOD_NOTICE);
     }
 
     update_idle(chan->dname, nick);

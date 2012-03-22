@@ -222,7 +222,6 @@ struct chanset_t {
   char topic[121];
   char added_by[HANDLEN + 1];	/* who added the channel? */
   char floodwho[FLOOD_CHAN_MAX][128];
-  char deopd[NICKLEN];		/* last person deop'd (must change	*/
   char dname[81];               /* what the users know the channel as like !eggdev */
   char name[81];                /* what the servers know the channel as, like !ABCDEeggdev */
 };
