@@ -896,6 +896,11 @@ static char *var_rem_list(const char *botnick, variable_t *var, const char *elem
       strlcpy(ret, word, sizeof(ret));
   }
 
+  // If the data now matches the default global, just set to NULL
+  if (botnick && var->gdata && data && !strcmp(var->gdata, data)) {
+    data[0] = 0;
+  }
+
   if (num <= i && ret[0]) {
     var_set(var, botnick, data);
     if (botnick)
