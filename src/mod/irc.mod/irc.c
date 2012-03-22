@@ -132,7 +132,9 @@ detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
     return 0;
 
   const size_t tot = strlen(msg);
-  int caps_count = 0, color_count = 0, hit_check = 0, hit_count = 0, caps_percentage = 0;
+  int color_count = 0, hit_check = 0, hit_count = 0;
+  double caps_percentage = 0, caps_count = 0;
+  const double caps_limit = chan->capslimit ? double(chan->capslimit) / 100.0 : double(0);
 
   if (tot >= 30) {
     hit_check = tot/5; //check in-between for hits to save waste of cpu
@@ -146,8 +148,8 @@ detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
     }
 
     if (hit_check && !(hit_count % hit_check)) {
-      caps_percentage = ((float)caps_count)/((float)tot)*100;
-      if ((chan->capslimit && caps_percentage >= chan->capslimit) || (chan->colorlimit && color_count >= chan->colorlimit)) {
+      caps_percentage = (caps_count)/(double(tot));
+      if ((chan->capslimit && caps_percentage >= caps_limit) || (chan->colorlimit && color_count >= chan->colorlimit)) {
         break;
       }
       ++hit_count;
@@ -155,8 +157,8 @@ detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
     ++msg;
   }
   if (chan->capslimit && caps_count) {
-    caps_percentage = ((float)caps_count)/((float)tot)*100;
-    if (caps_percentage >= chan->capslimit) {
+    caps_percentage = (caps_count)/(double(tot));
+    if (caps_percentage >= caps_limit) {
       dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, response(RES_FLOOD));
       m->flags |= SENTKICK;
       return 0;
