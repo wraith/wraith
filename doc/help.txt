@@ -235,7 +235,7 @@ See also: -ban, +ban, console%{+m|m}, chanset, chaninfo%{-}, stick, unstick
    one. You can also specify a bot, and attempt to boot someone from another
    bot on the botnet. You cannot boot a bot owner.
 :hub:botcmd:
-###  $bbotcmd$b <bot|*|?|&|%%group> <cmd> [params]
+###  $bbotcmd$b <bot|*|?|&> [%%group] <cmd> [params]
    The specified cmd and optional parameters are executed on the specified bot, 
    all results are displayed back on DCC. For example:
      [19:29] #bryan# botcmd wtest whom ...
