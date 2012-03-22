@@ -118,7 +118,7 @@ static int
 detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
 {
   if (!chan || !msg
-      || !(chan->capslimit && chan->colorlimit)
+      || !(chan->capslimit || chan->colorlimit)
       || chan_sentkick(m)) //sanity check
     return 0;
 
