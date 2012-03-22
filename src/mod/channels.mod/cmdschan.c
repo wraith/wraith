@@ -1257,14 +1257,14 @@ static void cmd_chaninfo(int idx, char *par)
     SHOW_INT("Protect-backup: ", chan->protect_backup, "Do!", "Don't!");
     SHOW_INT("Voice-non-ident: ", chan->voice_non_ident, "Do!", "Don't!");
 
-    dprintf(idx, "Flood settings:   chan ctcp join kick deop nick mjoin\n");
-    dprintf(idx, "  number:          %3d  %3d  %3d  %3d  %3d  %3d  %3d\n",
-	    chan->flood_pub_thr, chan->flood_ctcp_thr,
+    dprintf(idx, "Flood settings:   chan bytes ctcp join kick deop nick mjoin\n");
+    dprintf(idx, "  number:          %3d  %4d  %3d  %3d  %3d  %3d  %3d  %3d\n",
+	    chan->flood_pub_thr, chan->flood_bytes_thr, chan->flood_ctcp_thr,
 	    chan->flood_join_thr, chan->flood_kick_thr,
 	    chan->flood_deop_thr, chan->flood_nick_thr,
             chan->flood_mjoin_thr);
-    dprintf(idx, "  time  :          %3u  %3u  %3u  %3u  %3u  %3u  %3u\n",
-	    chan->flood_pub_time, chan->flood_ctcp_time,
+    dprintf(idx, "  time  :          %3u  %4u  %3u  %3u  %3u  %3u  %3u  %3u\n",
+	    chan->flood_pub_time, chan->flood_bytes_time, chan->flood_ctcp_time,
 	    chan->flood_join_time, chan->flood_kick_time,
 	    chan->flood_deop_time, chan->flood_nick_time,
             chan->flood_mjoin_time);

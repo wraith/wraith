@@ -168,6 +168,8 @@ struct chanset_t {
   uint32_t ircnet_status;
   int flood_pub_thr;
   interval_t flood_pub_time;
+  int flood_bytes_thr;
+  interval_t flood_bytes_time;
   int flood_join_thr;
   interval_t flood_join_time;
   int flood_deop_thr;
