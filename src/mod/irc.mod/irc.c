@@ -131,16 +131,35 @@ detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
       (m && chan->flood_exempt_mode == CHAN_FLAG_VOICE && (chan_hasvoice(m) || chan_hasop(m))))
     return 0;
 
-  const size_t tot = strlen(msg);
   int color_count = 0, hit_check = 0, hit_count = 0;
   double caps_percentage = 0, caps_count = 0;
   const double caps_limit = chan->capslimit ? double(chan->capslimit) / 100.0 : double(0);
+
+  // Need to know how long the message is, and want to ignore spaces, so avoid a strlen() and just loop to count
+  size_t tot = 0;
+  char *msg_check = msg;
+  while (msg_check && *msg_check) {
+    if (!egg_isspace(*msg_check)) {
+      ++tot;
+    }
+    ++msg_check;
+  }
+
+  if (!tot) {
+    return 0;
+  }
 
   if (tot >= 30) {
     hit_check = tot/5; //check in-between for hits to save waste of cpu
   }
 
   while (msg && *msg) {
+    // Skip spaces
+    if (egg_isspace(*msg)) {
+      ++msg;
+      continue;
+    }
+
     if (egg_isupper(*msg)) {
       ++caps_count;
     } else if (*msg == 3 || *msg == 2) {
