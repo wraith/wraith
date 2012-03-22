@@ -141,7 +141,7 @@ detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
   while (msg && *msg) {
     if (egg_isupper(*msg)) {
       ++caps_count;
-    } else if (*msg == 3) {
+    } else if (*msg == 3 || *msg == 2) {
       ++color_count;
     }
 
