@@ -2649,6 +2649,7 @@ static int gotjoin(char *from, char *chname)
 //	m->flags |= STOPWHO;
 
 	if (match_my_nick(nick)) {
+          m->is_me = 1;
 	  /* It was me joining! Need to update the channel record with the
 	   * unique name for the channel (as the server see's it). <cybah>
 	   */
