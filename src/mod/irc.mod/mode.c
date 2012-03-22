@@ -696,8 +696,9 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
   if (isserver[0])		/* !m */
     putlog(LOG_MODES, chan->dname, "TS resync (%s): %s deopped by %s", chan->dname, mv->nick, isserver);
   /* Check for mass deop */
-  else if (m)
-    detect_chan_flood(m->nick, m->userhost, s1, chan, FLOOD_DEOP, mv->nick);
+  else if (m) {
+    detect_chan_flood(m, s1, chan, FLOOD_DEOP, mv->nick);
+  }
   /* Having op hides your +v and +h  status -- so now that someone's lost ops,
    * check to see if they have +v or +h
    */

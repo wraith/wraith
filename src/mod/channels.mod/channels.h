@@ -53,7 +53,7 @@ int channel_modify(char *, struct chanset_t *, int, char **, bool);
 int channel_add(char *, const char *, char *, bool = 0);
 void clear_channel(struct chanset_t *, bool);
 int u_equals_mask(maskrec *, char *);
-bool u_match_mask(struct maskrec *, char *);
+bool u_match_mask(struct maskrec *, const char *);
 bool ismasked(masklist *, const char *);
 bool ismodeline(masklist *, const char *);
 void channels_report(int, int);

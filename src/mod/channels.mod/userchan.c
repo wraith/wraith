@@ -219,7 +219,7 @@ int u_equals_mask(maskrec *u, char *mask)
   return 0;
 }
 
-bool u_match_mask(maskrec *rec, char *mask)
+bool u_match_mask(maskrec *rec, const char *mask)
 {
   for (; rec; rec = rec->next)
     if (wild_match(rec->mask, mask) || match_cidr(rec->mask, mask))
