@@ -140,7 +140,7 @@ detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
   if (caps_limit) {
     char *msg_check = msg;
     while (msg_check && *msg_check) {
-      if (!egg_isspace(*msg_check)) {
+      if (!egg_isspace(*msg_check) && *msg_check != 3 && *msg_check != 2) {
         ++tot;
       }
       ++msg_check;
