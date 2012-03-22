@@ -717,7 +717,7 @@ bd::String channel_to_string(struct chanset_t* chan, bool force_inactive) {
 chanmode { %s } groups { %s } bad-cookie %d manop %d mdop %d mop %d limit %d revenge %d ban-type %d \
 flood-chan %d:%d flood-ctcp %d:%d flood-join %d:%d \
 flood-kick %d:%d flood-deop %d:%d flood-nick %d:%d flood-mjoin %d:%d \
-closed-ban %d closed-invite %d closed-private %d closed-exempt %d ban-time %d \
+capslimits %d colorlimit %d closed-ban %d closed-invite %d closed-private %d closed-exempt %d ban-time %d \
 exempt-time %d invite-time %d voice-non-ident %d auto-delay %d \
 flood-exempt %d flood-lock-time %d knock %d fish-key { %s } \
 %cmeankicks %cenforcebans %cdynamicbans %cuserbans %cbitch %cfloodban \
@@ -744,6 +744,8 @@ flood-exempt %d flood-lock-time %d knock %d fish-key { %s } \
         chan->flood_deop_thr, chan->flood_deop_time,
 	chan->flood_nick_thr, chan->flood_nick_time,
 	chan->flood_mjoin_thr, chan->flood_mjoin_time,
+        chan->capslimit,
+        chan->colorlimit,
         chan->closed_ban,
 /* Chanint template
  *      chan->temp,
@@ -834,7 +836,7 @@ void write_chans_compat(bd::Stream& stream, int idx)
 bad-cookie %d manop %d mdop %d mop %d limit %d \
 flood-chan %d:%d flood-ctcp %d:%d flood-join %d:%d \
 flood-kick %d:%d flood-deop %d:%d flood-nick %d:%d \
-closed-ban %d closed-invite %d closed-private %d ban-time %d \
+capslimit %d colorlimit %d closed-ban %d closed-invite %d closed-private %d ban-time %d \
 exempt-time %d invite-time %d voice-non-ident %d auto-delay %d \
 %cenforcebans %cdynamicbans %cuserbans %cbitch \
 %cprivate %ccycle %cinactive %cdynamicexempts %cuserexempts \
@@ -855,6 +857,8 @@ exempt-time %d invite-time %d voice-non-ident %d auto-delay %d \
         chan->flood_kick_thr, chan->flood_kick_time,
         chan->flood_deop_thr, chan->flood_deop_time,
 	chan->flood_nick_thr, chan->flood_nick_time,
+        chan->capslimit,
+        chan->colorlimit,
         chan->closed_ban,
         chan->closed_invite,
         chan->closed_private,

@@ -61,6 +61,8 @@
 
 #include <stdarg.h>
 
+#include <math.h>
+
 #define PRIO_DEOP 1
 #define PRIO_KICK 2
 
@@ -112,39 +114,92 @@ voice_ok(memberlist *m, struct chanset_t *chan)
 #include "cmdsirc.c"
 #include "msgcmds.c"
 
-#ifdef unfinished
-static void
+static int
 detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
 {
+  if (!chan || !msg
+      || !(chan->capslimit || chan->colorlimit)
+      || chan_sentkick(m)) //sanity check
+    return 0;
+
   struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
   struct userrec *u = m->user ? m->user : get_user_by_host(m->userhost);
-  int i = 0;
-
-  //size_t tot = strlen(msg);
-
   get_user_flagrec(u, &fr, chan->dname, chan);
 
-  for (; *msg; ++msg) {
-    if (egg_isupper(*msg))
-      i++;
+  if (glob_bot(fr) ||
+      (m && chan->flood_exempt_mode == CHAN_FLAG_OP && chan_hasop(m)) ||
+      (m && chan->flood_exempt_mode == CHAN_FLAG_VOICE && (chan_hasvoice(m) || chan_hasop(m))))
+    return 0;
+
+  int color_count = 0, hit_check = 0, hit_count = 0;
+  double caps_percentage = 0, caps_count = 0;
+  const double caps_limit = chan->capslimit ? double(chan->capslimit) / 100.0 : double(0);
+
+  // Need to know how long the message is, and want to ignore spaces, so avoid a strlen() and just loop to count
+  size_t tot = 0;
+  if (caps_limit) {
+    char *msg_check = msg;
+    while (msg_check && *msg_check) {
+      if (!egg_isspace(*msg_check) && *msg_check != 3 && *msg_check != 2) {
+        ++tot;
+      }
+      ++msg_check;
+    }
+
+    if (!tot) {
+      return 0;
+    }
+
+    if (tot >= 30) {
+      hit_check = tot/5; //check in-between for hits to save waste of cpu
+    }
   }
 
-/*  if ((chan->capslimit)) { */
-  while (((msg) && *msg)) {
-    if (egg_isupper(*msg))
-      i++;
-    msg++;
-  }
+  while (msg && *msg) {
+    // Skip spaces
+    if (egg_isspace(*msg)) {
+      ++msg;
+      continue;
+    }
 
-/*
-  if (chan->capslimit && ((i / tot) >= chan->capslimit)) {
-dprintf(DP_MODE, "PRIVMSG %s :flood stats for %s: %d/%d are CAP, percentage: %d\n", chan->name, nick, i, tot, (i/tot)*100);
-  if ((((i / tot) * 100) >= 50)) {
-dprintf(DP_HELP, "PRIVMSG %s :cap flood.\n", chan->dname);
+    if (egg_isupper(*msg)) {
+      ++caps_count;
+    } else if (*msg == 3 || *msg == 2) {
+      ++color_count;
+    }
+
+    if (hit_check && !(hit_count % hit_check)) {
+      if (caps_limit) {
+        caps_percentage = (caps_count)/(double(tot));
+        if (caps_percentage >= caps_limit) {
+          break;
+        }
+      }
+      if (chan->colorlimit && color_count >= chan->colorlimit) {
+        break;
+      }
+      ++hit_count;
+    }
+    ++msg;
   }
-*/
+  if (chan->capslimit && caps_count) {
+    caps_percentage = (caps_count)/(double(tot));
+    if (caps_percentage >= caps_limit) {
+      putlog(LOG_MODES, chan->name, "Caps flood (%d%%) from %s -- kicking", int(caps_percentage * 100), m->nick);
+      dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, response(RES_FLOOD));
+      m->flags |= SENTKICK;
+      return 1;
+    }
+  } else if (chan->colorlimit && color_count) {
+    if (color_count >= chan->colorlimit) {
+      putlog(LOG_MODES, chan->name, "Color flood (%d) from %s -- kicking", color_count, m->nick);
+      dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, response(RES_FLOOD));
+      m->flags |= SENTKICK;
+      return 1;
+    }
+  }
+  return 0;
 }
-#endif
 
 void unlock_chan(struct chanset_t *chan)
 {
