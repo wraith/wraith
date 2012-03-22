@@ -131,30 +131,32 @@ detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
       (m && chan->flood_exempt_mode == CHAN_FLAG_VOICE && (chan_hasvoice(m) || chan_hasop(m))))
     return 0;
 
-  int tot = (int)strlen(msg);
-  int caps_count = 0;
-  int color_count = 0;
-  int hit_check = 0;
-  int hit_count = 0;
+  const size_t tot = strlen(msg);
+  int caps_count = 0, color_count = 0, hit_check = 0, hit_count = 0, caps_percentage = 0;
 
-  if (tot >= 30) hit_check = tot/5; //check in-between for hits to save waste of cpu
+  if (tot >= 30) {
+    hit_check = tot/5; //check in-between for hits to save waste of cpu
+  }
 
   while (msg && *msg) {
-    if (egg_isupper(*msg))
-      caps_count++;
-    else if (*msg == 3)
-      color_count++;
-
-    if (hit_check && !(hit_count%hit_check)) {
-      if (chan->capslimit && ((((float)caps_count)/((float)tot))*100 >= chan->capslimit)) break;
-      else if (chan->colorlimit && color_count >= chan->colorlimit) break;
-      hit_count++;
+    if (egg_isupper(*msg)) {
+      ++caps_count;
+    } else if (*msg == 3) {
+      ++color_count;
     }
-    msg++;
+
+    if (hit_check && !(hit_count % hit_check)) {
+      caps_percentage = ((float)caps_count)/((float)tot)*100;
+      if ((chan->capslimit && caps_percentage >= chan->capslimit) || (chan->colorlimit && color_count >= chan->colorlimit)) {
+        break;
+      }
+      ++hit_count;
+    }
+    ++msg;
   }
   if (chan->capslimit && caps_count) {
-    int cap_p = (((float)caps_count)/((float)tot))*100;
-    if (cap_p >= chan->capslimit) {
+    caps_percentage = ((float)caps_count)/((float)tot)*100;
+    if (caps_percentage >= chan->capslimit) {
       dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, response(RES_FLOOD));
       m->flags |= SENTKICK;
       return 0;
