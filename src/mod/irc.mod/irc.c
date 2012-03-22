@@ -137,20 +137,22 @@ detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
 
   // Need to know how long the message is, and want to ignore spaces, so avoid a strlen() and just loop to count
   size_t tot = 0;
-  char *msg_check = msg;
-  while (msg_check && *msg_check) {
-    if (!egg_isspace(*msg_check)) {
-      ++tot;
+  if (caps_limit) {
+    char *msg_check = msg;
+    while (msg_check && *msg_check) {
+      if (!egg_isspace(*msg_check)) {
+        ++tot;
+      }
+      ++msg_check;
     }
-    ++msg_check;
-  }
 
-  if (!tot) {
-    return 0;
-  }
+    if (!tot) {
+      return 0;
+    }
 
-  if (tot >= 30) {
-    hit_check = tot/5; //check in-between for hits to save waste of cpu
+    if (tot >= 30) {
+      hit_check = tot/5; //check in-between for hits to save waste of cpu
+    }
   }
 
   while (msg && *msg) {
@@ -167,8 +169,13 @@ detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
     }
 
     if (hit_check && !(hit_count % hit_check)) {
-      caps_percentage = (caps_count)/(double(tot));
-      if ((chan->capslimit && caps_percentage >= caps_limit) || (chan->colorlimit && color_count >= chan->colorlimit)) {
+      if (caps_limit) {
+        caps_percentage = (caps_count)/(double(tot));
+        if (caps_percentage >= caps_limit) {
+          break;
+        }
+      }
+      if (chan->colorlimit && color_count >= chan->colorlimit) {
         break;
       }
       ++hit_count;
