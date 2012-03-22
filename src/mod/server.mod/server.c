@@ -1030,32 +1030,53 @@ static void server_secondly()
       nick_available(1, 0);
     }
 
-    if (!loading) {
-      static int cnt_10 = 0;
+    static int cnt_10 = 0;
 
-      // Every 10 seconds
-      if (cnt_10 == 9) {
-        // Ensure that +D/+f are not conflicting
+    // Every 10 seconds
+    if (cnt_10 == 9) {
 
-        if (deaf_char) {
-          // +f or auth bots in used need to see channel chatter.
-          bool need_chatter = doflood(NULL) || (Auth::ht_host.size() && auth_chan && strlen(auth_prefix));
+      // Ensure that +D/+f are not conflicting
+      if (!loading && deaf_char) {
+        // +f or auth bots in used need to see channel chatter.
+        bool need_chatter = doflood(NULL) || (Auth::ht_host.size() && auth_chan && strlen(auth_prefix));
 
-          // In +D but am +f, need to -D
-          if (in_deaf && (need_chatter || !use_deaf)) {
-            dprintf(DP_SERVER, "MODE %s -%c\n", botname, deaf_char);
-            in_deaf = 0;
-          } else if (!in_deaf && use_deaf && !need_chatter) {
-            // Not +D but should be, probably had +f removed.
-            dprintf(DP_SERVER, "MODE %s +%c\n", botname, deaf_char);
-            in_deaf = 1;
-          }
+        // In +D but am +f, need to -D
+        if (in_deaf && (need_chatter || !use_deaf)) {
+          dprintf(DP_SERVER, "MODE %s -%c\n", botname, deaf_char);
+          in_deaf = 0;
+        } else if (!in_deaf && use_deaf && !need_chatter) {
+          // Not +D but should be, probably had +f removed.
+          dprintf(DP_SERVER, "MODE %s +%c\n", botname, deaf_char);
+          in_deaf = 1;
+        }
+      }
+
+      // Clear expired key exchanges that aren't finished (7 seconds)
+      const bd::Array<bd::String> fish_targets(FishKeys.keys());
+      for (size_t i = 0; i < fish_targets.length(); ++i) {
+        const bd::String target(fish_targets[i]);
+        fish_data_t* fishData = FishKeys[target];
+        bool should_delete = false;
+        if (fishData->key_created_at && !fishData->sharedKey && ((now - 7) >= fishData->key_created_at)) {
+          putlog(LOG_DEBUG, "*", "Deleting expired DH1080 FiSH exchange with %s", target.c_str());
+          should_delete = true;
+        } else if (fishData->key_created_at && fishData->sharedKey.length() && ((now - 3600) >= fishData->key_created_at)) {
+          putlog(LOG_DEBUG, "*", "Deleting expired (60 min) FiSH key with %s", target.c_str());
+          should_delete = true;
         }
 
-        cnt_10 = 0;
-      } else
-        ++cnt_10;
+        if (should_delete) {
+          FishKeys.remove(target);
+          delete fishData;
+        }
+      }
+
+
+      cnt_10 = 0;
+    } else {
+      ++cnt_10;
     }
+
     if (connect_bursting && (now - SERVER_CONNECT_BURST_TIME) >= connect_bursting) {
       end_burstmode();
       putlog(LOG_DEBUG, "*", "Ending server burst mode");

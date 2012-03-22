@@ -122,8 +122,20 @@ bd::String egg_bf_decrypt(bd::String in, const bd::String& key)
       data.lr.left |= val << part * 6;
     }
     BF_decrypt(&data.bf_long, &bf_d_key);
-    for (part = 0; part < 4; part++) out += char((data.lr.left & (0xff << ((3 - part) * 8))) >> ((3 - part) * 8));
-    for (part = 0; part < 4; part++) out += char((data.lr.right & (0xff << ((3 - part) * 8))) >> ((3 - part) * 8));
+    for (part = 0; part < 4; part++) {
+      const char decrypted_char = char((data.lr.left & (0xff << ((3 - part) * 8))) >> ((3 - part) * 8));
+      // Don't write NULLs into the string
+      if (decrypted_char) {
+        out += decrypted_char;
+      }
+    }
+    for (part = 0; part < 4; part++) {
+      const char decrypted_char = char((data.lr.right & (0xff << ((3 - part) * 8))) >> ((3 - part) * 8));
+      // Don't write NULLs into the string
+      if (decrypted_char) {
+        out += decrypted_char;
+      }
+    }
   }
 
   return out;
