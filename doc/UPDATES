@@ -6,7 +6,6 @@ next
   * Add chanset 'capslimit' to handle % of message that can be in caps before kick (#8)
   * Add chanset 'colorlimit' to handle how many color codes are allowed in a message before kick (#8)
   * Fix flood kicking not properly tracking multiple clients at once (#43)
-  * Fix flood kicking not properly tracking multiple clients at once (#43)
   * Add chanset 'flood-bytes' to count how many bytes:second a user sends before getting kicked for flood. (#42)
 
 1.4.0 - http://wraith.botpack.net/milestone/1.4.0
