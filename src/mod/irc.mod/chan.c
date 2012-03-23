@@ -575,9 +575,9 @@ static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t 
     return 0;
 
   char h[UHOSTLEN] = "", ftype[14] = "", *p = NULL;
-  int thr = 0;
+  int thr = 0, mthr = 0;
   int increment = 1;
-  time_t lapse = 0;
+  time_t lapse = 0, mlapse = 0;
 
   /* Determine how many are necessary to make a flood. */
   switch (which) {
@@ -620,8 +620,6 @@ static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t 
     strlcpy(ftype, "kick", sizeof(ftype));
     break;
   }
-  if ((thr == 0) || (lapse == 0))
-    return 0;			/* no flood protection */
 
   if ((which == FLOOD_KICK) || (which == FLOOD_DEOP))
     p = m->nick;
@@ -635,30 +633,36 @@ static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t 
   }
 
   // Track across all clients in the channel
-  if (!chan->channel.floodtime->contains("all")) {
-    (*chan->channel.floodtime)["all"][which] = now;
-    (*chan->channel.floodnum)["all"][which] = increment;
-    return 0;
-  }
+  if (mlapse && mthr) {
+    if (!chan->channel.floodtime->contains("all")) {
+      (*chan->channel.floodtime)["all"][which] = now;
+      (*chan->channel.floodnum)["all"][which] = increment;
+      return 0;
+    }
 
-  bd::HashTable<flood_t, time_t>      *global_floodtime = &(*chan->channel.floodtime)["all"];
-  bd::HashTable<flood_t, int>         *global_floodnum = &(*chan->channel.floodnum)["all"];
+    bd::HashTable<flood_t, time_t>      *global_floodtime = &(*chan->channel.floodtime)["all"];
+    bd::HashTable<flood_t, int>         *global_floodnum = &(*chan->channel.floodnum)["all"];
 
-  if ((*global_floodtime)[which] < now - lapse) {
-    /* Flood timer expired, reset it */
-    (*global_floodtime)[which] = now;
-    (*global_floodnum)[which] = increment;
-  } else {
-    (*global_floodnum)[which] += increment;
+    if ((*global_floodtime)[which] < now - mlapse) {
+      /* Flood timer expired, reset it */
+      (*global_floodtime)[which] = now;
+      (*global_floodnum)[which] = increment;
+    } else {
+      (*global_floodnum)[which] += increment;
 
-    if ((*global_floodnum)[which] >= thr) {	/* FLOOD */
-      /* Reset counters */
-      (*global_floodnum).remove(which);
-      (*global_floodtime).remove(which);
-      if (!chan->channel.drone_set_mode) {
-        lockdown_chan(chan, FLOOD_DRONE);
+      if ((*global_floodnum)[which] >= mthr) {	/* FLOOD */
+        /* Reset counters */
+        (*global_floodnum).remove(which);
+        (*global_floodtime).remove(which);
+        if (!chan->channel.drone_set_mode) {
+          lockdown_chan(chan, FLOOD_DRONE);
+        }
       }
     }
+  }
+
+  if ((thr == 0) || (lapse == 0)) {
+    return 0;			/* no flood protection */
   }
 
   // Track individual hosts/clients
