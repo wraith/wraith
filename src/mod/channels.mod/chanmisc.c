@@ -810,6 +810,8 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
 
         chan->flood_pub_thr = thr;
         chan->flood_pub_time = time;
+        chan->flood_bytes_thr = thr;
+        chan->flood_bytes_time = time;
         chan->flood_join_thr = thr;
         chan->flood_join_time = time;
         chan->flood_ctcp_thr = thr;
@@ -825,6 +827,9 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
       } else if (!strcmp(item[i] + 6, "chan")) {
 	pthr = &chan->flood_pub_thr;
 	ptime = &chan->flood_pub_time;
+      } else if (!strcmp(item[i] + 6, "bytes")) {
+	pthr = &chan->flood_bytes_thr;
+	ptime = &chan->flood_bytes_time;
       } else if (!strcmp(item[i] + 6, "join")) {
 	pthr = &chan->flood_join_thr;
 	ptime = &chan->flood_join_time;
@@ -1080,6 +1085,8 @@ int channel_add(char *result, const char *newname, char *options, bool isdefault
     chan->flood_exempt_mode = 0;
     chan->flood_pub_thr = gfld_chan_thr;
     chan->flood_pub_time = gfld_chan_time;
+    chan->flood_bytes_thr = gfld_bytes_thr;
+    chan->flood_bytes_time = gfld_bytes_time;
     chan->flood_ctcp_thr = gfld_ctcp_thr;
     chan->flood_ctcp_time = gfld_ctcp_time;
     chan->flood_join_thr = gfld_join_thr;

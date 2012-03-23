@@ -585,8 +585,9 @@ static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t 
       )))
     return 0;
 
-  char h[UHOSTLEN] = "", ftype[12] = "", *p = NULL;
+  char h[UHOSTLEN] = "", ftype[14] = "", *p = NULL;
   int thr = 0;
+  int increment = 1;
   time_t lapse = 0;
 
   /* Determine how many are necessary to make a flood. */
@@ -596,6 +597,12 @@ static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t 
     thr = chan->flood_pub_thr;
     lapse = chan->flood_pub_time;
     strlcpy(ftype, "pub", sizeof(ftype));
+    break;
+  case FLOOD_BYTES:
+    thr = chan->flood_bytes_thr;
+    lapse = chan->flood_bytes_time;
+    strlcpy(ftype, "bytes", sizeof(ftype));
+    increment = static_cast<int>(strlen(msg));
     break;
   case FLOOD_CTCP:
     thr = chan->flood_ctcp_thr;
@@ -648,7 +655,7 @@ static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t 
       // If not found, add them and start the count for next iteration
       if (!chan->channel.floodtime->contains(m->userhost)) {
         (*chan->channel.floodtime)[m->userhost][which] = now;
-        (*chan->channel.floodnum)[m->userhost][which] = 1;
+        (*chan->channel.floodnum)[m->userhost][which] = increment;
         return 0;
       } else {
         floodtime = &(*chan->channel.floodtime)[m->userhost];
@@ -660,7 +667,7 @@ static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t 
       // If not found, add them and start the count for next iteration
       if (!m->floodtime->contains(which)) {
         (*m->floodtime)[which] = now;
-        (*m->floodnum)[which] = 1;
+        (*m->floodnum)[which] = increment;
         return 0;
       } else {
         floodtime = m->floodtime;
@@ -672,10 +679,11 @@ static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t 
   if ((*floodtime)[which] < now - lapse) {
     /* Flood timer expired, reset it */
     (*floodtime)[which] = now;
-    (*floodnum)[which] = 1;
+    (*floodnum)[which] = increment;
     return 0;
   }
-  (*floodnum)[which]++;
+  (*floodnum)[which] += increment;
+
   if ((*floodnum)[which] >= thr) {	/* FLOOD */
     /* Reset counters */
     (*floodnum).remove(which);
@@ -684,6 +692,7 @@ static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t 
     case FLOOD_PRIVMSG:
     case FLOOD_NOTICE:
     case FLOOD_CTCP:
+    case FLOOD_BYTES:
       /* Flooding chan! either by public or notice */
       if (!chan_sentkick(m) && me_op(chan)) {
         if (channel_floodban(chan)) {
@@ -716,7 +725,7 @@ static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t 
 	putlog(LOG_MISC | LOG_JOIN, chan->dname, "JOIN flood from @%s!  Banning.", p);
       else
 	putlog(LOG_MISC | LOG_JOIN, chan->dname, "NICK flood from @%s!  Banning.", p);
-      strlcpy(ftype + 4, " flood", sizeof(ftype) - 4);
+      strlcat(ftype, " flood", sizeof(ftype));
       u_addmask('b', chan, h, conf.bot->nick, ftype, now + (60 * chan->ban_time), 0);
       if (which == FLOOD_PART)
         add_mode(chan, '+', 'b', h);
@@ -3214,6 +3223,7 @@ static int gotmsg(char *from, char *msg)
       strcpy(p1 - 1, p + 1);
       if (m) {
         detect_chan_flood(m, from, chan, strncmp(ctcp, "ACTION ", 7) ? FLOOD_CTCP : FLOOD_PRIVMSG);
+        detect_chan_flood(m, from, chan, FLOOD_BYTES, msg);
       }
 
       /* Respond to the first answer_ctcp */
@@ -3263,6 +3273,7 @@ static int gotmsg(char *from, char *msg)
 
     if (m) {
       detect_chan_flood(m, from, chan, FLOOD_PRIVMSG);
+      detect_chan_flood(m, from, chan, FLOOD_BYTES, msg);
     }
     
     if (auth_chan) {
@@ -3358,6 +3369,7 @@ static int gotnotice(char *from, char *msg)
       p = strchr(msg, 1);
       if (m) {
         detect_chan_flood(m, from, chan, strncmp(ctcp, "ACTION ", 7) ? FLOOD_CTCP : FLOOD_PRIVMSG);
+        detect_chan_flood(m, from, chan, FLOOD_BYTES, msg);
       }
 
       if (ctcp[0] != ' ') {
@@ -3377,6 +3389,7 @@ static int gotnotice(char *from, char *msg)
   if (msg[0]) {
     if (m) {
       detect_chan_flood(m, from, chan, FLOOD_NOTICE);
+      detect_chan_flood(m, from, chan, FLOOD_BYTES, msg);
     }
 
     update_idle(chan->dname, nick);
