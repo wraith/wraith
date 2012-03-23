@@ -2714,7 +2714,7 @@ static int gotjoin(char *from, char *chname)
           chan->channel.drone_jointime = now;
 
           if (!chan->channel.drone_set_mode && chan->channel.drone_joins >= chan->flood_mjoin_thr) {  //flood from dronenet, let's attempt to set +im
-            detected_drone_flood(chan, m);
+            detected_drone_flood(chan, m, FLOOD_DRONE);
           }
         }
 

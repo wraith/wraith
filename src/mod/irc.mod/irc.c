@@ -160,7 +160,7 @@ void unlock_chan(struct chanset_t *chan)
   chan->channel.drone_set_mode = 0;
 }
 
-void detected_drone_flood(struct chanset_t* chan, memberlist* m) {
+void detected_drone_flood(struct chanset_t* chan, memberlist* m, flood_reason_t reason) {
   egg_timeval_t howlong;
 
   chan->channel.drone_set_mode = 0;
@@ -186,7 +186,9 @@ void detected_drone_flood(struct chanset_t* chan, memberlist* m) {
     howlong.usec = 0;
     timer_create_complex(&howlong, "unlock", (Function) unlock_chan, (void *) chan, 0);
 
-    putlog(LOG_MISC, "*", "Flood detected in %s! Locking for %d seconds.", chan->dname, chan->flood_lock_time);
+    if (reason == FLOOD_DRONE) {
+      putlog(LOG_MISC, "*", "Flood detected in %s! Locking for %d seconds.", chan->dname, chan->flood_lock_time);
+    }
   }
 }
 
