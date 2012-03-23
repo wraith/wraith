@@ -24,6 +24,7 @@ typedef struct memstruct {
   char nick[NICKLEN];
   char userhost[UHOSTLEN];
   char userip[UHOSTLEN];
+  char from[NICKLEN + UHOSTLEN];   /* nick!user@host */
   bool is_me;
 } memberlist;
 
