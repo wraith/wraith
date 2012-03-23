@@ -135,7 +135,8 @@ enum flood_t {
   FLOOD_JOIN     = 4,
   FLOOD_KICK     = 5,
   FLOOD_DEOP     = 6,
-  FLOOD_PART     = 7
+  FLOOD_PART     = 7,
+  FLOOD_BYTES    = 8
 };
 
 
@@ -151,7 +152,7 @@ template<>
   };
 BDLIB_NS_END
 
-#define FLOOD_CHAN_MAX   8
+#define FLOOD_CHAN_MAX   9
 #define FLOOD_GLOBAL_MAX 3
 
 #define FEATURE_1		BIT0
