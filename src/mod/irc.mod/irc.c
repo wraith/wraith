@@ -189,10 +189,12 @@ void lockdown_chan(struct chanset_t* chan, flood_reason_t reason) {
     howlong.usec = 0;
     timer_create_complex(&howlong, "unlock", (Function) unlock_chan, (void *) chan, 0);
 
-    if (reason == FLOOD_DRONE) {
-      putlog(LOG_MISC, "*", "Flood detected in %s! Locking for %d seconds.", chan->dname, chan->flood_lock_time);
+    if (reason == FLOOD_MASSJOIN) {
+      putlog(LOG_MISC, "*", "Join flood detected in %s! Locking for %d seconds.", chan->dname, chan->flood_lock_time);
     } else if (reason == FLOOD_BANLIST) {
       putlog(LOG_MISC, "*", "Banlist full in %s! Locking for %d seconds.", chan->dname, chan->flood_lock_time);
+    } else if (reason == FLOOD_DRONE) {
+      putlog(LOG_MISC, "*", "Drone flood detected in %s! Locking for %d seconds.", chan->dname, chan->flood_lock_time);
     }
   }
 }

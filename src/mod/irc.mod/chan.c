@@ -634,6 +634,34 @@ static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t 
       return 0;
   }
 
+  // Track across all clients in the channel
+  if (!chan->channel.floodtime->contains("all")) {
+    (*chan->channel.floodtime)["all"][which] = now;
+    (*chan->channel.floodnum)["all"][which] = increment;
+    return 0;
+  }
+
+  bd::HashTable<flood_t, time_t>      *global_floodtime = &(*chan->channel.floodtime)["all"];
+  bd::HashTable<flood_t, int>         *global_floodnum = &(*chan->channel.floodnum)["all"];
+
+  if ((*global_floodtime)[which] < now - lapse) {
+    /* Flood timer expired, reset it */
+    (*global_floodtime)[which] = now;
+    (*global_floodnum)[which] = increment;
+  } else {
+    (*global_floodnum)[which] += increment;
+
+    if ((*global_floodnum)[which] >= thr) {	/* FLOOD */
+      /* Reset counters */
+      (*global_floodnum).remove(which);
+      (*global_floodtime).remove(which);
+      if (!chan->channel.drone_set_mode) {
+        lockdown_chan(chan, FLOOD_DRONE);
+      }
+    }
+  }
+
+  // Track individual hosts/clients
   bd::HashTable<flood_t, time_t>      *floodtime; // floodtime[FLOOD_PRIVMSG] = now;
   bd::HashTable<flood_t, int>         *floodnum;  //  floodnum[FLOOD_PRIVMSG] = 1;
 
@@ -2745,7 +2773,7 @@ static int gotjoin(char *from, char *chname)
           chan->channel.drone_jointime = now;
 
           if (!chan->channel.drone_set_mode && chan->channel.drone_joins >= chan->flood_mjoin_thr) {  //flood from dronenet, let's attempt to set +im
-            lockdown_chan(chan, FLOOD_DRONE);
+            lockdown_chan(chan, FLOOD_MASSJOIN);
           }
         }
 

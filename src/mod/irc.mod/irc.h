@@ -25,8 +25,9 @@ namespace bd {
 }
 
 enum flood_reason_t {
-  FLOOD_DRONE,
-  FLOOD_BANLIST
+  FLOOD_MASSJOIN,
+  FLOOD_BANLIST,
+  FLOOD_DRONE
 };
 
 #ifdef CACHE
