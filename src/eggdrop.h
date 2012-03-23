@@ -127,14 +127,29 @@ enum {		/* TAKE A GUESS */
 
 
 /* chan & global */
-#define FLOOD_PRIVMSG    0
-#define FLOOD_NOTICE     1
-#define FLOOD_CTCP       2
-#define FLOOD_NICK       3
-#define FLOOD_JOIN       4
-#define FLOOD_KICK       5
-#define FLOOD_DEOP       6
-#define FLOOD_PART       7
+enum flood_t {
+  FLOOD_PRIVMSG  = 0,
+  FLOOD_NOTICE   = 1,
+  FLOOD_CTCP     = 2,
+  FLOOD_NICK     = 3,
+  FLOOD_JOIN     = 4,
+  FLOOD_KICK     = 5,
+  FLOOD_DEOP     = 6,
+  FLOOD_PART     = 7
+};
+
+
+#include <bdlib/src/bdlib.h>
+BDLIB_NS_BEGIN
+template<typename T>
+  struct Hash;
+
+template<>
+  struct Hash<flood_t>
+  {
+    inline size_t operator()(flood_t val) const { return static_cast<size_t>(val); }
+  };
+BDLIB_NS_END
 
 #define FLOOD_CHAN_MAX   8
 #define FLOOD_GLOBAL_MAX 3

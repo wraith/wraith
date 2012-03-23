@@ -723,6 +723,8 @@ void remove_channel(struct chanset_t *chan)
    if (chan->groups) {
      delete(chan->groups);
    }
+   delete chan->channel.floodtime;
+   delete chan->channel.floodnum;
    free(chan);
 }
 

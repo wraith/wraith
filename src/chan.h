@@ -27,6 +27,8 @@ typedef struct memstruct {
   char from[NICKLEN + UHOSTLEN];   /* nick!user@host */
   char fromip[NICKLEN + UHOSTLEN]; /* nick!user@ip */
   bool is_me;
+  bd::HashTable<flood_t, time_t>     *floodtime; // floodtime[FLOOD_PRIVMSG] = now;
+  bd::HashTable<flood_t, int>         *floodnum; // floodnum[FLOOD_PRIVMSG] = 1;
 } memberlist;
 
 #define CHAN_FLAG_OP	1
@@ -122,6 +124,10 @@ struct chan_t {
   char *topic;
   char *key;
   unsigned short int mode;
+
+  // Shared non-member counts (JOIN/PART)
+  bd::HashTable<bd::String, bd::HashTable<flood_t, time_t> >     *floodtime; // floodtime[uhost][FLOOD_PRIVMSG] = now;
+  bd::HashTable<bd::String, bd::HashTable<flood_t, int> >         *floodnum; //  floodnum[uhost][FLOOD_PRIVMSG] = 1;
 };
 
 #define CHANINV    BIT0		/* +i					*/
@@ -158,7 +164,6 @@ struct chanset_t {
     char *op;
   } ccmode[MODES_PER_LINE_MAX];                 /* parameter-type mode changes -        */
   /* detect floods */
-  time_t floodtime[FLOOD_CHAN_MAX];
   uint32_t status;
   uint32_t ircnet_status;
   int flood_pub_thr;
@@ -211,7 +216,6 @@ struct chanset_t {
   size_t bytes;			/* total bytes so far			*/
   size_t cbytes;
   int compat;			/* to prevent mixing old/new modes	*/
-  int floodnum[FLOOD_CHAN_MAX];
   int opreqtime[5];             /* remember when ops was requested */
 
   char *key;			/* new key to set			*/
@@ -226,7 +230,6 @@ struct chanset_t {
  */
   char topic[121];
   char added_by[HANDLEN + 1];	/* who added the channel? */
-  char floodwho[FLOOD_CHAN_MAX][128];
   char dname[81];               /* what the users know the channel as like !eggdev */
   char name[81];                /* what the servers know the channel as, like !ABCDEeggdev */
 };
