@@ -586,9 +586,9 @@ static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t 
     return 0;
 
   char h[UHOSTLEN] = "", ftype[14] = "", *p = NULL;
-  int thr = 0;
+  int thr = 0, mthr = 0;
   int increment = 1;
-  time_t lapse = 0;
+  time_t lapse = 0, mlapse = 0;
 
   /* Determine how many are necessary to make a flood. */
   switch (which) {
@@ -596,18 +596,24 @@ static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t 
   case FLOOD_NOTICE:
     thr = chan->flood_pub_thr;
     lapse = chan->flood_pub_time;
+    mthr = chan->flood_mpub_thr;
+    mlapse = chan->flood_mpub_time;
     strlcpy(ftype, "pub", sizeof(ftype));
     break;
   case FLOOD_BYTES:
     thr = chan->flood_bytes_thr;
     lapse = chan->flood_bytes_time;
+    mthr = chan->flood_mbytes_thr;
+    mlapse = chan->flood_mbytes_time;
     strlcpy(ftype, "bytes", sizeof(ftype));
     increment = static_cast<int>(strlen(msg));
     break;
   case FLOOD_CTCP:
     thr = chan->flood_ctcp_thr;
     lapse = chan->flood_ctcp_time;
-    strlcpy(ftype, "pub", sizeof(ftype));
+    mthr = chan->flood_mctcp_thr;
+    mlapse = chan->flood_mctcp_time;
+    strlcpy(ftype, "ctcp", sizeof(ftype));
     break;
   case FLOOD_NICK:
     thr = chan->flood_nick_thr;
@@ -631,8 +637,6 @@ static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t 
     strlcpy(ftype, "kick", sizeof(ftype));
     break;
   }
-  if ((thr == 0) || (lapse == 0))
-    return 0;			/* no flood protection */
 
   if ((which == FLOOD_KICK) || (which == FLOOD_DEOP))
     p = m->nick;
@@ -645,6 +649,40 @@ static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t 
       return 0;
   }
 
+  // Track across all clients in the channel
+  if (mlapse && mthr) {
+    if (!chan->channel.floodtime->contains("all")) {
+      (*chan->channel.floodtime)["all"][which] = now;
+      (*chan->channel.floodnum)["all"][which] = increment;
+      return 0;
+    }
+
+    bd::HashTable<flood_t, time_t>      *global_floodtime = &(*chan->channel.floodtime)["all"];
+    bd::HashTable<flood_t, int>         *global_floodnum = &(*chan->channel.floodnum)["all"];
+
+    if ((*global_floodtime)[which] < now - mlapse) {
+      /* Flood timer expired, reset it */
+      (*global_floodtime)[which] = now;
+      (*global_floodnum)[which] = increment;
+    } else {
+      (*global_floodnum)[which] += increment;
+
+      if ((*global_floodnum)[which] >= mthr) {	/* FLOOD */
+        /* Reset counters */
+        (*global_floodnum).remove(which);
+        (*global_floodtime).remove(which);
+        if (!chan->channel.drone_set_mode) {
+          lockdown_chan(chan, FLOOD_MASS_FLOOD, ftype);
+        }
+      }
+    }
+  }
+
+  if ((thr == 0) || (lapse == 0)) {
+    return 0;			/* no flood protection */
+  }
+
+  // Track individual hosts/clients
   bd::HashTable<flood_t, time_t>      *floodtime; // floodtime[FLOOD_PRIVMSG] = now;
   bd::HashTable<flood_t, int>         *floodnum;  //  floodnum[FLOOD_PRIVMSG] = 1;
 
@@ -2457,6 +2495,37 @@ static int got475(char *from, char *msg)
   return 0;
 }
 
+/* got 478: Channel ban list is full
+ * [@] irc.blessed.net 478 wtest #wraith-devel *!*@host.com :Channel ban list is full
+ */
+static int got478(char *from, char *msg)
+{
+  char *chname = NULL;
+  struct chanset_t *chan = NULL;
+
+  newsplit(&msg);
+  chname = newsplit(&msg);
+
+  /* !channel short names (also referred to as 'description names'
+   * can be received by skipping over the unique ID.
+   */
+  if ((chname[0] == '!') && (strlen(chname) > CHANNEL_ID_LEN)) {
+    chname += CHANNEL_ID_LEN;
+    chname[0] = '!';
+  }
+  /* We use dname because name is first set on JOIN and we might not
+   * have joined the channel yet.
+   */
+  chan = findchan_by_dname(chname);
+  if (chan && shouldjoin(chan)) {
+    // Only lockdown if not already locked down
+    if (!chan->channel.drone_set_mode) {
+      lockdown_chan(chan, FLOOD_BANLIST);
+    }
+  }
+  return 0;
+}
+
 /* got invitation
  */
 static int gotinvite(char *from, char *msg)
@@ -2717,7 +2786,7 @@ static int gotjoin(char *from, char *chname)
         bool is_op = chk_op(fr, chan);
 
         /* Check for a mass join */
-        if (!splitjoin && channel_nomassjoin(chan) && !is_op) {
+        if (!splitjoin && chan->flood_mjoin_time && chan->flood_mjoin_thr && !is_op) {
           if (chan->channel.drone_jointime < now - chan->flood_mjoin_time) {      //expired, reset counter
             chan->channel.drone_joins = 0;
           }
@@ -2725,7 +2794,7 @@ static int gotjoin(char *from, char *chname)
           chan->channel.drone_jointime = now;
 
           if (!chan->channel.drone_set_mode && chan->channel.drone_joins >= chan->flood_mjoin_thr) {  //flood from dronenet, let's attempt to set +im
-            detected_drone_flood(chan, m);
+            lockdown_chan(chan, FLOOD_MASSJOIN);
           }
         }
 
@@ -3419,6 +3488,7 @@ static cmd_t irc_raw[] =
   {"473",	"",	(Function) got473,	"irc:473", LEAF},
   {"474",	"",	(Function) got474,	"irc:474", LEAF},
   {"475",	"",	(Function) got475,	"irc:475", LEAF},
+  {"478",	"",	(Function) got478,	"irc:478", LEAF},
   {"INVITE",	"",	(Function) gotinvite,	"irc:invite", LEAF},
   {"TOPIC",	"",	(Function) gottopic,	"irc:topic", LEAF},
   {"331",	"",	(Function) got331,	"irc:331", LEAF},

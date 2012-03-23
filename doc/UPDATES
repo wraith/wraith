@@ -7,6 +7,10 @@ next
   * Add chanset 'colorlimit' to handle how many color codes are allowed in a message before kick (#8)
   * Fix flood kicking not properly tracking multiple clients at once (#43)
   * Add chanset 'flood-bytes' to count how many bytes:second a user sends before getting kicked for flood. (#42)
+  * Bot will now lockdown channel (+im) if banlist becomes full (#37)
+  * Bot will now lockdown channel (+im) if a drone flood is detected (#37)
+    * Add chansets 'flood-mchan', 'flood-mbytes', 'flood-mctcp' to control reactions to mass floods (#37)
+  * Remove unneeded chanset 'nomassjoin'
 
 1.4.0 - http://wraith.botpack.net/milestone/1.4.0
   * Updated server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
