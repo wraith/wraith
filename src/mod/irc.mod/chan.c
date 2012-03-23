@@ -69,6 +69,7 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
       if (pe && !strcmp(pe + 1, r->host)) {
         strlcpy(user, m->userhost, pe - m->userhost + 1);
         simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, bd::String(ips[0]).c_str());
+        simple_snprintf(m->fromip, sizeof(m->fromip), "%s!%s", m->nick, m->userip);
         if (!m->user) {
           simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
           m->user = get_user_by_host(s);
@@ -1889,6 +1890,7 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
         simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, ip);
       else if (is_dotted_ip(host))
         simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, host);
+      simple_snprintf(m->fromip, sizeof(m->fromip), "%s!%s", m->nick, m->userip);
     }
   }
 
@@ -2623,6 +2625,7 @@ static int gotjoin(char *from, char *chname)
           if (!m->user && !m->userip[0] && doresolv(chan)) {
             if (is_dotted_ip(host)) {
               strlcpy(m->userip, uhost, sizeof(m->userip));
+              simple_snprintf(m->fromip, sizeof(m->fromip), "%s!%s", m->nick, m->userip);
               if (channel_rbl(chan))
                 resolve_to_rbl(chan, m->userip);
             } else
@@ -2636,8 +2639,10 @@ static int gotjoin(char *from, char *chname)
 	m->joined = m->last = now;
 	strlcpy(m->userhost, uhost, sizeof(m->userhost));
         simple_snprintf(m->from, sizeof(m->from), "%s!%s", m->nick, m->userhost);
-        if (is_dotted_ip(host))
+        if (is_dotted_ip(host)) {
           strlcpy(m->userip, uhost, sizeof(m->userip));
+          simple_snprintf(m->fromip, sizeof(m->fromip), "%s!%s", m->nick, m->userip);
+        }
         m->user = get_user_by_host(from);
         m->tried_getuser = 1;
 
