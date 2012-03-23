@@ -654,9 +654,7 @@ static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t 
       if (!chan_sentkick(m) && me_op(chan)) {
         if (channel_floodban(chan)) {
           putlog(LOG_MODES, chan->dname, "Channel flood from %s -- banning", m->nick);
-          char s[UHOSTLEN] = "", *s1 = NULL;
-          simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
-          s1 = quickban(chan, s);
+          char *s1 = quickban(chan, from);
           u_addmask('b', chan, s1, conf.bot->nick, "channel flood", now + (60 * chan->ban_time), 0);
         } else {
           putlog(LOG_MODES, chan->dname, "Channel flood from %s -- kicking", m->nick);
@@ -759,7 +757,7 @@ static void do_closed_kick(struct chanset_t *chan, memberlist *m)
 
 /* Given a nick!user@host, place a quick ban on them on a chan.
  */
-static char *quickban(struct chanset_t *chan, char *from)
+static char *quickban(struct chanset_t *chan, const char *from)
 {
   static char s1[512] = "";
 
