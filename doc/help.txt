@@ -474,9 +474,6 @@ See also: link%{+a}, newhub%{-}
                        the bot from fighting with services such as ChanServ, or
                        from kicking IRCops when setting channel modes without
                        having ops.
-        $bnomassjoin$b     If more than 6 clients join in 1 second, set +im
-                           for 2 minutes. (Could be triggered from net-split
-                           rejoin if clients hop servers and change nicks)
         $bprivate$b        This by far is probably the single most unique and
                        important feature of this pack. With this set, users with
                        global +o will not implicitly have access to the channel.
@@ -562,8 +559,8 @@ See also: link%{+a}, newhub%{-}
    The following settings will trigger a lockdown (chanmode +mi) for 'flood-lock-time'
    seconds.
         $bflood-mjoin$b  Set how many joins in how many seconds before triggering
-                    a lockdown for mass join. ($bnomassjoin$b must be set). Setting
-                    this to 0 or 0:0 disables mass join protection for the channel.
+                    a lockdown for mass join. Setting this to 0 or 0:0 disables mass
+                    join protection for the channel.
         $bflood-mchan$b  Set here how many channel messages in how many seconds
                     from any host constitutes a flood. Setting this to 0 or 0:0
                     disables text flood protection for the channel.

@@ -2775,7 +2775,7 @@ static int gotjoin(char *from, char *chname)
         bool is_op = chk_op(fr, chan);
 
         /* Check for a mass join */
-        if (!splitjoin && channel_nomassjoin(chan) && !is_op) {
+        if (!splitjoin && chan->flood_mjoin_time && chan->flood_mjoin_thr && !is_op) {
           if (chan->channel.drone_jointime < now - chan->flood_mjoin_time) {      //expired, reset counter
             chan->channel.drone_joins = 0;
           }
