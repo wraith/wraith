@@ -602,7 +602,7 @@ static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t 
     lapse = chan->flood_ctcp_time;
     mthr = chan->flood_mctcp_thr;
     mlapse = chan->flood_mctcp_time;
-    strlcpy(ftype, "pub", sizeof(ftype));
+    strlcpy(ftype, "ctcp", sizeof(ftype));
     break;
   case FLOOD_NICK:
     thr = chan->flood_nick_thr;
