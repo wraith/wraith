@@ -1,3 +1,5 @@
+* Fix flood kicking not properly tracking multiple clients at once (#43)
+
 1.4.0 - http://wraith.botpack.net/milestone/1.4.0
   * Updated server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
   * Change +bitch reaction to use normal queue for deopping opper/opped clients

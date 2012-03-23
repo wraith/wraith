@@ -897,6 +897,8 @@ static void init_channel(struct chanset_t *chan, bool reset)
   chan->channel.member->nick[0] = 0;
   chan->channel.member->next = NULL;
   chan->channel.topic = NULL;
+  chan->channel.floodtime = new bd::HashTable<bd::String, bd::HashTable<flood_t, time_t> >;
+  chan->channel.floodnum  = new bd::HashTable<bd::String, bd::HashTable<flood_t, int> >;
 }
 
 static void clear_masklist(masklist *m)
@@ -923,6 +925,8 @@ void clear_channel(struct chanset_t *chan, bool reset)
     free(chan->channel.topic);
   for (m = chan->channel.member; m; m = m1) {
     m1 = m->next;
+    delete m->floodtime;
+    delete m->floodnum;
     free(m);
   }
 
@@ -938,6 +942,11 @@ void clear_channel(struct chanset_t *chan, bool reset)
   chan->ircnet_status = 0;
 //  chan->ircnet_status &= ~CHAN_HAVEBANS;
 
+  delete chan->channel.floodtime;
+  chan->channel.floodtime = NULL;
+  delete chan->channel.floodnum;
+  chan->channel.floodnum = NULL;
+
   if (reset)
     init_channel(chan, 1);
   for (size_t i = 0; i < MODES_PER_LINE_MAX; ++i) {
@@ -950,6 +959,7 @@ void clear_channel(struct chanset_t *chan, bool reset)
       chan->ccmode[i].op = NULL;
     }
   }
+
 }
 
 /* Create new channel and parse commands.
@@ -1050,6 +1060,8 @@ int channel_add(char *result, const char *newname, char *options, bool isdefault
     chan->channel.drone_jointime = 0;
     chan->channel.drone_joins = 0;
     chan->channel.last_eI = 0;
+    chan->channel.floodtime = NULL;
+    chan->channel.floodnum = NULL;
 
     /* We _only_ put the dname (display name) in here so as not to confuse
      * any code later on. chan->name gets updated with the channel name as
