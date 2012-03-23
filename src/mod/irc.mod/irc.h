@@ -82,11 +82,10 @@ static int detect_offense(memberlist*, struct chanset_t *, char *);
 static bool do_op(char *, struct chanset_t *, bool, bool);
 static void request_op(struct chanset_t *);
 static void request_in(struct chanset_t *);
-static bool detect_chan_flood(char *, char *, char *, struct chanset_t *, int,
-			     char *);
+static bool detect_chan_flood(memberlist *m, const char* from, struct chanset_t *chan, int which, const char *msg = NULL);
 static bool new_mask(masklist *, char *, char *);
 static void do_closed_kick(struct chanset_t *, memberlist *);
-static char *quickban(struct chanset_t *, char *);
+static char *quickban(struct chanset_t *, const char *);
 static bool killmember(struct chanset_t *chan, char *nick);
 static void check_lonely_channel(struct chanset_t *chan);
 static int gotmode(char *, char *);
