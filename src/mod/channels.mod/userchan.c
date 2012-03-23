@@ -717,6 +717,7 @@ bd::String channel_to_string(struct chanset_t* chan, bool force_inactive) {
 chanmode { %s } groups { %s } bad-cookie %d manop %d mdop %d mop %d limit %d revenge %d ban-type %d \
 flood-chan %d:%d flood-bytes %d:%d flood-ctcp %d:%d flood-join %d:%d \
 flood-kick %d:%d flood-deop %d:%d flood-nick %d:%d flood-mjoin %d:%d \
+flood-mpub %d:%d flood-mbytes %d:%d flood-mctcp %d:%d \
 closed-ban %d closed-invite %d closed-private %d ban-time %d \
 exempt-time %d invite-time %d voice-non-ident %d auto-delay %d \
 flood-exempt %d flood-lock-time %d knock %d fish-key { %s } \
@@ -745,6 +746,9 @@ flood-exempt %d flood-lock-time %d knock %d fish-key { %s } \
         chan->flood_deop_thr, chan->flood_deop_time,
 	chan->flood_nick_thr, chan->flood_nick_time,
 	chan->flood_mjoin_thr, chan->flood_mjoin_time,
+	chan->flood_mpub_thr, chan->flood_mpub_time,
+	chan->flood_mbytes_thr, chan->flood_mbytes_time,
+	chan->flood_mctcp_thr, chan->flood_mctcp_time,
         chan->closed_ban,
 /* Chanint template
  *      chan->temp,

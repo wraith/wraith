@@ -585,17 +585,23 @@ static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t 
   case FLOOD_NOTICE:
     thr = chan->flood_pub_thr;
     lapse = chan->flood_pub_time;
+    mthr = chan->flood_mpub_thr;
+    mlapse = chan->flood_mpub_time;
     strlcpy(ftype, "pub", sizeof(ftype));
     break;
   case FLOOD_BYTES:
     thr = chan->flood_bytes_thr;
     lapse = chan->flood_bytes_time;
+    mthr = chan->flood_mbytes_thr;
+    mlapse = chan->flood_mbytes_time;
     strlcpy(ftype, "bytes", sizeof(ftype));
     increment = static_cast<int>(strlen(msg));
     break;
   case FLOOD_CTCP:
     thr = chan->flood_ctcp_thr;
     lapse = chan->flood_ctcp_time;
+    mthr = chan->flood_mctcp_thr;
+    mlapse = chan->flood_mctcp_time;
     strlcpy(ftype, "pub", sizeof(ftype));
     break;
   case FLOOD_NICK:

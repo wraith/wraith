@@ -767,12 +767,18 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
 
         chan->flood_pub_thr = thr;
         chan->flood_pub_time = time;
+        chan->flood_mpub_thr = thr;
+        chan->flood_mpub_time = time;
         chan->flood_bytes_thr = thr;
         chan->flood_bytes_time = time;
+        chan->flood_mbytes_thr = thr;
+        chan->flood_mbytes_time = time;
         chan->flood_join_thr = thr;
         chan->flood_join_time = time;
         chan->flood_ctcp_thr = thr;
         chan->flood_ctcp_time = time;
+        chan->flood_mctcp_thr = thr;
+        chan->flood_mctcp_time = time;
         chan->flood_kick_thr = thr;
         chan->flood_kick_time = time;
         chan->flood_deop_thr = thr;
@@ -805,6 +811,15 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
       } else if (!strcmp(item[i] + 6, "mjoin")) {
 	pthr = &chan->flood_mjoin_thr;
 	ptime = &chan->flood_mjoin_time;
+      } else if (!strcmp(item[i] + 6, "mpub")) {
+	pthr = &chan->flood_mpub_thr;
+	ptime = &chan->flood_mpub_time;
+      } else if (!strcmp(item[i] + 6, "mbytes")) {
+	pthr = &chan->flood_mbytes_thr;
+	ptime = &chan->flood_mbytes_time;
+      } else if (!strcmp(item[i] + 6, "mctcp")) {
+	pthr = &chan->flood_mctcp_thr;
+	ptime = &chan->flood_mctcp_time;
       } else { /* Ignore for optimal forward compatibility */
         i++;
         continue;
@@ -1056,6 +1071,12 @@ int channel_add(char *result, const char *newname, char *options, bool isdefault
     chan->flood_nick_time = gfld_nick_time;
     chan->flood_mjoin_thr = 6;
     chan->flood_mjoin_time = 1;
+    chan->flood_mpub_thr = 10;
+    chan->flood_mpub_time = 1;
+    chan->flood_mbytes_thr = 500;
+    chan->flood_mbytes_time = 1;
+    chan->flood_mctcp_thr = 7;
+    chan->flood_mctcp_time = 1;
     chan->limitraise = 20;
     chan->ban_time = global_ban_time;
     chan->exempt_time = global_exempt_time;
