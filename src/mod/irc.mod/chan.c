@@ -661,7 +661,7 @@ static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t 
         (*global_floodnum).remove(which);
         (*global_floodtime).remove(which);
         if (!chan->channel.drone_set_mode) {
-          lockdown_chan(chan, FLOOD_DRONE);
+          lockdown_chan(chan, FLOOD_MASS_FLOOD, ftype);
         }
       }
     }

@@ -160,7 +160,7 @@ void unlock_chan(struct chanset_t *chan)
   chan->channel.drone_set_mode = 0;
 }
 
-void lockdown_chan(struct chanset_t* chan, flood_reason_t reason) {
+void lockdown_chan(struct chanset_t* chan, flood_reason_t reason, const char* flood_type) {
   if (!me_op(chan)) {
     return;
   }
@@ -193,8 +193,8 @@ void lockdown_chan(struct chanset_t* chan, flood_reason_t reason) {
       putlog(LOG_MISC, "*", "Join flood detected in %s! Locking for %d seconds.", chan->dname, chan->flood_lock_time);
     } else if (reason == FLOOD_BANLIST) {
       putlog(LOG_MISC, "*", "Banlist full in %s! Locking for %d seconds.", chan->dname, chan->flood_lock_time);
-    } else if (reason == FLOOD_DRONE) {
-      putlog(LOG_MISC, "*", "Drone flood detected in %s! Locking for %d seconds.", chan->dname, chan->flood_lock_time);
+    } else if (reason == FLOOD_MASS_FLOOD) {
+      putlog(LOG_MISC, "*", "Mass flood (%s) detected in %s! Locking for %d seconds.", flood_type, chan->dname, chan->flood_lock_time);
     }
   }
 }

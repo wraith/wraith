@@ -27,7 +27,7 @@ namespace bd {
 enum flood_reason_t {
   FLOOD_MASSJOIN,
   FLOOD_BANLIST,
-  FLOOD_DRONE
+  FLOOD_MASS_FLOOD
 };
 
 #ifdef CACHE
@@ -96,7 +96,7 @@ static bool killmember(struct chanset_t *chan, char *nick);
 static void check_lonely_channel(struct chanset_t *chan);
 static int gotmode(char *, char *);
 void unset_im(struct chanset_t* chan);
-void lockdown_chan(struct chanset_t* chan, flood_reason_t reason);
+void lockdown_chan(struct chanset_t* chan, flood_reason_t reason, const char* flood_type = NULL);
 static void send_chan_who(int queue, struct chanset_t* chan, bool chain = 0);
 #define newban(chan, mask, who)         new_mask((chan)->channel.ban, mask, who)
 #define newexempt(chan, mask, who)      new_mask((chan)->channel.exempt, mask, who)
