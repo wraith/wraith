@@ -284,8 +284,8 @@ static void cmd_kickban(int idx, char *par)
       dprintf(idx, "%s is not on %s\n", nick, chan->dname);
       return;
     }
-    simple_snprintf(s, sizeof s, "%s!%s", m->nick, m->userhost);
-    u = get_user_by_host(s);
+    member_getuser(m);
+    u = m->user;
     get_user_flagrec(u, &victim, chan->dname);
   
     if ((chan_master(victim) || glob_master(victim)) &&
@@ -484,7 +484,6 @@ static void cmd_op(int idx, char *par)
   if (!all && !chan)
     return;
 
-  char s[UHOSTLEN] = "";
   memberlist *m = NULL;
   struct userrec *u = NULL;
 
@@ -528,8 +527,8 @@ static void cmd_op(int idx, char *par)
     dprintf(idx, "%s is not on %s.\n", nick, chan->dname);
     return;
   }
-  simple_snprintf(s, sizeof s, "%s!%s", m->nick, m->userhost);
-  u = get_user_by_host(s);
+  member_getuser(m);
+  u = m->user;
   get_user_flagrec(u, &victim, chan->dname);
   if (chk_deop(victim, chan)) {
     dprintf(idx, "%s is currently being auto-deopped  on %s.\n", m->nick, chan->dname);
@@ -976,7 +975,6 @@ static void cmd_deop(int idx, char *par)
   if (!all && !chan)
     return;
 
-  char s[UHOSTLEN] = "";
   memberlist *m = NULL;
   struct userrec *u = NULL;
 
@@ -1022,8 +1020,8 @@ static void cmd_deop(int idx, char *par)
       dprintf(idx, "I'm not going to deop myself.\n");
       return;
     }
-    simple_snprintf(s, sizeof s, "%s!%s", m->nick, m->userhost);
-    u = get_user_by_host(s);
+    member_getuser(m);
+    u = m->user;
     get_user_flagrec(u, &victim, chan->dname);
 
     if ((chan_master(victim) || glob_master(victim)) &&
@@ -1080,7 +1078,6 @@ static void cmd_kick(int idx, char *par)
     return;
   }
 
-  char s[UHOSTLEN] = "";
   memberlist *m = NULL;
   struct userrec *u = NULL;
 
@@ -1117,8 +1114,8 @@ static void cmd_kick(int idx, char *par)
       dprintf(idx, "%s is not on %s\n", nick, chan->dname);
       return;
     }
-    simple_snprintf(s, sizeof s, "%s!%s", m->nick, m->userhost);
-    u = get_user_by_host(s);
+    member_getuser(m);
+    u = m->user;
     get_user_flagrec(u, &victim, chan->dname);
     if (chk_op(victim, chan) && !(chan_master(user) || glob_master(user))) {
       if (all) goto next;
@@ -1209,7 +1206,6 @@ static void cmd_mop(int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# (%s) mop %s", dcc[idx].nick, all ? "*" : chan->dname, par);
 
   memberlist *m = NULL;
-  char s[256] = "";
 
   while (chan) {
     get_user_flagrec(dcc[idx].user, &user, chan->dname);
@@ -1230,14 +1226,7 @@ static void cmd_mop(int idx, char *par)
     }
     if (channel_active(chan) && !channel_pending(chan)) {
       for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-        if (!m->user) {
-          simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
-          m->user = get_user_by_host(s);
-          if (!m->user && m->userip[0]) {
-            simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userip);
-            m->user = get_user_by_host(s);
-          }
-        }
+        member_getuser(m);
         if (m->user && u_pass_match(m->user, "-"))
           continue;		/* dont op users without a pass */
         get_user_flagrec(m->user, &victim, chan->dname);
@@ -1295,10 +1284,8 @@ static void cmd_find(int idx, char *par)
 
       for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
         member_getuser(m, 1);
-        char s[UHOSTLEN] = "";
 
-        simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
-        if ((!lookup_user && wild_match(par, s)) || (lookup_user && m->user == u)) {
+        if ((!lookup_user && wild_match(par, m->from)) || (lookup_user && m->user == u)) {
           fcount++;
           if (!found) {
             found = (memberlist **) my_calloc(1, sizeof(memberlist *) * 100);
@@ -1732,8 +1719,8 @@ static void cmd_adduser(int idx, char *par)
   }
   if (strlen(hand) > HANDLEN)
     hand[HANDLEN] = 0;
-  simple_snprintf(s, sizeof s, "%s!%s", m->nick, m->userhost);
-  if ((u = get_user_by_host(s))) {
+  member_getuser(m);
+  if ((u = m->user)) {
     dprintf(idx, "%s is already known as %s.\n", nick, u->handle);
     return;
   }
@@ -1787,7 +1774,7 @@ static void cmd_deluser(int idx, char *par)
     return;
   }
 
-  char *nick = NULL, s[UHOSTLEN] = "", *added = NULL;
+  char *nick = NULL, *added = NULL;
   struct chanset_t *chan = NULL;
   memberlist *m = NULL;
   struct userrec *u = NULL;
@@ -1804,8 +1791,8 @@ static void cmd_deluser(int idx, char *par)
     return;
   }
   get_user_flagrec(dcc[idx].user, &user, chan->dname);
-  simple_snprintf(s, sizeof s, "%s!%s", m->nick, m->userhost);
-  if (!(u = get_user_by_host(s))) {
+  member_getuser(m);
+  if (!(u = m->user)) {
     dprintf(idx, "%s is not a valid user.\n", nick);
     return;
   }

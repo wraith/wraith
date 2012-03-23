@@ -649,16 +649,12 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
 static void
 got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
 {
-  char s1[UHOSTLEN] = "";
   const bool was_op = chan_hasop(mv);
 
   if (mdop_reversing && !was_op)
     return;
 
   /* m is NULL if a server made the change */
-  if (m)
-    simple_snprintf(s1, sizeof(s1), "%s!%s", m->nick, m->userhost);
-
   if (mv->user) {
     get_user_flagrec(mv->user, &victim, chan->dname, chan);
   }
@@ -697,7 +693,7 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
     putlog(LOG_MODES, chan->dname, "TS resync (%s): %s deopped by %s", chan->dname, mv->nick, isserver);
   /* Check for mass deop */
   else if (m) {
-    detect_chan_flood(m, s1, chan, FLOOD_DEOP, mv->nick);
+    detect_chan_flood(m, m->from, chan, FLOOD_DEOP, mv->nick);
   }
   /* Having op hides your +v and +h  status -- so now that someone's lost ops,
    * check to see if they have +v or +h
@@ -740,12 +736,11 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
 static void
 got_ban(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
 {
-  char me[UHOSTLEN] = "", meip[UHOSTLEN] = "", s[UHOSTLEN] = "";
+  const memberlist *me = ismember(chan, botname);
+  char s[UHOSTLEN] = "";
 
-  simple_snprintf(me, sizeof(me), "%s!%s", botname, botuserhost);
-  simple_snprintf(meip, sizeof(meip), "%s!%s", botname, botuserip);
   simple_snprintf(s, sizeof s, "%s!%s", m ? m->nick : "", m ? m->userhost : isserver);
-  if (newban(chan, mask, s))
+  if (m && newban(chan, mask, m->from))
     return; /* The ban was already set, don't bother with it */
 
   if (channel_pending(chan) || !me_op(chan))
@@ -754,17 +749,15 @@ got_ban(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
   // Make an array of all matching users
   bd::Array<memberlist*> matchedUserMembers;
   bool matched_bot = false;
-  char s1[UHOSTLEN] = "";
 
   for (memberlist *mv = chan->channel.member; mv && mv->nick[0]; mv = mv->next) {
     member_getuser(mv);
     if (mv->user) {
-      simple_snprintf(s1, sizeof s1, "%s!%s", mv->nick, mv->userhost);
-      if ((wild_match(mask, s1) || match_cidr(mask, s1))) {
+      if ((wild_match(mask, mv->from) || match_cidr(mask, mv->from))) {
         if (!matched_bot && mv != m && mv->user->bot) {
           matched_bot = true;
         }
-        if (mv->user && !isexempted(chan, s1)) {
+        if (mv->user && !isexempted(chan, mv->from)) {
           matchedUserMembers << mv;
         }
       }
@@ -785,7 +778,7 @@ got_ban(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
     }
   }
 
-  if ((wild_match(mask, me) || match_cidr(mask, meip)) && !isexempted(chan, me)) {
+  if ((wild_match(mask, me->from) || match_cidr(mask, me->fromip)) && !isexempted(chan, me->from)) {
     add_mode(chan, '-', 'b', mask);
     reversing = 1;
     return;
@@ -1244,7 +1237,7 @@ gotmode(char *from, char *msg)
                   const size_t len = simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_BADOP));
                   dprintf_real(DP_MODE_NEXT, tmp, len, sizeof(tmp));
                 }
-                simple_snprintf(tmp, sizeof(tmp), "%s!%s MODE %s %s", m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
+                simple_snprintf(tmp, sizeof(tmp), "%s MODE %s %s", m->from, chan->dname, modes[modecnt - 1]);
                 deflag_user(u, DEFLAG_EVENT_BADCOOKIE, tmp, chan);
               }
               /* Do the logging last as it can slow down the KICK pushing */
@@ -1283,7 +1276,7 @@ gotmode(char *from, char *msg)
                     dprintf_real(DP_MODE_NEXT, tmp, len, sizeof(tmp));
                     m->flags |= SENTKICK;
                   }
-                  simple_snprintf(tmp, sizeof(tmp), "%s!%s MODE %s %s", m->nick, m->userhost, chan->dname, modes[modecnt - 1]);
+                  simple_snprintf(tmp, sizeof(tmp), "%s MODE %s %s", m->from, chan->dname, modes[modecnt - 1]);
                   deflag_user(u, DEFLAG_EVENT_MANUALOP, tmp, chan);
                 }
                 break;
