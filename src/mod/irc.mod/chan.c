@@ -2446,6 +2446,37 @@ static int got475(char *from, char *msg)
   return 0;
 }
 
+/* got 478: Channel ban list is full
+ * [@] irc.blessed.net 478 wtest #wraith-devel *!*@host.com :Channel ban list is full
+ */
+static int got478(char *from, char *msg)
+{
+  char *chname = NULL;
+  struct chanset_t *chan = NULL;
+
+  newsplit(&msg);
+  chname = newsplit(&msg);
+
+  /* !channel short names (also referred to as 'description names'
+   * can be received by skipping over the unique ID.
+   */
+  if ((chname[0] == '!') && (strlen(chname) > CHANNEL_ID_LEN)) {
+    chname += CHANNEL_ID_LEN;
+    chname[0] = '!';
+  }
+  /* We use dname because name is first set on JOIN and we might not
+   * have joined the channel yet.
+   */
+  chan = findchan_by_dname(chname);
+  if (chan && shouldjoin(chan)) {
+    // Only lockdown if not already locked down
+    if (!chan->channel.drone_set_mode) {
+      lockdown_chan(chan, FLOOD_BANLIST);
+    }
+  }
+  return 0;
+}
+
 /* got invitation
  */
 static int gotinvite(char *from, char *msg)
@@ -2714,7 +2745,7 @@ static int gotjoin(char *from, char *chname)
           chan->channel.drone_jointime = now;
 
           if (!chan->channel.drone_set_mode && chan->channel.drone_joins >= chan->flood_mjoin_thr) {  //flood from dronenet, let's attempt to set +im
-            detected_drone_flood(chan, m, FLOOD_DRONE);
+            lockdown_chan(chan, FLOOD_DRONE);
           }
         }
 
@@ -3411,6 +3442,7 @@ static cmd_t irc_raw[] =
   {"473",	"",	(Function) got473,	"irc:473", LEAF},
   {"474",	"",	(Function) got474,	"irc:474", LEAF},
   {"475",	"",	(Function) got475,	"irc:475", LEAF},
+  {"478",	"",	(Function) got478,	"irc:478", LEAF},
   {"INVITE",	"",	(Function) gotinvite,	"irc:invite", LEAF},
   {"TOPIC",	"",	(Function) gottopic,	"irc:topic", LEAF},
   {"331",	"",	(Function) got331,	"irc:331", LEAF},

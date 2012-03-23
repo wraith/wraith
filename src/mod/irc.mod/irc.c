@@ -160,7 +160,7 @@ void unlock_chan(struct chanset_t *chan)
   chan->channel.drone_set_mode = 0;
 }
 
-void detected_drone_flood(struct chanset_t* chan, memberlist* m, flood_reason_t reason) {
+void lockdown_chan(struct chanset_t* chan, flood_reason_t reason) {
   egg_timeval_t howlong;
 
   chan->channel.drone_set_mode = 0;
@@ -188,6 +188,8 @@ void detected_drone_flood(struct chanset_t* chan, memberlist* m, flood_reason_t 
 
     if (reason == FLOOD_DRONE) {
       putlog(LOG_MISC, "*", "Flood detected in %s! Locking for %d seconds.", chan->dname, chan->flood_lock_time);
+    } else if (reason == FLOOD_BANLIST) {
+      putlog(LOG_MISC, "*", "Banlist full in %s! Locking for %d seconds.", chan->dname, chan->flood_lock_time);
     }
   }
 }

@@ -25,7 +25,8 @@ namespace bd {
 }
 
 enum flood_reason_t {
-  FLOOD_DRONE
+  FLOOD_DRONE,
+  FLOOD_BANLIST
 };
 
 #ifdef CACHE
@@ -94,7 +95,7 @@ static bool killmember(struct chanset_t *chan, char *nick);
 static void check_lonely_channel(struct chanset_t *chan);
 static int gotmode(char *, char *);
 void unset_im(struct chanset_t* chan);
-void detected_drone_flood(struct chanset_t* chan, memberlist*, flood_reason_t reason);
+void lockdown_chan(struct chanset_t* chan, flood_reason_t reason);
 static void send_chan_who(int queue, struct chanset_t* chan, bool chain = 0);
 #define newban(chan, mask, who)         new_mask((chan)->channel.ban, mask, who)
 #define newexempt(chan, mask, who)      new_mask((chan)->channel.exempt, mask, who)
