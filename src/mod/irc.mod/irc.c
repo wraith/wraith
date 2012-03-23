@@ -161,6 +161,9 @@ void unlock_chan(struct chanset_t *chan)
 }
 
 void lockdown_chan(struct chanset_t* chan, flood_reason_t reason) {
+  if (!me_op(chan)) {
+    return;
+  }
   egg_timeval_t howlong;
 
   chan->channel.drone_set_mode = 0;
