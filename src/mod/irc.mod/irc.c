@@ -1374,7 +1374,6 @@ check_expired_chanstuff(struct chanset_t *chan)
   if (channel_active(chan) && shouldjoin(chan)) {
     masklist *b = NULL, *e = NULL;
     memberlist *m = NULL, *n = NULL;
-    char s[UHOSTLEN] = "";
     struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
     if (me_op(chan)) {
@@ -1434,7 +1433,6 @@ check_expired_chanstuff(struct chanset_t *chan)
       if (m->split) {
         ++splitmembers;
         if (now - m->split > wait_split) {
-          simple_snprintf(s, sizeof(s), "%s!%s", m->nick, m->userhost);
           putlog(LOG_JOIN, chan->dname, "%s (%s) got lost in the net-split.", m->nick, m->userhost);
           --(chan->channel.splitmembers);
           killmember(chan, m->nick);
