@@ -280,6 +280,8 @@ static memberlist *newmember(struct chanset_t *chan, char *nick)
   }
 
   ++(chan->channel.members);
+  n->floodtime = new bd::HashTable<flood_t, time_t>;
+  n->floodnum  = new bd::HashTable<flood_t, int>;
   return n;
 }
 
@@ -538,7 +540,7 @@ static void do_mask(struct chanset_t *chan, masklist *m, char *mask, char Mode)
 /* This is a clone of detect_flood, but works for channel specificity now
  * and handles kick & deop as well.
  */
-static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t *chan, int which, const char *msg)
+static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t *chan, flood_t which, const char *msg)
 {
   /* Do not punish non-existant channel members and IRC services like
    * ChanServ
@@ -624,24 +626,49 @@ static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t 
     if (!p)
       return 0;
   }
-  if (rfc_casecmp(chan->floodwho[which], p)) {	/* new */
-    strlcpy(chan->floodwho[which], p, sizeof(chan->floodwho[which]));
-    chan->floodtime[which] = now;
-    chan->floodnum[which] = 1;
-    return 0;
+
+  bd::HashTable<flood_t, time_t>      *floodtime; // floodtime[FLOOD_PRIVMSG] = now;
+  bd::HashTable<flood_t, int>         *floodnum;  //  floodnum[FLOOD_PRIVMSG] = 1;
+
+  switch (which) {
+    // These 2 don't have a persistent member, use chan list
+    case FLOOD_JOIN:
+    case FLOOD_PART:
+      // If not found, add them and start the count for next iteration
+      if (!chan->channel.floodtime->contains(m->userhost)) {
+        (*chan->channel.floodtime)[m->userhost][which] = now;
+        (*chan->channel.floodnum)[m->userhost][which] = 1;
+        return 0;
+      } else {
+        floodtime = &(*chan->channel.floodtime)[m->userhost];
+        floodnum = &(*chan->channel.floodnum)[m->userhost];
+      }
+      break;
+    default:
+      // Everything else, log to the member
+      // If not found, add them and start the count for next iteration
+      if (!m->floodtime->contains(which)) {
+        (*m->floodtime)[which] = now;
+        (*m->floodnum)[which] = 1;
+        return 0;
+      } else {
+        floodtime = m->floodtime;
+        floodnum = m->floodnum;
+      }
+      break;
   }
-  if (chan->floodtime[which] < now - lapse) {
+
+  if ((*floodtime)[which] < now - lapse) {
     /* Flood timer expired, reset it */
-    chan->floodtime[which] = now;
-    chan->floodnum[which] = 1;
+    (*floodtime)[which] = now;
+    (*floodnum)[which] = 1;
     return 0;
   }
-  chan->floodnum[which]++;
-  if (chan->floodnum[which] >= thr) {	/* FLOOD */
+  (*floodnum)[which]++;
+  if ((*floodnum)[which] >= thr) {	/* FLOOD */
     /* Reset counters */
-    chan->floodnum[which] = 0;
-    chan->floodtime[which] = 0;
-    chan->floodwho[which][0] = 0;
+    (*floodnum).remove(which);
+    (*floodtime).remove(which);
     switch (which) {
     case FLOOD_PRIVMSG:
     case FLOOD_NOTICE:
@@ -685,7 +712,7 @@ static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t 
       if (!channel_enforcebans(chan) && me_op(chan)) {
 	  for (m = chan->channel.member; m && m->nick[0]; m = m->next) {	  
 	    if (!chan_sentkick(m) && wild_match(h, m->from) &&
-		(m->joined >= chan->floodtime[which]) &&
+		(m->joined >= (*floodtime)[which]) &&
 		!m->is_me && me_op(chan)) {
 	      m->flags |= SENTKICK;
 	      if (which == FLOOD_JOIN)

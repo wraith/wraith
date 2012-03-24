@@ -1077,6 +1077,8 @@ killmember(struct chanset_t *chan, char *nick)
     old->next = x->next;
   else
     chan->channel.member = x->next;
+  delete x->floodtime;
+  delete x->floodnum;
   free(x);
   chan->channel.members--;
 
