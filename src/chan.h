@@ -168,8 +168,12 @@ struct chanset_t {
   uint32_t ircnet_status;
   int flood_pub_thr;
   interval_t flood_pub_time;
+  int flood_mpub_thr;
+  interval_t flood_mpub_time;
   int flood_bytes_thr;
   interval_t flood_bytes_time;
+  int flood_mbytes_thr;
+  interval_t flood_mbytes_time;
   int flood_join_thr;
   interval_t flood_join_time;
   int flood_deop_thr;
@@ -178,6 +182,8 @@ struct chanset_t {
   interval_t flood_kick_time;
   int flood_ctcp_thr;
   interval_t flood_ctcp_time;
+  int flood_mctcp_thr;
+  interval_t flood_mctcp_time;
   int flood_nick_thr;
   interval_t flood_nick_time;
   interval_t flood_lock_time;
@@ -253,7 +259,7 @@ struct chanset_t {
 #define CHAN_CYCLE          BIT11	/* cycle the channel if possible      */
 #define CHAN_INACTIVE       BIT12	/* no irc support for this channel */
 #define CHAN_VOICE          BIT13	/* a bot +y|y will voice *, except +q */
-#define CHAN_NOMASSJOIN     BIT14       /* watch for mass join for flood nets and react */
+//#define CHAN_NOMASSJOIN     BIT14       /* watch for mass join for flood nets and react */
 #define CHAN_NODESYNCH      BIT15
 #define CHAN_FASTOP         BIT16	/* Bots will not use +o-b to op (no cookies) */ 
 #define CHAN_PRIVATE        BIT17	/* users need |o to access chan */ 
@@ -317,7 +323,6 @@ struct chanset_t *findchan_by_dname(const char *name);
 #define channel_fastop(chan) (chan->status & CHAN_FASTOP)
 #define channel_privchan(chan) (chan->status & CHAN_PRIVATE)
 #define channel_autoop(chan) (chan->status & CHAN_AUTOOP)
-#define channel_nomassjoin(chan) (chan->status & CHAN_NOMASSJOIN)
 #define channel_meankicks(chan) (chan->status & CHAN_MEANKICKS)
 #define channel_rbl(chan) (chan->status & CHAN_RBL)
 #define channel_voicebitch(chan) (chan->status & CHAN_VOICEBITCH)
