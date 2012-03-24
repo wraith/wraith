@@ -3326,10 +3326,8 @@ static int gotmsg(char *from, char *msg)
     int botmatch = 0;
     char *my_msg = NULL, *my_ptr = NULL, *fword = NULL;
 
-#ifdef unfinished
     if (me_op(chan) && doflood(chan))
       detect_offense(m, chan, msg);
-#endif
 
     if (m) {
       detect_chan_flood(m, from, chan, FLOOD_PRIVMSG);
@@ -3346,7 +3344,6 @@ static int gotmsg(char *from, char *msg)
       /* is it a cmd? */
       if (auth_prefix[0] && fword && fword[0] && fword[1] && ((botmatch && fword[0] != auth_prefix[0]) || (fword[0] == auth_prefix[0]))) {
         Auth *auth = Auth::Find(uhost);
-
         if (auth && auth->Authed()) {
           if (fword[0] == auth_prefix[0])
             fword++;
