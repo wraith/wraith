@@ -718,7 +718,7 @@ chanmode { %s } groups { %s } bad-cookie %d manop %d mdop %d mop %d limit %d rev
 flood-chan %d:%d flood-bytes %d:%d flood-ctcp %d:%d flood-join %d:%d \
 flood-kick %d:%d flood-deop %d:%d flood-nick %d:%d flood-mjoin %d:%d \
 flood-mpub %d:%d flood-mbytes %d:%d flood-mctcp %d:%d \
-capslimits %d colorlimit %d closed-ban %d closed-invite %d closed-private %d closed-exempt %d ban-time %d \
+capslimit %d colorlimit %d closed-ban %d closed-invite %d closed-private %d closed-exempt %d ban-time %d \
 exempt-time %d invite-time %d voice-non-ident %d auto-delay %d \
 flood-exempt %d flood-lock-time %d knock %d fish-key { %s } \
 %cmeankicks %cenforcebans %cdynamicbans %cuserbans %cbitch %cfloodban \

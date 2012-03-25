@@ -2,7 +2,6 @@ next
   * Bot will now jump from the server it's on if it is removed from the server list. (fixes a changing network bug)
   * Properly honor exemptions when kicking matched RBL clients
   * Fix LASTON not being shared
-  * Add chanset 'closed-exempt' which will allow exempting non-users (who are opped or voice) from being kicked. (fixes #171)
 
 1.4.0 - http://wraith.botpack.net/milestone/1.4.0
   * Updated server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
@@ -51,6 +50,7 @@ next
   * Remove unneeded chanset 'nomassjoin'
   * Add chanset 'capslimit' to handle % of message that can be in caps before kick (#8)
   * Add chanset 'colorlimit' to handle how many color codes are allowed in a message before kick (#8)
+  * Add chanset 'closed-exempt' which will allow exempting non-users (who are opped or voice) from being kicked. (fixes #171)
 
 1.3.4 - http://wraith.botpack.net/milestone/1.3.4
   * Fix various compile warnings with newer GCC
