@@ -286,6 +286,7 @@ static void cmd_kickban(int idx, char *par)
     }
     member_getuser(m);
     u = m->user;
+    strlcpy(s, m->from, sizeof(s));
     get_user_flagrec(u, &victim, chan->dname);
   
     if ((chan_master(victim) || glob_master(victim)) &&
@@ -1720,6 +1721,7 @@ static void cmd_adduser(int idx, char *par)
   if (strlen(hand) > HANDLEN)
     hand[HANDLEN] = 0;
   member_getuser(m);
+  strlcpy(s, m->from, sizeof(s));
   if ((u = m->user)) {
     dprintf(idx, "%s is already known as %s.\n", nick, u->handle);
     return;
