@@ -369,6 +369,12 @@ See also: link%{+a}, newhub%{-}
                           enforce +p as well. The point is to notice the chan
                           and bots when an /invite is done. This is useful in 
                           seeing when a shell is hijacked ;)
+        $bcapslimit$b         If this is set, any +f bots will kick a client for using
+                          too many caps. This is a percentage (0-100) of how much of
+                          their message can be caps before being kicked.
+        $bcolorlimit$b        If this is set, any +f bot will kick the client for
+                          excess color codes. The setting is how many color/bold
+                          character codes the message may contain before being kicked.
         $bban-time$b          Set here how long temporary bans will last (in
                           minutes). If you set this setting to 0, the bot will
                           never remove them. (This also requires +dynamicbans)
