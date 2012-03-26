@@ -61,22 +61,6 @@ static interval_t 			global_invite_time;
 
 static char *lastdeletedmask = NULL;
 
-/* Global flood settings */
-static int 			gfld_chan_thr;
-static interval_t 		gfld_chan_time;
-static int 			gfld_bytes_thr;
-static interval_t 		gfld_bytes_time;
-static int 			gfld_deop_thr = 8;
-static interval_t 		gfld_deop_time = 10;
-static int 			gfld_kick_thr;
-static interval_t 		gfld_kick_time;
-static int 			gfld_join_thr;
-static interval_t 		gfld_join_time;
-static int 			gfld_ctcp_thr = 5;
-static interval_t 		gfld_ctcp_time = 30;
-static int			gfld_nick_thr;
-static interval_t		gfld_nick_time;
-
 static int 			killed_bots = 0;
 
 #include "channels.h"
