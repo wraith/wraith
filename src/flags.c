@@ -585,7 +585,7 @@ deflag_t deflag_translate(const char *buf)
 
 void deflag_user(struct userrec *u, deflag_event_t why, const char *msg, const struct chanset_t *chan)
 {
-  char tmp[30] = "", tmp2[1024] = "";
+  char tmp[50] = "", tmp2[1024] = "";
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
   int which = 0;
 
