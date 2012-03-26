@@ -563,7 +563,8 @@ See also: link%{+a}, newhub%{-}
                     one host constitutes a flood. Setting this to 0 or 0:0
                     disables nick flood protection for the channel.
    The following settings will trigger a lockdown (chanmode +mi) for 'flood-lock-time'
-   seconds.
+   seconds. Unlike the other flood-* settings, these will trigger on $bmultiple$b clients.
+   They are for catching mass floods.
         $bflood-mjoin$b  Set how many joins in how many seconds before triggering
                     a lockdown for mass join. Setting this to 0 or 0:0 disables mass
                     join protection for the channel.
