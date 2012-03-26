@@ -181,7 +181,7 @@ detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
     }
     ++msg;
   }
-  if (chan->capslimit && caps_count) {
+  if (chan->capslimit && caps_count && tot >= 6) {
     caps_percentage = (caps_count)/(double(tot));
     if (caps_percentage >= caps_limit) {
       putlog(LOG_MODES, chan->name, "Caps flood (%d%%) from %s -- kicking", int(caps_percentage * 100), m->nick);
