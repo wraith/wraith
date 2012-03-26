@@ -146,12 +146,11 @@ detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
       ++msg_check;
     }
 
-    if (!tot) {
-      return 0;
-    }
-
     if (tot >= 30) {
       hit_check = tot/5; //check in-between for hits to save waste of cpu
+    } else if (!tot && !chan->colorlimit) {
+      // Nothing to do, bail out
+      return 0;
     }
   }
 
