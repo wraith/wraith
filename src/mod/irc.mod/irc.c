@@ -1400,14 +1400,16 @@ raise_limit(struct chanset_t *chan)
   if (chan->mode_mns_prot & CHANLIMIT)
     return false;
 
-  int nl = (chan->channel.members - chan->channel.splitmembers) + chan->limitraise;	/* new limit */
-  int i = chan->limitraise >> 2;			/* DIV 4 */
+  const int nl = (chan->channel.members - chan->channel.splitmembers) + chan->limitraise;	/* new limit */
+  const int limitraise = (chan->limitraise % 2 == 0) ? chan->limitraise : (chan->limitraise + 1);
+  const int i = limitraise >> 2;			/* DIV 4 */
   /* if the newlimit will be in the range made by these vars, dont change. */
-  int ul = nl + i;					/* upper limit */
-  int ll = nl - i;					/* lower limit */
+  const int ul = nl + i;					/* upper limit */
+  const int ll = nl - i;					/* lower limit */
 
-  if ((chan->channel.maxmembers > ll) && (chan->channel.maxmembers < ul))
+  if ((chan->channel.maxmembers > ll) && (chan->channel.maxmembers < ul)) {
     return false;                     /* the current limit is in the range, so leave it. */
+  }
 
   if (nl != chan->channel.maxmembers) {
     char s[6] = "";
