@@ -1514,9 +1514,8 @@ gotmode(char *from, char *msg)
                         (glob_master(user) || chan_master(user)) &&
                         rfc_casecmp(nick, mparam)) {
                       /* if the user is not +q set them norEVOICE. */
-                      if (!chan_quiet(victim) && !(mv->flags & EVOICE)) {
-                        putlog(LOG_DEBUG, "@", "Giving EVOICE flag to: %s (%s)", mv->nick, chan->dname);
-                        mv->flags |= EVOICE;
+                      if (!chan_quiet(victim)) {
+                        set_devoice(chan, mv);
                       }
                     }
                   }

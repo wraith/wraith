@@ -199,10 +199,18 @@ detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
   return 0;
 }
 
+void set_devoice(struct chanset_t *chan, memberlist* m) {
+  if (!(m->flags & EVOICE)) {
+    putlog(LOG_DEBUG, "@", "Giving EVOICE flag to: %s (%s)", m->nick, chan->dname);
+    m->flags |= EVOICE;
+  }
+}
+
 void punish_flooder(struct chanset_t* chan, memberlist* m, const char *reason) {
   if (channel_voice(chan) && chan->voice_moderate && !chan_sentdevoice(m)) {
     add_mode(chan, '-', 'v', m->nick);
     m->flags |= SENTDEVOICE;
+    set_devoice(chan, m);
   } else if (!chan_sentkick(m)) {
     dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, reason ? reason : response(RES_FLOOD));
     m->flags |= SENTKICK;
