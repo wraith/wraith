@@ -184,20 +184,39 @@ detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
   if (chan->capslimit && caps_count && tot >= 6) {
     caps_percentage = (caps_count)/(double(tot));
     if (caps_percentage >= caps_limit) {
-      putlog(LOG_MODES, chan->name, "Caps flood (%d%%) from %s -- kicking", int(caps_percentage * 100), m->nick);
-      dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, response(RES_FLOOD));
-      m->flags |= SENTKICK;
+      const char *response = punish_flooder(chan, m);
+      putlog(LOG_MODES, chan->name, "Caps flood (%d%%) from %s -- %s", int(caps_percentage * 100), m->nick, response);
       return 1;
     }
   } else if (chan->colorlimit && color_count) {
     if (color_count >= chan->colorlimit) {
-      putlog(LOG_MODES, chan->name, "Color flood (%d) from %s -- kicking", color_count, m->nick);
-      dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, response(RES_FLOOD));
-      m->flags |= SENTKICK;
+      const char *response = punish_flooder(chan, m);
+      putlog(LOG_MODES, chan->name, "Color flood (%d) from %s -- %s", color_count, m->nick, response);
       return 1;
     }
   }
   return 0;
+}
+
+void set_devoice(struct chanset_t *chan, memberlist* m) {
+  if (!(m->flags & EVOICE)) {
+    putlog(LOG_DEBUG, "@", "Giving EVOICE flag to: %s (%s)", m->nick, chan->dname);
+    m->flags |= EVOICE;
+  }
+}
+
+const char* punish_flooder(struct chanset_t* chan, memberlist* m, const char *reason) {
+  if (channel_voice(chan) && chan->voice_moderate && !chan_sentdevoice(m)) {
+    add_mode(chan, '-', 'v', m->nick);
+    m->flags |= SENTDEVOICE;
+    set_devoice(chan, m);
+    return "devoicing";
+  } else if (!chan_sentkick(m)) {
+    dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, reason ? reason : response(RES_FLOOD));
+    m->flags |= SENTKICK;
+    return "kicking";
+  }
+  return "ignoring";
 }
 
 void unlock_chan(struct chanset_t *chan)
