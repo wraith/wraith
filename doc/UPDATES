@@ -43,8 +43,8 @@
   * Bot will now lockdown channel (+im) if a drone flood is detected (#37)
     * Add chansets 'flood-mchan', 'flood-mbytes', 'flood-mctcp' to control reactions to mass floods (#37)
   * Remove unneeded chanset 'nomassjoin'
-  * Add chanset 'capslimit' to handle % of message that can be in caps before kick (#8)
-  * Add chanset 'colorlimit' to handle how many color codes are allowed in a message before kick (#8)
+  * Add chanset 'caps-limit' to handle % of message that can be in caps before kick (#8)
+  * Add chanset 'color-limit' to handle how many color codes are allowed in a message before kick (#8)
   * Add chanset 'closed-exempt' which will allow exempting non-users (who are opped or voice) from being kicked. (fixes #171)
 
 1.3.4 - http://wraith.botpack.net/milestone/1.3.4
