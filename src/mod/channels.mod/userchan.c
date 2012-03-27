@@ -841,7 +841,7 @@ void write_chans_compat(bd::Stream& stream, int idx)
 bad-cookie %d manop %d mdop %d mop %d limit %d \
 flood-chan %d:%d flood-ctcp %d:%d flood-join %d:%d \
 flood-kick %d:%d flood-deop %d:%d flood-nick %d:%d \
-capslimit %d colorlimit %d closed-ban %d closed-invite %d closed-private %d ban-time %d \
+caps-limit %d color-limit %d closed-ban %d closed-invite %d closed-private %d ban-time %d \
 exempt-time %d invite-time %d voice-non-ident %d auto-delay %d \
 %cenforcebans %cdynamicbans %cuserbans %cbitch \
 %cprivate %ccycle %cinactive %cdynamicexempts %cuserexempts \

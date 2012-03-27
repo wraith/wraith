@@ -426,13 +426,13 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
       i++;
       if (i >= items) {
         if (result)
-          strlcpy(result, "channel capslimit needs argument", RESULT_LEN);
+          strlcpy(result, "channel caps-limit needs argument", RESULT_LEN);
         return ERROR;
       }
       int capslimit = atoi(item[i]);
       if (capslimit > 100 || capslimit < 0 || item[i][0] == '-') {
         if (result)
-          strlcpy(result, "channel capslimit out of range (0-100)", RESULT_LEN);
+          strlcpy(result, "channel caps-limit out of range (0-100)", RESULT_LEN);
         return ERROR;
       }
       chan->capslimit = capslimit;
@@ -440,7 +440,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
       i++;
       if (i >= items) {
         if (result)
-          strlcpy(result, "channel colorlimit needs argument", RESULT_LEN);
+          strlcpy(result, "channel color-limit needs argument", RESULT_LEN);
         return ERROR;
       }
       chan->colorlimit = atoi(item[i]);
