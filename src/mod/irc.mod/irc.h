@@ -107,6 +107,7 @@ typedef struct resolvstruct resolv_member;
 void resolve_to_rbl(struct chanset_t *chan, const char *host, struct resolvstruct *r = NULL);
 static void do_mask(struct chanset_t *chan, masklist *m, char *mask, char Mode);
 static void get_channel_masks(struct chanset_t* chan);
+void punish_flooder(struct chanset_t* chan, memberlist* m, const char *reason = NULL);
 
 #endif /* MAKING_IRC */
 

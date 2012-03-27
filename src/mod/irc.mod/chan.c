@@ -731,8 +731,7 @@ static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t 
           u_addmask('b', chan, s1, conf.bot->nick, "channel flood", now + (60 * chan->ban_time), 0);
         } else {
           putlog(LOG_MODES, chan->dname, "Channel flood from %s -- kicking", m->nick);
-          dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, response(RES_FLOOD));
-          m->flags |= SENTKICK;
+          punish_flooder(chan, m);
         }
       }
       return 1;

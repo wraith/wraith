@@ -186,19 +186,22 @@ detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
     caps_percentage = (caps_count)/(double(tot));
     if (caps_percentage >= caps_limit) {
       putlog(LOG_MODES, chan->name, "Caps flood (%d%%) from %s -- kicking", int(caps_percentage * 100), m->nick);
-      dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, response(RES_FLOOD));
-      m->flags |= SENTKICK;
+      punish_flooder(chan, m);
       return 1;
     }
   } else if (chan->colorlimit && color_count) {
     if (color_count >= chan->colorlimit) {
       putlog(LOG_MODES, chan->name, "Color flood (%d) from %s -- kicking", color_count, m->nick);
-      dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, response(RES_FLOOD));
-      m->flags |= SENTKICK;
+      punish_flooder(chan, m);
       return 1;
     }
   }
   return 0;
+}
+
+void punish_flooder(struct chanset_t* chan, memberlist* m, const char *reason) {
+  dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, reason ? reason : response(RES_FLOOD));
+  m->flags |= SENTKICK;
 }
 
 void unlock_chan(struct chanset_t *chan)
