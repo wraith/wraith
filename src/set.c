@@ -937,9 +937,18 @@ void write_vars_and_cmdpass(bd::Stream& stream, int idx)
     stream << bd::String::printf("- %s %s\n", cp->name, cp->pass);
 }
 
-static void display_set_value(int idx, const variable_t *var, const char *data, bool format = false)
+static void display_set_value(int idx, const variable_t *var, const char *botnick, bool format = false)
 {
   char buf[51] = "";
+
+  const char *data = NULL;
+  if (botnick) {				//fetch data from bot's USERENTRY_SET
+    struct userrec *botu = get_user_by_handle(userlist, (char *) botnick);
+    const char *botdata = var_get_bot_data(botu, var->name);
+    data = botdata ? botdata : NULL;
+  } else {					//use global, no bot specified
+    data = var->gdata ? var->gdata : NULL;
+  }
 
   if (format) {
     simple_snprintf(buf, sizeof(buf), "(%-6s) %-19s: ", var_type_name(var->flags), var->name);
@@ -1059,7 +1068,7 @@ int cmd_set_real(const char *botnick, int idx, char *par)
         else if (list && !data)
           dprintf(idx, "%s list not set.\n", var->name);
         else {
-          display_set_value(idx, var, data, true);
+          display_set_value(idx, var, botnick, true);
         }
       }
       if (name && !wildcard)
@@ -1128,7 +1137,7 @@ int cmd_set_real(const char *botnick, int idx, char *par)
           return 0;
         } else if (var_add_list(botnick, var, data)) {
           dprintf(idx, "Added '%s' to %s list.\n", data, var->name);
-          display_set_value(idx, var, data);
+          display_set_value(idx, var, botnick);
           return 1;
         }
       } else if (list == LIST_RM) {
@@ -1136,7 +1145,7 @@ int cmd_set_real(const char *botnick, int idx, char *par)
 
         if ((expanded_data = var_rem_list(botnick, var, data)) && expanded_data[0]) {
           dprintf(idx, "Removed '%s' from %s list.\n", expanded_data, var->name);
-          display_set_value(idx, var, botnick ? (!var->ldata || (var->ldata[0] == '-' && !var->ldata[1]) ? "(not set)" : data) : (var->gdata ? var->gdata : "(not set)"));
+          display_set_value(idx, var, botnick);
           return 1;
         } else if (!var_find_list(botnick, var, data)) {
           char *data_word = NULL;
@@ -1168,7 +1177,7 @@ int cmd_set_real(const char *botnick, int idx, char *par)
       if (botnick)
         var_set_userentry(botnick, name, data);
 
-      display_set_value(idx, var, data);
+      display_set_value(idx, var, botnick);
 
       if (sdata)
         free(sdata);
