@@ -200,8 +200,13 @@ detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
 }
 
 void punish_flooder(struct chanset_t* chan, memberlist* m, const char *reason) {
-  dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, reason ? reason : response(RES_FLOOD));
-  m->flags |= SENTKICK;
+  if (channel_voice(chan) && chan->voice_moderate && !chan_sentdevoice(m)) {
+    add_mode(chan, '-', 'v', m->nick);
+    m->flags |= SENTDEVOICE;
+  } else if (!chan_sentkick(m)) {
+    dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, reason ? reason : response(RES_FLOOD));
+    m->flags |= SENTKICK;
+  }
 }
 
 void unlock_chan(struct chanset_t *chan)
