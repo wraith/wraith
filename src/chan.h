@@ -197,6 +197,7 @@ struct chanset_t {
   int closed_private;
   int closed_invite;
   int closed_exempt_mode;
+  int voice_moderate;
   deflag_t bad_cookie;
   deflag_t manop;
   deflag_t mdop;

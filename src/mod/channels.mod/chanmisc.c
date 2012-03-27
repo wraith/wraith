@@ -452,6 +452,14 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
         return ERROR;
       }
       chan->closed_ban = atoi(item[i]);
+    } else if (!strcmp(item[i], "voice-moderate")) {
+      i++;
+      if (i >= items) {
+        if (result)
+          strlcpy(result, "channel voice-moderate needs argument", RESULT_LEN);
+        return ERROR;
+      }
+      chan->voice_moderate = atoi(item[i]);
     } else if (!strcmp(item[i], "closed-invite")) {
       i++;
       if (i >= items) {
@@ -1082,6 +1090,7 @@ int channel_add(char *result, const char *newname, char *options, bool isdefault
     chan->closed_ban = 0;
     chan->closed_private = 1;
     chan->closed_invite = 1;
+    chan->voice_moderate = 1;
     chan->voice_non_ident = 1;
     chan->auto_delay = 5;
     chan->ban_type = 3;

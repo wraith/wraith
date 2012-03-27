@@ -1258,6 +1258,7 @@ static void cmd_chaninfo(int idx, char *par)
     SHOW_INT("Revenge: ", chan->revenge, DEFLAG_STR, "Ignore");
     SHOW_INT("Protect-backup: ", chan->protect_backup, "Do!", "Don't!");
     SHOW_INT("Voice-non-ident: ", chan->voice_non_ident, "Do!", "Don't!");
+    SHOW_INT("Voice-moderate:", chan->voice_moderate, NULL, "Don't!");
 
     dprintf(idx, "Flood settings:   chan bytes ctcp join kick deop nick mjoin mpub mbytes mctcp\n");
     dprintf(idx, "  number:          %3d  %4d  %3d  %3d  %3d  %3d  %3d   %3d  %3d   %4d   %3d\n",
