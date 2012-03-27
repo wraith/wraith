@@ -966,7 +966,7 @@ int cmd_set_real(const char *botnick, int idx, char *par)
   variable_t *var = NULL;
   char *name = NULL;
   const char *data = NULL, *botdata = NULL;
-  int list = 0, i = 0;
+  int list = 0;
   bool notyes = 1, wildcard = 0;
 
   if (par[0] && !strncasecmp(par, "-yes", 4)) {
@@ -1043,16 +1043,34 @@ int cmd_set_real(const char *botnick, int idx, char *par)
   }
 
   if (!data) {
+    // First determine which variables are going to be shown
+    bd::Array<variable_t*> varsToShow;
+    size_t i = 0;
+
     while (vars[i].name) {
-      botdata = NULL;
-      if (!name || wildcard)	//not looping all, provided with one...
-        if (vars[i].name)
-          var = &vars[i]; 
+      if (!name || wildcard) {	//not looping all, provided with one...
+        if (vars[i].name) {
+          var = &vars[i];
+        }
+      }
 
       if (wildcard && !wild_match(name, var->name)) {
         ++i;
         continue;
       }
+
+      varsToShow << var;
+
+      if (name && !wildcard) {
+        break;
+      }
+      ++i;
+    }
+
+    // Then display them
+    for (i = 0; i < varsToShow.length(); ++i) {
+      var = varsToShow[i];
+      botdata = NULL;
       
       if (!(var->flags & VAR_HIDE) && !((var->flags & VAR_PERM) && !isowner(dcc[idx].nick)) && 
           !(botnick && ((var->flags & VAR_NOLOC) || (ishub && (var->flags & VAR_NOLHUB))))
@@ -1068,12 +1086,10 @@ int cmd_set_real(const char *botnick, int idx, char *par)
         else if (list && !data)
           dprintf(idx, "%s list not set.\n", var->name);
         else {
-          display_set_value(idx, var, botnick, true);
+          const bool shouldFormat = varsToShow.length() > 1;
+          display_set_value(idx, var, botnick, shouldFormat);
         }
       }
-      if (name && !wildcard)
-        break;
-      ++i;
     }
   } else { // need to set it!
     if (!list && var->flags & VAR_LIST) {
