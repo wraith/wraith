@@ -583,6 +583,9 @@ static void set_mode_protect(struct chanset_t *chan, char *set)
 
   if (chan->mode_mns_prot & CHANINV && chan->closed_invite)
     chan->closed_invite = 0;
+
+  if (chan->mode_mns_prot & CHANMODER && chan->voice_moderate)
+    chan->voice_moderate = 0;
 }
 
 static void get_mode_protect(struct chanset_t *chan, char *s, size_t ssiz)

@@ -460,6 +460,8 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
         return ERROR;
       }
       chan->voice_moderate = atoi(item[i]);
+      if (chan->mode_mns_prot & CHANMODER && chan->voice_moderate)
+        chan->voice_moderate = 0;
     } else if (!strcmp(item[i], "closed-invite")) {
       i++;
       if (i >= items) {
