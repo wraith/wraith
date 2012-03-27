@@ -937,6 +937,26 @@ void write_vars_and_cmdpass(bd::Stream& stream, int idx)
     stream << bd::String::printf("- %s %s\n", cp->name, cp->pass);
 }
 
+static void display_set_value(int idx, const variable_t *var, const char *botnick, bool format = false)
+{
+  char buf[51] = "";
+
+  const char *data = NULL;
+  if (botnick) {				//fetch data from bot's USERENTRY_SET
+    struct userrec *botu = get_user_by_handle(userlist, (char *) botnick);
+    const char *botdata = var_get_bot_data(botu, var->name);
+    data = botdata ? botdata : NULL;
+  } else {					//use global, no bot specified
+    data = var->gdata ? var->gdata : NULL;
+  }
+
+  if (format) {
+    simple_snprintf(buf, sizeof(buf), "(%-6s) %-16s: ", var_type_name(var->flags), var->name);
+  } else {
+    simple_snprintf(buf, sizeof(buf), "(%s) %s: ", var_type_name(var->flags), var->name);
+  }
+  dumplots(idx, buf, data ? (char *) data : (char *) "(not set)");
+}
 
 #define LIST_ADD  1
 #define LIST_RM   2
@@ -946,7 +966,7 @@ int cmd_set_real(const char *botnick, int idx, char *par)
   variable_t *var = NULL;
   char *name = NULL;
   const char *data = NULL, *botdata = NULL;
-  int list = 0, i = 0;
+  int list = 0;
   bool notyes = 1, wildcard = 0;
 
   if (par[0] && !strncasecmp(par, "-yes", 4)) {
@@ -1018,21 +1038,39 @@ int cmd_set_real(const char *botnick, int idx, char *par)
   if (botnick) {
     botu = get_user_by_handle(userlist, (char *) botnick);
     if (data)
-      dprintf(idx, "%-10s:\n", botnick);
+      dprintf(idx, "%s:\n", botnick);
     ishub = bot_hublevel(botu) == 999 ? 0 : 1;
   }
 
   if (!data) {
+    // First determine which variables are going to be shown
+    bd::Array<variable_t*> varsToShow;
+    size_t i = 0;
+
     while (vars[i].name) {
-      botdata = NULL;
-      if (!name || wildcard)	//not looping all, provided with one...
-        if (vars[i].name)
-          var = &vars[i]; 
+      if (!name || wildcard) {	//not looping all, provided with one...
+        if (vars[i].name) {
+          var = &vars[i];
+        }
+      }
 
       if (wildcard && !wild_match(name, var->name)) {
         ++i;
         continue;
       }
+
+      varsToShow << var;
+
+      if (name && !wildcard) {
+        break;
+      }
+      ++i;
+    }
+
+    // Then display them
+    for (i = 0; i < varsToShow.length(); ++i) {
+      var = varsToShow[i];
+      botdata = NULL;
       
       if (!(var->flags & VAR_HIDE) && !((var->flags & VAR_PERM) && !isowner(dcc[idx].nick)) && 
           !(botnick && ((var->flags & VAR_NOLOC) || (ishub && (var->flags & VAR_NOLHUB))))
@@ -1048,16 +1086,10 @@ int cmd_set_real(const char *botnick, int idx, char *par)
         else if (list && !data)
           dprintf(idx, "%s list not set.\n", var->name);
         else {
-          char buf[51] = "";
-
-          simple_snprintf(buf, sizeof(buf), "(%-6s)  %-19s:  ", var_type_name(var->flags), var->name);
-//        dprintf(idx, "   %-15s:   %s\n", var->name, data);
-          dumplots(idx, buf, data ? (char *) data : (char *) "(not set)");
+          const bool shouldFormat = varsToShow.length() > 1;
+          display_set_value(idx, var, botnick, shouldFormat);
         }
       }
-      if (name && !wildcard)
-        break;
-      ++i;
     }
   } else { // need to set it!
     if (!list && var->flags & VAR_LIST) {
@@ -1121,6 +1153,7 @@ int cmd_set_real(const char *botnick, int idx, char *par)
           return 0;
         } else if (var_add_list(botnick, var, data)) {
           dprintf(idx, "Added '%s' to %s list.\n", data, var->name);
+          display_set_value(idx, var, botnick);
           return 1;
         }
       } else if (list == LIST_RM) {
@@ -1128,6 +1161,7 @@ int cmd_set_real(const char *botnick, int idx, char *par)
 
         if ((expanded_data = var_rem_list(botnick, var, data)) && expanded_data[0]) {
           dprintf(idx, "Removed '%s' from %s list.\n", expanded_data, var->name);
+          display_set_value(idx, var, botnick);
           return 1;
         } else if (!var_find_list(botnick, var, data)) {
           char *data_word = NULL;
@@ -1159,7 +1193,7 @@ int cmd_set_real(const char *botnick, int idx, char *par)
       if (botnick)
         var_set_userentry(botnick, name, data);
 
-      dprintf(idx, "%s: %s\n", name, botnick ? (!data || (data[0] == '-' && !data[1]) ? "(not set)" : data) : (var->gdata ? var->gdata : "(not set)"));
+      display_set_value(idx, var, botnick);
 
       if (sdata)
         free(sdata);
