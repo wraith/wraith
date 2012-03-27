@@ -730,8 +730,8 @@ static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t 
           char *s1 = quickban(chan, from);
           u_addmask('b', chan, s1, conf.bot->nick, "channel flood", now + (60 * chan->ban_time), 0);
         } else {
-          putlog(LOG_MODES, chan->dname, "Channel flood from %s -- kicking", m->nick);
-          punish_flooder(chan, m);
+          const char *response = punish_flooder(chan, m);
+          putlog(LOG_MODES, chan->dname, "Channel flood from %s -- %s", m->nick, response);
         }
       }
       return 1;
