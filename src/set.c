@@ -951,7 +951,7 @@ static void display_set_value(int idx, const variable_t *var, const char *botnic
   }
 
   if (format) {
-    simple_snprintf(buf, sizeof(buf), "(%-6s) %-19s: ", var_type_name(var->flags), var->name);
+    simple_snprintf(buf, sizeof(buf), "(%-6s) %-16s: ", var_type_name(var->flags), var->name);
   } else {
     simple_snprintf(buf, sizeof(buf), "(%s) %s: ", var_type_name(var->flags), var->name);
   }
