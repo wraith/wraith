@@ -757,6 +757,27 @@ getin_request(char *botnick, char *code, char *par)
 
     putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - Opped", botnick, nick, chan->dname);
   } else if (what[0] == 'i') {
+    // Should I respond to this request?
+    // If there's 18 eligible bots in the channel, and in-bots is 2, I have a 2/18 chance of replying.
+    int eligible_bots = 0;
+    for (memberlist* m = chan->channel.member; m && m->nick[0]; m = m->next) {
+      if (chan_hasop(m)) {
+        member_getuser(m, 0);
+        if (m->user && m->user->bot) {
+          ++eligible_bots;
+        }
+      }
+    }
+
+    if (!eligible_bots) {
+      return;
+    }
+
+    if (!((randint(eligible_bots) + 1) <= static_cast<unsigned int>(in_bots))) {
+      // Not my turn
+      return;
+    }
+
     if (mem) {
       putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - %s is already on %s", botnick, nick, chan->dname, nick, chan->dname);
       return;
@@ -784,26 +805,6 @@ getin_request(char *botnick, char *code, char *par)
       return;
     }
 
-    // Should I respond to this request?
-    // If there's 18 eligible bots in the channel, and in-bots is 2, I have a 2/18 chance of replying.
-    int eligible_bots = 0;
-    for (memberlist* m = chan->channel.member; m && m->nick[0]; m = m->next) {
-      if (chan_hasop(m)) {
-        member_getuser(m, 0);
-        if (m->user && m->user->bot) {
-          ++eligible_bots;
-        }
-      }
-    }
-
-    if (!eligible_bots) {
-      return;
-    }
-
-    if (!((randint(eligible_bots) + 1) <= static_cast<unsigned int>(in_bots))) {
-      // Not my turn
-      return;
-    }
 
     bool sendi = 0;
 
