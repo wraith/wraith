@@ -809,6 +809,9 @@ void channels_report(int idx, int details)
         if (chan->closed_private)
           strlcat(s2, "p", sizeof(s2));
       }
+      if (channel_voice(chan) && chan->voice_moderate) {
+        strlcat(s2, "m", sizeof(s2));
+      }
 
       if (conf.bot->hub || shouldjoin(chan)) {
 	if (channel_active(chan)) {

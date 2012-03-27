@@ -1121,6 +1121,10 @@ void recheck_channel_modes(struct chanset_t *chan)
       mns &= ~CHANPRIV;
     }
   }
+  if (channel_voice(chan) && chan->voice_moderate) {
+    pls |= CHANMODER;
+    mns &= ~CHANMODER;
+  }
 
   if (!(chan->ircnet_status & CHAN_ASKEDMODES)) {
     if (pls & CHANINV && !(cur & CHANINV))
