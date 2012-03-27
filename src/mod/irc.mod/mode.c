@@ -1482,8 +1482,7 @@ gotmode(char *from, char *msg)
 
               if (msign == '+') {
                 if (mv->flags & EVOICE) {
-                  /* FIXME: This is a lame check, we need to expand on this more */
-                  if (!chan_master(user) && !glob_master(user) && !chk_voice(victim, chan)) {
+                  if (!chk_op(user, chan) && !chk_voice(victim, chan)) {
                     dv = 1;
                   } else {
                     mv->flags &= ~EVOICE;
@@ -1509,9 +1508,8 @@ gotmode(char *from, char *msg)
                     add_mode(chan, '+', 'v', mparam);
                     /* if they arent +v|v and VOICER is m+ then EVOICE them */
                   } else {
-                    /* FIXME: same thing here */
                     if (!match_my_nick(nick) && channel_voice(chan) &&
-                        (glob_master(user) || chan_master(user) || glob_bot(user)) &&
+                        (chk_op(user, chan) || glob_bot(user)) &&
                         rfc_casecmp(nick, mparam)) {
                       /* if the user is not +q set them norEVOICE. */
                       if (!chan_quiet(victim)) {
