@@ -742,7 +742,7 @@ getin_request(char *botnick, char *code, char *par)
     char *shared_nick = par[0] ? newsplit(&par) : NULL;
     memberlist* shared_member = shared_nick ? ismember(chan, shared_nick) : NULL;
     char *shared_host = par[0] ? newsplit(&par) : NULL;
-    if (!shared_nick || !shared_member || !shared_host || (strcmp(curnetwork, bot_network)) || strcmp(shared_host, shared_member->userhost)) {
+    if (!shared_nick || !shared_member || !shared_host || (strcasecmp(curnetwork, bot_network)) || strcmp(shared_host, shared_member->userhost)) {
       putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - Bot seems to be on a different network '%s'", botnick, nick, chan->dname, bot_network);
       return;
     }
