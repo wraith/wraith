@@ -1,4 +1,5 @@
 * Bots now again respect devoices made by other bots and will not revoice those users.
+* Add chanset 'voice-moderate' which will auto set +m in '+voice' channel and devoice flooding clients instead of kick. (#48)
 
 1.4.0 - http://wraith.botpack.net/milestone/1.4.0
   * Updated server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
