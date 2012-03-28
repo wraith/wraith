@@ -3006,7 +3006,7 @@ static int gotkick(char *from, char *origmsg)
         } else {
           if (m->user) {
             char tmp[128] = "";
-            simple_snprintf(tmp, sizeof(tmp), "Kicked bot %s on %s", m->nick, chan->dname);
+            simple_snprintf(tmp, sizeof(tmp), "Kicked bot %s on %s", mv->nick, chan->dname);
             deflag_user(m->user, DEFLAG_EVENT_REVENGE_KICK, tmp, chan);
           }
         }
