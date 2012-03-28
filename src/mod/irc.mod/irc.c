@@ -1152,7 +1152,7 @@ new_mask(masklist *m, char *s, char *who)
 /* Removes a nick from the channel member list (returns 1 if successful)
  */
 static bool
-killmember(struct chanset_t *chan, char *nick)
+killmember(struct chanset_t *chan, char *nick, bool cacheMember)
 {
   memberlist *x = NULL, *old = NULL;
 
@@ -1168,8 +1168,15 @@ killmember(struct chanset_t *chan, char *nick)
     old->next = x->next;
   else
     chan->channel.member = x->next;
-  delete_member(x);
-  chan->channel.members--;
+
+  if (cacheMember) {
+    // Don't delete here, will delete when it expires from the cache.
+    (*chan->channel.cached_members)[x->userhost] = x;
+  } else {
+    delete_member(x);
+  }
+
+  --chan->channel.members;
 
   /* The following two errors should NEVER happen. We will try to correct
    * them though, to keep the bot from crashing.
@@ -1526,7 +1533,7 @@ check_expired_chanstuff(struct chanset_t *chan)
         if (now - m->split > wait_split) {
           putlog(LOG_JOIN, chan->dname, "%s (%s) got lost in the net-split.", m->nick, m->userhost);
           --(chan->channel.splitmembers);
-          killmember(chan, m->nick);
+          killmember(chan, m->nick, false);
           continue;
         }
       }

@@ -3059,7 +3059,7 @@ static int gotnick(char *from, char *msg)
       if (rfc_casecmp(nick, msg)) {
         /* Someone on channel with old nick?! */
 	if ((mm = ismember(chan, msg)))
-	  killmember(chan, mm->nick);
+	  killmember(chan, mm->nick, false);
       }
 
       strlcpy(m->nick, msg, sizeof(m->nick));
