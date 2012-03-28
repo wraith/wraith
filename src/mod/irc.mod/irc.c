@@ -1408,7 +1408,7 @@ raise_limit(struct chanset_t *chan, int default_limitraise)
     const int ul = nl + i;					/* upper limit */
     const int ll = nl - i;					/* lower limit */
 
-    if ((chan->channel.maxmembers > ll) && (chan->channel.maxmembers < ul)) {
+    if ((chan->channel.maxmembers >= ll) && (chan->channel.maxmembers <= ul)) {
       return false;                     /* the current limit is in the range, so leave it. */
     }
 
