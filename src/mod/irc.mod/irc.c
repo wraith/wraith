@@ -226,7 +226,7 @@ void unlock_chan(struct chanset_t *chan)
     char buf[3] = "", *p = buf;
     if ((chan->channel.drone_set_mode & CHANINV) && !(chan->mode_pls_prot & CHANINV))
       *p++ = 'i';
-    if ((chan->channel.drone_set_mode & CHANMODER) && !(chan->mode_pls_prot & CHANMODER))
+    if ((chan->channel.drone_set_mode & CHANMODER) && !((chan->mode_pls_prot & CHANMODER) || (channel_voice(chan) && chan->voice_moderate)))
       *p++ = 'm';
     *p = 0;
     dprintf(DP_MODE, "MODE %s :-%s\n", chan->name[0] ? chan->name : chan->dname, buf);
