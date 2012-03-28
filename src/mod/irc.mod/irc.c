@@ -1199,6 +1199,32 @@ killmember(struct chanset_t *chan, char *nick, bool cacheMember)
   return 1;
 }
 
+/**
+ * Update the member with cached information from a parted/quitted member
+ */
+static void member_update_from_cache(struct chanset_t* chan, memberlist *m) {
+  using std::swap;
+
+  // Are they in the cache?
+  const bd::String userhost(m->userhost);
+  if (chan->channel.cached_members->contains(userhost)) {
+    memberlist *cached_member = (*chan->channel.cached_members)[userhost];
+
+    // Update important flood tracking information
+    swap(m->floodtime, cached_member->floodtime);
+    swap(m->floodnum, cached_member->floodnum);
+
+    // Update EVOICE flag
+    if (cached_member->flags & EVOICE) {
+      m->flags |= EVOICE;
+    }
+
+    // No longer need the cached member
+    delete_member(cached_member);
+    chan->channel.cached_members->remove(userhost);
+  }
+}
+
 /* Check whether I'm voice. Returns boolean 1 or 0.
  */
 bool

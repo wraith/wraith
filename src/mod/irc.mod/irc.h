@@ -93,6 +93,7 @@ static bool new_mask(masklist *, char *, char *);
 static void do_closed_kick(struct chanset_t *, memberlist *);
 static char *quickban(struct chanset_t *, const char *);
 static bool killmember(struct chanset_t *chan, char *nick, bool cacheMember = true);
+static void member_update_from_cache(struct chanset_t* chan, memberlist *m);
 static void check_lonely_channel(struct chanset_t *chan);
 static int gotmode(char *, char *);
 void unset_im(struct chanset_t* chan);
