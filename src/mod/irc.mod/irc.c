@@ -809,7 +809,7 @@ getin_request(char *botnick, char *code, char *par)
     bool sendi = 0;
 
     if (chan->channel.maxmembers) {
-      if (raise_limit(chan)) {
+      if (raise_limit(chan, 5)) {
         putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Raised limit", botnick, nick, chan->dname);
       }
     }
@@ -1391,7 +1391,7 @@ check_netfight(struct chanset_t *chan)
 }
 
 bool
-raise_limit(struct chanset_t *chan)
+raise_limit(struct chanset_t *chan, int default_limitraise)
 {
   if (!chan || !me_op(chan))
     return false;
@@ -1400,7 +1400,7 @@ raise_limit(struct chanset_t *chan)
   if (chan->mode_mns_prot & CHANLIMIT)
     return false;
 
-  const int limitraise = (chan->limitraise % 2 == 0) ? chan->limitraise : (chan->limitraise + 1);
+  const int limitraise = (chan->limitraise ? ((chan->limitraise % 2 == 0) ? chan->limitraise : (chan->limitraise + 1)) : default_limitraise);
   if (limitraise) {
     const int nl = (chan->channel.members - chan->channel.splitmembers) + limitraise;	/* new limit */
     const int i = limitraise >> 2;			/* DIV 4 */

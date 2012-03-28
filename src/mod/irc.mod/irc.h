@@ -146,7 +146,7 @@ inline void check_this_mask(const char type, struct chanset_t *chan, char *mask,
 }
 
 void check_this_user(char *, int, char *);
-bool raise_limit(struct chanset_t *);
+bool raise_limit(struct chanset_t *, int default_limitraise = 0);
 void enforce_closed(struct chanset_t *);
 void recheck_channel(struct chanset_t *, int);
 void recheck_channel_modes(struct chanset_t *);
