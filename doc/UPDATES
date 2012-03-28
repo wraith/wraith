@@ -6,6 +6,7 @@ next
   * Add chanset 'voice-moderate' which will auto set +m in '+voice' channel and devoice flooding clients instead of kick. (#48)
   * Bots now will enforce devoices made by ops (user +o) and allow any op (user +o) to revoice to disable that enforcement.
     This used to use +m to enforce/allowed revoicing.
+  * Tweak limit range checking such that bot will set limit less often
 
 1.4.0 - http://wraith.botpack.net/milestone/1.4.0
   * Updated server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.

@@ -827,7 +827,7 @@ getin_request(char *botnick, char *code, char *par)
     bool sendi = 0;
 
     if (chan->channel.maxmembers) {
-      if (raise_limit(chan)) {
+      if (raise_limit(chan, 5)) {
         putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Raised limit", botnick, nick, chan->dname);
       }
     }
@@ -1409,7 +1409,7 @@ check_netfight(struct chanset_t *chan)
 }
 
 bool
-raise_limit(struct chanset_t *chan)
+raise_limit(struct chanset_t *chan, int default_limitraise)
 {
   if (!chan || !me_op(chan))
     return false;
@@ -1418,24 +1418,26 @@ raise_limit(struct chanset_t *chan)
   if (chan->mode_mns_prot & CHANLIMIT)
     return false;
 
-  const int nl = (chan->channel.members - chan->channel.splitmembers) + chan->limitraise;	/* new limit */
-  const int limitraise = (chan->limitraise % 2 == 0) ? chan->limitraise : (chan->limitraise + 1);
-  const int i = limitraise >> 2;			/* DIV 4 */
-  /* if the newlimit will be in the range made by these vars, dont change. */
-  const int ul = nl + i;					/* upper limit */
-  const int ll = nl - i;					/* lower limit */
+  const int limitraise = (chan->limitraise ? ((chan->limitraise % 2 == 0) ? chan->limitraise : (chan->limitraise + 1)) : default_limitraise);
+  if (limitraise) {
+    const int nl = (chan->channel.members - chan->channel.splitmembers) + limitraise;	/* new limit */
+    const int i = limitraise >> 2;			/* DIV 4 */
+    /* if the newlimit will be in the range made by these vars, dont change. */
+    const int ul = nl + i;					/* upper limit */
+    const int ll = nl - i;					/* lower limit */
 
-  if ((chan->channel.maxmembers > ll) && (chan->channel.maxmembers < ul)) {
-    return false;                     /* the current limit is in the range, so leave it. */
-  }
+    if ((chan->channel.maxmembers >= ll) && (chan->channel.maxmembers <= ul)) {
+      return false;                     /* the current limit is in the range, so leave it. */
+    }
 
-  if (nl != chan->channel.maxmembers) {
-    char s[6] = "";
+    if (nl != chan->channel.maxmembers) {
+      char s[6] = "";
 
-    simple_snprintf(s, sizeof(s), "%d", nl);
-    add_mode(chan, '+', 'l', s);
+      simple_snprintf(s, sizeof(s), "%d", nl);
+      add_mode(chan, '+', 'l', s);
 
-    return true;
+      return true;
+    }
   }
 
   return false;
