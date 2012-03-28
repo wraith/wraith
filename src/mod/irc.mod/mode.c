@@ -725,7 +725,7 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
       } else {
         if (m->user) {
           char tmp[128] = "";
-          simple_snprintf(tmp, sizeof(tmp), "Deopped bot %s on %s", m->nick, chan->dname);
+          simple_snprintf(tmp, sizeof(tmp), "Deopped bot %s on %s", mv->nick, chan->dname);
           deflag_user(m->user, DEFLAG_EVENT_REVENGE_DEOP, tmp, chan);
         }
       }
@@ -748,14 +748,14 @@ got_ban(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
 
   // Make an array of all matching users
   bd::Array<memberlist*> matchedUserMembers;
-  bool matched_bot = false;
+  memberlist *matched_bot = NULL;
 
   for (memberlist *mv = chan->channel.member; mv && mv->nick[0]; mv = mv->next) {
     member_getuser(mv);
     if (mv->user) {
       if ((wild_match(mask, mv->from) || match_cidr(mask, mv->from))) {
         if (!matched_bot && mv != m && mv->user->bot) {
-          matched_bot = true;
+          matched_bot = mv;
         }
         if (mv->user && !isexempted(chan, mv->from)) {
           matchedUserMembers << mv;
@@ -772,7 +772,7 @@ got_ban(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
     } else {
       if (m->user) {
         char tmp[128] = "";
-        simple_snprintf(tmp, sizeof(tmp), "Banned bot %s (%s) on %s", m->nick, mask, chan->dname);
+        simple_snprintf(tmp, sizeof(tmp), "Banned bot %s (%s) on %s", matched_bot->nick, mask, chan->dname);
         deflag_user(m->user, DEFLAG_EVENT_REVENGE_BAN, tmp, chan);
       }
     }
