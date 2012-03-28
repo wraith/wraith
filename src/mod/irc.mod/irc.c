@@ -736,13 +736,13 @@ getin_request(char *botnick, char *code, char *par)
     }
 
     // Does the remote bot have the same number of clients in its channel as me? And a shared member?
-    int members = atoi(tmp);
+    const char *bot_network = tmp;
 
     char *shared_nick = par[0] ? newsplit(&par) : NULL;
     memberlist* shared_member = shared_nick ? ismember(chan, shared_nick) : NULL;
     char *shared_host = par[0] ? newsplit(&par) : NULL;
-    if (!shared_nick || !shared_member || !shared_host || !((chan->channel.members - chan->channel.splitmembers) == members) || strcmp(shared_host, shared_member->userhost)) {
-      putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - Bot seems to be on a different network???", botnick, nick, chan->dname);
+    if (!shared_nick || !shared_member || !shared_host || (strcasecmp(curnetwork, bot_network)) || strcmp(shared_host, shared_member->userhost)) {
+      putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - Bot seems to be on a different network '%s' / me: '%s'", botnick, nick, chan->dname, bot_network, curnetwork);
       return;
     }
 
@@ -999,7 +999,7 @@ request_op(struct chanset_t *chan)
   }
 
   /* first scan for bots on my server, ask first found for ops */
-  simple_snprintf(s, sizeof(s), "gi o %s %s %d %s %s", chan->dname, botname, (chan->channel.members - chan->channel.splitmembers), shared_member->nick, shared_member->userhost);
+  simple_snprintf(s, sizeof(s), "gi o %s %s %s %s %s", chan->dname, botname, curnetwork, shared_member->nick, shared_member->userhost);
 
   /* look for bots 0-1 hops away */
   for (i2 = 0; i2 < i; i2++) {
