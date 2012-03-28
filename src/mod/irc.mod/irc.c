@@ -1168,9 +1168,7 @@ killmember(struct chanset_t *chan, char *nick)
     old->next = x->next;
   else
     chan->channel.member = x->next;
-  delete x->floodtime;
-  delete x->floodnum;
-  free(x);
+  delete_member(x);
   chan->channel.members--;
 
   /* The following two errors should NEVER happen. We will try to correct

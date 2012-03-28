@@ -996,9 +996,7 @@ void clear_channel(struct chanset_t *chan, bool reset)
     free(chan->channel.topic);
   for (m = chan->channel.member; m; m = m1) {
     m1 = m->next;
-    delete m->floodtime;
-    delete m->floodnum;
-    free(m);
+    delete_member(m);
   }
 
   clear_masklist(chan->channel.ban);

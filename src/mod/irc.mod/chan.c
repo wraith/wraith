@@ -285,6 +285,12 @@ static memberlist *newmember(struct chanset_t *chan, char *nick)
   return n;
 }
 
+void delete_member(memberlist* m) {
+  delete m->floodtime;
+  delete m->floodnum;
+  free(m);
+}
+
 static bool member_getuser(memberlist* m, bool act_on_lookup) {
   if (!m) return 0;
   if (!m->user && !m->tried_getuser) {

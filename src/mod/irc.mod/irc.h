@@ -157,6 +157,7 @@ void flush_modes();
 void reset_chan_info(struct chanset_t *);
 char *getnick(const char *, struct chanset_t *);
 void check_shouldjoin(struct chanset_t* chan);
+void delete_member(memberlist* m);
 
 extern int		max_bans, max_exempts, max_invites, max_modes;
 extern bool		use_354, include_lk;
