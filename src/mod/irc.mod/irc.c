@@ -1580,6 +1580,10 @@ check_expired_chanstuff(struct chanset_t *chan)
     if (bot_ops && !im_opped) {
       request_op(chan);
     }
+
+    if (role == 3) {
+      recheck_channel_modes(chan);
+    }
   }
 }
 
