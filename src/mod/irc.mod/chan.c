@@ -293,6 +293,12 @@ static memberlist *newmember(struct chanset_t *chan, char *nick)
   return n;
 }
 
+void delete_member(memberlist* m) {
+  delete m->floodtime;
+  delete m->floodnum;
+  free(m);
+}
+
 static bool member_getuser(memberlist* m, bool act_on_lookup) {
   if (!m) return 0;
   if (!m->user && !m->tried_getuser) {
@@ -1955,6 +1961,7 @@ static int got352or4(struct chanset_t *chan, char *user, char *host, char *nick,
     /* Store the userhost */
     simple_snprintf(m->userhost, sizeof(m->userhost), "%s@%s", user, host);
     simple_snprintf(m->from, sizeof(m->from), "%s!%s", m->nick, m->userhost);
+    member_update_from_cache(chan, m);
 
     if (!m->userip[0]) {
       if (ip)
@@ -2740,6 +2747,7 @@ static int gotjoin(char *from, char *chname)
 	m = newmember(chan, nick);
 	m->joined = m->last = now;
 	strlcpy(m->userhost, uhost, sizeof(m->userhost));
+        member_update_from_cache(chan, m);
         simple_snprintf(m->from, sizeof(m->from), "%s!%s", m->nick, m->userhost);
         if (is_dotted_ip(host)) {
           strlcpy(m->userip, uhost, sizeof(m->userip));
@@ -3061,7 +3069,7 @@ static int gotnick(char *from, char *msg)
       if (rfc_casecmp(nick, msg)) {
         /* Someone on channel with old nick?! */
 	if ((mm = ismember(chan, msg)))
-	  killmember(chan, mm->nick);
+	  killmember(chan, mm->nick, false);
       }
 
       strlcpy(m->nick, msg, sizeof(m->nick));

@@ -1146,7 +1146,7 @@ new_mask(masklist *m, char *s, char *who)
 /* Removes a nick from the channel member list (returns 1 if successful)
  */
 static bool
-killmember(struct chanset_t *chan, char *nick)
+killmember(struct chanset_t *chan, char *nick, bool cacheMember)
 {
   memberlist *x = NULL, *old = NULL;
 
@@ -1162,10 +1162,17 @@ killmember(struct chanset_t *chan, char *nick)
     old->next = x->next;
   else
     chan->channel.member = x->next;
-  delete x->floodtime;
-  delete x->floodnum;
-  free(x);
-  chan->channel.members--;
+
+  if (cacheMember) {
+    x->last = now;
+    // Don't delete here, will delete when it expires from the cache.
+    (*chan->channel.cached_members)[x->userhost] = x;
+  } else {
+    chan->channel.cached_members->remove(x->userhost);
+    delete_member(x);
+  }
+
+  --chan->channel.members;
 
   /* The following two errors should NEVER happen. We will try to correct
    * them though, to keep the bot from crashing.
@@ -1186,6 +1193,32 @@ killmember(struct chanset_t *chan, char *nick)
     chan->channel.member->next = NULL;
   }
   return 1;
+}
+
+/**
+ * Update the member with cached information from a parted/quitted member
+ */
+static void member_update_from_cache(struct chanset_t* chan, memberlist *m) {
+  using std::swap;
+
+  // Are they in the cache?
+  const bd::String userhost(m->userhost);
+  if (chan->channel.cached_members->contains(userhost)) {
+    memberlist *cached_member = (*chan->channel.cached_members)[userhost];
+
+    // Update important flood tracking information
+    swap(m->floodtime, cached_member->floodtime);
+    swap(m->floodnum, cached_member->floodnum);
+
+    // Update EVOICE flag
+    if (cached_member->flags & EVOICE) {
+      m->flags |= EVOICE;
+    }
+
+    // No longer need the cached member
+    delete_member(cached_member);
+    chan->channel.cached_members->remove(userhost);
+  }
 }
 
 /* Check whether I'm voice. Returns boolean 1 or 0.
@@ -1464,10 +1497,11 @@ void check_shouldjoin(struct chanset_t* chan)
 static void
 check_expired_chanstuff(struct chanset_t *chan)
 {
+  memberlist *m = NULL;
   check_shouldjoin(chan);
   if (channel_active(chan) && shouldjoin(chan)) {
     masklist *b = NULL, *e = NULL;
-    memberlist *m = NULL, *n = NULL;
+    memberlist *n = NULL;
     struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
     if (me_op(chan)) {
@@ -1529,7 +1563,7 @@ check_expired_chanstuff(struct chanset_t *chan)
         if (now - m->split > wait_split) {
           putlog(LOG_JOIN, chan->dname, "%s (%s) got lost in the net-split.", m->nick, m->userhost);
           --(chan->channel.splitmembers);
-          killmember(chan, m->nick);
+          killmember(chan, m->nick, false);
           continue;
         }
       }
@@ -1584,6 +1618,21 @@ check_expired_chanstuff(struct chanset_t *chan)
 
     if (role == 3) {
       recheck_channel_modes(chan);
+    }
+  }
+  // Clear out expired cached members
+  if (chan->channel.cached_members && chan->channel.cached_members->size()) {
+    bd::Array<bd::String> member_uhosts(chan->channel.cached_members->keys());
+    for (size_t i = 0; i < member_uhosts.length(); ++i) {
+      const bd::String uhost(member_uhosts[i]);
+
+      m = (*chan->channel.cached_members)[uhost];
+
+      // Delete the expired member
+      if (now - m->last > wait_split) {
+        delete_member(m);
+        chan->channel.cached_members->remove(uhost);
+      }
     }
   }
 }
