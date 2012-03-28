@@ -46,6 +46,7 @@
   * Add chanset 'caps-limit' to handle % of message that can be in caps before kick (#8)
   * Add chanset 'color-limit' to handle how many color codes are allowed in a message before kick (#8)
   * Add chanset 'closed-exempt' which will allow exempting non-users (who are opped or voice) from being kicked. (fixes #171)
+  * Tweak limit range checking such that bot will set limit less often
 
 1.3.4 - http://wraith.botpack.net/milestone/1.3.4
   * Fix various compile warnings with newer GCC

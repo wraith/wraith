@@ -756,6 +756,27 @@ getin_request(char *botnick, char *code, char *par)
 
     putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - Opped", botnick, nick, chan->dname);
   } else if (what[0] == 'i') {
+    // Should I respond to this request?
+    // If there's 18 eligible bots in the channel, and in-bots is 2, I have a 2/18 chance of replying.
+    int eligible_bots = 0;
+    for (memberlist* m = chan->channel.member; m && m->nick[0]; m = m->next) {
+      if (chan_hasop(m)) {
+        member_getuser(m, 0);
+        if (m->user && m->user->bot) {
+          ++eligible_bots;
+        }
+      }
+    }
+
+    if (!eligible_bots) {
+      return;
+    }
+
+    if (!((randint(eligible_bots) + 1) <= static_cast<unsigned int>(in_bots))) {
+      // Not my turn
+      return;
+    }
+
     if (mem) {
       putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - %s is already on %s", botnick, nick, chan->dname, nick, chan->dname);
       return;
@@ -783,38 +804,12 @@ getin_request(char *botnick, char *code, char *par)
       return;
     }
 
-    // Should I respond to this request?
-    // If there's 18 eligible bots in the channel, and in-bots is 2, I have a 2/18 chance of replying.
-    int eligible_bots = 0;
-    for (memberlist* m = chan->channel.member; m && m->nick[0]; m = m->next) {
-      if (chan_hasop(m)) {
-        member_getuser(m, 0);
-        if (m->user && m->user->bot) {
-          ++eligible_bots;
-        }
-      }
-    }
-
-    if (!eligible_bots) {
-      return;
-    }
-
-    if (!((randint(eligible_bots) + 1) <= static_cast<unsigned int>(in_bots))) {
-      // Not my turn
-      return;
-    }
 
     bool sendi = 0;
 
     if (chan->channel.maxmembers) {
-      int lim = (chan->channel.members - chan->channel.splitmembers) + 5, curlim = chan->channel.maxmembers;
-      if (curlim < lim) {
-        char s2[6] = "";
-
-        sendi = 1;
-        simple_snprintf(s2, sizeof(s2), "%d", lim);
-        add_mode(chan, '+', 'l', s2);
-        putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Raised limit to %d", botnick, nick, chan->dname, lim);
+      if (raise_limit(chan, 5)) {
+        putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Raised limit", botnick, nick, chan->dname);
       }
     }
 
@@ -1394,32 +1389,39 @@ check_netfight(struct chanset_t *chan)
   chan->channel.fighting = 0;   /* we put this here because we need to clear it once per min */
 }
 
-void
-raise_limit(struct chanset_t *chan)
+bool
+raise_limit(struct chanset_t *chan, int default_limitraise)
 {
   if (!chan || !me_op(chan))
-    return;
+    return false;
 
   /* Don't bother setting limit if the user has set a protect -l */
   if (chan->mode_mns_prot & CHANLIMIT)
-    return;
+    return false;
 
-  int nl = (chan->channel.members - chan->channel.splitmembers) + chan->limitraise;	/* new limit */
-  int i = chan->limitraise >> 2;			/* DIV 4 */
-  /* if the newlimit will be in the range made by these vars, dont change. */
-  int ul = nl + i;					/* upper limit */
-  int ll = nl - i;					/* lower limit */
+  const int limitraise = (chan->limitraise ? ((chan->limitraise % 2 == 0) ? chan->limitraise : (chan->limitraise + 1)) : default_limitraise);
+  if (limitraise) {
+    const int nl = (chan->channel.members - chan->channel.splitmembers) + limitraise;	/* new limit */
+    const int i = limitraise >> 2;			/* DIV 4 */
+    /* if the newlimit will be in the range made by these vars, dont change. */
+    const int ul = nl + i;					/* upper limit */
+    const int ll = nl - i;					/* lower limit */
 
-  if ((chan->channel.maxmembers > ll) && (chan->channel.maxmembers < ul))
-    return;                     /* the current limit is in the range, so leave it. */
+    if ((chan->channel.maxmembers >= ll) && (chan->channel.maxmembers <= ul)) {
+      return false;                     /* the current limit is in the range, so leave it. */
+    }
 
-  if (nl != chan->channel.maxmembers) {
-    char s[6] = "";
+    if (nl != chan->channel.maxmembers) {
+      char s[6] = "";
 
-    simple_snprintf(s, sizeof(s), "%d", nl);
-    add_mode(chan, '+', 'l', s);
+      simple_snprintf(s, sizeof(s), "%d", nl);
+      add_mode(chan, '+', 'l', s);
+
+      return true;
+    }
   }
 
+  return false;
 }
 
 void check_shouldjoin(struct chanset_t* chan)
