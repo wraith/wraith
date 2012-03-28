@@ -1170,6 +1170,7 @@ killmember(struct chanset_t *chan, char *nick, bool cacheMember)
     chan->channel.member = x->next;
 
   if (cacheMember) {
+    x->last = now;
     // Don't delete here, will delete when it expires from the cache.
     (*chan->channel.cached_members)[x->userhost] = x;
   } else {
@@ -1495,10 +1496,11 @@ void check_shouldjoin(struct chanset_t* chan)
 static void
 check_expired_chanstuff(struct chanset_t *chan)
 {
+  memberlist *m = NULL;
   check_shouldjoin(chan);
   if (channel_active(chan) && shouldjoin(chan)) {
     masklist *b = NULL, *e = NULL;
-    memberlist *m = NULL, *n = NULL;
+    memberlist *n = NULL;
     struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
     if (me_op(chan)) {
@@ -1615,6 +1617,21 @@ check_expired_chanstuff(struct chanset_t *chan)
 
     if (role == 3) {
       recheck_channel_modes(chan);
+    }
+  }
+  // Clear out expired cached members
+  if (chan->channel.cached_members && chan->channel.cached_members->size()) {
+    bd::Array<bd::String> member_uhosts(chan->channel.cached_members->keys());
+    for (size_t i = 0; i < member_uhosts.length(); ++i) {
+      const bd::String uhost(member_uhosts[i]);
+
+      m = (*chan->channel.cached_members)[uhost];
+
+      // Delete the expired member
+      if (now - m->last > wait_split) {
+        delete_member(m);
+        chan->channel.cached_members->remove(uhost);
+      }
     }
   }
 }
