@@ -92,7 +92,8 @@ static bool detect_chan_flood(memberlist *m, const char* from, struct chanset_t 
 static bool new_mask(masklist *, char *, char *);
 static void do_closed_kick(struct chanset_t *, memberlist *);
 static char *quickban(struct chanset_t *, const char *);
-static bool killmember(struct chanset_t *chan, char *nick);
+static bool killmember(struct chanset_t *chan, char *nick, bool cacheMember = true);
+static void member_update_from_cache(struct chanset_t* chan, memberlist *m);
 static void check_lonely_channel(struct chanset_t *chan);
 static int gotmode(char *, char *);
 void unset_im(struct chanset_t* chan);
@@ -157,6 +158,7 @@ void flush_modes();
 void reset_chan_info(struct chanset_t *);
 char *getnick(const char *, struct chanset_t *);
 void check_shouldjoin(struct chanset_t* chan);
+void delete_member(memberlist* m);
 
 extern int		max_bans, max_exempts, max_invites, max_modes;
 extern bool		use_354, include_lk;

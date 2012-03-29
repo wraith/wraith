@@ -31,6 +31,19 @@ typedef struct memstruct {
   bd::HashTable<flood_t, int>         *floodnum; // floodnum[FLOOD_PRIVMSG] = 1;
 } memberlist;
 
+#include <bdlib/src/bdlib.h>
+BDLIB_NS_BEGIN
+template<typename T>
+  struct Hash;
+
+template<>
+  struct Hash<memberlist*>
+  {
+    // Use memory address
+    inline size_t operator()(memberlist* m) const { return reinterpret_cast<size_t>(m); }
+  };
+BDLIB_NS_END
+
 #define CHAN_FLAG_OP	1
 #define CHAN_FLAG_VOICE 2
 #define CHAN_FLAG_USER 3
@@ -128,6 +141,9 @@ struct chan_t {
   // Shared non-member counts (JOIN/PART)
   bd::HashTable<bd::String, bd::HashTable<flood_t, time_t> >     *floodtime; // floodtime[uhost][FLOOD_PRIVMSG] = now;
   bd::HashTable<bd::String, bd::HashTable<flood_t, int> >         *floodnum; //  floodnum[uhost][FLOOD_PRIVMSG] = 1;
+
+  // Member caching to cache cyclers
+  bd::HashTable<bd::String, memberlist*> *cached_members;
 };
 
 #define CHANINV    BIT0		/* +i					*/
