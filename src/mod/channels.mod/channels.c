@@ -567,6 +567,9 @@ static void set_mode_protect(struct chanset_t *chan, char *set)
 
   if (chan->mode_mns_prot & CHANINV && chan->closed_invite)
     chan->closed_invite = 0;
+
+  if (chan->mode_mns_prot & CHANMODER && chan->voice_moderate)
+    chan->voice_moderate = 0;
 }
 
 static void get_mode_protect(struct chanset_t *chan, char *s, size_t ssiz)
@@ -789,6 +792,9 @@ void channels_report(int idx, int details)
           strlcat(s2, "i", sizeof(s2));
         if (chan->closed_private)
           strlcat(s2, "p", sizeof(s2));
+      }
+      if (channel_voice(chan) && chan->voice_moderate) {
+        strlcat(s2, "m", sizeof(s2));
       }
 
       if (conf.bot->hub || shouldjoin(chan)) {

@@ -730,9 +730,8 @@ static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t 
           char *s1 = quickban(chan, from);
           u_addmask('b', chan, s1, conf.bot->nick, "channel flood", now + (60 * chan->ban_time), 0);
         } else {
-          putlog(LOG_MODES, chan->dname, "Channel flood from %s -- kicking", m->nick);
-          dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, response(RES_FLOOD));
-          m->flags |= SENTKICK;
+          const char *response = punish_flooder(chan, m);
+          putlog(LOG_MODES, chan->dname, "Channel flood from %s -- %s", m->nick, response);
         }
       }
       return 1;
@@ -1120,6 +1119,10 @@ void recheck_channel_modes(struct chanset_t *chan)
       pls |= CHANPRIV;
       mns &= ~CHANPRIV;
     }
+  }
+  if (channel_voice(chan) && chan->voice_moderate) {
+    pls |= CHANMODER;
+    mns &= ~CHANMODER;
   }
 
   if (!(chan->ircnet_status & CHAN_ASKEDMODES)) {

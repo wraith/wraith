@@ -719,7 +719,7 @@ flood-chan %d:%d flood-bytes %d:%d flood-ctcp %d:%d flood-join %d:%d \
 flood-kick %d:%d flood-deop %d:%d flood-nick %d:%d flood-mjoin %d:%d \
 flood-mpub %d:%d flood-mbytes %d:%d flood-mctcp %d:%d \
 capslimit %d colorlimit %d closed-ban %d closed-invite %d closed-private %d closed-exempt %d ban-time %d \
-exempt-time %d invite-time %d voice-non-ident %d auto-delay %d \
+exempt-time %d invite-time %d voice-non-ident %d voice-moderate %d auto-delay %d \
 flood-exempt %d flood-lock-time %d knock %d fish-key { %s } \
 %cmeankicks %cenforcebans %cdynamicbans %cuserbans %cbitch %cfloodban \
 %cprivate %ccycle %cinactive %cdynamicexempts %cuserexempts \
@@ -763,6 +763,7 @@ flood-exempt %d flood-lock-time %d knock %d fish-key { %s } \
         chan->exempt_time,
         chan->invite_time,
         chan->voice_non_ident,
+        chan->voice_moderate,
         chan->auto_delay,
         chan->flood_exempt_mode,
         chan->flood_lock_time,

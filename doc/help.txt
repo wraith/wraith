@@ -437,6 +437,8 @@ See also: link%{+a}, newhub%{-}
                           channel is +protect.
         $bvoice-non-ident$b   If channel is +voice, clients without an ident will 
                           be voiced. Set to 0 to not voice clients without ident.
+        $bvoice-moderate$b    If channel is +voice, auto set +m and devoice flooders
+                          instead of kicking them. Set to 0 to disable.
  
    The following options choose how to respond to specific events.
         Each can be set as any of the specified options.
