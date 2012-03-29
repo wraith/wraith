@@ -2,11 +2,6 @@ next
   * Bot will now jump from the server it's on if it is removed from the server list. (fixes a changing network bug)
   * Properly honor exemptions when kicking matched RBL clients
   * Fix LASTON not being shared
-  * Bots now again respect devoices made by other bots and will not revoice those users.
-  * Add chanset 'voice-moderate' which will auto set +m in '+voice' channel and devoice flooding clients instead of kick. (#48)
-  * Bots now will enforce devoices made by ops (user +o) and allow any op (user +o) to revoice to disable that enforcement.
-    This used to use +m to enforce/allowed revoicing.
-  * Bots will now remember a client's flood/devoice settings if they cycle (#49)
 
 1.4.0 - http://wraith.botpack.net/milestone/1.4.0
   * Updated server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
@@ -57,6 +52,11 @@ next
   * Add chanset 'color-limit' to handle how many color codes are allowed in a message before kick (#8)
   * Add chanset 'closed-exempt' which will allow exempting non-users (who are opped or voice) from being kicked. (fixes #171)
   * Tweak limit range checking such that bot will set limit less often
+  * Bots now again respect devoices made by other bots and will not revoice those users.
+  * Add chanset 'voice-moderate' which will auto set +m in '+voice' channel and devoice flooding clients instead of kick. (#48)
+  * Bots now will enforce devoices made by ops (user +o) and allow any op (user +o) to revoice to disable that enforcement.
+    This used to use +m to enforce/allowed revoicing.
+  * Bots will now remember a client's flood/devoice settings if they cycle (#49)
 
 1.3.4 - http://wraith.botpack.net/milestone/1.3.4
   * Fix various compile warnings with newer GCC
