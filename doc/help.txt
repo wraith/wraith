@@ -508,11 +508,12 @@ See also: link%{+a}, newhub%{-}
         $btake$b           Once a bot is opped, it will mass op all other bots
                        in the channel. After that, they will all attempt to 
                        mass deop in hopes 'taking' the channel. :)
-        $bvoice$b          This feature is somewhat experimental. With it set
-                       the +y bot will voice ALL people who join the channel
-                       unless they are +q globally or +q for the channel.
-                       If a botnet master devoices them, they will remain 
-                       devoiced no matter who voices them.
+        $bvoice$b          With this set, the +y bot will voice ALL clients
+                       that join the channel, whether they are a user or not.
+                       It will still keep +q|q users devoiced. Any client
+                       devoiced by a user op (+o) will remain devoiced even
+                       if they cycle. See also: 'voice-non-ident' and
+                       'voice-moderate'
         $bvoicebitch$b     Enforce voices in a +bitch style. Only +v users
                        will be allowed to be voiced. This does take +private
                        into mind as well.
