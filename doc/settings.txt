@@ -33,7 +33,6 @@ efnet.xs4all.nl
 irc.ac.za
 irc.du.se
 irc.efnet.fr
-irc.efnet.nl
 irc.efnet.pl
 irc.homelien.no
 irc.inet.tele.dk
@@ -50,7 +49,6 @@ efnet.portlane.se
 irc.ac.za
 irc.choopa.ca
 irc.choopa.net
-irc.efnet.nl
 irc.inet.tele.dk
 irc.ipv6.homelien.no
 irc.ipv6.paraphysics.net
