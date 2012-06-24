@@ -721,7 +721,7 @@ flood-mpub %d:%d flood-mbytes %d:%d flood-mctcp %d:%d \
 capslimit %d colorlimit %d closed-ban %d closed-invite %d closed-private %d closed-exempt %d ban-time %d \
 exempt-time %d invite-time %d voice-non-ident %d voice-moderate %d auto-delay %d \
 flood-exempt %d flood-lock-time %d knock %d fish-key { %s } \
-%cmeankicks %cenforcebans %cdynamicbans %cuserbans %cbitch %cfloodban \
+%cenforcebans %cdynamicbans %cuserbans %cbitch %cfloodban \
 %cprivate %ccycle %cinactive %cdynamicexempts %cuserexempts \
 %cdynamicinvites %cuserinvites %cnodesynch %cclosed %cvoice \
 %cfastop %cautoop %cbotbitch %cbackup %crbl %cvoicebitch %cprotect protect-backup %d %c%s",
@@ -769,7 +769,6 @@ flood-exempt %d flood-lock-time %d knock %d fish-key { %s } \
         chan->flood_lock_time,
         chan->knock_flags,
         chan->fish_key,
- 	PLSMNS(channel_meankicks(chan)),
  	PLSMNS(channel_enforcebans(chan)),
 	PLSMNS(channel_dynamicbans(chan)),
 	PLSMNS(!channel_nouserbans(chan)),
