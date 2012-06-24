@@ -716,10 +716,6 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
       chan->status |= CHAN_BOTBITCH;
     else if (!strcmp(item[i], "-botbitch"))
       chan->status &= ~CHAN_BOTBITCH;
-    else if (!strcmp(item[i], "+meankicks"))
-      chan->status |= CHAN_MEANKICKS;
-    else if (!strcmp(item[i], "-meankicks"))
-      chan->status &= ~CHAN_MEANKICKS;
     else if (!strcmp(item[i], "+rbl"))
       chan->status |= CHAN_RBL;
     else if (!strcmp(item[i], "-rbl"))
@@ -758,6 +754,8 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
     else if (!cmd && !HAVE_TAKE && !strcmp(item[i], "-take")) ;
     else if (!cmd && !strcmp(item[i], "stopnethack-mode")) ;
     else if (!cmd && !strcmp(item[i], "revenge-mode")) ;
+    else if (!cmd && !strcmp(item[i], "+meankicks")) ;
+    else if (!cmd && !strcmp(item[i], "-meankicks")) ;
     else if (!cmd && !strcmp(item[i], "+nomassjoin")) ;
     else if (!cmd && !strcmp(item[i], "-nomassjoin")) ;
     else if (!cmd && !strcmp(item[i], "+revenge")) ;

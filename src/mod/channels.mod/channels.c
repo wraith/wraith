@@ -857,8 +857,6 @@ void channels_report(int idx, int details)
           i += my_strcpy(s + i, "voice ");
         if (channel_autoop(chan))
           i += my_strcpy(s + i, "autoop ");
-        if (channel_meankicks(chan))
-          i += my_strcpy(s + i, "meankicks ");
         if (channel_rbl(chan))
           i += my_strcpy(s + i, "rbl ");
         if (channel_voicebitch(chan))

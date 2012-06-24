@@ -483,7 +483,6 @@ See also: link%{+a}, newhub%{-}
                        can be useful to make the bot leave a channel without
                        losing its settings, channel-specific user flags,
                        channel bans, and without affecting sharing.
-        $bmeankicks$b      Use mean/offensive kicks/bans in the channel.
         $bnodesynch$b      Allow non-ops to perform channel modes? This can stop
                        the bot from fighting with services such as ChanServ, or
                        from kicking IRCops when setting channel modes without
