@@ -53,6 +53,7 @@ irc.inet.tele.dk
 irc.ipv6.homelien.no
 irc.ipv6.paraphysics.net
 irc.underworld.no
+irc.teksavvy.ca
 
 :servers_ssl
 efnet.xs4all.nl
