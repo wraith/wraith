@@ -23,7 +23,6 @@ irc.paraphysics.net
 irc.servercentral.net
 irc.shoutcast.com
 irc.umich.edu
-irc.wh.verio.net
 irc2.choopa.net
 #EU
 efnet.cs.hut.fi
