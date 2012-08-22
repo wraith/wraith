@@ -3226,7 +3226,7 @@ static int gotquit(char *from, char *msg)
   return 0;
 }
 
-/* Got a private message.
+/* Got a channel message.
  */
 static int gotmsg(char *from, char *msg)
 {
