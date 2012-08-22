@@ -22,7 +22,8 @@
 #define ERR_NOUSERNAME	20
 #define ERR_NOHOMEDIR	21
 #define ERR_NOTINIT	22
-#define ERR_MAX         23
+#define ERR_TOOMANYBOTS 23
+#define ERR_MAX         24
 
 #define DETECT_LOGIN 	1
 #define DETECT_TRACE 	2
