@@ -127,6 +127,7 @@ detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
   get_user_flagrec(u, &fr, chan->dname, chan);
 
   if (glob_bot(fr) ||
+      chk_noflood(fr) ||
       (m && chan->flood_exempt_mode == CHAN_FLAG_OP && chan_hasop(m)) ||
       (m && chan->flood_exempt_mode == CHAN_FLAG_VOICE && (chan_hasvoice(m) || chan_hasop(m))))
     return 0;
