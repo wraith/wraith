@@ -7,6 +7,7 @@ maint
   * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
   * Remove 'chanset +meankicks'. You can customize your kicks in doc/responses.txt and recompile.
   * Don't allow running as root
+  * Don't allow more than 5 bots per binary.
 
 1.4.0 - http://wraith.botpack.net/milestone/1.4.0
   * Updated server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.

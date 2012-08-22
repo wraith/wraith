@@ -652,6 +652,8 @@ const char *werr_tostr(int errnum)
     return STR("I have no bot record but received -B???");
   case ERR_NOTINIT:
     return STR("Binary data is not initialized; try ./binary -C");
+  case ERR_TOOMANYBOTS:
+    return STR("Too many bots defined. 5 max. Too many will lead to klines.\nSpread out into multiple accounts/shells/ip ranges.");
   default:
     return STR("Unforseen error");
   }

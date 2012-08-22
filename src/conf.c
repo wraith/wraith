@@ -595,6 +595,7 @@ readconf(const char *fname, int bits)
 {
   int enc = (bits & CONF_ENC) ? 1 : 0;
   bd::Stream* stream;
+  size_t bots = 0;
 
   if (enc) {
     const char salt1[] = SALT1;
@@ -692,8 +693,12 @@ readconf(const char *fname, int bits)
       ipsix = newsplit(line);
 
       conf_addbot(nick.c_str(), ip.c_str(), host.c_str(), ipsix.c_str());
+      ++bots;
     }
   }                             /* while(fgets()) */
+
+  if (bots >= 5)
+    werr(ERR_TOOMANYBOTS);
 
   delete stream;
   return 0;
