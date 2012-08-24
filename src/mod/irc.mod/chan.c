@@ -655,22 +655,26 @@ static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t 
       return 0;
     }
 
-    bd::HashTable<flood_t, time_t>      *global_floodtime = &(*chan->channel.floodtime)["all"];
-    bd::HashTable<flood_t, int>         *global_floodnum = &(*chan->channel.floodnum)["all"];
+    // No point locking down due to OPs flooding.
+    if (!chan_hasop(m)) {
 
-    if ((*global_floodtime)[which] < now - mlapse) {
-      /* Flood timer expired, reset it */
-      (*global_floodtime)[which] = now;
-      (*global_floodnum)[which] = increment;
-    } else {
-      (*global_floodnum)[which] += increment;
+      bd::HashTable<flood_t, time_t>      *global_floodtime = &(*chan->channel.floodtime)["all"];
+      bd::HashTable<flood_t, int>         *global_floodnum = &(*chan->channel.floodnum)["all"];
 
-      if ((*global_floodnum)[which] >= mthr) {	/* FLOOD */
-        /* Reset counters */
-        (*global_floodnum).remove(which);
-        (*global_floodtime).remove(which);
-        if (!chan->channel.drone_set_mode) {
-          lockdown_chan(chan, FLOOD_MASS_FLOOD, ftype);
+      if ((*global_floodtime)[which] < now - mlapse) {
+        /* Flood timer expired, reset it */
+        (*global_floodtime)[which] = now;
+        (*global_floodnum)[which] = increment;
+      } else {
+        (*global_floodnum)[which] += increment;
+
+        if ((*global_floodnum)[which] >= mthr) {	/* FLOOD */
+          /* Reset counters */
+          (*global_floodnum).remove(which);
+          (*global_floodtime).remove(which);
+          if (!chan->channel.drone_set_mode) {
+            lockdown_chan(chan, FLOOD_MASS_FLOOD, ftype);
+          }
         }
       }
     }
