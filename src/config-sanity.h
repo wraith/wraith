@@ -25,11 +25,6 @@
 #  ifndef HAVE_IPV6
 #    undef USE_IPV6
 #  endif
-#  ifndef HAVE_GETHOSTBYNAME2
-#    ifndef HAVE_GETIPNODEBYNAME
-#      undef USE_IPV6
-#    endif
-#  endif
 #endif
 
 /* TCL sanity check */

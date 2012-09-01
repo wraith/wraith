@@ -4710,8 +4710,6 @@ _ACEOF
 
 fi
 
-#  AC_CHECK_LIB(nsl, gethostbyname)
-#  AC_CHECK_LIB(dns, gethostbyname)
 
 #  AC_CHECK_LIB(z, gzopen, ZLIB="-lz")
   # This is needed for Tcl libraries compiled with thread support
@@ -8380,7 +8378,7 @@ done
 
 #autoscan suggested this....
 #These are recommended by autoscan, but no code supports it currently
-#AC_CHECK_FUNCS([alarm bzero dup2 getcwd gethostbyaddr gethostbyname gethostname getpass gettimeofday mbrlen
+#AC_CHECK_FUNCS([alarm bzero dup2 getcwd gethostbyaddr gethostname getpass gettimeofday mbrlen
 #mkdir munmap realpath select setlocale socket strchr strerror strpbrk strrchr strstr strtol tzset])
 
 
