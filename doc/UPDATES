@@ -3,6 +3,7 @@ next
   * Properly honor exemptions when kicking matched RBL clients
   * Fix LASTON not being shared
   * Reading in pack.cfg will now do some sanity checks
+  * Fix compiling without TCL support (#50)
 
 maint
   * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
