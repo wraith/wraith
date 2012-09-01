@@ -2,6 +2,7 @@ next
   * Bot will now jump from the server it's on if it is removed from the server list. (fixes a changing network bug)
   * Properly honor exemptions when kicking matched RBL clients
   * Fix LASTON not being shared
+  * Reading in pack.cfg will now do some sanity checks
 
 maint
   * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
