@@ -348,13 +348,13 @@ readcfg(const char *cfgfile, bool read_stdin)
 
 #define ADD_ERROR(str) \
   if (line != -1) { \
-    fprintf(stderr, STR("\n[Line %2d]: " str "\n"), line); \
+    fprintf(stderr, "\n[Line %2d]: %s\n", line, str); \
     error_line = (line_list_t *) my_calloc(1, sizeof(line_list_t)); \
     error_line->line = line; \
     error_line->next = NULL; \
     list_append((struct list_type **) &(error_list), (struct list_type *) error_line); \
   } else \
-    fprintf(stderr, STR("\n" str "\n")); \
+    fprintf(stderr, "\n%s\n", str); \
   error = 1
 
   settings.salt1[0] = settings.salt2[0] = 0;
@@ -374,7 +374,7 @@ readcfg(const char *cfgfile, bool read_stdin)
       if ((skipline(buffer, &skip)))
         continue;
       if ((strchr(buffer, '<') || strchr(buffer, '>')) && !strstr(buffer, "SALT")) {
-        ADD_ERROR("Invalid <>");
+        ADD_ERROR(STR("Invalid <>"));
       }
       p = strchr(buffer, ' ');
       while (p && (strchr(LISTSEPERATORS, p[0])))
@@ -385,39 +385,39 @@ readcfg(const char *cfgfile, bool read_stdin)
 
         if (!strcasecmp(buffer, STR("packname"))) {
           if (words.length() == 0) {
-            ADD_ERROR("PACKNAME requires argument");
+            ADD_ERROR(STR("PACKNAME requires argument"));
           }
           strlcpy(settings.packname, line_str.c_str(), sizeof settings.packname);
         } else if (!strcasecmp(buffer, STR("shellhash")) || !strcasecmp(buffer, STR("binarypass"))) {
           if (line_str.length() != 40 && line_str.length() != 47) {
-            ADD_ERROR("BINARYPASS should be a SHA1 hash or salted-SHA1 hash.");
+            ADD_ERROR(STR("BINARYPASS should be a SHA1 hash or salted-SHA1 hash."));
           }
           strlcpy(settings.shellhash, line_str.c_str(), sizeof settings.shellhash);
         } else if (!strcasecmp(buffer, STR("dccprefix"))) {
           if (words.length() == 0) {
-            ADD_ERROR("DCCPREFIX requires argument");
+            ADD_ERROR(STR("DCCPREFIX requires argument"));
           }
           strlcpy(settings.dcc_prefix, line_str.c_str(), 2);
         } else if (!strcasecmp(buffer, STR("owner"))) {
           if (words.length() < 2) {
-            ADD_ERROR("OWNER requires 2 arguments: nick password");
+            ADD_ERROR(STR("OWNER requires 2 arguments: nick password"));
           }
           strlcat(settings.owners, line_str.c_str(), sizeof(settings.owners));
           strlcat(settings.owners, ",", sizeof(settings.owners));
         } else if (!strcasecmp(buffer, STR("hub"))) {
           if (words.length() < 3) {
-            ADD_ERROR("HUB requires 3 arguments: nick host port");
+            ADD_ERROR(STR("HUB requires 3 arguments: nick host port"));
           }
           strlcat(settings.hubs, line_str.c_str(), sizeof(settings.hubs));
           strlcat(settings.hubs, ",", sizeof(settings.hubs));
         } else if (!strcasecmp(buffer, STR("salt1"))) {
           if (words.length() == 0) {
-            ADD_ERROR("SALT1 requires argument");
+            ADD_ERROR(STR("SALT1 requires argument"));
           }
           strlcat(settings.salt1, line_str.c_str(), sizeof(settings.salt1));
         } else if (!strcasecmp(buffer, STR("salt2"))) {
           if (words.length() == 0) {
-            ADD_ERROR("SALT2 requires argument");
+            ADD_ERROR(STR("SALT2 requires argument"));
           }
           strlcat(settings.salt2, line_str.c_str(), sizeof(settings.salt2));
           if (read_stdin) break;
@@ -443,22 +443,22 @@ readcfg(const char *cfgfile, bool read_stdin)
   line = -1;
   /* Was the entire pack read in? */
   if (!settings.packname[0]) {
-    ADD_ERROR("Missing PACKNAME");
+    ADD_ERROR(STR("Missing PACKNAME"));
   }
   if (!settings.dcc_prefix[0]) {
-    ADD_ERROR("Missing DCCPREFIX");
+    ADD_ERROR(STR("Missing DCCPREFIX"));
   }
   if (!settings.shellhash[0]) {
-    ADD_ERROR("Missing BINARYPASS");
+    ADD_ERROR(STR("Missing BINARYPASS"));
   }
   if (!settings.owners[0]) {
-    ADD_ERROR("Missing OWNER");
+    ADD_ERROR(STR("Missing OWNER"));
   }
   if (!settings.hubs[0]) {
-    ADD_ERROR("Missing HUBS");
+    ADD_ERROR(STR("Missing HUBS"));
   }
   if (!settings.salt1[0] || !settings.salt2[0]) {
-    ADD_ERROR("Missing SALTS");
+    ADD_ERROR(STR("Missing SALTS"));
   }
 
 
