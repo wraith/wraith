@@ -5,6 +5,8 @@ maint
   * Don't allow more than 5 bots per binary.
   * Fix CAPS/COLOR flood detection not obeying x|x flags
   * Fix OPs engaging the mass flood protection
+  * Fix +bitch not working under some conditions
+  * Fix "+d virus" causing bots to enforce deop anyone who ops someone who opped a +d user
 
 1.4.0 - http://wraith.botpack.net/milestone/1.4.0
   * Updated server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.

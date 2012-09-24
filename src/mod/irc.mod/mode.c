@@ -557,14 +557,13 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
     meop = 1;
   }
 
-  if (mv->user) {
-    get_user_flagrec(mv->user, &victim, chan->dname, chan);
+  get_user_flagrec(mv->user, &victim, chan->dname, chan);
 
-    // Did some other bot just get opped, and I'm not opped yet?
-    if (mv->user->bot && !me_opped && !meop) {
-      chan->channel.do_opreq = 1;
-    }
+  // Did some other bot just get opped, and I'm not opped yet?
+  if (mv->user && mv->user->bot && !me_opped && !meop) {
+    chan->channel.do_opreq = 1;
   }
+
   /* Flags need to be set correctly right from the beginning now, so that
    * add_mode() doesn't get irritated.
    */
@@ -655,9 +654,7 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
     return;
 
   /* m is NULL if a server made the change */
-  if (mv->user) {
-    get_user_flagrec(mv->user, &victim, chan->dname, chan);
-  }
+  get_user_flagrec(mv->user, &victim, chan->dname, chan);
 
   /* Flags need to be set correctly right from the beginning now, so that
    * add_mode() doesn't get irritated.
