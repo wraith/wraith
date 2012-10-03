@@ -2,8 +2,6 @@ next
   * Bot will now jump from the server it's on if it is removed from the server list. (fixes a changing network bug)
   * Properly honor exemptions when kicking matched RBL clients
   * Fix LASTON not being shared
-  * Reading in pack.cfg will now do some sanity checks
-  * Fix compiling without TCL support (#50)
 
 maint
   * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
@@ -14,6 +12,8 @@ maint
   * Fix OPs engaging the mass flood protection
   * Fix +bitch not working under some conditions
   * Fix "+d virus" causing bots to enforce deop anyone who ops someone who opped a +d user
+  * Fix compiling without TCL support (#50)
+  * Reading in pack.cfg will now do some sanity checks
 
 1.4.0 - http://wraith.botpack.net/milestone/1.4.0
   * Updated server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
