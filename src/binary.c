@@ -343,17 +343,25 @@ readcfg(const char *cfgfile, bool read_stdin)
   char *buffer = NULL, *p = NULL;
   int skip = 0, line = 0, feature = 0;
   bool error = 0;
+  bd::Array<bd::String> words;
+  bd::String line_str;
 
-#define ADD_ERROR \
-  error_line = (line_list_t *) my_calloc(1, sizeof(line_list_t)); \
-  error_line->line = line; \
-  error_line->next = NULL; \
-  list_append((struct list_type **) &(error_list), (struct list_type *) error_line); \
-  error = 1;
+#define ADD_ERROR(str) \
+  if (line != -1) { \
+    fprintf(stderr, "\n[Line %2d]: %s\n", line, str); \
+    error_line = (line_list_t *) my_calloc(1, sizeof(line_list_t)); \
+    error_line->line = line; \
+    error_line->next = NULL; \
+    list_append((struct list_type **) &(error_list), (struct list_type *) error_line); \
+  } else \
+    fprintf(stderr, "\n%s\n", str); \
+  error = 1
 
   settings.salt1[0] = settings.salt2[0] = 0;
-  if (!read_stdin)
+  if (!read_stdin) {
     printf(STR("Reading '%s' "), cfgfile);
+    fflush(stdout);
+  }
   while ((!feof(f)) && ((buffer = step_thru_file(f)) != NULL)) {
     if (tty_changed) {
       printf(".");
@@ -366,33 +374,52 @@ readcfg(const char *cfgfile, bool read_stdin)
       if ((skipline(buffer, &skip)))
         continue;
       if ((strchr(buffer, '<') || strchr(buffer, '>')) && !strstr(buffer, "SALT")) {
-        ADD_ERROR
+        ADD_ERROR(STR("Invalid <>"));
       }
       p = strchr(buffer, ' ');
       while (p && (strchr(LISTSEPERATORS, p[0])))
         *p++ = 0;
       if (p) {
-        size_t p_len = strlen(trim(p));
+        line_str = bd::String(trim(p));
+        words = line_str.split(" ");
+
         if (!strcasecmp(buffer, STR("packname"))) {
-          strlcpy(settings.packname, trim(p), sizeof settings.packname);
-        } else if (!strcasecmp(buffer, STR("shellhash")) || !strcasecmp(buffer, STR("binarypass"))) {
-          if (p_len != 40 && p_len != 47) {
-            fprintf(stderr, STR("\nBINARYPASS should be a SHA1 hash or salted-SHA1 hash.\n"));
-            ADD_ERROR
+          if (words.length() == 0) {
+            ADD_ERROR(STR("PACKNAME requires argument"));
           }
-          strlcpy(settings.shellhash, trim(p), sizeof settings.shellhash);
+          strlcpy(settings.packname, line_str.c_str(), sizeof settings.packname);
+        } else if (!strcasecmp(buffer, STR("shellhash")) || !strcasecmp(buffer, STR("binarypass"))) {
+          if (line_str.length() != 40 && line_str.length() != 47) {
+            ADD_ERROR(STR("BINARYPASS should be a SHA1 hash or salted-SHA1 hash."));
+          }
+          strlcpy(settings.shellhash, line_str.c_str(), sizeof settings.shellhash);
         } else if (!strcasecmp(buffer, STR("dccprefix"))) {
-          strlcpy(settings.dcc_prefix, trim(p), 2);
+          if (words.length() == 0) {
+            ADD_ERROR(STR("DCCPREFIX requires argument"));
+          }
+          strlcpy(settings.dcc_prefix, line_str.c_str(), 2);
         } else if (!strcasecmp(buffer, STR("owner"))) {
-          strlcat(settings.owners, trim(p), sizeof(settings.owners));
+          if (words.length() < 2) {
+            ADD_ERROR(STR("OWNER requires 2 arguments: nick password"));
+          }
+          strlcat(settings.owners, line_str.c_str(), sizeof(settings.owners));
           strlcat(settings.owners, ",", sizeof(settings.owners));
         } else if (!strcasecmp(buffer, STR("hub"))) {
-          strlcat(settings.hubs, trim(p), sizeof(settings.hubs));
+          if (words.length() < 3) {
+            ADD_ERROR(STR("HUB requires 3 arguments: nick host port"));
+          }
+          strlcat(settings.hubs, line_str.c_str(), sizeof(settings.hubs));
           strlcat(settings.hubs, ",", sizeof(settings.hubs));
         } else if (!strcasecmp(buffer, STR("salt1"))) {
-          strlcat(settings.salt1, trim(p), sizeof(settings.salt1));
+          if (words.length() == 0) {
+            ADD_ERROR(STR("SALT1 requires argument"));
+          }
+          strlcat(settings.salt1, line_str.c_str(), sizeof(settings.salt1));
         } else if (!strcasecmp(buffer, STR("salt2"))) {
-          strlcat(settings.salt2, trim(p), sizeof(settings.salt2));
+          if (words.length() == 0) {
+            ADD_ERROR(STR("SALT2 requires argument"));
+          }
+          strlcat(settings.salt2, line_str.c_str(), sizeof(settings.salt2));
           if (read_stdin) break;
         }
       } else { /* SINGLE DIRECTIVES */
@@ -413,18 +440,33 @@ readcfg(const char *cfgfile, bool read_stdin)
     tcsetattr (fileno (stdin), TCSAFLUSH | TCSASOFT, &s);
   }
 
-  if (error) {
-    printf("\n");
-    fprintf(stderr, STR("Error: Look at your configuration again and remove any <>\n"));
-    for (error_line = error_list; error_line; error_line = error_line->next)
-        fprintf(stderr, STR("Line %d\n"), error_line->line);
-    exit(1);
+  line = -1;
+  /* Was the entire pack read in? */
+  if (!settings.packname[0]) {
+    ADD_ERROR(STR("Missing PACKNAME"));
+  }
+  if (!settings.dcc_prefix[0]) {
+    ADD_ERROR(STR("Missing DCCPREFIX"));
+  }
+  if (!settings.shellhash[0]) {
+    ADD_ERROR(STR("Missing BINARYPASS"));
+  }
+  if (!settings.owners[0]) {
+    ADD_ERROR(STR("Missing OWNER"));
+  }
+  if (!settings.hubs[0]) {
+    ADD_ERROR(STR("Missing HUBS"));
+  }
+  if (!settings.salt1[0] || !settings.salt2[0]) {
+    ADD_ERROR(STR("Missing SALTS"));
   }
 
-  /* Was the entire pack read in? */
-  if (!settings.salt1[0] || !settings.salt2[0]) {
+
+  if (error) {
     printf("\n");
-    fprintf(stderr, STR("Missing SALTS\n"));
+    fprintf(stderr, STR("Error: Look at your configuration again and fix any errors.\n"));
+    for (error_line = error_list; error_line; error_line = error_line->next)
+        fprintf(stderr, STR("Line %d\n"), error_line->line);
     exit(1);
   }
 
