@@ -203,7 +203,7 @@ AC_CHECK_FUNCS([strcasecmp strncasecmp vsnprintf])
 
 #autoscan suggested this....
 #These are recommended by autoscan, but no code supports it currently
-#AC_CHECK_FUNCS([alarm bzero dup2 getcwd gethostbyaddr gethostbyname gethostname getpass gettimeofday mbrlen
+#AC_CHECK_FUNCS([alarm bzero dup2 getcwd gethostbyaddr gethostname getpass gettimeofday mbrlen
 #mkdir munmap realpath select setlocale socket strchr strerror strpbrk strrchr strstr strtol tzset])
 
 EGG_CHECK_FUNC_VSPRINTF
@@ -227,47 +227,7 @@ AH_TEMPLATE(HAVE_ST_MTIM, [Define to 1 if your struct stat has an st_mtim member
 AH_TEMPLATE(HAVE_ST_MTIMESPEC, [Define to 1 if your struct stat has an st_mtimespec member])
 AH_TEMPLATE(HAVE_TIMESPEC, [Define to 1 if you have struct timespec in sys/time.h])
 AH_TEMPLATE(HAVE_TIMESPECSUB2, [Define to 1 if you have a timespecsub macro or function that takes two arguments (not three)])
-AH_BOTTOM([/*
- * Macros to pull sec and nsec parts of mtime from struct stat.
- */
-#ifdef HAVE_ST_MTIM
-# define mtim_getsec(_x)        ((_x).st_mtim.tv_sec)
-# define mtim_getnsec(_x)       ((_x).st_mtim.tv_nsec)
-#else
-# ifdef HAVE_ST_MTIMESPEC
-#  define mtim_getsec(_x)       ((_x).st_mtimespec.tv_sec)
-#  define mtim_getnsec(_x)      ((_x).st_mtimespec.tv_nsec)
-# else
-#  define mtim_getsec(_x)       ((_x).st_mtime)
-#  define mtim_getnsec(_x)      (0)
-# endif /* HAVE_ST_MTIMESPEC */
-#endif /* HAVE_ST_MTIM */
-
-/*
- * Enable IPv6 debugging?
- */
-#define DEBUG_IPV6 1
-#define HAVE_IPV6 1
-
-/* IPv6 sanity checks. */
-#ifdef USE_IPV6
-#  ifndef HAVE_IPV6
-#    undef USE_IPV6
-#  endif
-#  ifndef HAVE_GETHOSTBYNAME2
-#    ifndef HAVE_GETIPNODEBYNAME
-#      undef USE_IPV6
-#    endif
-#  endif
-#endif
-
-/* TCL sanity check */
-#ifdef USE_SCRIPT_TCL
-#  ifndef HAVE_LIBTCL
-#    undef USE_SCRIPT_TCL
-#  endif
-#endif
-])
+AH_BOTTOM([#include "config-sanity.h"])
 
 [
 GIT_REQUIRED=1
