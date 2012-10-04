@@ -226,7 +226,7 @@ greet_new_bot(int idx)
   // Reject -o bots, and if we're a localhub who hasnt linked to hub yet, dont allow links in
   if ((conf.bot->hub || conf.bot->localhub) && dcc[idx].user && (!(dcc[idx].user->flags & USER_OP) || (conf.bot->localhub && (dcc[idx].status & STAT_UNIXDOMAIN) && !have_linked_to_hub))) {
     if (!(dcc[idx].user->flags & USER_OP)) {
-      putlog(LOG_BOTS, "*", "Rejecting link from %s", dcc[idx].nick);
+      putlog(LOG_BOTS, "*", "Rejecting link from %s (Bot is not +o)", dcc[idx].nick);
       dprintf(idx, "error You are being rejected.\n");
     } else if (conf.bot->localhub && !have_linked_to_hub) {
       putlog(LOG_BOTS, "*", "Delaying link from %s", dcc[idx].nick);
