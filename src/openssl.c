@@ -28,6 +28,7 @@
 #include "common.h"
 #include "main.h"
 #include "dl.h"
+#include "shell.h"
 #include <bdlib/src/String.h>
 #include <bdlib/src/Array.h>
 
@@ -66,8 +67,9 @@ static DH* tmp_dh_callback(SSL* ssl, int is_export, int keylength) {
 }
 
 int init_openssl() {
-  load_libcrypto();
-  load_libssl();
+  if (load_libcrypto() || load_libssl()) {
+    werr(ERR_LIBS);
+  }
 
 #ifdef EGG_SSL_EXT
   /* good place to init ssl stuff */

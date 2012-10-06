@@ -3,6 +3,9 @@ next
   * Properly honor exemptions when kicking matched RBL clients
   * Fix LASTON not being shared
 
+maint
+  * Prevent crashing on startup if openssl can not be loaded
+
 1.4.1 - http://wraith.botpack.net/milestone/1.4.1
   * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
   * Remove 'chanset +meankicks'. You can customize your kicks in doc/responses.txt and recompile.

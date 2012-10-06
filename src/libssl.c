@@ -80,7 +80,7 @@ int load_libssl() {
     }
   }
   if (!libssl_handle) {
-    sdprintf("Unable to find libssl");
+    fprintf(stderr, STR("Unable to find libssl\n"));
     return(1);
   }
 

@@ -107,7 +107,7 @@ int load_libcrypto() {
     }
   }
   if (!libcrypto_handle) {
-    sdprintf("Unable to find libcrypto");
+    fprintf(stderr, STR("Unable to find libcrypto\n"));
     return(1);
   }
 

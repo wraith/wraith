@@ -654,6 +654,8 @@ const char *werr_tostr(int errnum)
     return STR("Binary data is not initialized; try ./binary -C");
   case ERR_TOOMANYBOTS:
     return STR("Too many bots defined. 5 max. Too many will lead to klines.\nSpread out into multiple accounts/shells/ip ranges.");
+  case ERR_LIBS:
+    return STR("Failed to load required libraries");
   default:
     return STR("Unforseen error");
   }
@@ -683,10 +685,10 @@ void werr(int errnum)
   printf(STR("*** Error code %d\n\n"), errnum);
   printf(STR("Segmentation fault\n"));
 #else
-  printf(STR("Error %d: %s\n"), errnum, werr_tostr(errnum));
+  fprintf(stderr, STR("Error %d: %s\n"), errnum, werr_tostr(errnum));
 #endif
   fatal("", 0);
-  exit(0);				//gcc is stupid :)
+  exit(1); // This is never reached, done for gcc() warnings
 }
 
 char *homedir(bool useconf)
