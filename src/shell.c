@@ -687,7 +687,7 @@ void werr(int errnum)
   fprintf(stderr, STR("Error %d: %s\n"), errnum, werr_tostr(errnum));
 #endif
   fatal("", 0);
-  exit(0);				//gcc is stupid :)
+  exit(1); // This is never reached, done for gcc() warnings
 }
 
 char *homedir(bool useconf)
