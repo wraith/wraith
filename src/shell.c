@@ -684,7 +684,7 @@ void werr(int errnum)
   printf(STR("*** Error code %d\n\n"), errnum);
   printf(STR("Segmentation fault\n"));
 #else
-  printf(STR("Error %d: %s\n"), errnum, werr_tostr(errnum));
+  fprintf(stderr, STR("Error %d: %s\n"), errnum, werr_tostr(errnum));
 #endif
   fatal("", 0);
   exit(0);				//gcc is stupid :)
