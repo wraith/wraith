@@ -2,6 +2,7 @@ next
   * Bot will now jump from the server it's on if it is removed from the server list. (fixes a changing network bug)
   * Properly honor exemptions when kicking matched RBL clients
   * Fix LASTON not being shared
+  * Warn when using 'chattr +a' as some users may expect it to be auto-op
 
 maint
   * Prevent crashing on startup if openssl can not be loaded
