@@ -484,7 +484,7 @@ void show_channels(int idx, char *handle)
           channel_privchan(chan) ? "(private)  " : "", chan->manop ? "(no manop) " : "", 
           channel_bitch(chan) && !channel_botbitch(chan) ? "(bitch)    " : channel_botbitch(chan) ? "(botbitch) " : "",
           channel_closed(chan) ?  "(closed) " : "", channel_backup(chan) ? "(backup)" : "",
-          static_cast<bd::String>(chan->groups->join(" ")).c_str());
+          chan->groups && chan->groups->length() ? static_cast<bd::String>(chan->groups->join(" ")).c_str() : "-");
     }
   } else {
     if (group.length()) {
