@@ -1,3 +1,5 @@
+* Warn when using 'chattr +a' as some users may expect it to be auto-op
+
 maint
   * Prevent crashing on startup if openssl can not be loaded
 
