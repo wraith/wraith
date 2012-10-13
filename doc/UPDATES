@@ -6,6 +6,7 @@ next
 
 maint
   * Prevent crashing on startup if openssl can not be loaded
+  * Rename option -c to -m for 'manual' edit, and redirect -c to -C
 
 1.4.1 - http://wraith.botpack.net/milestone/1.4.1
   * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
