@@ -301,7 +301,6 @@ static void show_help()
   printf(format, STR("Option"), STR("Description"));
   printf(format, STR("------"), STR("-----------"));
   printf(format, STR("[-B] <botnick>"), STR("Starts the specified bot [deprecated]"));
-  printf(format, STR("-c"), STR("Config file editor [reads env: EDITOR] [No auto update]"));
   printf(format, STR("-C"), STR("Config file editor [reads env: EDITOR]"));
 //  printf(format, STR("-e <infile> <outfile>"), STR("Encrypt infile to outfile"));
 //  printf(format, STR("-d <infile> <outfile>"), STR("Decrypt infile to outfile"));
@@ -312,6 +311,7 @@ static void show_help()
 */
   printf(format, STR("-h"), STR("Display this help listing"));
   printf(format, STR("-k <botname>"), STR("Terminates (botname) with kill -9 (see also: -r)"));
+  printf(format, STR("-m"), STR("Config file editor [reads env: EDITOR] [No auto update]"));
   printf(format, STR("-n"), STR("Disables backgrounding bot (requires [-B] <botnick>)"));
   printf(format, STR("-q <pack.cfg>"), STR("Initialize the binary with the given pack.cfg (Can only be done once per binary)"));
   printf(format, STR("-Q"), STR("Securely initialize the binary by reading the PackConfig from stdin (paste). (Can only be done once per binary)"));
@@ -326,8 +326,8 @@ static void show_help()
 }
 
 // leaf: BkLP
-#define PARSE_FLAGS STR("0234:aB:cCd:De:EH:k:hnr:tu:U:vV")
-#define FLAGS_CHECKPASS STR("cCdDeEknrtuUV")
+#define PARSE_FLAGS STR("0234:aB:cCd:De:EH:k:hmnr:tu:U:vV")
+#define FLAGS_CHECKPASS STR("cCdDeEkmnrtuUV")
 static void dtx_arg(int& argc, char *argv[])
 {
   int i = 0, checked_pass = 0;
@@ -365,9 +365,10 @@ static void dtx_arg(int& argc, char *argv[])
 //        do_crypt_console();
         exit(0);
         break;
-      case 'c':
+      case 'm':
         do_confedit = 2;
         break;
+      case 'c':
       case 'C':
         do_confedit = 1;
         break;
