@@ -83,9 +83,13 @@
 
 extern int		optind;
 
+#if (BUILDTS + 0)
 const time_t 	buildts = BUILDTS;		/* build timestamp (UTC) */
 const char	*commit = COMMIT;
 const char	*branch = BRANCH;
+#else
+#error BUILDTS unable to be determined. Gmake required. Source may also be incorrect.
+#endif
 const char	*egg_version = VERSION;
 char	git_version[50] = "";
 
