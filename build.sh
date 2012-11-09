@@ -1,12 +1,4 @@
 #! /bin/sh
-# We want to use BASH, not whatever /bin/sh points to.
-if test -z "$BASH"; then
-  PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-  bash="`which bash`"
-  ${bash} $0 ${1+"$@"}
-  exit 0
-fi
-
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:${HOME}/bin
 # Prefer gawk
