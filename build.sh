@@ -1,26 +1,13 @@
 #! /bin/sh
-# We want to use BASH, not whatever /bin/sh points to.
-if test -z "$BASH"; then
-  PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-  bash="`which bash`"
-  ${bash} $0 ${1+"$@"}
-  exit 0
-fi
-
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:${HOME}/bin
-# Prefer gawk
-AWK="`which awk`"
-if test -z "${AWK}"; then
- AWK="`which gawk`"
-fi
 
 if [ -d .git ]; then
   BUILDTS=$(git log -1 --pretty=format:%ct HEAD)
   ver=$(git describe)
 else
-  ver=$($AWK '/^VERSION/ {print $3}' Makefile.in)
-  BUILDTS=`grep -m 1 "BUILDTS = " Makefile.in | ${AWK} '{print $3}'`
+  ver=$(awk '/^VERSION/ {print $3}' Makefile.in)
+  BUILDTS=`grep -m 1 "BUILDTS = " Makefile.in | awk '{print $3}'`
 fi
 
 # Convert timestamp into readable format
@@ -83,7 +70,7 @@ if test -z "$1"; then
 fi
 
 
-PACKNAME=`grep "PACKNAME " ${pack} | $AWK '/PACKNAME/ {print $2}'`
+PACKNAME=`grep "PACKNAME " ${pack} | awk '/PACKNAME/ {print $2}'`
 
 rm=1
 compile=1
@@ -123,15 +110,10 @@ if [ $compile = "1" ]; then
 
  echo "[*] Building ${PACKNAME} for $os"
 
- MAKE="`which gmake`"
- if test -z "${MAKE}"; then
-  MAKE="`which make`"
- fi
-
  if [ $clean = "2" ]; then
   if test -f Makefile; then
    echo "[*] DistCleaning old files..."
-   ${MAKE} distclean > /dev/null
+   make distclean > /dev/null
   fi
  fi
 
@@ -143,7 +125,7 @@ if [ $compile = "1" ]; then
 
  if [ $clean = "1" ]; then
   echo "[*] Cleaning up old binaries/files..."
-  ${MAKE} clean > /dev/null
+  make clean > /dev/null
  fi
 fi
 
@@ -151,7 +133,7 @@ _build()
 {
  if [ $compile = "1" ]; then
   echo "[*] Building ${dmake}${tb}..."
-  ${MAKE} ${dmake}${tb}
+  make ${dmake}${tb}
   if ! test -f ${tb}; then
     echo "[!] ${dmake}${tb} build failed"
     exit 1
