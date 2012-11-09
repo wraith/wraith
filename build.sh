@@ -115,15 +115,10 @@ if [ $compile = "1" ]; then
 
  echo "[*] Building ${PACKNAME} for $os"
 
- MAKE="`which gmake`"
- if test -z "${MAKE}"; then
-  MAKE="`which make`"
- fi
-
  if [ $clean = "2" ]; then
   if test -f Makefile; then
    echo "[*] DistCleaning old files..."
-   ${MAKE} distclean > /dev/null
+   make distclean > /dev/null
   fi
  fi
 
@@ -135,7 +130,7 @@ if [ $compile = "1" ]; then
 
  if [ $clean = "1" ]; then
   echo "[*] Cleaning up old binaries/files..."
-  ${MAKE} clean > /dev/null
+  make clean > /dev/null
  fi
 fi
 
@@ -143,7 +138,7 @@ _build()
 {
  if [ $compile = "1" ]; then
   echo "[*] Building ${dmake}${tb}..."
-  ${MAKE} ${dmake}${tb}
+  make ${dmake}${tb}
   if ! test -f ${tb}; then
     echo "[!] ${dmake}${tb} build failed"
     exit 1
