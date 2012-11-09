@@ -1,18 +1,13 @@
 #! /bin/sh
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:${HOME}/bin
-# Prefer gawk
-AWK="`which awk`"
-if test -z "${AWK}"; then
- AWK="`which gawk`"
-fi
 
 if [ -d .git ]; then
   BUILDTS=$(git log -1 --pretty=format:%ct HEAD)
   ver=$(git describe)
 else
-  ver=$($AWK '/^VERSION/ {print $3}' Makefile.in)
-  BUILDTS=`grep -m 1 "BUILDTS = " Makefile.in | ${AWK} '{print $3}'`
+  ver=$(awk '/^VERSION/ {print $3}' Makefile.in)
+  BUILDTS=`grep -m 1 "BUILDTS = " Makefile.in | awk '{print $3}'`
 fi
 
 # Convert timestamp into readable format
@@ -75,7 +70,7 @@ if test -z "$1"; then
 fi
 
 
-PACKNAME=`grep "PACKNAME " ${pack} | $AWK '/PACKNAME/ {print $2}'`
+PACKNAME=`grep "PACKNAME " ${pack} | awk '/PACKNAME/ {print $2}'`
 
 rm=1
 compile=1
