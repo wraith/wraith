@@ -1918,6 +1918,10 @@ static int got465(char *from, char *msg)
 static int got718(char *from, char *msg)
 {
   char *nick = NULL, *uhost = NULL;
+  bool ignoring = match_ignore(from);
+
+  if (ignoring)
+    return 0;
 
   newsplit(&msg);
   nick = newsplit(&msg);
