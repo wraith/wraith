@@ -1,3 +1,5 @@
+* Fix CALLERID not respecting ignores (#63)
+
 maint
   * Prevent crashing on startup if openssl can not be loaded
   * Rename option -c to -m for 'manual' edit, and redirect -c to -C
