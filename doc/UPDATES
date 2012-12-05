@@ -4,6 +4,7 @@ next
   * Fix LASTON not being shared
   * Warn when using 'chattr +a' as some users may expect it to be auto-op
   * When using msg OP, check for and allow '#chan PASS' as well as 'PASS #chan'
+  * Fix CALLERID not respecting ignores (#63)
 
 maint
   * Prevent crashing on startup if openssl can not be loaded
