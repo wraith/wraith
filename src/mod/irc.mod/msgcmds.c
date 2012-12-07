@@ -345,7 +345,7 @@ static int msg_auth(char *nick, char *host, struct userrec *u, char *par)
 
   Auth *auth = Auth::Find(host);
 
-  if (!auth || auth->Status() != AUTH_PASS)
+  if (!auth || auth->Status() != AUTH_PASS || !u)
     return BIND_RET_BREAK;
 
   pass = newsplit(&par);
