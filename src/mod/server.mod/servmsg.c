@@ -1918,6 +1918,7 @@ static int got465(char *from, char *msg)
 static int got718(char *from, char *msg)
 {
   char *nick = NULL, *uhost = NULL;
+  char s[UHOSTLEN + 2] = "";
 
   newsplit(&msg);
   nick = newsplit(&msg);
@@ -1938,11 +1939,15 @@ static int got718(char *from, char *msg)
     uhost = newsplit(&msg);
   fixcolon(msg);
 
+  simple_snprintf(s, sizeof(s), "%s!%s", nick, uhost);
+
+  if (match_ignore(s)) {
+    return 0;
+  }
+
   if (ischanhub()) {
-    char s[UHOSTLEN + 2] = "";
     struct userrec *u = NULL;
 
-    simple_snprintf(s, sizeof(s), "%s!%s", nick, uhost);
     u = get_user_by_host(s);
     if (u) {
       struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };

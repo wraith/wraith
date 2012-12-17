@@ -3,6 +3,7 @@ maint
   * Rename option -c to -m for 'manual' edit, and redirect -c to -C
   * Show a nicer compile error when BUILDTS unable to be determined / gmake is not used.
   * Show 'Do!' in 'chaninfo' for 'Voice-moderate' to be consistent with other flags.
+  * Fix CALLERID not respecting ignores (#63)
 
 1.4.1 - http://wraith.botpack.net/milestone/1.4.1
   * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
