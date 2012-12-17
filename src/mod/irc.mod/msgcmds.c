@@ -130,6 +130,11 @@ static int msg_op(char *nick, char *host, struct userrec *u, char *par)
     return BIND_RET_BREAK;
   pass = newsplit(&par);
 
+  /* Check if they used the wrong order */
+  if (!u_pass_match(u, pass) && u_pass_match(u, par)) {
+    std::swap(pass, par);
+  }
+
   bd::String msg;
 
   if (homechan[0]) {
