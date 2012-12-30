@@ -2671,6 +2671,10 @@ static void cmd_chattr(int idx, char *par)
       putlog(LOG_CMDS, "*", "#%s# chattr %s %s", dcc[idx].nick, hand, chg ? chg : "");
       update_mod(hand, dcc[idx].nick, "chattr", chg);
     }
+    if (chg && (pls.global & USER_ADMIN)) { // +a was used, warn that this is admin and not auto-op.
+      dprintf(idx, "WARNING: You have just used +a, which is an ADMIN privilege.\n");
+      dprintf(idx, "If you intended to use the AUTO-OP privilege, please use +O instead.\n");
+    }
   }
   /* Get current flags and display them */
 
