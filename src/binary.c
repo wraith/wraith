@@ -498,11 +498,11 @@ void writecfg() {
   }
   for (size_t i = 0; i < hubs.length(); ++i) {
     hubInfo = static_cast<bd::String>(hubs[i]).split(' ');
-    // Trim away hublevel [3]
-    printf("HUB %s %s %s\n",
-	static_cast<bd::String>(hubInfo[0]).c_str(),
-	static_cast<bd::String>(hubInfo[1]).c_str(),
-	static_cast<bd::String>(hubInfo[2]).c_str());
+    // Trim away hublevel
+    if (hubInfo.length() == 4) {
+      hubInfo.resize(3);
+    }
+    printf("HUB %s\n", static_cast<bd::String>(hubInfo.join(" ")).c_str());
   }
   printf("SALT1 %s\n", salt1);
   printf("SALT2 %s\n", salt2);
