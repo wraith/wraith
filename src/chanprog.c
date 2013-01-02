@@ -403,30 +403,30 @@ void load_internal_users()
   /* hubs */
   for (size_t idx = 0; idx < conf.hubs.length(); ++idx) {
     bd::Array<bd::String> params(static_cast<bd::String>(conf.hubs[idx]).split(' '));
-    bd::String handle(params[0]);
-    if (!get_user_by_handle(userlist, const_cast<char*>(handle.c_str()))) {
-      bd::String address(params[1]);
-      in_port_t port = atoi(static_cast<bd::String>(params[2]).c_str());
-      unsigned short hublevel = params.length() == 4 ? atoi(static_cast<bd::String>(params[3]).c_str()) : (idx + 1);
+    const bd::String handle(params[0]);
+    const bd::String address(params[1]);
+    const in_port_t port = atoi(static_cast<bd::String>(params[2]).c_str());
+    const unsigned short hublevel = params.length() == 4 ? atoi(static_cast<bd::String>(params[3]).c_str()) : (idx + 1);
 
+    if (!(u = get_user_by_handle(userlist, const_cast<char*>(handle.c_str())))) {
       userlist = adduser(userlist, handle.c_str(), "none", "-", USER_OP, 1);
       u = get_user_by_handle(userlist, const_cast<char*>(handle.c_str()));
-
-      simple_snprintf(tmp, sizeof(tmp), "%li [internal]", (long)now);
-      set_user(&USERENTRY_ADDED, u, tmp);
-
-      struct bot_addr *bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
-
-      bi->address = strdup(address.c_str());
-      bi->telnet_port = bi->relay_port = port;
-      bi->hublevel = hublevel;
-      if (conf.bot->hub && (!bi->hublevel) && (!strcasecmp(handle.c_str(), conf.bot->nick))) {
-        bi->hublevel = 99;
-      }
-      bi->uplink = (char *) my_calloc(1, 1);
-      set_user(&USERENTRY_BOTADDR, u, bi);
-      /* set_user(&USERENTRY_PASS, get_user_by_handle(userlist, handle.c_str()), SALT2); */
     }
+
+    simple_snprintf(tmp, sizeof(tmp), "%li [internal]", (long)now);
+    set_user(&USERENTRY_ADDED, u, tmp);
+
+    struct bot_addr *bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
+
+    bi->address = strdup(address.c_str());
+    bi->telnet_port = bi->relay_port = port;
+    bi->hublevel = hublevel;
+    if (conf.bot->hub && (!bi->hublevel) && (!strcasecmp(handle.c_str(), conf.bot->nick))) {
+      bi->hublevel = 99;
+    }
+    bi->uplink = (char *) my_calloc(1, 1);
+    set_user(&USERENTRY_BOTADDR, u, bi);
+    /* set_user(&USERENTRY_PASS, get_user_by_handle(userlist, handle.c_str()), SALT2); */
   }
 
   /* perm owners */

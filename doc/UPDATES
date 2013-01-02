@@ -1,3 +1,5 @@
+* Fix hub startup not respecting changed HUB lines in config
+
 1.4.1 - http://wraith.botpack.net/milestone/1.4.1
   * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
   * Remove 'chanset +meankicks'. You can customize your kicks in doc/responses.txt and recompile.
