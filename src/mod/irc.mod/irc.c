@@ -122,9 +122,10 @@ detect_offense(memberlist* m, struct chanset_t *chan, char *msg)
       || chan_sentkick(m)) //sanity check
     return 0;
 
+  member_getuser(m, 0);
+
   struct flag_record fr = { FR_GLOBAL | FR_CHAN, 0, 0, 0 };
-  struct userrec *u = m->user ? m->user : get_user_by_host(m->userhost);
-  get_user_flagrec(u, &fr, chan->dname, chan);
+  get_user_flagrec(m->user, &fr, chan->dname, chan);
 
   if (glob_bot(fr) ||
       chk_noflood(fr) ||
