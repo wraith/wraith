@@ -4,6 +4,7 @@ next
   * Fix LASTON not being shared
   * Fix './wraith -V' not showing the updated HUB info
   * Fix hub startup not respecting changed HUB lines in config
+  * Really fix CAPS/COLOR flood detection not obeying x|x flags
 
 maint
   * Prevent crashing on startup if openssl can not be loaded
