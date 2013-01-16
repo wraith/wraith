@@ -1,4 +1,4 @@
-* Support TCL 8.6
+* Support TCL 8.6 in the beta libtcl support (no scripting support yet)
 
 1.4.1 - http://wraith.botpack.net/milestone/1.4.1
   * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
