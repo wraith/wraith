@@ -1,4 +1,4 @@
-maint
+1.4.2 - http://wraith.botpack.net/milestone/1.4.2
   * Prevent crashing on startup if openssl can not be loaded
   * Rename option -c to -m for 'manual' edit, and redirect -c to -C
   * Show a nicer compile error when BUILDTS unable to be determined / gmake is not used.
