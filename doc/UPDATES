@@ -8,6 +8,7 @@ maint
   * Warn when using 'chattr +a' as some users may expect it to be auto-op (#58)
   * Really fix CAPS/COLOR flood detection not obeying x|x flags
   * Support TCL 8.6 in the beta libtcl support (no scripting support yet)
+  * Fix hub startup not respecting changed HUB lines in config
 
 1.4.1 - http://wraith.botpack.net/milestone/1.4.1
   * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
