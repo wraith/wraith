@@ -97,7 +97,7 @@ tclrecommendver="8.5.X"
 tclrecommendsite="ftp://tcl.activestate.com/pub/tcl/tcl8_5/"
 
 # Tcl library filename prefixes, suffixes, and search paths.
-tcllibnames="tcl8.5 tcl85 tcl8.4 tcl84 tcl8.3 tcl83 tcl8.2 tcl82 \
+tcllibnames="tcl8.6 tcl86 tcl8.5 tcl85 tcl8.4 tcl84 tcl8.3 tcl83 tcl8.2 tcl82 \
              tcl8.1 tcl81 tcl8.0 tcl80 tcl tcl7.6 tcl76 tcl7.5 tcl75 \
              tcl7.4 tcl74 tcl7.3 tcl73 tcl7.2 tcl72 tcl7.1 tcl71 \
              tcl7.0 tcl70"
