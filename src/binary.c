@@ -479,7 +479,8 @@ void writecfg() {
   const char salt1[] = SALT1;
   const char salt2[] = SALT2;
   bd::Array<bd::String> owners(bd::String(settings.owners).split(","));
-  bd::Array<bd::String> hubs(bd::String(settings.hubs).split(","));
+  const bd::Array<bd::String> hubs(conf.hubs);
+  bd::Array<bd::String> hubInfo;
 
   printf("PACKNAME %s\n", settings.packname);
   // Display the shellhash as salted-sha1 if it is not already
@@ -496,7 +497,12 @@ void writecfg() {
     printf("OWNER %s\n", ownerInfo.join(" ").c_str());
   }
   for (size_t i = 0; i < hubs.length(); ++i) {
-    printf("HUB %s\n", static_cast<bd::String>(hubs[i]).c_str());
+    hubInfo = static_cast<bd::String>(hubs[i]).split(' ');
+    // Trim away hublevel
+    if (hubInfo.length() == 4) {
+      hubInfo.resize(3);
+    }
+    printf("HUB %s\n", static_cast<bd::String>(hubInfo.join(" ")).c_str());
   }
   printf("SALT1 %s\n", salt1);
   printf("SALT2 %s\n", salt2);
