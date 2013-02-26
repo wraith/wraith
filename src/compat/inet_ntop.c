@@ -23,7 +23,7 @@
 
 #define NS_INADDRSZ     4       /* IPv4 T_A */
 #define NS_IN6ADDRSZ    16      /* IPv6 T_AAAA */
-#define NS_INT16SZ      2       /* #/bytes of data in a u_int16_t */
+#define NS_INT16SZ      2       /* #/bytes of data in a uint16_t */
 
 /*
  * WARNING: Don't even consider trying to compile this on a system where
@@ -101,7 +101,7 @@ inet_ntop6(const u_char *src, char *dst, socklen_t size)
 	 */
 	char tmp[sizeof "ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255"], *tp;
 	struct { int base, len; } best, cur;
-	u_int words[NS_IN6ADDRSZ / NS_INT16SZ];
+	unsigned int words[NS_IN6ADDRSZ / NS_INT16SZ];
 	int i;
 
 	/*
