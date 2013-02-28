@@ -125,7 +125,7 @@ static variable_t vars[] = {
  VAR("oidentd",		&oidentd,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "0"),
  VAR("op-bots",		&op_bots,		VAR_INT|VAR_NOLOC,				1, MAX_BOTS, "1"),
  VAR("op-requests",	&op_requests,		VAR_RATE|VAR_NOLOC,				0, 0, "2:5"),
- VAR("promisc",		&promisc,		VAR_INT|VAR_DETECTED,				0, 4, "warn"),
+ VAR("promisc",		&promisc,		VAR_INT|VAR_DETECTED,				0, 4, "ignore"),
  VAR("rbl-servers",	rbl_servers,		VAR_STRING|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB,	0, 0, DEFAULT_RBL),
  VAR("realname",	botrealname,		VAR_STRING|VAR_NOLHUB,				0, 0, "* I'm too lame to read BitchX.doc *"),
  VAR("server-port",	&default_port,		VAR_INT|VAR_SHORT|VAR_NOLHUB,			0, 65535, "6667"),

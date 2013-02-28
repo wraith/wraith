@@ -1,3 +1,7 @@
+maint
+  * Default 'set promisc' to ignore since it's usually a false positive
+    and doesn't matter much.
+
 1.4.2 - http://wraith.botpack.net/milestone/1.4.2
   * Prevent crashing on startup if openssl can not be loaded
   * Rename option -c to -m for 'manual' edit, and redirect -c to -C
