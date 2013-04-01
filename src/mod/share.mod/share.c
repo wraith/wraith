@@ -946,7 +946,7 @@ share_userfileq(int idx, char *par)
   flush_tbuf(dcc[idx].nick);
 
   if (bot_aggressive_to(dcc[idx].user)) {
-    putlog(LOG_ERRORS, "*", "%s offered user transfer - I'm supposed to be aggressive to it", dcc[idx].nick);
+    putlog(LOG_ERRORS, "*", "%s offered user transfer - I'm supposed to be aggressive to it [likely a hack]", dcc[idx].nick);
     dprintf(idx, "s un I have you marked for Agressive sharing.\n");
     botunlink(-2, dcc[idx].nick, "I'm aggressive to you");
   } else {
@@ -1094,13 +1094,22 @@ share_end(int idx, char *par)
 }
 
 static void share_userfile_line(int idx, char *par) {
-  char *size = newsplit(&par);
+  if (stream_in) {
+    char *size = newsplit(&par);
 
-  (*stream_in) << bd::String(par, atoi(size));
-  (*stream_in) << '\n';
+    (*stream_in) << bd::String(par, atoi(size));
+    (*stream_in) << '\n';
+  }
 }
 
 static void share_userfile_start(int idx, char *par) {
+  if (bot_aggressive_to(dcc[idx].user)) {
+    putlog(LOG_ERRORS, "*", "%s attempted to initiate user transfer - I'm supposed to be aggressive to it [likely a hack]", dcc[idx].nick);
+    dprintf(idx, "s un I have you marked for Agressive sharing.\n");
+    botunlink(-2, dcc[idx].nick, "I'm aggressive to you");
+    return;
+  }
+
   dcc[idx].status |= STAT_GETTING;
   /* Start up a tbuf to queue outgoing changes for this bot until the
    * userlist is done transferring.
@@ -1110,6 +1119,13 @@ static void share_userfile_start(int idx, char *par) {
 }
 
 static void share_userfile_end(int idx, char *par) {
+  if (bot_aggressive_to(dcc[idx].user)) {
+    putlog(LOG_ERRORS, "*", "%s attempted to end user transfer - I'm supposed to be aggressive to it [likely a hack]", dcc[idx].nick);
+    dprintf(idx, "s un I have you marked for Agressive sharing.\n");
+    botunlink(-2, dcc[idx].nick, "I'm aggressive to you");
+    return;
+  }
+
   stream_in->seek(0, SEEK_SET);
   share_read_stream(idx, *stream_in);
   delete stream_in;
@@ -1284,6 +1300,13 @@ finish_share(int idx)
     }
   if (j == -1)
     return;
+
+  if (bot_aggressive_to(dcc[idx].user)) {
+    putlog(LOG_ERRORS, "*", "%s attempted to end user transfer [compat] - I'm supposed to be aggressive to it [likely a hack]", dcc[idx].nick);
+    dprintf(idx, "s un I have you marked for Agressive sharing.\n");
+    botunlink(-2, dcc[idx].nick, "I'm aggressive to you");
+    return;
+  }
 
   const char salt1[] = SALT1;
   EncryptedStream stream(salt1);
