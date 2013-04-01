@@ -4,6 +4,7 @@ next
   * Fix LASTON not being shared
   * Bots linking in must now have a matching host on their user to succeed linking.
     This was always requiring a valid host, but was not restricted to that bot.
+  * Fix backwards compatibility with older 1.2/1.3 bots
 
 maint
   * Default 'set promisc' to ignore since it's usually a false positive
