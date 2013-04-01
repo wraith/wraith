@@ -654,7 +654,7 @@ const char *werr_tostr(int errnum)
   case ERR_TOOMANYBOTS:
     return STR("Too many bots defined. 5 max. Too many will lead to klines.\nSpread out into multiple accounts/shells/ip ranges.");
   case ERR_LIBS:
-    return STR("Failed to load required libraries.\nEnsure that 32bit compat libs are installed, and openssl.\nLinux: ia32-libs\nFreeBSD: misc/compat7x");
+    return STR("Failed to load required libraries.\nEnsure that 32bit compat libs are installed, and openssl.\nLinux: ia32-libs\nFreeBSD: misc/compat8x");
   default:
     return STR("Unforseen error");
   }
