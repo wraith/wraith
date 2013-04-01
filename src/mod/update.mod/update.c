@@ -25,6 +25,7 @@
 
 
 #include "src/common.h"
+#include "src/chanprog.h"
 #include "src/users.h"
 #include "src/dcc.h"
 #include "src/botnet.h"
@@ -164,12 +165,24 @@ static void update_stream_line(int idx, char *par) {
 }
 
 static void update_stream_start(int idx, char *par) {
+  if (!dcc[idx].hub) {
+    putlog(LOG_ERRORS, "*", "%s attempted to initiate binary transfer - they are not a hub [likely a hack]", dcc[idx].nick);
+    dprintf(idx, "s un You are not allowed to send me binaries.\n");
+    botunlink(-2, dcc[idx].nick, "You are not allowed to send me binaries.");
+    return;
+  }
   putlog(LOG_BOTS, "*", "Downloading updated binary from %s", dcc[idx].nick);
   dcc[idx].status |= STAT_GETTINGU;
   stream_in.clear();
 }
 
 static void update_stream_end(int idx, char *par) {
+  if (!dcc[idx].hub) {
+    putlog(LOG_ERRORS, "*", "%s attempted to end binary transfer - they are not a hub [likely a hack]", dcc[idx].nick);
+    dprintf(idx, "s un You are not allowed to send me binaries.\n");
+    botunlink(-2, dcc[idx].nick, "You are not allowed to send me binaries.");
+    return;
+  }
   stream_in.seek(0, SEEK_SET);
   finish_update_stream(idx, stream_in);
 }
@@ -191,6 +204,12 @@ static void got_nu(char *botnick, char *code, char *par)
 {
   if (!par || !*par || updated) 
     return;
+
+  if (!is_hub(botnick)) {
+    putlog(LOG_ERRORS, "*", "%s offered binary transfer - they are not a hub [likely a hack]", botnick);
+    return;
+  }
+
   if (!conf.bot->hub) {
     if (!conf.bot->localhub)
       return;
@@ -269,6 +288,13 @@ ulsend(int idx, const char* data, size_t datalen)
 }
 
 void finish_update(int idx) {
+  if (!dcc[idx].hub) {
+    putlog(LOG_ERRORS, "*", "%s attemped to finish binary transfer - they are not a hub [likely a hack]", dcc[idx].nick);
+    dprintf(idx, "s un You are not allowed to send me binaries.\n");
+    botunlink(-2, dcc[idx].nick, "You are not allowed to send me binaries.");
+    return;
+  }
+
   bd::Stream stream;
   stream.loadFile(dcc[idx].u.xfer->filename);
   unlink(dcc[idx].u.xfer->filename);
