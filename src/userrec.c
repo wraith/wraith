@@ -278,7 +278,7 @@ bool user_has_host(const char *handle, struct userrec *u, char *host)
     return 0;
 
   if (!u && handle)
-    get_user_by_handle(userlist, (char *) handle);
+    u = get_user_by_handle(userlist, (char *) handle);
 
   if (!u)
     return 0;
