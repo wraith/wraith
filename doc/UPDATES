@@ -1,4 +1,5 @@
 * Fix leaf bots being able to initiate userfile transfer to hubs
+* Protect binary updates so that only hubs can offer/send them
 
 1.4.2 - http://wraith.botpack.net/milestone/1.4.2
   * Prevent crashing on startup if openssl can not be loaded
