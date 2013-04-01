@@ -766,11 +766,12 @@ getin_request(char *botnick, char *code, char *par)
 
     // Does the remote bot have the same number of clients in its channel as me? And a shared member?
     const char *bot_network = tmp;
+    int members = atoi(tmp);
 
     char *shared_nick = par[0] ? newsplit(&par) : NULL;
     memberlist* shared_member = shared_nick ? ismember(chan, shared_nick) : NULL;
     char *shared_host = par[0] ? newsplit(&par) : NULL;
-    if (!shared_nick || !shared_member || !shared_host || (strcasecmp(curnetwork, bot_network)) || strcmp(shared_host, shared_member->userhost)) {
+    if (!shared_nick || !shared_member || !shared_host || (strcasecmp(curnetwork, bot_network) && ((chan->channel.members - chan->channel.splitmembers) != members)) || strcmp(shared_host, shared_member->userhost)) {
       putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - Bot seems to be on a different network '%s' / me: '%s'", botnick, nick, chan->dname, bot_network, curnetwork);
       return;
     }
