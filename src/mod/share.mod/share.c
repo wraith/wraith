@@ -1100,7 +1100,7 @@ share_end(int idx, char *par)
 }
 
 static void share_userfile_line(int idx, char *par) {
-  if (stream_in) {
+  if (stream_in && (dcc[idx].status & STAT_GETTING)) {
     char *size = newsplit(&par);
 
     (*stream_in) << bd::String(par, atoi(size));
