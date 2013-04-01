@@ -1814,20 +1814,20 @@ dcc_telnet_id(int idx, char *buf, int atr)
     char *p = strchr(dcc[idx].host, '@');
     strlcpy(user, dcc[idx].host, p - dcc[idx].host + 1);
     simple_snprintf(sip, sizeof(sip), "-telnet!%s@%s", user, iptostr(htonl(dcc[idx].addr)));
+    struct userrec *u = get_user_by_handle(userlist, nick);
 
-    struct userrec *u = NULL;
     ok = 1;
 
-    if (!u)
-      u = get_user_by_host(sip);			/* Check for -telnet!ident@ip */
-    if (!u)
-      u = get_user_by_host(shost);		/* Check for -telnet!ident@host */
-    if (!u)
-      ok = 0;
+    // Require that the linking bot has a matching host
 
-    // Restrict connect to matching the user who they claim to be
-    if (u && strcasecmp(nick, u->handle))
+    if (u) {
+      /* Check for -telnet!ident@ip or -telnet!ident@host */
+      if (!user_has_matching_host(nick, u, sip) && !user_has_matching_host(nick, u, shost)) {
+	ok = 0;
+      }
+    } else {
       ok = 0;
+    }
 
     if (!ok) {
       putlog(LOG_BOTS, "*", "Denied link to '%s': Host not recognized: %s", nick, dcc[idx].host);

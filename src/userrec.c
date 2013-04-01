@@ -294,6 +294,43 @@ bool user_has_host(const char *handle, struct userrec *u, char *host)
   return 0;
 }
 
+bool user_has_matching_host(const char *handle, struct userrec *u, char *host)
+{
+  if (host == NULL) {
+    return false;
+  }
+  rmspace(host);
+  if (!host[0]) {
+    return false;
+  }
+
+  if (!u && handle) {
+    u = get_user_by_handle(userlist, (char *) handle);
+  }
+
+  if (!u) {
+    return false;
+  }
+
+  /* do CIDR matching if given host is an ip */
+  char *p = NULL;
+  bool do_cidr = 0;
+  struct list_type *q = NULL;
+
+  do_cidr = ((p = strchr(host, '@')) && is_dotted_ip(++p));
+
+  for (q = (struct list_type *) get_user(&USERENTRY_HOSTS, u); q; q = q->next) {
+      if (do_cidr && match_cidr(q->extra, host)) {
+	  return true;
+      }
+      if (wild_match(q->extra, host)) {
+	return true;
+      }
+  }
+
+  return false;
+}
+
 void convert_password(struct userrec *u)
 {
   char *oldpass = (char *) get_user(&USERENTRY_PASS1, u);
