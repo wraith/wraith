@@ -985,6 +985,13 @@ share_userfileq(int idx, char *par)
 static void
 share_ufsend(int idx, char *par)
 {
+  if (bot_aggressive_to(dcc[idx].user)) {
+    putlog(LOG_ERRORS, "*", "%s attempted to start sending userfile [compat] - I'm supposed to be aggressive to it [likely a hack]", dcc[idx].nick);
+    dprintf(idx, "s un I have you marked for Agressive sharing.\n");
+    botunlink(-2, dcc[idx].nick, "I'm aggressive to you");
+    return;
+  }
+
   char *port = NULL, *ip = NULL;
   char s[1024] = "";
   int i, sock;
@@ -1306,13 +1313,6 @@ finish_share(int idx)
     }
   if (j == -1)
     return;
-
-  if (bot_aggressive_to(dcc[idx].user)) {
-    putlog(LOG_ERRORS, "*", "%s attempted to end user transfer [compat] - I'm supposed to be aggressive to it [likely a hack]", dcc[idx].nick);
-    dprintf(idx, "s un I have you marked for Agressive sharing.\n");
-    botunlink(-2, dcc[idx].nick, "I'm aggressive to you");
-    return;
-  }
 
   const char salt1[] = SALT1;
   EncryptedStream stream(salt1);
