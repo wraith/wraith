@@ -3,6 +3,8 @@ maint
     and doesn't matter much.
   * Bots linking in must now have a matching host on their user to succeed linking.
     This was always requiring a valid host, but was not restricted to that bot.
+  * Fix leaf bots being able to initiate userfile transfer to hubs
+  * Protect binary updates so that only hubs can offer/send them
 
 1.4.2 - http://wraith.botpack.net/milestone/1.4.2
   * Prevent crashing on startup if openssl can not be loaded
