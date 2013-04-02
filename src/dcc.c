@@ -291,7 +291,7 @@ bot_version(int idx, char *par)
 #endif
 
   char x[1024] = "", *vversion = NULL, *vcommit = NULL;
-  int vlocalhub = 0;
+  int vlocalhub = -1;
   time_t vbuildts = 0;
 
   strlcpy(dcc[idx].u.bot->version, par, 120);
@@ -306,6 +306,15 @@ bot_version(int idx, char *par)
     vcommit = newsplit(&par);
   if (par[0])
     vversion = newsplit(&par);
+
+  if (vlocalhub == -1 || vbuildts == 0 || vcommit == NULL || vversion == NULL) {
+    putlog(LOG_BOTS, "*", "Invalid link from %s [likely a hack].\n", dcc[idx].nick);
+    dprintf(idx, "error badbot\n");
+    dprintf(idx, "bye badbot\n");
+    killsock(dcc[idx].sock);
+    lostdcc(idx);
+    return;
+  }
 
   if (conf.bot->hub || (conf.bot->localhub && (dcc[idx].status & STAT_UNIXDOMAIN))) {
     putlog(LOG_BOTS, "*", "Linked to %s.\n", dcc[idx].nick);
