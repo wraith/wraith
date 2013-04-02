@@ -1,3 +1,8 @@
+1.3.5
+  * Fix security vulnerability in linking
+  * Validate that bots connecting have a matching host on their own user
+  * Don't allow leaf bots to initiate userfile transfer to hubs
+
 1.3.4 - http://wraith.botpack.net/milestone/1.3.4
   * Fix various compile warnings with newer GCC
   * Fix bot getting confused when changing to long nicks
