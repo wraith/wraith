@@ -348,7 +348,6 @@ bot_version(int idx, char *par)
   dcc[idx].type = &DCC_BOT;
   addbot(dcc[idx].nick, dcc[idx].nick, conf.bot->nick, '-', vlocalhub, vbuildts, vcommit, vversion);
   simple_snprintf(x, sizeof x, "v 1001500");
-  bot_shareupdate(idx, x);
   bot_share(idx, x);
   dprintf(idx, "el\n");
 }

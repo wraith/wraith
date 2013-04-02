@@ -1158,7 +1158,7 @@ void bot_share(int idx, char *par)
   sharein(idx, par);
 }
 
-void bot_shareupdate(int idx, char *par)
+static void bot_shareupdate(int idx, char *par)
 {
   updatein(idx, par);
 }
