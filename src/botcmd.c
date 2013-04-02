@@ -158,11 +158,6 @@ void bot_remotecmd(int idx, char *par) {
     return;
   }
 
-  if (!dcc[idx].hub) {
-    fake_alert(idx, fbot, "hub", "rc");
-    return;
-  }
-
   if (!strcasecmp(tbot, conf.bot->nick)) {
     gotremotecmd(tbot, fbot, fhnd, fidx, par);
   } else if (!strcmp(tbot, "*")) {
