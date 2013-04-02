@@ -1,6 +1,8 @@
 maint
   * Default 'set promisc' to ignore since it's usually a false positive
     and doesn't matter much.
+  * Bots linking in must now have a matching host on their user to succeed linking.
+    This was always requiring a valid host, but was not restricted to that bot.
 
 1.4.2 - http://wraith.botpack.net/milestone/1.4.2
   * Prevent crashing on startup if openssl can not be loaded
