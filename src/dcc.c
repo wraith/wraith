@@ -950,6 +950,15 @@ dcc_chat_pass(int idx, char *buf, int atr)
     if (!egg_strcasecmp(pass, STR("neg!"))) {		/* we're the hub */
       link_parse(idx, buf);
     } else if (!egg_strcasecmp(pass, STR("neg."))) {		/* we're done, link up! */
+      int snum = findanysnum(dcc[idx].sock);
+
+      if (socklist[snum].enclink == -1) {
+	putlog(LOG_WARN, "*", STR("%s attempted to negotiate an encryption out of order."), dcc[idx].nick);
+	killsock(dcc[idx].sock);
+	lostdcc(idx);
+	return;
+      }
+
       dcc[idx].type = &DCC_BOT_NEW;
       dcc[idx].u.bot = (struct bot_info *) my_calloc(1, sizeof(struct bot_info));
       dcc[idx].status = STAT_CALLED;
