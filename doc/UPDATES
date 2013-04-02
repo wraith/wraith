@@ -1,4 +1,4 @@
-maint
+1.4.3
   * Default 'set promisc' to ignore since it's usually a false positive
     and doesn't matter much.
   * Bots linking in must now have a matching host on their user to succeed linking.
@@ -6,6 +6,7 @@ maint
   * Fix leaf bots being able to initiate userfile transfer to hubs
   * Protect binary updates so that only hubs can offer/send them
   * Fix backwards compatibility with older 1.2/1.3 bots
+  * Fix vulnerability in linking
 
 1.4.2 - http://wraith.botpack.net/milestone/1.4.2
   * Prevent crashing on startup if openssl can not be loaded
