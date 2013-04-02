@@ -93,6 +93,13 @@ static void update_fileq(int idx, char *par)
   if (dcc[idx].status & STAT_GETTINGU || updated) 
     return;
 
+  if (!dcc[idx].hub) {
+    putlog(LOG_ERRORS, "*", "%s attemped to offer binary transfer - they are not a hub [likely a hack]", dcc[idx].nick);
+    dprintf(idx, "s un You are not allowed to send me binaries.\n");
+    botunlink(-2, dcc[idx].nick, "You are not allowed to send me binaries.");
+    return;
+  }
+
   if (!conf.bot->hub) {
     if (!conf.bot->localhub)
       return;
@@ -110,6 +117,12 @@ static void update_fileq(int idx, char *par)
  */
 static void update_ufsend(int idx, char *par)
 {
+  if (!dcc[idx].hub) {
+    putlog(LOG_ERRORS, "*", "%s attempted to initiate binary transfer - they are not a hub [likely a hack]", dcc[idx].nick);
+    dprintf(idx, "s un You are not allowed to send me binaries.\n");
+    botunlink(-2, dcc[idx].nick, "You are not allowed to send me binaries.");
+    return;
+  }
 
   char *ip = NULL, *port = NULL, s[1024] = "";
   int i, sock;
@@ -166,7 +179,7 @@ static void update_stream_line(int idx, char *par) {
 
 static void update_stream_start(int idx, char *par) {
   if (!dcc[idx].hub) {
-    putlog(LOG_ERRORS, "*", "%s attempted to initiate binary transfer - they are not a hub [likely a hack]", dcc[idx].nick);
+    putlog(LOG_ERRORS, "*", "%s attempted to initiate streaming binary transfer - they are not a hub [likely a hack]", dcc[idx].nick);
     dprintf(idx, "s un You are not allowed to send me binaries.\n");
     botunlink(-2, dcc[idx].nick, "You are not allowed to send me binaries.");
     return;
@@ -178,7 +191,7 @@ static void update_stream_start(int idx, char *par) {
 
 static void update_stream_end(int idx, char *par) {
   if (!dcc[idx].hub) {
-    putlog(LOG_ERRORS, "*", "%s attempted to end binary transfer - they are not a hub [likely a hack]", dcc[idx].nick);
+    putlog(LOG_ERRORS, "*", "%s attempted to end streaming binary transfer - they are not a hub [likely a hack]", dcc[idx].nick);
     dprintf(idx, "s un You are not allowed to send me binaries.\n");
     botunlink(-2, dcc[idx].nick, "You are not allowed to send me binaries.");
     return;
@@ -288,13 +301,6 @@ ulsend(int idx, const char* data, size_t datalen)
 }
 
 void finish_update(int idx) {
-  if (!dcc[idx].hub) {
-    putlog(LOG_ERRORS, "*", "%s attemped to finish binary transfer - they are not a hub [likely a hack]", dcc[idx].nick);
-    dprintf(idx, "s un You are not allowed to send me binaries.\n");
-    botunlink(-2, dcc[idx].nick, "You are not allowed to send me binaries.");
-    return;
-  }
-
   bd::Stream stream;
   stream.loadFile(dcc[idx].u.xfer->filename);
   unlink(dcc[idx].u.xfer->filename);
