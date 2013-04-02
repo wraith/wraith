@@ -1301,13 +1301,6 @@ finish_share(int idx)
   if (j == -1)
     return;
 
-  if (bot_aggressive_to(dcc[idx].user)) {
-    putlog(LOG_ERRORS, "*", "%s attempted to end user transfer [compat] - I'm supposed to be aggressive to it [likely a hack]", dcc[idx].nick);
-    dprintf(idx, "s un I have you marked for Agressive sharing.\n");
-    botunlink(-2, dcc[idx].nick, "I'm aggressive to you");
-    return;
-  }
-
   const char salt1[] = SALT1;
   EncryptedStream stream(salt1);
   stream.loadFile(dcc[idx].u.xfer->filename);
