@@ -1500,8 +1500,12 @@ static void cmd_botcmd(int idx, char *par)
     check_bind_dcc(cmd, idx, par);
   }
 
-  if (!found)
-    dprintf(idx, "No bot matching '%s' linked\n", botm);
+  if (!found) {
+    if (group)
+      dprintf(idx, "No linked bots found in group '%s'\n", group);
+    else
+      dprintf(idx, "No bot matching '%s' linked\n", botm);
+  }
 
   return;
 }
