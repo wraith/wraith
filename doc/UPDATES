@@ -1,3 +1,5 @@
+* Fix cmd_hublevel not properly requiring a hublevel argument
+
 1.4.3
   * Default 'set promisc' to ignore since it's usually a false positive
     and doesn't matter much.
