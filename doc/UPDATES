@@ -1,3 +1,5 @@
+* Fix 'bl %group cmd' giving incorrect message when group/bots not found.
+
 1.4.3
   * Default 'set promisc' to ignore since it's usually a false positive
     and doesn't matter much.
