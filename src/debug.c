@@ -123,6 +123,7 @@ static void write_debug(bool fatal = 1)
   }
 
   putlog(LOG_MISC, "*", "** Paste to bryan:");
+  putlog(LOG_MISC, "*", "Version: %s", egg_version);
   const size_t cur_buf = (current_get_buf == 0) ? GET_BUFS - 1 : current_get_buf - 1;
   for (size_t i = 0; i < GET_BUFS; i++)
     putlog(LOG_MISC, "*", "%c %02zu: %s", i == cur_buf ? '*' : '_', i, get_buf[i]);
