@@ -551,7 +551,7 @@ static void cmd_slowjoin(int idx, char *par)
     return;
   }
 
-  simple_snprintf(buf, sizeof(buf), "+inactive addedby %s addedts %li", dcc[idx].nick, (long)now);
+  simple_snprintf(buf, sizeof(buf), "+inactive addedby %s addedts %li ", dcc[idx].nick, (long)now);
 
   if (par[0])
     strlcat(buf, par, sizeof(buf));

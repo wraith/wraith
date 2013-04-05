@@ -3,6 +3,7 @@ next
   * Properly honor exemptions when kicking matched RBL clients
   * Fix LASTON not being shared
   * Fix cmd_hublevel not properly requiring a hublevel argument
+  * Fix cmd_slowjoin eating the first channel option (This fixes groups support)
 
 1.4.3
   * Default 'set promisc' to ignore since it's usually a false positive
