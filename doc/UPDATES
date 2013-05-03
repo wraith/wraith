@@ -1,3 +1,5 @@
+* Read in /etc/hosts on startup
+
 1.4.3
   * Default 'set promisc' to ignore since it's usually a false positive
     and doesn't matter much.
