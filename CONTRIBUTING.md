@@ -1,6 +1,6 @@
 Contributions are welcome.
 
-The public git repository can be found on [github](http://github.com/wraith/wraith github)
+The public git repository can be found on http://github.com/wraith/wraith
 
 ## Guides
  * [Github's contribution guide](http://github.com/guides/fork-a-project-and-submit-your-modifications)
