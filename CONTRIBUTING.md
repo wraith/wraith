@@ -1,16 +1,16 @@
 Contributions are welcome.
 
-The public git repository can be found on [http://github.com/wraith/wraith github].
+The public git repository can be found on [github](http://github.com/wraith/wraith github)
 
 ## Guides
- * [http://github.com/guides/fork-a-project-and-submit-your-modifications Github's contribution guide]
- * [http://github.com/guides/pull-requests Github's pull request guide]
- * [http://raw.github.com/git/git/master/Documentation/SubmittingPatches Git's Submitting Patches Guide]
+ * [Github's contribution guide](http://github.com/guides/fork-a-project-and-submit-your-modifications)
+ * [Github's pull request guide](http://github.com/guides/pull-requests Github's pull request guide)
+ * [Git's Submitting Patches Guide](http://raw.github.com/git/git/master/Documentation/SubmittingPatches)
 
 There's two options for submitting patches:
  * Use github's pull requests to submit patches.
  * Send patches to wraith-patches@botpack.net.
-  * [http://www.kernel.org/pub/software/scm/git/docs/git-format-patch.html git-format-patch(1)] should be used for all patches.
+  * [git-format-patch(1)](http://www.kernel.org/pub/software/scm/git/docs/git-format-patch.html) should be used for all patches.
 
 ## Guidelines
  * Please stick to the coding style found in the files.
