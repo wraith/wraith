@@ -106,7 +106,7 @@
  * Users need userflag +i to access hub bots through telnet or .relay.
  * Users need userflag +p to speak on partyline.
 
-## Removed eggdrop features ==
+## Removed eggdrop features
  * Modules
  * TCL
  * File area (filesys.mod)
