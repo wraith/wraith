@@ -1907,9 +1907,12 @@ See also: find
 ###  $btcl$b script
    Executes the given string and returns the result.
 :leaf:topic
-###  $btopic$b <text>
+###  $btopic$b [channel] [new topic]
    Changes the channel's topic, assuming the bot is a chanop or the
    channel is not +t (uses your current console channel).
+
+   If no chanel is specified, the console channel is used.
+   If no new topic is specified, the current topic of the channel will be displayed.
  
 See also: console
 :hub:trace
