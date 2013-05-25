@@ -1522,6 +1522,13 @@ static void cmd_hublevel(int idx, char *par)
   struct userrec *u1 = NULL;
 
   handle = newsplit(&par);
+
+  if (!par[0]) {
+    dprintf(idx, "Usage: hublevel <bot> <level>\n");
+    dprintf(idx, "A hublevel is required.\n");
+    return;
+  }
+
   level = newsplit(&par);
   u1 = get_user_by_handle(userlist, handle);
   if (!u1 || !u1->bot) {

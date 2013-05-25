@@ -3,6 +3,7 @@ maint
   * Fix 'bl %group cmd' giving incorrect message when group/bots not found.
   * Fix cmd_slowjoin eating the first channel option (This fixes groups support)
   * Fix help for 'topic' to show optional channel argument
+  * Fix cmd_hublevel not properly requiring a hublevel argument
 
 1.4.3
   * Default 'set promisc' to ignore since it's usually a false positive
