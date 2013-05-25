@@ -2,13 +2,13 @@ next
   * Bot will now jump from the server it's on if it is removed from the server list. (fixes a changing network bug)
   * Properly honor exemptions when kicking matched RBL clients
   * Fix LASTON not being shared
-  * Fix cmd_hublevel not properly requiring a hublevel argument
 
 maint
   * Read in /etc/hosts on startup
   * Fix 'bl %group cmd' giving incorrect message when group/bots not found.
   * Fix cmd_slowjoin eating the first channel option (This fixes groups support)
   * Fix help for 'topic' to show optional channel argument
+  * Fix cmd_hublevel not properly requiring a hublevel argument
 
 1.4.3
   * Default 'set promisc' to ignore since it's usually a false positive
