@@ -1338,7 +1338,7 @@ int egg_dns_init()
 		add_dns_server("8.8.4.4");
         }
 
-//	read_hosts("/etc/hosts");
+	read_hosts("/etc/hosts");
 	read_hosts(".hosts");
     
 /* root servers for future development (tracing down)
