@@ -1,32 +1,3 @@
-****************************************************************
-****************************************************************
-ANY REDISTRIBUTION OF THIS SOURCE OR DERIVATIVES OF THIS SOURCE 
-MUST INCLUDE THIS FILE, README, DOC/CREDITS, CMD_ABOUT, AND FILE HEADERS
-WITH LICENSING/COPYRIGHTS.
-CMD_ABOUT MUST INCLUDE: CREDITS TO BRYAN/EGGDEV/GHOST AND THE 
-OFFICIAL WRAITH URL (http://wraith.botpack.net)
--Bryan Drewery
-****************************************************************
-****************************************************************
-
-Some old releases are missing the GPL headers and this file, however they are still
-bound by these terms and the GPL.
-
-This package includes a mix of licenses:
-  * Public domain
-  * BSD
-  * GPL v2
-  * BSD-style
-
- * This product includes unlicensed code (mostly GPL) by Erik Johansen (einride) from the ghost botpack (http://ghost.botpack.net)
-
- snprintf.c:
- * This code is based on code written by Patrick Powell (papowell@astart.com)
- * It may be used for any purpose as long as this notice remains intact
- * on all source code distributions
-
- This contains code derived from dirtirc (which is mostly derived from eggdrop): http://dirtirc.sf.net/
-
 /*
  * Copyright (C) 1997 Robey Pointer
  * Copyright (C) 1999 - 2002 Eggheads Development Team (http://www.eggheads.org)
@@ -47,3 +18,23 @@ This package includes a mix of licenses:
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 (FULL GPL CAN BE FOUND IN DOC/GPL)
+
+Some old releases are missing the GPL headers and this file, however they are still
+bound by these terms and the GPL.
+
+This package includes a mix of licenses:
+  * Public domain
+  * BSD
+  * GPL v2
+  * BSD-style
+
+ * This product includes unlicensed code (mostly GPL) by Erik Johansen (einride) from the ghost botpack (http://ghost.botpack.net)
+
+ snprintf.c:
+ * This code is based on code written by Patrick Powell (papowell@astart.com)
+ * It may be used for any purpose as long as this notice remains intact
+ * on all source code distributions
+
+ This contains code derived from dirtirc (which is mostly derived from eggdrop): http://dirtirc.sf.net/
+
+
