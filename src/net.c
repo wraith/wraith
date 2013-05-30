@@ -1188,7 +1188,7 @@ int sockgets(char *s, int *len)
            *(socklist[i].inbuf) += static_cast<size_t>(1);
 
           if (s[0] && socklist[i].encstatus)
-            link_read(i, s, (size_t *) len);
+            link_read(i, s);
             
           *len = strlen(s);
 
@@ -1295,7 +1295,7 @@ int sockgets(char *s, int *len)
     }
   }
   if (s[0] && socklist[ret].encstatus)
-    link_read(ret, s, (size_t *) len);
+    link_read(ret, s);
 
   *len = strlen(s);
 

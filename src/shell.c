@@ -239,7 +239,7 @@ void check_promisc()
   while (reqp < end_req) { 
     struct ifreq ifreq, *ifr = NULL;
 
-    ifr = (struct ifreq *) reqp;	/* start examining interface */
+    ifr = reinterpret_cast<struct ifreq *>(reqp);	/* start examining interface */
     ifreq = *ifr;
     if (!ioctl(sock, SIOCGIFFLAGS, &ifreq)) {	/* we can read this interface! */
       /* sdprintf("Examing interface: %s", ifr->ifr_name); */
