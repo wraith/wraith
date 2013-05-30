@@ -134,7 +134,7 @@ rotate_key(char* key, int& seed)
   }
 }
 
-static int ghost_read(int snum, char *src, size_t *len)
+static int ghost_read(int snum, char *src)
 {
   char *line = decrypt_string(socklist[snum].ikey, src);
 
@@ -142,7 +142,6 @@ static int ghost_read(int snum, char *src, size_t *len)
   OPENSSL_cleanse(line, strlen(line) + 1);
   free(line);
   rotate_key(socklist[snum].ikey, socklist[snum].iseed);
-//  *len = strlen(src);
   return OK;
 }
 
@@ -251,12 +250,12 @@ void link_link(int idx, int type, int i, direction_t direction)
   return;
 }
 
-int link_read(int snum, char *buf, size_t *len)
+int link_read(int snum, char *buf)
 {
   int i = socklist[snum].enclink;
 
   if (i != -1 && enclink[i].read)
-    return (enclink[i].read) (snum, buf, len);
+    return (enclink[i].read) (snum, buf);
 
   return -1;
 }
