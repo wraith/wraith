@@ -37,7 +37,6 @@
 #include "misc.h"
 #include "binary.h"
 #include "response.h"
-#include "thread.h"
 #include "settings.h"
 #include "misc_file.h"
 #include "net.h"
