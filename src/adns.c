@@ -1382,4 +1382,4 @@ bd::String dns_find_ip(bd::Array<bd::String> ips, int af_type) {
     }
 	return bd::String();
 }
-/* vim: set sts=4 sw=4 ts=4 noet: */
+/* vim: set sts=0 sw=8 ts=8 noet: */
