@@ -213,6 +213,36 @@ fi
 AC_SUBST(STATIC)dnl
 ])
 
+dnl CHECK_CC_COLOR_DIAGNOSTICS()
+dnl
+dnl See if the compiler supports -fcolor-diagnostics (Clang).
+dnl
+AC_DEFUN([CHECK_CC_COLOR_DIAGNOSTICS],
+[
+  if test -n "$GXX" && test -z "$no_color_diagnostics"; then
+    AC_CACHE_CHECK([whether the compiler understands -fcolor-diagnostics], egg_cv_var_cc_color_diagnostics, [
+      ac_old_CXXFLAGS="$CXXFLAGS"
+      CXXFLAGS="$CXXFLAGS -fcolor-diagnostics"
+       AC_COMPILE_IFELSE([[
+         int main ()
+         {
+           return(0);
+         }
+       ]], [
+         egg_cv_var_cc_color_diagnostics="yes"
+       ], [
+         egg_cv_var_cc_color_diagnostics="no"
+       ])
+      CXXFLAGS="$ac_old_CXXFLAGS"
+    ])
+
+    if test "$egg_cv_var_cc_color_diagnostics" = "yes"; then
+      CXXFLAGS="$CXXFLAGS -fcolor-diagnostics"
+    fi
+  fi
+])
+
+
 dnl EGG_PROG_HEAD_1()
 dnl
 AC_DEFUN([EGG_PROG_HEAD_1],
