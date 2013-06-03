@@ -133,12 +133,12 @@ AC_DEFUN([EGG_CHECK_CCPIPE],
     AC_CACHE_CHECK([whether the compiler understands -pipe], egg_cv_var_ccpipe, [
         ac_old_CXX="$CXX"
         CXX="$CXX -pipe"
-        AC_COMPILE_IFELSE([[
+        AC_COMPILE_IFELSE([AC_LANG_SOURCE([
           int main ()
           {
             return(0);
           }
-        ]], [
+        ])], [
           egg_cv_var_ccpipe="yes"
         ], [
           egg_cv_var_ccpipe="no"
@@ -162,12 +162,12 @@ AC_DEFUN([EGG_CHECK_CCWALL],
     AC_CACHE_CHECK([whether the compiler understands -Wall], egg_cv_var_ccwall, [
       ac_old_CXXFLAGS="$CXXFLAGS"
       CXXFLAGS="$CXXFLAGS -Wall"
-       AC_COMPILE_IFELSE([[
+       AC_COMPILE_IFELSE([AC_LANG_SOURCE([
          int main ()
          {
            return(0);
          }
-       ]], [
+       ])], [
          egg_cv_var_ccwall="yes"
        ], [
          egg_cv_var_ccwall="no"
@@ -223,12 +223,12 @@ AC_DEFUN([CHECK_CC_COLOR_DIAGNOSTICS],
     AC_CACHE_CHECK([whether the compiler understands -fcolor-diagnostics], egg_cv_var_cc_color_diagnostics, [
       ac_old_CXXFLAGS="$CXXFLAGS"
       CXXFLAGS="$CXXFLAGS -fcolor-diagnostics"
-       AC_COMPILE_IFELSE([[
+       AC_COMPILE_IFELSE([AC_LANG_SOURCE([
          int main ()
          {
            return(0);
          }
-       ]], [
+       ])], [
          egg_cv_var_cc_color_diagnostics="yes"
        ], [
          egg_cv_var_cc_color_diagnostics="no"
