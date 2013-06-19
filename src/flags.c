@@ -32,6 +32,7 @@
 #include "userrec.h"
 #include "misc.h"
 #include "dccutil.h"
+#include "main.h"
 #include "userent.h"
 #include "users.h"
 #include "chanprog.h"
@@ -488,6 +489,9 @@ doresolv(const struct chanset_t *chan)
   if (!chan)
     return 0;
 
+  if (role & ROLE_RESOLV)
+    return 1;
+
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_BOT, 0, 0, 0 };
 
   get_user_flagrec(conf.bot->u, &fr, chan->dname);
@@ -502,6 +506,9 @@ dovoice(const struct chanset_t *chan)
   if (!chan)
     return 0;
 
+  if (role & ROLE_VOICE)
+    return 1;
+
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_BOT, 0, 0, 0 };
 
   get_user_flagrec(conf.bot->u, &fr, chan->dname);
@@ -513,6 +520,9 @@ dovoice(const struct chanset_t *chan)
 int
 doflood(const struct chanset_t *chan)
 {
+  if (role & ROLE_FLOOD)
+    return 1;
+
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_BOT, 0, 0, 0 };
   if (!chan)
     fr.match |= FR_ANYWH;
@@ -528,6 +538,9 @@ dolimit(const struct chanset_t *chan)
 {
   if (!chan)
     return 0;
+
+  if (role & ROLE_LIMIT)
+    return 1;
 
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_BOT, 0, 0, 0 };
 
