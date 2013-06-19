@@ -85,7 +85,7 @@ MAKE_UTILS_NR = $(MAKE) 'CXX=$(CXX)' 'STRIP=touch' 'INCLUDES=$(INCLUDES)' \
 
 MAKE_CONFIG = $(MAKE) 'MAKE=$(MAKE)'
 
-.PHONY: checkclean.static checkclean.dynamic checkclean.debug lib wraith dwraith lib.debug debug test general crypto utils sorthelp makehelp makeset makeres stringfix set res help sort indent tar distrib distclean clean cleanutils test all dynamic static
+.PHONY: checkclean.static checkclean.dynamic checkclean.debug lib wraith dwraith lib.debug debug test general crypto utils sorthelp makehelp makeset makeres stringfix set res help sort indent tar distrib distclean clean cleanutils test all dynamic static tags
 
 all: dynamic
 
@@ -128,6 +128,10 @@ distrib: clean
 	  $(DISTRIB)/Makefile.in > Makefile.in.tmp && mv Makefile.in.tmp $(DISTRIB)/Makefile.in
 	@sed -e 's/GIT_REQUIRED=1/GIT_REQUIRED=0/' configure > $(DISTRIB)/configure
 #	@for s in `find $(DISTRIB)/src/ -name '*.h' -or -name '*.c'`; do mangle -rnw $$s > /dev/null 2>&1; done
+
+tags:
+	@which cscope >/dev/null 2>&1 && cscope -Rbq || :
+	@which ctags >/dev/null 2>&1 && ctags -R || :
 
 tar: distrib
 	tar -czvf $(DISTRIB).tar.gz $(DISTRIB)/
