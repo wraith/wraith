@@ -58,6 +58,17 @@ enum deflag_event_t {
   DEFLAG_EVENT_MOP,
 };
 
+
+#define ROLE_VOICE    BIT0
+#define ROLE_FLOOD    BIT1
+#define ROLE_OP       BIT2
+#define ROLE_DEOP     BIT3
+#define ROLE_KICK     BIT4
+#define ROLE_BAN      BIT5
+#define ROLE_TOPIC    BIT6
+#define ROLE_LIMIT    BIT7
+#define ROLE_RESOLV   BIT8
+
 #define USER_DEFAULT	0
 
 #define USER_ADMIN	FLAG[(int) 'a']
