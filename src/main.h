@@ -14,7 +14,7 @@ enum {
   CONF_STATIC
 };
 
-extern int		role, default_flags, default_uflags, do_confedit,
+extern int		default_flags, default_uflags, do_confedit,
 			updating, do_restart, do_write_userfile;
 extern bool		use_stderr, backgrd, used_B, term_z, loading, have_linked_to_hub, restart_was_update, restarting, safe_to_log;
 extern char		tempdir[], *binname, owner[121], version[151], ver[101], quit_msg[], *socksfile;

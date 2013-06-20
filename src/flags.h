@@ -16,6 +16,7 @@
 typedef uint64_t flag_t;
 
 extern flag_t FLAG[128];
+extern int role;
 
 struct flag_record {
   flag_t match;

@@ -32,12 +32,12 @@
 #include "userrec.h"
 #include "misc.h"
 #include "dccutil.h"
-#include "main.h"
 #include "userent.h"
 #include "users.h"
 #include "chanprog.h"
 
 flag_t FLAG[128];
+int role;
 
 void
 init_flags()
