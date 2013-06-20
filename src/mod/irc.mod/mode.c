@@ -1182,7 +1182,6 @@ gotmode(char *from, char *msg)
           }
         }
         if (ops) {
-          int n = 0;
           /* Check cookies */
           if (u && m && u->bot && !channel_fastop(chan) && !channel_take(chan) && !cookies_disabled) {
             int isbadop = 0;
@@ -1259,48 +1258,32 @@ gotmode(char *from, char *msg)
           }
 
           /* manop */
-          if (chan->manop && u && !u->bot) {
-            n = i = 0;
+	  if (chan->manop && u && !u->bot) {
 
-            switch (role) {
-              case 0:
-                break;
-              case 1:
-                if (m) {
-                  /* Kick opper */
-                  if (!chan_sentkick(m)) {
-                    const size_t len = simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MANUALOP));
-                    dprintf_real(DP_MODE_NEXT, tmp, len, sizeof(tmp));
-                    m->flags |= SENTKICK;
-                  }
-                  simple_snprintf(tmp, sizeof(tmp), "%s MODE %s %s", m->from, chan->dname, modes[modecnt - 1]);
-                  deflag_user(u, DEFLAG_EVENT_MANUALOP, tmp, chan);
-                }
-                break;
-              default:
-                /* KICK the opped */
-                n = role - 1;
-                i = 0;
-                while ((i < modecnt) && (n > 0)) {
-                  if (modes[i] && !strncmp(modes[i], "+o", 2))
-                    n--;
-                  if (n)
-                    i++;
-                }
-                if (!n) {
-                  for (i = 0; i < modecnt; i++) {
-                    if (msign == '+' && mmode == 'o' && !match_my_nick(mparam)) {
-                      mv = ismember(chan, mparam);
-                      if (!mv || !chan_sentkick(mv)) {
-                        if (mv)
-                          mv->flags |= SENTKICK;
-                        const size_t len = simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, mparam, kickprefix, response(RES_MANUALOPPED));
-                        dprintf_real(DP_MODE_NEXT, tmp, len, sizeof(tmp));
-                      }
-                    }
-                  }
-                }
-            }
+	    if (m && (role & ROLE_PROTECT)) {
+	      /* Kick opper */
+	      if (!chan_sentkick(m)) {
+		const size_t len = simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MANUALOP));
+		dprintf_real(DP_MODE_NEXT, tmp, len, sizeof(tmp));
+		m->flags |= SENTKICK;
+	      }
+	      simple_snprintf(tmp, sizeof(tmp), "%s MODE %s %s", m->from, chan->dname, modes[modecnt - 1]);
+	      deflag_user(u, DEFLAG_EVENT_MANUALOP, tmp, chan);
+	    }
+
+	    if (role & ROLE_KICK) {
+	      for (i = 0; i < modecnt; i++) {
+		if (msign == '+' && mmode == 'o' && !match_my_nick(mparam)) {
+		  mv = ismember(chan, mparam);
+		  if (!mv || !chan_sentkick(mv)) {
+		    if (mv)
+		      mv->flags |= SENTKICK;
+		    const size_t len = simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, mparam, kickprefix, response(RES_MANUALOPPED));
+		    dprintf_real(DP_MODE_NEXT, tmp, len, sizeof(tmp));
+		  }
+		}
+	      }
+	    }
           }
         }
       }
