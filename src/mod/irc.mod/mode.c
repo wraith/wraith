@@ -678,7 +678,7 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
            */
           (reversing && (!chan_bitch(chan) || chk_op(victim, chan))) ||
           /* Reop bots to avoid them needing to ask */
-          (role == 3 && mv->user && mv->user->bot && chk_op(victim, chan))
+          ((role & ROLE_PROTECT) && mv->user && mv->user->bot && chk_op(victim, chan))
         )
        ) {
       /* Then we'll bless the victim */
@@ -1140,7 +1140,7 @@ gotmode(char *from, char *msg)
         if (!isserver[0] && role && (!u || (u && !u->bot))) {
           if (m && deops >= 3) {
             if (chan->mdop) {
-              if (role < 5 && !chan_sentkick(m)) {
+              if ((role & ROLE_PROTECT) && !chan_sentkick(m)) {
                 m->flags |= SENTKICK;
                 const size_t len = simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MASSDEOP));
                 dprintf_real(DP_MODE_NEXT, tmp, len, sizeof(tmp));
@@ -1160,7 +1160,7 @@ gotmode(char *from, char *msg)
           if (ops >= 3) {
             if (chan->mop) {
               if (m && !chan_sentkick(m)) {
-                if (role < 5) {
+                if ((role & ROLE_PROTECT)) {
                   m->flags |= SENTKICK;
                   const size_t len = simple_snprintf(tmp, sizeof(tmp), "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_MANUALOP));
                   dprintf_real(DP_MODE_NEXT, tmp, len, sizeof(tmp));
