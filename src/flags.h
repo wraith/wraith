@@ -69,6 +69,7 @@ enum deflag_event_t {
 #define ROLE_LIMIT    BIT7
 #define ROLE_RESOLV   BIT8
 #define ROLE_REVENGE  BIT9
+#define ROLE_CHANMODE BIT10
 
 #define USER_DEFAULT	0
 
