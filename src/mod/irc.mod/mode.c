@@ -716,7 +716,7 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
   } else {
     // Revenge kick clients that deop our bots
     if (chan->revenge && m && m != mv && mv->user && mv->user->bot && !(m->user && m->user->bot)) {
-      if (role < 5 && !chan_sentkick(m) && me_op(chan)) {
+      if ((role & ROLE_REVENGE) && !chan_sentkick(m) && me_op(chan)) {
         m->flags |= SENTKICK;
         dprintf(DP_MODE_NEXT, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_REVENGE));
       } else {
@@ -763,7 +763,7 @@ got_ban(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
 
   // Revenge kick clients that ban our bots
   if (chan->revenge && m && matched_bot && !(m->user && m->user->bot)) {
-    if (role < 5 && !chan_sentkick(m)) {
+    if ((role & ROLE_REVENGE) && !chan_sentkick(m)) {
       m->flags |= SENTKICK;
       dprintf(DP_MODE_NEXT, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_REVENGE));
     } else {
