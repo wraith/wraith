@@ -1,0 +1,14 @@
+language: cpp
+
+compiler:
+  - clang
+  - gcc
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install libcppunit-dev libcppunit-1.12-1 libssl-dev openssl tcl tcl-dev
+
+script: ./configure && make debug && make test
+
+# Skip install
+install: true
