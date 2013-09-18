@@ -1,6 +1,6 @@
 # Wraith
 
-[![Build Status](https://travis-ci.org/wraith/wraith.png?branch=maint)](https://travis-ci.org/wraith/wraith)
+[![Build Status](https://travis-ci.org/wraith/wraith.png?branch=master)](https://travis-ci.org/wraith/wraith)
 
 * http://wraith.botpack.net
 * http://github.com/wraith/wraith
