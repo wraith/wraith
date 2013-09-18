@@ -1,15 +1,10 @@
 # Wraith
 
-[![Build Status](https://travis-ci.org/wraith/wraith.png?branch=master)](https://travis-ci.org/wraith/wraith)
-			    __  __   __
-    __  _  ______________  |__|/  |_|  |__
-    \ \/ \/ /\_  __ \__  \ |  \    _\  |  \
-     \     /  |  | \// __ \|  ||  | |   \  \
-      \/\_/   |__|  (____  /__||__| |___|  /
-			 \/              \/
-	http://wraith.botpack.net
-	http://github.com/wraith/wraith
-	@wraithbotpack
+[![Build Status](https://travis-ci.org/wraith/wraith.png?branch=maint)](https://travis-ci.org/wraith/wraith)
+
+* http://wraith.botpack.net
+* http://github.com/wraith/wraith
+* @wraithbotpack
 
 Wraith is an IRC channel management bot written purely in C/C++.
 It has been in development since late 2003. It is based on
