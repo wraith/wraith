@@ -28,6 +28,9 @@
 /* Define to 1 if you have the `clock' function. */
 #undef HAVE_CLOCK
 
+/* define if the compiler supports basic C++11 syntax */
+#undef HAVE_CXX11
+
 /* Define to 1 if you have the declaration of `tzname', and to 0 if you don't.
    */
 #undef HAVE_DECL_TZNAME
@@ -150,9 +153,6 @@
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
-
-/* Define to 1 if you have the <std_arg.h> header file. */
-#undef HAVE_STD_ARG_H
 
 /* Define to 1 if you have the `strcasecmp' function. */
 #undef HAVE_STRCASECMP
