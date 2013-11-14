@@ -1072,10 +1072,6 @@ static int sockread(char *s, int *len)
                     case 0:
                       // EOF
                       break;
-                    case -1:
-                      // I/O error
-                      putlog(LOG_DEBUG, "*", "SSL_read() [IO] = %d, %s", err, (char *)ERR_error_string(ERR_get_error(), NULL));
-                      break;
                     default:
                       putlog(LOG_DEBUG, "*", "SSL_read() unknown error: %s", strerror(errno));
                       break;
@@ -1391,10 +1387,6 @@ void tputs(register int z, const char *s, size_t len)
               case 0:
                 // EOF
                 break;
-              case -1:
-                // I/O error
-                putlog(LOG_DEBUG, "*", "SSL_write() [IO] = %d, %s", err, (char *)ERR_error_string(ERR_get_error(), NULL));
-                break;
               default:
                 putlog(LOG_DEBUG, "*", "SSL_write() unknown error: %s", strerror(errno));
                 break;
@@ -1513,10 +1505,6 @@ void dequeue_sockets()
                  switch (ERR_get_error()) {
                    case 0:
                      // EOF
-                     break;
-                   case -1:
-                     // I/O error
-                     putlog(LOG_DEBUG, "*", "SSL_write()/dequeue_sockets() [IO] = %d, %s", err, (char *)ERR_error_string(ERR_get_error(), NULL));
                      break;
                    default:
                      putlog(LOG_DEBUG, "*", "SSL_write() unknown error: %s", strerror(errno));
