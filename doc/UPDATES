@@ -5,7 +5,7 @@ maint
   * Fix help for 'topic' to show optional channel argument
   * Fix cmd_hublevel not properly requiring a hublevel argument
   * Fix build with clang (FreeBSD 10)
-  * Fix startup crash when some libcrypto symbols were missing
+  * Fix startup crash when some shared library symbols were missing
 
 1.4.3
   * Default 'set promisc' to ignore since it's usually a false positive

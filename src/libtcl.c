@@ -81,7 +81,10 @@ int load_libtcl() {
     return 1;
   }
 
-  load_symbols(libtcl_handle);
+  if (load_symbols(libtcl_handle)) {
+    fprintf(stderr, STR("Missing symbols for libtcl (likely too old)\n"));
+    return(1);
+  }
 
 #ifdef USE_SCRIPT_TCL
   // create interp

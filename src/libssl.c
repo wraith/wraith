@@ -84,7 +84,10 @@ int load_libssl() {
     return(1);
   }
 
-  load_symbols(libssl_handle);
+  if (load_symbols(libssl_handle)) {
+    fprintf(stderr, STR("Missing symbols for libssl (likely too old)\n"));
+    return(1);
+  }
 
   return 0;
 }
