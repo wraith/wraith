@@ -592,7 +592,7 @@ AC_TRY_COMPILE([#include <openssl/opensslv.h>],[
 [AC_MSG_RESULT(OK)],
 [
   AC_MSG_RESULT([too old.])
-  AC_MSG_ERROR([OpenSSL version is too old.], 1)
+  AC_MSG_ERROR([OpenSSL version is too old. Must be 0.9.8f+], 1)
 ]
 )
 
