@@ -433,6 +433,8 @@ static void
 eof_dcc_bot_new(int idx)
 {
   putlog(LOG_BOTS, "*", "Lost Bot: %s", dcc[idx].nick);
+  if (dcc[idx].hub)
+    putlog(LOG_BOTS, "*", "See log on %s for disconnect reason.\n", dcc[idx].nick);
   killsock(dcc[idx].sock);
   lostdcc(idx);
 }
