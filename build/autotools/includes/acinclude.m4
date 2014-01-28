@@ -181,6 +181,36 @@ AC_DEFUN([EGG_CHECK_CCWALL],
   fi
 ])
 
+dnl @synopsis CXX_FLAGS_CHECK [var] [compiler flags] [cache name] [required]
+dnl @summary check whether compiler supports given C++ flags or not
+AC_DEFUN([CXX_FLAG_CHECK],
+[
+  AC_CACHE_CHECK([whether the compiler understands $2], egg_cv_prog_cc_$3, [
+    AC_LANG_PUSH([C++])
+    ac_saved_flags="$CXXFLAGS"
+    CXXFLAGS="-Werror $2"
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([])],
+      [egg_cv_prog_cc_$3="yes"],
+      [egg_cv_prog_cc_$3="no"],
+    )
+    CXXFLAGS="$ac_saved_flags"
+    AC_LANG_POP([C++])
+  ])
+
+  if [[ "$egg_cv_prog_cc_$3" = "yes" ]]; then
+    $1="$$1 $2"
+  elif [[ -n "$4" ]]; then
+      cat << 'EOF' >&2
+configure: error:
+
+  Your OS or C++ compiler does not support $2.
+  This compile flag is required.
+
+EOF
+    exit 1
+  fi
+])
+
 dnl  EGG_CHECK_CCSTATIC()
 dnl
 dnl  Checks whether the compiler supports the `-static' flag.
