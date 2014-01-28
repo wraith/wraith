@@ -65,8 +65,6 @@ EGG_CHECK_RANDOM_MAX
 EGG_CHECK_CCSTATIC
 AC_SUBST(CCDEBUG)dnl
 
-AC_SUBST(MAKEJOBS)dnl
-
 #checkpoint
 AC_CACHE_SAVE 
 
@@ -263,4 +261,4 @@ fi
 echo ""
 echo ""
 echo "------------ Configuring BDLIB ------------"
-test -f lib/bdlib/configure && cd lib/bdlib && CXX="$CXX" MAKEJOBS="$MAKEJOBS" ./configure
+test -f lib/bdlib/configure && cd lib/bdlib && CXX="$CXX" ./configure

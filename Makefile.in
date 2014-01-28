@@ -56,7 +56,7 @@ _CFLGS = -fno-strict-aliasing -W -Wformat \
 #-Wconversion
 #-Wtraditional
 
-MAKEFLAGS = -s @MAKEJOBS@
+MAKEFLAGS = -s
 
 STRINGFIX = src/stringfix
 
