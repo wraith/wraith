@@ -542,7 +542,7 @@ if test "$with_openssl_path" != "auto"; then
 else
   dnl Do the auto-probe here.  Check some common directory paths.
   for dirs in /usr/local/ssl /usr/pkg /usr/local /usr/local/openssl; do
-    if test -f "${dirs}/include/openssl/opensslv.h" ; then
+    if test -f "${dirs}/include/openssl/opensslv.h" && test -f "${dirs}/lib/libssl.so"; then
       cf_openssl_basedir="${dirs}"
       break
     fi
@@ -551,7 +551,7 @@ else
 fi
 dnl Now check cf_openssl_found to see if we found anything.
 if test ! -z "$cf_openssl_basedir"; then
-  if test -f "${cf_openssl_basedir}/include/openssl/opensslv.h" ; then
+  if test -f "${cf_openssl_basedir}/include/openssl/opensslv.h" && test -f "${cf_openssl_basedir}/lib/libssl.so"; then
     SSL_INCLUDES="-I${cf_openssl_basedir}/include"
     SSL_LIBS="-L${cf_openssl_basedir}/lib"
   else
