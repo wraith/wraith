@@ -5479,7 +5479,7 @@ if test "$with_openssl_path" != "auto"; then
     cf_openssl_basedir="`echo ${with_openssl_path} | sed 's/\/$//'`"
 else
     for dirs in /usr/local/ssl /usr/pkg /usr/local /usr/local/openssl; do
-    if test -f "${dirs}/include/openssl/opensslv.h" ; then
+    if test -f "${dirs}/include/openssl/opensslv.h" && test -f "${dirs}/lib/libssl.so"; then
       cf_openssl_basedir="${dirs}"
       break
     fi
@@ -5487,7 +5487,7 @@ else
   unset dirs
 fi
 if test ! -z "$cf_openssl_basedir"; then
-  if test -f "${cf_openssl_basedir}/include/openssl/opensslv.h" ; then
+  if test -f "${cf_openssl_basedir}/include/openssl/opensslv.h" && test -f "${cf_openssl_basedir}/lib/libssl.so"; then
     SSL_INCLUDES="-I${cf_openssl_basedir}/include"
     SSL_LIBS="-L${cf_openssl_basedir}/lib"
   else
@@ -5541,7 +5541,7 @@ else
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: too old." >&5
 $as_echo "too old." >&6; }
-  as_fn_error 1 "OpenSSL version is too old." "$LINENO" 5
+  as_fn_error 1 "OpenSSL version is too old. Must be 0.9.8f+" "$LINENO" 5
 
 
 fi
