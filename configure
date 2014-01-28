@@ -5271,7 +5271,7 @@ $as_echo "$as_me: not updating unwritable cache $cache_file" >&6;}
   fi
 fi
 rm -f confcache
-for ac_header in stdarg.h std_arg.h arpa/inet.h fcntl.h limits.h locale.h netdb.h netinet/in.h
+for ac_header in stdarg.h arpa/inet.h fcntl.h limits.h locale.h netdb.h netinet/in.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_cxx_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
