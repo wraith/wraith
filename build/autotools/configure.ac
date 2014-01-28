@@ -109,6 +109,7 @@ tcllibextensions=".so .so.1 .so.1.0 .so.1.1 .so.1.2 .dll .dylib .sl .a"
 
 tcllibpaths="$HOME/lib $HOME/tcl/lib \
              /usr/local/lib /usr/lib /lib /lib64 /usr/lib64 \
+             /usr/local/lib/tcl8.6 /usr/lib/tcl8.6 \
              /usr/local/lib/tcl8.5 /usr/lib/tcl8.5 \
              /usr/local/lib/tcl8.4 /usr/lib/tcl8.4 \
              /usr/local/lib/tcl8.3 /usr/lib/tcl8.3 \
@@ -119,6 +120,7 @@ tcllibpaths="$HOME/lib $HOME/tcl/lib \
 tclheadernames="tcl.h"
 tclheaderpaths="$HOME/include $HOME/tcl/include \
                 /usr/local/include /usr/include \
+                /usr/local/include/tcl8.6 /usr/include/tcl8.6 \
                 /usr/local/include/tcl8.5 /usr/include/tcl8.5 \
                 /usr/local/include/tcl8.4 /usr/include/tcl8.4 \
                 /usr/local/include/tcl8.3 /usr/include/tcl8.3 \
