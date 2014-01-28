@@ -111,7 +111,10 @@ int load_libcrypto() {
     return(1);
   }
 
-  load_symbols(libcrypto_handle);
+  if (load_symbols(libcrypto_handle)) {
+    fprintf(stderr, STR("Missing symbols for libcrypto (likely too old)\n"));
+    return(1);
+  }
 
   return 0;
 }
