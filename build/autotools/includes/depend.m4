@@ -14,9 +14,6 @@ if test $num -ge "3"; then
   GCC3="-W -Wno-unused-parameter -Wdisabled-optimization -Wno-write-strings -Wno-format-security -fno-strict-aliasing -Woverloaded-virtual -Wno-format-y2k"
   GCC3DEB="-Wno-disabled-optimization -Wmissing-format-attribute"
 fi
-if test $num -ge "4"; then
-  GCC4DEB="-fstack-protector-all"
-fi
 AC_SUBST(CCDEPMODE)dnl
 AC_SUBST(GCC3)dnl
 AC_SUBST(GCC3DEB)dnl

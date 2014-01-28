@@ -639,7 +639,7 @@ TCLLIBFN
 TCLLIB
 SSL_LIBS
 SSL_INCLUDES
-MAKEJOBS
+DEBCXXFLAGS
 CCDEBUG
 STATIC
 BUILDARCH
@@ -3804,43 +3804,117 @@ $as_echo "$egg_cv_var_ccpipe" >&6; }
   fi
 
 
-  if test -n "$GXX" && test -z "$no_color_diagnostics"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -fcolor-diagnostics" >&5
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -fcolor-diagnostics" >&5
 $as_echo_n "checking whether the compiler understands -fcolor-diagnostics... " >&6; }
-if ${egg_cv_var_cc_color_diagnostics+:} false; then :
+if ${egg_cv_prog_cc_colordiagnostics+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
-      ac_old_CXXFLAGS="$CXXFLAGS"
-      CXXFLAGS="$CXXFLAGS -fcolor-diagnostics"
-       cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+    ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+    ac_saved_flags="$CXXFLAGS"
+    CXXFLAGS="-Werror -fcolor-diagnostics"
+    cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end build/confdefs.h.  */
 
-         int main ()
-         {
-           return(0);
-         }
+int
+main ()
+{
 
+  ;
+  return 0;
+}
 _ACEOF
 if ac_fn_cxx_try_compile "$LINENO"; then :
-
-         egg_cv_var_cc_color_diagnostics="yes"
-
+  egg_cv_prog_cc_colordiagnostics="yes"
 else
-
-         egg_cv_var_cc_color_diagnostics="no"
-
+  egg_cv_prog_cc_colordiagnostics="no"
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-      CXXFLAGS="$ac_old_CXXFLAGS"
+    CXXFLAGS="$ac_saved_flags"
+    ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
 
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $egg_cv_var_cc_color_diagnostics" >&5
-$as_echo "$egg_cv_var_cc_color_diagnostics" >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $egg_cv_prog_cc_colordiagnostics" >&5
+$as_echo "$egg_cv_prog_cc_colordiagnostics" >&6; }
 
-    if test "$egg_cv_var_cc_color_diagnostics" = "yes"; then
-      CXXFLAGS="$CXXFLAGS -fcolor-diagnostics"
-    fi
+  if [ "$egg_cv_prog_cc_colordiagnostics" = "yes" ]; then
+    CXXFLAGS="$CXXFLAGS -fcolor-diagnostics"
+  elif [ -n "" ]; then
+      cat << 'EOF' >&2
+configure: error:
+
+  Your OS or C++ compiler does not support -fcolor-diagnostics.
+  This compile flag is required.
+
+EOF
+    exit 1
+  fi
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -fstack-protector-all" >&5
+$as_echo_n "checking whether the compiler understands -fstack-protector-all... " >&6; }
+if ${egg_cv_prog_cc_stackprotector+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+    ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+    ac_saved_flags="$CXXFLAGS"
+    CXXFLAGS="-Werror -fstack-protector-all"
+    cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  egg_cv_prog_cc_stackprotector="yes"
+else
+  egg_cv_prog_cc_stackprotector="no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+    CXXFLAGS="$ac_saved_flags"
+    ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $egg_cv_prog_cc_stackprotector" >&5
+$as_echo "$egg_cv_prog_cc_stackprotector" >&6; }
+
+  if [ "$egg_cv_prog_cc_stackprotector" = "yes" ]; then
+    DEBCXXFLAGS="$DEBCXXFLAGS -fstack-protector-all"
+  elif [ -n "" ]; then
+      cat << 'EOF' >&2
+configure: error:
+
+  Your OS or C++ compiler does not support -fstack-protector-all.
+  This compile flag is required.
+
+EOF
+    exit 1
   fi
 
 
@@ -3852,9 +3926,6 @@ if test $num -ge "3"; then
 #  GCC3="-Wpadded -Wpacked -Wno-unused-parameter -Wmissing-format-attribute -Wdisabled-optimization"
   GCC3="-W -Wno-unused-parameter -Wdisabled-optimization -Wno-write-strings -Wno-format-security -fno-strict-aliasing -Woverloaded-virtual -Wno-format-y2k"
   GCC3DEB="-Wno-disabled-optimization -Wmissing-format-attribute"
-fi
-if test $num -ge "4"; then
-  GCC4DEB="-fstack-protector-all"
 fi
 
 
@@ -10119,4 +10190,4 @@ fi
 echo ""
 echo ""
 echo "------------ Configuring BDLIB ------------"
-test -f lib/bdlib/configure && cd lib/bdlib && CXX="$CXX" MAKEJOBS="$MAKEJOBS" ./configure
+test -f lib/bdlib/configure && cd lib/bdlib && CXX="$CXX" ./configure

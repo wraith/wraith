@@ -32,7 +32,8 @@ AC_CACHE_SAVE
 # Speedup compile
 EGG_CHECK_CCWALL
 EGG_CHECK_CCPIPE
-CHECK_CC_COLOR_DIAGNOSTICS
+CXX_FLAG_CHECK([CXXFLAGS], [-fcolor-diagnostics], [colordiagnostics])
+CXX_FLAG_CHECK([DEBCXXFLAGS], [-fstack-protector-all], [stackprotector])
 
 EGG_CHECK_DEPMODE
 
@@ -66,8 +67,7 @@ EGG_CHECK_RANDOM_MAX
 # Create static binaries
 EGG_CHECK_CCSTATIC
 AC_SUBST(CCDEBUG)dnl
-
-AC_SUBST(MAKEJOBS)dnl
+AC_SUBST(DEBCXXFLAGS)
 
 #checkpoint
 AC_CACHE_SAVE 
@@ -265,4 +265,4 @@ fi
 echo ""
 echo ""
 echo "------------ Configuring BDLIB ------------"
-test -f lib/bdlib/configure && cd lib/bdlib && CXX="$CXX" MAKEJOBS="$MAKEJOBS" ./configure
+test -f lib/bdlib/configure && cd lib/bdlib && CXX="$CXX" ./configure
