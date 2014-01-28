@@ -23,7 +23,7 @@
   my_symbols << #x; \
   dlsym_error = dlerror(); \
   if (dlsym_error) { \
-    sdprintf("%s", dlsym_error); \
+    fprintf(stderr, "%s", dlsym_error); \
     return(1); \
   } \
 } while (0)
