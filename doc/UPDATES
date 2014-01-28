@@ -6,6 +6,7 @@ maint
   * Fix cmd_hublevel not properly requiring a hublevel argument
   * Fix build with clang (FreeBSD 10)
   * Fix startup crash when some shared library symbols were missing
+  * Fix build on systems without working libssp
 
 1.4.3
   * Default 'set promisc' to ignore since it's usually a false positive
