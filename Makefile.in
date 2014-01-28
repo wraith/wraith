@@ -42,7 +42,7 @@ DIFF = @DIFF@
 LIBS = @LIBS@
 INCLUDES = @TCL_INCLUDES@
 
-DEBCXXFLAGS = -DDEBUG -fno-inline -g3 -ggdb3 -O0 -Wshadow -Wpointer-arith -Wcast-align @GCC3DEB@ @GCC4DEB@
+DEBCXXFLAGS = -DDEBUG -fno-inline -g3 -ggdb3 -O0 -Wshadow -Wpointer-arith -Wcast-align @GCC3DEB@ @GCC4DEB@ @DEBCXXFLAGS@
 CFLGS = @GCC3@ -fno-rtti @SSL_INCLUDES@
 _CFLGS = -fno-strict-aliasing -W -Wformat \
 #-Wshadow -Wnested-externs -Wno-format-y2k \
@@ -56,7 +56,7 @@ _CFLGS = -fno-strict-aliasing -W -Wformat \
 #-Wconversion
 #-Wtraditional
 
-MAKEFLAGS = -s @MAKEJOBS@
+MAKEFLAGS = -s
 
 STRINGFIX = src/stringfix
 

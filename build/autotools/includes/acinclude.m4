@@ -181,6 +181,36 @@ AC_DEFUN([EGG_CHECK_CCWALL],
   fi
 ])
 
+dnl @synopsis CXX_FLAGS_CHECK [var] [compiler flags] [cache name] [required]
+dnl @summary check whether compiler supports given C++ flags or not
+AC_DEFUN([CXX_FLAG_CHECK],
+[
+  AC_CACHE_CHECK([whether the compiler understands $2], egg_cv_prog_cc_$3, [
+    AC_LANG_PUSH([C++])
+    ac_saved_flags="$CXXFLAGS"
+    CXXFLAGS="-Werror $2"
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([])],
+      [egg_cv_prog_cc_$3="yes"],
+      [egg_cv_prog_cc_$3="no"],
+    )
+    CXXFLAGS="$ac_saved_flags"
+    AC_LANG_POP([C++])
+  ])
+
+  if [[ "$egg_cv_prog_cc_$3" = "yes" ]]; then
+    $1="$$1 $2"
+  elif [[ -n "$4" ]]; then
+      cat << 'EOF' >&2
+configure: error:
+
+  Your OS or C++ compiler does not support $2.
+  This compile flag is required.
+
+EOF
+    exit 1
+  fi
+])
+
 dnl  EGG_CHECK_CCSTATIC()
 dnl
 dnl  Checks whether the compiler supports the `-static' flag.
@@ -212,36 +242,6 @@ else
 fi
 AC_SUBST(STATIC)dnl
 ])
-
-dnl CHECK_CC_COLOR_DIAGNOSTICS()
-dnl
-dnl See if the compiler supports -fcolor-diagnostics (Clang).
-dnl
-AC_DEFUN([CHECK_CC_COLOR_DIAGNOSTICS],
-[
-  if test -n "$GXX" && test -z "$no_color_diagnostics"; then
-    AC_CACHE_CHECK([whether the compiler understands -fcolor-diagnostics], egg_cv_var_cc_color_diagnostics, [
-      ac_old_CXXFLAGS="$CXXFLAGS"
-      CXXFLAGS="$CXXFLAGS -fcolor-diagnostics"
-       AC_COMPILE_IFELSE([AC_LANG_SOURCE([
-         int main ()
-         {
-           return(0);
-         }
-       ])], [
-         egg_cv_var_cc_color_diagnostics="yes"
-       ], [
-         egg_cv_var_cc_color_diagnostics="no"
-       ])
-      CXXFLAGS="$ac_old_CXXFLAGS"
-    ])
-
-    if test "$egg_cv_var_cc_color_diagnostics" = "yes"; then
-      CXXFLAGS="$CXXFLAGS -fcolor-diagnostics"
-    fi
-  fi
-])
-
 
 dnl EGG_PROG_HEAD_1()
 dnl
