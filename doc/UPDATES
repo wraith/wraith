@@ -8,6 +8,7 @@ maint
   * Fix startup crash when some shared library symbols were missing
   * Fix build on systems without working libssp
   * Fix build detecting invalid openssl installations (ones with only static libs)
+  * Give hint on bot when disconnected from hub for reason
 
 1.4.3
   * Default 'set promisc' to ignore since it's usually a false positive
