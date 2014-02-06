@@ -98,7 +98,7 @@ clean:  cleanutils
 	+@cd src && $(MAKE) clean
 	+@cd src/compat && $(MAKE) clean
 	+@cd src/crypto && $(MAKE) clean
-	+@cd src/mod && $(MAKE) distclean
+	+@cd src/mod && $(MAKE) clean
 	-+@cd lib && $(MAKE) clean
 	@rm -f $(BINEXEC) build/stamp.* *~ src/*~ configure.temp .mangled stamp.*
 	@rm -f src/help.h src/response.h src/responses.h utctime@EXEEXT@ ts@EXEEXT@
