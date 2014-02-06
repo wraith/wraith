@@ -1,7 +1,6 @@
 # Makefile for src/mod/channels.mod/
 
 srcdir = .
-depcomp = /bin/sh ../../../build/autotools/depcomp
 
 #This line is simply for configure to generate .deps/
 OBJS = channels.o
