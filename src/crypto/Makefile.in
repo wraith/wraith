@@ -6,9 +6,9 @@ SHELL = @SHELL@
 CXXFLAGS = @CXXFLAGS@ -I.. -I$(top_srcdir) -I$(top_srcdir)/lib @DEFS@ $(CFLGS)
 CPPFLAGS = @CPPFLAGS@
 STRIP = @STRIP@
-
 VPATH = @srcdir@
-depcomp = /bin/sh $(top_srcdir)/build/autotools/depcomp
+
+include $(top_srcdir)/build/build.mk
 
 @SET_MAKE@
 
@@ -29,15 +29,3 @@ clean:
 crypto: $(OBJS)
 
 include ./.deps/includes
-
-%.o: %.c
-	@echo -e "Compiling: \033[1m$*\033[0m"
-ifeq ($(CCDEPMODE),gcc3)
-	if $(CXX) -MT '$@' -MD -MP -MF '.deps/$*.TPo' $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@; then \
-	mv '.deps/$*.TPo' '.deps/$*.Po'; \
-	else rm -f '.deps/$*.Tpo'; exit 1; \
-	fi
-else
-	libtool=no source='$<' object='$@' depfile='.deps/$*.Po' tmpdepfile='.deps/$*.TPo' depmode=$(CCDEPMODE) $(depcomp) \
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
-endif
