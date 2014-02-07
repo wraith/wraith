@@ -3737,6 +3737,63 @@ EOF
   fi
 
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -Qunused-arguments" >&5
+$as_echo_n "checking whether the compiler understands -Qunused-arguments... " >&6; }
+if ${egg_cv_prog_cc_unusedarguments+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+    ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+    ac_saved_flags="$CXXFLAGS"
+    CXXFLAGS="-Werror -Qunused-arguments"
+    cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  egg_cv_prog_cc_unusedarguments="yes"
+else
+  egg_cv_prog_cc_unusedarguments="no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+    CXXFLAGS="$ac_saved_flags"
+    ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $egg_cv_prog_cc_unusedarguments" >&5
+$as_echo "$egg_cv_prog_cc_unusedarguments" >&6; }
+
+  if [ "$egg_cv_prog_cc_unusedarguments" = "yes" ]; then
+    CXXFLAGS="$CXXFLAGS -Qunused-arguments"
+  elif [ -n "" ]; then
+      cat << 'EOF' >&2
+configure: error:
+
+  Your OS or C++ compiler does not support -Qunused-arguments.
+  This compile flag is required.
+
+EOF
+    exit 1
+  fi
+
+
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -fstack-protector-all" >&5
 $as_echo_n "checking whether the compiler understands -fstack-protector-all... " >&6; }
 if ${egg_cv_prog_cc_stackprotector+:} false; then :
@@ -6853,12 +6910,14 @@ $as_echo "#define gid_t int" >>build/confdefs.h
 fi
 
 
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for long long int" >&5
-$as_echo_n "checking for long long int... " >&6; }
-if ${ac_cv_type_long_long_int+:} false; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for unsigned long long int" >&5
+$as_echo_n "checking for unsigned long long int... " >&6; }
+if ${ac_cv_type_unsigned_long_long_int+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+  ac_cv_type_unsigned_long_long_int=yes
+     if test "x${ac_cv_prog_cc_c99-no}" = xno; then
+       cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end build/confdefs.h.  */
 
   /* For now, do not test the preprocessor; as of 2007 there are too many
@@ -6891,37 +6950,64 @@ main ()
 
 _ACEOF
 if ac_fn_cxx_try_link "$LINENO"; then :
-                          if test "$cross_compiling" = yes; then :
+
+else
+  ac_cv_type_unsigned_long_long_int=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+     fi
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_type_unsigned_long_long_int" >&5
+$as_echo "$ac_cv_type_unsigned_long_long_int" >&6; }
+  if test $ac_cv_type_unsigned_long_long_int = yes; then
+
+$as_echo "#define HAVE_UNSIGNED_LONG_LONG_INT 1" >>build/confdefs.h
+
+  fi
+
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for long long int" >&5
+$as_echo_n "checking for long long int... " >&6; }
+if ${ac_cv_type_long_long_int+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
   ac_cv_type_long_long_int=yes
+      if test "x${ac_cv_prog_cc_c99-no}" = xno; then
+        ac_cv_type_long_long_int=$ac_cv_type_unsigned_long_long_int
+        if test $ac_cv_type_long_long_int = yes; then
+                                        if test "$cross_compiling" = yes; then :
+  :
 else
   cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end build/confdefs.h.  */
 #include <limits.h>
-               #ifndef LLONG_MAX
-               # define HALF \
-                        (1LL << (sizeof (long long int) * CHAR_BIT - 2))
-               # define LLONG_MAX (HALF - 1 + HALF)
-               #endif
+                 #ifndef LLONG_MAX
+                 # define HALF \
+                          (1LL << (sizeof (long long int) * CHAR_BIT - 2))
+                 # define LLONG_MAX (HALF - 1 + HALF)
+                 #endif
 int
 main ()
 {
 long long int n = 1;
-               int i;
-               for (i = 0; ; i++)
-                 {
-                   long long int m = n << i;
-                   if (m >> i != n)
-                     return 1;
-                   if (LLONG_MAX / 2 < m)
-                     break;
-                 }
-               return 0;
+                 int i;
+                 for (i = 0; ; i++)
+                   {
+                     long long int m = n << i;
+                     if (m >> i != n)
+                       return 1;
+                     if (LLONG_MAX / 2 < m)
+                       break;
+                   }
+                 return 0;
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_cxx_try_run "$LINENO"; then :
-  ac_cv_type_long_long_int=yes
+
 else
   ac_cv_type_long_long_int=no
 fi
@@ -6929,11 +7015,8 @@ rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
   conftest.$ac_objext conftest.beam conftest.$ac_ext
 fi
 
-else
-  ac_cv_type_long_long_int=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
+        fi
+      fi
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_type_long_long_int" >&5
 $as_echo "$ac_cv_type_long_long_int" >&6; }
@@ -8745,7 +8828,7 @@ $as_echo X"$mf" |
 done
 
 
-ac_config_files="$ac_config_files Makefile lib/Makefile src/Makefile src/compat/Makefile src/crypto/Makefile src/mod/Makefile src/buildinfo.h src/mod/mod.mk"
+ac_config_files="$ac_config_files Makefile lib/Makefile src/Makefile src/compat/Makefile src/crypto/Makefile src/mod/Makefile src/buildinfo.h"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -9446,7 +9529,6 @@ do
     "src/crypto/Makefile") CONFIG_FILES="$CONFIG_FILES src/crypto/Makefile" ;;
     "src/mod/Makefile") CONFIG_FILES="$CONFIG_FILES src/mod/Makefile" ;;
     "src/buildinfo.h") CONFIG_FILES="$CONFIG_FILES src/buildinfo.h" ;;
-    "src/mod/mod.mk") CONFIG_FILES="$CONFIG_FILES src/mod/mod.mk" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac

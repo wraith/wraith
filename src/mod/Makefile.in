@@ -73,7 +73,7 @@ clean:
 			cp $(srcdir)/$$i/Makefile $$i/Makefile; \
 		fi; \
 		if (test -r $$i/Makefile); then \
-			(cd $$i; $(MAKE) "VPATH=$(MOD_UPDIR)$(srcdir)/$$i" "srcdir=$(MOD_UPDIR)$(srcdir)/$$i" 'MAKE=$(MAKE)' clean); \
+			(cd $$i; $(MAKE) "VPATH=$(MOD_UPDIR)$(srcdir)/$$i" top_srcdir="$(MOD_UPDIR)$(top_srcdir)" "srcdir=$(MOD_UPDIR)$(srcdir)/$$i" 'MAKE=$(MAKE)' clean); \
 		fi; \
 	done
 
@@ -86,7 +86,7 @@ distclean:
 			cp $(srcdir)/$$i/Makefile $$i/Makefile; \
 		fi; \
 		if (test -r $$i/Makefile); then \
-			(cd $$i; $(MAKE) "VPATH=$(MOD_UPDIR)$(srcdir)/$$i" "srcdir=$(MOD_UPDIR)$(srcdir)/$$i" 'MAKE=$(MAKE)' distclean); \
+			(cd $$i; $(MAKE) "VPATH=$(MOD_UPDIR)$(srcdir)/$$i" top_srcdir="$(MOD_UPDIR)$(top_srcdir)" "srcdir=$(MOD_UPDIR)$(srcdir)/$$i" 'MAKE=$(MAKE)' distclean); \
 		fi; \
 	done
 

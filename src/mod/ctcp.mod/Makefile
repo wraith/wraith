@@ -1,13 +1,11 @@
 # Makefile for src/mod/ctcp.mod/
 
 srcdir = .
-depcomp = /bin/sh ../../../build/autotools/depcomp
 
-#This line is simply for configure to generate .deps/
 OBJS = ctcp.o
 
 include ./.deps/includes
-include ../mod.mk
+include $(top_srcdir)/build/build.mk
 
 doofus:
 	@echo ""
@@ -15,7 +13,7 @@ doofus:
 	@echo ""
 	@cd ../../../ && make
 
-static: ../ctcp.o
+static: $(OBJS)
 
 clean:
 	@rm -f .depend *.o *~
