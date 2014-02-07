@@ -19,10 +19,11 @@ autoconf:
 	@echo "Autoconf...."
 	@autoconf
 	@echo "Fixing configure temp paths"
-	@(if ! sed configure \
+	@(if ! sed \
 	  -e 's:config\.log:build/config.log:g' \
 	  -e 's:config\.status:build/config.status:g' \
 	  -e 's:confdefs\.h:build/confdefs.h:g' \
+	  configure \
 	  > ../../configure; then \
 	  echo "FAILED TO FIX configure" >&2; \
           cp configure ../../configure; \

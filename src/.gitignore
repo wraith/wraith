@@ -1,6 +1,5 @@
 /Makefile
 /buildinfo.h
-/*.c.real
 /_*.c
 /*~
 /help.h
@@ -15,3 +14,4 @@
 /makeset
 /set_default.h
 *.o
+*.i

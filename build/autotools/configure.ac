@@ -33,6 +33,7 @@ AC_CACHE_SAVE
 EGG_CHECK_CCWALL
 EGG_CHECK_CCPIPE
 CXX_FLAG_CHECK([CXXFLAGS], [-fcolor-diagnostics], [colordiagnostics])
+CXX_FLAG_CHECK([CXXFLAGS], [-Qunused-arguments], [unusedarguments])
 CXX_FLAG_CHECK([DEBCXXFLAGS], [-fstack-protector-all], [stackprotector])
 
 EGG_CHECK_DEPMODE
@@ -225,7 +226,7 @@ EGG_SUBST_VERSION
 EGG_SUBST_MOD_UPDIR
 DO_DEPS
 
-AC_CONFIG_FILES([Makefile lib/Makefile src/Makefile src/compat/Makefile src/crypto/Makefile src/mod/Makefile src/buildinfo.h src/mod/mod.mk])
+AC_CONFIG_FILES([Makefile lib/Makefile src/Makefile src/compat/Makefile src/crypto/Makefile src/mod/Makefile src/buildinfo.h])
 AC_OUTPUT
 
 AH_TEMPLATE(HAVE_ST_MTIM, [Define to 1 if your struct stat has an st_mtim member])

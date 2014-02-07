@@ -1,13 +1,11 @@
 # Makefile for src/mod/transfer.mod/
 
 srcdir = .
-depcomp = /bin/sh ../../../build/autotools/depcomp
 
-#This line is simply for configure to generate .deps/
 OBJS = transfer.o
 
 include ./.deps/includes
-include ../mod.mk
+include $(top_srcdir)/build/build.mk
 
 doofus:
 	@echo ""
@@ -15,7 +13,7 @@ doofus:
 	@echo ""
 	@cd ../../../ && make
 
-static: ../transfer.o
+static: $(OBJS)
 
 clean:
 	@rm -f .depend *.o *~
