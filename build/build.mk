@@ -1,7 +1,7 @@
 depcomp = /bin/sh $(top_srcdir)/build/autotools/depcomp
 
 %.o: %.c $(top_srcdir)/src/stringfix
-	@echo -e "Compiling: \033[1m$*\033[0m"
+	@echo -e "[C ]	\033[1m$*\033[0m"
 	if [ "$(CCDEPMODE)" = "gcc3" ]; then \
 	  if $(CXX) -MT '$@' -MD -MP -MF '.deps/$*.TPo' $(CXXFLAGS) $(CPPFLAGS) -E $< | $(top_srcdir)/src/stringfix > $<.i; then \
 	    mv '.deps/$*.TPo' '.deps/$*.Po'; \
