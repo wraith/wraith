@@ -1,15 +1,21 @@
 depcomp = /bin/sh $(top_srcdir)/build/autotools/depcomp
 
-%.o: %.c $(top_srcdir)/src/stringfix $(top_srcdir)/build/cc1plus
+%.o: %.c $(top_srcdir)/src/stringfix
 	@echo -e "Compiling: \033[1m$*\033[0m"
 	if [ "$(CCDEPMODE)" = "gcc3" ]; then \
-	  if STRINGFIX='$(top_srcdir)/$(STRINGFIX)' $(CXX) -MT '$@' -MD -MP -MF '.deps/$*.TPo' -DSTRINGFIX=$(STRINGFIX) -B$(top_srcdir)/build $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@; then \
+	  if $(CXX) -MT '$@' -MD -MP -MF '.deps/$*.TPo' $(CXXFLAGS) $(CPPFLAGS) -E $< | $(top_srcdir)/src/stringfix > $<.i; then \
 	    mv '.deps/$*.TPo' '.deps/$*.Po'; \
 	  else \
 	    rm -f '.deps/$*.Tpo'; \
 	    exit 1; \
 	  fi; \
 	else \
-	  STRINGFIX="$(top_srcdir)/$(STRINGFIX)" libtool=no source='$<' object='$@' depfile='.deps/$*.Po' tmpdepfile='.deps/$*.TPo' depmode=$(CCDEPMODE) $(depcomp) \
-	  $(CXX) -DSTRINGFIX=$(STRINGFIX) -B$(top_srcdir)/build $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@; \
+	  libtool=no source='$<' object='$@' depfile='.deps/$*.Po' tmpdepfile='.deps/$*.TPo' depmode=$(CCDEPMODE) $(depcomp) \
+	  $(CXX) $(CXXFLAGS) $(CPPFLAGS) -E $< | $(top_srcdir)/src/stringfix > $<.i; \
+	fi; \
+	if ! $(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $<.i -o $@; then \
+	  rm -f $<.i; \
+	  exit 1; \
+	else \
+	  rm -f $<.i; \
 	fi
