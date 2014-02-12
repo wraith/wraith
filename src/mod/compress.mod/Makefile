@@ -2,7 +2,7 @@
 
 srcdir = .
 
-OBJS = compress.o
+OBJS = compress.So
 
 include ./.deps/includes
 include $(top_srcdir)/build/build.mk
@@ -16,7 +16,7 @@ doofus:
 static: $(OBJS)
 
 clean:
-	@rm -f .depend *.o *~
+	@rm -f .depend *.So *~
 
 distclean: clean
 

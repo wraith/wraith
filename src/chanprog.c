@@ -308,7 +308,7 @@ void tell_verbose_status(int idx)
   int i;
   struct utsname un;
 
-  if (!uname(&un) < 0) {
+  if (uname(&un) < 0) {
     vers_t = " ";
     uni_t = "*unknown*";
   } else {
