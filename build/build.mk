@@ -3,11 +3,12 @@ depcomp = /bin/sh $(top_srcdir)/build/autotools/depcomp
 .SUFFIXES:
 .SUFFIXES: .c .cc .h .o
 
-.cc.o: $(top_srcdir)/src/stringfix
+.cc.o:
 	@echo -e "[CC]	\033[1m$*\033[0m"
 	trap "rm -f '.deps/$*.Tpo' $*.ii; exit 1" 1 2 3 5 10 13 15; \
 	if [ "$(CCDEPMODE)" = "gcc3" ]; then \
 	  if $(CXX) -MT '$@' -MD -MP -MF '.deps/$*.TPo' $(CXXFLAGS) $(CPPFLAGS) -E $< | $(top_srcdir)/src/stringfix > $*.ii; then \
+	    echo '$@: $(top_srcdir)/src/stringfix' >> '.deps/$*.TPo'; \
 	    mv '.deps/$*.TPo' '.deps/$*.Po'; \
 	  fi; \
 	else \
@@ -17,11 +18,12 @@ depcomp = /bin/sh $(top_srcdir)/build/autotools/depcomp
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $*.ii -o $@; \
 	rm -f '.deps/$*.Tpo' $*.ii
 
-.c.o: $(top_srcdir)/src/stringfix
+.c.o:
 	@echo -e "[C ]	\033[1m$*\033[0m"
 	trap "rm -f '.deps/$*.Tpo' $*.i; exit 1" 1 2 3 5 10 13 15; \
 	if [ "$(CCDEPMODE)" = "gcc3" ]; then \
 	  if $(CXX) -MT '$@' -MD -MP -MF '.deps/$*.TPo' $(CXXFLAGS) $(CPPFLAGS) -E $< | $(top_srcdir)/src/stringfix > $*.i; then \
+	    echo '$@: $(top_srcdir)/src/stringfix' >> '.deps/$*.TPo'; \
 	    mv '.deps/$*.TPo' '.deps/$*.Po'; \
 	  fi; \
 	else \
