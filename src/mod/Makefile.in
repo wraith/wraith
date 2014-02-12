@@ -65,7 +65,7 @@ build_msg:
 	cd $*.mod && $(MAKE_MOD) 'VPATH=$(MOD_UPDIR)$(srcdir)/$*.mod' 'srcdir=$(MOD_UPDIR)$(srcdir)/$*.mod' static;
 
 clean:
-	@rm -f *.o *~
+	@rm -f *.o *.So *~
 	@for i in *.mod; do \
 		if test ! -d $$i; then mkdir $$i; fi; \
 		if (test ! -r $$i/Makefile) && \
@@ -78,7 +78,7 @@ clean:
 	done
 
 distclean:
-	@rm -f *.o *~
+	@rm -f *.o *.So *~
 	@for i in *.mod; do \
 		if test ! -d $$i; then mkdir $$i; fi; \
 		if (test ! -r $$i/Makefile) && \
