@@ -14,57 +14,57 @@ include $(top_srcdir)/build/build.mk
 
 OBJCOPY = @OBJCOPY@
 
-OBJS = auth.o \
-	base64.o \
-	binary.o \
-	binds.o \
-	bg.o \
-	botcmd.o \
-	botmsg.o \
-	botnet.o \
-	chanprog.o \
-	cmds.o \
-	core_binds.o \
-	conf.o \
-	crypt.o \
-	dcc.o \
-	dccutil.o \
-	debug.o \
-	dl.o \
-	egg_timer.o \
-	enclink.o \
-	EncryptedStream.o \
-	flags.o \
-	garble.o \
-	libcrypto.o \
-	libssl.o \
-	libtcl.o \
-	log.o \
-	main.o \
-	match.o \
-	misc.o \
-	misc_file.o \
-	net.o \
-	openssl.o \
-	adns.o \
-	response.o \
-	rfc1459.o \
-	set.o \
-	shell.o \
-	socket.o \
-	sprintf.o \
-	userent.o \
-	userrec.o \
-	users.o
+OBJS = auth.So \
+	base64.So \
+	binary.So \
+	binds.So \
+	bg.So \
+	botcmd.So \
+	botmsg.So \
+	botnet.So \
+	chanprog.So \
+	cmds.So \
+	core_binds.So \
+	conf.So \
+	crypt.So \
+	dcc.So \
+	dccutil.So \
+	debug.So \
+	dl.So \
+	egg_timer.So \
+	enclink.So \
+	EncryptedStream.So \
+	flags.So \
+	garble.So \
+	libcrypto.So \
+	libssl.So \
+	libtcl.So \
+	log.So \
+	main.So \
+	match.So \
+	misc.So \
+	misc_file.So \
+	net.So \
+	openssl.So \
+	adns.So \
+	response.So \
+	rfc1459.So \
+	set.So \
+	shell.So \
+	socket.So \
+	sprintf.So \
+	userent.So \
+	userrec.So \
+	users.So
 
-MODOBJS = mod/channels.mod/channels.o \
-        mod/console.mod/console.o \
-        mod/ctcp.mod/ctcp.o \
-        mod/irc.mod/irc.o \
-        mod/server.mod/server.o \
-        mod/share.mod/share.o \
-        mod/transfer.mod/transfer.o \
-        mod/update.mod/update.o
+MODOBJS = mod/channels.mod/channels.So \
+        mod/console.mod/console.So \
+        mod/ctcp.mod/ctcp.So \
+        mod/irc.mod/irc.So \
+        mod/server.mod/server.So \
+        mod/share.mod/share.So \
+        mod/transfer.mod/transfer.So \
+        mod/update.mod/update.So
 
 
 MAKE_GENERIC = $(MAKE) 'MAKE=$(MAKE)' 'MAKEFLAGS=$(MAKEFLAGS)' 'CXX=$(CXX)' 'LD=$(LD)' 'STRIP=$(STRIP)' 'CFLGS=$(CFLGS)' 'CCDEPMODE=$(CCDEPMODE)'
@@ -115,7 +115,7 @@ stringfix: stringfix.c common.h config.h eggdrop.h
 $(EGGEXEC): stringfix ../$(EGGEXEC)
 
 clean:
-	@rm -f .depend *.o *~ _*.c
+	@rm -f .depend *.o *.So *~ _*.c
 
 build_msg:
 	@echo "[*] Compiling core components"

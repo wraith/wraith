@@ -44,13 +44,14 @@ for mf in $files; do
     }
     /^OBJS = / s/^OBJS = //p' < "$mf"`;
   do
-    base=`basename $file .o`
+    suffix=${file##*.}
+    base=${file%%.*}
     test -f "$dirpart/$base.c" || continue
     if ! test -f "$dirpart/.deps/$base.Po"; then
       echo '# dummy' > "$dirpart/.deps/$base.Po"
       #Remove the .o file, because it needs to be recompiled for its dependancies.
-      if test -f "$dirpart/$base.o"; then
-        rm -f "$dirpart/$base.o"
+      if test -f "$dirpart/${base}.${suffix}"; then
+        rm -f "$dirpart/${base}.${suffix}"
       fi
     fi
     echo "include .deps/$base.Po" >> "$dirpart/.deps/includes"
