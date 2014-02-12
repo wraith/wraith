@@ -124,14 +124,17 @@ void processline(char *line)
 
 int main(int argc, char *argv[])
 {
+  int readData = 0;
+
   if (argc == 2)
     help = 1;
   char tempBuf[1024] = "";
   while (!feof(stdin)) {
     if (fgets(tempBuf, sizeof(tempBuf), stdin) && !feof(stdin)) {
       processline(tempBuf);
+      readData = 1;
     }
   }
 
-  return 0;
+  return !(readData);
 }
