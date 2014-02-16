@@ -1159,6 +1159,8 @@ int channel_add(char *result, const char *newname, char *options, bool isdefault
     chan->channel.last_eI = 0;
     chan->channel.floodtime = NULL;
     chan->channel.floodnum = NULL;
+    chan->bot_roles = new bd::HashTable<bd::String, int>;
+    chan->role_bots = new bd::HashTable<short, bd::Array<bd::String> >;
 
     /* We _only_ put the dname (display name) in here so as not to confuse
      * any code later on. chan->name gets updated with the channel name as
