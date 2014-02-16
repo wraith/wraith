@@ -37,7 +37,6 @@
 #include "chanprog.h"
 
 flag_t FLAG[128];
-int role;
 
 struct rolecount role_counts[] = {
   {"voice",	ROLE_VOICE,	1},
@@ -505,7 +504,7 @@ doresolv(const struct chanset_t *chan)
   if (!chan)
     return 0;
 
-  if (role & ROLE_RESOLV)
+  if (chan->role & ROLE_RESOLV)
     return 1;
 
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_BOT, 0, 0, 0 };
@@ -522,7 +521,7 @@ dovoice(const struct chanset_t *chan)
   if (!chan)
     return 0;
 
-  if (role & ROLE_VOICE)
+  if (chan->role & ROLE_VOICE)
     return 1;
 
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_BOT, 0, 0, 0 };
@@ -536,7 +535,7 @@ dovoice(const struct chanset_t *chan)
 int
 doflood(const struct chanset_t *chan)
 {
-  if (role & ROLE_FLOOD)
+  if (chan->role & ROLE_FLOOD)
     return 1;
 
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_BOT, 0, 0, 0 };
@@ -555,7 +554,7 @@ dolimit(const struct chanset_t *chan)
   if (!chan)
     return 0;
 
-  if (role & ROLE_LIMIT)
+  if (chan->role & ROLE_LIMIT)
     return 1;
 
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_BOT, 0, 0, 0 };

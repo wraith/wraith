@@ -263,6 +263,9 @@ struct chanset_t {
 
   // List of bots for each role
   bd::HashTable<short, bd::Array<bd::String> > *role_bots;
+
+  // My role bitmask
+  int role;
 };
 
 /* behavior modes for the channel */

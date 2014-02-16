@@ -892,12 +892,12 @@ static void refresh_ban_kick(struct chanset_t* chan, memberlist *m, const char *
   for (int cycle = 0; cycle < 2; cycle++) {
     for (register maskrec* b = cycle ? chan->bans : global_bans; b; b = b->next) {
       if (wild_match(b->mask, user) || match_cidr(b->mask, user)) {
-        if ((role & ROLE_DEOP) && chan_hasop(m))
+        if ((chan->role & ROLE_DEOP) && chan_hasop(m))
   	  add_mode(chan, '-', 'o', m->nick);	/* Guess it can't hurt.	*/
 	check_exemptlist(chan, user);
 	do_mask(chan, chan->channel.ban, b->mask, 'b');
 	b->lastactive = now;
-        if (role & ROLE_KICK) {
+        if (chan->role & ROLE_KICK) {
           char c[512] = "";		/* The ban comment.	*/
 
           if (b->desc && b->desc[0] != '@')
@@ -3004,7 +3004,7 @@ static int gotkick(char *from, char *origmsg)
     if (mv->user) {
       // Revenge kick clients that kick our bots
       if (chan->revenge && !mv->is_me && m && m != mv && mv->user->bot && !(m->user && m->user->bot)) {
-        if ((role & ROLE_REVENGE) && !chan_sentkick(m) && me_op(chan)) {
+        if ((chan->role & ROLE_REVENGE) && !chan_sentkick(m) && me_op(chan)) {
           m->flags |= SENTKICK;
           dprintf(DP_MODE_NEXT, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_REVENGE));
         } else {

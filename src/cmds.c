@@ -2108,6 +2108,7 @@ static void cmd_suicide(int idx, char *par)
 static void cmd_debug(int idx, char *par)
 {
   char *cmd = NULL;
+  struct chanset_t* chan = NULL;
 
   if (!par[0]) 
     putlog(LOG_CMDS, "*", "#%s# debug", dcc[idx].nick);
@@ -2118,8 +2119,13 @@ static void cmd_debug(int idx, char *par)
     dprintf(idx, "Timesync: %li (%li)\n", (long) (now + timesync), (long)timesync);
   if (!cmd || (cmd && !strcmp(cmd, "now")))
     dprintf(idx, "Now: %li\n", (long)now);
-  if (!cmd || (cmd && !strcmp(cmd, "role")))
-    dprintf(idx, "Role: %d\n", role);
+  if (!cmd || (cmd && !strcmp(cmd, "role"))) {
+    for (chan = chanset; chan; chan = chan->next) {
+      if (chan->role) {
+        dprintf(idx, "Role: %20s: %d\n", chan->dname, chan->role);
+      }
+    }
+  }
   if (!cmd || (cmd && !strcmp(cmd, "net")))
     tell_netdebug(idx);
   if (!cmd || (cmd && !strcmp(cmd, "dns")))

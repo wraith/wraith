@@ -292,7 +292,14 @@ static void got_down(char *botnick, char *code, char *par)
 
 static void got_role(char *botnick, char *code, char *par)
 {
+  struct chanset_t* chan = NULL;
+  int role;
+
   role = atoi(newsplit(&par));
+
+  for (chan = chanset; chan; chan = chan->next) {
+    chan->role = role;
+  }
   putlog(LOG_DEBUG, "@", "Got role index %d", role);
 }
 

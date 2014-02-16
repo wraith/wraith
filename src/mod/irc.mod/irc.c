@@ -1619,7 +1619,7 @@ check_expired_chanstuff(struct chanset_t *chan)
       request_op(chan);
     }
 
-    if (role & ROLE_CHANMODE) {
+    if (chan->role & ROLE_CHANMODE) {
       recheck_channel_modes(chan);
     }
   }
