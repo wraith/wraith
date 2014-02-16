@@ -2109,6 +2109,8 @@ static void cmd_debug(int idx, char *par)
 {
   char *cmd = NULL;
   struct chanset_t* chan = NULL;
+  size_t roleidx;
+  bd::Array<bd::String> roles;
 
   if (!par[0]) 
     putlog(LOG_CMDS, "*", "#%s# debug", dcc[idx].nick);
@@ -2122,7 +2124,14 @@ static void cmd_debug(int idx, char *par)
   if (!cmd || (cmd && !strcmp(cmd, "role"))) {
     for (chan = chanset; chan; chan = chan->next) {
       if (chan->role) {
-        dprintf(idx, "Role: %20s: %d\n", chan->dname, chan->role);
+        roles.clear();
+        for (roleidx = 0; role_counts[roleidx].name; ++roleidx) {
+          if (chan->role & role_counts[roleidx].role) {
+            roles << role_counts[roleidx].name;
+          }
+        }
+        dprintf(idx, "Role: %-8s: %s\n", chan->dname,
+            static_cast<bd::String>(roles.join(" ")).c_str());
       }
     }
   }
