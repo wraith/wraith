@@ -14,6 +14,7 @@ maint
   * Binary now uses libelf internally for handling conf data.
   * Bot responses are now clear and nice. Recompile with your own list if you want
     in doc/responses.txt
+  * Remove channel limit when limitraise is disabled (#77)
 
 1.4.3
   * Default 'set promisc' to ignore since it's usually a false positive
