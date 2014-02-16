@@ -535,6 +535,9 @@ dovoice(const struct chanset_t *chan)
 int
 doflood(const struct chanset_t *chan)
 {
+  if (!chan)
+    return 0;
+
   if (chan->role & ROLE_FLOOD)
     return 1;
 
