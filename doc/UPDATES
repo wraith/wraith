@@ -2,6 +2,7 @@ next
   * Bot will now jump from the server it's on if it is removed from the server list. (fixes a changing network bug)
   * Properly honor exemptions when kicking matched RBL clients
   * Fix LASTON not being shared
+  * Remove channel limit when limitraise is disabled (#77)
 
 maint
   * Read in /etc/hosts on startup
