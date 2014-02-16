@@ -1,3 +1,5 @@
+* Remove channel limit when limitraise is disabled (#77)
+
 maint
   * Read in /etc/hosts on startup
   * Fix 'bl %group cmd' giving incorrect message when group/bots not found.
