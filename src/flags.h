@@ -59,6 +59,13 @@ enum deflag_event_t {
   DEFLAG_EVENT_MOP,
 };
 
+struct rolecount {
+  const char* name;
+  short role;
+  int count;
+};
+
+extern struct rolecount role_counts[];
 
 #define ROLE_VOICE    BIT0
 #define ROLE_FLOOD    BIT1

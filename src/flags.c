@@ -39,6 +39,22 @@
 flag_t FLAG[128];
 int role;
 
+struct rolecount role_counts[] = {
+  {"voice",	ROLE_VOICE,	1},
+  {"flood",	ROLE_FLOOD,	2},
+  {"op",	ROLE_OP,	1},
+  {"deop",	ROLE_DEOP,	1},
+  {"kick",	ROLE_KICK,	2},
+  {"ban",	ROLE_BAN,	2},
+  {"topic",	ROLE_TOPIC,	1},
+  {"limit",	ROLE_LIMIT,	1},
+  {"resolv",	ROLE_RESOLV,	2},
+  {"revenge",	ROLE_REVENGE,	3},
+  {"chanmode",	ROLE_CHANMODE,	1},
+  {"protect",	ROLE_PROTECT,	2},
+  {NULL,	0,		0},
+};
+
 void
 init_flags()
 {
