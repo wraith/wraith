@@ -1,3 +1,5 @@
+* Add cmd_roles (leaf only) to display roles for a channel.
+
 maint
   * Read in /etc/hosts on startup
   * Fix 'bl %group cmd' giving incorrect message when group/bots not found.
