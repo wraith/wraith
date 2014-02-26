@@ -742,7 +742,7 @@ static bool laston_gotshare(struct userrec *u, struct user_entry *e, char *par, 
 
   if (par[0])
     where = newsplit(&par);
-  if (!strcmp(where, "-"))
+  if (where && !strcmp(where, "-"))
     where = NULL;
   if (par[0])
     timeval = atol(newsplit(&par));
