@@ -112,8 +112,10 @@ static int is_compressedfile(char *filename)
   if (!fin)
     return COMPF_FAILED;
   len2 = fread(buf2, 1, sizeof(buf2), fin);
-  if (ferror(fin))
+  if (ferror(fin)) {
+    fclose(fin);
     return COMPF_FAILED;
+  }
   fclose(fin);
 
   /* Compare what we found.
@@ -239,6 +241,7 @@ static int compress_to_file(char *f_src, char *f_target, int mode_num)
   char buf[BUFLEN] = "", mode[5] = "";
   FILE *fin = NULL, *fout = NULL;
   size_t len;
+  int ret = COMPF_ERROR;
 
   adjust_mode_num(&mode_num);
   simple_snprintf(mode, sizeof mode, "wb%d", mode_num);
@@ -246,20 +249,20 @@ static int compress_to_file(char *f_src, char *f_target, int mode_num)
   if (!is_file(f_src)) {
     putlog(LOG_MISC, "*", "Failed to compress file `%s': not a file.",
 	   f_src);
-    return COMPF_ERROR;
+    goto err;
   }
   fin = fopen(f_src, "rb");
   if (!fin) {
     putlog(LOG_MISC, "*", "Failed to compress file `%s': open failed: %s.",
 	   f_src, strerror(errno));
-    return COMPF_ERROR;
+    goto err;
   }
 
   fout = gzopen(f_target, mode);
   if (!fout) {
     putlog(LOG_MISC, "*", "Failed to compress file `%s': gzopen failed.",
 	   f_src);
-    return COMPF_ERROR;
+    goto err;
   }
 
 #ifdef HAVE_MMAP
@@ -280,24 +283,29 @@ static int compress_to_file(char *f_src, char *f_target, int mode_num)
     if (ferror(fin)) {
       putlog(LOG_MISC, "*", "Failed to compress file `%s': fread failed: %s",
 	     f_src, strerror(errno));
-      return COMPF_ERROR;
+      goto err;
     }
     if (!len)
       break;
     if (gzwrite(fout, buf, (unsigned int) len) != len) {
       putlog(LOG_MISC, "*", "Failed to compress file `%s': gzwrite failed.",
 	     f_src);
-      return COMPF_ERROR;
+      goto err;
     }
   }
-  fclose(fin);
+
   if (gzclose(fout) != Z_OK) {
     putlog(LOG_MISC, "*", "Failed to compress file `%s': gzclose failed.",
 	   f_src);
+    goto err;
     return COMPF_ERROR;
   }
   compressed_files++;
-  return COMPF_SUCCESS;
+  ret = COMPF_SUCCESS;
+err:
+  if (fin)
+    fclose(fin);
+  return ret;
 }
 
 /* Compresses a file `filename' and saves it as `filename'.

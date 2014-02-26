@@ -851,11 +851,11 @@ static int raw_dcc_resend_send(char *filename, char *nick, char *from, int resen
   if (zz == (-1))
     return DCCSEND_NOSOCK;
   
+  if ((i = new_dcc(&DCC_GET_PENDING, sizeof(struct xfer_info))) == -1)
+     return DCCSEND_FULL;
   f = fopen(filename, "rb");
   if (!f)
     return DCCSEND_BADFN;
-  if ((i = new_dcc(&DCC_GET_PENDING, sizeof(struct xfer_info))) == -1)
-     return DCCSEND_FULL;
   dcc[i].sock = zz;
   dcc[i].addr = (in_addr_t) (-559026163);
   dcc[i].port = port;
