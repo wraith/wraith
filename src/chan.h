@@ -266,6 +266,8 @@ struct chanset_t {
 
   // My role bitmask
   int role;
+
+  int needs_role_rebalance;
 };
 
 /* behavior modes for the channel */

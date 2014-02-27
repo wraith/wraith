@@ -969,6 +969,8 @@ static void init_channel(struct chanset_t *chan, bool reset)
   chan->channel.floodtime = new bd::HashTable<bd::String, bd::HashTable<flood_t, time_t> >;
   chan->channel.floodnum  = new bd::HashTable<bd::String, bd::HashTable<flood_t, int> >;
   chan->channel.cached_members = new bd::HashTable<bd::String, memberlist*>;
+  chan->role = 0;
+  chan->needs_role_rebalance = 1;
 }
 
 static void clear_masklist(masklist *m)

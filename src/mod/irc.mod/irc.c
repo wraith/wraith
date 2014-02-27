@@ -1313,6 +1313,7 @@ reset_chan_info(struct chanset_t *chan)
     send_chan_who(DP_MODE, chan, 1);
     /* clear_channel nuked the data...so */
     dprintf(DP_HELP, "TOPIC %s\n", chan->name);//Topic is very low priority
+    rebalance_roles_chan(chan);
   }
 }
 
@@ -1753,7 +1754,7 @@ static void bot_release_nick (char *botnick, char *code, char *par) {
   release_nick(par);
 }
 
-static void rebalance_roles_chans(struct chanset_t* chan)
+static void rebalance_roles_chan(struct chanset_t* chan)
 {
   bd::Array<bd::String> bots;
   int *bot_bits;
@@ -1761,9 +1762,9 @@ static void rebalance_roles_chans(struct chanset_t* chan)
   size_t botcount, mappedbot, omappedbot, botidx, roleidx, rolecount;
   memberlist *m;
 
-  /* Reset current bits */
-  chan->bot_roles->clear();
-  chan->role_bots->clear();
+  if (chan->needs_role_rebalance == 0) {
+    return;
+  }
 
   /* Gather list of all bots in the channel. */
   /* XXX: Keep this known in chan->bots */
@@ -1806,6 +1807,10 @@ static void rebalance_roles_chans(struct chanset_t* chan)
     }
   }
 
+  /* Reset current bits */
+  chan->bot_roles->clear();
+  chan->role_bots->clear();
+
   /* Take bitmask of assigned roles and apply to bots. */
   for (botidx = 0; botidx < botcount; botidx++) {
     if (bot_bits[botidx] != 0) {
@@ -1827,6 +1832,7 @@ static void rebalance_roles_chans(struct chanset_t* chan)
   /* Set my own roles */
   chan->role = (*chan->bot_roles)[botname];
   free(bot_bits);
+  chan->needs_role_rebalance = 0;
 }
 
 static void rebalance_roles()
@@ -1837,7 +1843,7 @@ static void rebalance_roles()
     if (channel_pending(chan) || !channel_active(chan) ||
         !shouldjoin(chan) || (chan->channel.mode & CHANANON))
       continue;
-    rebalance_roles_chans(chan);
+    rebalance_roles_chan(chan);
   }
 }
 
