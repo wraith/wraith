@@ -49,6 +49,7 @@
  * Pre-defined list of kick reasons
  * Auto-limiter algorithm sets channel limit only when needed.
  * Configurable auto-voicer
+ * Bots automatically assign roles to manage channel (limit, voice, kicks, bans, etc)
  * [CIDR ban](http://svn.ratbox.org/svnroot/ircd-ratbox/trunk/doc/CIDR.txt) support
  * Bots DNS clients to see if they match users/bans. (+r)
  * Bots prefer requesting op from bots on same server or from a list of bots sorted by hops.
