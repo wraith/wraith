@@ -1,3 +1,6 @@
+master
+  * Require C++11 compiler support (G++ 4.7+, clang32+)
+
 maint
   * Read in /etc/hosts on startup
   * Fix 'bl %group cmd' giving incorrect message when group/bots not found.
