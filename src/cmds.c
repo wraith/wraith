@@ -4128,16 +4128,14 @@ static void rcmd_curnick(char * fbot, char * fhand, char * fidx) {
   if (!conf.bot->hub) {
     char tmp[301] = "";
 
-    if (server_online)
-      simple_snprintf(tmp, sizeof(tmp), "Currently: %-20s ", botname);
+    simple_snprintf(tmp, sizeof(tmp), "Currently: %-20s ",
+        server_online ? botname : "(not online)");
     if (jupenick[0] && strncmp(botname, jupenick, strlen(botname)))
       simple_snprintf(&tmp[strlen(tmp)], sizeof(tmp) - strlen(tmp), "Jupe: %s ", jupenick);
     else if (jupenick[0] && strcmp(botname, origbotname))
       simple_snprintf(&tmp[strlen(tmp)], sizeof(tmp) - strlen(tmp), "Jupe: %s Main: %s ", jupenick, origbotname);
     else if (strcmp(botname, origbotname))
       simple_snprintf(&tmp[strlen(tmp)], sizeof(tmp) - strlen(tmp), "Main: %s ", origbotname);
-    if (!server_online)
-      strlcat(tmp, "(not online)", sizeof(tmp));
     botnet_send_cmdreply(conf.bot->nick, fbot, fhand, fidx, tmp);
   }
 }
