@@ -1868,7 +1868,7 @@ void
 irc_init()
 {
   timer_create_secs(60, "irc_minutely", (Function) irc_minutely);
-  timer_create_secs(30, "rebalance_roles", (Function) rebalance_roles);
+  timer_create_secs(10, "rebalance_roles", (Function) rebalance_roles);
 
   /* Add our commands to the imported tables. */
   add_builtins("dcc", irc_dcc);
