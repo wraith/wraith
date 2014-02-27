@@ -347,7 +347,7 @@ See also: link%{+a}, newhub%{-}
 ###  $bchaninfo$b <channel>
    This lists all the settings for the bot on the given channel.
    It shows any of the following:
-        $bchanmode$b         These modes are enforced on the channel.
+        $bchanmode$b          These modes are enforced on the channel.
                           Both + and - modes can be enforced. Use {} to
                           add a key. '%dchanset #chan chanmode { +nt key }'
         $bgroups$b            List of groups that should join the channel.
@@ -355,8 +355,8 @@ See also: link%{+a}, newhub%{-}
                           '%dchanset #chan groups { main alt }'
 %{+m|m}
         $bauto-delay$b        Amount of seconds to wait before auto opping,
-                              or auto voicing a client based on flags or
-                              +voice
+                          or auto voicing a client based on flags or
+                          +voice
         $blimit$b             If this is set, the +l bot will raise the limit 
                           to the users in the channel + this amount. Set to
                           0 to disable.
@@ -378,8 +378,7 @@ See also: link%{+a}, newhub%{-}
         $bban-time$b          Set here how long temporary bans will last (in
                           minutes). If you set this setting to 0, the bot will
                           never remove them. (This also requires +dynamicbans)
-        $bban-type$b
-                              This setting defines what type of bans should be
+        $bban-type$b          This setting defines what type of bans should be
                           placed. Available types are:
                               0 *!user@host
                               1 *!*user@host
@@ -403,7 +402,7 @@ See also: link%{+a}, newhub%{-}
                           Once the ban is removed, then the exempt will be
                           removed the next time the bot checks. Please note
                           that this is an IRCnet feature.
-        $bknock$b         Allow auto-inviting on /KNOCK? +y bots will invite.
+        $bknock$b             Allow auto-inviting on /KNOCK? +y bots will invite.
                               None/0         Don't invite on /KNOCK
                               Op/1           Ops (+o) are invited on /KNOCK
                               Voice/2        Voices (+v) are invited on /KNOCK
@@ -422,7 +421,7 @@ See also: link%{+a}, newhub%{-}
                               Voice/2        Voices are exempt from +closed kicks
  
         $bflood-lock-time$b   How long in seconds to keep the channel locked
-                         during drone floods.
+                          during drone floods.
         $bfish-key$b          The key to use for FiSH encryption. Use '{ key }'
                           to set and '{}' to unset.
  
@@ -442,18 +441,18 @@ See also: link%{+a}, newhub%{-}
  
    The following options choose how to respond to specific events.
         Each can be set as any of the specified options.
-        ignore/0           Ignore
-        deop/1             Chattr user +d (deop)
-        kick/2             Chattr user +k (auto kickban)
-        delete/remove/3    Remove user
-        react/4            React and punish the client, but don't add or modify
-                             their user flags.
+        ignore/0          Ignore
+        deop/1            Chattr user +d (deop)
+        kick/2            Chattr user +k (auto kickban)
+        delete/remove/3   Remove user
+        react/4           React and punish the client, but don't add or modify
+                          their user flags.
    These events trigger the bot to react with the above option.
-      $bbad-cookie$b             Missing or invalid cookie in bot op line.
-      $bmanop$b                  Manual op.
-      $bmdop$b                   Mass deop.
-      $bmop$b                    Mass op.
-      $brevenge$b                Client kicking/banning/deopping another bot.
+      $bbad-cookie$b          Missing or invalid cookie in bot op line.
+      $bmanop$b               Manual op.
+      $bmdop$b                Mass deop.
+      $bmop$b                 Mass op.
+      $brevenge$b             Client kicking/banning/deopping another bot.
  
    The following can be set + or - (e.g. '%dchanset #channel -enforcebans')
         $bautoop$b         Bots that are +y will auto-op all users with 
@@ -476,7 +475,7 @@ See also: link%{+a}, newhub%{-}
                        more secure and the chances of someone hijacking the bot
                        for ops in your channel are much less. This is
                        highly recommeneded to always be set.
-        $bfloodban$b   If a channel flood (public, notice or ctcp) is detected, the
+        $bfloodban$b       If a channel flood (public, notice or ctcp) is detected, the
                        flooder will also be banned, in accordance with ban-type.
         $binactive$b       This prevents the bot from joining the channel (or
                        makes it leave the channel if it is already there). It
@@ -499,7 +498,7 @@ See also: link%{+a}, newhub%{-}
         $bprotect$b        Set chan +botbitch and mass deop the channel if someone
                        attempts to takeover. The channel is also set +backup
                        if protect-backup is set.
-        $brbl$b             Do RBL lookups on clients and ban on matches.
+        $brbl$b            Do RBL lookups on clients and ban on matches.
                        Uses 'rbl-servers'. See also '%dhelp set'. Only the
                        +r bot will do lookups. On positive match, the bot
                        will add a ban to the botnet and all bots will enforce
@@ -549,42 +548,42 @@ See also: link%{+a}, newhub%{-}
    indicating the number of times in how many seconds the flood will be
    triggered. Setting one of these to 0:0, 0:1, or 1:0 will deactivate the
    respective flood setting.
-        $bflood-chan$b  Set here how many channel messages in how many seconds
-                    from one host constitutes a flood. Setting this to 0 or 0:0
-                    disables text flood protection for the channel.
+        $bflood-chan$b   Set here how many channel messages in how many seconds
+                     from one host constitutes a flood. Setting this to 0 or 0:0
+                     disables text flood protection for the channel.
         $bflood-bytes$b  Set here how many bytes in how many seconds from one
-                    host constitutes a flood. Setting this to 0 or 0:0
-                    disables text flood protection for the channel.
-        $bflood-ctcp$b  Set here how many channel ctcps in how many seconds from
-                    one host constitutes a flood. Setting this to 0 or 0:0
-                    disables ctcp flood protection for the channel.
-        $bflood-join$b  Set here how many joins in how many seconds from one
-                    host constitutes a flood. Setting this to 0 or 0:0 disables
-                    join flood protection for the channel.
+                     host constitutes a flood. Setting this to 0 or 0:0
+                     disables text flood protection for the channel.
+        $bflood-ctcp$b   Set here how many channel ctcps in how many seconds from
+                     one host constitutes a flood. Setting this to 0 or 0:0
+                     disables ctcp flood protection for the channel.
+        $bflood-join$b   Set here how many joins in how many seconds from one
+                     host constitutes a flood. Setting this to 0 or 0:0 disables
+                     join flood protection for the channel.
         $bflood-kick$b   Set here how many kicks in how many seconds from one
-                    host constitutes a flood. Setting this to 0 or 0:0 disables
-                    kick flood protection for the channel.
+                     host constitutes a flood. Setting this to 0 or 0:0 disables
+                     kick flood protection for the channel.
         $bflood-deop$b   Set here how many deops in how many seconds from one
-                    host constitutes a flood. Setting this to 0 or 0:0 disables
-                    deop flood protection for the channel.
+                     host constitutes a flood. Setting this to 0 or 0:0 disables
+                     deop flood protection for the channel.
         $bflood-nick$b   Set here how many nick changes in how many seconds from
-                    one host constitutes a flood. Setting this to 0 or 0:0
-                    disables nick flood protection for the channel.
+                     one host constitutes a flood. Setting this to 0 or 0:0
+                     disables nick flood protection for the channel.
    The following settings will trigger a lockdown (chanmode +mi) for 'flood-lock-time'
    seconds. Unlike the other flood-* settings, these will trigger on $bmultiple$b clients.
    They are for catching mass floods.
         $bflood-mjoin$b  Set how many joins in how many seconds before triggering
-                    a lockdown for mass join. Setting this to 0 or 0:0 disables mass
-                    join protection for the channel.
+                     a lockdown for mass join. Setting this to 0 or 0:0 disables mass
+                     join protection for the channel.
         $bflood-mchan$b  Set here how many channel messages in how many seconds
-                    from any host constitutes a flood. Setting this to 0 or 0:0
-                    disables text flood protection for the channel.
-        $bflood-mbytes$b  Set here how many bytes in how many seconds from any
-                    host constitutes a flood. Setting this to 0 or 0:0
-                    disables text flood protection for the channel.
+                     from any host constitutes a flood. Setting this to 0 or 0:0
+                     disables text flood protection for the channel.
+        $bflood-mbytes$b Set here how many bytes in how many seconds from any
+                     host constitutes a flood. Setting this to 0 or 0:0
+                     disables text flood protection for the channel.
         $bflood-mctcp$b  Set here how many channel ctcps in how many seconds from
-                    any host constitutes a flood. Setting this to 0 or 0:0
-                    disables ctcp flood protection for the channel.
+                     any host constitutes a flood. Setting this to 0 or 0:0
+                     disables ctcp flood protection for the channel.
    These can all be changed simultaneously with $bflood-*$b
  
 See also: %{-}%{+n}+chan, -chan%{-}%{+m|m}, chanset%{-}
@@ -1657,110 +1656,110 @@ See also: reload, backup
    $uD$u:    Detected vars have the following options: $bignore$b/0, $bwarn$b/1, $breject$b/2,
                                                       $bdie$b/3, $bsuicide$b/4
  
-[L] $balias$b            List of dcc aliases in format '<alias> <cmd> [parms]'. First
-                          matching alias is used. Normal flag checking is done
-                          after the alias is expanded. 
-                          $bAliases may not reference other aliases.$b
-[N]  $bserver-port$b     Default port to use for server connections.
-[N]  $bserver-port-ssl$b Default port to use for SSL server connections.
-[B]  $bserver-use-ssl$b  Use SSL for IRC server connections?
+[L] $balias$b                List of dcc aliases in format '<alias> <cmd> [parms]'. First
+                         matching alias is used. Normal flag checking is done
+                         after the alias is expanded. 
+                         $bAliases may not reference other aliases.$b
+[N]  $bserver-port$b         Default port to use for server connections.
+[N]  $bserver-port-ssl$b     Default port to use for SSL server connections.
+[B]  $bserver-use-ssl$b      Use SSL for IRC server connections?
  
  
-[B]  $bauth-chan$b       If set, auth cmds will work in channels as well as in msg, otherwise 
-                          only in msg.
-[S]  $bauth-key$b        The authkey used during authing. Give to users if they need to auth. 
-                          (can be bot specific)
-[C]  $bauth-prefix$b     The prefix character used for msg cmds, ie: $u!$uop or $u.$uop
-[B]  $bauth-obscure$b    Will not halt on dcc login if pass is wrong. Will display auth hash..
-                          Will always fail at hash though.
-[N]  $bdcc-autoaway$b    Time in seconds until a user is set auto-away on dcc.
-                          (0/- to disable)
-[B]  $bmanop-warn$b      Warn users via /NOTICE when they msg-op in a channel with manop
-                           punishments.
+[B]  $bauth-chan$b           If set, auth cmds will work in channels as well as in msg, otherwise 
+                         only in msg.
+[S]  $bauth-key$b            The authkey used during authing. Give to users if they need to auth. 
+                         (can be bot specific)
+[C]  $bauth-prefix$b         The prefix character used for msg cmds, ie: $u!$uop or $u.$uop
+[B]  $bauth-obscure$b        Will not halt on dcc login if pass is wrong. Will display auth hash..
+                         Will always fail at hash though.
+[N]  $bdcc-autoaway$b        Time in seconds until a user is set auto-away on dcc.
+                         (0/- to disable)
+[B]  $bmanop-warn$b          Warn users via /NOTICE when they msg-op in a channel with manop
+                         punishments.
  
   *  Msg cmd vars may be left blank to disable usage of cmd.
-[S]  $bmsg-op$b          Defines the cmd for opping via msging the bot.
-[S]  $bmsg-pass$b        Defines the cmd for setting a pass via msging the bot.
-[S]  $bmsg-invite$b      Defines the cmd for requesting invite via msging the bot.
-[S]  $bmsg-ident$b       Defines the cmd for identing via msging the bot.
-[S]  $bmsg-release$b     Defines the cmd for releasing a nick.
+[S]  $bmsg-op$b              Defines the cmd for opping via msging the bot.
+[S]  $bmsg-pass$b            Defines the cmd for setting a pass via msging the bot.
+[S]  $bmsg-invite$b          Defines the cmd for requesting invite via msging the bot.
+[S]  $bmsg-ident$b           Defines the cmd for identing via msging the bot.
+[S]  $bmsg-release$b         Defines the cmd for releasing a nick.
  
-[N]  $bfork-interval$b   Number of seconds in between each fork() call made by the bot. 
-                          (Resets PID/CPU)
-[R]  $bflood-msg$b       Msgs:Secs until a host is ignored. (0:0 to disable) 
-[R]  $bflood-ctcp$b      Ctcps:Secs until a host is ignored. (0:0 to disable) 
-[R]  $bflood-callerid$b  Msgs:Secs until triggering to set CALLERID for
-                          60 seconds (0:0 to disable)
+[N]  $bfork-interval$b       Number of seconds in between each fork() call made by the bot. 
+                         (Resets PID/CPU)
+[R]  $bflood-msg$b           Msgs:Secs until a host is ignored. (0:0 to disable) 
+[R]  $bflood-ctcp$b          Ctcps:Secs until a host is ignored. (0:0 to disable) 
+[R]  $bflood-callerid$b      Msgs:Secs until triggering to set CALLERID for
+                         60 seconds (0:0 to disable)
  
-[D]  $blogin$b           How to handle someone logging in to the shell.
-[D]  $btrace$b           How to handle someone tracing/debugging the bot.
-[D]  $bpromisc$b         How to handle when an interface is set to promiscuous mode.
-[D]  $bhijack$b          How to handle when a commonly used hijack method attempt is detected. 
+[D]  $blogin$b               How to handle someone logging in to the shell.
+[D]  $btrace$b               How to handle someone tracing/debugging the bot.
+[D]  $bpromisc$b             How to handle when an interface is set to promiscuous mode.
+[D]  $bhijack$b              How to handle when a commonly used hijack method attempt is detected. 
  
-[L]  $bservers$b         Comma-separated list of servers the bot will use.
-[L]  $bservers-ssl$b     Comma-separated list of SSL servers to use if server-use-ssl is true.
-[L]  $bservers6$b        Comma-separated list of servers the bot will use (FOR IPv6).
-[L]  $bservers6-ssl$b    Comma-separated list of IPv6 SSL servers to use if server-use-ssl is true.
+[L]  $bservers$b             Comma-separated list of servers the bot will use.
+[L]  $bservers-ssl$b         Comma-separated list of SSL servers to use if server-use-ssl is true.
+[L]  $bservers6$b            Comma-separated list of servers the bot will use (FOR IPv6).
+[L]  $bservers6-ssl$b        Comma-separated list of IPv6 SSL servers to use if server-use-ssl is true.
  
-[N]  $bmsgburst$b        How many messages to burst at once to server. (Too high will excess flood)
-[N]  $bmsgrate$b         How often (msecs) to dequeue msgs to the server. Only used on
-                           non-ratbox servers. Too small a value can result in Excess Flood.
-[L]  $bgroups$b          List of groups that the affected bots are a part of.
-[L]  $brbl-servers$b     Servers to use for RBL checking in channels that are +rbl.
+[N]  $bmsgburst$b            How many messages to burst at once to server. (Too high will excess flood)
+[N]  $bmsgrate$b             How often (msecs) to dequeue msgs to the server. Only used on
+                         non-ratbox servers. Too small a value can result in Excess Flood.
+[L]  $bgroups$b              List of groups that the affected bots are a part of.
+[L]  $brbl-servers$b         Servers to use for RBL checking in channels that are +rbl.
  
-[S]  $brealname$b        The bot's "real name" when connecting. (supports '$n' expansion)
-[S]  $busermode$b        The bot's usermode on IRC. (Set on connect/rehash)
-[B]  $bdeaf$b            Runs bot in DEAF mode if the IRCD supports it. This will stop
-                           the IRCD from sending any channel conversations to the bot.
-                           This will decrease bandwidth/CPU used, as well as prevent
-                           sniffing of channels.
-[B]  $bcallerid$b        Run bot in CALLERID mode. This is commonly known as +g on most
-                           servers. +c bots will automatically accept messages from
-                           known users. Note that this will break msg-ident.
-[B]  $bfish-auto-keyx$b  Whether to automatically do a DH1010 FiSH Key exchange when
-                           accepting users. This is only supported if using callerid.
+[S]  $brealname$b            The bot's "real name" when connecting. (supports '$n' expansion)
+[S]  $busermode$b            The bot's usermode on IRC. (Set on connect/rehash)
+[B]  $bdeaf$b                Runs bot in DEAF mode if the IRCD supports it. This will stop
+                         the IRCD from sending any channel conversations to the bot.
+                         This will decrease bandwidth/CPU used, as well as prevent
+                         sniffing of channels.
+[B]  $bcallerid$b            Run bot in CALLERID mode. This is commonly known as +g on most
+                         servers. +c bots will automatically accept messages from
+                         known users. Note that this will break msg-ident.
+[B]  $bfish-auto-keyx$b      Whether to automatically do a DH1010 FiSH Key exchange when
+                         accepting users. This is only supported if using callerid.
 
-[B]  $bfish-paranoid$b   Whether to automatically re-keyexchange after every message. This
-                           mitigates replay attacks.
+[B]  $bfish-paranoid$b       Whether to automatically re-keyexchange after every message. This
+                         mitigates replay attacks.
 
-[S]  $baltchars$b        Define string of characters to cycle when generating alternative
-                          nicks when nick is taken. Ie: _-`[].
-[S]  $bjupenick$b        The bot will attempt to jupe this nick. It will never use a variation
+[S]  $baltchars$b            Define string of characters to cycle when generating alternative
+                         nicks when nick is taken. Ie: _-`[].
+[S]  $bjupenick$b            The bot will attempt to jupe this nick. It will never use a variation
                          of the nick though. It will still prefer 'nick' over a variation
                          of jupenick.
-[S]  $bnick$b            The bot's preferred nickname on IRC. It will auto rotate and append
+[S]  $bnick$b                The bot's preferred nickname on IRC. It will auto rotate and append
                          'altchars' on the end if taken.
-[N]  $bnotify-time$b     The number of seconds between server notify checks for nick, if
-                          the server does not support MONITOR.
+[N]  $bnotify-time$b         The number of seconds between server notify checks for nick, if
+                         the server does not support MONITOR.
  
-[B]  $birc-autoaway$b    Should the bot go away auto?
+[B]  $birc-autoaway$b        Should the bot go away auto?
  
-[B]  $bident-botnick$b   Send botnick instead of shell username on connect (non-ident)
-[B]  $boidentd$b         Make bot try and use oidentd spoofing as BOTNICK.
+[B]  $bident-botnick$b       Send botnick instead of shell username on connect (non-ident)
+[B]  $boidentd$b             Make bot try and use oidentd spoofing as BOTNICK.
  
-[B]  $blink_cleartext$b  Allows bots to link without an encryption scheme. This is needed
+[B]  $blink_cleartext$b      Allows bots to link without an encryption scheme. This is needed
                          for allowing older bots to link in. Be sure to never leave this on
                          unless upgrading or letting an older bot link in to upgrade.
  
-[B]  $bdccauth$b         Boolean (0 or 1). Set to use auth checking on dcc/telnet login.
-[N]  $bop-bots$b         Number of bots to ask every time an oprequest is to be made.
-[N]  $bin-bots$b         Number of bots to ask every time an inrequest is to be made.
+[B]  $bdccauth$b             Boolean (0 or 1). Set to use auth checking on dcc/telnet login.
+[N]  $bop-bots$b             Number of bots to ask every time an oprequest is to be made.
+[N]  $bin-bots$b             Number of bots to ask every time an inrequest is to be made.
  
-[R]  $bop-requests$b     (requests:seconds) limits how often the bot will ask for ops.
-[R]  $bclose-threshold$b (H:L) When at least H hubs but L or less leafs are linked, close 
-                          all channels.
+[R]  $bop-requests$b         (requests:seconds) limits how often the bot will ask for ops.
+[R]  $bclose-threshold$b     (H:L) When at least H hubs but L or less leafs are linked, close 
+                         all channels.
  
-[N]  $blag-threshold$b   Maximum acceptable server lag for the bot to send/honor requests.
-[N]  $bkill-threshold$b  When more than this many bots have been killed/klined in the last
-                          minute, close all channels.
-[N]  $bfight-threshold$b When more than this many +obeI/-obeI/kicks have happened on a channel
-                          in 1 minute, the channel is locked down. Channel must be +protect.
-                          See also '%dhelp chanset' for +protect.
+[N]  $blag-threshold$b       Maximum acceptable server lag for the bot to send/honor requests.
+[N]  $bkill-threshold$b      When more than this many bots have been killed/klined in the last
+                         minute, close all channels.
+[N]  $bfight-threshold$b     When more than this many +obeI/-obeI/kicks have happened on a channel
+                         in 1 minute, the channel is locked down. Channel must be +protect.
+                         See also '%dhelp chanset' for +protect.
  
-[N]  $bcloak-script$b    Decides which script the bot cloaks as. 
-                          If set to 0, a random script will be used.
-                          1=plain bitchx, 2=crackrock, 3=neonapple, 4=tunnelvision, 
-                          5=argon, 6=evolver, 7=prevail 8=cypress 9=mIRC 10=other
+[N]  $bcloak-script$b        Decides which script the bot cloaks as. 
+                         If set to 0, a random script will be used.
+                         1=plain bitchx, 2=crackrock, 3=neonapple, 4=tunnelvision, 
+                         5=argon, 6=evolver, 7=prevail 8=cypress 9=mIRC 10=other
  
  * $bExamples$b:
  
