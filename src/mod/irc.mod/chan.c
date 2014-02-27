@@ -2938,7 +2938,7 @@ static int gotpart(char *from, char *msg)
       reset_chan_info(chan);
     }
     /* This bot fullfilled a role, need to rebalance. */
-    if (is_bot(u) && (*chan->bot_roles)[nick] != 0) {
+    if (u && u->bot && (*chan->bot_roles)[u->handle] != 0) {
       chan->needs_role_rebalance = 1;
     }
     set_handle_laston(chan->dname, u, now);
@@ -3030,7 +3030,7 @@ static int gotkick(char *from, char *origmsg)
 
       set_handle_laston(chan->dname, mv->user, now);
       /* This bot fullfilled a role, need to rebalance. */
-      if (mv->user->bot && (*chan->bot_roles)[nick] != 0) {
+      if (mv->user->bot && (*chan->bot_roles)[mv->user->handle] != 0) {
         chan->needs_role_rebalance = 1;
       }
     }
@@ -3208,7 +3208,7 @@ static int gotquit(char *from, char *msg)
         if (u->bot) {
           counter_clear(u->handle);
           /* This bot fullfilled a role, need to rebalance. */
-          if ((*chan->bot_roles)[nick] != 0) {
+          if ((*chan->bot_roles)[u->handle] != 0) {
             chan->needs_role_rebalance = 1;
           }
         }

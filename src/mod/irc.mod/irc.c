@@ -1785,7 +1785,7 @@ static void rebalance_roles_chan(struct chanset_t* chan)
     if (!chk_op(fr, chan)) {
       continue;
     }
-    bots << m->nick;
+    bots << m->user->handle;
   }
   botcount = bots.length();
   if (botcount == 0)
@@ -1843,7 +1843,7 @@ static void rebalance_roles_chan(struct chanset_t* chan)
   }
 
   /* Set my own roles */
-  chan->role = (*chan->bot_roles)[botname];
+  chan->role = (*chan->bot_roles)[conf.bot->nick];
   free(bot_bits);
   chan->needs_role_rebalance = 0;
 }
