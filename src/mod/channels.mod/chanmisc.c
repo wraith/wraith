@@ -969,6 +969,8 @@ static void init_channel(struct chanset_t *chan, bool reset)
   chan->channel.floodtime = new bd::HashTable<bd::String, bd::HashTable<flood_t, time_t> >;
   chan->channel.floodnum  = new bd::HashTable<bd::String, bd::HashTable<flood_t, int> >;
   chan->channel.cached_members = new bd::HashTable<bd::String, memberlist*>;
+  chan->bot_roles = new bd::HashTable<bd::String, int>;
+  chan->role_bots = new bd::HashTable<short, bd::Array<bd::String> >;
   chan->role = 0;
   chan->needs_role_rebalance = 1;
 }
@@ -1016,6 +1018,10 @@ void clear_channel(struct chanset_t *chan, bool reset)
   chan->channel.floodtime = NULL;
   delete chan->channel.floodnum;
   chan->channel.floodnum = NULL;
+  delete chan->bot_roles;
+  chan->bot_roles = NULL;
+  delete chan->role_bots;
+  chan->role_bots = NULL;
 
   if (chan->channel.cached_members) {
     if (chan->channel.cached_members->size()) {
@@ -1161,8 +1167,6 @@ int channel_add(char *result, const char *newname, char *options, bool isdefault
     chan->channel.last_eI = 0;
     chan->channel.floodtime = NULL;
     chan->channel.floodnum = NULL;
-    chan->bot_roles = new bd::HashTable<bd::String, int>;
-    chan->role_bots = new bd::HashTable<short, bd::Array<bd::String> >;
 
     /* We _only_ put the dname (display name) in here so as not to confuse
      * any code later on. chan->name gets updated with the channel name as
