@@ -1286,12 +1286,26 @@ void check_this_user(char *hand, int del, char *host)
     for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
       bool check_member = 0;
       bool had_user = m->user ? 1 : 0;
+      struct userrec* u;
+      bool matches_hand = false;
+
       m->tried_getuser = 0;
       member_getuser(m);
-      struct userrec* u = m->user;
+      u = m->user;
+      if (u) {
+        matches_hand = (strcasecmp(u->handle, hand) == 0);
+      }
+
+      if (u && u->bot && matches_hand) {
+        /* Newly discovered bot, or deleted bot which fullfilled a role,
+         * need to rebalance. */
+        if (!del || (del && (*chan->bot_roles)[u->handle] != 0)) {
+          chan->needs_role_rebalance = 1;
+        }
+      }
       if (m->user && !had_user) // If a member is newly recognized, act on it
         check_member = 1;
-      else if (del != 2 && m->user && !strcasecmp(m->user->handle, hand)) { //general check / -user, match specified user
+      else if (del != 2 && m->user && matches_hand) { //general check / -user, match specified user
         check_member = 1;
         if (del == 1)
           u = NULL; // Pretend user doesn't exist when checking
