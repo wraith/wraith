@@ -971,6 +971,14 @@ static void init_channel(struct chanset_t *chan, bool reset)
   chan->channel.floodtime = new bd::HashTable<bd::String, bd::HashTable<flood_t, time_t> >;
   chan->channel.floodnum  = new bd::HashTable<bd::String, bd::HashTable<flood_t, int> >;
   chan->channel.cached_members = new bd::HashTable<bd::String, memberlist*>;
+  /* Don't clear out existing roles, keep them until rebalancing
+   * to not create a window of missing roles. */
+  if (!chan->bot_roles) {
+    chan->bot_roles = new bd::HashTable<bd::String, int>;
+    chan->role_bots = new bd::HashTable<short, bd::Array<bd::String> >;
+    chan->role = 0;
+  }
+  chan->needs_role_rebalance = 1;
 }
 
 static void clear_masklist(masklist *m)
@@ -1016,6 +1024,14 @@ void clear_channel(struct chanset_t *chan, bool reset)
   chan->channel.floodtime = NULL;
   delete chan->channel.floodnum;
   chan->channel.floodnum = NULL;
+  /* Don't clear out existing roles if resetting, keep them until rebalancing
+   * to not create a window of missing roles. */
+  if (!reset) {
+    delete chan->bot_roles;
+    chan->bot_roles = NULL;
+    delete chan->role_bots;
+    chan->role_bots = NULL;
+  }
 
   if (chan->channel.cached_members) {
     if (chan->channel.cached_members->size()) {

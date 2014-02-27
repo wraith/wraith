@@ -58,7 +58,6 @@ struct laston_info {
 };
 
 struct bot_addr {
-  unsigned int roleid;
   char *address;
   char *uplink;
   unsigned short hublevel;

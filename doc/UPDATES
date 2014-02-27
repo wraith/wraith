@@ -3,6 +3,7 @@ next
   * Properly honor exemptions when kicking matched RBL clients
   * Fix LASTON not being shared
   * Remove channel limit when limitraise is disabled (#77)
+  * Add cmd_roles (leaf only) to display roles for a channel.
 
 maint
   * Read in /etc/hosts on startup

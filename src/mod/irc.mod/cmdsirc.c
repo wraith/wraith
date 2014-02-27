@@ -1421,6 +1421,29 @@ static void cmd_authed(int idx, char *par)
   Auth::TellAuthed(idx);
 }
 
+static void cmd_roles(int idx, char *par)
+{
+  struct chanset_t* chan = NULL;
+  size_t roleidx;
+  int role;
+
+  chan = get_channel(idx, par);
+  if (!chan) {
+    return;
+  }
+
+  putlog(LOG_CMDS, "*", "#%s# (%s) roles", dcc[idx].nick, chan->dname);
+
+  dprintf(idx, "Roles for %s:\n", chan->dname);
+
+  /* Advertise roles */
+  for (roleidx = 0; role_counts[roleidx].name; roleidx++) {
+    role = role_counts[roleidx].role;
+    dprintf(idx, "  %-8s: %s\n", role_counts[roleidx].name,
+        static_cast<bd::String>((*chan->role_bots)[role].join(" ")).c_str());
+  }
+}
+
 static void cmd_channel(int idx, char *par)
 {
   struct chanset_t *chan = NULL;
@@ -1972,6 +1995,7 @@ static cmd_t irc_dcc[] =
   {"resetbans",		"o|o",	 (Function) cmd_resetbans,	NULL, LEAF|AUTH},
   {"resetexempts",	"o|o",	 (Function) cmd_resetexempts,	NULL, LEAF|AUTH},
   {"resetinvites",	"o|o",	 (Function) cmd_resetinvites,	NULL, LEAF|AUTH},
+  {"roles",		"o|o",	 (Function) cmd_roles,		NULL, LEAF},
   {"say",		"o|o",	 (Function) cmd_say,		NULL, LEAF},
   {"swhois",		"",	 (Function) cmd_swhois,		NULL, LEAF|AUTH},
   {"topic",		"o|o",	 (Function) cmd_topic,		NULL, LEAF|AUTH},

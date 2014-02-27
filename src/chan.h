@@ -257,6 +257,17 @@ struct chanset_t {
   char added_by[HANDLEN + 1];	/* who added the channel? */
   char dname[81];               /* what the users know the channel as like !eggdev */
   char name[81];                /* what the servers know the channel as, like !ABCDEeggdev */
+
+  // bitmask of roles for each bot
+  bd::HashTable<bd::String, int> *bot_roles;
+
+  // List of bots for each role
+  bd::HashTable<short, bd::Array<bd::String> > *role_bots;
+
+  // My role bitmask
+  int role;
+
+  int needs_role_rebalance;
 };
 
 /* behavior modes for the channel */

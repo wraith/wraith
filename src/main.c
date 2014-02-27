@@ -95,7 +95,6 @@ char	git_version[50] = "";
 
 bool	used_B = 0;		/* did we get started with -B? */
 bool	safe_to_log = 0;
-int 	role;
 bool 	loading = 0;
 int	default_flags = 0;	/* Default user flags and */
 bool     have_linked_to_hub = 0;  /* Have we ever been linked to a hub? */

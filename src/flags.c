@@ -38,6 +38,22 @@
 
 flag_t FLAG[128];
 
+struct rolecount role_counts[] = {
+  {"voice",	ROLE_VOICE,	1},
+  {"flood",	ROLE_FLOOD,	2},
+  {"op",	ROLE_OP,	1},
+  {"deop",	ROLE_DEOP,	1},
+  {"kick",	ROLE_KICK,	2},
+  {"ban",	ROLE_BAN,	2},
+  {"topic",	ROLE_TOPIC,	1},
+  {"limit",	ROLE_LIMIT,	1},
+  {"resolv",	ROLE_RESOLV,	2},
+  {"revenge",	ROLE_REVENGE,	3},
+  {"chanmode",	ROLE_CHANMODE,	1},
+  {"protect",	ROLE_PROTECT,	2},
+  {NULL,	0,		0},
+};
+
 void
 init_flags()
 {
@@ -488,6 +504,9 @@ doresolv(const struct chanset_t *chan)
   if (!chan)
     return 0;
 
+  if (chan->role & ROLE_RESOLV)
+    return 1;
+
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_BOT, 0, 0, 0 };
 
   get_user_flagrec(conf.bot->u, &fr, chan->dname);
@@ -502,6 +521,9 @@ dovoice(const struct chanset_t *chan)
   if (!chan)
     return 0;
 
+  if (chan->role & ROLE_VOICE)
+    return 1;
+
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_BOT, 0, 0, 0 };
 
   get_user_flagrec(conf.bot->u, &fr, chan->dname);
@@ -513,6 +535,12 @@ dovoice(const struct chanset_t *chan)
 int
 doflood(const struct chanset_t *chan)
 {
+  if (!chan)
+    return 0;
+
+  if (chan->role & ROLE_FLOOD)
+    return 1;
+
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_BOT, 0, 0, 0 };
   if (!chan)
     fr.match |= FR_ANYWH;
@@ -528,6 +556,9 @@ dolimit(const struct chanset_t *chan)
 {
   if (!chan)
     return 0;
+
+  if (chan->role & ROLE_LIMIT)
+    return 1;
 
   struct flag_record fr = { FR_GLOBAL | FR_CHAN | FR_BOT, 0, 0, 0 };
 

@@ -1313,6 +1313,7 @@ reset_chan_info(struct chanset_t *chan)
     send_chan_who(DP_MODE, chan, 1);
     /* clear_channel nuked the data...so */
     dprintf(DP_HELP, "TOPIC %s\n", chan->name);//Topic is very low priority
+    rebalance_roles_chan(chan);
   }
 }
 
@@ -1619,7 +1620,7 @@ check_expired_chanstuff(struct chanset_t *chan)
       request_op(chan);
     }
 
-    if (role == 3) {
+    if (chan->role & ROLE_CHANMODE) {
       recheck_channel_modes(chan);
     }
   }
@@ -1753,6 +1754,109 @@ static void bot_release_nick (char *botnick, char *code, char *par) {
   release_nick(par);
 }
 
+static void rebalance_roles_chan(struct chanset_t* chan)
+{
+  bd::Array<bd::String> bots;
+  int *bot_bits;
+  short role;
+  size_t botcount, mappedbot, omappedbot, botidx, roleidx, rolecount;
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
+  memberlist *m;
+
+  if (chan->needs_role_rebalance == 0) {
+    return;
+  }
+
+  if (channel_pending(chan) || !channel_active(chan) ||
+      !shouldjoin(chan) || (chan->channel.mode & CHANANON)) {
+    return;
+  }
+
+  /* Gather list of all bots in the channel. */
+  /* XXX: Keep this known in chan->bots */
+  for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
+    if (!member_getuser(m) || !is_bot(m->user)) {
+      continue;
+    }
+
+    get_user_flagrec(m->user, &fr, chan->dname, chan);
+
+    /* Only consider bots that can be opped to be roled. */
+    if (!chk_op(fr, chan)) {
+      continue;
+    }
+    bots << m->user->handle;
+  }
+  botcount = bots.length();
+  if (botcount == 0)
+    return;
+  bot_bits = (int*)calloc(botcount, sizeof(bot_bits[0]));
+
+  for (roleidx = 0; role_counts[roleidx].name; roleidx++) {
+    /* Map this role to a bot */
+    omappedbot = mappedbot = roleidx % botcount;
+    rolecount = role_counts[roleidx].count;
+    role = role_counts[roleidx].role;
+
+    /* Does the mapped bot have the bit yet? If not, check next bot,
+     * on max restart at 0 but avoid looping back to start. */
+    while (rolecount > 0) {
+      if (!(bot_bits[mappedbot] & role)) {
+        bot_bits[mappedbot] |= role;
+        --rolecount;
+      }
+
+      /* Try next bot */
+      ++mappedbot;
+
+      /* Reached the end, wrap around. */
+      if (mappedbot == botcount) {
+        mappedbot = 0;
+      }
+      /* Reached original bot, cannot satisfy the role need. */
+      if (mappedbot == omappedbot) {
+        break;
+      }
+    }
+  }
+
+  /* Reset current bits */
+  chan->bot_roles->clear();
+  chan->role_bots->clear();
+
+  /* Take bitmask of assigned roles and apply to bots. */
+  for (botidx = 0; botidx < botcount; botidx++) {
+    if (bot_bits[botidx] != 0) {
+      (*chan->bot_roles)[bots[botidx]] = bot_bits[botidx];
+    }
+  }
+
+  /* Fill role_bots */
+  for (roleidx = 0; role_counts[roleidx].name; roleidx++) {
+    role = role_counts[roleidx].role;
+    /* Find all bots with this role */
+    for (botidx = 0; botidx < botcount; botidx++) {
+      if (bot_bits[botidx] & role) {
+        (*chan->role_bots)[role] << bots[botidx];
+      }
+    }
+  }
+
+  /* Set my own roles */
+  chan->role = (*chan->bot_roles)[conf.bot->nick];
+  free(bot_bits);
+  chan->needs_role_rebalance = 0;
+}
+
+static void rebalance_roles()
+{
+  struct chanset_t* chan = NULL;
+
+  for (chan = chanset; chan; chan = chan->next) {
+    rebalance_roles_chan(chan);
+  }
+}
+
 static cmd_t irc_bot[] = {
   {"gi", "", (Function) getin_request, NULL, LEAF},
   {"mr", "", (Function) mass_request, NULL, LEAF},
@@ -1764,6 +1868,7 @@ void
 irc_init()
 {
   timer_create_secs(60, "irc_minutely", (Function) irc_minutely);
+  timer_create_secs(10, "rebalance_roles", (Function) rebalance_roles);
 
   /* Add our commands to the imported tables. */
   add_builtins("dcc", irc_dcc);
