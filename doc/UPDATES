@@ -11,6 +11,9 @@ next
     bots know which bots have which roles. (#39)
   * Add cmd_roles (leaf only) to display roles for a channel. (#39)
 
+master
+  * Require C++11 compiler support (G++ 4.7+, clang32+)
+
 maint
   * Read in /etc/hosts on startup
   * Fix 'bl %group cmd' giving incorrect message when group/bots not found.
