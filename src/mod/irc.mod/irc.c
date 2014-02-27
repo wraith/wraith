@@ -1760,6 +1760,7 @@ static void rebalance_roles_chan(struct chanset_t* chan)
   int *bot_bits;
   short role;
   size_t botcount, mappedbot, omappedbot, botidx, roleidx, rolecount;
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
   memberlist *m;
 
   if (chan->needs_role_rebalance == 0) {
@@ -1770,6 +1771,13 @@ static void rebalance_roles_chan(struct chanset_t* chan)
   /* XXX: Keep this known in chan->bots */
   for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
     if (!member_getuser(m) || !is_bot(m->user)) {
+      continue;
+    }
+
+    get_user_flagrec(m->user, &fr, chan->dname, chan);
+
+    /* Only consider bots that can be opped to be roled. */
+    if (!chk_op(fr, chan)) {
       continue;
     }
     bots << m->nick;
