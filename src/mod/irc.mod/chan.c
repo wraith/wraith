@@ -2718,6 +2718,10 @@ static int gotjoin(char *from, char *chname)
 	m->last = now;
 	m->delay = 0L;
 	m->flags = (chan_hasop(m) ? WASOP : 0);
+        /* New bot available for roles, rebalance. */
+        if (is_bot(m->user)) {
+          chan->needs_role_rebalance = 1;
+        }
 	set_handle_laston(chan->dname, m->user, now);
 //	m->flags |= STOPWHO;
         irc_log(chan, "%s returned from netsplit", m->nick);
@@ -2780,6 +2784,10 @@ static int gotjoin(char *from, char *chname)
 	} else {
           irc_log(chan, "Join: %s (%s)", nick, uhost);
           detect_chan_flood(m, from, chan, FLOOD_JOIN);
+          /* New bot available for roles, rebalance. */
+          if (is_bot(m->user)) {
+            chan->needs_role_rebalance = 1;
+          }
 	  set_handle_laston(chan->dname, m->user, now);
 	}
       }
@@ -2929,6 +2937,10 @@ static int gotpart(char *from, char *msg)
       chan->ircnet_status &= ~(CHAN_PEND | CHAN_JOINING);
       reset_chan_info(chan);
     }
+    /* This bot fullfilled a role, need to rebalance. */
+    if (is_bot(u) && (*chan->bot_roles)[nick] != 0) {
+      chan->needs_role_rebalance = 1;
+    }
     set_handle_laston(chan->dname, u, now);
 
     if (m) {
@@ -3017,6 +3029,10 @@ static int gotkick(char *from, char *origmsg)
       }
 
       set_handle_laston(chan->dname, mv->user, now);
+      /* This bot fullfilled a role, need to rebalance. */
+      if (mv->user->bot && (*chan->bot_roles)[nick] != 0) {
+        chan->needs_role_rebalance = 1;
+      }
     }
     irc_log(chan, "%s was kicked by %s (%s)", s1, from, msg);
     /* Kicked ME?!? the sods! */
@@ -3189,8 +3205,13 @@ static int gotquit(char *from, char *msg)
       member_getuser(m);
       u = m->user;
       if (u) {
-        if (u->bot)
+        if (u->bot) {
           counter_clear(u->handle);
+          /* This bot fullfilled a role, need to rebalance. */
+          if ((*chan->bot_roles)[nick] != 0) {
+            chan->needs_role_rebalance = 1;
+          }
+        }
         set_handle_laston(chan->dname, u, now); /* If you remove this, the bot will crash when the user record in question
 						   is removed/modified during the tcl binds below, and the users was on more
 						   than one monitored channel */

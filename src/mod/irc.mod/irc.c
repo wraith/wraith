@@ -1767,6 +1767,11 @@ static void rebalance_roles_chan(struct chanset_t* chan)
     return;
   }
 
+  if (channel_pending(chan) || !channel_active(chan) ||
+      !shouldjoin(chan) || (chan->channel.mode & CHANANON)) {
+    return;
+  }
+
   /* Gather list of all bots in the channel. */
   /* XXX: Keep this known in chan->bots */
   for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
@@ -1848,9 +1853,6 @@ static void rebalance_roles()
   struct chanset_t* chan = NULL;
 
   for (chan = chanset; chan; chan = chan->next) {
-    if (channel_pending(chan) || !channel_active(chan) ||
-        !shouldjoin(chan) || (chan->channel.mode & CHANANON))
-      continue;
     rebalance_roles_chan(chan);
   }
 }
