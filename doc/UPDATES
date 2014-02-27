@@ -9,6 +9,7 @@ maint
   * Fix build on systems without working libssp
   * Fix build detecting invalid openssl installations (ones with only static libs)
   * Give hint on bot when disconnected from hub for reason
+  * Fix cmd_netnick formatting issue with offline bots
 
 1.4.3
   * Default 'set promisc' to ignore since it's usually a false positive
