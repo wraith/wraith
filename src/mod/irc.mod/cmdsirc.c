@@ -1434,6 +1434,16 @@ static void cmd_roles(int idx, char *par)
 
   putlog(LOG_CMDS, "*", "#%s# (%s) roles", dcc[idx].nick, chan->dname);
 
+  if (!channel_active(chan)) {
+    dprintf(idx, "I'm not on %s right now!\n", chan->dname);
+    return;
+  }
+
+  if (chan->bot_roles->size() == 0) {
+    dprintf(idx, "Roles for %s are not yet calculated.\n", chan->dname);
+    return;
+  }
+
   dprintf(idx, "Roles for %s:\n", chan->dname);
 
   /* Advertise roles */
