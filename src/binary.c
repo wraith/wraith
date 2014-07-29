@@ -78,6 +78,18 @@ int checked_bin_buf = 0;
               (_block_len)*/				\
       )
 
+static inline size_t
+memmem_aligned(unsigned char *buf, size_t buf_size, size_t offset, void *mem,
+    size_t mem_size)
+{
+  MMAP_LOOP(offset, mem_size, buf_size) {
+    if (!memcmp(&buf[offset], mem, mem_size)) {
+      return offset;
+    }
+  }
+  return buf_size;
+}
+
 #define MMAP_READ(_map, _dest, _offset, _len)	\
   memcpy((_dest), &(_map)[(_offset)], (_len));	\
   (_offset) += (_len);
@@ -87,7 +99,7 @@ bin_checksum(const char *fname, int todo)
 {
   MD5_CTX ctx;
   static char hash[MD5_HASH_LENGTH + 1] = "";
-  unsigned char md5out[MD5_HASH_LENGTH + 1] = "", buf[PREFIXLEN + 1] = "";
+  unsigned char md5out[MD5_HASH_LENGTH + 1] = "";
   int fd = -1;
   size_t offset = 0, size = 0, newpos = 0;
   unsigned char *map = NULL, *outmap = NULL;
@@ -108,9 +120,9 @@ bin_checksum(const char *fname, int todo)
     size = lseek(fd, 0, SEEK_END);
     map = (unsigned char*) mmap(0, size, PROT_READ, MAP_SHARED, fd, 0);
     if ((void*)map == MAP_FAILED) goto fatal;
-    MMAP_LOOP(offset, sizeof(buf) - 1, size) {
-      if (!memcmp(&map[offset], &settings.prefix, PREFIXLEN))
-        break;
+    if ((offset = memmem_aligned(map, size, offset, &settings.prefix,
+        PREFIXLEN)) >= size) {
+      goto fatal;
     }
     MD5_Update(&ctx, map, offset);
 
@@ -134,9 +146,9 @@ bin_checksum(const char *fname, int todo)
     if ((void*)map == MAP_FAILED) goto fatal;
 
     /* Find the packdata */
-    MMAP_LOOP(offset, sizeof(buf) - 1, size) {
-      if (!memcmp(&map[offset], &settings.prefix, PREFIXLEN))
-        break;
+    if ((offset = memmem_aligned(map, size, offset, &settings.prefix,
+        PREFIXLEN)) >= size) {
+      goto fatal;
     }
     MD5_Update(&ctx, map, offset);
 
@@ -181,9 +193,9 @@ bin_checksum(const char *fname, int todo)
     if ((void*)map == MAP_FAILED) goto fatal;
 
     /* Find settings struct in original binary */
-    MMAP_LOOP(offset, sizeof(buf) - 1, size) {
-      if (!memcmp(&map[offset], &settings.prefix, PREFIXLEN))
-        break;
+    if ((offset = memmem_aligned(map, size, offset, &settings.prefix,
+        PREFIXLEN)) >= size) {
+      goto fatal;
     }
     MD5_Update(&ctx, map, offset);
     /* Hash everything after the packdata too */
