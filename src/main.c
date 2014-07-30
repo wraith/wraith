@@ -720,10 +720,12 @@ int main(int argc, char **argv)
   mypid = getpid();
   myuid = geteuid();
 
+#ifndef DEBUG
   if (myuid == 0 || getuid() == 0) {
     fprintf(stderr, "Don't run as root.\n");
     return 1;
   }
+#endif
 
   srandom(now % (mypid + getppid()) * randint(1000));
 
