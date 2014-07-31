@@ -176,6 +176,7 @@ bin_checksum(const char *fname, int todo)
       PREFIXLEN)) == 0) {
     goto fatal;
   }
+  madvise(map, size, MADV_SEQUENTIAL);
   MD5_Update(&ctx, map, offset);
 
   /* Hash everything after the packdata too */
