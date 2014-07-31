@@ -151,7 +151,7 @@ bin_checksum(const char *fname, int todo)
   static char hash[MD5_HASH_LENGTH + 1] = "";
   unsigned char md5out[MD5_HASH_LENGTH + 1] = "";
   int fd = -1;
-  size_t offset = 0, size = 0, newpos = 0;
+  size_t offset = 0, size = 0, newpos = 0, fname_len;
   unsigned char *map = NULL, *outmap = NULL;
   char *fname_bak = NULL;
   Tempfile *newbin = NULL;
@@ -164,49 +164,33 @@ bin_checksum(const char *fname, int todo)
 
   fixmod(fname);
 
+  fd = open(fname, O_RDONLY);
+  if (fd == -1) werr(ERR_BINSTAT);
+  size = lseek(fd, 0, SEEK_END);
+  map = (unsigned char*) mmap(0, size, PROT_READ, MAP_PRIVATE, fd, 0);
+  if ((void*)map == MAP_FAILED) {
+    goto fatal;
+  }
+  /* Find the packdata */
+  if ((offset = elf_find_data_mem_offset(fd, map, size, &settings.prefix,
+      PREFIXLEN)) == 0) {
+    goto fatal;
+  }
+  MD5_Update(&ctx, map, offset);
+
+  /* Hash everything after the packdata too */
+  MD5_Update(&ctx, &map[offset + sizeof(settings_t)], size - (offset +
+      sizeof(settings_t)));
+
+  MD5_Final(md5out, &ctx);
+  btoh(md5out, MD5_DIGEST_LENGTH, hash, sizeof(hash));
+  OPENSSL_cleanse(&ctx, sizeof(ctx));
+  OPENSSL_cleanse(md5out, sizeof(md5out));
+
   if (todo == GET_CHECKSUM) {
-    fd = open(fname, O_RDONLY);
-    if (fd == -1) werr(ERR_BINSTAT);
-    size = lseek(fd, 0, SEEK_END);
-    map = (unsigned char*) mmap(0, size, PROT_READ, MAP_PRIVATE, fd, 0);
-    if ((void*)map == MAP_FAILED) goto fatal;
-    if ((offset = elf_find_data_mem_offset(fd, map, size, &settings.prefix,
-        PREFIXLEN)) == 0) {
-      goto fatal;
-    }
-    MD5_Update(&ctx, map, offset);
-
-    /* Hash everything after the packdata too */
-    offset += sizeof(settings_t);
-    MD5_Update(&ctx, &map[offset], size - offset);
-
-    MD5_Final(md5out, &ctx);
-    btoh(md5out, MD5_DIGEST_LENGTH, hash, sizeof(hash));
-    OPENSSL_cleanse(&ctx, sizeof(ctx));
-
     munmap(map, size);
     close(fd);
   } else if (todo == GET_CONF) {
-    fd = open(fname, O_RDONLY);
-    if (fd == -1) werr(ERR_BINSTAT);
-    size = lseek(fd, 0, SEEK_END);
-    map = (unsigned char*) mmap(0, size, PROT_READ, MAP_PRIVATE, fd, 0);
-    if ((void*)map == MAP_FAILED) goto fatal;
-
-    /* Find the packdata */
-    if ((offset = elf_find_data_mem_offset(fd, map, size, &settings.prefix,
-        PREFIXLEN)) == 0) {
-      goto fatal;
-    }
-    MD5_Update(&ctx, map, offset);
-
-    /* Hash everything after the packdata too */
-    MD5_Update(&ctx, &map[offset + sizeof(settings_t)], size - (offset + sizeof(settings_t)));
-
-    MD5_Final(md5out, &ctx);
-    btoh(md5out, MD5_DIGEST_LENGTH, hash, sizeof(hash));
-    OPENSSL_cleanse(&ctx, sizeof(ctx));
-
     settings_t newsettings;
 
     /* Read the settings struct into newsettings */
@@ -227,28 +211,9 @@ bin_checksum(const char *fname, int todo)
   } else if (todo & WRITE_CHECKSUM) {
     newbin = new Tempfile("bin", 0);
 
-    size = strlen(fname) + 2;
-    fname_bak = (char *) my_calloc(1, size);
-    simple_snprintf(fname_bak, size, "%s~", fname);
-
-    fd = open(fname, O_RDONLY);
-    if (fd == -1) werr(ERR_BINSTAT);
-    size = lseek(fd, 0, SEEK_END);
-
-    map = (unsigned char*) mmap(0, size, PROT_READ, MAP_PRIVATE, fd, 0);
-    if ((void*)map == MAP_FAILED) goto fatal;
-
-    /* Find settings struct in original binary */
-    if ((offset = elf_find_data_mem_offset(fd, map, size, &settings.prefix,
-        PREFIXLEN)) == 0) {
-      goto fatal;
-    }
-    MD5_Update(&ctx, map, offset);
-    /* Hash everything after the packdata too */
-    MD5_Update(&ctx, &map[offset + sizeof(settings_t)], size - (offset + sizeof(settings_t)));
-    MD5_Final(md5out, &ctx);
-    btoh(md5out, MD5_DIGEST_LENGTH, hash, sizeof(hash));
-    OPENSSL_cleanse(&ctx, sizeof(ctx));
+    fname_len = strlen(fname) + 2;
+    fname_bak = (char *) my_calloc(1, fname_len);
+    simple_snprintf(fname_bak, fname_len, "%s~", fname);
 
     strlcpy(settings.hash, hash, sizeof(settings.hash));
 
