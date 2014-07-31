@@ -49,6 +49,9 @@
 #include <fcntl.h>
 #include <termios.h>
 
+#include <libelf.h>
+#include <gelf.h>
+
 settings_t settings = {
   SETTINGS_HEADER,
   /* -- STATIC -- */
@@ -69,30 +72,77 @@ static void tellconfig(settings_t *);
 
 int checked_bin_buf = 0;
 
-#define MMAP_LOOP(_offset, _block_len, _total)		\
-  for ((_offset) = 0; 					\
-       (_offset) < (_total); 				\
-       (_offset) += (_block_len)/*,			\
-       (_len) = ((_total) - (_offset)) < (_block_len) ? \
-              ((_total) - (_offset)) : 			\
-              (_block_len)*/				\
-      )
-
-static inline size_t
-memmem_aligned(unsigned char *buf, size_t buf_size, size_t offset, void *mem,
-    size_t mem_size)
-{
-  MMAP_LOOP(offset, mem_size, buf_size) {
-    if (!memcmp(&buf[offset], mem, mem_size)) {
-      return offset;
-    }
-  }
-  return buf_size;
-}
-
 #define MMAP_READ(_map, _dest, _offset, _len)	\
   memcpy((_dest), &(_map)[(_offset)], (_len));	\
   (_offset) += (_len);
+
+static size_t
+elf_find_data_offset(int fd) {
+  Elf *elf = NULL;
+  GElf_Shdr shdr;
+  Elf_Scn *scn = NULL;
+  const char *sh_name;
+  size_t shstrndx;
+  size_t offset = 0;
+
+  if (elf_version(EV_CURRENT) == EV_NONE)
+    goto failure;
+
+  if ((elf = elf_begin(fd, ELF_C_READ, NULL)) == NULL)
+    goto failure;
+
+  if (elf_kind(elf) != ELF_K_ELF)
+    goto failure;
+
+  elf_getshdrstrndx(elf, &shstrndx);
+
+  while ((scn = elf_nextscn(elf, scn)) != NULL) {
+    if (gelf_getshdr(scn, &shdr) != &shdr)
+      goto failure;
+    if (shdr.sh_type != SHT_PROGBITS)
+      continue;
+    if ((sh_name = elf_strptr(elf, shstrndx, shdr.sh_name)) == NULL)
+      goto failure;
+    if (strcmp(sh_name, ".data"))
+      continue;
+    offset = shdr.sh_offset;
+    break;
+  }
+
+  goto cleanup;
+
+failure:
+  offset = 0;
+#ifdef DEBUG
+  printf("Elf error: %s\n", elf_errmsg(-1));
+#endif
+
+cleanup:
+
+  if (elf != NULL)
+    elf_end(elf);
+  lseek(fd, 0, SEEK_SET);
+
+  return offset;
+}
+
+static size_t
+elf_find_data_mem_offset(int fd, unsigned char *map, size_t map_size,
+    void *symbol_header, size_t symbol_header_len) {
+  size_t data_offset;
+  unsigned char *symbol_start;
+
+  if ((data_offset = elf_find_data_offset(fd)) == 0)
+    return 0;
+
+  symbol_start = (unsigned char*)memmem(map + data_offset,
+      map_size - data_offset, symbol_header, symbol_header_len);
+
+  if (symbol_start == NULL)
+    return 0;
+
+  return symbol_start - map;
+}
 
 static char *
 bin_checksum(const char *fname, int todo)
@@ -120,8 +170,8 @@ bin_checksum(const char *fname, int todo)
     size = lseek(fd, 0, SEEK_END);
     map = (unsigned char*) mmap(0, size, PROT_READ, MAP_SHARED, fd, 0);
     if ((void*)map == MAP_FAILED) goto fatal;
-    if ((offset = memmem_aligned(map, size, offset, &settings.prefix,
-        PREFIXLEN)) >= size) {
+    if ((offset = elf_find_data_mem_offset(fd, map, size, &settings.prefix,
+        PREFIXLEN)) == 0) {
       goto fatal;
     }
     MD5_Update(&ctx, map, offset);
@@ -146,8 +196,8 @@ bin_checksum(const char *fname, int todo)
     if ((void*)map == MAP_FAILED) goto fatal;
 
     /* Find the packdata */
-    if ((offset = memmem_aligned(map, size, offset, &settings.prefix,
-        PREFIXLEN)) >= size) {
+    if ((offset = elf_find_data_mem_offset(fd, map, size, &settings.prefix,
+        PREFIXLEN)) == 0) {
       goto fatal;
     }
     MD5_Update(&ctx, map, offset);
@@ -193,8 +243,8 @@ bin_checksum(const char *fname, int todo)
     if ((void*)map == MAP_FAILED) goto fatal;
 
     /* Find settings struct in original binary */
-    if ((offset = memmem_aligned(map, size, offset, &settings.prefix,
-        PREFIXLEN)) >= size) {
+    if ((offset = elf_find_data_mem_offset(fd, map, size, &settings.prefix,
+        PREFIXLEN)) == 0) {
       goto fatal;
     }
     MD5_Update(&ctx, map, offset);
