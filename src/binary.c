@@ -279,7 +279,7 @@ bin_checksum(const char *fname, int todo)
       fatal(STR("Binary corrupted"), 0);
     }
 
-    if (movefile(fname, fname_bak)) {
+    if (copyfile(fname, fname_bak)) {
       printf(STR("Failed to move file (%s -> %s): %s\n"), fname, fname_bak, strerror(errno));
       delete newbin;
       fatal("", 0);
