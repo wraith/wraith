@@ -186,9 +186,7 @@ bin_checksum(const char *fname, int todo)
 
     munmap(map, size);
     close(fd);
-  }
-
-  if (todo == GET_CONF) {
+  } else if (todo == GET_CONF) {
     fd = open(fname, O_RDONLY);
     if (fd == -1) werr(ERR_BINSTAT);
     size = lseek(fd, 0, SEEK_END);
@@ -226,9 +224,7 @@ bin_checksum(const char *fname, int todo)
     close(fd);
 
     return ".";
-  }
-
-  if (todo & WRITE_CHECKSUM) {
+  } else if (todo & WRITE_CHECKSUM) {
     newbin = new Tempfile("bin", 0);
 
     size = strlen(fname) + 2;
