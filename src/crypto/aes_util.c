@@ -222,3 +222,4 @@ aes_decrypt_cbc_binary(const char *keydata, unsigned char *in, size_t *len, unsi
 
   return out;
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

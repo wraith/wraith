@@ -1876,3 +1876,4 @@ irc_init()
   add_builtins("raw", irc_raw);
   add_builtins("msg", C_msg);
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

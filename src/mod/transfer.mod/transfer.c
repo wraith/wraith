@@ -908,3 +908,4 @@ void transfer_report(int idx, int details)
 void transfer_init()
 {
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

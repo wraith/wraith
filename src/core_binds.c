@@ -298,3 +298,4 @@ void check_bind_time(struct tm *tm)
 	simple_snprintf(full, sizeof(full), "%02d %02d %02d %02d %04d", tm->tm_min, tm->tm_hour, tm->tm_mday, tm->tm_mon, tm->tm_year + 1900);
 	check_bind(BT_time, full, NULL, tm->tm_min, tm->tm_hour, tm->tm_mday, tm->tm_mon, tm->tm_year + 1900);
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

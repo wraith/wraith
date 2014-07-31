@@ -153,3 +153,4 @@ bd::String tcl_eval(const bd::String& str) {
   return bd::String();
 }
 #endif
+/* vim: set sts=2 sw=2 ts=8 et: */

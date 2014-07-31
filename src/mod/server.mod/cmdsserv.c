@@ -231,3 +231,4 @@ static cmd_t C_dcc_serv[] =
   {NULL,		NULL,	NULL,				NULL, 0}
 };
 
+/* vim: set sts=2 sw=2 ts=8 et: */

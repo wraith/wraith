@@ -242,3 +242,4 @@ b64dec_bd(const unsigned char *data, size_t *len)
   b64dec_bd_buf(data, len, dest);
   return dest;
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

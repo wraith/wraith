@@ -1712,3 +1712,4 @@ share_init()
   def_dcc_bot_kill = DCC_BOT.kill;
   DCC_BOT.kill = cancel_user_xfer;
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

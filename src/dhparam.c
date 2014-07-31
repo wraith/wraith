@@ -106,3 +106,4 @@ DH *get_dh512() {
    iDezzV0CAwY1RzzZRJm7m0wkssATAgEC
    -----END DH PARAMETERS-----
    */
+/* vim: set sts=2 sw=2 ts=8 et: */

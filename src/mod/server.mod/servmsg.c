@@ -2209,3 +2209,4 @@ fatal_dns:
   lostdcc(idx);
   return;
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

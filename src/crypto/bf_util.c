@@ -245,3 +245,4 @@ bf_decrypt_cbc_binary(const char *keydata, unsigned char *in, size_t *len, unsig
   return out;
 }
 #endif
+/* vim: set sts=2 sw=2 ts=8 et: */

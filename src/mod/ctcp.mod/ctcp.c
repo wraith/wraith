@@ -730,3 +730,4 @@ void ctcp_init()
 
   timer_create_secs(60, "ctcp_minutely", (Function) ctcp_minutely);
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

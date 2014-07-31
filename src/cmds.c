@@ -4877,3 +4877,4 @@ cmd_t C_dcc[] =
   {"uplink", 		"a", 	(Function) cmd_uplink, 		NULL, HUB},
   {NULL,		NULL,	NULL,				NULL, 0}
 };
+/* vim: set sts=2 sw=2 ts=8 et: */

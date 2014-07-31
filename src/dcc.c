@@ -2173,3 +2173,4 @@ dcc_telnet_got_ident(int i, char *host)
   else
     dprintf(i, "%s\n", response(RES_USERNAME));
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

@@ -1226,3 +1226,4 @@ void cmdpass_free(struct cmd_pass *x)
     free(cp);
   }
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

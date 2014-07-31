@@ -82,3 +82,4 @@ printf("init_thread called from %d\n", pid);
 
   pthread_create(&thread, &thread_attr, &thread_main, (void *) pid);
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

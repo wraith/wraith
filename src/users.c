@@ -1243,3 +1243,4 @@ void check_stale_dcc_users()
     }
   }
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

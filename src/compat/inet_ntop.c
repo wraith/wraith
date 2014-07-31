@@ -178,3 +178,4 @@ inet_ntop6(const u_char *src, char *dst, socklen_t size)
 }
 #endif /* USE_IPV6 */
 #endif /* !HAVE_INET_NTOP */
+/* vim: set sts=2 sw=2 ts=8 et: */

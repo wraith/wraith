@@ -1214,3 +1214,4 @@ int channel_add(char *result, const char *newname, char *options, bool isdefault
     join_chan(chan);
   return ret;
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

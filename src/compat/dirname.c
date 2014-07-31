@@ -45,3 +45,4 @@ dirname(const char *path)
         return(bname);
 }
 
+/* vim: set sts=2 sw=2 ts=8 et: */

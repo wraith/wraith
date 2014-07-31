@@ -113,3 +113,4 @@ writepid(const char *pidfile, pid_t pid)
   } else
     printf("* Warning!  Could not write %s file!\n", pidfile);
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

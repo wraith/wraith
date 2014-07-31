@@ -319,3 +319,4 @@ void init_signals()
   signal(SIGUSR1, got_usr1);
   signal(SIGINT, got_int);
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

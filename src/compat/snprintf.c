@@ -662,3 +662,4 @@ egg_snprintf(char *str,size_t count,const char *fmt, ...)
 }
 
 #endif /* !HAVE_SNPRINTF */
+/* vim: set sts=2 sw=2 ts=8 et: */
