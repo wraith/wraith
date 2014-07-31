@@ -168,7 +168,7 @@ bin_checksum(const char *fname, int todo)
     fd = open(fname, O_RDONLY);
     if (fd == -1) werr(ERR_BINSTAT);
     size = lseek(fd, 0, SEEK_END);
-    map = (unsigned char*) mmap(0, size, PROT_READ, MAP_SHARED, fd, 0);
+    map = (unsigned char*) mmap(0, size, PROT_READ, MAP_PRIVATE, fd, 0);
     if ((void*)map == MAP_FAILED) goto fatal;
     if ((offset = elf_find_data_mem_offset(fd, map, size, &settings.prefix,
         PREFIXLEN)) == 0) {
@@ -190,7 +190,7 @@ bin_checksum(const char *fname, int todo)
     fd = open(fname, O_RDONLY);
     if (fd == -1) werr(ERR_BINSTAT);
     size = lseek(fd, 0, SEEK_END);
-    map = (unsigned char*) mmap(0, size, PROT_READ, MAP_SHARED, fd, 0);
+    map = (unsigned char*) mmap(0, size, PROT_READ, MAP_PRIVATE, fd, 0);
     if ((void*)map == MAP_FAILED) goto fatal;
 
     /* Find the packdata */
@@ -235,7 +235,7 @@ bin_checksum(const char *fname, int todo)
     if (fd == -1) werr(ERR_BINSTAT);
     size = lseek(fd, 0, SEEK_END);
 
-    map = (unsigned char*) mmap(0, size, PROT_READ, MAP_SHARED, fd, 0);
+    map = (unsigned char*) mmap(0, size, PROT_READ, MAP_PRIVATE, fd, 0);
     if ((void*)map == MAP_FAILED) goto fatal;
 
     /* Find settings struct in original binary */
