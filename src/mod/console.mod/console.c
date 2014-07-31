@@ -392,3 +392,4 @@ console_init()
 
   add_entry_type(&USERENTRY_CONSOLE);
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

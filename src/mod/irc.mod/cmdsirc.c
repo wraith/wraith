@@ -1979,3 +1979,4 @@ static cmd_t irc_dcc[] =
   {NULL,		NULL,	 NULL,				NULL, 0}
 };
 
+/* vim: set sts=2 sw=2 ts=8 et: */

@@ -36,3 +36,4 @@ const char *degarble(int len, const char *g)
   return (const char *) garble_buffer[garble_ptr];
 }
 
+/* vim: set sts=2 sw=2 ts=8 et: */

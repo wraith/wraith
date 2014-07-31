@@ -327,3 +327,4 @@ match_cidr(const char *m, const char *a)
   return 0;
 }
 
+/* vim: set sts=2 sw=2 ts=8 et: */

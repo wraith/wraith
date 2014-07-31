@@ -668,3 +668,4 @@ void deflag_user(struct userrec *u, deflag_event_t why, const char *msg, const s
     set_user(&USERENTRY_COMMENT, u, tmp2);
   }
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

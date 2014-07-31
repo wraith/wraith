@@ -1220,3 +1220,4 @@ void server_init()
   timer_create_secs(60, "server_minutely", (Function) server_minutely);
 //  timer_create_secs(60, "minutely_checks", (Function) minutely_checks);
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

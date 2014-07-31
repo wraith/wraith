@@ -544,3 +544,4 @@ int add_note(char *to, char *from, char *msg, int idx, int echo)
 
   return NOTE_ERROR;
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

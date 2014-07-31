@@ -14,3 +14,4 @@ void *memcpy(void *dest, const void *src, size_t n)
   return dest;
 }
 #endif /* !HAVE_MEMCPY */
+/* vim: set sts=2 sw=2 ts=8 et: */

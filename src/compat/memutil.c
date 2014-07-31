@@ -62,3 +62,4 @@ void *my_realloc(void *ptr, size_t size)
   return x;
 }
 
+/* vim: set sts=2 sw=2 ts=8 et: */

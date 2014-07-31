@@ -134,3 +134,4 @@ int unload_libcrypto() {
   }
   return 1;
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

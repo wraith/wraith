@@ -93,3 +93,4 @@ _rfc_toupper(int c)
   return rfc_touppertab[(unsigned char) (c)];
 }
 
+/* vim: set sts=2 sw=2 ts=8 et: */

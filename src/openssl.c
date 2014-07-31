@@ -162,3 +162,4 @@ static int seed_PRNG(void)
   return 0;
 }
 #endif
+/* vim: set sts=2 sw=2 ts=8 et: */

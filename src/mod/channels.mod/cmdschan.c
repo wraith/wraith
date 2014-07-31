@@ -1396,3 +1396,4 @@ static cmd_t C_dcc_channels[] =
   {"unstick",	"o|o",	(Function) cmd_unstick,		NULL, AUTH},
   {NULL,	NULL,	NULL,			NULL, 0}
 };
+/* vim: set sts=2 sw=2 ts=8 et: */

@@ -255,3 +255,4 @@ size_t simple_snprintf (char *buf, size_t size, const char *format, ...)
   return ret;
 }
 
+/* vim: set sts=2 sw=2 ts=8 et: */

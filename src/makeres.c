@@ -104,3 +104,4 @@ int main(int argc, char **argv) {
   outs = bd::String::printf("%s/responses.h%s", argv[2], argc == 4 ? "~" : "");
   return parse_res(in, out, outs);
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

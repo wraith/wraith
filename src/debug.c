@@ -287,3 +287,4 @@ void init_signals()
   signal(SIGHUP, got_hup);
   signal(SIGUSR1, got_usr1);
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

@@ -1577,3 +1577,4 @@ gotmode(char *from, char *msg)
   return 0;
 }
 
+/* vim: set sts=2 sw=2 ts=8 et: */

@@ -212,3 +212,4 @@ void btoh(const unsigned char *md, size_t md_len, char *buf, const size_t buf_le
     doblock(3);
   }
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

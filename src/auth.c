@@ -268,3 +268,4 @@ int check_auth_dcc(Auth *auth, const char *cmd, const char *par)
 {
   return real_check_bind_dcc(cmd, auth->idx, par, auth);
 }
+/* vim: set sts=2 sw=2 ts=8 et: */
