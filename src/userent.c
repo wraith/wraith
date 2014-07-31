@@ -1121,3 +1121,4 @@ bool set_user(struct user_entry_type *et, struct userrec *u, void *d)
   }
   return r;
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

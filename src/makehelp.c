@@ -102,3 +102,4 @@ int main(int argc, char **argv) {
   bd::String in(argv[1]), out(argv[2]);
   return parse_help(in, out);
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

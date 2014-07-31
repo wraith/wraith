@@ -477,3 +477,4 @@ static cmd_t C_msg[] =
   {"bewm",		"",	(Function) msg_bewm,		NULL, LEAF},
   {NULL,		NULL,	NULL,				NULL, 0}
 };
+/* vim: set sts=2 sw=2 ts=8 et: */

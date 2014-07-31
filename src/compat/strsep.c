@@ -47,3 +47,4 @@ strsep (char **stringp, const char *delim)
     }
   /* NOTREACHED */
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

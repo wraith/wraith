@@ -71,3 +71,4 @@ strlcat(char *dst, const char *src, size_t siz)
 
   return (dlen + (s - src));    /* count does not include NUL */
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

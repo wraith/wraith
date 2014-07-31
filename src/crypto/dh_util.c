@@ -152,3 +152,4 @@ bool DH1080_comp(const bd::String privateKey, const bd::String theirPublicKeyB64
 
   return true;
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

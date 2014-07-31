@@ -481,3 +481,4 @@ void update_init()
     timer_create_secs(30, "check_updates", (Function) check_updates);
   }
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

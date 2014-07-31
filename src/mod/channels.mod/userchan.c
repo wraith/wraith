@@ -1060,3 +1060,4 @@ void check_expired_masks()
   if (use_invites)
     check_expired_mask('I');
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

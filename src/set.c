@@ -1202,3 +1202,4 @@ int cmd_set_real(const char *botnick, int idx, char *par)
   }
   return 0;
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

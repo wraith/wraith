@@ -348,3 +348,4 @@ struct enc_link enclink[] = {
   { "cleartext", LINK_CLEARTEXT, NULL, NULL, NULL, NULL },
   { NULL, 0, NULL, NULL, NULL, NULL }
 };
+/* vim: set sts=2 sw=2 ts=8 et: */

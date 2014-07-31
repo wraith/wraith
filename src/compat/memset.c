@@ -13,3 +13,4 @@ void *memset(void *dest, int c, size_t n)
   return dest;
 }
 #endif /* !HAVE_MEMSET */
+/* vim: set sts=2 sw=2 ts=8 et: */

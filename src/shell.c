@@ -911,3 +911,4 @@ char *shell_escape(const char *path)
   return ret;
 }
 
+/* vim: set sts=2 sw=2 ts=8 et: */

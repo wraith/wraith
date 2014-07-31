@@ -50,3 +50,4 @@ r_banned(struct chanset_t *chan)
 {
   return response(RES_BANNED);
 }
+/* vim: set sts=2 sw=2 ts=8 et: */

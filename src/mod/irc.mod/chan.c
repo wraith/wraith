@@ -3516,3 +3516,4 @@ static cmd_t irc_raw[] =
   {"710",	"",	(Function) got710,	"irc:710", LEAF},
   {NULL,	NULL,	NULL,			NULL, 0}
 };
+/* vim: set sts=2 sw=2 ts=8 et: */

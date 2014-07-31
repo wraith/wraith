@@ -117,3 +117,4 @@ int main(int argc, char **argv) {
   return parse_help(in, out);
 }
 
+/* vim: set sts=2 sw=2 ts=8 et: */

@@ -1227,3 +1227,4 @@ emacs_strftime (char *s, size_t maxsize, const char *format, const struct tm *tp
   return my_strftime (s, maxsize, format, tp, 0);
 }
 #endif
+/* vim: set sts=2 sw=2 ts=8 et: */

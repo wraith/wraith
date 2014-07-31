@@ -1831,3 +1831,4 @@ void lower_bot_linked(int idx)
   putbot(dcc[idx].nick, tmp);
 }
 
+/* vim: set sts=2 sw=2 ts=8 et: */
