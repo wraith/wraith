@@ -39,6 +39,7 @@
 #include "net.h"
 #include "userrec.h"
 #include <bdlib/src/Array.h>
+#include <bdlib/src/AtomicFile.h>
 #include <bdlib/src/String.h>
 
 #include <sys/wait.h>
@@ -151,10 +152,8 @@ bin_checksum(const char *fname, int todo)
   static char hash[MD5_HASH_LENGTH + 1] = "";
   unsigned char md5out[MD5_HASH_LENGTH + 1] = "";
   int fd = -1;
-  size_t offset = 0, size = 0, newpos = 0, fname_len;
+  size_t offset = 0, size = 0, newpos = 0;
   unsigned char *map = NULL, *outmap = NULL;
-  char *fname_bak = NULL;
-  Tempfile *newbin = NULL;
 
   MD5_Init(&ctx);
 
@@ -169,12 +168,15 @@ bin_checksum(const char *fname, int todo)
   size = lseek(fd, 0, SEEK_END);
   map = (unsigned char*) mmap(0, size, PROT_READ, MAP_PRIVATE, fd, 0);
   if ((void*)map == MAP_FAILED) {
-    goto fatal;
+    close(fd);
+    werr(ERR_BINSTAT);
   }
   /* Find the packdata */
   if ((offset = elf_find_data_mem_offset(fd, map, size, &settings.prefix,
       PREFIXLEN)) == 0) {
-    goto fatal;
+    munmap(map, size);
+    close(fd);
+    werr(ERR_BINSTAT);
   }
   madvise(map, size, MADV_SEQUENTIAL);
   MD5_Update(&ctx, map, offset);
@@ -210,11 +212,7 @@ bin_checksum(const char *fname, int todo)
 
     return ".";
   } else if (todo & WRITE_CHECKSUM) {
-    newbin = new Tempfile("bin", 0);
-
-    fname_len = strlen(fname) + 2;
-    fname_bak = (char *) my_calloc(1, fname_len);
-    simple_snprintf(fname_bak, fname_len, "%s~", fname);
+    bd::AtomicFile* newbin = new bd::AtomicFile();
 
     strlcpy(settings.hash, hash, sizeof(settings.hash));
 
@@ -225,10 +223,16 @@ bin_checksum(const char *fname, int todo)
     if (!(todo & GET_CHECKSUM))
       OPENSSL_cleanse(hash, sizeof(hash));
 
-    if (ftruncate(newbin->fd, size)) goto fatal;
+    if (!newbin->open(fname, BINMOD)) {
+      goto fatal;
+    }
+    if (ftruncate(newbin->fd(), size)) {
+      goto fatal;
+    }
 
     /* Copy everything up to this point into the new binary (including the settings header/prefix) */
-    outmap = (unsigned char*) mmap(0, size, PROT_READ|PROT_WRITE, MAP_SHARED, newbin->fd, 0);
+    outmap = (unsigned char*) mmap(0, size, PROT_READ|PROT_WRITE, MAP_SHARED,
+        newbin->fd(), 0);
     if ((void*)outmap == MAP_FAILED) goto fatal;
 
     offset += PREFIXLEN;
@@ -270,29 +274,21 @@ bin_checksum(const char *fname, int todo)
 
     munmap(map, size);
     close(fd);
+    fd = -1;
 
     munmap(outmap, size);
-    newbin->my_close();
 
     if (size != newpos) {
       delete newbin;
       fatal(STR("Binary corrupted"), 0);
     }
 
-    if (copyfile(fname, fname_bak)) {
-      printf(STR("Failed to move file (%s -> %s): %s\n"), fname, fname_bak, strerror(errno));
+    if (!newbin->commit()) {
+      printf(STR("Failed to commit to file %s: %s\n"), fname, strerror(errno));
       delete newbin;
       fatal("", 0);
     }
 
-    if (movefile(newbin->file, fname)) {
-      printf(STR("Failed to move file (%s -> %s): %s\n"), newbin->file, fname, strerror(errno));
-      delete newbin;
-      fatal("", 0);
-    }
-
-    fixmod(fname);
-    unlink(fname_bak);
     delete newbin;
     
     return hash;
