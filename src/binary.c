@@ -297,12 +297,12 @@ bin_checksum(const char *fname, int todo)
     
     return hash;
   fatal:
-    if ((void*)map != MAP_FAILED)
+    if (map != NULL && (void*)map != MAP_FAILED)
       munmap(map, size);
     if (fd != -1)
       close(fd);
 
-    if ((void*)outmap != MAP_FAILED)
+    if (outmap != NULL && (void*)outmap != MAP_FAILED)
       munmap(outmap, size);
     delete newbin;
     werr(ERR_BINSTAT);
