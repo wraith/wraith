@@ -1,3 +1,6 @@
+* Bot responses are now clear and nice. Recompile with your own list if you want
+  in doc/responses.txt
+
 master
   * Require C++11 compiler support (G++ 4.7+, clang32+)
 
