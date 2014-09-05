@@ -12,6 +12,8 @@ maint
   * Fix cmd_netnick formatting issue with offline bots
   * Fix crash when built with clang (FreeBSD)
   * Binary now uses libelf internally for handling conf data.
+  * Bot responses are now clear and nice. Recompile with your own list if you want
+    in doc/responses.txt
 
 1.4.3
   * Default 'set promisc' to ignore since it's usually a false positive
