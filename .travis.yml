@@ -9,7 +9,7 @@ before_install:
   - sudo apt-get update
   - sudo apt-get install libcppunit-dev libcppunit-1.12-1 libssl-dev openssl tcl tcl-dev
   - if [ "$CXX" = "clang++" ]; then sudo apt-get install clang-3.4; fi
-  - if [ "$CXX" = "g++" ]; then sudo apt-get install gcc-4.8; fi
+  - if [ "$CXX" = "g++" ]; then sudo apt-get install gcc-4.8 g++-4.8; fi
   - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
 
 script: ./configure && make debug && make test
