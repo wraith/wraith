@@ -1417,7 +1417,7 @@ gotmode(char *from, char *msg)
               }
               chan->channel.maxmembers = 0;
             } else {  /* + */
-              if (mparam == '\0')
+              if (*mparam == '\0')
                 break;
               chan->channel.maxmembers = atoi(mparam);
               if (channel_pending(chan))
@@ -1441,7 +1441,7 @@ gotmode(char *from, char *msg)
               chan->channel.mode |= CHANKEY;
             else
               chan->channel.mode &= ~CHANKEY;
-            if (mparam == '\0') 
+            if (*mparam == '\0')
               break;
 
             if (msign == '+') {
