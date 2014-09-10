@@ -5,13 +5,14 @@ depcomp = /bin/sh $(top_srcdir)/build/autotools/depcomp
 
 .cc.So:
 	@echo -e "{CC}	\033[1m$*\033[0m"
-	set -e; trap "rm -f '.deps/$*.TPo' $*.ii; exit 1" 1 2 3 5 10 13 15; \
+	set -e; trap "rm -f '.deps/$*.TPo' $*.ii $*.fail; exit 1" 1 2 3 5 10 13 15; \
 	if [ "$(CCDEPMODE)" = "gcc3" ]; then \
-	  if $(CXX) -MT '$@' -MD -MP -MF '.deps/$*.TPo' $(CXXFLAGS) $(CPPFLAGS) -E $< | $(top_srcdir)/src/stringfix > $*.ii; then \
+	  if { { $(CXX) -MT '$@' -MD -MP -MF '.deps/$*.TPo' $(CXXFLAGS) $(CPPFLAGS) -E $< || :> $*.fail; } | \
+	    $(top_srcdir)/src/stringfix > $*.ii; } && ! [ -f $*.fail ]; then \
 	    echo '$@: $(top_srcdir)/src/stringfix' >> '.deps/$*.TPo'; \
 	    mv '.deps/$*.TPo' '.deps/$*.Po'; \
 	   else \
-	     rm -f '.deps/$*.TPo' $*.ii; \
+	     rm -f '.deps/$*.TPo' $*.ii $*.fail; \
 	     exit 1; \
 	  fi; \
 	else \
@@ -23,13 +24,14 @@ depcomp = /bin/sh $(top_srcdir)/build/autotools/depcomp
 
 .c.So:
 	@echo -e "{C }	\033[1m$*\033[0m"
-	set -e; trap "rm -f '.deps/$*.TPo' $*.i; exit 1" 1 2 3 5 10 13 15; \
+	set -e; trap "rm -f '.deps/$*.TPo' $*.i $*.fail; exit 1" 1 2 3 5 10 13 15; \
 	if [ "$(CCDEPMODE)" = "gcc3" ]; then \
-	  if $(CXX) -MT '$@' -MD -MP -MF '.deps/$*.TPo' $(CXXFLAGS) $(CPPFLAGS) -E $< | $(top_srcdir)/src/stringfix > $*.i; then \
+	  if { { $(CXX) -MT '$@' -MD -MP -MF '.deps/$*.TPo' $(CXXFLAGS) $(CPPFLAGS) -E $< || :> $*.fail; } | \
+	    $(top_srcdir)/src/stringfix > $*.i; } && ! [ -f $*.fail ]; then \
 	    echo '$@: $(top_srcdir)/src/stringfix' >> '.deps/$*.TPo'; \
 	    mv '.deps/$*.TPo' '.deps/$*.Po'; \
 	   else \
-	     rm -f '.deps/$*.TPo' $*.i; \
+	     rm -f '.deps/$*.TPo' $*.i $*.fail; \
 	     exit 1; \
 	  fi; \
 	else \
