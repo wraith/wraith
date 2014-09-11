@@ -1,5 +1,58 @@
 #! /bin/sh
 
+strip_trailing_slashes() {
+  _STRIP=$1
+  while :
+  do
+    case $_STRIP in
+      ## If the last character is a slash, remove it
+      */) _STRIP=${_STRIP%/} ;;
+      *) break ;;
+    esac
+  done
+}
+
+_basename() {
+  fn_path=$1
+  fn_suffix=$2
+  case $fn_path in
+    "") _BASENAME=; return ;;
+     *)
+        strip_trailing_slashes "$fn_path"
+        case $_STRIP in
+          "") fn_path="/" ;;
+           *) fn_path=${_STRIP##*/} ;;
+        esac
+        ;;
+  esac
+
+
+  case $fn_path in
+    $fn_suffix | "/" ) _BASENAME="$fn_path" ;;
+                    *) _BASENAME=${fn_path%$fn_suffix} ;;
+  esac
+}
+
+basename() {
+  _basename "$@" && echo $_BASENAME
+}
+
+_dirname() {
+  _DIRNAME=$1
+  strip_trailing_slashes "$_DIRNAME"
+  case $_STRIP in
+    "") _DIRNAME='/'; return ;;
+   */*) _DIRNAME="${_STRIP%/*}" ;;
+     *) _DIRNAME='.'; return ;;
+  esac
+  strip_trailing_slashes "$_DIRNAME"
+  _DIRNAME=${_STRIP:-/}
+}
+
+dirname() {
+  _dirname "$@" && echo $_DIRNAME
+}
+
 ### Export LC_ALL=C sort(1) stays consistent
 export LC_ALL=C
 
