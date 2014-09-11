@@ -217,7 +217,7 @@ static int compress_to_file_mmap(FILE *fout, FILE *fin)
       return COMPF_ERROR;
 
     /* mmap file contents to memory */
-    buf = mmap(0, st.st_size, PROT_READ, MAP_SHARED, ifd, 0);
+    buf = mmap(0, st.st_size, PROT_READ, MAP_PRIVATE, ifd, 0);
     if (buf < 0)
       return COMPF_ERROR;
 

@@ -39,6 +39,7 @@
 #include "net.h"
 #include "userrec.h"
 #include <bdlib/src/Array.h>
+#include <bdlib/src/AtomicFile.h>
 #include <bdlib/src/String.h>
 
 #include <sys/wait.h>
@@ -48,6 +49,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <termios.h>
+
+#include <libelf.h>
+#include <gelf.h>
 
 settings_t settings = {
   SETTINGS_HEADER,
@@ -69,30 +73,77 @@ static void tellconfig(settings_t *);
 
 int checked_bin_buf = 0;
 
-#define MMAP_LOOP(_offset, _block_len, _total)		\
-  for ((_offset) = 0; 					\
-       (_offset) < (_total); 				\
-       (_offset) += (_block_len)/*,			\
-       (_len) = ((_total) - (_offset)) < (_block_len) ? \
-              ((_total) - (_offset)) : 			\
-              (_block_len)*/				\
-      )
-
-static inline size_t
-memmem_aligned(unsigned char *buf, size_t buf_size, size_t offset, void *mem,
-    size_t mem_size)
-{
-  MMAP_LOOP(offset, mem_size, buf_size) {
-    if (!memcmp(&buf[offset], mem, mem_size)) {
-      return offset;
-    }
-  }
-  return buf_size;
-}
-
 #define MMAP_READ(_map, _dest, _offset, _len)	\
   memcpy((_dest), &(_map)[(_offset)], (_len));	\
   (_offset) += (_len);
+
+static size_t
+elf_find_data_offset(int fd) {
+  Elf *elf = NULL;
+  GElf_Shdr shdr;
+  Elf_Scn *scn = NULL;
+  const char *sh_name;
+  size_t shstrndx;
+  size_t offset = 0;
+
+  if (elf_version(EV_CURRENT) == EV_NONE)
+    goto failure;
+
+  if ((elf = elf_begin(fd, ELF_C_READ, NULL)) == NULL)
+    goto failure;
+
+  if (elf_kind(elf) != ELF_K_ELF)
+    goto failure;
+
+  elf_getshdrstrndx(elf, &shstrndx);
+
+  while ((scn = elf_nextscn(elf, scn)) != NULL) {
+    if (gelf_getshdr(scn, &shdr) != &shdr)
+      goto failure;
+    if (shdr.sh_type != SHT_PROGBITS)
+      continue;
+    if ((sh_name = elf_strptr(elf, shstrndx, shdr.sh_name)) == NULL)
+      goto failure;
+    if (strcmp(sh_name, ".data"))
+      continue;
+    offset = shdr.sh_offset;
+    break;
+  }
+
+  goto cleanup;
+
+failure:
+  offset = 0;
+#ifdef DEBUG
+  printf("Elf error: %s\n", elf_errmsg(-1));
+#endif
+
+cleanup:
+
+  if (elf != NULL)
+    elf_end(elf);
+  lseek(fd, 0, SEEK_SET);
+
+  return offset;
+}
+
+static size_t
+elf_find_data_mem_offset(int fd, unsigned char *map, size_t map_size,
+    void *symbol_header, size_t symbol_header_len) {
+  size_t data_offset;
+  unsigned char *symbol_start;
+
+  if ((data_offset = elf_find_data_offset(fd)) == 0)
+    return 0;
+
+  symbol_start = (unsigned char*)memmem(map + data_offset,
+      map_size - data_offset, symbol_header, symbol_header_len);
+
+  if (symbol_start == NULL)
+    return 0;
+
+  return symbol_start - map;
+}
 
 static char *
 bin_checksum(const char *fname, int todo)
@@ -103,8 +154,6 @@ bin_checksum(const char *fname, int todo)
   int fd = -1;
   size_t offset = 0, size = 0, newpos = 0;
   unsigned char *map = NULL, *outmap = NULL;
-  char *fname_bak = NULL;
-  Tempfile *newbin = NULL;
 
   MD5_Init(&ctx);
 
@@ -114,51 +163,37 @@ bin_checksum(const char *fname, int todo)
 
   fixmod(fname);
 
-  if (todo == GET_CHECKSUM) {
-    fd = open(fname, O_RDONLY);
-    if (fd == -1) werr(ERR_BINSTAT);
-    size = lseek(fd, 0, SEEK_END);
-    map = (unsigned char*) mmap(0, size, PROT_READ, MAP_SHARED, fd, 0);
-    if ((void*)map == MAP_FAILED) goto fatal;
-    if ((offset = memmem_aligned(map, size, offset, &settings.prefix,
-        PREFIXLEN)) >= size) {
-      goto fatal;
-    }
-    MD5_Update(&ctx, map, offset);
-
-    /* Hash everything after the packdata too */
-    offset += sizeof(settings_t);
-    MD5_Update(&ctx, &map[offset], size - offset);
-
-    MD5_Final(md5out, &ctx);
-    btoh(md5out, MD5_DIGEST_LENGTH, hash, sizeof(hash));
-    OPENSSL_cleanse(&ctx, sizeof(ctx));
-
+  fd = open(fname, O_RDONLY);
+  if (fd == -1) werr(ERR_BINSTAT);
+  size = lseek(fd, 0, SEEK_END);
+  map = (unsigned char*) mmap(0, size, PROT_READ, MAP_PRIVATE, fd, 0);
+  if ((void*)map == MAP_FAILED) {
+    close(fd);
+    werr(ERR_BINSTAT);
+  }
+  /* Find the packdata */
+  if ((offset = elf_find_data_mem_offset(fd, map, size, &settings.prefix,
+      PREFIXLEN)) == 0) {
     munmap(map, size);
     close(fd);
+    werr(ERR_BINSTAT);
   }
+  madvise(map, size, MADV_SEQUENTIAL);
+  MD5_Update(&ctx, map, offset);
 
-  if (todo == GET_CONF) {
-    fd = open(fname, O_RDONLY);
-    if (fd == -1) werr(ERR_BINSTAT);
-    size = lseek(fd, 0, SEEK_END);
-    map = (unsigned char*) mmap(0, size, PROT_READ, MAP_SHARED, fd, 0);
-    if ((void*)map == MAP_FAILED) goto fatal;
+  /* Hash everything after the packdata too */
+  MD5_Update(&ctx, &map[offset + sizeof(settings_t)], size - (offset +
+      sizeof(settings_t)));
 
-    /* Find the packdata */
-    if ((offset = memmem_aligned(map, size, offset, &settings.prefix,
-        PREFIXLEN)) >= size) {
-      goto fatal;
-    }
-    MD5_Update(&ctx, map, offset);
+  MD5_Final(md5out, &ctx);
+  btoh(md5out, MD5_DIGEST_LENGTH, hash, sizeof(hash));
+  OPENSSL_cleanse(&ctx, sizeof(ctx));
+  OPENSSL_cleanse(md5out, sizeof(md5out));
 
-    /* Hash everything after the packdata too */
-    MD5_Update(&ctx, &map[offset + sizeof(settings_t)], size - (offset + sizeof(settings_t)));
-
-    MD5_Final(md5out, &ctx);
-    btoh(md5out, MD5_DIGEST_LENGTH, hash, sizeof(hash));
-    OPENSSL_cleanse(&ctx, sizeof(ctx));
-
+  if (todo == GET_CHECKSUM) {
+    munmap(map, size);
+    close(fd);
+  } else if (todo == GET_CONF) {
     settings_t newsettings;
 
     /* Read the settings struct into newsettings */
@@ -176,33 +211,8 @@ bin_checksum(const char *fname, int todo)
     close(fd);
 
     return ".";
-  }
-
-  if (todo & WRITE_CHECKSUM) {
-    newbin = new Tempfile("bin", 0);
-
-    size = strlen(fname) + 2;
-    fname_bak = (char *) my_calloc(1, size);
-    simple_snprintf(fname_bak, size, "%s~", fname);
-
-    fd = open(fname, O_RDONLY);
-    if (fd == -1) werr(ERR_BINSTAT);
-    size = lseek(fd, 0, SEEK_END);
-
-    map = (unsigned char*) mmap(0, size, PROT_READ, MAP_SHARED, fd, 0);
-    if ((void*)map == MAP_FAILED) goto fatal;
-
-    /* Find settings struct in original binary */
-    if ((offset = memmem_aligned(map, size, offset, &settings.prefix,
-        PREFIXLEN)) >= size) {
-      goto fatal;
-    }
-    MD5_Update(&ctx, map, offset);
-    /* Hash everything after the packdata too */
-    MD5_Update(&ctx, &map[offset + sizeof(settings_t)], size - (offset + sizeof(settings_t)));
-    MD5_Final(md5out, &ctx);
-    btoh(md5out, MD5_DIGEST_LENGTH, hash, sizeof(hash));
-    OPENSSL_cleanse(&ctx, sizeof(ctx));
+  } else if (todo & WRITE_CHECKSUM) {
+    bd::AtomicFile* newbin = new bd::AtomicFile();
 
     strlcpy(settings.hash, hash, sizeof(settings.hash));
 
@@ -213,10 +223,16 @@ bin_checksum(const char *fname, int todo)
     if (!(todo & GET_CHECKSUM))
       OPENSSL_cleanse(hash, sizeof(hash));
 
-    if (ftruncate(newbin->fd, size)) goto fatal;
+    if (!newbin->open(fname, BINMOD)) {
+      goto fatal;
+    }
+    if (ftruncate(newbin->fd(), size)) {
+      goto fatal;
+    }
 
     /* Copy everything up to this point into the new binary (including the settings header/prefix) */
-    outmap = (unsigned char*) mmap(0, size, PROT_READ|PROT_WRITE, MAP_SHARED, newbin->fd, 0);
+    outmap = (unsigned char*) mmap(0, size, PROT_READ|PROT_WRITE, MAP_SHARED,
+        newbin->fd(), 0);
     if ((void*)outmap == MAP_FAILED) goto fatal;
 
     offset += PREFIXLEN;
@@ -258,39 +274,31 @@ bin_checksum(const char *fname, int todo)
 
     munmap(map, size);
     close(fd);
+    fd = -1;
 
     munmap(outmap, size);
-    newbin->my_close();
 
     if (size != newpos) {
       delete newbin;
       fatal(STR("Binary corrupted"), 0);
     }
 
-    if (movefile(fname, fname_bak)) {
-      printf(STR("Failed to move file (%s -> %s): %s\n"), fname, fname_bak, strerror(errno));
+    if (!newbin->commit()) {
+      printf(STR("Failed to commit to file %s: %s\n"), fname, strerror(errno));
       delete newbin;
       fatal("", 0);
     }
 
-    if (movefile(newbin->file, fname)) {
-      printf(STR("Failed to move file (%s -> %s): %s\n"), newbin->file, fname, strerror(errno));
-      delete newbin;
-      fatal("", 0);
-    }
-
-    fixmod(fname);
-    unlink(fname_bak);
     delete newbin;
     
     return hash;
   fatal:
-    if ((void*)map != MAP_FAILED)
+    if (map != NULL && (void*)map != MAP_FAILED)
       munmap(map, size);
     if (fd != -1)
       close(fd);
 
-    if ((void*)outmap != MAP_FAILED)
+    if (outmap != NULL && (void*)outmap != MAP_FAILED)
       munmap(outmap, size);
     delete newbin;
     werr(ERR_BINSTAT);

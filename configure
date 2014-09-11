@@ -639,6 +639,8 @@ TCLLIBFN
 TCLLIB
 SSL_LIBS
 SSL_INCLUDES
+LIBELF_LIB
+LIBELF_BUNDLED
 DEBCXXFLAGS
 CCDEBUG
 STATIC
@@ -5175,6 +5177,97 @@ _ACEOF
 fi
 
   fi
+
+
+
+  LIBELF_DIR="\$(top_srcdir)/lib/libelf/lib"
+  LIBELF_LIB="${LIBELF_DIR}/libelf.a"
+  LIBELF_BUNDLED="${LIBELF_LIB}"
+  LIBELF_INCLUDE="-I${LIBELF_DIR}"
+
+  for ac_header in gelf.h libelf.h
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_cxx_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>build/confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+    ac_fn_cxx_check_type "$LINENO" "Elf_Note" "ac_cv_type_Elf_Note" "
+#include \"gelf.h\"
+#include \"libelf.h\"
+
+
+"
+if test "x$ac_cv_type_Elf_Note" = xyes; then :
+
+cat >>build/confdefs.h <<_ACEOF
+#define HAVE_ELF_NOTE 1
+_ACEOF
+
+
+
+$as_echo "#define HAVE_GELF_H 1" >>build/confdefs.h
+
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gelf_getehdr in -lelf" >&5
+$as_echo_n "checking for gelf_getehdr in -lelf... " >&6; }
+if ${ac_cv_lib_elf_gelf_getehdr+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lelf  $LIBS"
+cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char gelf_getehdr ();
+int
+main ()
+{
+return gelf_getehdr ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_lib_elf_gelf_getehdr=yes
+else
+  ac_cv_lib_elf_gelf_getehdr=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_elf_gelf_getehdr" >&5
+$as_echo "$ac_cv_lib_elf_gelf_getehdr" >&6; }
+if test "x$ac_cv_lib_elf_gelf_getehdr" = xyes; then :
+
+
+$as_echo "#define HAVE_LIBELF 1" >>build/confdefs.h
+
+        LIBELF_LIB="-Wl,-Bstatic -lelf -Wl,-Bdynamic"
+        LIBELF_BUNDLED=
+        LIBELF_INCLUDE=
+
+fi
+
+fi
+
+
+fi
+
+done
+
+
+  CPPFLAGS="${CPPFLAGS} ${LIBELF_INCLUDE}"
+
+
 
 
 
@@ -10262,7 +10355,14 @@ if [ $? -ne 0 ]; then
 fi
 
 
-echo ""
-echo ""
+echo
+echo
 echo "------------ Configuring BDLIB ------------"
-test -f lib/bdlib/configure && cd lib/bdlib && CXX="$CXX" ./configure
+[ -f lib/bdlib/configure ] && ( cd lib/bdlib && CXX="$CXX" ./configure )
+
+if [ -n "${LIBELF_BUNDLED}" ] && [ -f lib/libelf/configure ]; then
+  echo
+  echo
+  echo "------------ Configuring LIBELF ------------"
+  ( cd lib/libelf && CC="$CC" CXX="$CXX" ./configure )
+fi
