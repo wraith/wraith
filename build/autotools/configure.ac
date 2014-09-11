@@ -257,5 +257,5 @@ if [[ -f lib/bdlib/configure ]]; then
 fi
 AC_OUTPUT
 
-CXX="$CXX" TCL_INCLUDES="$TCL_INCLUDES" SSL_INCLUDES="$SSL_INCLUDES" \
+CXX="$CXX" CXXFLAGS="$CXXFLAGS" TCL_INCLUDES="$TCL_INCLUDES" SSL_INCLUDES="$SSL_INCLUDES" \
   SED="$SED" src/generate_defs.sh || exit 1
