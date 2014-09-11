@@ -21,11 +21,6 @@ AC_REQUIRE_CPP
 AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
 EGG_CHECK_CC
 
-# Crazy machines
-AC_AIX
-AC_ISC_POSIX
-AC_MINIX
-
 #checkpoint
 AC_CACHE_SAVE 
 
