@@ -19,11 +19,6 @@ AC_PROG_CXX([g++49 g++-4.9 g++48 g++-4.8 g++47 g++-4.7 g++46 g++-4.6 g++45 g++-4
 dnl AC_PROG_CC([gcc34 gcc-3.4 gcc33 gcc3 gcc-3.3 gcc cc c1])
 EGG_CHECK_CC
 
-# Crazy machines
-AC_AIX
-AC_ISC_POSIX
-AC_MINIX
-
 #checkpoint
 AC_CACHE_SAVE 
 
