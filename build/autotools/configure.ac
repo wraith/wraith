@@ -222,7 +222,6 @@ EGG_SUBST_MOD_UPDIR
 DO_DEPS
 
 AC_CONFIG_FILES([Makefile lib/Makefile src/Makefile src/compat/Makefile src/crypto/Makefile src/mod/Makefile src/buildinfo.h])
-AC_OUTPUT
 
 AH_TEMPLATE(HAVE_ST_MTIM, [Define to 1 if your struct stat has an st_mtim member])
 AH_TEMPLATE(HAVE_ST_MTIMESPEC, [Define to 1 if your struct stat has an st_mtimespec member])
@@ -253,14 +252,10 @@ if test -d .git; then
 fi
 ]
 
-CXX="$CXX" TCL_INCLUDES="$TCL_INCLUDES" SSL_INCLUDES="$SSL_INCLUDES" SED="$SED" src/generate_defs.sh
-[
-if [ $? -ne 0 ]; then
-  exit 1
+if [[ -f lib/bdlib/configure ]]; then
+  AC_CONFIG_SUBDIRS([lib/bdlib])
 fi
-]
+AC_OUTPUT
 
-echo ""
-echo ""
-echo "------------ Configuring BDLIB ------------"
-test -f lib/bdlib/configure && cd lib/bdlib && CXX="$CXX" ./configure
+CXX="$CXX" TCL_INCLUDES="$TCL_INCLUDES" SSL_INCLUDES="$SSL_INCLUDES" \
+  SED="$SED" src/generate_defs.sh || exit 1
