@@ -44,13 +44,12 @@ for file in ${files}; do
   echo "extern \"C\" {" > $defsFile_wrappers
   echo "extern \"C\" {" > $defsFile_post
 
-  cd src >/dev/null 2>&1
-  $CXX -E -I. -I.. -I../lib ${INCLUDES} -DHAVE_CONFIG_H -DGENERATE_DEFS ../${file} > $TMPFILE
+  cd src
+  $CXX $CXXFLAGS -E -I. -I.. -I../lib ${INCLUDES} -DHAVE_CONFIG_H -DGENERATE_DEFS ../${file} > $TMPFILE
   # Fix wrapped prototypes
   $SED -e :a -e N -e '$!ba' -e 's/,\n/,/g' $TMPFILE > $TMPFILE.sed
   mv $TMPFILE.sed $TMPFILE
-
-  cd .. >/dev/null 2>&1
+  cd ..
 
   for symbol in $($SED -n -e 's/.*DLSYM_GLOBAL(.*, \([^)]*\).*/\1/p' $TMPFILE|sort -u); do
     # Check if the typedef is already defined ...
