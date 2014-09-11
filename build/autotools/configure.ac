@@ -6,6 +6,7 @@ AC_PREREQ(2.59)
 AC_INIT([wraith],[],[wraith@botpack.net])
 AC_CONFIG_SRCDIR(src/eggdrop.h)
 AC_CONFIG_HEADER(src/config.h)
+AC_CONFIG_AUX_DIR([build/autotools])
 AC_COPYRIGHT([Copyright (c) Bryan Drewery])
 AC_REVISION($Revision$)
 
