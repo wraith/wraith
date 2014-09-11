@@ -31,11 +31,12 @@ debug: general notice_debug build.debug
 
 general:
 
-build:
-	+@cd bdlib && $(MAKE) bdlib
+bdlib/libbdlib.a:
+	+@cd bdlib && $(MAKE)
 
-build.debug:
-	+@cd bdlib && $(MAKE) debug
+build: bdlib/libbdlib.a
+
+build.debug: bdlib/libbdlib.a
 
 buildcheck: build
 
