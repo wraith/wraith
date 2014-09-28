@@ -2,7 +2,6 @@ next
   * Bot will now jump from the server it's on if it is removed from the server list. (fixes a changing network bug)
   * Properly honor exemptions when kicking matched RBL clients
   * Fix LASTON not being shared
-  * Remove channel limit when limitraise is disabled (#77)
   * Wraith now automatically assigns roles to bots for channels, no longer
     requiring manually assigning them with flags +flry for flood, limit,
     resolve, auto-voice, auto-op. These roles are decentralized and per-chan
@@ -30,6 +29,7 @@ maint
   * Binary now uses libelf internally for handling conf data.
   * Bot responses are now clear and nice. Recompile with your own list if you want
     in doc/responses.txt
+  * Remove channel limit when limitraise is disabled (#77)
 
 1.4.3
   * Default 'set promisc' to ignore since it's usually a false positive
