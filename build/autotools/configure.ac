@@ -70,6 +70,7 @@ AC_CACHE_SAVE
 
 # Checks for system libraries
 EGG_CHECK_LIBS
+CHECK_LIBELF
 
 # Checks for header files
 AC_HEADER_DIRENT
@@ -260,7 +261,14 @@ if [ $? -ne 0 ]; then
 fi
 ]
 
-echo ""
-echo ""
+echo
+echo
 echo "------------ Configuring BDLIB ------------"
-test -f lib/bdlib/configure && cd lib/bdlib && CXX="$CXX" ./configure
+[[ -f lib/bdlib/configure ]] && ( cd lib/bdlib && CXX="$CXX" ./configure )
+
+if [[ -n "${LIBELF_BUNDLED}" ]] && [[ -f lib/libelf/configure ]]; then
+  echo
+  echo
+  echo "------------ Configuring LIBELF ------------"
+  ( cd lib/libelf && CC="$CC" CXX="$CXX" ./configure )
+fi

@@ -168,7 +168,7 @@ int fixmod(const char *s)
 {
   if (!can_stat(s))
     return 1;
-  return chmod(s, S_IRUSR | S_IWUSR | S_IXUSR);
+  return chmod(s, BINMOD);
 }
 
 Tempfile::Tempfile(const char *_prefix, bool _useFopen)

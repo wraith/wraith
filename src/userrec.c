@@ -50,6 +50,7 @@
 #include "socket.h"
 #include "net.h"
 #include "EncryptedStream.h"
+#include <bdlib/src/AtomicFile.h>
 #include <bdlib/src/String.h>
 
 bool             noshare = 1;		/* don't send out to sharebots	    */
@@ -528,24 +529,28 @@ int real_write_userfile(int idx)
 
   putlog(LOG_DEBUG, "@", "Writing user entries.");
 
-  Tempfile *new_userfile = new Tempfile("userfile");
+  bd::AtomicFile *new_userfile = new bd::AtomicFile;
+
+  if (!new_userfile->open(userfile)) {
+    return 3;
+  }
 
   const char salt1[] = SALT1;
   EncryptedStream stream(salt1);
   stream_writeuserfile(stream, userlist);
-  if (stream.writeFile(new_userfile->fd)) {
+  if (stream.writeFile(new_userfile->fd())) {
     putlog(LOG_MISC, "*", "ERROR writing user file. (%s)", strerror(errno));
     delete new_userfile;
     return 3;
   }
-  new_userfile->my_close();
-  putlog(LOG_DEBUG, "@", "Done writing userfile.");
-
   char backup[DIRMAX] = "";
 
   simple_snprintf(backup, sizeof backup, "%s/%s~", conf.datadir, userfile);
   copyfile(userfile, backup);
-  movefile(new_userfile->file, userfile);
+  if (!new_userfile->commit()) {
+    return 3;
+  }
+  putlog(LOG_DEBUG, "@", "Done writing userfile.");
   delete new_userfile;
   return 0;
 }
