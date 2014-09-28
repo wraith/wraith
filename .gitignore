@@ -25,3 +25,13 @@ cscope.in.out
 cscope.out
 cscope.po.out
 tags
+/lib/libelf/Makefile
+/lib/libelf/config.cache
+/lib/libelf/config.h
+/lib/libelf/config.status
+/lib/libelf/lib/Makefile
+/lib/libelf/lib/stamp-h
+/lib/libelf/lib/sys_elf.h
+/lib/libelf/po/Makefile
+/lib/libelf/stamp-h
+/lib/libelf/lib/*.os

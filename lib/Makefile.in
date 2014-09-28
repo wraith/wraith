@@ -8,16 +8,18 @@ VPATH = @srcdir@
 
 #include $(top_srcdir)/build/build.mk
 
-.PHONY: default clean distclean normal debug general buildcheck notice notice_debug build units
+.PHONY: default clean distclean normal debug general buildcheck notice notice_debug build units libelf libelf_notice
 
 default: normal
 
 clean:
 	-+@cd bdlib && $(MAKE) clean
+	-+@test -f libelf/Makefile && cd libelf && $(MAKE) clean
 	@rm -f *.a
 
 distclean: clean
 	-+@cd bdlib && $(MAKE) distclean
+	-+@test -f libelf/Makefile && cd libelf && $(MAKE) distclean
 
 notice:
 	@echo "[*] Making libraries"
@@ -31,11 +33,21 @@ debug: general notice_debug build.debug
 
 general:
 
+libelf_notice:
+	@echo "[*] Building libelf"
+
+$(top_srcdir)/lib/libelf/lib/libelf.a: libelf_notice
+	+@cd libelf/lib && $(MAKE) libelf.a
+
+libelf: @LIBELF_BUNDLED@
+
 build:
 	+@cd bdlib && $(MAKE) bdlib
+	+@$(MAKE) libelf
 
 build.debug:
 	+@cd bdlib && $(MAKE) debug
+	+@$(MAKE) libelf
 
 buildcheck: build
 

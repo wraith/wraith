@@ -9,6 +9,8 @@
 
 #include <stdio.h>
 
+#define BINMOD		S_IRUSR | S_IWUSR | S_IXUSR
+
 int copyfile(const char *, const char *);
 int movefile(const char *, const char *);
 int is_file(const char *);
