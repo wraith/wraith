@@ -10,9 +10,6 @@ next
     will properly assign roles out to bots to not cause overlap. Only leaf
     bots know which bots have which roles. (#39)
   * Add cmd_roles (leaf only) to display roles for a channel. (#39)
-  * Bot responses are now clear and nice. Recompile with your own list if you want
-    in doc/responses.txt
-  * Binary now uses libelf internally for handling conf data.
 
 master
   * Require C++11 compiler support (G++ 4.7+, clang32+)
@@ -30,6 +27,9 @@ maint
   * Give hint on bot when disconnected from hub for reason
   * Fix cmd_netnick formatting issue with offline bots
   * Fix crash when built with clang (FreeBSD)
+  * Binary now uses libelf internally for handling conf data.
+  * Bot responses are now clear and nice. Recompile with your own list if you want
+    in doc/responses.txt
 
 1.4.3
   * Default 'set promisc' to ignore since it's usually a false positive
