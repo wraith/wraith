@@ -41,12 +41,13 @@ $(top_srcdir)/lib/libelf/lib/libelf.a: libelf_notice
 
 libelf: @LIBELF_BUNDLED@
 
-build:
-	+@cd bdlib && $(MAKE) bdlib
+bdlib/libbdlib.a:
+	+@cd bdlib && $(MAKE)
+
+build: bdlib/libbdlib.a
 	+@$(MAKE) libelf
 
-build.debug:
-	+@cd bdlib && $(MAKE) debug
+build.debug: bdlib/libbdlib.a
 	+@$(MAKE) libelf
 
 buildcheck: build

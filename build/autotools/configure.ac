@@ -6,6 +6,7 @@ AC_PREREQ(2.59)
 AC_INIT([wraith],[],[wraith@botpack.net])
 AC_CONFIG_SRCDIR(src/eggdrop.h)
 AC_CONFIG_HEADER(src/config.h)
+AC_CONFIG_AUX_DIR([build/autotools])
 AC_COPYRIGHT([Copyright (c) Bryan Drewery])
 AC_REVISION($Revision$)
 
@@ -223,7 +224,6 @@ EGG_SUBST_MOD_UPDIR
 DO_DEPS
 
 AC_CONFIG_FILES([Makefile lib/Makefile src/Makefile src/compat/Makefile src/crypto/Makefile src/mod/Makefile src/buildinfo.h])
-AC_OUTPUT
 
 AH_TEMPLATE(HAVE_ST_MTIM, [Define to 1 if your struct stat has an st_mtim member])
 AH_TEMPLATE(HAVE_ST_MTIMESPEC, [Define to 1 if your struct stat has an st_mtimespec member])
@@ -254,21 +254,13 @@ if test -d .git; then
 fi
 ]
 
-CXX="$CXX" TCL_INCLUDES="$TCL_INCLUDES" SSL_INCLUDES="$SSL_INCLUDES" SED="$SED" src/generate_defs.sh
-[
-if [ $? -ne 0 ]; then
-  exit 1
+if [[ -f lib/bdlib/configure ]]; then
+  AC_CONFIG_SUBDIRS([lib/bdlib])
 fi
-]
-
-echo
-echo
-echo "------------ Configuring BDLIB ------------"
-[[ -f lib/bdlib/configure ]] && ( cd lib/bdlib && CXX="$CXX" ./configure )
-
 if [[ -n "${LIBELF_BUNDLED}" ]] && [[ -f lib/libelf/configure ]]; then
-  echo
-  echo
-  echo "------------ Configuring LIBELF ------------"
-  ( cd lib/libelf && CC="$CC" CXX="$CXX" ./configure )
+  AC_CONFIG_SUBDIRS([lib/libelf])
 fi
+AC_OUTPUT
+
+CXX="$CXX" CXXFLAGS="$CXXFLAGS" TCL_INCLUDES="$TCL_INCLUDES" SSL_INCLUDES="$SSL_INCLUDES" \
+  SED="$SED" src/generate_defs.sh || exit 1
