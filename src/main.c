@@ -531,8 +531,6 @@ static void core_secondly()
   static int cnt = 0;
   time_t miltime;
 
-  if (fork_interval && backgrd && ((now - lastfork) > fork_interval))
-      do_fork();
   ++cnt;
 
   if (((conf.bot->localhub || conf.bot->hub) && (cnt % 30) == 0) || (cnt % 5) == 0) {

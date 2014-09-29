@@ -7,8 +7,6 @@
 
 #include <sys/types.h>
 
-extern time_t 		lastfork;
-
 pid_t do_fork();
 int close_tty();
 void writepid(const char *, pid_t);

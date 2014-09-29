@@ -1684,8 +1684,6 @@ See also: reload, backup
 [S]  $bmsg-ident$b           Defines the cmd for identing via msging the bot.
 [S]  $bmsg-release$b         Defines the cmd for releasing a nick.
  
-[N]  $bfork-interval$b       Number of seconds in between each fork() call made by the bot. 
-                         (Resets PID/CPU)
 [R]  $bflood-msg$b           Msgs:Secs until a host is ignored. (0:0 to disable) 
 [R]  $bflood-ctcp$b          Ctcps:Secs until a host is ignored. (0:0 to disable) 
 [R]  $bflood-callerid$b      Msgs:Secs until triggering to set CALLERID for
