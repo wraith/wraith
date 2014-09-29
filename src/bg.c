@@ -43,8 +43,6 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
-time_t lastfork = 0;
-
 int close_tty()
 {
   int fd = -1;
@@ -87,7 +85,6 @@ do_fork()
   pid_t pid = getpid();
 
   writepid(conf.bot->pid_file, pid);
-  lastfork = now;
   return pid;
 }
 

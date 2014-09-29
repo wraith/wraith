@@ -48,7 +48,6 @@ int cloak_script = 0;
 rate_t close_threshold;
 int fight_threshold;
 int set_noshare = 0;
-int fork_interval;
 int hijack;
 int in_bots;
 int ison_time = 10;
@@ -99,7 +98,6 @@ static variable_t vars[] = {
  VAR("flood-callerid",	&flood_callerid,	VAR_RATE|VAR_NOLHUB,				0, 0, "6:2"),
  VAR("flood-ctcp",	&flood_ctcp,		VAR_RATE|VAR_NOLHUB,				0, 0, "3:60"),
  VAR("flood-msg",	&flood_msg,		VAR_RATE|VAR_NOLHUB,				0, 0, "5:60"),
- VAR("fork-interval",	&fork_interval,		VAR_INT,					10, 0, "0"),
  VAR("groups",		groups,			VAR_STRING|VAR_LIST|VAR_NOLHUB,			0, 0, "main"),
  VAR("hijack",		&hijack,		VAR_INT|VAR_DETECTED|VAR_PERM,			0, 4, "die"),
  VAR("homechan",	homechan,		VAR_WORD|VAR_NOLOC|VAR_HIDE,			0, 0, NULL),

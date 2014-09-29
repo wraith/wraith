@@ -30,6 +30,7 @@ maint
   * Bot responses are now clear and nice. Recompile with your own list if you want
     in doc/responses.txt
   * Remove channel limit when limitraise is disabled (#77)
+  * 'fork-interval' removed.
 
 1.4.3
   * Default 'set promisc' to ignore since it's usually a false positive
