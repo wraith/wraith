@@ -249,6 +249,7 @@ fi
 if test -d .git; then
   git submodule init
   git submodule update
+  git submodule foreach --recursive git clean -fdx
 fi
 ]
 
