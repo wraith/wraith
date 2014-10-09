@@ -14,6 +14,9 @@
 #include <ctype.h>
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #ifndef HAVE_STRCASECMP
 /* Use our own implementation. */
 int strcasecmp(const char *, const char *);
@@ -24,4 +27,7 @@ int strcasecmp(const char *, const char *);
 int strncasecmp(const char *, const char *, size_t);
 #endif
 
+#ifdef __cplusplus
+}
+#endif
 #endif	/* !__EGG_COMPAT_STRCASECMP_H */

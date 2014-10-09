@@ -13,9 +13,15 @@
 
 #include <string.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #ifndef HAVE_MEMSET
 /* Use our own implementation. */
 void *memset(void *dest, int c, size_t n);
+#endif
+#ifdef __cplusplus
+}
 #endif
 
 /* Use memset instead of bzero.
