@@ -8589,7 +8589,7 @@ $as_echo "$as_me: not updating unwritable cache $cache_file" >&6;}
   fi
 fi
 rm -f confcache
-for ac_func in clock fsync getrusage isascii getpassphrase
+for ac_func in clock fsync getrusage isascii getpassphrase madvise
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_cxx_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -8601,7 +8601,7 @@ _ACEOF
 fi
 done
 
-for ac_func in memcpy memset random rename snprintf srandom gettime
+for ac_func in memcpy memmem memset random rename snprintf srandom gettime
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_cxx_check_func "$LINENO" "$ac_func" "$as_ac_var"

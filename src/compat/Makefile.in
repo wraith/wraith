@@ -17,8 +17,9 @@ OBJS = dirname.o \
 	dn_expand.o \
 	inet_ntop.o \
 	snprintf.o \
-	memset.o \
 	memcpy.o \
+	memmem.o \
+	memset.o \
 	memutil.o \
 	strcasecmp.o \
 	strftime.o \
