@@ -890,7 +890,7 @@ static void refresh_ban_kick(struct chanset_t* chan, memberlist *m, const char *
   /* Check global bans in first cycle and channel bans
      in second cycle. */
   for (int cycle = 0; cycle < 2; cycle++) {
-    for (register maskrec* b = cycle ? chan->bans : global_bans; b; b = b->next) {
+    for (maskrec* b = cycle ? chan->bans : global_bans; b; b = b->next) {
       if (wild_match(b->mask, user) || match_cidr(b->mask, user)) {
         if (role == 1 && chan_hasop(m))
   	  add_mode(chan, '-', 'o', m->nick);	/* Guess it can't hurt.	*/
@@ -1350,11 +1350,11 @@ take_massopline(char *op, char **to_op)
   char *nicks = (char *) my_calloc(1, nicks_len),
        *modes = (char *) my_calloc(1, modes_len),
        *nick = NULL;
-  register bool useop = 0;
+  bool useop = 0;
   static char ret[182] = "";
 
   memset(ret, 0, sizeof(ret));
-  for (register unsigned int i = 0; i < modesperline; i++) {
+  for (unsigned int i = 0; i < modesperline; i++) {
     if (*to_op[0] || op) {
       /* if 'op' then use it, then move on to to_op */
       if (!useop && op) {
@@ -1415,12 +1415,12 @@ do_take(struct chanset_t *chan)
 {
   char to_deop[2048] = "", *to_deop_ptr = to_deop;
   char to_op[2048] = "", *to_op_ptr = to_op;
-  register size_t to_op_len = 0, to_deop_len = 0;
+  size_t to_op_len = 0, to_deop_len = 0;
 
   /* Make lists of who needs to be opped, and who needs to be deopped */
   for (memberlist *m = chan->channel.member; m && m->nick[0]; m = m->next) {
     if (!m->is_me) {
-      register const bool isbot = m->user && m->user->bot ? 1 : 0;
+      const bool isbot = m->user && m->user->bot ? 1 : 0;
 
       /* Avoid countless unneeded operations from strcat/strlen */
       if (isbot && !(m->flags & CHANOP)) {
@@ -1437,10 +1437,10 @@ do_take(struct chanset_t *chan)
 
   size_t deops_len = 0;
   size_t work_len = 0;
-  register short lines = 0;
-  register const unsigned short max_lines = floodless ? 15 : default_alines;
+  short lines = 0;
+  const unsigned short max_lines = floodless ? 15 : default_alines;
   char work[2048] = "", *op = NULL, *modeline = NULL, deops[2048] = "";
-  register unsigned int deopn;
+  unsigned int deopn;
 
   while (to_op_ptr[0] || to_deop_ptr[0]) {
     deops_len = 0;
@@ -1453,7 +1453,7 @@ do_take(struct chanset_t *chan)
       op = newsplit(&to_op_ptr);
 
     /* Prepare a list of modesperline-1 nicks for deop */
-    for (register unsigned int i = 0; i < modesperline; i++) {
+    for (unsigned int i = 0; i < modesperline; i++) {
       if (to_deop_ptr[0] && ((i < (modesperline - 1)) || (!op))) {
         ++deopn; 
         const char *deop_nick = newsplit(&to_deop_ptr);

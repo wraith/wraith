@@ -1643,7 +1643,7 @@ check_expired_chanstuff(struct chanset_t *chan)
 void
 irc_minutely()
 {
-  for (register struct chanset_t *chan = chanset; chan; chan = chan->next) {
+  for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
     warn_pls_take(chan);
     if (server_online) {
       if (!channel_pending(chan)) {
@@ -1686,7 +1686,7 @@ flush_modes()
 
   Context;
 
-  for (register struct chanset_t *chan = chanset; chan; chan = chan->next) {
+  for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
     if (!me_op(chan)) continue;
     for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
       if (m->delay && m->delay <= now) {

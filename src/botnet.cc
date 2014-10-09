@@ -784,8 +784,8 @@ void tell_bottree(int idx)
  */
 void dump_links(int z)
 {
-  register int i;
-  register size_t l;
+  int i;
+  size_t l;
   char x[1024] = "";
 
   if (conf.bot->hub || conf.bot->localhub) {
@@ -875,7 +875,7 @@ int users_in_subtree(tand_t *bot)
  */
 int botunlink(int idx, const char *nick, const char *reason)
 {
-  register int i;
+  int i;
   int bots, users;
   tand_t *bot = NULL;
 
@@ -989,7 +989,7 @@ int botlink(char *linker, int idx, char *nick)
     if (idx >= 0)
       dprintf(idx, "That bot is already connected up.\n");
   } else {
-    register int i;
+    int i;
 
     for (i = 0; i < dcc_total; i++) {
       if (dcc[i].type && (dcc[i].user == u) &&
@@ -1187,7 +1187,7 @@ static void tandem_relay_dns_callback(int, void *, const char *, bd::Array<bd::S
 
 /* Relay to another tandembot
  */
-void tandem_relay(int idx, char *nick, register int i)
+void tandem_relay(int idx, char *nick, int i)
 {
   struct userrec *u = get_user_by_handle(userlist, nick);
 
@@ -1336,9 +1336,9 @@ static void tandem_relay_dns_callback(int id, void *client_data, const char *hos
 
 /* Input from user before connect is ready
  */
-static void pre_relay(int idx, char *buf, register int len)
+static void pre_relay(int idx, char *buf, int len)
 {
-  register int tidx = (-1), i;
+  int tidx = (-1), i;
 
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type && dcc[i].type == &DCC_FORK_RELAY && (dcc[i].u.relay->sock == dcc[idx].sock)) {
@@ -1383,7 +1383,7 @@ static void pre_relay(int idx, char *buf, register int len)
  */
 static void failed_pre_relay(int idx)
 {
-  register int tidx = (-1), i;
+  int tidx = (-1), i;
 
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type && (dcc[i].type == &DCC_FORK_RELAY) &&
@@ -1427,9 +1427,9 @@ static void failed_pre_relay(int idx)
   lostdcc(idx);
 }
 
-static void cont_tandem_relay(int idx, char *buf, register int len)
+static void cont_tandem_relay(int idx, char *buf, int len)
 {
-  register int uidx = (-1), i;
+  int uidx = (-1), i;
   struct relay_info *ri = NULL;
 
   for (i = 0; i < dcc_total; i++) {
@@ -1468,7 +1468,7 @@ static void cont_tandem_relay(int idx, char *buf, register int len)
 
 static void eof_dcc_relay(int idx)
 {
-  register int j;
+  int j;
 
   for (j = 0; j < dcc_total; j++)
     if (dcc[j].type && dcc[j].sock == dcc[idx].u.relay->sock)
@@ -1505,7 +1505,7 @@ static void eof_dcc_relay(int idx)
 
 static void eof_dcc_relaying(int idx)
 {
-  register int j, x = dcc[idx].u.relay->sock;
+  int j, x = dcc[idx].u.relay->sock;
 
   putlog(LOG_MISC, "*", "%s [%s]%s/%d", "Lost dcc connection to", dcc[idx].nick, dcc[idx].host, dcc[idx].port);
   killsock(dcc[idx].sock);
@@ -1629,7 +1629,7 @@ static void display_pre_relay(int i, char *other, size_t bufsiz)
 
 static void kill_relay(int idx, void *x)
 {
-  register struct relay_info *p = (struct relay_info *) x;
+  struct relay_info *p = (struct relay_info *) x;
 
   if (p->chat)
     DCC_CHAT.kill(idx, p->chat);
@@ -1652,7 +1652,7 @@ struct dcc_table DCC_RELAY =
 
 static void out_relay(int idx, char *buf, void *x)
 {
-  register struct relay_info *p = (struct relay_info *) x;
+  struct relay_info *p = (struct relay_info *) x;
 
   if (p && p->chat)
     DCC_CHAT.output(idx, buf, p->chat);

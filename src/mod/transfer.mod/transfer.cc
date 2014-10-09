@@ -88,12 +88,12 @@ static void dcc_get_pending(int, char *, int);
  */
 #define	PMAX_SIZE	4096
 static unsigned long pump_file_to_sock(FILE *file, long sock,
-				       register unsigned long pending_data)
+				       unsigned long pending_data)
 {
   const unsigned long		 buf_len = pending_data >= PMAX_SIZE ?
 	  					PMAX_SIZE : pending_data;
   char				*bf = (char *) my_calloc(1, buf_len);
-  register unsigned long	 actual_size;
+  unsigned long	 actual_size;
 
   if (bf) {
     do {
@@ -637,7 +637,7 @@ void display_dcc_fork_send(int idx, char *buf, size_t bufsiz)
 
 void kill_dcc_xfer(int idx, void *x)
 {
-  register struct xfer_info *p = (struct xfer_info *) x;
+  struct xfer_info *p = (struct xfer_info *) x;
 
   if (p->filename)
     free(p->filename);

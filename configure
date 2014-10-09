@@ -3532,6 +3532,63 @@ EOF
 
 #CXX_FLAG_CHECK([CXXFLAGS], [-Qunused-arguments], [unusedarguments])
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -Wno-invalid-source-encoding" >&5
+$as_echo_n "checking whether the compiler understands -Wno-invalid-source-encoding... " >&6; }
+if ${egg_cv_prog_cc_invalid_source_encoding+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+    ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+    ac_saved_flags="$CXXFLAGS"
+    CXXFLAGS="-Werror -Wno-invalid-source-encoding"
+    cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  egg_cv_prog_cc_invalid_source_encoding="yes"
+else
+  egg_cv_prog_cc_invalid_source_encoding="no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+    CXXFLAGS="$ac_saved_flags"
+    ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $egg_cv_prog_cc_invalid_source_encoding" >&5
+$as_echo "$egg_cv_prog_cc_invalid_source_encoding" >&6; }
+
+  if [ "$egg_cv_prog_cc_invalid_source_encoding" = "yes" ]; then
+    CXXFLAGS="$CXXFLAGS -Wno-invalid-source-encoding"
+  elif [ -n "" ]; then
+      cat << 'EOF' >&2
+configure: error:
+
+  Your OS or C++ compiler does not support -Wno-invalid-source-encoding.
+  This compile flag is required.
+
+EOF
+    exit 1
+  fi
+
+
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -fstack-protector" >&5
 $as_echo_n "checking whether the compiler understands -fstack-protector... " >&6; }
 if ${egg_cv_prog_cc_stackprotector+:} false; then :

@@ -264,7 +264,7 @@ void rehash_server(const char *servname, const char *nick)
 void 
 join_chans()
 {
-  for (register struct chanset_t *chan = chanset; chan; chan = chan->next) {
+  for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
     if (shouldjoin(chan))
       force_join_chan(chan, DP_SERVER);
   }
@@ -984,7 +984,7 @@ static void minutely_checks()
     static int count = 4;
     bool ok = 0;
 
-    for (register struct chanset_t *chan = chanset; chan; chan = chan->next) {
+    for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
       if (channel_active(chan) && chan->channel.members == 1) {
         ok = 1;
         break;

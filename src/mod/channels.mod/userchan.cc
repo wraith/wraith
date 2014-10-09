@@ -30,7 +30,7 @@ extern struct cmd_pass *cmdpass;
 
 struct chanuserrec *get_chanrec(struct userrec *u, char *chname)
 {
-  for (register struct chanuserrec *ch = u->chanrec; ch; ch = ch->next) 
+  for (struct chanuserrec *ch = u->chanrec; ch; ch = ch->next)
     if (!rfc_casecmp(ch->channel, chname))
       return ch;
   return NULL;

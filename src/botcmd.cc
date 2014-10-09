@@ -786,7 +786,7 @@ static void bot_traced(int idx, char *par)
           ((sock == (-1)) || (sock == dcc[i].sock))) {
 	if (t) {
           int j=0;
-          register char *c = p2;
+          char *c = p2;
           for (; *c != '\0'; c++) if (*c == ':') j++;
 
           time_t tm;
@@ -1065,7 +1065,7 @@ static void bot_part(int idx, char *par)
   }
   if ((partyidx = getparty(bot, sock)) != -1) {
     if (!silent) {
-      register int chan = party[partyidx].chan;
+      int chan = party[partyidx].chan;
 
       if (par[0])
 	chanout_but(-1, chan, "*** (%s) %s %s %s (%s).\n", conf.bot->hub ? bot : "[botnet]", nick,

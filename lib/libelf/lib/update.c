@@ -914,7 +914,10 @@ _elf_output(Elf *elf, int fd, size_t len, off_t (*_elf_write)(Elf*, char*, size_
 
     elf_assert(len);
 #if HAVE_FTRUNCATE
-    ftruncate(fd, 0);
+    if (ftruncate(fd, 0)) {
+	seterr(ERROR_IO_WRITE);
+	return -1;
+    }
 #endif /* HAVE_FTRUNCATE */
 #if HAVE_MMAP
     /*
