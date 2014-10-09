@@ -19,6 +19,8 @@ for file in ${files}; do
   basename=${basename##*/}
   dirname=${file%%/*}
 
+  echo -n "Generating symbols for ${basename}... "
+
   defsFile_wrappers="src/.defs/${basename}_defs.${suffix}"
   defsFile_pre="src/.defs/${basename}_pre.h"
   defsFile_post="src/.defs/${basename}_post.h"
@@ -63,5 +65,7 @@ for file in ${files}; do
 
   echo "}" >> $defsFile_wrappers
   echo "}" >> $defsFile_post
+
+  echo "done"
 done
 rm -f $TMPFILE
