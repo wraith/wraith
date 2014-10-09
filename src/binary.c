@@ -178,7 +178,9 @@ bin_checksum(const char *fname, int todo)
     close(fd);
     werr(ERR_BINSTAT);
   }
-#ifdef HAVE_MADVISE
+#if defined(HAVE_POSIX_MADVISE)
+  posix_madvise(map, size, POSIX_MADV_SEQUENTIAL);
+#elif defined(HAVE_MADVISE)
   madvise(map, size, MADV_SEQUENTIAL);
 #endif
   MD5_Update(&ctx, map, offset);
