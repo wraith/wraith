@@ -116,7 +116,7 @@ stringfix: stringfix.cc common.h config.h eggdrop.h
 $(EGGEXEC): stringfix ../$(EGGEXEC)
 
 clean:
-	@rm -f .depend *.o *.So *~ _*.c _*.cc
+	@rm -f .depend *.o *.So *~ _*.c _*.cc *.ii *.i
 
 build_msg:
 	@echo "[*] Compiling core components"
