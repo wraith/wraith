@@ -106,12 +106,18 @@
    zero-length file name argument. */
 #undef HAVE_LSTAT_EMPTY_STRING_BUG
 
+/* Define to 1 if you have the `madvise' function. */
+#undef HAVE_MADVISE
+
 /* Define to 1 if your system has a GNU libc compatible `malloc' function, and
    to 0 otherwise. */
 #undef HAVE_MALLOC
 
 /* Define to 1 if you have the `memcpy' function. */
 #undef HAVE_MEMCPY
+
+/* Define to 1 if you have the `memmem' function. */
+#undef HAVE_MEMMEM
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
