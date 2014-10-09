@@ -1,5 +1,4 @@
 next
-  * Bot will now jump from the server it's on if it is removed from the server list. (fixes a changing network bug)
   * Properly honor exemptions when kicking matched RBL clients
   * Fix LASTON not being shared
   * Wraith now automatically assigns roles to bots for channels, no longer

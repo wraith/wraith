@@ -1454,8 +1454,6 @@ static void share_read_stream(int idx, bd::Stream& stream) {
    */
   clear_userlist(ou);
 
-  check_removed_server();
-
   /* The userfile we received may just be bogus or missing important users */
   load_internal_users();
   add_myself_to_userlist();

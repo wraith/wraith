@@ -33,7 +33,6 @@ void load_internal_users();
 void setup_HQ(int);
 void privmsg(bd::String target, bd::String msg, int idx);
 void notice(bd::String target, bd::String msg, int idx);
-void check_removed_server(bool = 1);
 void keyx(const bd::String& target);
 void set_fish_key(char *, bd::String);
 
