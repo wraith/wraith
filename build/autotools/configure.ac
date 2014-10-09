@@ -198,7 +198,7 @@ AC_FUNC_STRFTIME
 
 #checkpoint
 AC_CACHE_SAVE
-AC_CHECK_FUNCS([clock fsync getrusage isascii getpassphrase madvise])
+AC_CHECK_FUNCS([clock fsync getrusage isascii getpassphrase posix_madvise madvise])
 AC_CHECK_FUNCS([memcpy memmem memset random rename snprintf srandom gettime])
 #checkpoint
 AC_CACHE_SAVE
