@@ -180,19 +180,19 @@ res: makeres
 	cp -f src/responses.h~ src/responses.h; \
 	fi)
 
-stringfix: src/stringfix.c src/config.h
+stringfix: src/stringfix.cc src/config.h
 	+@cd src && ${MAKE_UTILS} stringfix
 
-makeres: src/makeres.c
+makeres: src/makeres.cc
 	+@cd src && ${MAKE_UTILS} makeres
 
-makeset: src/makeset.c
+makeset: src/makeset.cc
 	+@cd src && ${MAKE_UTILS} makeset
 
-makehelp: src/makehelp.c
+makehelp: src/makehelp.cc
 	+@cd src && ${MAKE_UTILS} makehelp
 
-sorthelp: src/sorthelp.c
+sorthelp: src/sorthelp.cc
 	+@cd src && ${MAKE_UTILS} sorthelp
 
 utils: stringfix makehelp

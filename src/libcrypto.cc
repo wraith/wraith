@@ -32,7 +32,7 @@
 #include <bdlib/src/Array.h>
 
 #include "libcrypto.h"
-#include ".defs/libcrypto_defs.c"
+#include ".defs/libcrypto_defs.cc"
 
 void *libcrypto_handle = NULL;
 static bd::Array<bd::String> my_symbols;

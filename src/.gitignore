@@ -1,6 +1,7 @@
 /Makefile
 /buildinfo.h
 /_*.c
+/_*.cc
 /*~
 /help.h
 /response.h

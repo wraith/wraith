@@ -132,7 +132,7 @@ bind_table_t *BT_ctcr = NULL, *BT_ctcp = NULL;
 #define SERVER_CONNECT_BURST_TIME 18
 #define SERVER_CONNECT_BURST_RATE 5 * 7
 
-#include "servmsg.c"
+#include "servmsg.cc"
 
 #define MAXPENALTY 10
 
@@ -164,7 +164,7 @@ static const struct {
 #define Q_PLAY 3
 #define Q_CACHE 4
 
-#include "cmdsserv.c"
+#include "cmdsserv.cc"
 
 
 /*

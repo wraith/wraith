@@ -109,10 +109,10 @@ voice_ok(memberlist *m, struct chanset_t *chan)
   return 1;
 }
 
-#include "chan.c"
-#include "mode.c"
-#include "cmdsirc.c"
-#include "msgcmds.c"
+#include "chan.cc"
+#include "mode.cc"
+#include "cmdsirc.cc"
+#include "msgcmds.cc"
 
 static int
 detect_offense(memberlist* m, struct chanset_t *chan, char *msg)

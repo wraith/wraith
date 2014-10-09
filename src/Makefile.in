@@ -75,27 +75,27 @@ blah:
 	@echo "Use the build script."
 	@echo ""
 
-makeres: makeres.c ../lib/bdlib/src/libbdlib.a
+makeres: makeres.cc ../lib/bdlib/src/libbdlib.a
 	@echo -e "Compiling: \033[1mmakeres\033[0m"
 	@$(CXX) $(CPPFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CXXFLAGS) $< ../lib/bdlib/src/libbdlib.a -o $@
 	@$(STRIP) $@@EXEEXT@
 
-makeset: makeset.c ../lib/bdlib/src/libbdlib.a
+makeset: makeset.cc ../lib/bdlib/src/libbdlib.a
 	@echo -e "Compiling: \033[1mmakeset\033[0m"
 	@$(CXX) $(CPPFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CXXFLAGS) $< ../lib/bdlib/src/libbdlib.a -o $@
 	@$(STRIP) $@@EXEEXT@
 
-makehelp: makehelp.c ../lib/bdlib/src/libbdlib.a
+makehelp: makehelp.cc ../lib/bdlib/src/libbdlib.a
 	@echo -e "Compiling: \033[1mmakehelp\033[0m"
 	@$(CXX) $(CPPFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CXXFLAGS) $< ../lib/bdlib/src/libbdlib.a -o $@
 	@$(STRIP) $@@EXEEXT@
 
-sorthelp: sorthelp.c ../lib/bdlib/src/libbdlib.a
+sorthelp: sorthelp.cc ../lib/bdlib/src/libbdlib.a
 	@echo -e "Compiling: \033[1msorthelp\033[0m"
 	@$(CXX) $(CPPFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CXXFLAGS) $< ../lib/bdlib/src/libbdlib.a -o $@
 	@$(STRIP) $@@EXEEXT@
 
-stringfix: stringfix.c common.h config.h eggdrop.h
+stringfix: stringfix.cc common.h config.h eggdrop.h
 	@echo -e "Compiling: \033[1mstringfix\033[0m"
 	@$(CXX) $(CPPFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CXXFLAGS) $< -o stringfix
 	@$(STRIP) $@@EXEEXT@
@@ -116,7 +116,7 @@ stringfix: stringfix.c common.h config.h eggdrop.h
 $(EGGEXEC): stringfix ../$(EGGEXEC)
 
 clean:
-	@rm -f .depend *.o *.So *~ _*.c
+	@rm -f .depend *.o *.So *~ _*.c _*.cc
 
 build_msg:
 	@echo "[*] Compiling core components"

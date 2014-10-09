@@ -64,9 +64,9 @@ static char *lastdeletedmask = NULL;
 static int 			killed_bots = 0;
 
 #include "channels.h"
-#include "cmdschan.c"
-#include "chanmisc.c"
-#include "userchan.c"
+#include "cmdschan.cc"
+#include "chanmisc.cc"
+#include "userchan.cc"
 
 /* This will close channels if the HUB:leaf count is skewed from config setting */
 static void 

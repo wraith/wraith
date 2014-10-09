@@ -12,7 +12,7 @@ INCLUDES="${TCL_INCLUDES} ${SSL_INCLUDES}"
 
 mkdir -p src/.defs > /dev/null 2>&1
 TMPFILE=$(mktemp "/tmp/pre.XXXXXX")
-files=$(grep -l DLSYM_GLOBAL src/*.c|grep -v "src/_")
+files=$(grep -l DLSYM_GLOBAL src/*.cc|grep -v "src/_")
 for file in ${files}; do
   suffix=${file##*.}
   basename=${file%%.*}

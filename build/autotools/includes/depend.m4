@@ -45,7 +45,7 @@ for mf in $files; do
   do
     suffix=${file##*.}
     base=${file%%.*}
-    test -f "$dirpart/$base.c" || continue
+    test -f "$dirpart/$base.cc" || test -f "$dirpart/$base.c" || continue
     if ! test -f "$dirpart/.deps/$base.Po"; then
       echo '# dummy' > "$dirpart/.deps/$base.Po"
       #Remove the .o file, because it needs to be recompiled for its dependancies.

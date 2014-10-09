@@ -8812,7 +8812,7 @@ fi
 rm -f confcache
 
 
-VERSION=`grep "char" $srcdir/src/main.c | $AWK '/egg_version/ {print $5}' | sed -e 's/\"//g' | sed -e 's/\;//g'`
+VERSION=`grep "char" $srcdir/src/main.cc | $AWK '/egg_version/ {print $5}' | sed -e 's/\"//g' | sed -e 's/\;//g'`
 version_num=`echo $VERSION | $AWK 'BEGIN {FS = "."} {printf("%d%02d%02d", $1, $2, $3)}'`
 
 cat >>build/confdefs.h <<_ACEOF
@@ -8852,7 +8852,7 @@ for mf in $files; do
   do
     suffix=${file##*.}
     base=${file%%.*}
-    test -f "$dirpart/$base.c" || continue
+    test -f "$dirpart/$base.cc" || test -f "$dirpart/$base.c" || continue
     if ! test -f "$dirpart/.deps/$base.Po"; then
       echo '# dummy' > "$dirpart/.deps/$base.Po"
       #Remove the .o file, because it needs to be recompiled for its dependancies.
