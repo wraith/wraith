@@ -26,7 +26,7 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
+#include <sys/types.h>
 /* $FreeBSD: head/lib/libc/string/memmem.c 188080 2009-02-03 17:58:20Z danger $ */
 #include <string.h>
 
