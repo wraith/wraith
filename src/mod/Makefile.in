@@ -9,11 +9,12 @@ MOD_UPDIR = @MOD_UPDIR@
 @SET_MAKE@
 
 STRIP = @STRIP@
-CXXFLAGS = @CXXFLAGS@ -I../.. -I$(top_srcdir) @DEFS@ $(CFLGS)
-CPPFLAGS = @CPPFLAGS@
-MOD_CXXFLAGS = @CXXFLAGS@ -I. -I$(MOD_UPDIR)$(top_srcdir)/src -I$(MOD_UPDIR)$(top_srcdir) \
-  -I$(MOD_UPDIR)$(top_srcdir)/src/mod -I$(MOD_UPDIR)$(top_srcdir)/lib @DEFS@ $(CFLGS)
-MOD_CPPFLAGS = @CPPFLAGS@
+CXXFLAGS = $(CXXFLAGS)
+CFLAGS = $(CFLGS)
+CPPFLAGS = @CPPFLAGS@ -I../.. -I$(top_srcdir)
+MOD_CXXFLAGS = $(CXXFLAGS)
+MOD_CPPFLAGS = @CPPFLAGS@ -I. -I$(MOD_UPDIR)$(top_srcdir)/src -I$(MOD_UPDIR)$(top_srcdir) \
+  -I$(MOD_UPDIR)$(top_srcdir)/src/mod -I$(MOD_UPDIR)$(top_srcdir)/lib @DEFS@
 LIBS = @LIBS@
 
 mods = channels.mod \

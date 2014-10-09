@@ -10,8 +10,9 @@ include $(top_srcdir)/build/build.mk
 @SET_MAKE@
 
 STRIP = @STRIP@
-CXXFLAGS = @CXXFLAGS@ -I../.. -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/src @DEFS@ $(CFLGS)
-CPPFLAGS = @CPPFLAGS@
+CXXFLAGS = $(CXXFLAGS)
+CFLAGS = $(CFLGS)
+CPPFLAGS = @CPPFLAGS@ -I../.. -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/src @DEFS@
 
 OBJS = dirname.o \
 	dn_expand.o \

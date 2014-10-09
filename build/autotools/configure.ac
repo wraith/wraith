@@ -60,7 +60,6 @@ EGG_CHECK_RANDOM_MAX
 
 # Create static binaries
 EGG_CHECK_CCSTATIC
-AC_SUBST(CCDEBUG)dnl
 AC_SUBST(DEBCXXFLAGS)
 
 #checkpoint

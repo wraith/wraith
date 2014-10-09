@@ -7,8 +7,9 @@ VPATH = @srcdir@
 
 @SET_MAKE@
 
-CXXFLAGS = @CXXFLAGS@ -I. -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/pack @DEFS@ $(INCLUDES) $(CFLGS) '-DCOMMIT="$(COMMIT)"' '-DBRANCH="$(BRANCH)"' -DBUILDTS=$(BUILDTS) '-DVERSION="$(VERSION)"'
-CPPFLAGS = @CPPFLAGS@
+CXXFLAGS = $(CXXFLAGS)
+CFLAGS = $(CFLGS)
+CPPFLAGS = @CPPFLAGS@ -I. -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/pack @DEFS@ $(INCLUDES) '-DCOMMIT="$(COMMIT)"' '-DBRANCH="$(BRANCH)"' -DBUILDTS=$(BUILDTS) '-DVERSION="$(VERSION)"'
 
 include $(top_srcdir)/build/build.mk
 
@@ -67,7 +68,7 @@ MODOBJS = mod/channels.mod/channels.So \
         mod/update.mod/update.So
 
 
-MAKE_GENERIC = $(MAKE) 'MAKE=$(MAKE)' 'MAKEFLAGS=$(MAKEFLAGS)' 'CXX=$(CXX)' 'LD=$(LD)' 'STRIP=$(STRIP)' 'CFLGS=$(CFLGS)' 'CCDEPMODE=$(CCDEPMODE)'
+MAKE_GENERIC = $(MAKE) 'MAKE=$(MAKE)' 'MAKEFLAGS=$(MAKEFLAGS)' 'CXX=$(CXX)' 'LD=$(LD)' 'STRIP=$(STRIP)' 'CXXFLAGS=$(CXXFLAGS)' 'CFLGS=$(CFLGS)' 'CCDEPMODE=$(CCDEPMODE)'
 
 blah:
 	@echo ""
@@ -76,27 +77,27 @@ blah:
 
 makeres: makeres.c ../lib/bdlib/src/libbdlib.a
 	@echo -e "Compiling: \033[1mmakeres\033[0m"
-	@$(CXX) $(CXXFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CPPFLAGS) $< ../lib/bdlib/src/libbdlib.a -o $@
+	@$(CXX) $(CPPFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CXXFLAGS) $< ../lib/bdlib/src/libbdlib.a -o $@
 	@$(STRIP) $@@EXEEXT@
 
 makeset: makeset.c ../lib/bdlib/src/libbdlib.a
 	@echo -e "Compiling: \033[1mmakeset\033[0m"
-	@$(CXX) $(CXXFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CPPFLAGS) $< ../lib/bdlib/src/libbdlib.a -o $@
+	@$(CXX) $(CPPFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CXXFLAGS) $< ../lib/bdlib/src/libbdlib.a -o $@
 	@$(STRIP) $@@EXEEXT@
 
 makehelp: makehelp.c ../lib/bdlib/src/libbdlib.a
 	@echo -e "Compiling: \033[1mmakehelp\033[0m"
-	@$(CXX) $(CXXFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CPPFLAGS) $< ../lib/bdlib/src/libbdlib.a -o $@
+	@$(CXX) $(CPPFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CXXFLAGS) $< ../lib/bdlib/src/libbdlib.a -o $@
 	@$(STRIP) $@@EXEEXT@
 
 sorthelp: sorthelp.c ../lib/bdlib/src/libbdlib.a
 	@echo -e "Compiling: \033[1msorthelp\033[0m"
-	@$(CXX) $(CXXFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CPPFLAGS) $< ../lib/bdlib/src/libbdlib.a -o $@
+	@$(CXX) $(CPPFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CXXFLAGS) $< ../lib/bdlib/src/libbdlib.a -o $@
 	@$(STRIP) $@@EXEEXT@
 
 stringfix: stringfix.c common.h config.h eggdrop.h
 	@echo -e "Compiling: \033[1mstringfix\033[0m"
-	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) $< -o stringfix
+	@$(CXX) $(CPPFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CXXFLAGS) $< -o stringfix
 	@$(STRIP) $@@EXEEXT@
 
 #../$(EGGEXEC): build_msg $(OBJS) mycrypto compatability

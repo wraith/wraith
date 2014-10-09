@@ -11,11 +11,13 @@ num=`$CXX -dumpversion | sed "s/^\\\(.\\\).*/\\\1/"`
 if test $num -ge "3"; then
   CCDEPMODE=gcc3
 #  GCC3="-Wpadded -Wpacked -Wno-unused-parameter -Wmissing-format-attribute -Wdisabled-optimization"
-  GCC3="-W -Wno-unused-parameter -Wdisabled-optimization -Wno-write-strings -Wno-format-security -fno-strict-aliasing -Woverloaded-virtual -Wno-format-y2k"
+  GCC3_CFLAGS="-W -Wno-unused-parameter -Wdisabled-optimization -Wno-write-strings -Wno-format-security -fno-strict-aliasing -Wno-format-y2k"
+  GCC3_CXXFLAGS="-Woverloaded-virtual"
   GCC3DEB="-Wno-disabled-optimization -Wmissing-format-attribute"
 fi
 AC_SUBST(CCDEPMODE)dnl
-AC_SUBST(GCC3)dnl
+AC_SUBST(GCC3_CFLAGS)dnl
+AC_SUBST(GCC3_CXXFLAGS)dnl
 AC_SUBST(GCC3DEB)dnl
 AC_SUBST(GCC4DEB)dnl
 ])
