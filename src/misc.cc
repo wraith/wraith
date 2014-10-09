@@ -74,9 +74,9 @@ bool		use_exempts = 0;
 /* low-level stuff for other modules
  */
 
-size_t my_strcpy(register char *a, register const char *b)
+size_t my_strcpy(char *a, const char *b)
 {
-  register const char *c = b;
+  const char *c = b;
 
   while (*b)
     *a++ = *b++;
@@ -188,7 +188,7 @@ char *newsplit(char **rest, char delim, bool trim)
   if (!rest)
     return *rest = "";
 
-  register char *o = *rest, *r = NULL;
+  char *o = *rest, *r = NULL;
 
   while (*o == delim)
     ++o;
@@ -240,7 +240,7 @@ char *newsplit(char **rest, char delim, bool trim)
 void maskaddr(const char *s, char *nw, int type)
 {
   int d = type % 5, num = 1;
-  register const char *u = NULL, *h = NULL, *p = NULL;
+  const char *u = NULL, *h = NULL, *p = NULL;
 
   /* Look for user and host.. */
   if ((u = strchr(s, '!')))
@@ -579,10 +579,10 @@ char *str_escape(const char *str, const char divc, const char mask)
  * NOTE: If you look carefully, you'll notice that strchr_unescape()
  *       behaves differently than strchr().
  */
-char *strchr_unescape(char *str, const char divc, register const char esc_char)
+char *strchr_unescape(char *str, const char divc, const char esc_char)
 {
   char buf[3] = "";
-  register char	*s = NULL, *p = NULL;
+  char	*s = NULL, *p = NULL;
 
   for (s = p = str; *s; s++, p++) {
     if (*s == esc_char) {	/* Found escape character.		*/
@@ -605,7 +605,7 @@ char s1_16[3] = "",s2_6[3] = "",s2_7[3] = "";
 /* As strchr_unescape(), but converts the complete string, without
  * searching for a specific delimiter character.
  */
-void str_unescape(char *str, register const char esc_char)
+void str_unescape(char *str, const char esc_char)
 {
   strchr_unescape(str, 0, esc_char);
   return;

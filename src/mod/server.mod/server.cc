@@ -361,7 +361,7 @@ static void calc_penalty(char * msg, size_t len)
     return;
 
   char *cmd = NULL, *par1 = NULL, *par2 = NULL, *par3 = NULL;
-  register int penalty, i, ii;
+  int penalty, i, ii;
 
   cmd = newsplit(&msg);
   if (msg)
@@ -495,7 +495,7 @@ char *splitnicks(char **rest)
   if (!rest)
     return *rest = "";
 
-  register char *o = *rest, *r = NULL;
+  char *o = *rest, *r = NULL;
 
   while (*o == ' ')
     o++;
@@ -1174,9 +1174,9 @@ void server_report(int idx, int details)
 
 static void msgq_clear(struct msgq_head *qh)
 {
-  register struct msgq *qq = NULL;
+  struct msgq *qq = NULL;
 
-  for (register struct msgq *q = qh->head; q; q = qq) {
+  for (struct msgq *q = qh->head; q; q = qq) {
     qq = q->next;
     free(q->msg);
     free(q);

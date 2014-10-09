@@ -801,7 +801,7 @@ display_dcc_chat_pass(int idx, char *buf, size_t bufsiz)
 static void
 kill_dcc_general(int idx, void *x)
 {
-  register struct chat_info *p = (struct chat_info *) x;
+  struct chat_info *p = (struct chat_info *) x;
 
   if (p) {
     if (p->buffer) {
@@ -942,7 +942,7 @@ out_dcc_general(int idx, char *buf, void *x)
   char *y = buf;
 
   if (dcc[idx].type == &DCC_CHAT) {
-    register struct chat_info *p = (struct chat_info *) x;
+    struct chat_info *p = (struct chat_info *) x;
 
     strip_mirc_codes(p->strip_flags, buf);
   }
@@ -1700,7 +1700,7 @@ display_dupwait(int idx, char *buf, size_t bufsiz)
 static void
 kill_dupwait(int idx, void *x)
 {
-  register struct dupwait_info *p = (struct dupwait_info *) x;
+  struct dupwait_info *p = (struct dupwait_info *) x;
 
   if (p)
     free(p);
@@ -1726,7 +1726,7 @@ struct dcc_table DCC_DUPWAIT = {
 void
 dupwait_notify(const char *who)
 {
-  for (register int idx = 0; idx < dcc_total; idx++)
+  for (int idx = 0; idx < dcc_total; idx++)
     if (dcc[idx].type && (dcc[idx].type == &DCC_DUPWAIT) && !strcasecmp(dcc[idx].nick, who)) {
       dcc_telnet_pass(idx, dcc[idx].u.dupwait->atr);
       break;

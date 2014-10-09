@@ -78,7 +78,7 @@ static int has_op(int idx, struct chanset_t *chan)
  */
 char *getnick(const char *handle, struct chanset_t *chan)
 {
-  for (register memberlist *m = chan->channel.member; m && m->nick[0]; m = m->next) {
+  for (memberlist *m = chan->channel.member; m && m->nick[0]; m = m->next) {
     member_getuser(m);
     if (m->user && !strcasecmp(m->user->handle, handle))
       return m->nick;
@@ -559,7 +559,7 @@ static void mass_mode(const char* chname, const char* mode, char *par)
 {
   char list[101] = "", buf[2048] = "";
   size_t list_len = 0, buf_len = 0, cnt = 0;
-  register const unsigned short max_lines = floodless ? 15 : default_alines;
+  const unsigned short max_lines = floodless ? 15 : default_alines;
   unsigned short lines = 0;
 
   while (par[0]) {

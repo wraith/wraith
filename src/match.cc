@@ -60,7 +60,7 @@
 #define PERMATCH (match+saved+sofar)
 
 /* binds matching */
-int _wild_match_per(register unsigned char *m, register unsigned char *n)
+int _wild_match_per(unsigned char *m, unsigned char *n)
 {
   /* null strings should never match */
   if ((m == 0) || (n == 0) || (!*n))
@@ -68,7 +68,7 @@ int _wild_match_per(register unsigned char *m, register unsigned char *n)
 
   unsigned char *ma = m, *lsm = NULL, *lsn = NULL, *lpm = NULL, *lpn = NULL;
   int match = 1, saved = 0, space;
-  register int sofar = 0;
+  int sofar = 0;
 
   while (*n) {
     if (*m == WILDT) {          /* Match >=1 space */
@@ -158,7 +158,7 @@ int _wild_match_per(register unsigned char *m, register unsigned char *n)
 
 
 /* general/host matching */
-int _wild_match(register unsigned char *m, register unsigned char *n)
+int _wild_match(unsigned char *m, unsigned char *n)
 {
   unsigned char *ma = m, *na = n;
 
@@ -168,7 +168,7 @@ int _wild_match(register unsigned char *m, register unsigned char *n)
 
   unsigned char *lsm = NULL, *lsn = NULL;
   int match = 1;
-  register int sofar = 0;
+  int sofar = 0;
 
   /* find the end of each string */
   while (*(++m))
