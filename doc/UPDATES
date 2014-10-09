@@ -16,6 +16,7 @@ maint
     in doc/responses.txt
   * Remove channel limit when limitraise is disabled (#77)
   * 'fork-interval' removed.
+  * Build with -fstack-protector by default
 
 1.4.3
   * Default 'set promisc' to ignore since it's usually a false positive
