@@ -44,7 +44,7 @@ for file in ${files}; do
   echo "extern \"C\" {" > $defsFile_post
 
   cd src >/dev/null 2>&1
-  $CXX -E -I. -I.. -I../lib ${INCLUDES} -DHAVE_CONFIG_H ../${file} > $TMPFILE 2> /dev/null
+  $CXX -E -I. -I.. -I../lib ${INCLUDES} -DHAVE_CONFIG_H ../${file} > $TMPFILE
   # Fix wrapped prototypes
   $SED -e :a -e N -e '$!ba' -e 's/,\n/,/g' $TMPFILE > $TMPFILE.sed
   mv $TMPFILE.sed $TMPFILE
