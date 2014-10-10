@@ -17,9 +17,6 @@ for file in ${files}; do
   suffix=${file##*.}
   basename=${file%%.*}
   basename=${basename##*/}
-  dirname=${file%%/*}
-
-  echo -n "Generating symbols for ${basename}... "
 
   defsFile_wrappers="src/.defs/${basename}_defs.${suffix}"
   defsFile_pre="src/.defs/${basename}_pre.h"
@@ -29,6 +26,19 @@ for file in ${files}; do
   : > $defsFile_pre
   : > $defsFile_post
   : > $defsFile_wrappers
+done
+
+for file in ${files}; do
+  suffix=${file##*.}
+  basename=${file%%.*}
+  basename=${basename##*/}
+  dirname=${file%%/*}
+
+  echo -n "Generating symbols for ${basename}... "
+
+  defsFile_wrappers="src/.defs/${basename}_defs.${suffix}"
+  defsFile_pre="src/.defs/${basename}_pre.h"
+  defsFile_post="src/.defs/${basename}_post.h"
 
   echo "extern \"C\" {" > $defsFile_wrappers
   echo "extern \"C\" {" > $defsFile_post
