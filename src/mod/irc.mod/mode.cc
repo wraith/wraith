@@ -803,7 +803,7 @@ got_ban(struct chanset_t *chan, memberlist *m, char *mask, char *isserver)
   refresh_exempt(chan, mask);
   /* This looks for bans added through bot and tacks on banned: if a description is found */
   if (m && channel_enforcebans(chan)) {
-    register maskrec *b = NULL;
+    maskrec *b = NULL;
     char resn[512] = "";
 
     /* The point of this cycle crap is to first check chan->bans then global_bans for a reason */

@@ -93,7 +93,7 @@ static int is_compressedfile(char *filename)
 
   char buf1[50] = "", buf2[50] = "";
   FILE *fin = NULL;
-  register int len1, len2, i;
+  int len1, len2, i;
 
   /* Read data with zlib routines.
    */

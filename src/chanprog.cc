@@ -77,7 +77,7 @@ void rmspace(char *s)
   if (!s || !*s)
     return;
 
-  register char *p = NULL, *q = NULL;
+  char *p = NULL, *q = NULL;
 
   /* Remove trailing whitespaces. */
   for (q = s + strlen(s) - 1; q >= s && egg_isspace(*q); q--)
@@ -96,7 +96,7 @@ void rmspace(char *s)
  */
 memberlist *ismember(const struct chanset_t *chan, const char *nick)
 {
-  register memberlist	*x = NULL;
+  memberlist	*x = NULL;
 
   if (chan && nick && nick[0])
     for (x = chan->channel.member; x && x->nick[0]; x = x->next)
@@ -109,7 +109,7 @@ memberlist *ismember(const struct chanset_t *chan, const char *nick)
  */
 struct chanset_t *findchan(const char *name)
 {
-  register struct chanset_t	*chan = NULL;
+  struct chanset_t	*chan = NULL;
 
   for (chan = chanset; chan; chan = chan->next)
     if (chan->name[0] && !rfc_casecmp(chan->name, name))
@@ -121,7 +121,7 @@ struct chanset_t *findchan(const char *name)
  */
 struct chanset_t *findchan_by_dname(const char *name)
 {
-  register struct chanset_t	*chan = NULL;
+  struct chanset_t	*chan = NULL;
 
   for (chan = chanset; chan; chan = chan->next)
     if (!rfc_casecmp(chan->dname, name))
@@ -139,8 +139,8 @@ struct chanset_t *findchan_by_dname(const char *name)
 struct userrec *check_chanlist(const char *host)
 {
   char				*nick = NULL, *uhost = NULL, buf[UHOSTLEN] = "";
-  register memberlist		*m = NULL;
-  register struct chanset_t	*chan = NULL;
+  memberlist		*m = NULL;
+  struct chanset_t	*chan = NULL;
 
   strlcpy(buf, host, sizeof buf);
   uhost = buf;
@@ -156,8 +156,8 @@ struct userrec *check_chanlist(const char *host)
  */
 struct userrec *check_chanlist_hand(const char *hand)
 {
-  register struct chanset_t	*chan = NULL;
-  register memberlist		*m = NULL;
+  struct chanset_t	*chan = NULL;
+  memberlist		*m = NULL;
 
   for (chan = chanset; chan; chan = chan->next)
     for (m = chan->channel.member; m && m->nick[0]; m = m->next)
@@ -173,8 +173,8 @@ struct userrec *check_chanlist_hand(const char *hand)
  */
 void clear_chanlist(void)
 {
-  register memberlist		*m = NULL;
-  register struct chanset_t	*chan = NULL;
+  memberlist		*m = NULL;
+  struct chanset_t	*chan = NULL;
 
   for (chan = chanset; chan; chan = chan->next)
     for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
@@ -191,8 +191,8 @@ void clear_chanlist(void)
  */
 void clear_chanlist_member(const char *nick)
 {
-  register memberlist		*m = NULL;
-  register struct chanset_t	*chan = NULL;
+  memberlist		*m = NULL;
+  struct chanset_t	*chan = NULL;
 
   for (chan = chanset; chan; chan = chan->next)
     for (m = chan->channel.member; m && m->nick[0]; m = m->next)
@@ -208,8 +208,8 @@ void clear_chanlist_member(const char *nick)
 void set_chanlist(const char *host, struct userrec *rec)
 {
   char				*nick = NULL, *uhost = NULL, buf[UHOSTLEN] = "";
-  register memberlist		*m = NULL;
-  register struct chanset_t	*chan = NULL;
+  memberlist		*m = NULL;
+  struct chanset_t	*chan = NULL;
 
   strlcpy(buf, host, sizeof buf);
   uhost = buf;

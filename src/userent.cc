@@ -566,7 +566,7 @@ struct user_entry_type USERENTRY_MODIFIED =
 static bool pass_set(struct userrec *u, struct user_entry *e, void *buf)
 {
   char *newpass = NULL;
-  register char *pass = (char *) buf;
+  char *pass = (char *) buf;
 
   if (e->u.extra)
     free(e->u.extra);
@@ -614,7 +614,7 @@ struct user_entry_type USERENTRY_PASS =
 
 static bool pass1_set(struct userrec *u, struct user_entry *e, void *buf)
 {
-  register char *pass = (char *) buf;
+  char *pass = (char *) buf;
 
   if (e->u.extra)
     free(e->u.extra);
@@ -820,14 +820,14 @@ static bool botaddr_kill(struct user_entry *e)
 
 static void botaddr_write_userfile(bd::Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
 {
-  register struct bot_addr *bi = (struct bot_addr *) e->u.extra;
+  struct bot_addr *bi = (struct bot_addr *) e->u.extra;
 
   stream << bd::String::printf("--%s %s:%u/%u:%u:%s\n", e->type->name, bi->address, bi->telnet_port, bi->relay_port, bi->hublevel, bi->uplink);
 }
 
 static bool botaddr_set(struct userrec *u, struct user_entry *e, void *buf)
 {
-  register struct bot_addr *bi = (struct bot_addr *) e->u.extra;
+  struct bot_addr *bi = (struct bot_addr *) e->u.extra;
 
   if (!bi && !buf)
     return 1;
@@ -856,7 +856,7 @@ static void botaddr_display(int idx, struct user_entry *e, struct userrec *u)
 
     get_user_flagrec(dcc[idx].user, &fr, NULL);
     if (glob_admin(fr)) {
-      register struct bot_addr *bi = (struct bot_addr *) e->u.extra;
+      struct bot_addr *bi = (struct bot_addr *) e->u.extra;
 
       if (bi->hublevel && bi->hublevel != 999) {
         if (bi->address) {

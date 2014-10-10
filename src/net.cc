@@ -400,7 +400,7 @@ int real_getsock(int options, const char *fname, int line)
 
 /* Done with a socket
  */
-void real_killsock(register int sock, const char *file, int line)
+void real_killsock(int sock, const char *file, int line)
 {
   if (sock < 0) {
     putlog(LOG_ERRORS, "*", "Attempt to kill socket -1 %s:%d", file, line);
@@ -1322,7 +1322,7 @@ int sockgets(char *s, int *len)
  * 
  * NOTE: Do NOT put Contexts in here if you want DEBUG to be meaningful!!
  */
-void tputs(register int z, const char *s, size_t len)
+void tputs(int z, const char *s, size_t len)
 {
   if (z < 0)			/* um... HELLO?!  sanity check please! */
     return;			
@@ -1334,7 +1334,7 @@ void tputs(register int z, const char *s, size_t len)
     return;
   }
 
-  register int x, idx;
+  int x, idx;
 
   int i = -1;
   if ((i = findanysnum(z)) != -1) {
@@ -1441,9 +1441,9 @@ void tputs(register int z, const char *s, size_t len)
 */
 }
 
-int findanysnum(register int sock)
+int findanysnum(int sock)
 {
-  register int i = 0;
+  int i = 0;
 
   if (sock != -1)
     for (i = 0; i < MAXSOCKS; i++)

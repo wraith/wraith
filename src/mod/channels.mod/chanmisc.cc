@@ -207,7 +207,7 @@ done:
 /* unneeded?
 int CopyAndCollapse(int count, const char *src, char *dst)
 {
-    register char c;
+    char c;
     int numRead; 
     int newCount = 0;
     int backslashCount; 
@@ -315,7 +315,7 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
   if (result)
     result[0] = 0;
 
-  for (register int i = 0; i < items; i++) {
+  for (int i = 0; i < items; i++) {
 /* Chanchar template
     } else if (!strcmp(item[i], "temp")) {
       i++;

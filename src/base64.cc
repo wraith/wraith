@@ -154,7 +154,7 @@ static void
 b64enc_buf(const unsigned char *data, size_t len, char *dest)
 {
 #define DB(x) ((unsigned char) ((x + i) < len ? data[x + i] : 0))
-  register size_t t, i;
+  size_t t, i;
 
   /* 4-byte blocks */
   for (i = 0, t = 0; i < len; i += NUM_ASCII_BYTES, t += NUM_ENCODED_BYTES) {
@@ -181,7 +181,7 @@ static void
 b64dec_buf(const unsigned char *data, size_t *len, char *dest)
 {
 #define DB(x) ((unsigned char) (x + i < *len ? base64r[(unsigned char) data[x + i]] : 0))
-  register size_t t, i;
+  size_t t, i;
 
   for (i = 0, t = 0; i < *len; i += 4, t += 3) {
     dest[t] = (DB(0) << 2) + (DB(1) >> 4);
@@ -213,8 +213,8 @@ static void
 b64dec_bd_buf(const unsigned char *data, size_t *len, char *dest)
 {
 #define DB(x) ((unsigned char) (x + i < *len ? base64r[(unsigned char) data[x + i]] : 0))
-  register size_t t, i;
-  register int pads = 0;
+  size_t t, i;
+  int pads = 0;
 
   for (i = 0, t = 0; i < *len; i += NUM_ENCODED_BYTES, t += NUM_ASCII_BYTES) {
 
