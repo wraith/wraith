@@ -7,7 +7,7 @@ if [ -z "$SED" -o -z "$CXX" ]; then
   echo "This must be ran by configure" >&2
   exit 1
 fi
-echo "Generating lib symbols"
+echo "==== Generating lib symbols ===="
 INCLUDES="${TCL_INCLUDES} ${SSL_INCLUDES}"
 
 mkdir -p src/.defs > /dev/null 2>&1

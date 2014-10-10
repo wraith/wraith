@@ -254,13 +254,6 @@ if test -d .git; then
 fi
 ]
 
-CXX="$CXX" TCL_INCLUDES="$TCL_INCLUDES" SSL_INCLUDES="$SSL_INCLUDES" SED="$SED" src/generate_defs.sh
-[
-if [ $? -ne 0 ]; then
-  exit 1
-fi
-]
-
 echo
 echo
 echo "------------ Configuring BDLIB ------------"
@@ -272,3 +265,10 @@ if [[ -n "${LIBELF_BUNDLED}" ]] && [[ -f lib/libelf/configure ]]; then
   echo "------------ Configuring LIBELF ------------"
   ( cd lib/libelf && CC="$CC" CXX="$CXX" ./configure )
 fi
+
+CXX="$CXX" TCL_INCLUDES="$TCL_INCLUDES" SSL_INCLUDES="$SSL_INCLUDES" SED="$SED" src/generate_defs.sh
+[
+if [ $? -ne 0 ]; then
+  exit 1
+fi
+]
