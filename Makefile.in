@@ -30,10 +30,10 @@ SETTINGSFILE = doc/settings.txt
 RESPONSESFILE = doc/responses.txt
 
 # defaults
-CXX = @CCACHE@ @DISTCC@ @CXX@ @STATIC@ -no-integrated-cpp
+CXX = @CCACHE@ @DISTCC@ @CXX@ @STATIC@
 LD_DYNAMIC = @CXX@
 LD_STATIC = @CXX@ @STATIC@
-CCDEBUG = @CCACHE@ @DISTCC@ @CXX@
+CXX_DEBUG = @CCACHE@ @DISTCC@ @CXX@
 LD_DEBUG = @CXX@
 STRIP = @STRIP@
 DIFF = @DIFF@
@@ -43,18 +43,8 @@ LIBS = @LIBS@
 INCLUDES = @TCL_INCLUDES@
 
 DEBCXXFLAGS = -DDEBUG -fno-inline -g3 -ggdb3 -O0 -Wshadow -Wpointer-arith -Wcast-align @GCC3DEB@ @GCC4DEB@ @DEBCXXFLAGS@
-CFLGS = @GCC3@ -fno-rtti @SSL_INCLUDES@
-_CFLGS = -fno-strict-aliasing -W -Wformat \
-#-Wshadow -Wnested-externs -Wno-format-y2k \
-#-Wlarger-than-6608 -Wpointer-arith -Wcast-align \
-#-Waggrepate-return -Wbad-function-cast \
-#-Wlong-long @GCC3@
-
-#-Wmissing-noreturn
-#-Wunused-parameter
-#-Wwrite-strings
-#-Wconversion
-#-Wtraditional
+CFLGS = @GCC3_CFLAGS@ @SSL_INCLUDES@
+CXXFLAGS = @CXXFLAGS@ $(CFLGS) @GCC3_CXXFLAGS@ -fno-rtti
 
 MAKEFLAGS = -s
 
@@ -62,26 +52,26 @@ STRINGFIX = src/stringfix
 
 MAKE_STATIC = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CXX)' 'LD=$(LD_STATIC)' 'INCLUDES=$(INCLUDES)' \
 'CCDEPMODE=$(CCDEPMODE)' 'BRANCH=$(BRANCH)' 'COMMIT=$(COMMIT_SHORT)' 'BUILDTS=$(BUILDTS)' 'VERSION=$(VERSION)' \
-'STRIP=$(STRIP)' 'CFLGS=$(CFLGS) -DBIN_TYPE_STATIC' 'STRINGFIX=$(STRINGFIX)' \
+'STRIP=$(STRIP)' 'CXXFLAGS=$(CXXFLAGS)' 'CFLGS=$(CFLGS) -DBIN_TYPE_STATIC' 'STRINGFIX=$(STRINGFIX)' \
 'LIBS=$(LIBS)' 'EGGEXEC=$(BINEXEC)' 'EGGBUILD=(wraith)'
 
 MAKE_DYNAMIC = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CXX)' 'LD=$(LD_DYNAMIC)' 'INCLUDES=$(INCLUDES)' \
 'CCDEPMODE=$(CCDEPMODE)' 'BRANCH=$(BRANCH)' 'COMMIT=$(COMMIT_SHORT)' 'BUILDTS=$(BUILDTS)' 'VERSION=$(VERSION)' \
-'STRIP=$(STRIP)' 'CFLGS=$(CFLGS) -DBIN_TYPE_DYNAMIC' 'STRINGFIX=$(STRINGFIX)' \
+'STRIP=$(STRIP)' 'CXXFLAGS=$(CXXFLAGS)' 'CFLGS=$(CFLGS) -DBIN_TYPE_DYNAMIC' 'STRINGFIX=$(STRINGFIX)' \
 'LIBS=$(LIBS)' 'EGGEXEC=$(BINEXEC)' 'EGGBUILD=(wraith)'
 
-MAKE_DEBUG = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CCDEBUG)' 'LD=$(LD_DEBUG) -g' 'INCLUDES=$(INCLUDES)' \
+MAKE_DEBUG = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CXX_DEBUG)' 'LD=$(LD_DEBUG) -g' 'INCLUDES=$(INCLUDES)' \
 'CCDEPMODE=$(CCDEPMODE)' 'BRANCH=$(BRANCH)' 'COMMIT=$(COMMIT_SHORT)' 'BUILDTS=$(BUILDTS)' 'VERSION=$(VERSION)' \
-'STRIP=touch' 'CFLGS=$(CFLGS) $(DEBCXXFLAGS) -DBIN_TYPE_DYNAMIC' 'STRINGFIX=' \
+'STRIP=touch' 'CXXFLAGS=$(CXXFLAGS) $(DEBCXXFLAGS)' 'CFLGS=$(CFLGS) $(DEBCXXFLAGS) -DBIN_TYPE_DYNAMIC' 'STRINGFIX=' \
 'LIBS=$(LIBS)' 'EGGEXEC=$(BINEXEC)' 'EGGBUILD=(debug)'
 
-MAKE_UTILS = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CCDEBUG)' 'STRIP=touch' 'INCLUDES=$(INCLUDES)' \
+MAKE_UTILS = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CXX_DEBUG)' 'STRIP=touch' 'INCLUDES=$(INCLUDES)' \
 'CCDEPMODE=$(CCDEPMODE)' \
-'CFLGS=$(CFLGS) $(DEBCXXFLAGS)' 'LIBS=$(LIBS)' 'LD=$(LD_DEBUG) -g'
+'CXXFLAGS=$(CXXFLAGS) $(DEBCXXFLAGS)' 'CFLGS=$(CFLGS) $(DEBCXXFLAGS)' 'LIBS=$(LIBS)' 'LD=$(LD_DEBUG) -g'
 
 MAKE_UTILS_NR = $(MAKE) 'CXX=$(CXX)' 'STRIP=touch' 'INCLUDES=$(INCLUDES)' \
 'CCDEPMODE=$(CCDEPMODE)' \
-'CFLGS=$(CFLGS) $(DEBCXXFLAGS)' 'LIBS=$(LIBS)' 'LD=$(LD) -g'
+'CXXFLAGS=$(CXXFLAGS) $(DEBCXXFLAGS)' 'CFLGS=$(CFLGS) $(DEBCXXFLAGS)' 'LIBS=$(LIBS)' 'LD=$(LD) -g'
 
 MAKE_CONFIG = $(MAKE) 'MAKE=$(MAKE)'
 
@@ -190,19 +180,19 @@ res: makeres
 	cp -f src/responses.h~ src/responses.h; \
 	fi)
 
-stringfix: src/stringfix.c src/config.h
+stringfix: src/stringfix.cc src/config.h
 	+@cd src && ${MAKE_UTILS} stringfix
 
-makeres: src/makeres.c
+makeres: src/makeres.cc
 	+@cd src && ${MAKE_UTILS} makeres
 
-makeset: src/makeset.c
+makeset: src/makeset.cc
 	+@cd src && ${MAKE_UTILS} makeset
 
-makehelp: src/makehelp.c
+makehelp: src/makehelp.cc
 	+@cd src && ${MAKE_UTILS} makehelp
 
-sorthelp: src/sorthelp.c
+sorthelp: src/sorthelp.cc
 	+@cd src && ${MAKE_UTILS} sorthelp
 
 utils: stringfix makehelp

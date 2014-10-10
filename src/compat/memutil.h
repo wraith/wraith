@@ -17,12 +17,18 @@
 //#define calloc my_calloc
 //#define realloc my_realloc
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void str_redup(char **, const char *);
 char *strdup(const char *);
 char *strldup(const char *, size_t);
-
-
 void *my_calloc(size_t, size_t);
 void *my_realloc(void *, size_t);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* !_MEMUTIL_H */

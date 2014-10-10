@@ -32,7 +32,7 @@
 #include <bdlib/src/Array.h>
 
 #include "libtcl.h"
-#include ".defs/libtcl_defs.c"
+#include ".defs/libtcl_defs.cc"
 
 #ifdef USE_SCRIPT_TCL
 Tcl_Interp *global_interp = NULL;

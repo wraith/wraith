@@ -29,8 +29,10 @@ AC_CACHE_SAVE
 EGG_CHECK_CCWALL
 EGG_CHECK_CCPIPE
 CXX_FLAG_CHECK([CXXFLAGS], [-fcolor-diagnostics], [colordiagnostics])
-CXX_FLAG_CHECK([CXXFLAGS], [-Qunused-arguments], [unusedarguments])
-CXX_FLAG_CHECK([DEBCXXFLAGS], [-fstack-protector-all], [stackprotector])
+#CXX_FLAG_CHECK([CXXFLAGS], [-Qunused-arguments], [unusedarguments])
+CXX_FLAG_CHECK([CXXFLAGS], [-fstack-protector], [stackprotector])
+CXX_FLAG_CHECK([CXXFLAGS], [-fstack-protector-strong], [stackprotectorstrong])
+CXX_FLAG_CHECK([DEBCXXFLAGS], [-fstack-protector-all], [stackprotectorall])
 
 EGG_CHECK_DEPMODE
 
@@ -47,7 +49,7 @@ AC_CHECK_PROG(OBJCOPY, objcopy, [objcopy --remove-section=.note --remove-section
 AC_CHECK_PROG(STRIP, strip, strip, touch)
 AC_CHECK_PROG(DIFF, gdiff, gdiff, diff)
 AC_CHECK_PROG(UNAME, uname, uname)
-AC_CHECK_PROG(CCACHE, ccache, ccache)
+AC_CHECK_PROG(CCACHE, ccache, env CCACHE_CPP2=1 ccache)
 AC_CHECK_PROG(DISTCC, distcc, distcc)
 
 # Test the os and set the module linking settings
@@ -63,7 +65,6 @@ EGG_CHECK_RANDOM_MAX
 
 # Create static binaries
 EGG_CHECK_CCSTATIC
-AC_SUBST(CCDEBUG)dnl
 AC_SUBST(DEBCXXFLAGS)
 
 #checkpoint
