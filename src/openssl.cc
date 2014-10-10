@@ -43,7 +43,7 @@ int     ssl_use = 0; /* kyotou */
 
 static int seed_PRNG(void);
 
-#include "dhparam.c"
+#include "dhparam.cc"
 
 static DH* tmp_dh_callback(SSL* ssl, int is_export, int keylength) {
   DH *ret = NULL;

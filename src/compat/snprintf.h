@@ -23,6 +23,9 @@
 #  endif
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* Use the system libraries version of vsnprintf() if available. Otherwise
  * use our own.
  */
@@ -45,4 +48,7 @@ int egg_snprintf();
 #  define egg_snprintf	snprintf
 #endif
 
+#ifdef __cplusplus
+}
+#endif
 #endif	/* !_EGG_COMPAT_SNPRINTF_H_ */

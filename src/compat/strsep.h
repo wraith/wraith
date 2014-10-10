@@ -9,7 +9,12 @@
 
 #define strsep my_strsep
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 char *strsep(char **, const char *);
 
+#ifdef __cplusplus
+}
+#endif
 #endif /* !_STRSEP_H */
-

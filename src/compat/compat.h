@@ -24,8 +24,14 @@
 #include "strsep.h"
 #include "timespec.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #ifndef HAVE_MEMMEM
 void *memmem(const void *l, size_t l_len, const void *s, size_t s_len);
+#endif
+#ifdef __cplusplus
+}
 #endif
 
 /* These apparently are unsafe without recasting. */

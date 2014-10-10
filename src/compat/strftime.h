@@ -13,6 +13,9 @@
 
 #include <time.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* Use the system libraries version of strftime() if available. Otherwise
  * use our own.
  */
@@ -20,4 +23,7 @@
 size_t strftime(char *s, size_t maxsize, const char *format, const struct tm *tp);
 #endif
 
+#ifdef __cplusplus
+}
+#endif
 #endif	/* !_EGG_COMPAT_STRFTIME_H_ */

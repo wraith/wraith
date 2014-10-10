@@ -651,7 +651,7 @@ dnl  EGG_SUBST_VERSION()
 dnl
 AC_DEFUN([EGG_SUBST_VERSION], 
 [
-VERSION=`grep "char" $srcdir/src/main.c | $AWK '/egg_version/ {print [$]5}' | sed -e 's/\"//g' | sed -e 's/\;//g'`
+VERSION=`grep "char" $srcdir/src/main.cc | $AWK '/egg_version/ {print [$]5}' | sed -e 's/\"//g' | sed -e 's/\;//g'`
 version_num=`echo $VERSION | $AWK 'BEGIN {FS = "."} {printf("%d%02d%02d", [$]1, [$]2, [$]3)}'`
 AC_DEFINE_UNQUOTED(EGG_VERSION, $version_num, [Defines the current pack version])dnl
 AC_SUBST(VERSION)dnl

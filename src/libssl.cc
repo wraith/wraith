@@ -32,7 +32,7 @@
 #include <bdlib/src/Array.h>
 
 #include "libssl.h"
-#include ".defs/libssl_defs.c"
+#include ".defs/libssl_defs.cc"
 
 void *libssl_handle = NULL;
 static bd::Array<bd::String> my_symbols;

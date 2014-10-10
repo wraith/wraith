@@ -646,7 +646,6 @@ LIBELF_BUNDLED
 EGREP
 GREP
 DEBCXXFLAGS
-CCDEBUG
 STATIC
 BUILDARCH
 BUILDOS
@@ -663,7 +662,8 @@ SED
 SET_MAKE
 GCC4DEB
 GCC3DEB
-GCC3
+GCC3_CXXFLAGS
+GCC3_CFLAGS
 CCDEPMODE
 HAVE_CXX11
 CXXCPP
@@ -3530,66 +3530,10 @@ EOF
     exit 1
   fi
 
+#CXX_FLAG_CHECK([CXXFLAGS], [-Qunused-arguments], [unusedarguments])
 
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -Qunused-arguments" >&5
-$as_echo_n "checking whether the compiler understands -Qunused-arguments... " >&6; }
-if ${egg_cv_prog_cc_unusedarguments+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-    ac_ext=cpp
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-    ac_saved_flags="$CXXFLAGS"
-    CXXFLAGS="-Werror -Qunused-arguments"
-    cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end build/confdefs.h.  */
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_compile "$LINENO"; then :
-  egg_cv_prog_cc_unusedarguments="yes"
-else
-  egg_cv_prog_cc_unusedarguments="no"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-    CXXFLAGS="$ac_saved_flags"
-    ac_ext=cpp
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $egg_cv_prog_cc_unusedarguments" >&5
-$as_echo "$egg_cv_prog_cc_unusedarguments" >&6; }
-
-  if [ "$egg_cv_prog_cc_unusedarguments" = "yes" ]; then
-    CXXFLAGS="$CXXFLAGS -Qunused-arguments"
-  elif [ -n "" ]; then
-      cat << 'EOF' >&2
-configure: error:
-
-  Your OS or C++ compiler does not support -Qunused-arguments.
-  This compile flag is required.
-
-EOF
-    exit 1
-  fi
-
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -fstack-protector-all" >&5
-$as_echo_n "checking whether the compiler understands -fstack-protector-all... " >&6; }
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -fstack-protector" >&5
+$as_echo_n "checking whether the compiler understands -fstack-protector... " >&6; }
 if ${egg_cv_prog_cc_stackprotector+:} false; then :
   $as_echo_n "(cached) " >&6
 else
@@ -3601,7 +3545,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
     ac_saved_flags="$CXXFLAGS"
-    CXXFLAGS="-Werror -fstack-protector-all"
+    CXXFLAGS="-Werror -fstack-protector"
     cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end build/confdefs.h.  */
 
@@ -3632,6 +3576,120 @@ fi
 $as_echo "$egg_cv_prog_cc_stackprotector" >&6; }
 
   if [ "$egg_cv_prog_cc_stackprotector" = "yes" ]; then
+    CXXFLAGS="$CXXFLAGS -fstack-protector"
+  elif [ -n "" ]; then
+      cat << 'EOF' >&2
+configure: error:
+
+  Your OS or C++ compiler does not support -fstack-protector.
+  This compile flag is required.
+
+EOF
+    exit 1
+  fi
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -fstack-protector-strong" >&5
+$as_echo_n "checking whether the compiler understands -fstack-protector-strong... " >&6; }
+if ${egg_cv_prog_cc_stackprotectorstrong+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+    ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+    ac_saved_flags="$CXXFLAGS"
+    CXXFLAGS="-Werror -fstack-protector-strong"
+    cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  egg_cv_prog_cc_stackprotectorstrong="yes"
+else
+  egg_cv_prog_cc_stackprotectorstrong="no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+    CXXFLAGS="$ac_saved_flags"
+    ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $egg_cv_prog_cc_stackprotectorstrong" >&5
+$as_echo "$egg_cv_prog_cc_stackprotectorstrong" >&6; }
+
+  if [ "$egg_cv_prog_cc_stackprotectorstrong" = "yes" ]; then
+    CXXFLAGS="$CXXFLAGS -fstack-protector-strong"
+  elif [ -n "" ]; then
+      cat << 'EOF' >&2
+configure: error:
+
+  Your OS or C++ compiler does not support -fstack-protector-strong.
+  This compile flag is required.
+
+EOF
+    exit 1
+  fi
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -fstack-protector-all" >&5
+$as_echo_n "checking whether the compiler understands -fstack-protector-all... " >&6; }
+if ${egg_cv_prog_cc_stackprotectorall+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+    ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+    ac_saved_flags="$CXXFLAGS"
+    CXXFLAGS="-Werror -fstack-protector-all"
+    cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  egg_cv_prog_cc_stackprotectorall="yes"
+else
+  egg_cv_prog_cc_stackprotectorall="no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+    CXXFLAGS="$ac_saved_flags"
+    ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $egg_cv_prog_cc_stackprotectorall" >&5
+$as_echo "$egg_cv_prog_cc_stackprotectorall" >&6; }
+
+  if [ "$egg_cv_prog_cc_stackprotectorall" = "yes" ]; then
     DEBCXXFLAGS="$DEBCXXFLAGS -fstack-protector-all"
   elif [ -n "" ]; then
       cat << 'EOF' >&2
@@ -3651,7 +3709,8 @@ num=`$CXX -dumpversion | sed "s/^\\\(.\\\).*/\\\1/"`
 if test $num -ge "3"; then
   CCDEPMODE=gcc3
 #  GCC3="-Wpadded -Wpacked -Wno-unused-parameter -Wmissing-format-attribute -Wdisabled-optimization"
-  GCC3="-W -Wno-unused-parameter -Wdisabled-optimization -Wno-write-strings -Wno-format-security -fno-strict-aliasing -Woverloaded-virtual -Wno-format-y2k"
+  GCC3_CFLAGS="-W -Wno-unused-parameter -Wdisabled-optimization -Wno-write-strings -Wno-format-security -fno-strict-aliasing -Wno-format-y2k"
+  GCC3_CXXFLAGS="-Woverloaded-virtual"
   GCC3DEB="-Wno-disabled-optimization -Wmissing-format-attribute"
 fi
 
@@ -4166,7 +4225,7 @@ do
   test -z "$as_dir" && as_dir=.
     for ac_exec_ext in '' $ac_executable_extensions; do
   if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CCACHE="ccache"
+    ac_cv_prog_CCACHE="env CCACHE_CPP2=1 ccache"
     $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -8869,7 +8928,7 @@ fi
 rm -f confcache
 
 
-VERSION=`grep "char" $srcdir/src/main.c | $AWK '/egg_version/ {print $5}' | sed -e 's/\"//g' | sed -e 's/\;//g'`
+VERSION=`grep "char" $srcdir/src/main.cc | $AWK '/egg_version/ {print $5}' | sed -e 's/\"//g' | sed -e 's/\;//g'`
 version_num=`echo $VERSION | $AWK 'BEGIN {FS = "."} {printf("%d%02d%02d", $1, $2, $3)}'`
 
 cat >>build/confdefs.h <<_ACEOF
@@ -8891,33 +8950,8 @@ esac
 files="src/Makefile.in src/compat/Makefile.in src/crypto/Makefile.in src/mod/channels.mod/Makefile src/mod/compress.mod/Makefile src/mod/console.mod/Makefile src/mod/ctcp.mod/Makefile src/mod/irc.mod/Makefile src/mod/server.mod/Makefile src/mod/share.mod/Makefile src/mod/transfer.mod/Makefile src/mod/update.mod/Makefile"
 for mf in $files; do
   # Strip MF so we end up with the name of the file.
-#  echo "MF: $mf"
-  mf=`echo "$mf" | sed -e 's/:.*$//'`
-  dirpart=`$as_dirname -- "$mf" ||
-$as_expr X"$mf" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
-	 X"$mf" : 'X\(//\)[^/]' \| \
-	 X"$mf" : 'X\(//\)$' \| \
-	 X"$mf" : 'X\(/\)' \| . 2>/dev/null ||
-$as_echo X"$mf" |
-    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\/\)[^/].*/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\/\)$/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\).*/{
-	    s//\1/
-	    q
-	  }
-	  s/.*/./; q'`
-#  echo "dirpart: $dirpart mf: $mf"
-#  rm -rf "$dirpart/.deps/"
+  mf=${mf%%:*}
+  dirpart=${mf%/*}
   rm -f "$dirpart/.deps/includes"
   test -d "$dirpart/.deps" || mkdir "$dirpart/.deps"
   for file in `sed -n -e '
@@ -8934,7 +8968,7 @@ $as_echo X"$mf" |
   do
     suffix=${file##*.}
     base=${file%%.*}
-    test -f "$dirpart/$base.c" || continue
+    test -f "$dirpart/$base.cc" || test -f "$dirpart/$base.c" || continue
     if ! test -f "$dirpart/.deps/$base.Po"; then
       echo '# dummy' > "$dirpart/.deps/$base.Po"
       #Remove the .o file, because it needs to be recompiled for its dependancies.

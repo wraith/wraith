@@ -3,8 +3,9 @@ top_srcdir = @top_srcdir@
 srcdir = @srcdir@
 
 SHELL = @SHELL@
-CXXFLAGS = @CXXFLAGS@ -I.. -I$(top_srcdir) -I$(top_srcdir)/lib @DEFS@ $(CFLGS)
-CPPFLAGS = @CPPFLAGS@
+CXXFLAGS = $(CXXFLAGS)
+CFLAGS = $(CFLGS)
+CPPFLAGS = @CPPFLAGS@ -I.. -I$(top_srcdir) -I$(top_srcdir)/lib @DEFS@
 STRIP = @STRIP@
 VPATH = @srcdir@
 
