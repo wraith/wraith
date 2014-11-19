@@ -10,6 +10,7 @@ VPATH = @srcdir@
 CXXFLAGS = $(CXXFLAGS)
 CFLAGS = $(CFLGS)
 CPPFLAGS = @CPPFLAGS@ -I. -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/pack @DEFS@ $(INCLUDES) '-DCOMMIT="$(COMMIT)"' '-DBRANCH="$(BRANCH)"' -DBUILDTS=$(BUILDTS) '-DVERSION="$(VERSION)"'
+LDFLAGS = @LDFLAGS@
 
 include $(top_srcdir)/build/build.mk
 
@@ -106,8 +107,7 @@ stringfix: stringfix.cc common.h config.h eggdrop.h
 	@echo ""
 	@echo "Linking wraith... $(EGGBUILD)"
 	@echo ""
-	$(LD) -o ../$(EGGEXEC) $(OBJS) $(MODOBJS) compat/*.o crypto/*.o ../lib/bdlib/libbdlib.a $(LIBS) @LIBELF_LIB@
-#	$(LD) -o ../$(EGGEXEC) $(OBJS) $(MODOBJS) $(LIBS) compat/*.o crypto/*.o
+	$(LD) $(LDFLAGS) -o ../$(EGGEXEC) $(OBJS) $(MODOBJS) compat/*.o crypto/*.o ../lib/bdlib/libbdlib.a $(LIBS) @LIBELF_LIB@
 	@$(STRIP) ../$(EGGEXEC)
 	@$(OBJCOPY) ../$(EGGEXEC)
 	@echo "Successful compile: $(EGGEXEC)"
