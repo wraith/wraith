@@ -33,6 +33,11 @@ CXX_FLAG_CHECK([CXXFLAGS], [-fcolor-diagnostics], [colordiagnostics])
 CXX_FLAG_CHECK([CXXFLAGS], [-Wno-invalid-source-encoding], [invalid_source_encoding])
 CXX_FLAG_CHECK([CXXFLAGS], [-fstack-protector], [stackprotector])
 CXX_FLAG_CHECK([CXXFLAGS], [-fstack-protector-strong], [stackprotectorstrong])
+if [[ "${ax_cv_prog_cc_stackprotectorstrong}" = "yes" ]]; then
+  LDFLAGS="${LDFLAGS} -fstack-protector-strong"
+elif [[ "${ax_cv_prog_cc_stackprotector}" = "yes" ]]; then
+  LDFLAGS="${LDFLAGS} -fstack-protector"
+fi
 CXX_FLAG_CHECK([DEBCXXFLAGS], [-fstack-protector-all], [stackprotectorall])
 
 EGG_CHECK_DEPMODE
