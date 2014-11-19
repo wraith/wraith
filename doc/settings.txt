@@ -21,7 +21,6 @@ irc.eversible.com
 irc.mzima.net
 irc.paraphysics.net
 irc.servercentral.net
-irc.shoutcast.com
 irc.umich.edu
 irc2.choopa.net
 #EU
@@ -61,7 +60,6 @@ irc.choopa.net:9999
 irc.eversible.com:9999
 irc.paraphysics.net
 irc.servercentral.net:9999
-irc.shoutcast.com:8000
 irc.umich.edu:9999
 irc.underworld.no
 
