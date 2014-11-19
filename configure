@@ -3396,6 +3396,11 @@ EOF
     exit 1
   fi
 
+if [ "${ax_cv_prog_cc_stackprotectorstrong}" = "yes" ]; then
+  LDFLAGS="${LDFLAGS} -fstack-protector-strong"
+elif [ "${ax_cv_prog_cc_stackprotector}" = "yes" ]; then
+  LDFLAGS="${LDFLAGS} -fstack-protector"
+fi
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -fstack-protector-all" >&5
 $as_echo_n "checking whether the compiler understands -fstack-protector-all... " >&6; }
