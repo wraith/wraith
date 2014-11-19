@@ -3170,7 +3170,7 @@ $as_echo "$egg_cv_var_ccpipe" >&6; }
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -fcolor-diagnostics" >&5
 $as_echo_n "checking whether the compiler understands -fcolor-diagnostics... " >&6; }
-if ${egg_cv_prog_cc_colordiagnostics+:} false; then :
+if ${ax_cv_prog_cc_colordiagnostics+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
@@ -3194,9 +3194,9 @@ main ()
 }
 _ACEOF
 if ac_fn_cxx_try_compile "$LINENO"; then :
-  egg_cv_prog_cc_colordiagnostics="yes"
+  ax_cv_prog_cc_colordiagnostics="yes"
 else
-  egg_cv_prog_cc_colordiagnostics="no"
+  ax_cv_prog_cc_colordiagnostics="no"
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     CXXFLAGS="$ac_saved_flags"
@@ -3208,10 +3208,10 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $egg_cv_prog_cc_colordiagnostics" >&5
-$as_echo "$egg_cv_prog_cc_colordiagnostics" >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_prog_cc_colordiagnostics" >&5
+$as_echo "$ax_cv_prog_cc_colordiagnostics" >&6; }
 
-  if [ "$egg_cv_prog_cc_colordiagnostics" = "yes" ]; then
+  if [ "$ax_cv_prog_cc_colordiagnostics" = "yes" ]; then
     CXXFLAGS="$CXXFLAGS -fcolor-diagnostics"
   elif [ -n "" ]; then
       cat << 'EOF' >&2
@@ -3228,7 +3228,7 @@ EOF
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -Wno-invalid-source-encoding" >&5
 $as_echo_n "checking whether the compiler understands -Wno-invalid-source-encoding... " >&6; }
-if ${egg_cv_prog_cc_invalid_source_encoding+:} false; then :
+if ${ax_cv_prog_cc_invalid_source_encoding+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
@@ -3252,9 +3252,9 @@ main ()
 }
 _ACEOF
 if ac_fn_cxx_try_compile "$LINENO"; then :
-  egg_cv_prog_cc_invalid_source_encoding="yes"
+  ax_cv_prog_cc_invalid_source_encoding="yes"
 else
-  egg_cv_prog_cc_invalid_source_encoding="no"
+  ax_cv_prog_cc_invalid_source_encoding="no"
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     CXXFLAGS="$ac_saved_flags"
@@ -3266,10 +3266,10 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $egg_cv_prog_cc_invalid_source_encoding" >&5
-$as_echo "$egg_cv_prog_cc_invalid_source_encoding" >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_prog_cc_invalid_source_encoding" >&5
+$as_echo "$ax_cv_prog_cc_invalid_source_encoding" >&6; }
 
-  if [ "$egg_cv_prog_cc_invalid_source_encoding" = "yes" ]; then
+  if [ "$ax_cv_prog_cc_invalid_source_encoding" = "yes" ]; then
     CXXFLAGS="$CXXFLAGS -Wno-invalid-source-encoding"
   elif [ -n "" ]; then
       cat << 'EOF' >&2
@@ -3285,7 +3285,7 @@ EOF
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -fstack-protector" >&5
 $as_echo_n "checking whether the compiler understands -fstack-protector... " >&6; }
-if ${egg_cv_prog_cc_stackprotector+:} false; then :
+if ${ax_cv_prog_cc_stackprotector+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
@@ -3309,9 +3309,9 @@ main ()
 }
 _ACEOF
 if ac_fn_cxx_try_compile "$LINENO"; then :
-  egg_cv_prog_cc_stackprotector="yes"
+  ax_cv_prog_cc_stackprotector="yes"
 else
-  egg_cv_prog_cc_stackprotector="no"
+  ax_cv_prog_cc_stackprotector="no"
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     CXXFLAGS="$ac_saved_flags"
@@ -3323,10 +3323,10 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $egg_cv_prog_cc_stackprotector" >&5
-$as_echo "$egg_cv_prog_cc_stackprotector" >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_prog_cc_stackprotector" >&5
+$as_echo "$ax_cv_prog_cc_stackprotector" >&6; }
 
-  if [ "$egg_cv_prog_cc_stackprotector" = "yes" ]; then
+  if [ "$ax_cv_prog_cc_stackprotector" = "yes" ]; then
     CXXFLAGS="$CXXFLAGS -fstack-protector"
   elif [ -n "" ]; then
       cat << 'EOF' >&2
@@ -3342,7 +3342,7 @@ EOF
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -fstack-protector-strong" >&5
 $as_echo_n "checking whether the compiler understands -fstack-protector-strong... " >&6; }
-if ${egg_cv_prog_cc_stackprotectorstrong+:} false; then :
+if ${ax_cv_prog_cc_stackprotectorstrong+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
@@ -3366,9 +3366,9 @@ main ()
 }
 _ACEOF
 if ac_fn_cxx_try_compile "$LINENO"; then :
-  egg_cv_prog_cc_stackprotectorstrong="yes"
+  ax_cv_prog_cc_stackprotectorstrong="yes"
 else
-  egg_cv_prog_cc_stackprotectorstrong="no"
+  ax_cv_prog_cc_stackprotectorstrong="no"
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     CXXFLAGS="$ac_saved_flags"
@@ -3380,10 +3380,10 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $egg_cv_prog_cc_stackprotectorstrong" >&5
-$as_echo "$egg_cv_prog_cc_stackprotectorstrong" >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_prog_cc_stackprotectorstrong" >&5
+$as_echo "$ax_cv_prog_cc_stackprotectorstrong" >&6; }
 
-  if [ "$egg_cv_prog_cc_stackprotectorstrong" = "yes" ]; then
+  if [ "$ax_cv_prog_cc_stackprotectorstrong" = "yes" ]; then
     CXXFLAGS="$CXXFLAGS -fstack-protector-strong"
   elif [ -n "" ]; then
       cat << 'EOF' >&2
@@ -3404,7 +3404,7 @@ fi
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -fstack-protector-all" >&5
 $as_echo_n "checking whether the compiler understands -fstack-protector-all... " >&6; }
-if ${egg_cv_prog_cc_stackprotectorall+:} false; then :
+if ${ax_cv_prog_cc_stackprotectorall+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
@@ -3428,9 +3428,9 @@ main ()
 }
 _ACEOF
 if ac_fn_cxx_try_compile "$LINENO"; then :
-  egg_cv_prog_cc_stackprotectorall="yes"
+  ax_cv_prog_cc_stackprotectorall="yes"
 else
-  egg_cv_prog_cc_stackprotectorall="no"
+  ax_cv_prog_cc_stackprotectorall="no"
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     CXXFLAGS="$ac_saved_flags"
@@ -3442,10 +3442,10 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $egg_cv_prog_cc_stackprotectorall" >&5
-$as_echo "$egg_cv_prog_cc_stackprotectorall" >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_prog_cc_stackprotectorall" >&5
+$as_echo "$ax_cv_prog_cc_stackprotectorall" >&6; }
 
-  if [ "$egg_cv_prog_cc_stackprotectorall" = "yes" ]; then
+  if [ "$ax_cv_prog_cc_stackprotectorall" = "yes" ]; then
     DEBCXXFLAGS="$DEBCXXFLAGS -fstack-protector-all"
   elif [ -n "" ]; then
       cat << 'EOF' >&2
