@@ -57,7 +57,7 @@ size_t	current_get_buf = 0;
 
 void setlimits()
 {
-  struct rlimit plim, fdlim, corelim;
+  struct rlimit fdlim, corelim;
 #ifndef DEBUG
 /*  struct rsslim, stacklim;
   rsslim.rlim_cur = 30720;
@@ -68,20 +68,13 @@ void setlimits()
   setrlimit(RLIMIT_STACK, &stacklim);
 */
   /* do NOT dump a core. */
-  plim.rlim_cur = 60;
-  plim.rlim_max = 60;
   corelim.rlim_cur = 0;
   corelim.rlim_max = 0;
 #else /* DEBUG */
-  plim.rlim_cur = 500;
-  plim.rlim_max = 500;
   corelim.rlim_cur = RLIM_INFINITY;
   corelim.rlim_max = RLIM_INFINITY;
 #endif /* !DEBUG */
   setrlimit(RLIMIT_CORE, &corelim);
-#ifndef __sun__
-  setrlimit(RLIMIT_NPROC, &plim);
-#endif
   fdlim.rlim_cur = MAX_SOCKETS;
   fdlim.rlim_max = MAX_SOCKETS;
   setrlimit(RLIMIT_NOFILE, &fdlim);
