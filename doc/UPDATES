@@ -12,7 +12,7 @@ next
 master
   * Require C++11 compiler support (G++ 4.7+, clang32+)
 
-maint
+1.4.4
   * Read in /etc/hosts on startup
   * Fix 'bl %group cmd' giving incorrect message when group/bots not found.
   * Fix cmd_slowjoin eating the first channel option (This fixes groups support)
