@@ -70,7 +70,6 @@ irc.ipv6.paraphysics.net
 irc.underworld.no
 
 :rbl
-dnsbl.ahbl.org
 dnsbl.proxybl.org
 rbl.efnetrbl.org
 tor.efnet.org
