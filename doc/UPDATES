@@ -1,6 +1,10 @@
 master
   * Require C++11 compiler support (G++ 4.7+, clang32+)
 
+1.4.5
+  * Remove ahbl as it now positively identifies all hosts as abusive
+    http://www.ahbl.org/content/last-notice-wildcarding-services-jan-1st
+
 1.4.4
   * Read in /etc/hosts on startup
   * Fix 'bl %group cmd' giving incorrect message when group/bots not found.
