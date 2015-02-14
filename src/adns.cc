@@ -396,7 +396,7 @@ static int get_dns_idx()
 	return 1;
 }
 
-void egg_dns_send(char *query, int len, bool blocking)
+static void egg_dns_send(char *query, int len, bool blocking)
 {
         if (dns_idx >= 0 && dcc[dns_idx].sock == -1) {
           lostdcc(dns_idx);
