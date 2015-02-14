@@ -348,8 +348,7 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool
   in = new Tempfile("in");
   if (!in || in->error) {
 //    putlog(LOG_ERRORS, "*" , "exec: Couldn't open '%s': %s", in->file, strerror(errno)); 
-    if (in)
-      delete in;
+    delete in;
     return 0;
   }
 
@@ -366,8 +365,7 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool
   if (!err || err->error) {
 //    putlog(LOG_ERRORS, "*", "exec: Couldn't open '%s': %s", err->file, strerror(errno));
     delete in;
-    if (err)
-      delete err;
+    delete err;
     return 0;
   }
 
@@ -376,8 +374,7 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool
 //    putlog(LOG_ERRORS, "*", "exec: Couldn't open '%s': %s", out->file, strerror(errno));
     delete in;
     delete err;
-    if (out)
-      delete out;
+    delete out;
     return 0;
   }
 

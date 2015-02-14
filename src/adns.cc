@@ -182,97 +182,94 @@ interval_t async_lookup_timeout = 10;
 interval_t async_server_timeout = 20;
 //int resend_on_read = 0;
 
-static void 
+static void
 dns_display(int idx, char *buf, size_t bufsiz)
 {
-  simple_snprintf(buf, bufsiz, "named   waited %ds", (int) (now - dcc[idx].timeval));
+	simple_snprintf(buf, bufsiz, "named   waited %ds", (int) (now - dcc[idx].timeval));
 }
 
 static void
 dns_reinit(int idx)
 {
-        sdprintf("Re-opening dns socket...");
-        killsock(dcc[idx].sock);
-        lostdcc(idx);
+	sdprintf("Re-opening dns socket...");
+	killsock(dcc[idx].sock);
+	lostdcc(idx);
 	dns_idx = -1;
-        dns_sock = -1;
+	dns_sock = -1;
 	dns_ip = NULL;
 
-        if (!get_dns_idx())
-          sdprintf("Successfully reopened dns socket");
-        else
-          sdprintf("Failed to reopen dns socket");
+	if (!get_dns_idx())
+		sdprintf("Successfully reopened dns socket");
+	else
+		sdprintf("Failed to reopen dns socket");
 }
 
 static void
 dns_timeout(int idx)
 {
-  sdprintf("DNS socket timed out");
-  /*egg_dns_cancel(dcc[idx].u.dns_id, 1);*/
-//  resend_on_read = 1;
-  dns_reinit(idx);  
-//  sleep(2);
-//  dns_resend_queries();
+	sdprintf("DNS socket timed out");
+	/*egg_dns_cancel(dcc[idx].u.dns_id, 1);*/
+//	resend_on_read = 1;
+	dns_reinit(idx);
+//	sleep(2);
+//	dns_resend_queries();
 }
 
 static struct dcc_table dns_handler = {
-  "adns",
-  DCT_VALIDIDX,
-  dns_on_eof,
-  dns_on_read,
-  NULL,
-  dns_timeout,
-  dns_display,
-  NULL,
-  NULL,
-  NULL
+	"adns",
+	DCT_VALIDIDX,
+	dns_on_eof,
+	dns_on_read,
+	NULL,
+	dns_timeout,
+	dns_display,
+	NULL,
+	NULL,
+	NULL
 };
 
 static void dcc_dnswait(int idx, char *buf, int len)
 {
-  /* Ignore anything now. */
+	/* Ignore anything now. */
 }
 
 static void eof_dcc_dnswait(int idx)
 {
-  putlog(LOG_MISC, "*", "Lost connection while resolving hostname [%s/%d]",
-         iptostr(htonl(dcc[idx].addr)), dcc[idx].port);
-  killsock(dcc[idx].sock);
-  lostdcc(idx);
+	putlog(LOG_MISC, "*", "Lost connection while resolving hostname [%s/%d]",
+	    iptostr(htonl(dcc[idx].addr)), dcc[idx].port);
+	killsock(dcc[idx].sock);
+	lostdcc(idx);
 }
 
 static void display_dcc_dnswait(int idx, char *buf, size_t bufsiz)
 {
-  simple_snprintf(buf, bufsiz, "dns   waited %ds", (int) (now - dcc[idx].timeval));
+	simple_snprintf(buf, bufsiz, "dns   waited %ds", (int) (now - dcc[idx].timeval));
 }
 
 static void kill_dcc_dnswait(int idx, void *x)
 {
-  struct dns_info *p = (struct dns_info *) x;
+	struct dns_info *p = (struct dns_info *) x;
 
-  if (p) {
-    if (p->cbuf)
-      free(p->cbuf);
-
-    if (p->cptr)
-      free(p->cptr);
-    // free(p) is same thing here.
-    free(dcc[idx].u.other);
-    dcc[idx].u.other = NULL;
-  }
+	if (p) {
+		free(p->cbuf);
+		free(p->cptr);
+		// free(p) is same thing here.
+		free(dcc[idx].u.other);
+		dcc[idx].u.other = NULL;
+	}
 }
 
 struct dcc_table DCC_DNSWAIT = {
- "DNSWAIT",
-  DCT_VALIDIDX,
-  eof_dcc_dnswait,
-  dcc_dnswait,
-  NULL,
-  NULL,
-  display_dcc_dnswait,
-  kill_dcc_dnswait,
-  NULL,
-  NULL
+	"DNSWAIT",
+	DCT_VALIDIDX,
+	eof_dcc_dnswait,
+	dcc_dnswait,
+	NULL,
+	NULL,
+	display_dcc_dnswait,
+	kill_dcc_dnswait,
+	NULL,
+	NULL
 };
 
 
@@ -280,21 +277,18 @@ struct dcc_table DCC_DNSWAIT = {
 /*
 static void async_timeout(void *client_data)
 {
-  int id = (int) client_data;
-  sdprintf("%d timed out", id);
-  egg_dns_cancel(id, 1);
+	int id = (int) client_data;
+	sdprintf("%d timed out", id);
+	egg_dns_cancel(id, 1);
 }
 */
 
 char s1_7[3] = "",s2_3[3] = "",s2_2[3] = "";
 
 static void free_query(dns_query_t*& q) {
-	if (q->ip)
-		free(q->ip);
-	if (q->answer)
-		delete q->answer;
-	if (q->query)
-		free(q->query);
+	free(q->ip);
+	delete q->answer;
+	free(q->query);
 	free(q);
 	q = NULL;
 }
@@ -322,8 +316,8 @@ static dns_query_t *alloc_query(void *client_data, dns_callback_t callback, cons
 	q->id = get_dns_id();
 	q->query = strdup(query);
 	q->answers = 0;
-        q->answer = new bd::Array<bd::String>;
-        q->lowest_ttl = 0;
+	q->answer = new bd::Array<bd::String>;
+	q->lowest_ttl = 0;
 	q->callback = callback;
 	q->client_data = client_data;
 	q->expiretime = now + async_lookup_timeout;
@@ -342,7 +336,7 @@ static void query_transform_ip(dns_query_t* q, const char* ip) {
 		socket_ipv6_to_dots(ip, temp);
 		size_t iplen = strlen(temp) + 9 + 1;
 		q->ip = (char *) my_calloc(1, iplen);
-		//		reverse_ip(temp, q->ip);
+//		reverse_ip(temp, q->ip);
 		strlcat(q->ip, temp, iplen);
 		strlcat(q->ip, "ip6.arpa", iplen);
 	}
@@ -357,7 +351,7 @@ static void query_transform_ip(dns_query_t* q, const char* ip) {
 static int get_dns_idx()
 {
 	int i, sock;
-       
+
 	sock = -1;
 	for (i = 0; i < nservers; i++) {
 		if (!dns_ip) dns_ip = dns_next_server();
@@ -369,112 +363,112 @@ static int get_dns_idx()
 		else break;
 	}
 	if (i == nservers) return 1;
-//	dns_idx = sockbuf_new();
-//	sockbuf_set_handler(dns_idx, &dns_handler, NULL);
-//	sockbuf_set_sock(dns_idx, sock, 0);
-//        allocsock(sock, SOCK_CONNECT);
+	//	dns_idx = sockbuf_new();
+	//	sockbuf_set_handler(dns_idx, &dns_handler, NULL);
+	//	sockbuf_set_sock(dns_idx, sock, 0);
+	//	allocsock(sock, SOCK_CONNECT);
 
-        if (sock >= 0 && dns_ip) {
-          dns_idx = new_dcc(&dns_handler, 0);
+	if (sock >= 0 && dns_ip) {
+		dns_idx = new_dcc(&dns_handler, 0);
 
-          if (dns_idx < 0) {
-           putlog(LOG_SERV, "*", "NO MORE DCC CONNECTIONS -- Can't create dns connection.");
-           killsock(sock);
-           return 1;
-          }
-          sdprintf("dns_idx: %d", dns_idx);
-          dcc[dns_idx].sock = sock;
-          dns_sock = sock;
-          sdprintf("dns_sock: %d", dcc[dns_idx].sock);
-          strlcpy(dcc[dns_idx].host, dns_ip, sizeof(dcc[dns_idx].host));
-          strlcpy(dcc[dns_idx].nick, "(adns)", sizeof(dcc[dns_idx].nick));
-          sdprintf("dns_ip: %s", dns_ip);
-          dcc[dns_idx].timeval = now;
-          dns_handler.timeout_val = 0;
-          return 0;
-        }
+		if (dns_idx < 0) {
+			putlog(LOG_SERV, "*", "NO MORE DCC CONNECTIONS -- Can't create dns connection.");
+			killsock(sock);
+			return 1;
+		}
+		sdprintf("dns_idx: %d", dns_idx);
+		dcc[dns_idx].sock = sock;
+		dns_sock = sock;
+		sdprintf("dns_sock: %d", dcc[dns_idx].sock);
+		strlcpy(dcc[dns_idx].host, dns_ip, sizeof(dcc[dns_idx].host));
+		strlcpy(dcc[dns_idx].nick, "(adns)", sizeof(dcc[dns_idx].nick));
+		sdprintf("dns_ip: %s", dns_ip);
+		dcc[dns_idx].timeval = now;
+		dns_handler.timeout_val = 0;
+		return 0;
+	}
 	return 1;
 }
 
-void egg_dns_send(char *query, int len, bool blocking)
+static void egg_dns_send(char *query, int len, bool blocking)
 {
-        if (dns_idx >= 0 && dcc[dns_idx].sock == -1) {
-          lostdcc(dns_idx);
-          dns_idx = -1;
-        }
+	if (dns_idx >= 0 && dcc[dns_idx].sock == -1) {
+		lostdcc(dns_idx);
+		dns_idx = -1;
+	}
 	if (dns_idx < 0) {
 		if (get_dns_idx()) {
-                  sdprintf("get_dns_idx() failed in egg_dns_send");
-                  return;
-                }
+			sdprintf("get_dns_idx() failed in egg_dns_send");
+			return;
+		}
 	}
-        if (!dns_handler.timeout_val) {
-          dns_handler.timeout_val = &async_server_timeout;
+	if (!dns_handler.timeout_val) {
+		dns_handler.timeout_val = &async_server_timeout;
 #ifdef DEBUG
-          sdprintf("SETTING TIMEOUT to %d", async_server_timeout);
+		sdprintf("SETTING TIMEOUT to %d", async_server_timeout);
 #endif
-          dcc[dns_idx].timeval = now;
-        }
+		dcc[dns_idx].timeval = now;
+	}
 
-		if (blocking)
-			socket_set_nonblock(dcc[dns_idx].sock, 0);
-        if (write(dcc[dns_idx].sock, query, len) == -1) {
-	  ;
+	if (blocking)
+		socket_set_nonblock(dcc[dns_idx].sock, 0);
+	if (write(dcc[dns_idx].sock, query, len) == -1) {
+		;
 	}
 //	sockbuf_write(dns_idx, query, len);
 }
 
 dns_query_t *find_query(const char *host)
 {
-  dns_query_t *q = NULL;
+	dns_query_t *q = NULL;
 
-  for (q = query_head; q; q = q->next)
-    if (!strcasecmp(q->query, host))
-      return q;
-  return NULL;
+	for (q = query_head; q; q = q->next)
+		if (!strcasecmp(q->query, host))
+			return q;
+	return NULL;
 }
 
 #define DEFAULT_DNS_TYPE (DNS_LOOKUP_A|DNS_LOOKUP_AAAA)
 static void dns_send_query(dns_query_t *q, int type = DEFAULT_DNS_TYPE, bool blocking = 0)
 {
-  char buf[512] = "";
-  int len;
+	char buf[512] = "";
+	int len;
 
-  q->remaining = 0;
+	q->remaining = 0;
 
-  if (!q->ip) {
-    if (type & DNS_LOOKUP_A) {
-      /* Send the ipv4 query. */
-      q->remaining++;
-      len = make_header(buf, q->id);
-      len += cut_host(q->query, buf + len);
-      buf[len] = 0; len++; buf[len] = DNS_A; len++;
-      buf[len] = 0; len++; buf[len] = 1; len++;
+	if (!q->ip) {
+		if (type & DNS_LOOKUP_A) {
+			/* Send the ipv4 query. */
+			q->remaining++;
+			len = make_header(buf, q->id);
+			len += cut_host(q->query, buf + len);
+			buf[len] = 0; len++; buf[len] = DNS_A; len++;
+			buf[len] = 0; len++; buf[len] = 1; len++;
 
-      egg_dns_send(buf, len, blocking);
-    }
+			egg_dns_send(buf, len, blocking);
+		}
 
 #ifdef USE_IPV6
-    if (type & DNS_LOOKUP_AAAA) {
-      /* Now send the ipv6 query. */
-      q->remaining++;
-      len = make_header(buf, q->id);
-      len += cut_host(q->query, buf + len);
-      buf[len] = 0; len++; buf[len] = DNS_AAAA; len++;
-      buf[len] = 0; len++; buf[len] = 1; len++;
+		if (type & DNS_LOOKUP_AAAA) {
+			/* Now send the ipv6 query. */
+			q->remaining++;
+			len = make_header(buf, q->id);
+			len += cut_host(q->query, buf + len);
+			buf[len] = 0; len++; buf[len] = DNS_AAAA; len++;
+			buf[len] = 0; len++; buf[len] = 1; len++;
 
-      egg_dns_send(buf, len, blocking);
-    }
+			egg_dns_send(buf, len, blocking);
+		}
 #endif
-  } else if (q->ip) {
-    q->remaining++;
-    len = make_header(buf, q->id);
-    len += cut_host(q->ip, buf + len);
-    buf[len] = 0; len++; buf[len] = DNS_PTR; len++;
-    buf[len] = 0; len++; buf[len] = 1; len++;
+	} else if (q->ip) {
+		q->remaining++;
+		len = make_header(buf, q->id);
+		len += cut_host(q->ip, buf + len);
+		buf[len] = 0; len++; buf[len] = DNS_PTR; len++;
+		buf[len] = 0; len++; buf[len] = 1; len++;
 
-    egg_dns_send(buf, len, blocking);
-  }
+		egg_dns_send(buf, len, blocking);
+	}
 }
 
 static void dns_send_query_blocking(dns_query_t* q, int type = DEFAULT_DNS_TYPE) {
@@ -485,14 +479,14 @@ static void dns_send_query_blocking(dns_query_t* q, int type = DEFAULT_DNS_TYPE)
 /*
 void dns_resend_queries()
 {
-  dns_query_t *q = NULL;
+	dns_query_t *q = NULL;
 
-  for (q = query_head; q; q = q->next) {
-    if (now >= q->expiretime) {
-sdprintf("RESENDING: %s", q->query);
-      dns_send_query(q);
-    }
-  }
+	for (q = query_head; q; q = q->next) {
+		if (now >= q->expiretime) {
+			sdprintf("RESENDING: %s", q->query);
+			dns_send_query(q);
+		}
+	}
 }
 */
 
@@ -519,10 +513,10 @@ int egg_dns_lookup(const char *host, interval_t timeout, dns_callback_t callback
 
 	if (is_dotted_ip(host)) {
 		/* If it's already an ip, we're done. */
-                bd::Array<bd::String> answer;
+		bd::Array<bd::String> answer;
 		sdprintf("egg_dns_lookup(%s, %d): Already an ip.", host, timeout);
 
-                answer << host;
+		answer << host;
 		callback(-1, client_data, host, answer);
 		return(-1);
 	}
@@ -533,7 +527,7 @@ int egg_dns_lookup(const char *host, interval_t timeout, dns_callback_t callback
 			bd::Array<bd::String> answer;
 
 			sdprintf("egg_dns_lookup(%s, %d): Found in hosts -> %s", host, timeout, hosts[i].ip);
-                        answer << hosts[i].ip;
+			answer << hosts[i].ip;
 			callback(-1, client_data, host, answer);
 			return(-1);
 		}
@@ -548,18 +542,18 @@ int egg_dns_lookup(const char *host, interval_t timeout, dns_callback_t callback
 	}
 
 	/* check if the query was already made */
-        if ((q = find_query(host))) {
-	  sdprintf("egg_dns_lookup(%s, %d): Already querying -> %d", host, timeout, q->id);
-          return(-2);
+	if ((q = find_query(host))) {
+		sdprintf("egg_dns_lookup(%s, %d): Already querying -> %d", host, timeout, q->id);
+		return(-2);
 	}
 
 	/* Allocate our query struct. */
-        q = alloc_query(client_data, callback, host);
+	q = alloc_query(client_data, callback, host);
 
 	sdprintf("egg_dns_lookup(%s, %d) -> %d", host, timeout, q->id);
-        dns_send_query(q, type);
+	dns_send_query(q, type);
 
-//        /* setup a timer to detect dead ns */
+//	/* setup a timer to detect dead ns */
 //	dns_create_timeout_timer(&q, host, timeout);
 
 	/* Send the ipv4 query. */
@@ -600,12 +594,15 @@ read_more:
 	if (q) {
 		dns_query_t *prev = NULL, *cur = NULL;
 		for (cur = query_head; cur; cur = cur->next) {
-			if (cur->id == q->id) break;
+			if (cur->id == q->id)
+				break;
 			prev = cur;
 		}
 		if (cur) {
-			if (prev) prev->next = cur->next;
-			else query_head = cur->next;
+			if (prev)
+				prev->next = cur->next;
+			else
+				query_head = cur->next;
 		}
 		free_query(q);
 	}
@@ -647,7 +644,7 @@ bd::Array<bd::String> dns_lookup_block(const char *host, interval_t timeout, int
 		bd::Array<bd::String> answer;
 		/* If it's already an ip, we're done. */
 		sdprintf("dns_lookup_block(%s, %d): Already an ip.", host, timeout);
-                answer << host;
+		answer << host;
 		return answer;
 	}
 
@@ -656,8 +653,8 @@ bd::Array<bd::String> dns_lookup_block(const char *host, interval_t timeout, int
 		if (!strcasecmp(host, hosts[i].host)) {
 			bd::Array<bd::String> answer;
 			sdprintf("dns_lookup_block(%s, %d): Found in hosts -> %s", host, timeout, hosts[i].ip);
-                        answer << hosts[i].ip;
-                        return answer;
+			answer << hosts[i].ip;
+			return answer;
 		}
 	}
 
@@ -695,7 +692,7 @@ bd::Array<bd::String> dns_reverse_block(const char *ip, interval_t timeout)
 	}
 
 	int cache_id = cache_find(ip);
-        if (cache_id >= 0) {
+	if (cache_id >= 0) {
 //		cache[cache_id].answer->shuffle();
 		sdprintf("dns_reverse_block(%s, %d): Found in cache -> %s", ip, timeout, cache[cache_id].answer->join(',').c_str());
 		return *(cache[cache_id].answer);
@@ -732,7 +729,7 @@ int egg_dns_reverse(const char *ip, interval_t timeout, dns_callback_t callback,
 	}
 
 	cache_id = cache_find(ip);
-        if (cache_id >= 0) {
+	if (cache_id >= 0) {
 //		cache[cache_id].answer->shuffle();
 		sdprintf("egg_dns_reverse(%s, %d): Found in cache -> %s", ip, timeout, cache[cache_id].answer->join(',').c_str());
 		callback(-1, client_data, ip, *(cache[cache_id].answer));
@@ -740,9 +737,9 @@ int egg_dns_reverse(const char *ip, interval_t timeout, dns_callback_t callback,
 	}
 
 	/* check if the query was already made */
-        if ((q = find_query(ip))) {
-	  sdprintf("egg_dns_reverse(%s, %d): Already querying -> %d", ip, timeout, q->id);
-          return(-1);
+	if ((q = find_query(ip))) {
+		sdprintf("egg_dns_reverse(%s, %d): Already querying -> %d", ip, timeout, q->id);
+		return(-1);
 	}
 
 	q = alloc_query(client_data, callback, ip);
@@ -750,7 +747,7 @@ int egg_dns_reverse(const char *ip, interval_t timeout, dns_callback_t callback,
 
 	query_transform_ip(q, ip);
 
-        dns_send_query(q);
+	dns_send_query(q);
 
 //	/* setup timer to detect dead ns */
 //	dns_create_timeout_timer(&q, ip, timeout);
@@ -800,8 +797,8 @@ static void dns_on_read(int idx, char* buf, int atr)
 
 static void dns_on_eof(int idx)
 {
-        sdprintf("EOF on dns idx: %d sock: %d (%s)", idx, dcc[idx].sock, dcc[idx].host);
-        dns_reinit(idx);
+	sdprintf("EOF on dns idx: %d sock: %d (%s)", idx, dcc[idx].sock, dcc[idx].host);
+	dns_reinit(idx);
 
 	return;
 }
@@ -813,18 +810,20 @@ int egg_dns_shutdown(void)
 
 	if (nservers > 0) {
 		for (i = 0; i < nservers; i++) {
-			if (servers[i].ip) free(servers[i].ip);
+			free(servers[i].ip);
 		}
-		free(servers); servers = NULL;
+		free(servers);
+		servers = NULL;
 		nservers = 0;
 	}
-	
+
 	if (nhosts > 0) {
 		for (i = 0; i < nhosts; i++) {
-			if (hosts[i].host) free(hosts[i].host);
-			if (hosts[i].ip) free(hosts[i].ip);
+			free(hosts[i].host);
+			free(hosts[i].ip);
 		}
-		free(hosts); hosts = NULL;
+		free(hosts);
+		hosts = NULL;
 		nhosts = 0;
 	}
 
@@ -833,23 +832,26 @@ int egg_dns_shutdown(void)
 */
 static const char *dns_next_server()
 {
-	if (!servers || nservers < 1) return("127.0.0.1");
+	if (!servers || nservers < 1)
+		return("127.0.0.1");
 	cur_server++;
-	if (cur_server >= nservers) cur_server = 0;
-	return(servers[cur_server].ip);
+	if (cur_server >= nservers)
+		cur_server = 0;
+	return (servers[cur_server].ip);
 }
 
 static void add_dns_server(char *ip)
 {
-	servers = (dns_server_t *) my_realloc(servers, (nservers+1)*sizeof(*servers));
+	servers = (dns_server_t *) my_realloc(servers, (nservers+1) *
+	    sizeof(*servers));
 	servers[nservers].ip = strdup(ip);
 	nservers++;
-        sdprintf("Added NS: %s", ip);
+	sdprintf("Added NS: %s", ip);
 }
 
 static void add_host(char *host, char *ip)
 {
-	hosts = (dns_host_t *) my_realloc(hosts, (nhosts+1)*sizeof(*hosts));
+	hosts = (dns_host_t *) my_realloc(hosts, (nhosts+1) * sizeof(*hosts));
 	hosts[nhosts].host = strdup(host);
 	hosts[nhosts].ip = strdup(ip);
 	nhosts++;
@@ -857,7 +859,8 @@ static void add_host(char *host, char *ip)
 
 static int cache_expired(int id)
 {
-	if (cache[id].expiretime && (now >= cache[id].expiretime))  return(1);
+	if (cache[id].expiretime && (now >= cache[id].expiretime))
+		return(1);
 	return (0);
 }
 
@@ -869,19 +872,22 @@ static void cache_del(int id)
 
 	ncache--;
 
-	if (id < ncache) memcpy(&cache[id], &cache[ncache], sizeof(dns_cache_t));
-	else bzero(&cache[id], sizeof(dns_cache_t));
+	if (id < ncache)
+		memcpy(&cache[id], &cache[ncache], sizeof(dns_cache_t));
+	else
+		bzero(&cache[id], sizeof(dns_cache_t));
 
-	cache = (dns_cache_t *) my_realloc(cache, (ncache+1)*sizeof(*cache));
+	cache = (dns_cache_t *) my_realloc(cache, (ncache+1) *
+	    sizeof(*cache));
 }
 
 static void cache_add(const char *query, bd::Array<bd::String> answer, int ttl)
 {
-	cache = (dns_cache_t *) my_realloc(cache, (ncache+1)*sizeof(*cache));
+	cache = (dns_cache_t *) my_realloc(cache, (ncache+1) * sizeof(*cache));
 	bzero(&cache[ncache], sizeof(cache[ncache]));
 	cache[ncache].query = strdup(query);
-        cache[ncache].answer = new bd::Array<bd::String>;
-        *(cache[ncache].answer) = answer;
+	cache[ncache].answer = new bd::Array<bd::String>;
+	*(cache[ncache].answer) = answer;
 	cache[ncache].expiretime = now + ttl;
 	ncache++;
 }
@@ -891,20 +897,22 @@ static int cache_find(const char *query)
 	int i;
 
 	for (i = 0; i < ncache; i++)
-		if (!strcasecmp(cache[i].query, query)) return (i);
+		if (!strcasecmp(cache[i].query, query))
+			return (i);
 
 	return (-1);
 }
 
 void dns_cache_flush()
 {
-  int i = 0;
+	int i = 0;
 
-  for (i = 0; i < ncache; i++) {
-    cache_del(i);
-    if (i == ncache) break;
-    i--;
-  }
+	for (i = 0; i < ncache; i++) {
+		cache_del(i);
+		if (i == ncache)
+			break;
+		i--;
+	}
 }
 
 static int read_thing(char *buf, char *ip)
@@ -916,14 +924,14 @@ static int read_thing(char *buf, char *ip)
 	len = strcspn(buf, separators);
 	memcpy(ip, buf, len);
 	ip[len] = 0;
-	return(skip + len);
+	return (skip + len);
 }
 
 static int read_resolv(char *fname)
 {
 	FILE *fp;
 	char buf[512], ip[512];
-        int count = 0;
+	int count = 0;
 
 	fp = fopen(fname, "r");
 	if (!fp) return 0;
@@ -932,12 +940,12 @@ static int read_resolv(char *fname)
 			read_thing(buf+10, ip);
 			if (strlen(ip)) {
 				add_dns_server(ip);
-                                ++count;
-                        }
+				++count;
+			}
 		}
 	}
 	fclose(fp);
-        return count;
+	return count;
 }
 
 static void read_hosts(char *fname)
@@ -1003,7 +1011,7 @@ int reverse_ip(const char *host, char *reverse)
 	if (!period) {
 		len = strlen(host);
 		memcpy(reverse, host, len);
-		return(len);
+		return (len);
 	}
 	else {
 		len = period - host;
@@ -1011,7 +1019,7 @@ int reverse_ip(const char *host, char *reverse)
 		reverse[offset++] = '.';
 		memcpy(reverse+offset, host, len);
 		reverse[offset+len] = 0;
-		return(offset+len);
+		return (offset+len);
 	}
 }
 
@@ -1020,12 +1028,16 @@ int egg_dns_cancel(int id, int issue_callback)
 	dns_query_t *q, *prev = NULL;
 
 	for (q = query_head; q; q = q->next) {
-		if (q->id == id) break;
+		if (q->id == id)
+			break;
 		prev = q;
 	}
-	if (!q) return(-1);
-	if (prev) prev->next = q->next;
-	else query_head = q->next;
+	if (!q)
+		return(-1);
+	if (prev)
+		prev->next = q->next;
+	else
+		query_head = q->next;
 	sdprintf("Cancelling query: %s", q->query);
 	if (issue_callback && q->callback) {
 		if (q->answer->size() > 0) {
@@ -1090,7 +1102,7 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip, boo
 	dns_rr_t reply;
 	unsigned const char *eop = (unsigned char *) response + nbytes;
 	unsigned char *ptr = (unsigned char *) response;
-        int return_code = 0;
+	int return_code = 0;
 
 	memcpy(&header, ptr, HEAD_SIZE);
 	ptr += HEAD_SIZE;
@@ -1106,76 +1118,77 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip, boo
 
 	/* Find our copy of the query before proceeding. */
 	for (q = query_head; q; q = q->next) {
-		if (q->id == header.id) break;
+		if (q->id == header.id)
+			break;
 		prev = q;
 	}
 
-        sdprintf("Reply(%d) questions: %d answers: %d ar: %d ns: %d from: %s QR: %d OPCODE: %d AA: %d TC: %d RD: %d RA: %d RCODE: %d",
-            header.id,
-            header.question_count,
-            header.answer_count,
-            header.ar_count,
-            header.ns_count,
-            server_ip,
-            GET_QR(header.flags),
-            GET_OPCODE(header.flags),
-            GET_AA(header.flags),
-            GET_TC(header.flags),
-            GET_RD(header.flags),
-            GET_RA(header.flags),
-            GET_RCODE(header.flags)
-        );
+	sdprintf("Reply(%d) questions: %d answers: %d ar: %d ns: %d from: %s QR: %d OPCODE: %d AA: %d TC: %d RD: %d RA: %d RCODE: %d",
+			header.id,
+			header.question_count,
+			header.answer_count,
+			header.ar_count,
+			header.ns_count,
+			server_ip,
+			GET_QR(header.flags),
+			GET_OPCODE(header.flags),
+			GET_AA(header.flags),
+			GET_TC(header.flags),
+			GET_RD(header.flags),
+			GET_RA(header.flags),
+			GET_RCODE(header.flags)
+		);
 
 	if (!q) {
-          sdprintf("Reply(%d) not found??", header.id);
-          return 0;
-        }
-
-        /* Did this server give us recursion? */
-        if (!GET_RA(header.flags)) {
-                sdprintf("Ignoring reply(%d) from %s: no recusion available.", header.id, server_ip);
-                return_code = 1;		/* get a new server */
-		q->remaining = 0;		/* Force this query to be removed, any further answers are ignored */
-				  errno = EACCES;
-                goto callback;
-        }
-
-        /* Check for errors */
-        if (GET_RCODE(header.flags)) {
-          switch (GET_RCODE(header.flags)) {
-            case 1:   /* Format error */
-                  sdprintf("Ignoring reply(%d) from %s: Format error.", header.id, server_ip);
-				  errno = EINVAL;
-                  break;
-            case 2:   /* Server error */
-                  sdprintf("Ignoring reply(%d) from %s: Server error.", header.id, server_ip);
-				  errno = EINVAL;
-                  return_code = 1;		/* get a new server */
-		  q->remaining = 0;		/* Force this query to be removed, any further answers are ignored */
-                  break;
-            case 3:   /* Name error */
-                  sdprintf("Ignoring reply(%d) from %s: NXDOMAIN.", header.id, server_ip);
-                  /* Ignore the incoming AAAA or A reply as it will still be NXDOMAIN */
-		  q->remaining = 0;		/* Force this query to be removed, any further answers are ignored */
-				  errno = ENOENT;
-                  break;
-            case 4:
-                  sdprintf("Ignoring reply(%d) from %s: Query not supported", header.id, server_ip);
-				  errno = EINVAL;
-                  break;
-            case 5:
-                  sdprintf("Ignoring reply(%d) from %s: REFUSED", header.id, server_ip);
-                  return_code = 1;		/* get a new server */
-		  q->remaining = 0;		/* Force this query to be removed, any further answers are ignored */
-				  errno = EACCES;
-                  break;
-          }
-
-          goto callback;
+		sdprintf("Reply(%d) not found??", header.id);
+		return 0;
 	}
 
-//        /* destroy our async timeout */
-//        timer_destroy(q->timer_id);
+	/* Did this server give us recursion? */
+	if (!GET_RA(header.flags)) {
+		sdprintf("Ignoring reply(%d) from %s: no recusion available.", header.id, server_ip);
+		return_code = 1;		/* get a new server */
+		q->remaining = 0;		/* Force this query to be removed, any further answers are ignored */
+		errno = EACCES;
+		goto callback;
+	}
+
+	/* Check for errors */
+	if (GET_RCODE(header.flags)) {
+		switch (GET_RCODE(header.flags)) {
+			case 1:   /* Format error */
+				sdprintf("Ignoring reply(%d) from %s: Format error.", header.id, server_ip);
+				errno = EINVAL;
+				break;
+			case 2:   /* Server error */
+				sdprintf("Ignoring reply(%d) from %s: Server error.", header.id, server_ip);
+				errno = EINVAL;
+				return_code = 1;		/* get a new server */
+				q->remaining = 0;		/* Force this query to be removed, any further answers are ignored */
+				break;
+			case 3:   /* Name error */
+				sdprintf("Ignoring reply(%d) from %s: NXDOMAIN.", header.id, server_ip);
+				/* Ignore the incoming AAAA or A reply as it will still be NXDOMAIN */
+				q->remaining = 0;		/* Force this query to be removed, any further answers are ignored */
+				errno = ENOENT;
+				break;
+			case 4:
+				sdprintf("Ignoring reply(%d) from %s: Query not supported", header.id, server_ip);
+				errno = EINVAL;
+				break;
+			case 5:
+				sdprintf("Ignoring reply(%d) from %s: REFUSED", header.id, server_ip);
+				return_code = 1;		/* get a new server */
+				q->remaining = 0;		/* Force this query to be removed, any further answers are ignored */
+				errno = EACCES;
+				break;
+		}
+
+		goto callback;
+	}
+
+//	/* destroy our async timeout */
+//	timer_destroy(q->timer_id);
 
 	/* Pass over the questions. */
 	for (rr = 0; rr < header.question_count; rr++) {
@@ -1204,38 +1217,38 @@ static int parse_reply(char *response, size_t nbytes, const char* server_ip, boo
 		/* Save the lowest ttl */
 		if (reply.ttl && ((!q->lowest_ttl) || (q->lowest_ttl >  reply.ttl))) q->lowest_ttl = reply.ttl;
 
-//		print_reply(reply);
+		//		print_reply(reply);
 
 		switch (reply.type) {
-		case DNS_A:
-			inet_ntop(AF_INET, ptr, result, 512);
-			*(q->answer) << result;
-			sdprintf("Reply(%d): %s. \t %d \t IN A \t %s", header.id, q->query, reply.ttl, result);
-			break;
-		case DNS_AAAA:
-#ifdef USE_IPV6
-			inet_ntop(AF_INET6, ptr, result, 512);
-			*(q->answer) << result;
-			sdprintf("Reply(%d): %s. \t %d \t IN AAAA \t %s", header.id, q->query, reply.ttl, result);
-#endif /* USE_IPV6 */
-			break;
-		case DNS_PTR:
-			if ((my_dn_expand((const unsigned char *) response, eop, ptr, result, sizeof(result)) != -1) && result[0]) {
+			case DNS_A:
+				inet_ntop(AF_INET, ptr, result, 512);
 				*(q->answer) << result;
-				sdprintf("Reply(%d): %s. \t %d \t IN PTR \t %s", header.id, q->query, reply.ttl, result);
-			}
-			break;
-		default:
-			sdprintf("Unhandled DNS reply type: %d", reply.type);
-			break;
+				sdprintf("Reply(%d): %s. \t %d \t IN A \t %s", header.id, q->query, reply.ttl, result);
+				break;
+			case DNS_AAAA:
+#ifdef USE_IPV6
+				inet_ntop(AF_INET6, ptr, result, 512);
+				*(q->answer) << result;
+				sdprintf("Reply(%d): %s. \t %d \t IN AAAA \t %s", header.id, q->query, reply.ttl, result);
+#endif /* USE_IPV6 */
+				break;
+			case DNS_PTR:
+				if ((my_dn_expand((const unsigned char *) response, eop, ptr, result, sizeof(result)) != -1) && result[0]) {
+					*(q->answer) << result;
+					sdprintf("Reply(%d): %s. \t %d \t IN PTR \t %s", header.id, q->query, reply.ttl, result);
+				}
+				break;
+			default:
+				sdprintf("Unhandled DNS reply type: %d", reply.type);
+				break;
 		}
 
 		ptr += reply.rdlength;
-                if ((size_t) (ptr - (unsigned char*) response) > nbytes) {
-                  sdprintf("MALFORMED/TRUNCATED DNS PACKET detected (need TCP).");
-		  q->remaining = 0;		/* Force this query to be removed, any further answers are ignored */
-                  break;
-                }
+		if ((size_t) (ptr - (unsigned char*) response) > nbytes) {
+			sdprintf("MALFORMED/TRUNCATED DNS PACKET detected (need TCP).");
+			q->remaining = 0;		/* Force this query to be removed, any further answers are ignored */
+			break;
+		}
 	}
 
 callback:
@@ -1249,21 +1262,23 @@ callback:
 	errno = 0;
 
 	/* Ok, we have, so now issue the callback with the answers. */
-	if (prev) prev->next = q->next;
-	else query_head = q->next;
+	if (prev)
+		prev->next = q->next;
+	else
+		query_head = q->next;
 
-        if (q->answer->size() > 0) {
+	if (q->answer->size() > 0) {
 		cache_add(q->query, *(q->answer), q->lowest_ttl);
 
 		if (q->callback)
 			q->callback(q->id, q->client_data, q->query, *(q->answer));
-        } else if (q->callback) {
+	} else if (q->callback) {
 		bd::Array<bd::String> empty;
 		q->callback(q->id, q->client_data, q->query, empty);
-        }
+	}
 
-		if (!blocking)
-			free_query(q);
+	if (!blocking)
+		free_query(q);
 
 	return return_code;
 }
@@ -1279,7 +1294,7 @@ void tell_dnsdebug(int idx)
 		dprintf(idx, "DNS (%d) (%ds): %s\n", q->id, (int) (q->expiretime - now), q->query);
 
 //	for (i = 0; i < nhosts; i++)
-//           dprintf(idx, "HOST #%d: %s/%s\n", i, hosts[i].host, hosts[i].ip);
+//		dprintf(idx, "HOST #%d: %s/%s\n", i, hosts[i].host, hosts[i].ip);
 
 	for (int i = 0; i < ncache; i++) {
 		dprintf(idx, "cache(%d) %s expires in %ds\n", i, cache[i].query, (int) (cache[i].expiretime - now));
@@ -1290,33 +1305,35 @@ void tell_dnsdebug(int idx)
 
 static void expire_queries()
 {
-  dns_query_t *q = NULL, *next = NULL;
-  int i = 0;
+	dns_query_t *q = NULL, *next = NULL;
+	int i = 0;
 
-  /* need to check for expired queries and either:
-    a) recheck/change ns
-    b) expire due to ttl
-    */
+	/* need to check for expired queries and either:
+	   a) recheck/change ns
+	   b) expire due to ttl
+	   */
 
-  if (query_head) {
-    for (q = query_head; q; q = q->next) {
-      if (q->expiretime <= now) {		/* set in alloc_query */
-        if (q->next)
-          next = q->next;
-        egg_dns_cancel(q->id, 1);
-        if (!next) break;
-        q = next;
-      }
-    }
-  }
+	if (query_head) {
+		for (q = query_head; q; q = q->next) {
+			if (q->expiretime <= now) {		/* set in alloc_query */
+				if (q->next)
+					next = q->next;
+				egg_dns_cancel(q->id, 1);
+				if (!next)
+					break;
+				q = next;
+			}
+		}
+	}
 
-  for (i = 0; i < ncache; i++) {
-    if (cache_expired(i)) {
-      cache_del(i);
-      if (i == ncache) break;
-      i--;
-    }
-  }
+	for (i = 0; i < ncache; i++) {
+		if (cache_expired(i)) {
+			cache_del(i);
+			if (i == ncache)
+				break;
+			i--;
+		}
+	}
 
 }
 
@@ -1325,10 +1342,10 @@ static void expire_queries()
 int egg_dns_init()
 {
 	/* Set RECURSION DESIRED */
-        SET_RD(_dns_header.flags);
+	SET_RD(_dns_header.flags);
 
-        /* Convert flags to network order */
-        _dns_header.flags = htons(_dns_header.flags);
+	/* Convert flags to network order */
+	_dns_header.flags = htons(_dns_header.flags);
 
 	if (!read_resolv(".resolv.conf")) {
 		read_resolv("/etc/resolv.conf");
@@ -1336,26 +1353,26 @@ int egg_dns_init()
 		add_dns_server("4.2.2.2");
 		add_dns_server("8.8.8.8");
 		add_dns_server("8.8.4.4");
-        }
+	}
 
 	read_hosts("/etc/hosts");
 	read_hosts(".hosts");
-    
-/* root servers for future development (tracing down)
-	add_dns_server("198.41.0.4");
-	add_dns_server("192.228.79.201");
-	add_dns_server("192.33.4.12");
-	add_dns_server("128.8.10.90");
-	add_dns_server("192.203.230.10");
-	add_dns_server("192.5.5.241");
-	add_dns_server("192.112.36.4");
-	add_dns_server("128.63.2.53");
-	add_dns_server("192.36.148.17");
-	add_dns_server("192.58.128.30");
-	add_dns_server("193.0.14.129");
-	add_dns_server("198.32.64.12");
-	add_dns_server("202.12.27.33");
-*/
+
+	/* root servers for future development (tracing down)
+	   add_dns_server("198.41.0.4");
+	   add_dns_server("192.228.79.201");
+	   add_dns_server("192.33.4.12");
+	   add_dns_server("128.8.10.90");
+	   add_dns_server("192.203.230.10");
+	   add_dns_server("192.5.5.241");
+	   add_dns_server("192.112.36.4");
+	   add_dns_server("128.63.2.53");
+	   add_dns_server("192.36.148.17");
+	   add_dns_server("192.58.128.30");
+	   add_dns_server("193.0.14.129");
+	   add_dns_server("198.32.64.12");
+	   add_dns_server("202.12.27.33");
+	   */
 
 
 	timer_create_secs(3, "adns_check_expires", (Function) expire_queries);
@@ -1366,20 +1383,20 @@ int egg_dns_init()
 
 bool valid_dns_id(int idx, int id)
 {
-  if (id == -1)
-    return 1;
-  if (valid_idx(idx) && dcc[idx].dns_id && dcc[idx].dns_id == id)
-    return 1;
-  sdprintf("dns_id: %d is not associated with dead idx: %d", id, idx);
-  return 0;
+	if (id == -1)
+		return 1;
+	if (valid_idx(idx) && dcc[idx].dns_id && dcc[idx].dns_id == id)
+		return 1;
+	sdprintf("dns_id: %d is not associated with dead idx: %d", id, idx);
+	return 0;
 }
 
 bd::String dns_find_ip(bd::Array<bd::String> ips, int af_type) {
-    for (size_t i = 0; i < ips.size(); ++i) {
-      if (is_dotted_ip(bd::String(ips[i]).c_str()) == af_type) {
-        return ips[i];
-      }
-    }
+	for (size_t i = 0; i < ips.size(); ++i) {
+		if (is_dotted_ip(bd::String(ips[i]).c_str()) == af_type) {
+			return ips[i];
+		}
+	}
 	return bd::String();
 }
 /* vim: set sts=0 sw=8 ts=8 noet: */

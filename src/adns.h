@@ -48,7 +48,6 @@ typedef void (*dns_callback_t)(int, void *client_data, const char *query, bd::Ar
 int egg_dns_init(void);
 //int egg_dns_shutdown(void);
 
-void egg_dns_send(char *query, int len);
 int egg_dns_lookup(const char *host, interval_t timeout, dns_callback_t callback, void *client_data, int type = (DNS_LOOKUP_A|DNS_LOOKUP_AAAA));
 bd::Array<bd::String> dns_lookup_block(const char *host, interval_t timeout, int type = (DNS_LOOKUP_A|DNS_LOOKUP_AAAA));
 int egg_dns_reverse(const char *ip, interval_t timeout, dns_callback_t callback, void *client_data);

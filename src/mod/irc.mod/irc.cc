@@ -863,10 +863,8 @@ getin_request(char *botnick, char *code, char *par)
         putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Removed permanent global ban %s", botnick, nick,
                chan->dname, (*mr)->mask);
         free((*mr)->mask);
-        if ((*mr)->desc)
-          free((*mr)->desc);
-        if ((*mr)->user)
-          free((*mr)->user);
+        free((*mr)->desc);
+        free((*mr)->user);
         tmr = *mr;
         *mr = (*mr)->next;
         free(tmr);
@@ -886,10 +884,8 @@ getin_request(char *botnick, char *code, char *par)
         putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Removed permanent channel ban %s", botnick, nick,
                chan->dname, (*mr)->mask);
         free((*mr)->mask);
-        if ((*mr)->desc)
-          free((*mr)->desc);
-        if ((*mr)->user)
-          free((*mr)->user);
+        free((*mr)->desc);
+        free((*mr)->user);
         tmr = *mr;
         *mr = (*mr)->next;
         free(tmr);

@@ -70,8 +70,7 @@ void list_type_kill(struct list_type *t)
 
   while (t) {
     u = t->next;
-    if (t->extra)
-      free(t->extra);
+    free(t->extra);
     free(t);
     t = u;
   }
@@ -263,8 +262,7 @@ static bool set_set(struct userrec *u, struct user_entry *e, void *buf)
   if (!old && (!newxk->data || !newxk->data[0])) {
     /* or simply ... delete non-existant entry */
     free(newxk->key);
-    if (newxk->data)
-      free(newxk->data);
+    free(newxk->data);
     free(newxk);
     return 1;
   }
@@ -283,8 +281,7 @@ static bool set_set(struct userrec *u, struct user_entry *e, void *buf)
     if (newxk->data[0]) {
       list_insert((struct xtra_key **) (&e->u.extra), newxk);
     } else {
-      if (newxk->data)
-        free(newxk->data);
+      free(newxk->data);
       free(newxk->key);
       free(newxk);
     }
@@ -380,8 +377,7 @@ static bool set_kill(struct user_entry *e)
   for (; x; x = y) {
     y = x->next;
     free(x->key);
-    if (x->data)
-      free(x->data);
+    free(x->data);
     free(x);
   }
   free(e);
@@ -568,8 +564,7 @@ static bool pass_set(struct userrec *u, struct user_entry *e, void *buf)
   char *newpass = NULL;
   char *pass = (char *) buf;
 
-  if (e->u.extra)
-    free(e->u.extra);
+  free(e->u.extra);
   if (!pass || !pass[0] || (pass[0] == '-'))
     e->u.extra = NULL;
   else {
@@ -589,8 +584,7 @@ static bool pass_set(struct userrec *u, struct user_entry *e, void *buf)
   }
   if (!noshare)
     shareout("c %s %s %s\n", e->type->name, u->handle, newpass ? newpass : "");
-  if (newpass)
-    free(newpass);
+  free(newpass);
 
   /* clear old records */
   noshare = 1;
@@ -616,8 +610,7 @@ static bool pass1_set(struct userrec *u, struct user_entry *e, void *buf)
 {
   char *pass = (char *) buf;
 
-  if (e->u.extra)
-    free(e->u.extra);
+  free(e->u.extra);
   if (!pass || !pass[0] || (pass[0] == '-'))
     e->u.extra = NULL;
   else {
@@ -706,8 +699,7 @@ static void laston_write_userfile(bd::Stream& stream, const struct userrec *u, c
 
 static bool laston_kill(struct user_entry *e)
 {
-  if (((struct laston_info *) (e->u.extra))->lastonplace)
-    free(((struct laston_info *) (e->u.extra))->lastonplace);
+  free(((struct laston_info *) (e->u.extra))->lastonplace);
   free(e->u.extra);
   free(e);
   return 1;
@@ -982,8 +974,7 @@ static bool hosts_set(struct userrec *u, struct user_entry *e, void *buf)
 
 	listu = *t;
 	*t = (*t)->next;
-	if (listu->extra)
-	  free(listu->extra);
+        free(listu->extra);
 	free(listu);
       } else
 	t = &((*t)->next);

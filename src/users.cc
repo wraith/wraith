@@ -116,10 +116,8 @@ char *delignore(char *ign)
       }
     }
     free((*u)->igmask);
-    if ((*u)->msg)
-      free((*u)->msg);
-    if ((*u)->user)
-      free((*u)->user);
+    free((*u)->msg);
+    free((*u)->user);
     t = *u;
     *u = (*u)->next;
     free(t);
