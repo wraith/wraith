@@ -274,8 +274,7 @@ static bool check_tempdir(bool do_mod)
 
   /* There was an error creating a file in this directory, return to move on in list of dirs */
   if (!testdir || testdir->error) {
-    if (testdir)
-      delete testdir;
+    delete testdir;
     return 0;
   }
 

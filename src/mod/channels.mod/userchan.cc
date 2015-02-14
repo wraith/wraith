@@ -105,8 +105,7 @@ void set_handle_chaninfo(struct userrec *bu, char *handle, char *chname, char *i
     if (strlen(info) > 80)
       info[80] = 0;
   }
-  if (ch->info != NULL)
-    free(ch->info);
+  free(ch->info);
   if (info && info[0]) {
     ch->info = strdup(info);
   } else
@@ -124,11 +123,10 @@ void del_chanrec(struct userrec *u, char *chname)
   while (ch) {
     if (!rfc_casecmp(chname, ch->channel)) {
       if (lst == NULL)
-	u->chanrec = ch->next;
+        u->chanrec = ch->next;
       else
-	lst->next = ch->next;
-      if (ch->info != NULL)
-	free(ch->info);
+        lst->next = ch->next;
+      free(ch->info);
       free(ch);
       if (!noshare)
 	shareout("-cr %s %s\n", u->handle, chname);
@@ -293,13 +291,10 @@ int u_delmask(char type, struct chanset_t *c, char *who, int doit)
 	free(mask);
       }
     }
-    if (lastdeletedmask)
-      free(lastdeletedmask);
+    free(lastdeletedmask);
     lastdeletedmask = (*u)->mask;
-    if ((*u)->desc)
-      free((*u)->desc);
-    if ((*u)->user)
-      free((*u)->user);
+    free((*u)->desc);
+    free((*u)->user);
     t = *u;
     *u = (*u)->next;
     free(t);
@@ -368,9 +363,9 @@ bool u_addmask(char type, struct chanset_t *chan, char *who, const char *from, c
     *u = p;
   }
   else {
-    free( p->mask );
-    free( p->user );
-    free( p->desc );
+    free(p->mask);
+    free(p->user);
+    free(p->desc);
   }
 
   p->expire = expire_time;
