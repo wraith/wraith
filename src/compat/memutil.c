@@ -10,7 +10,7 @@ str_redup(char **str, const char *newstr)
         size_t len;
 
         if (!newstr) {
-                if (*str) free(*str);
+                free(*str);
                 *str = NULL;
                 return;
         }

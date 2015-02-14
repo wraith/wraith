@@ -266,7 +266,7 @@ int SplitList(char *resultBuf, const char *list, int *argcPtr, const char ***arg
         length -= (list - prevList);
 
         if (result != OK) {
-            free((char *) argv);
+            free(argv);
             return result;
         }
 
@@ -275,7 +275,7 @@ int SplitList(char *resultBuf, const char *list, int *argcPtr, const char ***arg
         }
 
         if (i >= size) {
-            free((char *) argv);
+            free(argv);
             if (resultBuf)
                 strlcpy(resultBuf, "internal error in SplitList", RESULT_LEN);
             return ERROR;
@@ -979,10 +979,8 @@ static void clear_masklist(masklist *m)
 
   for (; m; m = temp) {
     temp = m->next;
-    if (m->mask)
-      free(m->mask);
-    if (m->who)
-      free(m->who);
+    free(m->mask);
+    free(m->who);
     free(m);
   }
 }
@@ -993,8 +991,7 @@ void clear_channel(struct chanset_t *chan, bool reset)
 {
   memberlist *m = NULL, *m1 = NULL;
 
-  if (chan->channel.topic)
-    free(chan->channel.topic);
+  free(chan->channel.topic);
   for (m = chan->channel.member; m; m = m1) {
     m1 = m->next;
     delete_member(m);

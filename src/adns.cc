@@ -251,11 +251,8 @@ static void kill_dcc_dnswait(int idx, void *x)
 	struct dns_info *p = (struct dns_info *) x;
 
 	if (p) {
-		if (p->cbuf)
-			free(p->cbuf);
-
-		if (p->cptr)
-			free(p->cptr);
+		free(p->cbuf);
+		free(p->cptr);
 		// free(p) is same thing here.
 		free(dcc[idx].u.other);
 		dcc[idx].u.other = NULL;
@@ -289,12 +286,9 @@ static void async_timeout(void *client_data)
 char s1_7[3] = "",s2_3[3] = "",s2_2[3] = "";
 
 static void free_query(dns_query_t*& q) {
-	if (q->ip)
-		free(q->ip);
-	if (q->answer)
-		delete q->answer;
-	if (q->query)
-		free(q->query);
+	free(q->ip);
+	delete q->answer;
+	free(q->query);
 	free(q);
 	q = NULL;
 }
@@ -816,21 +810,20 @@ int egg_dns_shutdown(void)
 
 	if (nservers > 0) {
 		for (i = 0; i < nservers; i++) {
-			if (servers[i].ip)
-				free(servers[i].ip);
+			free(servers[i].ip);
 		}
-		free(servers); servers = NULL;
+		free(servers);
+		servers = NULL;
 		nservers = 0;
 	}
 
 	if (nhosts > 0) {
 		for (i = 0; i < nhosts; i++) {
-			if (hosts[i].host)
-				free(hosts[i].host);
-			if (hosts[i].ip)
-				free(hosts[i].ip);
+			free(hosts[i].host);
+			free(hosts[i].ip);
 		}
-		free(hosts); hosts = NULL;
+		free(hosts);
+		hosts = NULL;
 		nhosts = 0;
 	}
 
