@@ -528,7 +528,7 @@ int open_telnet_raw(int sock, const char *ipIn, in_port_t sport, bool proxy_on, 
   union sockaddr_union so;
   char ip[121] = "";
   int is_resolved = 0;
-  volatile int proxy_type = 0, proxy = proxy_on;
+  int proxy_type = 0, proxy = proxy_on;
 
   /* firewall?  use socks */
   if (proxy) {
