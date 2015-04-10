@@ -54,6 +54,8 @@
 #include "src/mod/server.mod/server.h"
 #include "src/mod/channels.mod/channels.h"
 #include "src/mod/ctcp.mod/ctcp.h"
+#include <algorithm>
+using std::swap;
 #include <bdlib/src/String.h>
 #include <bdlib/src/HashTable.h>
 #include <bdlib/src/base64.h>
@@ -1198,8 +1200,6 @@ killmember(struct chanset_t *chan, char *nick, bool cacheMember)
  * Update the member with cached information from a parted/quitted member
  */
 static void member_update_from_cache(struct chanset_t* chan, memberlist *m) {
-  using std::swap;
-
   // Are they in the cache?
   const bd::String userhost(m->userhost);
   if (chan->channel.cached_members->contains(userhost)) {
