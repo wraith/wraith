@@ -27,6 +27,7 @@
 #include <bdlib/src/Stream.h>
 #include <bdlib/src/String.h>
 #include <algorithm>
+using std::swap;
 #include "src/misc_file.h"
 
 /* Do we have any flags that will allow us ops on a channel?
@@ -345,7 +346,7 @@ static void cmd_voice(int idx, char *par)
 {
   char *nick = newsplit(&par), *chname = newsplit(&par);
   if (strchr(CHANMETA, nick[0]) || (!chname[0] && !strcmp(nick, "*")))
-    std::swap(nick, chname);
+    swap(nick, chname);
   bool all = 0;
 
   struct chanset_t* chan = get_channel(idx, chname, 1, &all);
@@ -409,7 +410,7 @@ static void cmd_devoice(int idx, char *par)
 {
   char *nick = newsplit(&par), *chname = newsplit(&par);
   if (strchr(CHANMETA, nick[0]) || (!chname[0] && !strcmp(nick, "*")))
-    std::swap(nick, chname);
+    swap(nick, chname);
   bool all = 0;
 
   struct chanset_t* chan = get_channel(idx, chname, 1, &all);
@@ -478,7 +479,7 @@ static void cmd_op(int idx, char *par)
 {
   char *nick = newsplit(&par), *chname = newsplit(&par);
   if (strchr(CHANMETA, nick[0]) || (!chname[0] && !strcmp(nick, "*")))
-    std::swap(nick, chname);
+    swap(nick, chname);
   bool all = 0;
 
   struct chanset_t* chan = get_channel(idx, chname, 1, &all);
@@ -969,7 +970,7 @@ static void cmd_deop(int idx, char *par)
 {
   char *nick = newsplit(&par), *chname = newsplit(&par);
   if (strchr(CHANMETA, nick[0]) || (!chname[0] && !strcmp(nick, "*")))
-    std::swap(nick, chname);
+    swap(nick, chname);
   bool all = 0;
 
   struct chanset_t* chan = get_channel(idx, chname, 1, &all);
@@ -1346,7 +1347,7 @@ static void do_invite(int idx, char *par, bool op)
   }
 
   if (strchr(CHANMETA, nick[0]) || (!chname[0] && !strcmp(nick, "*")))
-    std::swap(nick, chname);
+    swap(nick, chname);
   bool all = 0;
 
   struct chanset_t* chan = get_channel(idx, chname, 1, &all);

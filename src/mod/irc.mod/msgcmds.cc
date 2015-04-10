@@ -26,6 +26,8 @@
 
 
 #include "src/core_binds.h"
+#include <algorithm>
+using std::swap;
 
 static int msg_bewm(char *nick, char *host, struct userrec *u, char *par)
 {
@@ -132,7 +134,7 @@ static int msg_op(char *nick, char *host, struct userrec *u, char *par)
 
   /* Check if they used the wrong order */
   if (!u_pass_match(u, pass) && u_pass_match(u, par)) {
-    std::swap(pass, par);
+    swap(pass, par);
   }
 
   bd::String msg;
