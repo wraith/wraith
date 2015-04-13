@@ -78,27 +78,27 @@ blah:
 
 makeres: makeres.cc ../lib/bdlib/src/libbdlib.a
 	@echo -e "Compiling: \033[1mmakeres\033[0m"
-	@$(CXX) $(CPPFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CXXFLAGS) $< ../lib/bdlib/src/libbdlib.a -o $@
+	@$(CXX) $(CPPFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CXXFLAGS) $< ../lib/bdlib/src/libbdlib.a $(LDFLAGS) -o $@
 	@$(STRIP) $@@EXEEXT@
 
 makeset: makeset.cc ../lib/bdlib/src/libbdlib.a
 	@echo -e "Compiling: \033[1mmakeset\033[0m"
-	@$(CXX) $(CPPFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CXXFLAGS) $< ../lib/bdlib/src/libbdlib.a -o $@
+	@$(CXX) $(CPPFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CXXFLAGS) $< ../lib/bdlib/src/libbdlib.a $(LDFLAGS) -o $@
 	@$(STRIP) $@@EXEEXT@
 
 makehelp: makehelp.cc ../lib/bdlib/src/libbdlib.a
 	@echo -e "Compiling: \033[1mmakehelp\033[0m"
-	@$(CXX) $(CPPFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CXXFLAGS) $< ../lib/bdlib/src/libbdlib.a -o $@
+	@$(CXX) $(CPPFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CXXFLAGS) $< ../lib/bdlib/src/libbdlib.a $(LDFLAGS) -o $@
 	@$(STRIP) $@@EXEEXT@
 
 sorthelp: sorthelp.cc ../lib/bdlib/src/libbdlib.a
 	@echo -e "Compiling: \033[1msorthelp\033[0m"
-	@$(CXX) $(CPPFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CXXFLAGS) $< ../lib/bdlib/src/libbdlib.a -o $@
+	@$(CXX) $(CPPFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CXXFLAGS) $< ../lib/bdlib/src/libbdlib.a $(LDFLAGS) -o $@
 	@$(STRIP) $@@EXEEXT@
 
 stringfix: stringfix.cc common.h config.h eggdrop.h
 	@echo -e "Compiling: \033[1mstringfix\033[0m"
-	@$(CXX) $(CPPFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CXXFLAGS) $< -o stringfix
+	@$(CXX) $(CPPFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CXXFLAGS) $< $(LDFLAGS) -o stringfix
 	@$(STRIP) $@@EXEEXT@
 
 #../$(EGGEXEC): build_msg $(OBJS) mycrypto compatability
