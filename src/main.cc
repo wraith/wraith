@@ -827,7 +827,6 @@ int main(int argc, char **argv)
   Auth::InitTimer();
   init_vars();			/* needed for cfg */
   init_botcmd();
-  init_responses();		/* zeros out response[] */
 
   egg_dns_init();
   channels_init();
