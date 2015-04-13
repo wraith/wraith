@@ -712,7 +712,7 @@ int egg_dns_reverse(const char *ip, interval_t timeout, dns_callback_t callback,
 	if (!is_dotted_ip(ip)) {
 		/* If it's not a valid ip, don't even make the request. */
 		sdprintf("egg_dns_reverse(%s, %d): Not an ip.", ip, timeout);
-		callback(-1, client_data, ip, NULL);
+		callback(-1, client_data, ip, {});
 		return(-1);
 	}
 
