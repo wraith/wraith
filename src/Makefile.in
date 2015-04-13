@@ -11,6 +11,7 @@ CXXFLAGS = $(CXXFLAGS)
 CFLAGS = $(CFLGS)
 CPPFLAGS = @CPPFLAGS@ -I. -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/pack @DEFS@ $(INCLUDES) '-DCOMMIT="$(COMMIT)"' '-DBRANCH="$(BRANCH)"' -DBUILDTS=$(BUILDTS) '-DVERSION="$(VERSION)"'
 LDFLAGS = @LDFLAGS@
+SETTINGSFILE = $(top_srcdir)/doc/settings.txt
 
 include $(top_srcdir)/build/build.mk
 
@@ -76,13 +77,14 @@ blah:
 	@echo "Use the build script."
 	@echo ""
 
+set.cc: set_default.h
+
+set_default.h: $(SETTINGSFILE) $(top_srcdir)/build/makeset.sh
+	@echo -e "[H]	\033[1m$*\033[0m"
+	@$(top_srcdir)/build/makeset.sh < $(SETTINGSFILE) > $@
+
 makeres: makeres.cc ../lib/bdlib/src/libbdlib.a
 	@echo -e "Compiling: \033[1mmakeres\033[0m"
-	@$(CXX) $(CPPFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CXXFLAGS) $< ../lib/bdlib/src/libbdlib.a $(LDFLAGS) -o $@
-	@$(STRIP) $@@EXEEXT@
-
-makeset: makeset.cc ../lib/bdlib/src/libbdlib.a
-	@echo -e "Compiling: \033[1mmakeset\033[0m"
 	@$(CXX) $(CPPFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CXXFLAGS) $< ../lib/bdlib/src/libbdlib.a $(LDFLAGS) -o $@
 	@$(STRIP) $@@EXEEXT@
 
@@ -116,7 +118,7 @@ stringfix: stringfix.cc common.h config.h eggdrop.h
 $(EGGEXEC): stringfix ../$(EGGEXEC)
 
 clean:
-	@rm -f .depend *.o *.So *~ _*.c _*.cc *.ii *.i
+	@rm -f .depend *.o *.So *~ _*.c _*.cc *.ii *.i set_default.h
 
 build_msg:
 	@echo "[*] Compiling core components"

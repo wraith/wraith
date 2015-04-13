@@ -12,7 +12,6 @@
 /makehelp
 /sorthelp
 /makeres
-/makeset
 /set_default.h
 *.o
 *.So
