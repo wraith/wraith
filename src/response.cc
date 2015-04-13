@@ -9,7 +9,7 @@
 #include "common.h"
 #include "response.h"
 #include "main.h"
-#include "responses.h"
+#include "responses.cc"
 
 static response_t response_totals[RES_TYPES + 1];
 

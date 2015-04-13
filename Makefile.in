@@ -26,7 +26,6 @@ VERSION 	:= $(shell git describe)
 DISTRIB = wraith-$(VERSION)
 
 HELPFILE = doc/help.txt
-RESPONSESFILE = doc/responses.txt
 
 # defaults
 CXX = @CCACHE@ @DISTCC@ @CXX@ @STATIC@
@@ -74,14 +73,14 @@ MAKE_UTILS_NR = $(MAKE) 'CXX=$(CXX)' 'STRIP=touch' 'INCLUDES=$(INCLUDES)' \
 
 MAKE_CONFIG = $(MAKE) 'MAKE=$(MAKE)'
 
-.PHONY: checkclean.static checkclean.dynamic checkclean.debug lib wraith dwraith lib.debug debug test general crypto utils sorthelp makehelp makeres stringfix res help sort indent tar distrib distclean clean cleanutils test all dynamic static tags
+.PHONY: checkclean.static checkclean.dynamic checkclean.debug lib wraith dwraith lib.debug debug test general crypto utils sorthelp makehelp stringfix help sort indent tar distrib distclean clean cleanutils test all dynamic static tags
 
 all: dynamic
 
 test:
 
 cleanutils:
-	@rm -f $(STRINGFIX) src/sorthelp@EXEEXT@ src/makehelp@EXEEXT@ src/makeres@EXEEXT@
+	@rm -f $(STRINGFIX) src/sorthelp@EXEEXT@ src/makehelp@EXEEXT@
 
 clean:  cleanutils
 	+@cd src && $(MAKE) clean
@@ -90,7 +89,7 @@ clean:  cleanutils
 	+@cd src/mod && $(MAKE) clean
 	-+@cd lib && $(MAKE) clean
 	@rm -f $(BINEXEC) build/stamp.* *~ src/*~ configure.temp .mangled stamp.*
-	@rm -f src/help.h src/response.h src/responses.h utctime@EXEEXT@ ts@EXEEXT@
+	@rm -f src/help.h utctime@EXEEXT@ ts@EXEEXT@
 
 distclean: clean
 	@rm -rf *-$(VERSION)/ autom4te.cache/ autoscan.log configure.scan
@@ -154,26 +153,8 @@ help: makehelp
 	cp -f src/help.h~ src/help.h; \
 	fi)
 
-res: makeres
-	@src/makeres@EXEEXT@ $(RESPONSESFILE) src/ 1
-	@(if [ ! -f src/response.h ]; then \
-	touch src/response.h; \
-	fi)
-	@(if [ ! -f src/responses.h ]; then \
-	touch src/responses.h; \
-	fi)
-	@(if test "x`$(DIFF) -qurN src/response.h~ src/response.h`" != "x"; then \
-	cp -f src/response.h~ src/response.h; \
-	fi)
-	@(if test "x`$(DIFF) -qurN src/responses.h~ src/responses.h`" != "x"; then \
-	cp -f src/responses.h~ src/responses.h; \
-	fi)
-
 stringfix: src/stringfix.cc src/config.h
 	+@cd src && ${MAKE_UTILS} stringfix
-
-makeres: src/makeres.cc
-	+@cd src && ${MAKE_UTILS} makeres
 
 makehelp: src/makehelp.cc
 	+@cd src && ${MAKE_UTILS} makehelp
@@ -186,7 +167,7 @@ utils: stringfix makehelp
 crypto:
 	+@cd src/crypto && ${MAKE_UTILS} crypto
 
-general: help res stringfix
+general: help stringfix
 
 .NOTPARALLEL: checkclean.static checkclean.dynamic checkclean.debug
 
