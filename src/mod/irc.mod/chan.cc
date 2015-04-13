@@ -2093,12 +2093,13 @@ static int got315(char *from, char *msg)
 
   putlog(LOG_DEBUG, "*", "END who %s", chname);
 
-  if (!chained_who.isEmpty()) {
+  if (!chained_who.empty()) {
     // Send off next WHO request
     while (1) {
-      if (chained_who.isEmpty()) break;
+      if (chained_who.empty()) break;
       // Dequeue the next chan in the chain
-      chan = findchan(bd::String(chained_who.dequeue()).c_str());
+      chan = findchan(chained_who.front().c_str());
+      chained_who.pop_front();
       if (chan) {
         if (!strcmp(chan->name, chname)) continue; // First reply got queued too
         if (!shouldjoin(chan)) continue; // No longer care about this channel
