@@ -20,6 +20,7 @@ while read -r line; do
 done
 
 echo "typedef struct {"
+echo "  const char*  name;"
 echo "  const char** res;"
 echo "  const size_t size;"
 echo "} res_t;"
@@ -28,7 +29,7 @@ echo "static const res_t res[] = {"
 needcomma=0
 for type in ${types}; do
 	[ ${needcomma} -eq 1 ] && printf ",\n"
-	printf "\t{res_%s, sizeof(res_%s)/sizeof(res_%s[0])}" "${type}" "${type}" "${type}"
+	printf "\t{\"%s\",\tres_%s,\tsizeof(res_%s)/sizeof(res_%s[0])}" "${type}" "${type}" "${type}" "${type}"
 	needcomma=1
 done
 echo
