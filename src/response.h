@@ -25,6 +25,11 @@ enum response_t {
 };
 
 const char *response(response_t);
-const char *r_banned(struct chanset_t* chan);
+
+inline const char *
+r_banned(struct chanset_t *chan)
+{
+  return response(RES_BANNED);
+}
 
 #endif /* !_RESPONSE_H */
