@@ -95,31 +95,28 @@ blah:
 set.cc: set_default.h
 
 set_default.h: $(SETTINGSFILE) $(top_srcdir)/build/makeset.sh
-	@echo -e "[H]	\033[1m$@\033[0m"
+	@echo -e "[GEN]	\033[1m$<\033[0m -> \033[1m$@\033[0m"
 	$(top_srcdir)/build/makeset.sh < $(SETTINGSFILE) > $@
 
 response.cc: responses.cc
 
 responses.cc: $(RESPONSESFILE) $(top_srcdir)/build/makeres.sh
-	@echo -e "[CC]	\033[1m$@\033[0m"
+	@echo -e "[GEN]	\033[1m$<\033[0m -> \033[1m$@\033[0m"
 	$(top_srcdir)/build/makeres.sh < $(RESPONSESFILE) > $@
 
 cmds.cc: help.h
 
 help.h: $(HELPFILE) $(top_srcdir)/build/makehelp.sh $(STRINGFIX)
-	@echo -e "{H}	\033[1m$@\033[0m"
+	@echo -e "{GEN}	\033[1m$<\033[0m -> \033[1m$@\033[0m"
 	$(top_srcdir)/build/makehelp.sh < $(HELPFILE) | $(STRINGFIX) > $@
 
 sorthelp: sorthelp.cc ../lib/bdlib/libbdlib.a
-	@echo -e "Compiling: \033[1msorthelp\033[0m"
+	@echo -e "Compiling: \033[1m$<\033[0m"
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $< ../lib/bdlib/libbdlib.a $(LDFLAGS) -o $@
 	@$(STRIP) $@@EXEEXT@
 
 ../$(EGGEXEC): build_msg $(OBJS) ../lib/bdlib/libbdlib.a @LIBELF_BUNDLED@
-	@echo "[*] Linking"
-	@echo ""
-	@echo "Linking wraith... $(EGGBUILD)"
-	@echo ""
+	@echo -e "[LD]	\033[1m$@\033[0m"
 	$(LD) $(LDFLAGS) -o ../$(EGGEXEC) $(OBJS) ../lib/bdlib/libbdlib.a $(LIBS) @LIBELF_LIB@
 	@$(STRIP) ../$(EGGEXEC)
 	@$(OBJCOPY) ../$(EGGEXEC)
