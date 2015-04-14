@@ -8,7 +8,6 @@
 /.deps
 /.defs
 /stringfix
-/makehelp
 /sorthelp
 /set_default.h
 *.o

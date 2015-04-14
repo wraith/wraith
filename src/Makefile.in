@@ -13,6 +13,7 @@ CPPFLAGS = @CPPFLAGS@ -I. -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/pa
 LDFLAGS = @LDFLAGS@
 SETTINGSFILE = $(top_srcdir)/doc/settings.txt
 RESPONSESFILE = $(top_srcdir)/doc/responses.txt
+HELPFILE = $(top_srcdir)/doc/help.txt
 
 include $(top_srcdir)/build/build.mk
 
@@ -90,10 +91,11 @@ responses.cc: $(RESPONSESFILE) $(top_srcdir)/build/makeres.sh
 	@echo -e "[CC]	\033[1m$*\033[0m"
 	@$(top_srcdir)/build/makeres.sh < $(RESPONSESFILE) > $@
 
-makehelp: makehelp.cc ../lib/bdlib/src/libbdlib.a
-	@echo -e "Compiling: \033[1mmakehelp\033[0m"
-	@$(CXX) $(CPPFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CXXFLAGS) $< ../lib/bdlib/src/libbdlib.a $(LDFLAGS) -o $@
-	@$(STRIP) $@@EXEEXT@
+cmds.cc: help.h
+
+help.h: $(HELPFILE) $(top_srcdir)/build/makehelp.sh
+	@echo -e "[H]	\033[1m$*\033[0m"
+	@$(top_srcdir)/build/makehelp.sh < $(HELPFILE) > $@
 
 sorthelp: sorthelp.cc ../lib/bdlib/src/libbdlib.a
 	@echo -e "Compiling: \033[1msorthelp\033[0m"
@@ -120,7 +122,7 @@ stringfix: stringfix.cc common.h config.h eggdrop.h
 $(EGGEXEC): stringfix ../$(EGGEXEC)
 
 clean:
-	@rm -f .depend *.o *.So *~ _*.c _*.cc *.ii *.i set_default.h responses.cc
+	@rm -f .depend *.o *.So *~ _*.c _*.cc *.ii *.i set_default.h responses.cc help.h
 
 build_msg:
 	@echo "[*] Compiling core components"
