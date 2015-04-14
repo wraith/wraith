@@ -41,7 +41,7 @@ DIFF = @DIFF@
 LIBS = @LIBS@
 INCLUDES = @TCL_INCLUDES@ @SSL_INCLUDES@
 
-DEBCXXFLAGS = -DDEBUG -fno-inline -g3 -ggdb3 -O0 -Wshadow -Wpointer-arith @GCC3DEB@ @GCC4DEB@ @DEBCXXFLAGS@
+DEBCXXFLAGS = -DDEBUG -fno-inline -g3 -ggdb3 -Wshadow -Wpointer-arith @GCC3DEB@ @GCC4DEB@ @DEBCXXFLAGS@
 CFLGS = @GCC3_CFLAGS@
 CXXFLAGS = @CXXFLAGS@ $(CFLGS) @GCC3_CXXFLAGS@ -fno-rtti
 
