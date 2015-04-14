@@ -3184,6 +3184,29 @@ else
 
     auto d = a;
     auto l = [](){};
+    // Prevent Clang error: unused variable 'l' [-Werror,-Wunused-variable]
+    struct use_l { use_l() { l(); } };
+
+    // http://stackoverflow.com/questions/13728184/template-aliases-and-sfinae
+    // Clang 3.1 fails with headers of libstd++ 4.8.3 when using std::function because of this
+    namespace test_template_alias_sfinae {
+        struct foo {};
+
+        template<typename T>
+        using member = typename T::member_type;
+
+        template<typename T>
+        void func(...) {}
+
+        template<typename T>
+        void func(member<T>*) {}
+
+        void test();
+
+        void test() {
+            func<foo>(0);
+        }
+    }
 
 _ACEOF
 if ac_fn_cxx_try_compile "$LINENO"; then :
@@ -3238,6 +3261,29 @@ else
 
     auto d = a;
     auto l = [](){};
+    // Prevent Clang error: unused variable 'l' [-Werror,-Wunused-variable]
+    struct use_l { use_l() { l(); } };
+
+    // http://stackoverflow.com/questions/13728184/template-aliases-and-sfinae
+    // Clang 3.1 fails with headers of libstd++ 4.8.3 when using std::function because of this
+    namespace test_template_alias_sfinae {
+        struct foo {};
+
+        template<typename T>
+        using member = typename T::member_type;
+
+        template<typename T>
+        void func(...) {}
+
+        template<typename T>
+        void func(member<T>*) {}
+
+        void test();
+
+        void test() {
+            func<foo>(0);
+        }
+    }
 
 _ACEOF
 if ac_fn_cxx_try_compile "$LINENO"; then :
