@@ -92,7 +92,7 @@ responses.cc: $(RESPONSESFILE) $(top_srcdir)/build/makeres.sh
 cmds.cc: help.h
 
 help.h: $(HELPFILE) $(top_srcdir)/build/makehelp.sh $(STRINGFIX)
-	@echo -e "[H]	\033[1m$*\033[0m"
+	@echo -e "{H}	\033[1m$*\033[0m"
 	@$(top_srcdir)/build/makehelp.sh < $(HELPFILE) | $(STRINGFIX) > $@
 
 sorthelp: sorthelp.cc ../lib/bdlib/src/libbdlib.a
