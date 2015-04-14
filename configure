@@ -648,8 +648,6 @@ DEBCXXFLAGS
 STATIC
 BUILDARCH
 BUILDOS
-DISTCC
-CCACHE
 UNAME
 DIFF
 STRIP
@@ -3958,80 +3956,6 @@ UNAME=$ac_cv_prog_UNAME
 if test -n "$UNAME"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $UNAME" >&5
 $as_echo "$UNAME" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-# Extract the first word of "ccache", so it can be a program name with args.
-set dummy ccache; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_CCACHE+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$CCACHE"; then
-  ac_cv_prog_CCACHE="$CCACHE" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CCACHE="env CCACHE_CPP2=1 ccache"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-fi
-fi
-CCACHE=$ac_cv_prog_CCACHE
-if test -n "$CCACHE"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CCACHE" >&5
-$as_echo "$CCACHE" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-# Extract the first word of "distcc", so it can be a program name with args.
-set dummy distcc; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_DISTCC+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$DISTCC"; then
-  ac_cv_prog_DISTCC="$DISTCC" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_DISTCC="distcc"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-fi
-fi
-DISTCC=$ac_cv_prog_DISTCC
-if test -n "$DISTCC"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $DISTCC" >&5
-$as_echo "$DISTCC" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }

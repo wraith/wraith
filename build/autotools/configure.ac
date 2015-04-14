@@ -52,8 +52,6 @@ AC_CHECK_PROG(OBJCOPY, objcopy, [objcopy --remove-section=.note --remove-section
 AC_CHECK_PROG(STRIP, strip, strip, touch)
 AC_CHECK_PROG(DIFF, gdiff, gdiff, diff)
 AC_CHECK_PROG(UNAME, uname, uname)
-AC_CHECK_PROG(CCACHE, ccache, env CCACHE_CPP2=1 ccache)
-AC_CHECK_PROG(DISTCC, distcc, distcc)
 
 # Test the os and set the module linking settings
 EGG_CHECK_OS
