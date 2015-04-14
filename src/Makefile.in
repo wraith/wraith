@@ -80,7 +80,10 @@ OBJS = auth.So \
 	compat/strcasecmp.o \
 	compat/strftime.o \
 	compat/strlcpy.o \
-	compat/strsep.o
+	compat/strsep.o \
+	crypto/aes_util.o \
+	crypto/bf_util.o \
+	crypto/dh_util.o
 
 MAKE_GENERIC = $(MAKE) 'MAKE=$(MAKE)' 'MAKEFLAGS=$(MAKEFLAGS)' 'CXX=$(CXX)' 'LD=$(LD)' 'STRIP=$(STRIP)' 'CXXFLAGS=$(CXXFLAGS)' 'CFLGS=$(CFLGS)' 'CCDEPMODE=$(CCDEPMODE)'
 
@@ -112,12 +115,12 @@ sorthelp: sorthelp.cc ../lib/bdlib/src/libbdlib.a
 	$(CXX) $(CPPFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CXXFLAGS) $< ../lib/bdlib/src/libbdlib.a $(LDFLAGS) -o $@
 	@$(STRIP) $@@EXEEXT@
 
-../$(EGGEXEC): build_msg $(OBJS) mycrypto ../lib/bdlib/src/libbdlib.a @LIBELF_BUNDLED@
+../$(EGGEXEC): build_msg $(OBJS) ../lib/bdlib/src/libbdlib.a @LIBELF_BUNDLED@
 	@echo "[*] Linking"
 	@echo ""
 	@echo "Linking wraith... $(EGGBUILD)"
 	@echo ""
-	$(LD) $(LDFLAGS) -o ../$(EGGEXEC) $(OBJS) crypto/*.o ../lib/bdlib/src/libbdlib.a $(LIBS) @LIBELF_LIB@
+	$(LD) $(LDFLAGS) -o ../$(EGGEXEC) $(OBJS) ../lib/bdlib/src/libbdlib.a $(LIBS) @LIBELF_LIB@
 	@$(STRIP) ../$(EGGEXEC)
 	@$(OBJCOPY) ../$(EGGEXEC)
 	@echo "Successful compile: $(EGGEXEC)"
@@ -130,9 +133,5 @@ clean:
 
 build_msg:
 	@echo "[*] Compiling core components"
-
-mycrypto:
-	@echo "[*] Compiling crypto"
-	+@cd crypto && $(MAKE_GENERIC) crypto
 
 include ./.deps/includes
