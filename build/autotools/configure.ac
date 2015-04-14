@@ -21,6 +21,7 @@ dnl AC_PROG_CC([gcc34 gcc-3.4 gcc33 gcc3 gcc-3.3 gcc cc c1])
 AC_REQUIRE_CPP
 AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
 EGG_CHECK_CC
+CXX_RPATH_CHECK
 
 #checkpoint
 AC_CACHE_SAVE 

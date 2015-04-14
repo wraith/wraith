@@ -211,6 +211,22 @@ EOF
   fi
 ])
 
+dnl Fix GCC lame compiler paths (FreeBSD)
+dnl @summary check whether compiler requires -rpath for libstdc++.so
+AC_DEFUN([CXX_RPATH_CHECK],
+[
+  AC_CACHE_CHECK([whether the compiler requires -rpath], ax_cv_prog_cc_rpath, [
+    ax_cv_prog_cc_rpath=
+    for path in `${CXX} -print-search-dirs | awk '/^libraries:/ {print substr([$]0, 13)}' | tr ':' ' '`; do
+      if [[ -r "${path}/libstdc++.so" ]]; then
+        ax_cv_prog_cc_rpath="${path}"
+        LDFLAGS="${LDFLAGS}${LDFLAGS:+ }-Wl,-rpath,${path}"
+        break
+      fi
+    done
+  ])
+])
+
 dnl  EGG_CHECK_CCSTATIC()
 dnl
 dnl  Checks whether the compiler supports the `-static' flag.

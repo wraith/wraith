@@ -8,12 +8,14 @@ next
     will properly assign roles out to bots to not cause overlap. Only leaf
     bots know which bots have which roles. (#39)
   * Add cmd_roles (leaf only) to display roles for a channel. (#39)
+  * Fix broken startup with GCC from ports on FreeBSD.
 
 master
   * Require C++11 compiler support (G++ 4.7+, clang32+)
 
 maint
   * Fix TCL warnings during build if TCL is not being used.
+  * Disable demo TCL support by default to prevent confusion during build.
 
 1.4.5
   * Remove ahbl as it now positively identifies all hosts as abusive
