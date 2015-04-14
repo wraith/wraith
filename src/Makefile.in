@@ -82,19 +82,19 @@ blah:
 set.cc: set_default.h
 
 set_default.h: $(SETTINGSFILE) $(top_srcdir)/build/makeset.sh
-	@echo -e "[H]	\033[1m$*\033[0m"
+	@echo -e "[H]	\033[1m$@\033[0m"
 	$(top_srcdir)/build/makeset.sh < $(SETTINGSFILE) > $@
 
 response.cc: responses.cc
 
 responses.cc: $(RESPONSESFILE) $(top_srcdir)/build/makeres.sh
-	@echo -e "[CC]	\033[1m$*\033[0m"
+	@echo -e "[CC]	\033[1m$@\033[0m"
 	$(top_srcdir)/build/makeres.sh < $(RESPONSESFILE) > $@
 
 cmds.cc: help.h
 
 help.h: $(HELPFILE) $(top_srcdir)/build/makehelp.sh stringfix
-	@echo -e "[H]	\033[1m$*\033[0m"
+	@echo -e "[H]	\033[1m$@\033[0m"
 	$(top_srcdir)/build/makehelp.sh < $(HELPFILE) | ./stringfix > $@
 
 sorthelp: sorthelp.cc ../lib/bdlib/src/libbdlib.a
