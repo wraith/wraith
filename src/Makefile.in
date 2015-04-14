@@ -112,7 +112,7 @@ help.h: $(HELPFILE) $(top_srcdir)/build/makehelp.sh $(STRINGFIX)
 
 sorthelp: sorthelp.cc ../lib/bdlib/src/libbdlib.a
 	@echo -e "Compiling: \033[1msorthelp\033[0m"
-	$(CXX) $(CPPFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CXXFLAGS) $< ../lib/bdlib/src/libbdlib.a $(LDFLAGS) -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $< ../lib/bdlib/src/libbdlib.a $(LDFLAGS) -o $@
 	@$(STRIP) $@@EXEEXT@
 
 ../$(EGGEXEC): build_msg $(OBJS) ../lib/bdlib/src/libbdlib.a @LIBELF_BUNDLED@
