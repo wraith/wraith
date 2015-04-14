@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MAX_LINE_LEN 16384
+#define MAX_LINE_LEN 25000
 int help = 0;
 
 void garble(char **inptr, char **outptr)
@@ -94,12 +94,10 @@ void garble(char **inptr, char **outptr)
 
 void processline(char *line)
 {
-  char tmpin[MAX_LINE_LEN] = "", tmpout[MAX_LINE_LEN] = "", *in = NULL, *out = NULL;
+  char tmpout[MAX_LINE_LEN] = "", *in = NULL, *out = NULL;
   size_t outlen = 0;
 
-  strcpy(tmpin, line); 
-  memset((char *) &tmpin[strlen(tmpin)], 0, 20);
-  in = tmpin;
+  in = line;
   out = tmpout;
   if (*in) {
     while (*in) {
@@ -124,7 +122,7 @@ int main(int argc, char *argv[])
 
   if (argc == 2)
     help = 1;
-  char tempBuf[1024] = "";
+  char tempBuf[MAX_LINE_LEN] = "";
   while (!feof(stdin)) {
     if (fgets(tempBuf, sizeof(tempBuf), stdin) && !feof(stdin)) {
       processline(tempBuf);
