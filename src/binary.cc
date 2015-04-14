@@ -543,32 +543,30 @@ static void edpack(settings_t *incfg, const char *in_hash, int what)
   else
     enc_dec_string = aes_decrypt_ecb_binary;
 
-#define dofield(_field) 		do {							\
-	if (_field) {										\
-		len = sizeof(_field) - 1;							\
-		tmp = (char *) enc_dec_string(hash, (unsigned char *) _field, &len);		\
-		if (what == PACK_ENC) 								\
-		  memcpy(_field, tmp, len);							\
-		else 										\
-		  simple_snprintf(_field, sizeof(_field), "%s", tmp);				\
-		OPENSSL_cleanse(tmp, len);							\
-		free(tmp);									\
-	}											\
+#define dofield(_field) 		do {				\
+    len = sizeof(_field) - 1;						\
+    tmp = (char *) enc_dec_string(hash, (unsigned char *) _field, &len);\
+    if (what == PACK_ENC) 						\
+      memcpy(_field, tmp, len);						\
+    else 								\
+      simple_snprintf(_field, sizeof(_field), "%s", tmp);		\
+    OPENSSL_cleanse(tmp, len);						\
+    free(tmp);								\
 } while (0)
 
-#define dohash(_field)		do {								\
-	if (what == PACK_ENC)									\
-	  strlcat(nhash, _field, sizeof(nhash));						\
-	dofield(_field);									\
-	if (what == PACK_DEC)									\
-	  strlcat(nhash, _field, sizeof(nhash));						\
+#define dohash(_field)		do {					\
+	if (what == PACK_ENC)						\
+	  strlcat(nhash, _field, sizeof(nhash));			\
+	dofield(_field);						\
+	if (what == PACK_DEC)						\
+	  strlcat(nhash, _field, sizeof(nhash));			\
 } while (0)
 
-#define update_hash()		do {				\
-	MD5(NULL);						\
-	hash = MD5(nhash);					\
-	OPENSSL_cleanse(nhash, sizeof(nhash));			\
-	nhash[0] = 0;						\
+#define update_hash()		do {					\
+	MD5(NULL);							\
+	hash = MD5(nhash);						\
+	OPENSSL_cleanse(nhash, sizeof(nhash));				\
+	nhash[0] = 0;							\
 } while (0)
 
   /* -- STATIC -- */
@@ -793,7 +791,7 @@ void conf_to_bin(conf_t *in, bool move, int die)
     strlcpy(settings.homedir, in->homedir, sizeof(settings.homedir));
   for (bot = in->bots; bot && bot->nick; bot = bot->next) {
     simple_snprintf(settings.bots, sizeof(settings.bots), STR("%s%s%s %s %s%s %s,"), 
-                           settings.bots && settings.bots[0] ? settings.bots : "",
+                           settings.bots[0] ? settings.bots : "",
                            bot->disabled ? "/" : "",
                            bot->nick,
                            bot->net.ip ? bot->net.ip : "*", 
