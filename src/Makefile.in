@@ -129,7 +129,8 @@ sorthelp: sorthelp.cc ../lib/bdlib/src/libbdlib.a
 $(EGGEXEC): ../$(EGGEXEC)
 
 clean:
-	@rm -f .depend *.o $(OBJS) *~ _*.c _*.cc *.ii *.i set_default.h responses.cc help.h
+	@rm -f .depend *.o $(OBJS) *~ _*.c _*.cc *.ii *.i set_default.h \
+	    responses.cc help.h $(STRINGFIX)
 
 build_msg:
 	@echo "[*] Compiling core components"
