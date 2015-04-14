@@ -61,14 +61,14 @@ OBJS = auth.So \
 	userent.So \
 	userrec.So \
 	users.So \
-        mod/channels.mod/channels.So \
-        mod/console.mod/console.So \
-        mod/ctcp.mod/ctcp.So \
-        mod/irc.mod/irc.So \
-        mod/server.mod/server.So \
-        mod/share.mod/share.So \
-        mod/transfer.mod/transfer.So \
-        mod/update.mod/update.So
+	mod/channels.mod/channels.So \
+	mod/console.mod/console.So \
+	mod/ctcp.mod/ctcp.So \
+	mod/irc.mod/irc.So \
+	mod/server.mod/server.So \
+	mod/share.mod/share.So \
+	mod/transfer.mod/transfer.So \
+	mod/update.mod/update.So
 
 MAKE_GENERIC = $(MAKE) 'MAKE=$(MAKE)' 'MAKEFLAGS=$(MAKEFLAGS)' 'CXX=$(CXX)' 'LD=$(LD)' 'STRIP=$(STRIP)' 'CXXFLAGS=$(CXXFLAGS)' 'CFLGS=$(CFLGS)' 'CCDEPMODE=$(CCDEPMODE)'
 
