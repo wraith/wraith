@@ -13,7 +13,7 @@ master
   * Require C++11 compiler support (G++ 4.7+, clang32+)
 
 maint
-  * Disable demo TCL support by default to prevent confusion during build.
+  * Fix TCL warnings during build if TCL is not being used.
 
 1.4.5
   * Remove ahbl as it now positively identifies all hosts as abusive

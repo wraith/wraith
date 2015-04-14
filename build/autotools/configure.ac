@@ -259,6 +259,10 @@ if test -d .git; then
   git submodule init
   git submodule update
   git submodule foreach --recursive git clean -fdx
+  # Restore as it may have been removed by an older 'make distclean'
+  if ! test -f src/response.h; then
+    git checkout src/response.h
+  fi
 fi
 ]
 
