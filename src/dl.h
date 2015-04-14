@@ -32,4 +32,8 @@
 
 extern bd::HashTable<bd::String, FunctionPtr> dl_symbol_table;
 
+#ifdef GENERATE_DEFS
+#undef DLSYM_GLOBAL
+#endif
+
 #endif /* !_DL_H_ */
