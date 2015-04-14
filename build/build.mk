@@ -1,72 +1,97 @@
 depcomp = /bin/sh $(top_srcdir)/build/autotools/depcomp
 
-.SUFFIXES:
-.SUFFIXES: .c .cc .h .o .So
+STRINGFIX= $(top_srcdir)/src/stringfix
 
-.cc.So:
+$(STRINGFIX): $(STRINGFIX).cc
+	@echo -e "[CC]	\033[1m$@\033[0m"
+	$(CXX) $(CPPFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CXXFLAGS) $< $(LDFLAGS) -o $(STRINGFIX)
+
+# Cannot use .SUFFIXES as it won't allow a dependency on $(STRINGFIX)
+
+%.So: %.cc $(STRINGFIX)
 	@echo -e "{CC}	\033[1m$*\033[0m"
-	set -e; trap "rm -f '.deps/$*.TPo' $*.ii $*.fail; exit 1" 1 2 3 5 10 13 15; \
+	file="$*"; \
+	dirname="$${file%/*}"; \
+	if [ "$${dirname}" = "$${file}" ]; then dirname=.; fi; \
+	file="$${file##*/}"; \
+	deps="$${dirname}/.deps/$${file}"; \
+	set -e; trap "rm -f "$${deps}.TPo" $*.ii $*.fail; exit 1" 1 2 3 5 10 13 15; \
 	if [ "$(CCDEPMODE)" = "gcc3" ]; then \
-	  if { { $(CXX) -MT '$@' -MD -MP -MF '.deps/$*.TPo' $(CXXFLAGS) $(CPPFLAGS) -E $< || :> $*.fail; } | \
-	    $(top_srcdir)/src/stringfix > $*.ii; } && ! [ -f $*.fail ]; then \
-	    echo '$@: $(top_srcdir)/src/stringfix' >> '.deps/$*.TPo'; \
-	    mv '.deps/$*.TPo' '.deps/$*.Po'; \
+	  if { { $(CXX) -MT '$@' -MD -MP -MF "$${deps}.TPo" $(CXXFLAGS) $(CPPFLAGS) -E $< || :> $*.fail; } | \
+	    $(STRINGFIX) > $*.ii; } && ! [ -f $*.fail ]; then \
+	    echo '$@: $(STRINGFIX)' >> "$${deps}.TPo"; \
+	    mv "$${deps}.TPo" "$${deps}.Po"; \
 	   else \
-	     rm -f '.deps/$*.TPo' $*.ii $*.fail; \
+	     rm -f "$${deps}.TPo" $*.ii $*.fail; \
 	     exit 1; \
 	  fi; \
 	else \
-	  libtool=no source='$<' object='$@' depfile='.deps/$*.Po' tmpdepfile='.deps/$*.TPo' depmode=$(CCDEPMODE) $(depcomp) \
-	  $(CXX) $(CPPFLAGS) $(CXXFLAGS) -E $< | $(top_srcdir)/src/stringfix > $*.ii; \
+	  libtool=no source='$<' object='$@' depfile="$${deps}.Po" tmpdepfile="$${deps}.TPo" depmode=$(CCDEPMODE) $(depcomp) \
+	  $(CXX) $(CPPFLAGS) $(CXXFLAGS) -E $< | $(STRINGFIX) > $*.ii; \
 	fi; \
 	$(CXX) $(CXXFLAGS) -c $*.ii -o $@; \
 	rm -f $*.ii
 
-.c.So:
+%.So: %.c $(STRINGFIX)
 	@echo -e "{C }	\033[1m$*\033[0m"
-	set -e; trap "rm -f '.deps/$*.TPo' $*.i $*.fail; exit 1" 1 2 3 5 10 13 15; \
+	file="$*"; \
+	dirname="$${file%/*}"; \
+	if [ "$${dirname}" = "$${file}" ]; then dirname=.; fi; \
+	file="$${file##*/}"; \
+	deps="$${dirname}/.deps/$${file}"; \
+	set -e; trap "rm -f "$${deps}.TPo" $*.i $*.fail; exit 1" 1 2 3 5 10 13 15; \
 	if [ "$(CCDEPMODE)" = "gcc3" ]; then \
-	  if { { $(CC) -MT '$@' -MD -MP -MF '.deps/$*.TPo' $(CPPFLAGS) $(CFLAGS) -E $< || :> $*.fail; } | \
-	    $(top_srcdir)/src/stringfix > $*.i; } && ! [ -f $*.fail ]; then \
-	    echo '$@: $(top_srcdir)/src/stringfix' >> '.deps/$*.TPo'; \
-	    mv '.deps/$*.TPo' '.deps/$*.Po'; \
+	  if { { $(CC) -MT '$@' -MD -MP -MF "$${deps}.TPo" $(CPPFLAGS) $(CFLAGS) -E $< || :> $*.fail; } | \
+	    $(STRINGFIX) > $*.i; } && ! [ -f $*.fail ]; then \
+	    echo '$@: $(STRINGFIX)' >> "$${deps}.TPo"; \
+	    mv "$${deps}.TPo" "$${deps}.Po"; \
 	   else \
-	     rm -f '.deps/$*.TPo' $*.i $*.fail; \
+	     rm -f "$${deps}.TPo" $*.i $*.fail; \
 	     exit 1; \
 	  fi; \
 	else \
-	  libtool=no source='$<' object='$@' depfile='.deps/$*.Po' tmpdepfile='.deps/$*.TPo' depmode=$(CCDEPMODE) $(depcomp) \
-	  $(CC) $(CPPFLAGS) $(CFLAGS) -E $< | $(top_srcdir)/src/stringfix > $*.i; \
+	  libtool=no source='$<' object='$@' depfile="$${deps}.Po" tmpdepfile="$${deps}.TPo" depmode=$(CCDEPMODE) $(depcomp) \
+	  $(CC) $(CPPFLAGS) $(CFLAGS) -E $< | $(STRINGFIX) > $*.i; \
 	fi; \
 	$(CC) $(CFLAGS) -c $*.i -o $@; \
 	rm -f $*.i
 
-.cc.o:
+%.o: %.cc
 	@echo -e "[CC]	\033[1m$*\033[0m"
-	set -e; trap "rm -f '.deps/$*.TPo'; exit 1" 1 2 3 5 10 13 15; \
+	file="$*"; \
+	dirname="$${file%/*}"; \
+	if [ "$${dirname}" = "$${file}" ]; then dirname=.; fi; \
+	file="$${file##*/}"; \
+	deps="$${dirname}/.deps/$${file}"; \
+	set -e; trap "rm -f "$${deps}.TPo"; exit 1" 1 2 3 5 10 13 15; \
 	if [ "$(CCDEPMODE)" = "gcc3" ]; then \
-	  if $(CXX) -MT '$@' -MD -MP -MF '.deps/$*.TPo' $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@; then \
-	    mv '.deps/$*.TPo' '.deps/$*.Po'; \
+	  if $(CXX) -MT '$@' -MD -MP -MF "$${deps}.TPo" $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@; then \
+	    mv "$${deps}.TPo" "$${deps}.Po"; \
 	   else \
-	     rm -f '.deps/$*.TPo'; \
+	     rm -f "$${deps}.TPo"; \
 	     exit 1; \
 	  fi; \
 	else \
-	  libtool=no source='$<' object='$@' depfile='.deps/$*.Po' tmpdepfile='.deps/$*.TPo' depmode=$(CCDEPMODE) $(depcomp) \
+	  libtool=no source='$<' object='$@' depfile="$${deps}.Po" tmpdepfile="$${deps}.TPo" depmode=$(CCDEPMODE) $(depcomp) \
 	  $(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@; \
 	fi
 
-.c.o:
+%.o: %.c
 	@echo -e "[C]	\033[1m$*\033[0m"
-	set -e; trap "rm -f '.deps/$*.TPo'; exit 1" 1 2 3 5 10 13 15; \
+	file="$*"; \
+	dirname="$${file%/*}"; \
+	if [ "$${dirname}" = "$${file}" ]; then dirname=.; fi; \
+	file="$${file##*/}"; \
+	deps="$${dirname}/.deps/$${file}"; \
+	set -e; trap "rm -f "$${deps}.TPo"; exit 1" 1 2 3 5 10 13 15; \
 	if [ "$(CCDEPMODE)" = "gcc3" ]; then \
-	  if $(CC) -MT '$@' -MD -MP -MF '.deps/$*.TPo' $(CPPFLAGS) $(CFLAGS) -c $< -o $@; then \
-	    mv '.deps/$*.TPo' '.deps/$*.Po'; \
+	  if $(CC) -MT '$@' -MD -MP -MF "$${deps}.TPo" $(CPPFLAGS) $(CFLAGS) -c $< -o $@; then \
+	    mv "$${deps}.TPo" "$${deps}.Po"; \
 	   else \
-	     rm -f '.deps/$*.TPo'; \
+	     rm -f "$${deps}.TPo"; \
 	     exit 1; \
 	  fi; \
 	else \
-	  libtool=no source='$<' object='$@' depfile='.deps/$*.Po' tmpdepfile='.deps/$*.TPo' depmode=$(CCDEPMODE) $(depcomp) \
+	  libtool=no source='$<' object='$@' depfile="$${deps}.Po" tmpdepfile="$${deps}.TPo" depmode=$(CCDEPMODE) $(depcomp) \
 	  $(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@; \
 	fi

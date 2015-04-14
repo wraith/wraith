@@ -12,7 +12,7 @@ VPATH = @srcdir@
 CCDEPMODE = @CCDEPMODE@
 BINEXEC = wraith@EXEEXT@
 
-STATICMAKEFILES = lib/Makefile src/mod/Makefile src/crypto/Makefile src/compat/Makefile src/Makefile Makefile
+STATICMAKEFILES = lib/Makefile src/crypto/Makefile src/compat/Makefile src/Makefile Makefile
 CONFIGFILES = build/config.cache build/config.log build/config.status src/config.h src/buildinfo.h
 
 DISTROFILES = README.md LICENSE build doc scripts lib Makefile.in build.sh configure src BSDmakefile
@@ -46,21 +46,19 @@ CXXFLAGS = @CXXFLAGS@ $(CFLGS) @GCC3_CXXFLAGS@ -fno-rtti
 
 MAKEFLAGS = -s
 
-STRINGFIX = src/stringfix
-
 MAKE_STATIC = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CXX)' 'LD=$(LD_STATIC)' 'INCLUDES=$(INCLUDES)' \
 'CCDEPMODE=$(CCDEPMODE)' 'BRANCH=$(BRANCH)' 'COMMIT=$(COMMIT_SHORT)' 'BUILDTS=$(BUILDTS)' 'VERSION=$(VERSION)' \
-'STRIP=$(STRIP)' 'CXXFLAGS=$(CXXFLAGS)' 'CFLGS=$(CFLGS) -DBIN_TYPE_STATIC' 'STRINGFIX=$(STRINGFIX)' \
+'STRIP=$(STRIP)' 'CXXFLAGS=$(CXXFLAGS)' 'CFLGS=$(CFLGS) -DBIN_TYPE_STATIC' \
 'LIBS=$(LIBS)' 'EGGEXEC=$(BINEXEC)' 'EGGBUILD=(wraith)'
 
 MAKE_DYNAMIC = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CXX)' 'LD=$(LD_DYNAMIC)' 'INCLUDES=$(INCLUDES)' \
 'CCDEPMODE=$(CCDEPMODE)' 'BRANCH=$(BRANCH)' 'COMMIT=$(COMMIT_SHORT)' 'BUILDTS=$(BUILDTS)' 'VERSION=$(VERSION)' \
-'STRIP=$(STRIP)' 'CXXFLAGS=$(CXXFLAGS)' 'CFLGS=$(CFLGS) -DBIN_TYPE_DYNAMIC' 'STRINGFIX=$(STRINGFIX)' \
+'STRIP=$(STRIP)' 'CXXFLAGS=$(CXXFLAGS)' 'CFLGS=$(CFLGS) -DBIN_TYPE_DYNAMIC' \
 'LIBS=$(LIBS)' 'EGGEXEC=$(BINEXEC)' 'EGGBUILD=(wraith)'
 
 MAKE_DEBUG = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CXX_DEBUG)' 'LD=$(LD_DEBUG) -g' 'INCLUDES=$(INCLUDES)' \
 'CCDEPMODE=$(CCDEPMODE)' 'BRANCH=$(BRANCH)' 'COMMIT=$(COMMIT_SHORT)' 'BUILDTS=$(BUILDTS)' 'VERSION=$(VERSION)' \
-'STRIP=touch' 'CXXFLAGS=$(CXXFLAGS) $(DEBCXXFLAGS)' 'CFLGS=$(CFLGS) $(DEBCXXFLAGS) -DBIN_TYPE_DYNAMIC' 'STRINGFIX=' \
+'STRIP=touch' 'CXXFLAGS=$(CXXFLAGS) $(DEBCXXFLAGS)' 'CFLGS=$(CFLGS) $(DEBCXXFLAGS) -DBIN_TYPE_DYNAMIC' \
 'LIBS=$(LIBS)' 'EGGEXEC=$(BINEXEC)' 'EGGBUILD=(debug)'
 
 MAKE_UTILS = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CXX_DEBUG)' 'STRIP=touch' 'INCLUDES=$(INCLUDES)' \
@@ -73,9 +71,11 @@ MAKE_UTILS_NR = $(MAKE) 'CXX=$(CXX)' 'STRIP=touch' 'INCLUDES=$(INCLUDES)' \
 
 MAKE_CONFIG = $(MAKE) 'MAKE=$(MAKE)'
 
-.PHONY: checkclean.static checkclean.dynamic checkclean.debug lib wraith dwraith lib.debug debug test general crypto utils sorthelp stringfix sort indent tar distrib distclean clean cleanutils test all dynamic static tags
+.PHONY: checkclean.static checkclean.dynamic checkclean.debug lib wraith dwraith lib.debug debug test general crypto sorthelp sort indent tar distrib distclean clean cleanutils test all dynamic static tags
 
 all: dynamic
+
+include $(top_srcdir)/build/build.mk
 
 test:
 
@@ -86,7 +86,6 @@ clean:  cleanutils
 	+@cd src && $(MAKE) clean
 	+@cd src/compat && $(MAKE) clean
 	+@cd src/crypto && $(MAKE) clean
-	+@cd src/mod && $(MAKE) clean
 	-+@cd lib && $(MAKE) clean
 	@rm -f $(BINEXEC) build/stamp.* *~ src/*~ configure.temp .mangled stamp.*
 	@rm -f utctime@EXEEXT@ ts@EXEEXT@
@@ -144,18 +143,13 @@ sort: sorthelp
 	@(src/sorthelp@EXEEXT@ $(HELPFILE) $(HELPFILE) || (cp -f help.txt~ $(HELPFILE); echo "Sort failed, restoring backup."))
 	@rm -f help.txt~
 
-stringfix: src/stringfix.cc src/config.h
-	+@cd src && ${MAKE_UTILS} stringfix
-
 sorthelp: src/sorthelp.cc
 	+@cd src && ${MAKE_UTILS} sorthelp
-
-utils: stringfix
 
 crypto:
 	+@cd src/crypto && ${MAKE_UTILS} crypto
 
-general: stringfix
+general:
 
 .NOTPARALLEL: checkclean.static checkclean.dynamic checkclean.debug
 
@@ -188,7 +182,6 @@ dynamic: checkclean.dynamic lib general
 	@echo "Making dynamic binary"
 	@echo ""
 	@echo ""
-	+@cd src/mod && $(MAKE_DYNAMIC) static
 	+@cd src && $(MAKE_DYNAMIC) $(BINEXEC)
 	@echo ""
 
@@ -197,7 +190,6 @@ static: checkclean.static lib general
 	@echo "Making static binary"
 	@echo ""
 	@echo ""
-	+@cd src/mod && $(MAKE_STATIC) static
 	+@cd src && $(MAKE_STATIC) $(BINEXEC)
 	@echo ""
 
@@ -211,7 +203,6 @@ debug: checkclean.debug lib.debug general
 	@echo "Making debug binary"
 	@echo ""
 	@echo ""
-	+@cd src/mod && $(MAKE_DEBUG) static
 	+@cd src && $(MAKE_DEBUG) $(BINEXEC)
 	@echo ""
 
