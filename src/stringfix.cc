@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MAX_LINE_LEN 25000
+#define MAX_LINE_LEN 35000
 int help = 0;
 
 void garble(char **inptr, char **outptr)
