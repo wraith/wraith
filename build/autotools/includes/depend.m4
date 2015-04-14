@@ -24,13 +24,13 @@ AC_SUBST(GCC4DEB)dnl
 
 AC_DEFUN([DO_DEPS],
 [
-files="src/Makefile.in src/compat/Makefile.in src/crypto/Makefile.in src/mod/channels.mod/Makefile src/mod/compress.mod/Makefile src/mod/console.mod/Makefile src/mod/ctcp.mod/Makefile src/mod/irc.mod/Makefile src/mod/server.mod/Makefile src/mod/share.mod/Makefile src/mod/transfer.mod/Makefile src/mod/update.mod/Makefile"
+files="src/Makefile.in src/compat/Makefile.in src/crypto/Makefile.in"
 for mf in $files; do
   # Strip MF so we end up with the name of the file.
   mf=${mf%%:*}
-  dirpart=${mf%/*}
-  rm -f "$dirpart/.deps/includes"
-  test -d "$dirpart/.deps" || mkdir "$dirpart/.deps"
+  dirmf=${mf%/*}
+  rm -f "$dirmf/.deps/includes"
+  test -d "$dirmf/.deps" || mkdir "$dirmf/.deps"
   for file in `sed -n -e '
     /^OBJS = .*\\\\$/ {
       s/^OBJS = //
@@ -43,6 +43,12 @@ for mf in $files; do
     }
     /^OBJS = / s/^OBJS = //p' < "$mf"`;
   do
+    dirpart="${dirmf}/${file}"
+    dirpart="${dirpart%/*}"
+    if [[ "${dirpart}" != "${dirmf}" ]]; then
+      test -d "${dirpart}/.deps" || mkdir "${dirpart}/.deps"
+    fi
+    file="${file##*/}"
     suffix=${file##*.}
     base=${file%%.*}
     test -f "$dirpart/$base.cc" || test -f "$dirpart/$base.c" || continue
