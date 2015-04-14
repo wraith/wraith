@@ -8852,7 +8852,7 @@ _ACEOF
 
 #FIND_WRAPS
 
-files="src/Makefile.in src/compat/Makefile.in src/crypto/Makefile.in"
+files="src/Makefile.in src/crypto/Makefile.in"
 for mf in $files; do
   # Strip MF so we end up with the name of the file.
   mf=${mf%%:*}
@@ -8892,7 +8892,7 @@ for mf in $files; do
 done
 
 
-ac_config_files="$ac_config_files Makefile lib/Makefile src/Makefile src/compat/Makefile src/crypto/Makefile src/buildinfo.h"
+ac_config_files="$ac_config_files Makefile lib/Makefile src/Makefile src/crypto/Makefile src/buildinfo.h"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -9589,7 +9589,6 @@ do
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "lib/Makefile") CONFIG_FILES="$CONFIG_FILES lib/Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
-    "src/compat/Makefile") CONFIG_FILES="$CONFIG_FILES src/compat/Makefile" ;;
     "src/crypto/Makefile") CONFIG_FILES="$CONFIG_FILES src/crypto/Makefile" ;;
     "src/buildinfo.h") CONFIG_FILES="$CONFIG_FILES src/buildinfo.h" ;;
 

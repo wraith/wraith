@@ -24,7 +24,7 @@ AC_SUBST(GCC4DEB)dnl
 
 AC_DEFUN([DO_DEPS],
 [
-files="src/Makefile.in src/compat/Makefile.in src/crypto/Makefile.in"
+files="src/Makefile.in src/crypto/Makefile.in"
 for mf in $files; do
   # Strip MF so we end up with the name of the file.
   mf=${mf%%:*}
