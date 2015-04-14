@@ -486,18 +486,14 @@ int simple_exec(const char* argv[]) {
   pid_t pid, savedpid;
   int status;
 
-  switch ((pid = vfork())) {
+  switch ((pid = fork())) {
     case -1:
       break;
     case 0:		//child
       // Close all sockets
-      for (int fd = 3; fd < MAX_SOCKETS; ++fd) {
-        close(fd);
-      }
-      if (execvp(argv[0], (char* const*) &argv[0]) == -1) {
-        _exit(127);
-      }
-      /* NOTREACHED */
+      for (int fd = 3; fd < MAX_SOCKETS; ++fd) close(fd);
+      execvp(argv[0], (char* const*) &argv[0]);
+      _exit(127);
     default:		//parent
       savedpid = pid;
       do {
