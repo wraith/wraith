@@ -847,7 +847,7 @@ int bots_in_subtree(tand_t *bot)
   tand_t *b = NULL;
 
   for (b = tandbot; b; b = b->next) {
-    if (b->bot && (b->uplink == bot)) {
+    if (b->uplink == bot) {
       nr += bots_in_subtree(b);
     }
   }
@@ -866,7 +866,7 @@ int users_in_subtree(tand_t *bot)
     if (!strcasecmp(party[i].bot, bot->bot))
       nr++;
   for (b = tandbot; b; b = b->next)
-    if (b->bot && (b->uplink == bot))
+    if (b->uplink == bot)
       nr += users_in_subtree(b);
   return nr;
 }
