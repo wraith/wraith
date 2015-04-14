@@ -24,7 +24,7 @@ before_install:
   - if [ "$CXX" = "clang++" ]; then sudo cp libcxxabi/lib/libc++abi.so.1.0 /usr/lib/; fi
   - if [ "$CXX" = "clang++" ]; then sudo ln -sf libc++abi.so.1.0 /usr/lib/libc++abi.so; fi
   - if [ "$CXX" = "clang++" ]; then sudo ln -sf libc++abi.so.1.0 /usr/lib/libc++abi.so.1; fi
-  - if [ "$CXX" = "clang++" ]; then export CXXFLAGS="-stdlib=libc++" LDFLAGS="-lc++abi"; fi
+  - if [ "$CXX" = "clang++" ]; then export CXXFLAGS="-stdlib=libc++" LDFLAGS="-stdlib=libc++ -lc++abi"; fi
   - if [ "$CXX" = "clang++" ]; then (wget http://dev-www.libreoffice.org/src/cppunit-1.13.2.tar.gz && tar -zxvf cppunit-1.13.2.tar.gz && cd cppunit-1.13.2 && ./configure --prefix=/usr --disable-doc --disable-doxygen --disable-html-docs && make -j2 && sudo make install); fi
   - export CPPFLAGS="-D_FORTIFY_SOURCE=2"
 
