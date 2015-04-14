@@ -1337,7 +1337,7 @@ Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --disable-ipv6          disable IPv6 support
-  --enable-script-tcl     enable TCL Script support
+  --disable-script-tcl    disable TCL Script support
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -5824,18 +5824,18 @@ if test "${enable_script_tcl+set}" = set; then :
        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $enableval" >&5
 $as_echo "$enableval" >&6; }
 
-$as_echo "#define USE_SCRIPT_TCL 1" >>build/confdefs.h
-
-
 else
 
-       # default if not given is DISABLED
+       # default if not given is ENABLED
        if test "x$enableval" = "x"; then
-         enableval="no"
+         enableval="yes"
        fi
        enable_script_tcl=$enableval
        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $enableval" >&5
 $as_echo "$enableval" >&6; }
+
+$as_echo "#define USE_SCRIPT_TCL 1" >>build/confdefs.h
+
 
 
 fi
