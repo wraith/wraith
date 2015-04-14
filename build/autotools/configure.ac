@@ -229,7 +229,7 @@ EGG_SUBST_VERSION
 #FIND_WRAPS
 DO_DEPS
 
-AC_CONFIG_FILES([Makefile lib/Makefile src/Makefile src/compat/Makefile src/crypto/Makefile src/buildinfo.h])
+AC_CONFIG_FILES([Makefile lib/Makefile src/Makefile src/buildinfo.h])
 
 AH_TEMPLATE(HAVE_ST_MTIM, [Define to 1 if your struct stat has an st_mtim member])
 AH_TEMPLATE(HAVE_ST_MTIMESPEC, [Define to 1 if your struct stat has an st_mtimespec member])

@@ -12,7 +12,7 @@ VPATH = @srcdir@
 CCDEPMODE = @CCDEPMODE@
 BINEXEC = wraith@EXEEXT@
 
-STATICMAKEFILES = lib/Makefile src/crypto/Makefile src/compat/Makefile src/Makefile Makefile
+STATICMAKEFILES = lib/Makefile src/Makefile Makefile
 CONFIGFILES = build/config.cache build/config.log build/config.status src/config.h src/buildinfo.h
 
 DISTROFILES = README.md LICENSE build doc scripts lib Makefile.in build.sh configure src BSDmakefile
@@ -70,7 +70,7 @@ MAKE_UTILS_NR = $(MAKE) 'CXX=$(CXX)' 'STRIP=touch' 'INCLUDES=$(INCLUDES)' \
 
 MAKE_CONFIG = $(MAKE) 'MAKE=$(MAKE)'
 
-.PHONY: checkclean.static checkclean.dynamic checkclean.debug lib wraith dwraith lib.debug debug test general crypto sorthelp sort indent tar distrib distclean clean cleanutils test all dynamic static tags
+.PHONY: checkclean.static checkclean.dynamic checkclean.debug lib wraith dwraith lib.debug debug test general sorthelp sort indent tar distrib distclean clean cleanutils test all dynamic static tags
 
 all: dynamic
 
@@ -83,8 +83,6 @@ cleanutils:
 
 clean:  cleanutils
 	+@cd src && $(MAKE) clean
-	+@cd src/compat && $(MAKE) clean
-	+@cd src/crypto && $(MAKE) clean
 	-+@cd lib && $(MAKE) clean
 	@rm -f $(BINEXEC) build/stamp.* *~ src/*~ configure.temp .mangled stamp.*
 	@rm -f utctime@EXEEXT@ ts@EXEEXT@
@@ -144,9 +142,6 @@ sort: sorthelp
 
 sorthelp: src/sorthelp.cc
 	+@cd src && ${MAKE_UTILS} sorthelp
-
-crypto:
-	+@cd src/crypto && ${MAKE_UTILS} crypto
 
 general:
 

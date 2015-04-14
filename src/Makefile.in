@@ -61,14 +61,29 @@ OBJS = auth.So \
 	userent.So \
 	userrec.So \
 	users.So \
-        mod/channels.mod/channels.So \
-        mod/console.mod/console.So \
-        mod/ctcp.mod/ctcp.So \
-        mod/irc.mod/irc.So \
-        mod/server.mod/server.So \
-        mod/share.mod/share.So \
-        mod/transfer.mod/transfer.So \
-        mod/update.mod/update.So
+	mod/channels.mod/channels.So \
+	mod/console.mod/console.So \
+	mod/ctcp.mod/ctcp.So \
+	mod/irc.mod/irc.So \
+	mod/server.mod/server.So \
+	mod/share.mod/share.So \
+	mod/transfer.mod/transfer.So \
+	mod/update.mod/update.So \
+	compat/dirname.o \
+	compat/dn_expand.o \
+	compat/inet_ntop.o \
+	compat/snprintf.o \
+	compat/memcpy.o \
+	compat/memmem.o \
+	compat/memset.o \
+	compat/memutil.o \
+	compat/strcasecmp.o \
+	compat/strftime.o \
+	compat/strlcpy.o \
+	compat/strsep.o \
+	crypto/aes_util.o \
+	crypto/bf_util.o \
+	crypto/dh_util.o
 
 MAKE_GENERIC = $(MAKE) 'MAKE=$(MAKE)' 'MAKEFLAGS=$(MAKEFLAGS)' 'CXX=$(CXX)' 'LD=$(LD)' 'STRIP=$(STRIP)' 'CXXFLAGS=$(CXXFLAGS)' 'CFLGS=$(CFLGS)' 'CCDEPMODE=$(CCDEPMODE)'
 
@@ -92,7 +107,7 @@ responses.cc: $(RESPONSESFILE) $(top_srcdir)/build/makeres.sh
 cmds.cc: help.h
 
 help.h: $(HELPFILE) $(top_srcdir)/build/makehelp.sh $(STRINGFIX)
-	@echo -e "[H]	\033[1m$*\033[0m"
+	@echo -e "{H}	\033[1m$@\033[0m"
 	@$(top_srcdir)/build/makehelp.sh < $(HELPFILE) | $(STRINGFIX) > $@
 
 sorthelp: sorthelp.cc ../lib/bdlib/libbdlib.a
@@ -100,12 +115,12 @@ sorthelp: sorthelp.cc ../lib/bdlib/libbdlib.a
 	@$(CXX) $(CPPFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CXXFLAGS) $< ../lib/bdlib/libbdlib.a $(LDFLAGS) -o $@
 	@$(STRIP) $@@EXEEXT@
 
-../$(EGGEXEC): build_msg $(OBJS) mycrypto compatability ../lib/bdlib/libbdlib.a @LIBELF_BUNDLED@
+../$(EGGEXEC): build_msg $(OBJS) ../lib/bdlib/libbdlib.a @LIBELF_BUNDLED@
 	@echo "[*] Linking"
 	@echo ""
 	@echo "Linking wraith... $(EGGBUILD)"
 	@echo ""
-	$(LD) $(LDFLAGS) -o ../$(EGGEXEC) $(OBJS) compat/*.o crypto/*.o ../lib/bdlib/libbdlib.a $(LIBS) @LIBELF_LIB@
+	$(LD) $(LDFLAGS) -o ../$(EGGEXEC) $(OBJS) ../lib/bdlib/libbdlib.a $(LIBS) @LIBELF_LIB@
 	@$(STRIP) ../$(EGGEXEC)
 	@$(OBJCOPY) ../$(EGGEXEC)
 	@echo "Successful compile: $(EGGEXEC)"
@@ -118,13 +133,5 @@ clean:
 
 build_msg:
 	@echo "[*] Compiling core components"
-
-compatability:
-	@echo "[*] Compiling compatability components"
-	+@cd compat && $(MAKE_GENERIC) compat
-
-mycrypto:
-	@echo "[*] Compiling crypto"
-	+@cd crypto && $(MAKE_GENERIC) crypto
 
 include ./.deps/includes
