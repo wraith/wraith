@@ -1,10 +1,10 @@
 depcomp = /bin/sh $(top_srcdir)/build/autotools/depcomp
 
-STRINGFIX= $(top_srcdir)/src/stringfix
+STRINGFIX= $(srcdir)/stringfix
 
 $(STRINGFIX): $(STRINGFIX).cc
 	@echo -e "[CC]	\033[1m$@\033[0m"
-	$(CXX) $(CPPFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CXXFLAGS) $< $(LDFLAGS) -o $(STRINGFIX)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $< $(LDFLAGS) -o $(STRINGFIX)
 
 # Cannot use .SUFFIXES as it won't allow a dependency on $(STRINGFIX)
 

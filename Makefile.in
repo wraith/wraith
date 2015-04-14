@@ -74,12 +74,10 @@ MAKE_CONFIG = $(MAKE) 'MAKE=$(MAKE)'
 
 all: dynamic
 
-include $(top_srcdir)/build/build.mk
-
 test:
 
 cleanutils:
-	@rm -f $(STRINGFIX) src/sorthelp@EXEEXT@
+	@rm -f src/sorthelp@EXEEXT@
 
 clean:  cleanutils
 	+@cd src && $(MAKE) clean

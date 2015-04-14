@@ -112,7 +112,7 @@ help.h: $(HELPFILE) $(top_srcdir)/build/makehelp.sh $(STRINGFIX)
 
 sorthelp: sorthelp.cc ../lib/bdlib/libbdlib.a
 	@echo -e "Compiling: \033[1msorthelp\033[0m"
-	@$(CXX) $(CPPFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CXXFLAGS) $< ../lib/bdlib/libbdlib.a $(LDFLAGS) -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $< ../lib/bdlib/libbdlib.a $(LDFLAGS) -o $@
 	@$(STRIP) $@@EXEEXT@
 
 ../$(EGGEXEC): build_msg $(OBJS) ../lib/bdlib/libbdlib.a @LIBELF_BUNDLED@
@@ -129,7 +129,8 @@ sorthelp: sorthelp.cc ../lib/bdlib/libbdlib.a
 $(EGGEXEC): ../$(EGGEXEC)
 
 clean:
-	@rm -f .depend *.o $(OBJS) *~ _*.c _*.cc *.ii *.i set_default.h responses.cc help.h
+	@rm -f .depend *.o $(OBJS) *~ _*.c _*.cc *.ii *.i set_default.h \
+	    responses.cc help.h $(STRINGFIX)
 
 build_msg:
 	@echo "[*] Compiling core components"
