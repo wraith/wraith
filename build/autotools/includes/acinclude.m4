@@ -216,15 +216,18 @@ dnl @summary check whether compiler requires -rpath for libstdc++.so
 AC_DEFUN([CXX_RPATH_CHECK],
 [
   AC_CACHE_CHECK([whether the compiler requires -rpath], ax_cv_prog_cc_rpath, [
-    ax_cv_prog_cc_rpath=
+    ax_cv_prog_cc_rpath=no
     for path in `${CXX} -print-search-dirs | awk '/^libraries:/ {print substr([$]0, 13)}' | tr ':' ' '`; do
       if [[ -r "${path}/libstdc++.so" ]]; then
         ax_cv_prog_cc_rpath="${path}"
-        LDFLAGS="${LDFLAGS}${LDFLAGS:+ }-Wl,-rpath,${path}"
         break
       fi
     done
   ])
+
+  if [ "${ax_cv_prog_cc_rpath}" != "no" ]; then
+    LDFLAGS="${LDFLAGS}${LDFLAGS:+ }-Wl,-rpath,${path}"
+  fi
 ])
 
 dnl  EGG_CHECK_CCSTATIC()
