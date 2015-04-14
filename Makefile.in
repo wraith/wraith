@@ -28,9 +28,9 @@ DISTRIB = wraith-$(VERSION)
 HELPFILE = doc/help.txt
 
 # defaults
-CXX = @CCACHE@ @DISTCC@ @CXX@
+CXX = @CXX@
 LD = @CXX@
-CXX_DEBUG = @CCACHE@ @DISTCC@ @CXX@
+CXX_DEBUG = @CXX@
 LD_DEBUG = @CXX@
 STRIP = @STRIP@
 DIFF = @DIFF@
