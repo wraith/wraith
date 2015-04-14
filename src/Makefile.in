@@ -93,9 +93,9 @@ responses.cc: $(RESPONSESFILE) $(top_srcdir)/build/makeres.sh
 
 cmds.cc: help.h
 
-help.h: $(HELPFILE) $(top_srcdir)/build/makehelp.sh
+help.h: $(HELPFILE) $(top_srcdir)/build/makehelp.sh stringfix
 	@echo -e "[H]	\033[1m$*\033[0m"
-	@$(top_srcdir)/build/makehelp.sh < $(HELPFILE) > $@
+	@$(top_srcdir)/build/makehelp.sh < $(HELPFILE) | ./stringfix > $@
 
 sorthelp: sorthelp.cc ../lib/bdlib/src/libbdlib.a
 	@echo -e "Compiling: \033[1msorthelp\033[0m"

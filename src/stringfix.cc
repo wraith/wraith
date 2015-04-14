@@ -13,12 +13,12 @@
 #include "config.h"
 #endif
 
-#define WTF 1524
+#define MAX_LINE_LEN 16384
 int help = 0;
 
 void garble(char **inptr, char **outptr)
 {
-  char *in = *inptr, *out = NULL, *p = NULL, obuf[WTF] = "";
+  char *in = *inptr, *out = NULL, *p = NULL, obuf[MAX_LINE_LEN] = "";
   size_t chars = 0;
   unsigned char x = 0;
 
@@ -98,7 +98,7 @@ void garble(char **inptr, char **outptr)
 
 void processline(char *line)
 {
-  char tmpin[WTF] = "", tmpout[WTF] = "", *in = NULL, *out = NULL;
+  char tmpin[MAX_LINE_LEN] = "", tmpout[MAX_LINE_LEN] = "", *in = NULL, *out = NULL;
   size_t outlen = 0;
 
   strcpy(tmpin, line); 
