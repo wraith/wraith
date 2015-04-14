@@ -3400,6 +3400,66 @@ elif [ "${ax_cv_prog_cc_stackprotector}" = "yes" ]; then
   LDFLAGS="${LDFLAGS} -fstack-protector"
 fi
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -Og" >&5
+$as_echo_n "checking whether the compiler understands -Og... " >&6; }
+if ${ax_cv_prog_cc_Og+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+    ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+    ac_saved_flags="$CXXFLAGS"
+    CXXFLAGS="-Werror -Og"
+    cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  ax_cv_prog_cc_Og="yes"
+else
+  ax_cv_prog_cc_Og="no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+    CXXFLAGS="$ac_saved_flags"
+    ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_prog_cc_Og" >&5
+$as_echo "$ax_cv_prog_cc_Og" >&6; }
+
+  if [ "$ax_cv_prog_cc_Og" = "yes" ]; then
+    DEBCXXFLAGS="$DEBCXXFLAGS -Og"
+  elif [ -n "" ]; then
+      cat << 'EOF' >&2
+configure: error:
+
+  Your OS or C++ compiler does not support -Og.
+  This compile flag is required.
+
+EOF
+    exit 1
+  fi
+
+if [ "${ax_cv_prog_cc_Og}" = "no" ]; then
+  DEBCXXFLAGS="${DEBCXXFLAGS} -O0"
+fi
+
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -fstack-protector-all" >&5
 $as_echo_n "checking whether the compiler understands -fstack-protector-all... " >&6; }
 if ${ax_cv_prog_cc_stackprotectorall+:} false; then :

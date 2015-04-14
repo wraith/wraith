@@ -35,6 +35,10 @@ if [[ "${ax_cv_prog_cc_stackprotectorstrong}" = "yes" ]]; then
 elif [[ "${ax_cv_prog_cc_stackprotector}" = "yes" ]]; then
   LDFLAGS="${LDFLAGS} -fstack-protector"
 fi
+CXX_FLAG_CHECK([DEBCXXFLAGS], [-Og], [Og])
+if [[ "${ax_cv_prog_cc_Og}" = "no" ]]; then
+  DEBCXXFLAGS="${DEBCXXFLAGS} -O0"
+fi
 CXX_FLAG_CHECK([DEBCXXFLAGS], [-fstack-protector-all], [stackprotectorall])
 
 EGG_CHECK_DEPMODE
