@@ -9,9 +9,10 @@
 #include "response.h"
 #include "responses.cc"
 #include <bdlib/src/HashTable.h>
+#include <bdlib/src/String.h>
 #include <vector>
 
-static bd::HashTable<const char*, std::vector<const char*> > res_map;
+static bd::HashTable<bd::String, std::vector<const char*> > res_map;
 
 void
 init_responses()
