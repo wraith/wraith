@@ -111,12 +111,12 @@ help.h: $(HELPFILE) $(top_srcdir)/build/makehelp.sh $(STRINGFIX)
 	$(top_srcdir)/build/makehelp.sh < $(HELPFILE) | $(STRINGFIX) > $@
 
 sorthelp: sorthelp.cc ../lib/bdlib/src/libbdlib.a
-	@echo -e "[CC]	\033[1m$<\033[0m"
+	@echo -e "[CXX]	\033[1m$<\033[0m"
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $< ../lib/bdlib/src/libbdlib.a $(LDFLAGS) -o $@
 	@$(STRIP) $@@EXEEXT@
 
 ../$(EGGEXEC): build_msg $(OBJS) ../lib/bdlib/src/libbdlib.a @LIBELF_BUNDLED@
-	@echo -e "[LD]	\033[1m$@\033[0m"
+	@echo -e "[LD ]	\033[1m$@\033[0m"
 	$(LD) $(LDFLAGS) -o ../$(EGGEXEC) $(OBJS) ../lib/bdlib/src/libbdlib.a $(LIBS) @LIBELF_LIB@
 	@$(STRIP) ../$(EGGEXEC)
 	@$(OBJCOPY) ../$(EGGEXEC)
