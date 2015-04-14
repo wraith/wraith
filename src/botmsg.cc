@@ -268,7 +268,7 @@ void botnet_send_update(int idx, tand_t * ptr)
   if (tands > 0) {
     /* the D0gc is a lingering hack which probably will never be able to come out. */
     const size_t len = simple_snprintf(OBUF, sizeof(OBUF), "u %s %cD0gc %d %d %s %s\n", ptr->bot, ptr->share, ptr->localhub,
-                                                          (int) ptr->buildts, ptr->commit, ptr->version ? ptr->version : "");
+                                                          (int) ptr->buildts, ptr->commit, ptr->version);
     send_tand_but(idx, OBUF, len);
   }
 }

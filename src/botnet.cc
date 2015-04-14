@@ -799,7 +799,7 @@ void dump_links(int z)
         p = bot->uplink->bot;
 
       l = simple_snprintf(x, sizeof(x), "n %s %s %cD0gc %d %d %s %s\n", bot->bot, p, bot->share, bot->localhub,
-                                                        (int) bot->buildts, bot->commit, bot->version ? bot->version : "");
+                                                        (int) bot->buildts, bot->commit, bot->version);
       tputs(dcc[z].sock, x, l);
     }
   }

@@ -1172,7 +1172,7 @@ static void cmd_chaninfo(int idx, char *par)
       strftime(date, sizeof date, "%c %Z", gmtime(&(chan->added_ts)));
     } else
       date[0] = 0;
-    if (chan->added_by && chan->added_by[0])
+    if (chan->added_by[0])
       strlcpy(nick, chan->added_by, sizeof(nick));
     else
       nick[0] = 0;
