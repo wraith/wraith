@@ -102,7 +102,7 @@ sorthelp: sorthelp.cc ../lib/bdlib/src/libbdlib.a
 	@$(CXX) $(CPPFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CXXFLAGS) $< ../lib/bdlib/src/libbdlib.a $(LDFLAGS) -o $@
 	@$(STRIP) $@@EXEEXT@
 
-stringfix: stringfix.cc common.h config.h eggdrop.h
+stringfix: stringfix.cc
 	@echo -e "Compiling: \033[1mstringfix\033[0m"
 	@$(CXX) $(CPPFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CXXFLAGS) $< $(LDFLAGS) -o stringfix
 	@$(STRIP) $@@EXEEXT@

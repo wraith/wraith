@@ -9,10 +9,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #define MAX_LINE_LEN 16384
 int help = 0;
 
