@@ -222,16 +222,15 @@ confedit()
   signal(SIGCONT, SIG_DFL);
 
   my_gettime(&ts1);
-  switch (pid = vfork()) {
+  switch (pid = fork()) {
     case -1:
       fatal(STR("Cannot fork"), 0);
     case 0:
     {
       /* child */
-      if (execlp(editor, editor, tmpconf.file, (char*)NULL) == -1) {
-        perror(editor);
-        _exit(1);
-      }
+      execlp(editor, editor, tmpconf.file, (char*)NULL);
+      perror(editor);
+      exit(1);
      /*NOTREACHED*/}
     default:
       /* parent */
