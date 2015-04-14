@@ -3354,11 +3354,10 @@ if ${ax_cv_prog_cc_rpath+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
-    ax_cv_prog_cc_rpath=
+    ax_cv_prog_cc_rpath=no
     for path in `${CXX} -print-search-dirs | awk '/^libraries:/ {print substr($0, 13)}' | tr ':' ' '`; do
       if [ -r "${path}/libstdc++.so" ]; then
         ax_cv_prog_cc_rpath="${path}"
-        LDFLAGS="${LDFLAGS}${LDFLAGS:+ }-Wl,-rpath,${path}"
         break
       fi
     done
@@ -3366,6 +3365,10 @@ else
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_prog_cc_rpath" >&5
 $as_echo "$ax_cv_prog_cc_rpath" >&6; }
+
+  if  "${ax_cv_prog_cc_rpath}" != "no" ; then
+    LDFLAGS="${LDFLAGS}${LDFLAGS:+ }-Wl,-rpath,${path}"
+  fi
 
 
 #checkpoint
