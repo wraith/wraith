@@ -3,13 +3,13 @@ depcomp = /bin/sh $(top_srcdir)/build/autotools/depcomp
 STRINGFIX= $(srcdir)/stringfix
 
 $(STRINGFIX): $(STRINGFIX).cc
-	@echo -e "[CC]	\033[1m$@\033[0m"
+	@echo -e "[CXX]	\033[1m$@\033[0m"
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $< $(LDFLAGS) -o $(STRINGFIX)
 
 # Cannot use .SUFFIXES as it won't allow a dependency on $(STRINGFIX)
 
 %.So: %.cc $(STRINGFIX)
-	@echo -e "{CC}	\033[1m$<\033[0m"
+	@echo -e "{CXX}	\033[1m$<\033[0m"
 	file="$*"; \
 	dirname="$${file%/*}"; \
 	if [ "$${dirname}" = "$${file}" ]; then dirname=.; fi; \
@@ -33,7 +33,7 @@ $(STRINGFIX): $(STRINGFIX).cc
 	rm -f $*.ii
 
 %.So: %.c $(STRINGFIX)
-	@echo -e "{C }	\033[1m$<\033[0m"
+	@echo -e "{CC }	\033[1m$<\033[0m"
 	file="$*"; \
 	dirname="$${file%/*}"; \
 	if [ "$${dirname}" = "$${file}" ]; then dirname=.; fi; \
@@ -57,7 +57,7 @@ $(STRINGFIX): $(STRINGFIX).cc
 	rm -f $*.i
 
 %.o: %.cc
-	@echo -e "[CC]	\033[1m$<\033[0m"
+	@echo -e "[CXX]	\033[1m$<\033[0m"
 	file="$*"; \
 	dirname="$${file%/*}"; \
 	if [ "$${dirname}" = "$${file}" ]; then dirname=.; fi; \
@@ -77,7 +77,7 @@ $(STRINGFIX): $(STRINGFIX).cc
 	fi
 
 %.o: %.c
-	@echo -e "[C]	\033[1m$<\033[0m"
+	@echo -e "[CC ]	\033[1m$<\033[0m"
 	file="$*"; \
 	dirname="$${file%/*}"; \
 	if [ "$${dirname}" = "$${file}" ]; then dirname=.; fi; \
