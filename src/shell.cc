@@ -268,15 +268,11 @@ static void got_sigtrap(int z)
 
 void check_trace(int start)
 {
-  if (trace == DET_IGNORE || trace == DET_WARN)
-    trace = DET_DIE;
-//    return;
-
 #ifdef DEBUG
-  trace = DET_IGNORE;
-#endif /* DEBUG */
+  return;
+#endif
 
-  if (trace == DET_IGNORE)
+  if (start == 0 && trace == DET_IGNORE)
     return;
 
   pid_t parent = getpid();
