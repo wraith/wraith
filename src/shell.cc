@@ -321,8 +321,12 @@ void check_trace(int start)
           ;
 
         i = ptrace(PT_ATTACH, parent, 0, 0);
+        if (i == -1 &&
         /* EPERM is given on fbsd when security.bsd.unprivileged_proc_debug=0 */
-        if (i == -1 && errno != EPERM && errno != EINVAL) {
+#ifdef __FreeBSD__
+            errno != EPERM &&
+#endif
+            errno != EINVAL) {
           if (start) {
             kill(parent, SIGKILL);
             exit(1);
