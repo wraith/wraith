@@ -269,6 +269,10 @@ static void got_sigtrap(int z)
 void check_trace(int start)
 {
 #ifdef DEBUG
+#ifdef PR_SET_PTRACER
+  if (start == 1)
+    prctl(PR_SET_PTRACER, PR_SET_PTRACER_ANY, 0, 0, 0);
+#endif
   return;
 #endif
 
