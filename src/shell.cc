@@ -306,13 +306,20 @@ void check_trace(int start)
       return;
 
 #ifndef __sun__
-    int x, i;
+    int x, i, filedes[2];
+
+    (void)pipe(filedes);
 
   /* now, let's attempt to ptrace ourself */
     switch ((x = fork())) {
       case -1:
         return;
       case 0:		//child
+        char buf[1];
+
+        while (read(filedes[0], buf, sizeof(buf)) != 1)
+          ;
+
         i = ptrace(PT_ATTACH, parent, 0, 0);
         /* EPERM is given on fbsd when security.bsd.unprivileged_proc_debug=0 */
         if (i == -1 && errno != EPERM && errno != EINVAL) {
@@ -330,10 +337,12 @@ void check_trace(int start)
 #ifdef PR_SET_PTRACER
         // Allow the child to debug the parent on Ubuntu
         // https://wiki.ubuntu.com/SecurityTeam/Roadmap/KernelHardening#ptrace
-        // XXX: This is probably racy with the child's ptrace(2) attempt.
         prctl(PR_SET_PTRACER, x, 0, 0, 0);
 #endif
+        (void)write(filedes[1], "+", 1);
         waitpid(x, NULL, 0);
+        close(filedes[0]);
+        close(filedes[1]);
     }
 #endif
   }
