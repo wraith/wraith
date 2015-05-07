@@ -268,15 +268,15 @@ static void got_sigtrap(int z)
 
 void check_trace(int start)
 {
-  if (trace == DET_IGNORE || trace == DET_WARN)
-    trace = DET_DIE;
-//    return;
-
 #ifdef DEBUG
-  trace = DET_IGNORE;
-#endif /* DEBUG */
+#ifdef PR_SET_PTRACER
+  if (start == 1)
+    prctl(PR_SET_PTRACER, PR_SET_PTRACER_ANY, 0, 0, 0);
+#endif
+  return;
+#endif
 
-  if (trace == DET_IGNORE)
+  if (start == 0 && trace == DET_IGNORE)
     return;
 
   pid_t parent = getpid();
@@ -306,35 +306,47 @@ void check_trace(int start)
       return;
 
 #ifndef __sun__
-    int x, i;
+    int x, i, filedes[2];
+
+    (void)pipe(filedes);
 
   /* now, let's attempt to ptrace ourself */
     switch ((x = fork())) {
       case -1:
         return;
       case 0:		//child
+        char buf[1];
+
+        while (read(filedes[0], buf, sizeof(buf)) != 1)
+          ;
+
         i = ptrace(PT_ATTACH, parent, 0, 0);
+        if (i == -1 &&
         /* EPERM is given on fbsd when security.bsd.unprivileged_proc_debug=0 */
-        if (i == -1 && errno != EPERM && errno != EINVAL) {
+#ifdef __FreeBSD__
+            errno != EPERM &&
+#endif
+            errno != EINVAL) {
           if (start) {
             kill(parent, SIGKILL);
             exit(1);
           } else
             detected(DETECT_TRACE, STR("I'm being traced!"));
-        } else {
+        } else if (i == 0) {
           waitpid(parent, NULL, 0);
           ptrace(PT_DETACH, parent, (char *) 1, 0);
-          kill(parent, SIGCHLD);
         }
         exit(0);
       default:		//parent
 #ifdef PR_SET_PTRACER
         // Allow the child to debug the parent on Ubuntu
         // https://wiki.ubuntu.com/SecurityTeam/Roadmap/KernelHardening#ptrace
-        // XXX: This is probably racy with the child's ptrace(2) attempt.
         prctl(PR_SET_PTRACER, x, 0, 0, 0);
 #endif
+        (void)write(filedes[1], "+", 1);
         waitpid(x, NULL, 0);
+        close(filedes[0]);
+        close(filedes[1]);
     }
 #endif
   }
@@ -347,7 +359,6 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool
 
   Tempfile *in = NULL, *out = NULL, *err = NULL;
   int x;
-  int parent = getpid();
 
   /* Set up temp files */
   in = new Tempfile("in");
@@ -450,15 +461,12 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool
 //    errd = fileno(errFile);
 
     if (dup2(in->fd, STDIN_FILENO) == (-1)) {
-      kill(parent, SIGCHLD);
       exit(1);
     }
     if (dup2(out->fd, STDOUT_FILENO) == (-1)) {
-      kill(parent, SIGCHLD);
       exit(1);
     }
     if (dup2(err->fd, STDERR_FILENO) == (-1)) {
-      kill(parent, SIGCHLD);
       exit(1);
     }
 
@@ -483,7 +491,6 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool
     }
 
     execvp(argv[0], &argv[0]);
-    kill(parent, SIGCHLD);
     exit(1);
   }
 }
