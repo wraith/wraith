@@ -16,6 +16,7 @@ master
 maint
   * Fix TCL warnings during build if TCL is not being used.
   * Disable demo TCL support by default to prevent confusion during build.
+  * Avoid apparmor ptrace(2) warnings on Ubuntu
 
 1.4.5
   * Remove ahbl as it now positively identifies all hosts as abusive
