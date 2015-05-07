@@ -324,7 +324,6 @@ void check_trace(int start)
         } else {
           waitpid(parent, NULL, 0);
           ptrace(PT_DETACH, parent, (char *) 1, 0);
-          kill(parent, SIGCHLD);
         }
         exit(0);
       default:		//parent
@@ -347,7 +346,6 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool
 
   Tempfile *in = NULL, *out = NULL, *err = NULL;
   int x;
-  int parent = getpid();
 
   /* Set up temp files */
   in = new Tempfile("in");
@@ -450,15 +448,12 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool
 //    errd = fileno(errFile);
 
     if (dup2(in->fd, STDIN_FILENO) == (-1)) {
-      kill(parent, SIGCHLD);
       exit(1);
     }
     if (dup2(out->fd, STDOUT_FILENO) == (-1)) {
-      kill(parent, SIGCHLD);
       exit(1);
     }
     if (dup2(err->fd, STDERR_FILENO) == (-1)) {
-      kill(parent, SIGCHLD);
       exit(1);
     }
 
@@ -483,7 +478,6 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool
     }
 
     execvp(argv[0], &argv[0]);
-    kill(parent, SIGCHLD);
     exit(1);
   }
 }
