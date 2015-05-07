@@ -328,7 +328,7 @@ void check_trace(int start)
             exit(1);
           } else
             detected(DETECT_TRACE, STR("I'm being traced!"));
-        } else {
+        } else if (i == 0) {
           waitpid(parent, NULL, 0);
           ptrace(PT_DETACH, parent, (char *) 1, 0);
         }
