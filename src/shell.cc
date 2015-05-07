@@ -328,6 +328,12 @@ void check_trace(int start)
         }
         exit(0);
       default:		//parent
+#ifdef PR_SET_PTRACER
+        // Allow the child to debug the parent on Ubuntu
+        // https://wiki.ubuntu.com/SecurityTeam/Roadmap/KernelHardening#ptrace
+        // XXX: This is probably racy with the child's ptrace(2) attempt.
+        prctl(PR_SET_PTRACER, x, 0, 0, 0);
+#endif
         waitpid(x, NULL, 0);
     }
 #endif
