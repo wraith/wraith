@@ -8,7 +8,6 @@ next
     will properly assign roles out to bots to not cause overlap. Only leaf
     bots know which bots have which roles. (#39)
   * Add cmd_roles (leaf only) to display roles for a channel. (#39)
-  * Fix broken startup with GCC from ports on FreeBSD.
 
 master
   * Require C++11 compiler support (G++ 4.7+, clang32+)
@@ -19,6 +18,7 @@ maint
   * Avoid apparmor ptrace(2) warnings on Ubuntu
   * Allow 'set trace ignore' again. Undoes a change from 2005.
   * Fix ptrace detection on Linux
+  * Fix broken startup with GCC from ports on FreeBSD.
 
 1.4.5
   * Remove ahbl as it now positively identifies all hosts as abusive

@@ -3351,7 +3351,6 @@ fi
 
 
 
-
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler requires -rpath" >&5
 $as_echo_n "checking whether the compiler requires -rpath... " >&6; }
 if ${ax_cv_prog_cc_need_rpath+:} false; then :
