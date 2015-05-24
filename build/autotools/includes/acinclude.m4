@@ -211,6 +211,57 @@ EOF
   fi
 ])
 
+dnl Fix GCC lame compiler paths (FreeBSD)
+dnl @summary check whether compiler requires -rpath for libstdc++.so
+AC_DEFUN([CXX_RPATH_CHECK],
+[
+  AC_CACHE_CHECK([whether the compiler requires -rpath], ax_cv_prog_cc_need_rpath, [
+  AC_TRY_RUN([
+#include <vector>
+int main() {
+        std::vector<int> test;
+        try {
+                return test.at(5);
+        } catch (...) {
+                ;
+        }
+        return 0;
+}
+  ], ax_cv_prog_cc_need_rpath=no, ax_cv_prog_cc_need_rpath=yes)])
+
+  if [[ "${ax_cv_prog_cc_need_rpath}" = "yes" ]]; then
+    save_ldflags="$LDFLAGS"
+    AC_CACHE_CHECK([whether the compiler requires -rpath], ax_cv_prog_cc_rpath, [
+      ax_cv_prog_cc_rpath=
+
+      for path in `${CXX} -print-search-dirs | awk '/^libraries:/ {print substr([$]0, 13)}' | tr ':' ' '`; do
+        if [[ -r "${path}/libstdc++.so" ]]; then
+          LDFLAGS="-Wl,-rpath,${path}"
+          AC_TRY_RUN([
+#include <vector>
+int main() {
+        std::vector<int> test;
+        try {
+                return test.at(5);
+        } catch (...) {
+                ;
+        }
+        return 0;
+}
+          ], ax_cv_prog_cc_rpath="`realpath ${path}`")
+          LDFLAGS="$save_ldflags"
+          [[ -n "${ax_cv_prog_cc_rpath}" ]] && break
+        fi
+      done
+    ])
+    LDFLAGS="$save_ldflags"
+  fi
+
+  if [[ -n "${ax_cv_prog_cc_rpath}" ]]; then
+    LDFLAGS="${LDFLAGS}${LDFLAGS:+ }-Wl,-rpath,${ax_cv_prog_cc_rpath}"
+  fi
+])
+
 dnl  EGG_CHECK_CCSTATIC()
 dnl
 dnl  Checks whether the compiler supports the `-static' flag.
