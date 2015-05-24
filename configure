@@ -3352,6 +3352,103 @@ fi
 
 
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler requires -rpath" >&5
+$as_echo_n "checking whether the compiler requires -rpath... " >&6; }
+if ${ax_cv_prog_cc_need_rpath+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  if test "$cross_compiling" = yes; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "cannot run test program while cross compiling
+See \`build/config.log' for more details" "$LINENO" 5; }
+else
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
+
+#include <vector>
+int main() {
+        std::vector<int> test;
+        try {
+                return test.at(5);
+        } catch (...) {
+                ;
+        }
+        return 0;
+}
+
+_ACEOF
+if ac_fn_cxx_try_run "$LINENO"; then :
+  ax_cv_prog_cc_need_rpath=no
+else
+  ax_cv_prog_cc_need_rpath=yes
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_prog_cc_need_rpath" >&5
+$as_echo "$ax_cv_prog_cc_need_rpath" >&6; }
+
+  if [ "${ax_cv_prog_cc_need_rpath}" = "yes" ]; then
+    save_ldflags="$LDFLAGS"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler requires -rpath" >&5
+$as_echo_n "checking whether the compiler requires -rpath... " >&6; }
+if ${ax_cv_prog_cc_rpath+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+      ax_cv_prog_cc_rpath=
+
+      for path in `${CXX} -print-search-dirs | awk '/^libraries:/ {print substr($0, 13)}' | tr ':' ' '`; do
+        if [ -r "${path}/libstdc++.so" ]; then
+          LDFLAGS="-Wl,-rpath,${path}"
+          if test "$cross_compiling" = yes; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "cannot run test program while cross compiling
+See \`build/config.log' for more details" "$LINENO" 5; }
+else
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
+
+#include <vector>
+int main() {
+        std::vector<int> test;
+        try {
+                return test.at(5);
+        } catch (...) {
+                ;
+        }
+        return 0;
+}
+
+_ACEOF
+if ac_fn_cxx_try_run "$LINENO"; then :
+  ax_cv_prog_cc_rpath="`realpath ${path}`"
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+          LDFLAGS="$save_ldflags"
+          [ -n "${ax_cv_prog_cc_rpath}" ] && break
+        fi
+      done
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_prog_cc_rpath" >&5
+$as_echo "$ax_cv_prog_cc_rpath" >&6; }
+    LDFLAGS="$save_ldflags"
+  fi
+
+  if [ -n "${ax_cv_prog_cc_rpath}" ]; then
+    LDFLAGS="${LDFLAGS}${LDFLAGS:+ }-Wl,-rpath,${ax_cv_prog_cc_rpath}"
+  fi
+
+
 #checkpoint
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
