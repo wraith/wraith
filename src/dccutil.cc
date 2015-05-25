@@ -1157,7 +1157,7 @@ int check_cmd_pass(const char *cmd, char *pass)
 
         simple_snprintf(ctmp, sizeof(ctmp), "%s %s", cmd, epass);
         free(epass);
-        set_cmd_pass(tmp, 1);
+        set_cmd_pass(ctmp, 1);
         return 1;
       }
 
