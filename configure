@@ -8971,7 +8971,7 @@ for mf in $files; do
         rm -f "$dirpart/${base}.${suffix}"
       fi
     fi
-    echo "include .deps/$base.Po" >> "$dirpart/.deps/includes"
+    echo "include .${dirpart#${dirmf}}/.deps/$base.Po" >> "${dirmf}/.deps/includes"
   done
 done
 
