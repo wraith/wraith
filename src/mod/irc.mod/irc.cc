@@ -921,7 +921,11 @@ getin_request(char *botnick, char *code, char *par)
 static void
 request_op(struct chanset_t *chan)
 {
-  if (!chan || (chan && (channel_pending(chan) || !shouldjoin(chan) || !channel_active(chan) || me_op(chan)))) {
+  if (!chan) {
+    return;
+  }
+
+  if (channel_pending(chan) || !shouldjoin(chan) || !channel_active(chan) || me_op(chan)) {
     chan->channel.do_opreq = 0;
     return;
   }
