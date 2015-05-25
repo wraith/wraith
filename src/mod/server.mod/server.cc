@@ -449,7 +449,7 @@ static void calc_penalty(char * msg, size_t len)
         penalty += 5;
     }
   } else if (!strcasecmp(cmd, "AWAY")) {
-    if (strlen(msg) > 0)
+    if (msg && strlen(msg) > 0)
       penalty += 2;
     else
       penalty += 1;
