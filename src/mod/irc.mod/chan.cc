@@ -3388,7 +3388,7 @@ static int gotnotice(char *from, char *msg)
   
   bool ignoring = match_ignore(from);
   char *to = newsplit(&msg), *realto = (*to == '@') ? to + 1 : to;
-  struct chanset_t *chan = findchan(realto); 
+  struct chanset_t *chan = NULL;
 
   chan = findchan(realto);
   if (!chan)
