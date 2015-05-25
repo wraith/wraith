@@ -7,6 +7,10 @@ maint
   * Allow 'set trace ignore' again. Undoes a change from 2005.
   * Fix ptrace detection on Linux
   * Fix broken startup with GCC from ports on FreeBSD.
+  * Fix simulated terminal mode (-nt) defaulting to all console flags.
+  * Fix simulated terminal mode (-nt) not having color supported.
+  * Fix race between DCC and terminal output which could result in
+    bolds being backwards (#86).
 
 1.4.5
   * Remove ahbl as it now positively identifies all hosts as abusive
