@@ -735,7 +735,7 @@ void var_parse_my_botset()
   /* look for local vars inside our own USERENTRY_SET and set them in our cfg struct */
   set_noshare = 1;                      /* why bother sharing out our LOCAL settings? */
   parsing_botset = 1;
-  xk = x = (struct xtra_key *) get_user(&USERENTRY_SET, conf.bot->u);
+  x = (struct xtra_key *) get_user(&USERENTRY_SET, conf.bot->u);
   for (i = 0; vars[i].name; i++) {
     xk = x;	/* reset pointer to beginning */
 
