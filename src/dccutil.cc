@@ -318,7 +318,7 @@ dprintf_real(int idx, char* buf, size_t len, size_t bufsiz, const char* target)
   } else if (unlikely(idx < 0)) {
     tputs(-idx, buf, len);
   } else if (idx > 0x7FF0) {
-    if (unlikely(idx == DP_STDOUT || idx == DP_STDOUT)) {
+    if (unlikely(idx == DP_STDOUT)) {
       len = colorbuf(buf, len, -1, bufsiz);
     }
 
