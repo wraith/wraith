@@ -1610,7 +1610,6 @@ check_expired_chanstuff(struct chanset_t *chan)
       if (m->user && m->user->bot) {
         ++bot_ops;
       }
-      m = n;
     }
     // Update minutely
     chan->channel.splitmembers = splitmembers;
