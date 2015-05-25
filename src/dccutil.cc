@@ -96,9 +96,16 @@ colorbuf(char *buf, size_t len, int idx, size_t bufsiz)
 {
 //  char *buf = *bufp;
   int cidx = coloridx(idx);
-  static int cflags;
   int schar = 0;
   char buf3[1024] = "", buf2[15] = "", c = 0;
+  static int8_t stdout_cflags = 0;
+  int8_t *cflags;
+
+  if (idx == -1) {
+    cflags = &stdout_cflags;
+  } else {
+    cflags = &dcc[idx].cflags;
+  }
 
   for (size_t i = 0; i < len; i++) {
     c = buf[i];
@@ -120,30 +127,30 @@ colorbuf(char *buf, size_t len, int idx, size_t bufsiz)
         schar--;                  /* Unset identifier int */
         switch (c) {
           case 'b':
-            if (cflags & CFLGS_BOLD) {
+            if (*cflags & CFLGS_BOLD) {
               strlcpy(buf2, BOLD_END(idx), sizeof(buf2));
-              cflags &= ~CFLGS_BOLD;
+              *cflags &= ~CFLGS_BOLD;
             } else {
-              cflags |= CFLGS_BOLD;
+              *cflags |= CFLGS_BOLD;
               strlcpy(buf2, BOLD(idx), sizeof(buf2));
             }
             break;
           case 'u':
-            if (cflags & CFLGS_UNDERLINE) {
+            if (*cflags & CFLGS_UNDERLINE) {
               strlcpy(buf2, UNDERLINE_END(idx), sizeof(buf2));
-              cflags &= ~CFLGS_UNDERLINE;
+              *cflags &= ~CFLGS_UNDERLINE;
             } else {
               strlcpy(buf2, UNDERLINE(idx), sizeof(buf2));
-              cflags |= CFLGS_UNDERLINE;
+              *cflags |= CFLGS_UNDERLINE;
             }
             break;
           case 'f':
-            if (cflags & CFLGS_FLASH) {
+            if (*cflags & CFLGS_FLASH) {
               strlcpy(buf2, FLASH_END(idx), sizeof(buf2));
-              cflags &= ~CFLGS_FLASH;
+              *cflags &= ~CFLGS_FLASH;
             } else {
               strlcpy(buf2, FLASH(idx), sizeof(buf2));
-              cflags |= CFLGS_FLASH;
+              *cflags |= CFLGS_FLASH;
             }
             break;
           default:
