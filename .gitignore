@@ -1,6 +1,7 @@
 /Makefile
 /build/confcache
 /build/config.cache
+/config.cache
 /build/confdefs.h
 /src/config.h
 /build/config.log
