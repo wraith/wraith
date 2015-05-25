@@ -13,7 +13,6 @@ master
   * Require C++11 compiler support (G++ 4.7+, clang32+)
 
 maint
-  * Fix TCL warnings during build if TCL is not being used.
   * Disable demo TCL support by default to prevent confusion during build.
   * Avoid apparmor ptrace(2) warnings on Ubuntu
   * Allow 'set trace ignore' again. Undoes a change from 2005.
@@ -23,6 +22,8 @@ maint
   * Fix simulated terminal mode (-nt) not having color supported.
   * Fix race between DCC and terminal output which could result in
     bolds being backwards (#86).
+  * Fix TCL warnings during build if TCL is not being used.
+  * Rework the build to parallelize better and rebuild some things less often.
 
 1.4.5
   * Remove ahbl as it now positively identifies all hosts as abusive
