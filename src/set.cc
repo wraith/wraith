@@ -288,7 +288,7 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
   } else if (var->flags & VAR_BOOL) {
     bool olddata = *(bool*)(var->mem);
     bool num = 0;
-    if (data[0] == '0')
+    if (data == NULL || data[0] == '0')
       num = 0;
     else if (data[0] == '1')
       num = 1;
