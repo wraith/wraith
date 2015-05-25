@@ -82,7 +82,7 @@ clean:  cleanutils
 	+@cd src && $(MAKE) clean
 	-+@cd lib && $(MAKE) clean
 	@rm -f $(BINEXEC) build/stamp.* *~ src/*~ configure.temp .mangled stamp.*
-	@rm -f utctime@EXEEXT@ ts@EXEEXT@
+	@rm -f ts@EXEEXT@
 
 distclean: clean
 	@rm -rf *-$(VERSION)/ autom4te.cache/ autoscan.log configure.scan
