@@ -699,7 +699,7 @@ void setup_HQ(int n) {
     dcc[n].timeval = now;
     dcc[n].u.chat->con_flags = conmask;
     dcc[n].u.chat->strip_flags = STRIP_ALL;
-    dcc[n].status = STAT_ECHO;
+    dcc[n].status = STAT_ECHO|STAT_COLOR;
     strlcpy(dcc[n].nick, STR("HQ"), sizeof(dcc[n].nick));
     strlcpy(dcc[n].host, STR("llama@console"), sizeof(dcc[n].host));
     dcc[n].user = get_user_by_handle(userlist, dcc[n].nick);

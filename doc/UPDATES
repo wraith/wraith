@@ -5,6 +5,7 @@ maint
   * Fix ptrace detection on Linux
   * Fix broken startup with GCC from ports on FreeBSD.
   * Fix simulated terminal mode (-nt) defaulting to all console flags.
+  * Fix simulated terminal mode (-nt) not having color supported.
 
 1.4.5
   * Remove ahbl as it now positively identifies all hosts as abusive

@@ -1288,8 +1288,8 @@ coloridx(int idx)
     if (dcc[idx].irc || dcc[idx].bot) {
       return 0;
     } else if ((dcc[idx].status & STAT_COLOR) && (dcc[idx].type && dcc[idx].type != &DCC_RELAYING)) {
-      /* telnet probably wants ANSI, even though it might be a relay from an mIRC client; fuck`em */
-      if (dcc[idx].status & STAT_TELNET)
+      /* telnet probably wants ANSI, even though it might be a relay from an mIRC client */
+      if (dcc[idx].status & STAT_TELNET || dcc[idx].sock == STDOUT)
         return 1;
       /* non-telnet is probably a /dcc-chat, most irc clients support mIRC codes... */
       else
