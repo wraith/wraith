@@ -228,10 +228,9 @@ AC_CACHE_SAVE
 
 EGG_SUBST_VERSION
 #FIND_WRAPS
-EGG_SUBST_MOD_UPDIR
 DO_DEPS
 
-AC_CONFIG_FILES([Makefile lib/Makefile src/Makefile src/compat/Makefile src/crypto/Makefile src/mod/Makefile src/buildinfo.h])
+AC_CONFIG_FILES([Makefile lib/Makefile src/Makefile src/buildinfo.h])
 AC_OUTPUT
 
 AH_TEMPLATE(HAVE_ST_MTIM, [Define to 1 if your struct stat has an st_mtim member])
@@ -261,6 +260,10 @@ if test -d .git; then
   git submodule init
   git submodule update
   git submodule foreach --recursive git clean -fdx
+  # Restore as it may have been removed by an older 'make distclean'
+  if ! test -f src/response.h; then
+    git checkout src/response.h
+  fi
 fi
 ]
 

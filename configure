@@ -626,7 +626,6 @@ ac_includes_default="\
 ac_header_list=
 ac_func_list=
 ac_subst_vars='LTLIBOBJS
-MOD_UPDIR
 NUMVER
 VERSION
 LIBOBJS
@@ -1336,7 +1335,7 @@ Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --disable-ipv6          disable IPv6 support
-  --enable-script-tcl     enable TCL Script support
+  --disable-script-tcl    disable TCL Script support
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -5908,18 +5907,18 @@ if test "${enable_script_tcl+set}" = set; then :
        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $enableval" >&5
 $as_echo "$enableval" >&6; }
 
-$as_echo "#define USE_SCRIPT_TCL 1" >>build/confdefs.h
-
-
 else
 
-       # default if not given is DISABLED
+       # default if not given is ENABLED
        if test "x$enableval" = "x"; then
-         enableval="no"
+         enableval="yes"
        fi
        enable_script_tcl=$enableval
        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $enableval" >&5
 $as_echo "$enableval" >&6; }
+
+$as_echo "#define USE_SCRIPT_TCL 1" >>build/confdefs.h
+
 
 
 fi
@@ -8937,23 +8936,13 @@ _ACEOF
 
 #FIND_WRAPS
 
-case "$srcdir" in
-  [\\/]* | ?:[\\/]*)
-    MOD_UPDIR=""
-  ;;
-  *)
-    MOD_UPDIR="../"
-  ;;
-esac
-
-
-files="src/Makefile.in src/compat/Makefile.in src/crypto/Makefile.in src/mod/channels.mod/Makefile src/mod/compress.mod/Makefile src/mod/console.mod/Makefile src/mod/ctcp.mod/Makefile src/mod/irc.mod/Makefile src/mod/server.mod/Makefile src/mod/share.mod/Makefile src/mod/transfer.mod/Makefile src/mod/update.mod/Makefile"
+files="src/Makefile.in"
 for mf in $files; do
   # Strip MF so we end up with the name of the file.
   mf=${mf%%:*}
-  dirpart=${mf%/*}
-  rm -f "$dirpart/.deps/includes"
-  test -d "$dirpart/.deps" || mkdir "$dirpart/.deps"
+  dirmf=${mf%/*}
+  rm -f "$dirmf/.deps/includes"
+  test -d "$dirmf/.deps" || mkdir "$dirmf/.deps"
   for file in `sed -n -e '
     /^OBJS = .*\\\\$/ {
       s/^OBJS = //
@@ -8966,6 +8955,12 @@ for mf in $files; do
     }
     /^OBJS = / s/^OBJS = //p' < "$mf"`;
   do
+    dirpart="${dirmf}/${file}"
+    dirpart="${dirpart%/*}"
+    if [ "${dirpart}" != "${dirmf}" ]; then
+      test -d "${dirpart}/.deps" || mkdir "${dirpart}/.deps"
+    fi
+    file="${file##*/}"
     suffix=${file##*.}
     base=${file%%.*}
     test -f "$dirpart/$base.cc" || test -f "$dirpart/$base.c" || continue
@@ -8981,7 +8976,7 @@ for mf in $files; do
 done
 
 
-ac_config_files="$ac_config_files Makefile lib/Makefile src/Makefile src/compat/Makefile src/crypto/Makefile src/mod/Makefile src/buildinfo.h"
+ac_config_files="$ac_config_files Makefile lib/Makefile src/Makefile src/buildinfo.h"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -9678,9 +9673,6 @@ do
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "lib/Makefile") CONFIG_FILES="$CONFIG_FILES lib/Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
-    "src/compat/Makefile") CONFIG_FILES="$CONFIG_FILES src/compat/Makefile" ;;
-    "src/crypto/Makefile") CONFIG_FILES="$CONFIG_FILES src/crypto/Makefile" ;;
-    "src/mod/Makefile") CONFIG_FILES="$CONFIG_FILES src/mod/Makefile" ;;
     "src/buildinfo.h") CONFIG_FILES="$CONFIG_FILES src/buildinfo.h" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
@@ -10291,6 +10283,10 @@ if test -d .git; then
   git submodule init
   git submodule update
   git submodule foreach --recursive git clean -fdx
+  # Restore as it may have been removed by an older 'make distclean'
+  if ! test -f src/response.h; then
+    git checkout src/response.h
+  fi
 fi
 
 

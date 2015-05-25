@@ -10,7 +10,7 @@ AC_DEFUN([EGG_TCL_OPTIONS],
   AC_ARG_WITH(tcllib, [AS_HELP_STRING([--with-tcllib=PATH],[full path to Tcl library])], [tcllibname="$withval"])
   AC_ARG_WITH(tclinc, [AS_HELP_STRING([--with-tclinc=PATH],[full path to Tcl header])],  [tclincname="$withval"])
 
-  MY_ARG_ENABLE([script_tcl], [TCL Script])
+  MY_ARG_DISABLE([script_tcl], [TCL Script])
 
   WARN=0
   # Make sure either both or neither $tcllibname and $tclincname are set

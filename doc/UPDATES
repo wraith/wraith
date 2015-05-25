@@ -8,6 +8,8 @@ maint
   * Fix simulated terminal mode (-nt) not having color supported.
   * Fix race between DCC and terminal output which could result in
     bolds being backwards (#86).
+  * Fix TCL warnings during build if TCL is not being used.
+  * Rework the build to parallelize better and rebuild some things less often.
 
 1.4.5
   * Remove ahbl as it now positively identifies all hosts as abusive
