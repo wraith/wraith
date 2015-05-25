@@ -1436,7 +1436,6 @@ static void cmd_botcmd(int idx, char *par)
     rand_leaf = 1;
     for (tbot = tandbot; tbot; tbot = tbot->next) {
       if (bot_hublevel(tbot->u) == 999) {
-        group_match = false;
         if (group) {
           group_match = bd::String(var_get_bot_data(tbot->u, "groups", true)).split(',').find(group) != bd::String::npos;
         } else {
@@ -1460,7 +1459,6 @@ static void cmd_botcmd(int idx, char *par)
     all_localhub = 1;
     for (tbot = tandbot; tbot; tbot = tbot->next) {
       if (bot_hublevel(tbot->u) == 999 && tbot->localhub) {
-        group_match = false;
         if (group) {
           group_match = bd::String(var_get_bot_data(tbot->u, "groups", true)).split(',').find(group) != bd::String::npos;
         } else {
