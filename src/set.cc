@@ -317,7 +317,7 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
       }
     }
   } else if (var->flags & (VAR_STRING|VAR_WORD)) {
-    char *olddata = ((char*) var->mem) ? strdup((char*) var->mem) : NULL;
+    char *olddata = ((char*) var->mem)[0] ? strdup((char*) var->mem) : NULL;
 
     if (data)
       strlcpy((char *) var->mem, data, var->size);
