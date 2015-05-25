@@ -595,7 +595,9 @@ static bool detect_flood(char *floodnick, char *floodhost, char *from, int which
     lastmsgs[which] = 0;
     lastmsgtime[which] = 0;
     lastmsghost[which][0] = 0;
+#ifdef TCL
     u = get_user_by_host(from);
+#endif
     /* Private msg */
     simple_snprintf(h, sizeof(h), "*!*@%s", p);
     putlog(LOG_MISC, "*", "Flood from @%s!  Placing on ignore!", p);
