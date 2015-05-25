@@ -3152,7 +3152,9 @@ static int gotquit(char *from, char *msg)
   struct userrec *u = NULL;
 
   strlcpy(from2, from, sizeof(from2));
+#ifdef TCL
   u = get_user_by_host(from2);
+#endif
   nick = splitnick(&from);
   fixcolon(msg);
   /* Fred1: Instead of expensive wild_match on signoff, quicker method.
