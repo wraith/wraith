@@ -15,7 +15,7 @@
 :manualop
  Manual opping is not allowed
 :manualopped
- Manuaally opped
+ Manually opped
 :closed
  Channel is closed
 :flood

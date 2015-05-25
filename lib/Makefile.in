@@ -8,7 +8,7 @@ VPATH = @srcdir@
 
 #include $(top_srcdir)/build/build.mk
 
-.PHONY: default clean distclean normal debug general buildcheck notice notice_debug build units libelf libelf_notice
+.PHONY: default clean distclean normal debug general buildcheck notice notice_debug build units libelf libelf_notice bdlib
 
 default: normal
 
@@ -41,14 +41,13 @@ $(top_srcdir)/lib/libelf/lib/libelf.a: libelf_notice
 
 libelf: @LIBELF_BUNDLED@
 
-bdlib/libbdlib.a:
+$(top_srcdir)/lib/bdlib/libbdlib.a:
 	+@cd bdlib && $(MAKE)
 
-build: bdlib/libbdlib.a
-	+@$(MAKE) libelf
+bdlib: $(top_srcdir)/lib/bdlib/libbdlib.a
 
-build.debug: bdlib/libbdlib.a
-	+@$(MAKE) libelf
+build: $(top_srcdir)/lib/bdlib/libbdlib.a @LIBELF_BUNDLED@
+build.debug: $(top_srcdir)/lib/bdlib/libbdlib.a @LIBELF_BUNDLED@
 
 buildcheck: build
 

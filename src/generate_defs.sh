@@ -13,6 +13,7 @@ INCLUDES="${TCL_INCLUDES} ${SSL_INCLUDES}"
 mkdir -p src/.defs > /dev/null 2>&1
 TMPFILE=$(mktemp "/tmp/pre.XXXXXX")
 files=$(grep -l DLSYM_GLOBAL src/*.cc|grep -v "src/_")
+
 for file in ${files}; do
   suffix=${file##*.}
   basename=${file%%.*}
@@ -44,13 +45,13 @@ for file in ${files}; do
   echo "extern \"C\" {" > $defsFile_post
 
   cd src
-  $CXX $CXXFLAGS -E -I. -I.. -I../lib ${INCLUDES} -DHAVE_CONFIG_H ../${file} > $TMPFILE
+  $CXX $CXXFLAGS -E -I. -I.. -I../lib ${INCLUDES} -DHAVE_CONFIG_H -DGENERATE_DEFS ../${file} > $TMPFILE
   # Fix wrapped prototypes
   $SED -e :a -e N -e '$!ba' -e 's/,\n/,/g' $TMPFILE > $TMPFILE.sed
   mv $TMPFILE.sed $TMPFILE
   cd ..
 
-  for symbol in $($SED -n -e 's/.*DLSYM_GLOBAL(.*, \([^)]*\).*/\1/p' $file|sort -u); do
+  for symbol in $($SED -n -e 's/.*DLSYM_GLOBAL(.*, \([^)]*\).*/\1/p' $TMPFILE|sort -u); do
     # Check if the typedef is already defined ...
     typedef=$(grep "^typedef .*(\*${symbol}_t)" ${dirname}/${basename}.h)
     # ... if not, generate it

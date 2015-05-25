@@ -4,15 +4,11 @@
 /_*.cc
 /*~
 /help.h
-/response.h
-/responses.h
+/responses.cc
 /.deps
 /.defs
 /stringfix
-/makehelp
 /sorthelp
-/makeres
-/makeset
 /set_default.h
 *.o
 *.So
