@@ -58,8 +58,8 @@
 using std::swap;
 #include <bdlib/src/String.h>
 #include <bdlib/src/HashTable.h>
-#include <bdlib/src/Queue.h>
 #include <bdlib/src/base64.h>
+#include <deque>
 
 #include <stdarg.h>
 
@@ -96,7 +96,7 @@ bool include_lk = 1;      /* For correct calculation
 bd::HashTable<bd::String, unsigned long> bot_counters;
 unsigned long my_cookie_counter = 0;
 
-static bd::Queue<bd::String> chained_who;
+static std::deque<bd::String> chained_who;
 static int chained_who_idx;
 
 static int
@@ -1318,8 +1318,9 @@ reset_chan_info(struct chanset_t *chan)
 
 static void send_chan_who(int queue, struct chanset_t *chan, bool chain) {
   if (chain) {
-    if (!chained_who.contains(chan->name))
-      chained_who.enqueue(chan->name);
+    if (std::find(std::begin(chained_who), std::end(chained_who),
+          chan->name) != std::end(chained_who))
+      chained_who.push_back(chan->name);
     chained_who_idx = queue;
     if (chained_who.size() > 1)
       return;
