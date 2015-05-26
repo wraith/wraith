@@ -108,7 +108,7 @@ cmds.cc: help.h
 
 help.h: $(HELPFILE) $(top_srcdir)/build/makehelp.sh $(STRINGFIX)
 	@echo -e "{GEN}	\033[1m$<\033[0m -> \033[1m$@\033[0m"
-	$(top_srcdir)/build/makehelp.sh < $(HELPFILE) | $(STRINGFIX) > $@
+	$(top_srcdir)/build/makehelp.sh < $(HELPFILE) | $(STRINGFIX) help > $@
 
 sorthelp: sorthelp.cc ../lib/bdlib/libbdlib.a
 	@echo -e "[CXX]	\033[1m$<\033[0m"
