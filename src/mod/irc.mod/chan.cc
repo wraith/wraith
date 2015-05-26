@@ -3191,7 +3191,9 @@ static int gotquit(char *from, char *msg)
   struct userrec *u = NULL;
 
   strlcpy(from2, from, sizeof(from2));
+#ifdef TCL
   u = get_user_by_host(from2);
+#endif
   nick = splitnick(&from);
   fixcolon(msg);
   /* Fred1: Instead of expensive wild_match on signoff, quicker method.
@@ -3430,7 +3432,7 @@ static int gotnotice(char *from, char *msg)
   
   bool ignoring = match_ignore(from);
   char *to = newsplit(&msg), *realto = (*to == '@') ? to + 1 : to;
-  struct chanset_t *chan = findchan(realto); 
+  struct chanset_t *chan = NULL;
 
   chan = findchan(realto);
   if (!chan)

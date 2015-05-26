@@ -288,7 +288,7 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
   } else if (var->flags & VAR_BOOL) {
     bool olddata = *(bool*)(var->mem);
     bool num = 0;
-    if (data[0] == '0')
+    if (data == NULL || data[0] == '0')
       num = 0;
     else if (data[0] == '1')
       num = 1;
@@ -317,7 +317,7 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
       }
     }
   } else if (var->flags & (VAR_STRING|VAR_WORD)) {
-    char *olddata = ((char*) var->mem) ? strdup((char*) var->mem) : NULL;
+    char *olddata = ((char*) var->mem)[0] ? strdup((char*) var->mem) : NULL;
 
     if (data)
       strlcpy((char *) var->mem, data, var->size);
@@ -735,7 +735,7 @@ void var_parse_my_botset()
   /* look for local vars inside our own USERENTRY_SET and set them in our cfg struct */
   set_noshare = 1;                      /* why bother sharing out our LOCAL settings? */
   parsing_botset = 1;
-  xk = x = (struct xtra_key *) get_user(&USERENTRY_SET, conf.bot->u);
+  x = (struct xtra_key *) get_user(&USERENTRY_SET, conf.bot->u);
   for (i = 0; vars[i].name; i++) {
     xk = x;	/* reset pointer to beginning */
 

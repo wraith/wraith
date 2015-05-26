@@ -1017,8 +1017,6 @@ identd_open(const char *sourceIp, const char *destIp, int identd)
       if (dcc[idx].type == &DCC_IDENTD_CONNECT)
         return;                   /* it's already open :) */
 
-    idx = -1;
-
     identd_hack = 1;
 #ifdef USE_IPV6
     i = open_listen_by_af(&port, AF_INET6);
@@ -1159,7 +1157,7 @@ int check_cmd_pass(const char *cmd, char *pass)
 
         simple_snprintf(ctmp, sizeof(ctmp), "%s %s", cmd, epass);
         free(epass);
-        set_cmd_pass(tmp, 1);
+        set_cmd_pass(ctmp, 1);
         return 1;
       }
 

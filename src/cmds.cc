@@ -979,7 +979,7 @@ static void cmd_channels(int idx, char *par) {
       show_channels(idx, NULL);
   }
 
-  if ((dcc[idx].user->flags & USER_MASTER) && !(par && par[0]))
+  if ((dcc[idx].user->flags & USER_MASTER) && !par[0])
     dprintf(idx, "You can also %schannels <user|%%group>\n", (dcc[idx].u.chat->channel >= 0) ? settings.dcc_prefix : "");
 }
 
@@ -1436,7 +1436,6 @@ static void cmd_botcmd(int idx, char *par)
     rand_leaf = 1;
     for (tbot = tandbot; tbot; tbot = tbot->next) {
       if (bot_hublevel(tbot->u) == 999) {
-        group_match = false;
         if (group) {
           group_match = bd::String(var_get_bot_data(tbot->u, "groups", true)).split(',').find(group) != bd::String::npos;
         } else {
@@ -1460,7 +1459,6 @@ static void cmd_botcmd(int idx, char *par)
     all_localhub = 1;
     for (tbot = tandbot; tbot; tbot = tbot->next) {
       if (bot_hublevel(tbot->u) == 999 && tbot->localhub) {
-        group_match = false;
         if (group) {
           group_match = bd::String(var_get_bot_data(tbot->u, "groups", true)).split(',').find(group) != bd::String::npos;
         } else {
@@ -2923,7 +2921,7 @@ static void cmd_last(int idx, char *par) {
 
   char user[20] = "";
 
-  if (par && par[0]) {
+  if (par[0]) {
     strlcpy(user, par, sizeof(user));
   } else if (conf.username) {
     strlcpy(user, conf.username, sizeof(user));
@@ -3451,7 +3449,7 @@ static void cmd_nopass(int idx, char *par)
   size_t userssiz = 1;
   bool dopass = 0;
 
-  putlog(LOG_CMDS, "*", "#%s# nopass %s", dcc[idx].nick, (par && par[0]) ? par : "");
+  putlog(LOG_CMDS, "*", "#%s# nopass %s", dcc[idx].nick, par[0] ? par : "");
 
   if (par[0])
     dopass = 1;
