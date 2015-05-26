@@ -121,7 +121,6 @@ sorthelp: sorthelp.cc ../lib/bdlib/src/libbdlib.a
 	@$(STRIP) ../$(EGGEXEC)
 	@$(OBJCOPY) ../$(EGGEXEC)
 	@echo "Successful compile: $(EGGEXEC)"
-	@echo ""
 
 $(EGGEXEC): ../$(EGGEXEC)
 
