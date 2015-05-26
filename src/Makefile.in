@@ -2,6 +2,7 @@
 
 SHELL = @SHELL@
 top_srcdir = @top_srcdir@
+top_builddir = @top_builddir@
 srcdir = @srcdir@
 VPATH = @srcdir@
 
@@ -110,14 +111,14 @@ help.h: $(HELPFILE) $(top_srcdir)/build/makehelp.sh $(STRINGFIX)
 	@echo -e "{GEN}	\033[1m$<\033[0m -> \033[1m$@\033[0m"
 	$(top_srcdir)/build/makehelp.sh < $(HELPFILE) | $(STRINGFIX) help > $@
 
-sorthelp: sorthelp.cc ../lib/bdlib/libbdlib.a
+sorthelp: sorthelp.cc $(top_builddir)/lib/bdlib/src/libbdlib.a
 	@echo -e "[CXX]	\033[1m$<\033[0m"
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $< ../lib/bdlib/libbdlib.a $(LDFLAGS) -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $< $(top_builddir)/lib/bdlib/libbdlib.a $(LDFLAGS) -o $@
 	@$(STRIP) $@@EXEEXT@
 
-../$(EGGEXEC): $(OBJS) ../lib/bdlib/libbdlib.a @LIBELF_BUNDLED@
+../$(EGGEXEC): $(OBJS) $(top_builddir)/lib/bdlib/libbdlib.a @LIBELF_BUNDLED@
 	@echo -e "[LD ]	\033[1m$@\033[0m"
-	$(LD) $(LDFLAGS) -o ../$(EGGEXEC) $(OBJS) ../lib/bdlib/libbdlib.a $(LIBS) @LIBELF_LIB@
+	$(LD) $(LDFLAGS) -o ../$(EGGEXEC) $(OBJS) $(top_builddir)/lib/bdlib/libbdlib.a $(LIBS) @LIBELF_LIB@
 	@$(STRIP) ../$(EGGEXEC)
 	@$(OBJCOPY) ../$(EGGEXEC)
 	@echo "Successful compile: $(EGGEXEC)"
