@@ -16,7 +16,7 @@ typedef struct {
 typedef struct {
   int type;
   const char *cmd;
-  int garble;
+  size_t garble_len;
   const char *desc;
 } help_t;
 

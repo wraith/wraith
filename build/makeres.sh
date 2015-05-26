@@ -5,7 +5,7 @@ needcomma=0
 types=
 while read -r line; do
 	[ -z "${line%%#*}" ] && continue # skip comments
-	if [ -z "${line%%:*}" ]; then
+	if [ -n "${line}" -a -z "${line%%:*}" ]; then
 		[ ${needcomma} -eq 1 ] && printf ",\n};\n\n"
 		type="${line#:}"
 		[ "${type}" = "end" ] && break

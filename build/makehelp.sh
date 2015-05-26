@@ -7,7 +7,7 @@ needcomma=0
 IFS="
 "
 sed -e 's,["],\\&,g' | while read -r line; do
-	if [ -z "${line%%:*}" ]; then
+	if [ -n "${line}" -a -z "${line%%:*}" ]; then
 		if [ ${needcomma} -eq 1 ]; then
 			printf "\""
 			[ ${garble} -eq 1 ] && printf ")"
@@ -23,15 +23,15 @@ sed -e 's,["],\\&,g' | while read -r line; do
 		cmd="${line#*:}"
 		[ "${cmd}" = "end" ] && break
 		case ${type} in
-			hub)  type_int=1 ;;
-			leaf) type_int=2 ;;
-			*)    type_int=0 ;;
+			hub)  type_flag="HUB" ;;
+			leaf) type_flag="LEAF" ;;
+			*)    type_flag="0" ;;
 		esac
 
 		if [ ${garble} -eq 0 ]; then
-			printf "  {%d, \"%s\", %d, \"" ${type_int} "${cmd}" ${garble}
+			printf "  {%s, \"%s\", 0, \"" ${type_flag} "${cmd}"
 		else
-			printf "  {%d, \"%s\", %d, STR(\"" ${type_int} "${cmd}" ${garble}
+			printf "  {%s, \"%s\", STR(\"" ${type_flag} "${cmd}"
 	fi
 		needcomma=0
 	else
