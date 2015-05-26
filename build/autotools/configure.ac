@@ -19,7 +19,7 @@ AC_PROG_CXX([g++49 g++-4.9 g++48 g++-4.8 g++47 g++-4.7 g++46 g++-4.6 g++45 g++-4
 CC="${CXX} -x c"
 AC_SUBST(CC)
 EGG_CHECK_CC
-CXX_RPATH_CHECK
+#CXX_RPATH_CHECK
 
 #checkpoint
 AC_CACHE_SAVE 
@@ -43,7 +43,7 @@ if [[ "${ax_cv_prog_cc_Og}" = "no" ]]; then
 fi
 CXX_FLAG_CHECK([DEBCXXFLAGS], [-fstack-protector-all], [stackprotectorall])
 CXX_FLAG_CHECK([LDFLAGS], [-static-libstdc++], [static_libstdcxx])
-CXX_FLAG_CHECK([LDFLAGS], [-static-libgcc], [static_libgcc])
+#CXX_FLAG_CHECK([LDFLAGS], [-static-libgcc], [static_libgcc])
 
 EGG_CHECK_DEPMODE
 

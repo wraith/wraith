@@ -2997,104 +2997,7 @@ if test -n "$GXX"; then
 fi
 
 
-
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler requires -rpath" >&5
-$as_echo_n "checking whether the compiler requires -rpath... " >&6; }
-if ${ax_cv_prog_cc_need_rpath+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-  if test "$cross_compiling" = yes; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "cannot run test program while cross compiling
-See \`build/config.log' for more details" "$LINENO" 5; }
-else
-  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end build/confdefs.h.  */
-
-#include <vector>
-int main() {
-        std::vector<int> test;
-        try {
-                return test.at(5);
-        } catch (...) {
-                ;
-        }
-        return 0;
-}
-
-_ACEOF
-if ac_fn_cxx_try_run "$LINENO"; then :
-  ax_cv_prog_cc_need_rpath=no
-else
-  ax_cv_prog_cc_need_rpath=yes
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_prog_cc_need_rpath" >&5
-$as_echo "$ax_cv_prog_cc_need_rpath" >&6; }
-
-  if [ "${ax_cv_prog_cc_need_rpath}" = "yes" ]; then
-    save_ldflags="$LDFLAGS"
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler requires -rpath" >&5
-$as_echo_n "checking whether the compiler requires -rpath... " >&6; }
-if ${ax_cv_prog_cc_rpath+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-      ax_cv_prog_cc_rpath=
-
-      for path in `${CXX} -print-search-dirs | awk '/^libraries:/ {print substr($0, 13)}' | tr ':' ' '`; do
-        if [ -r "${path}/libstdc++.so" ]; then
-          LDFLAGS="-Wl,-rpath,${path}"
-          if test "$cross_compiling" = yes; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "cannot run test program while cross compiling
-See \`build/config.log' for more details" "$LINENO" 5; }
-else
-  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end build/confdefs.h.  */
-
-#include <vector>
-int main() {
-        std::vector<int> test;
-        try {
-                return test.at(5);
-        } catch (...) {
-                ;
-        }
-        return 0;
-}
-
-_ACEOF
-if ac_fn_cxx_try_run "$LINENO"; then :
-  ax_cv_prog_cc_rpath="`realpath ${path}`"
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
-          LDFLAGS="$save_ldflags"
-          [ -n "${ax_cv_prog_cc_rpath}" ] && break
-        fi
-      done
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_prog_cc_rpath" >&5
-$as_echo "$ax_cv_prog_cc_rpath" >&6; }
-    LDFLAGS="$save_ldflags"
-  fi
-
-  if [ -n "${ax_cv_prog_cc_rpath}" ]; then
-    LDFLAGS="${LDFLAGS}${LDFLAGS:+ }-Wl,-rpath,${ax_cv_prog_cc_rpath}"
-  fi
-
+#CXX_RPATH_CHECK
 
 #checkpoint
 cat >confcache <<\_ACEOF
@@ -3184,6 +3087,7 @@ fi
 rm -f confcache
 
 # Speedup compile
+
 
   if test -n "$GXX" && test -z "$no_wall"; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -Wall" >&5
@@ -3672,63 +3576,7 @@ EOF
     exit 1
   fi
 
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -static-libgcc" >&5
-$as_echo_n "checking whether the compiler understands -static-libgcc... " >&6; }
-if ${ax_cv_prog_cc_static_libgcc+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-    ac_ext=cpp
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-    ac_saved_flags="$CXXFLAGS"
-    CXXFLAGS="-Werror -static-libgcc"
-    cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end build/confdefs.h.  */
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_compile "$LINENO"; then :
-  ax_cv_prog_cc_static_libgcc="yes"
-else
-  ax_cv_prog_cc_static_libgcc="no"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-    CXXFLAGS="$ac_saved_flags"
-    ac_ext=cpp
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_prog_cc_static_libgcc" >&5
-$as_echo "$ax_cv_prog_cc_static_libgcc" >&6; }
-
-  if [ "$ax_cv_prog_cc_static_libgcc" = "yes" ]; then
-    LDFLAGS="$LDFLAGS -static-libgcc"
-  elif [ -n "" ]; then
-      cat << 'EOF' >&2
-configure: error:
-
-  Your OS or C++ compiler does not support -static-libgcc.
-  This compile flag is required.
-
-EOF
-    exit 1
-  fi
-
+#CXX_FLAG_CHECK([LDFLAGS], [-static-libgcc], [static_libgcc])
 
 
 CCDEPMODE=gcc
