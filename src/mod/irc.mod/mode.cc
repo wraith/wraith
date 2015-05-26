@@ -1260,7 +1260,7 @@ gotmode(char *from, char *msg)
 
           /* manop */
           if (chan->manop && u && !u->bot) {
-            n = i = 0;
+            i = 0;
 
             switch (role) {
               case 0:

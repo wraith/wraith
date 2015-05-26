@@ -449,7 +449,7 @@ static void calc_penalty(char * msg, size_t len)
         penalty += 5;
     }
   } else if (!strcasecmp(cmd, "AWAY")) {
-    if (strlen(msg) > 0)
+    if (msg && strlen(msg) > 0)
       penalty += 2;
     else
       penalty += 1;
@@ -575,7 +575,6 @@ static bool fast_deq(int which)
       }    
   }
   to = newsplit(&msg);
-  len = strlen(to);
   victims = to;
   while (m) {
     nm = m->next;
@@ -585,7 +584,6 @@ static bool fast_deq(int which)
     nextmsg = nextmsgstr;
     nextcmd = newsplit(&nextmsg);
     nextto = newsplit(&nextmsg);
-    len = strlen(nextto);
     if ( strcmp(to, nextto) /* we don't stack to the same recipients */
         && !strcmp(cmd, nextcmd) && !strcmp(msg, nextmsg)
         && ((strlen(cmd) + victims.length() + strlen(nextto)
