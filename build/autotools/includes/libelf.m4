@@ -1,9 +1,9 @@
 AC_DEFUN([CHECK_LIBELF],
 [
-  LIBELF_DIR="\$(top_srcdir)/lib/libelf/lib"
-  LIBELF_LIB="${LIBELF_DIR}/libelf.a"
+  LIBELF_DIR="lib/libelf/lib"
+  LIBELF_LIB="\$(top_builddir)/${LIBELF_DIR}/libelf.a"
   LIBELF_BUNDLED="${LIBELF_LIB}"
-  LIBELF_INCLUDE="-I${LIBELF_DIR}"
+  LIBELF_INCLUDE="-I\$(top_srcdir)/${LIBELF_DIR}"
 
   AC_CHECK_HEADERS([gelf.h libelf.h], [
     AC_CHECK_TYPES([Elf_Note], [

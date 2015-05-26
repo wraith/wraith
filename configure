@@ -5085,10 +5085,10 @@ done
 
 
 
-  LIBELF_DIR="\$(top_srcdir)/lib/libelf/lib"
-  LIBELF_LIB="${LIBELF_DIR}/libelf.a"
+  LIBELF_DIR="lib/libelf/lib"
+  LIBELF_LIB="\$(top_builddir)/${LIBELF_DIR}/libelf.a"
   LIBELF_BUNDLED="${LIBELF_LIB}"
-  LIBELF_INCLUDE="-I${LIBELF_DIR}"
+  LIBELF_INCLUDE="-I\$(top_srcdir)/${LIBELF_DIR}"
 
   for ac_header in gelf.h libelf.h
 do :
