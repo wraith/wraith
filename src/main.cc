@@ -718,13 +718,6 @@ int main(int argc, char **argv)
   mypid = getpid();
   myuid = geteuid();
 
-#ifndef DEBUG
-  if (myuid == 0 || getuid() == 0) {
-    fprintf(stderr, "Don't run as root.\n");
-    return 1;
-  }
-#endif
-
   srandom(now % (mypid + getppid()) * randint(1000));
 
   setlimits();
@@ -769,6 +762,14 @@ int main(int argc, char **argv)
       read_stdin =1;
     check_sum(binname, argc >= 3 && !strcmp(argv[1], STR("-q")) ? argv[2] : NULL, read_stdin);
   }
+
+#ifndef DEBUG
+  if (myuid == 0 || getuid() == 0) {
+    fprintf(stderr, "Don't run as root.\n");
+    return 1;
+  }
+#endif
+
   // Now settings struct is decrypted
   if (!checked_bin_buf)
     exit(1);
