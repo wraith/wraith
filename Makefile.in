@@ -168,17 +168,13 @@ dynamic: checkclean.dynamic lib general
 	@echo ""
 	@echo "Making dynamic binary"
 	@echo ""
-	@echo ""
-	+@cd src && $(MAKE_DYNAMIC) $(BINEXEC)
-	@echo ""
+	+@cd src && $(MAKE_DYNAMIC) ../$(BINEXEC)
 
 static: checkclean.static lib general
 	@echo ""
 	@echo "Making static binary"
 	@echo ""
-	@echo ""
-	+@cd src && $(MAKE_STATIC) $(BINEXEC)
-	@echo ""
+	+@cd src && $(MAKE_STATIC) ../$(BINEXEC)
 
 dwraith: debug
 
@@ -189,9 +185,7 @@ debug: checkclean.debug lib.debug general
 	@echo ""
 	@echo "Making debug binary"
 	@echo ""
-	@echo ""
-	+@cd src && $(MAKE_DEBUG) $(BINEXEC)
-	@echo ""
+	+@cd src && $(MAKE_DEBUG) ../$(BINEXEC)
 
 #safety hash
 
