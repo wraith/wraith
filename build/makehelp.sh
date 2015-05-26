@@ -7,7 +7,7 @@ needcomma=0
 IFS="
 "
 sed -e 's,["],\\&,g' | while read -r line; do
-	if [ -z "${line%%:*}" ]; then
+	if [ -n "${line}" -a -z "${line%%:*}" ]; then
 		if [ ${needcomma} -eq 1 ]; then
 			printf "\""
 			[ ${garble} -eq 1 ] && printf ")"
