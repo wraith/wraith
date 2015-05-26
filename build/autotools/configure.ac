@@ -22,7 +22,7 @@ AC_SUBST(CC)
 AC_REQUIRE_CPP
 AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
 EGG_CHECK_CC
-CXX_RPATH_CHECK
+#CXX_RPATH_CHECK
 
 #checkpoint
 AC_CACHE_SAVE 
@@ -46,7 +46,7 @@ if [[ "${ax_cv_prog_cc_Og}" = "no" ]]; then
 fi
 CXX_FLAG_CHECK([DEBCXXFLAGS], [-fstack-protector-all], [stackprotectorall])
 CXX_FLAG_CHECK([LDFLAGS], [-static-libstdc++], [static_libstdcxx])
-CXX_FLAG_CHECK([LDFLAGS], [-static-libgcc], [static_libgcc])
+#CXX_FLAG_CHECK([LDFLAGS], [-static-libgcc], [static_libgcc])
 
 EGG_CHECK_DEPMODE
 
