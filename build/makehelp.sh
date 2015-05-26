@@ -23,15 +23,15 @@ sed -e 's,["],\\&,g' | while read -r line; do
 		cmd="${line#*:}"
 		[ "${cmd}" = "end" ] && break
 		case ${type} in
-			hub)  type_int=1 ;;
-			leaf) type_int=2 ;;
-			*)    type_int=0 ;;
+			hub)  type_flag="HUB" ;;
+			leaf) type_flag="LEAF" ;;
+			*)    type_flag="0" ;;
 		esac
 
 		if [ ${garble} -eq 0 ]; then
-			printf "  {%d, \"%s\", 0, \"" ${type_int} "${cmd}"
+			printf "  {%s, \"%s\", 0, \"" ${type_flag} "${cmd}"
 		else
-			printf "  {%d, \"%s\", STR(\"" ${type_int} "${cmd}"
+			printf "  {%s, \"%s\", STR(\"" ${type_flag} "${cmd}"
 	fi
 		needcomma=0
 	else
