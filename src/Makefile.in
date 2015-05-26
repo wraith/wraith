@@ -115,20 +115,15 @@ sorthelp: sorthelp.cc ../lib/bdlib/libbdlib.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $< ../lib/bdlib/libbdlib.a $(LDFLAGS) -o $@
 	@$(STRIP) $@@EXEEXT@
 
-../$(EGGEXEC): build_msg $(OBJS) ../lib/bdlib/libbdlib.a @LIBELF_BUNDLED@
+../$(EGGEXEC): $(OBJS) ../lib/bdlib/libbdlib.a @LIBELF_BUNDLED@
 	@echo -e "[LD ]	\033[1m$@\033[0m"
 	$(LD) $(LDFLAGS) -o ../$(EGGEXEC) $(OBJS) ../lib/bdlib/libbdlib.a $(LIBS) @LIBELF_LIB@
 	@$(STRIP) ../$(EGGEXEC)
 	@$(OBJCOPY) ../$(EGGEXEC)
 	@echo "Successful compile: $(EGGEXEC)"
 
-$(EGGEXEC): ../$(EGGEXEC)
-
 clean:
 	@rm -f .depend *.o $(OBJS) *~ _*.c _*.cc *.ii *.i set_default.h \
 	    responses.cc help.h $(STRINGFIX)
-
-build_msg:
-	@echo "[*] Compiling core components"
 
 include ./.deps/includes
