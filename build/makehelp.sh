@@ -29,9 +29,9 @@ sed -e 's,["],\\&,g' | while read -r line; do
 		esac
 
 		if [ ${garble} -eq 0 ]; then
-			printf "  {%d, \"%s\", %d, \"" ${type_int} "${cmd}" ${garble}
+			printf "  {%d, \"%s\", 0, \"" ${type_int} "${cmd}"
 		else
-			printf "  {%d, \"%s\", %d, STR(\"" ${type_int} "${cmd}" ${garble}
+			printf "  {%d, \"%s\", STR(\"" ${type_int} "${cmd}"
 	fi
 		needcomma=0
 	else

@@ -681,8 +681,8 @@ static void cmd_help(int idx, char *par)
         dprintf(idx, "Showing you help for '%s' (%s):\n", match, flg);
         help_t *h_entry = NULL;
         if ((h_entry = findhelp(match)) != NULL) {
-          if (h_entry->garble)
-            showhelp(idx, &fr, degarble(h_entry->garble, h_entry->desc));
+          if (h_entry->garble_len)
+            showhelp(idx, &fr, degarble(h_entry->garble_len, h_entry->desc));
           else
             showhelp(idx, &fr, h_entry->desc);
         }
