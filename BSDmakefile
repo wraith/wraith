@@ -1,18 +1,21 @@
-.PHONY: default check_gmake debug static dynamic clean distclean test
+#.PHONY: default check_gmake debug static dynamic clean distclean test
 
-default: check_gmake
-	@gmake
-check_gmake:
+MAKE=env -u MAKELEVEL gmake ${MFLAGS}
+
+TARGETS=	\
+		all \
+		debug \
+		static \
+		dynamic \
+		clean \
+		distclean \
+		test \
+		check
+
+.for target in ${TARGETS}
+${target}: check_gmake .PHONY .SILENT
+	@${MAKE} ${.TARGET}
+.endfor
+
+check_gmake: .PHONY .SILENT
 	@which gmake > /dev/null 2>&1 || (echo "Please install gmake" && exit 0)
-debug: check_gmake
-	@gmake debug
-static: check_gmake
-	@gmake static
-dynamic: check_gmake
-	@gmake dynamic
-clean: check_gmake
-	@gmake clean
-distclean: check_gmake
-	@gmake distclean
-test: check_gmake
-	@gmake test
