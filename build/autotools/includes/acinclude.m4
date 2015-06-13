@@ -490,20 +490,6 @@ AC_DEFUN([EGG_CHECK_LIBS],
   AC_CHECK_LIB(dl, dlopen)
 
 #  AC_CHECK_LIB(z, gzopen, ZLIB="-lz")
-  # This is needed for Tcl libraries compiled with thread support
-#  AC_CHECK_LIB(pthread, pthread_mutex_init, [dnl
-#  ac_cv_lib_pthread_pthread_mutex_init=yes
-#  ac_cv_lib_pthread="-lpthread"], [dnl
-#    AC_CHECK_LIB(pthread, __pthread_mutex_init, [dnl
-#    ac_cv_lib_pthread_pthread_mutex_init=yes
-#    ac_cv_lib_pthread="-lpthread"], [dnl
-#      AC_CHECK_LIB(pthreads, pthread_mutex_init, [dnl
-#      ac_cv_lib_pthread_pthread_mutex_init=yes
-#      ac_cv_lib_pthread="-lpthreads"], [dnl
-#        AC_CHECK_FUNC(pthread_mutex_init, [dnl
-#        ac_cv_lib_pthread_pthread_mutex_init=yes
-#        ac_cv_lib_pthread=""],
-#        ac_cv_lib_pthread_pthread_mutex_init=no)])])])
   if test "$SUNOS" = "yes"; then
     # For suns without yp
     AC_CHECK_LIB(dl, main)
