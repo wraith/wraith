@@ -1,7 +1,6 @@
 #include <string.h>
 #include "memcpy.h"
 #include "memutil.h"
-#include "src/main.h"
 #include <stdlib.h>
 
 
@@ -11,7 +10,7 @@ str_redup(char **str, const char *newstr)
         size_t len;
 
         if (!newstr) {
-                if (*str) free(*str);
+                free(*str);
                 *str = NULL;
                 return;
         }
@@ -62,3 +61,4 @@ void *my_realloc(void *ptr, size_t size)
   return x;
 }
 
+/* vim: set sts=2 sw=2 ts=8 et: */

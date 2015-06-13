@@ -252,3 +252,4 @@ int my_dn_expand(const unsigned char *msg, const unsigned char *eom, const unsig
         return (n);
 }
 
+/* vim: set sts=2 sw=2 ts=8 et: */

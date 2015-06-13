@@ -11,27 +11,26 @@ num=`$CXX -dumpversion | sed "s/^\\\(.\\\).*/\\\1/"`
 if test $num -ge "3"; then
   CCDEPMODE=gcc3
 #  GCC3="-Wpadded -Wpacked -Wno-unused-parameter -Wmissing-format-attribute -Wdisabled-optimization"
-  GCC3="-W -Wno-unused-parameter -Wdisabled-optimization -Wno-write-strings -Wno-format-security -fno-strict-aliasing -Woverloaded-virtual -Wno-format-y2k"
+  GCC3_CFLAGS="-W -Wno-unused-parameter -Wdisabled-optimization -Wno-write-strings -Wno-format-security -fno-strict-aliasing -Wno-format-y2k"
+  GCC3_CXXFLAGS="-Woverloaded-virtual"
   GCC3DEB="-Wno-disabled-optimization -Wmissing-format-attribute"
 fi
 AC_SUBST(CCDEPMODE)dnl
-AC_SUBST(GCC3)dnl
+AC_SUBST(GCC3_CFLAGS)dnl
+AC_SUBST(GCC3_CXXFLAGS)dnl
 AC_SUBST(GCC3DEB)dnl
 AC_SUBST(GCC4DEB)dnl
 ])
 
 AC_DEFUN([DO_DEPS],
 [
-files="src/Makefile.in src/compat/Makefile.in src/crypto/Makefile.in src/mod/channels.mod/Makefile src/mod/compress.mod/Makefile src/mod/console.mod/Makefile src/mod/ctcp.mod/Makefile src/mod/irc.mod/Makefile src/mod/server.mod/Makefile src/mod/share.mod/Makefile src/mod/transfer.mod/Makefile src/mod/update.mod/Makefile"
+files="src/Makefile.in"
 for mf in $files; do
   # Strip MF so we end up with the name of the file.
-#  echo "MF: $mf"
-  mf=`echo "$mf" | sed -e 's/:.*$//'`
-  dirpart=`AS_DIRNAME("$mf")`
-#  echo "dirpart: $dirpart mf: $mf"
-#  rm -rf "$dirpart/.deps/"
-  rm -f "$dirpart/.deps/includes"
-  test -d "$dirpart/.deps" || mkdir "$dirpart/.deps"
+  mf=${mf%%:*}
+  dirmf=${mf%/*}
+  rm -f "$dirmf/.deps/includes"
+  test -d "$dirmf/.deps" || mkdir "$dirmf/.deps"
   for file in `sed -n -e '
     /^OBJS = .*\\\\$/ {
       s/^OBJS = //
@@ -44,9 +43,15 @@ for mf in $files; do
     }
     /^OBJS = / s/^OBJS = //p' < "$mf"`;
   do
+    dirpart="${dirmf}/${file}"
+    dirpart="${dirpart%/*}"
+    if [[ "${dirpart}" != "${dirmf}" ]]; then
+      test -d "${dirpart}/.deps" || mkdir "${dirpart}/.deps"
+    fi
+    file="${file##*/}"
     suffix=${file##*.}
     base=${file%%.*}
-    test -f "$dirpart/$base.c" || continue
+    test -f "$dirpart/$base.cc" || test -f "$dirpart/$base.c" || continue
     if ! test -f "$dirpart/.deps/$base.Po"; then
       echo '# dummy' > "$dirpart/.deps/$base.Po"
       #Remove the .o file, because it needs to be recompiled for its dependancies.
@@ -54,7 +59,7 @@ for mf in $files; do
         rm -f "$dirpart/${base}.${suffix}"
       fi
     fi
-    echo "include .deps/$base.Po" >> "$dirpart/.deps/includes"
+    echo "include .${dirpart#${dirmf}}/.deps/$base.Po" >> "${dirmf}/.deps/includes"
   done
 done
 ])

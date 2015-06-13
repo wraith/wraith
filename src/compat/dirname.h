@@ -7,6 +7,12 @@
 
 #define dirname my_dirname
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 char *dirname(const char *);
-#endif /* !_DIRNAME_H */
+#ifdef __cplusplus
+}
+#endif
 
+#endif /* !_DIRNAME_H */

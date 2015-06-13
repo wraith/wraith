@@ -8,8 +8,35 @@
 #ifndef _EGG_CHAN_H
 #define _EGG_CHAN_H
 
+#include <functional>
 #include <lib/bdlib/src/Array.h>
 #include <lib/bdlib/src/String.h>
+
+/* chan & global */
+enum flood_t {
+  FLOOD_PRIVMSG  = 0,
+  FLOOD_NOTICE   = 1,
+  FLOOD_CTCP     = 2,
+  FLOOD_NICK     = 3,
+  FLOOD_JOIN     = 4,
+  FLOOD_KICK     = 5,
+  FLOOD_DEOP     = 6,
+  FLOOD_PART     = 7,
+  FLOOD_BYTES    = 8
+};
+
+namespace std {
+  template<>
+  struct hash<flood_t>
+  {
+    inline size_t operator()(flood_t val) const {
+      return static_cast<size_t>(val);
+    }
+  };
+}
+
+#define FLOOD_CHAN_MAX   9
+#define FLOOD_GLOBAL_MAX 3
 
 typedef struct memstruct {
   struct memstruct *next;
@@ -31,18 +58,16 @@ typedef struct memstruct {
   bd::HashTable<flood_t, int>         *floodnum; // floodnum[FLOOD_PRIVMSG] = 1;
 } memberlist;
 
-#include <bdlib/src/bdlib.h>
-BDLIB_NS_BEGIN
-template<typename T>
-  struct Hash;
-
-template<>
-  struct Hash<memberlist*>
+namespace std {
+  template<>
+  struct hash<memberlist*>
   {
     // Use memory address
-    inline size_t operator()(memberlist* m) const { return reinterpret_cast<size_t>(m); }
+    inline size_t operator()(memberlist* m) const {
+      return reinterpret_cast<size_t>(m);
+    }
   };
-BDLIB_NS_END
+}
 
 #define CHAN_FLAG_OP	1
 #define CHAN_FLAG_VOICE 2

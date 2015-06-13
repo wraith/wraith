@@ -29,3 +29,4 @@ int strncasecmp(const char *s1, const char *s2, size_t n)
   return toupper(*s1) - toupper(*s2);
 }
 #endif /* !HAVE_STRNCASECMP */
+/* vim: set sts=2 sw=2 ts=8 et: */

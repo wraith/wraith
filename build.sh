@@ -12,7 +12,7 @@ fi
 
 # Convert timestamp into readable format
 rm -f ts > /dev/null 2>&1
-gcc -o ts src/timestamp.c > /dev/null 2>&1
+cc -o ts src/timestamp.c > /dev/null 2>&1
 builddate=`./ts ${BUILDTS}`
 rm -f ts > /dev/null 2>&1
 

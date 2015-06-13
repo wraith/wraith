@@ -1,220 +1,37 @@
 :banned
- bye
- b&
- go away
- unwanted!
- remember when you used to be able to join this channel?
- we're gonna need to go ahead and have you move your stuff down to the basement...
+ Banned
 :kickban
- not wanted
- something tells me you're annoying
- don't bug me lewser
- creep
- you are not banned
- gone
- stupid
- lewser
- ...
+ Banned
 :massdeop
- spammer!
- easy on the modes now
- mode this
- nice try
- really?
- you lose
- scary... really scary...
- i win kthx
- dont tase me bro
- try that again and you will never come back to efnet
- are you tryign to joke me ?
- your time will come soon
- brb loadin up mah bots
- do, or do not. there is no try.
+ Mass deop
 :badop
- neat...
- oh, no you don't. go away.
- didn't you forget something now?
- no
- hijack this
+ Bad op cookie from you
 :badopped
- fuck off kid
- tubgirl wants some love!
- asl?
- whoa... what a hacker... skills!
- yes! yes! yes! hit me baby one more time!
- with your skills, you're better off jacking off than hijacking
- i'll need split all efnet to secure this fucking channel ?
+ Bad op cookie for you
 :bitchop
- channel is +bitch
+ Channel is +bitch
 :bitchopped
- you dont have op access here
+ You dont have op access here
 :manualop
- you think you're special?
- naughty kid
- didn't someone tell you that is bad?
- want perm?
- see how much good that did you?
- not a smart move...
- jackass!
- fuck off
+ Manual opping is not allowed
 :manualopped
- your pal got mean friends. like me.
- uhh now.. don't wake me up...
- hi hun. missed me?
- spammer! die!
- boo!
- that @ was useful, don't ya think
- not in my book
- lol, really?
+ Manually opped
 :closed
- locked
- later
- closed for now
- come back later
- better safe than sorry
- cleanup, come back later
- this channel is closed
- shutting down for now
- lockdown
- reopening later
- not for the public atm
- private channel for now
- might reopen soon, might reopen later
- you're not supposed to be here right now
- sorry, closed
- try us later, atm we're locked down
- closed. try tomorrow
- shutting down spamchan
+ Channel is closed
 :flood
- so much bull in such a short time. amazing.
- slow down. i'm trying to read here.
- uhm... you actually think irc is for talking?
- talk talk talk
- blabbering are we?
- ... and i don't even like you!
- and you're outa here...
- blog it
- dont care
- tell someone who cares
- try here instead http://www.livejournal.com
- care-meter\037:\037 14[5....4..7..8..3..9..14] 140%
+ Flood
 :nickflood
- detected: identity crisis
- make up your mind?
- be schizofrenic elsewhere
- I'm loosing track of you... not
- that is REALLY annoying
- try this: /NICK n00b
- playing hide 'n' seek?
- gotcha!
- you are now known as kicked!
- become who you are.
+ Nick flood
 :kickflood
- you should be a soccer player
- easier to just leave if you wan't to be alone
- cool down
- don't be so damned aggressive. that's my job.
- kicking's fun, isn't it?
- what's the rush?
- next time you do that, i'll kick you again
- and I thought you were a catcher
+ Kick flood
 :revenge
- hey! that wasn't very nice!
- don't fuck with my pals
- don't touch my buddies like that queer
- meanie!
- I can be a bitch too...
- leave the bots alone, will ya?
- not very clever
- watch it
- die
- easy now. that's a friend.
- abuse of power. leave that to me, will ya?
- there as some things you cannot do, and that was one of them...
+ Don't mess with the bots
 :username
- sup
- dont panic
- never forget 12/17/2007!
- a/s/l?\ni'm 17/f/ca ;)
- who are you?
- uhhh do i know you?
- what?
- wtf do you want?
- hold on a second, I am sort of busy..
- mIRC v6.31 File Server\n\nUse: cd dir ls get read help exit\n[\\]
- got any porn?
- ?
- can I help you?
- this better be good.
- haha, I got your ip now!
- you again?
- make it quick
- yes?
- ...
- lost?
- .
- hey..checkout this cool video http://www.youtube.com/watch?v=oHg5SJYRHA0
- SSH-2.0-OpenSSH_4.3p2 Debian-10
- SSH-2.0-OpenSSH_4.3
- SSH-2.0-OpenSSH_4.6p1 FreeBSD-openssh-portable-overwrite-base-4.6.p1,1
- SSH-2.0-OpenSSH_5.1p1 FreeBSD-20080901
- SSH-2.0-OpenSSH_5.2p1 FreeBSD-openssh-portable-overwrite-base-5.2.p1_2,1
- sup g00n
- lol
- whats happenin pimpin?
+ Username?
 :password
- what?
- huh?
- no.
- thats great..
- bzzzzzzzzt, WRONG.
- I don't remember caring..
- good for you.
- I'm going to report you to the RIAA!!!
- who?
- why?
- you're aren't making any sense!
- hurry up so I can get back to this porn
- eh?
- why do you keep bugging me?
- I hear you're gay?
- asl?
- wat
- d/c
- ignored
- I think you got the wrong person...
- ...
- lol
- I have put you on a permanent ignore, public and private. I have found you disturbing, rude and generally not worth talking to.\nAccording to the channels you hang on, it strengtens the effect of wanting to put you on ignore because of my lack of interest in you as a person. This message is not meant to be rude to you, just to inform you that i won't see anything of what you type from now on.
- msg me again and u drop
- how about i do a nice icmp ping, figure out where you are and what you are on, spawn your command.com to a port of my choice and log in with telnet and have a field day with you.
+ Password?
 :baduserpass
- stop wasting my time.
- gtg
- go away
- go away already
- fuck off already
- ehh..no, bye.
- you're still here?
- jesus loves you, but I ain't jesus. \002FUCK OFF\002
- stop bugging me.
- haha, I'm going to tell everyone that!
- lost?
- cya
- oops?
- leave me alone.
- ...?
- whatever man, cya
- lewser
- try again, newb
- newb
- haha, no.
- lol
- dont care
- d/c
- reporting you for spam.
- Congratulations, prick, you've just made my ignore list. Was it worth it to you to make your 'witty' comments and snide in-jokes to your irc pals about me if it meant you are now disappeared from my online experience? Have a nice life.
- brb getting u glined
+ Invalid username/password
 :mIRCver
  5.91
  6.01

@@ -6,7 +6,32 @@
   bots know which bots have which roles. (#39)
 * Add cmd_roles (leaf only) to display roles for a channel. (#39)
 
+master
+  * Require C++11 compiler support (G++ 4.7+, clang32+)
+
 maint
+  * Disable demo TCL support by default to prevent confusion during build.
+  * Avoid apparmor ptrace(2) warnings on Ubuntu
+  * Allow 'set trace ignore' again. Undoes a change from 2005.
+  * Fix ptrace detection on Linux
+  * Fix broken startup with GCC from ports on FreeBSD.
+  * Fix simulated terminal mode (-nt) defaulting to all console flags.
+  * Fix simulated terminal mode (-nt) not having color supported.
+  * Fix race between DCC and terminal output which could result in
+    bolds being backwards (#86).
+  * Fix TCL warnings during build if TCL is not being used.
+  * Rework the build to parallelize better and rebuild some things less often.
+  * GCC: Always link libstdc++ statically. This avoids distributing
+    a binary that would rely on having a specific compiler version installed
+    and avoids issues when updating the local compiler. This also fixes
+    building a binary with GCC on FreeBSD and using it on a clang-only system.
+  * Fix conversion of command passes from ancient 1.3 format.
+
+1.4.5
+  * Remove ahbl as it now positively identifies all hosts as abusive
+    http://www.ahbl.org/content/last-notice-wildcarding-services-jan-1st
+
+1.4.4
   * Read in /etc/hosts on startup
   * Fix 'bl %group cmd' giving incorrect message when group/bots not found.
   * Fix cmd_slowjoin eating the first channel option (This fixes groups support)
@@ -18,6 +43,14 @@ maint
   * Fix build detecting invalid openssl installations (ones with only static libs)
   * Give hint on bot when disconnected from hub for reason
   * Fix cmd_netnick formatting issue with offline bots
+  * Fix crash when built with clang (FreeBSD)
+  * Binary now uses libelf internally for handling conf data.
+  * Bot responses are now clear and nice. Recompile with your own list if you want
+    in doc/responses.txt
+  * Remove channel limit when limitraise is disabled (#77)
+  * 'fork-interval' removed.
+  * Build with -fstack-protector by default
+  * Remove 60 process limit
 
 1.4.3
   * Default 'set promisc' to ignore since it's usually a false positive

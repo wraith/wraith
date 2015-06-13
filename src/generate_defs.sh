@@ -1,45 +1,59 @@
 #! /bin/sh
 
-### Export LC_ALL=C sort(1) stays consistent
+### Export LC_ALL=C so sort(1) stays consistent
 export LC_ALL=C
 
 if [ -z "$SED" -o -z "$CXX" ]; then
   echo "This must be ran by configure" >&2
   exit 1
 fi
-echo "Generating lib symbols"
+echo "==== Generating lib symbols ===="
 INCLUDES="${TCL_INCLUDES} ${SSL_INCLUDES}"
 
 mkdir -p src/.defs > /dev/null 2>&1
 TMPFILE=$(mktemp "/tmp/pre.XXXXXX")
-for file in $(grep -l DLSYM_GLOBAL src/*.c|grep -v "src/_"); do
-  defsFile_wrappers="src/.defs/$(basename $file .c)_defs.c"
-  defsFile_pre="src/.defs/$(basename $file .c)_pre.h"
-  defsFile_post="src/.defs/$(basename $file .c)_post.h"
+files=$(grep -l DLSYM_GLOBAL src/*.cc|grep -v "src/_")
+
+for file in ${files}; do
+  suffix=${file##*.}
+  basename=${file%%.*}
+  basename=${basename##*/}
+
+  defsFile_wrappers="src/.defs/${basename}_defs.${suffix}"
+  defsFile_pre="src/.defs/${basename}_pre.h"
+  defsFile_post="src/.defs/${basename}_post.h"
 
   rm -f $defsFile_pre $defsFile_post $defsFile_wrappers > /dev/null 2>&1
-  touch $defsFile_pre $defsFile_post $defsFile_wrappers
+  : > $defsFile_pre
+  : > $defsFile_post
+  : > $defsFile_wrappers
 done
 
-for file in $(grep -l DLSYM_GLOBAL src/*.c|grep -v "src/_"); do
-  defsFile_wrappers="src/.defs/$(basename $file .c)_defs.c"
-  defsFile_pre="src/.defs/$(basename $file .c)_pre.h"
-  defsFile_post="src/.defs/$(basename $file .c)_post.h"
+for file in ${files}; do
+  suffix=${file##*.}
+  basename=${file%%.*}
+  basename=${basename##*/}
+  dirname=${file%%/*}
+
+  echo -n "Generating symbols for ${basename}... "
+
+  defsFile_wrappers="src/.defs/${basename}_defs.${suffix}"
+  defsFile_pre="src/.defs/${basename}_pre.h"
+  defsFile_post="src/.defs/${basename}_post.h"
 
   echo "extern \"C\" {" > $defsFile_wrappers
   echo "extern \"C\" {" > $defsFile_post
 
-  cd src >/dev/null 2>&1
-  $CXX -E -I. -I.. -I../lib ${INCLUDES} -DHAVE_CONFIG_H ../${file} > $TMPFILE 2> /dev/null
+  cd src
+  $CXX $CXXFLAGS -E -I. -I.. -I../lib ${INCLUDES} -DHAVE_CONFIG_H -DGENERATE_DEFS ../${file} > $TMPFILE
   # Fix wrapped prototypes
   $SED -e :a -e N -e '$!ba' -e 's/,\n/,/g' $TMPFILE > $TMPFILE.sed
   mv $TMPFILE.sed $TMPFILE
+  cd ..
 
-  cd .. >/dev/null 2>&1
-
-  for symbol in $($SED -n -e 's/.*DLSYM_GLOBAL(.*, \([^)]*\).*/\1/p' $file|sort -u); do
+  for symbol in $($SED -n -e 's/.*DLSYM_GLOBAL(.*, \([^)]*\).*/\1/p' $TMPFILE|sort -u); do
     # Check if the typedef is already defined ...
-    typedef=$(grep "^typedef .*(\*${symbol}_t)" $(dirname $file)/$(basename $file .c).h)
+    typedef=$(grep "^typedef .*(\*${symbol}_t)" ${dirname}/${basename}.h)
     # ... if not, generate it
     if [ -z "$typedef" ]; then
       # Trim off any extern "C", trim out the variable names, cleanup whitespace issues
@@ -61,5 +75,7 @@ for file in $(grep -l DLSYM_GLOBAL src/*.c|grep -v "src/_"); do
 
   echo "}" >> $defsFile_wrappers
   echo "}" >> $defsFile_post
+
+  echo "done"
 done
 rm -f $TMPFILE

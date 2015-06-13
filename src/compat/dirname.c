@@ -10,7 +10,7 @@ char *
 dirname(const char *path)
 {
         static char bname[MAXPATHLEN] = "";
-        register const char *endp = NULL;
+        const char *endp = NULL;
 
         /* Empty or NULL string gets treated as "." */
         if (path == NULL || *path == '\0') {
@@ -45,3 +45,4 @@ dirname(const char *path)
         return(bname);
 }
 
+/* vim: set sts=2 sw=2 ts=8 et: */

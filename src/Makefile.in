@@ -2,13 +2,19 @@
 
 SHELL = @SHELL@
 top_srcdir = @top_srcdir@
+top_builddir = @top_builddir@
 srcdir = @srcdir@
 VPATH = @srcdir@
 
 @SET_MAKE@
 
-CXXFLAGS = @CXXFLAGS@ -I. -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/pack @DEFS@ $(INCLUDES) $(CFLGS) '-DCOMMIT="$(COMMIT)"' '-DBRANCH="$(BRANCH)"' -DBUILDTS=$(BUILDTS) '-DVERSION="$(VERSION)"'
-CPPFLAGS = @CPPFLAGS@
+CXXFLAGS = $(CXXFLAGS)
+CFLAGS = $(CFLGS)
+CPPFLAGS = @CPPFLAGS@ -I. -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/pack @DEFS@ $(INCLUDES) '-DCOMMIT="$(COMMIT)"' '-DBRANCH="$(BRANCH)"' -DBUILDTS=$(BUILDTS) '-DVERSION="$(VERSION)"'
+LDFLAGS = @LDFLAGS@
+SETTINGSFILE = $(top_srcdir)/doc/settings.txt
+RESPONSESFILE = $(top_srcdir)/doc/responses.txt
+HELPFILE = $(top_srcdir)/doc/help.txt
 
 include $(top_srcdir)/build/build.mk
 
@@ -55,77 +61,70 @@ OBJS = auth.So \
 	sprintf.So \
 	userent.So \
 	userrec.So \
-	users.So
+	users.So \
+	mod/channels.mod/channels.So \
+	mod/console.mod/console.So \
+	mod/ctcp.mod/ctcp.So \
+	mod/irc.mod/irc.So \
+	mod/server.mod/server.So \
+	mod/share.mod/share.So \
+	mod/transfer.mod/transfer.So \
+	mod/update.mod/update.So \
+	compat/dirname.o \
+	compat/dn_expand.o \
+	compat/inet_ntop.o \
+	compat/snprintf.o \
+	compat/memcpy.o \
+	compat/memmem.o \
+	compat/memset.o \
+	compat/memutil.o \
+	compat/strcasecmp.o \
+	compat/strftime.o \
+	compat/strlcpy.o \
+	compat/strsep.o \
+	crypto/aes_util.o \
+	crypto/bf_util.o \
+	crypto/dh_util.o
 
-MODOBJS = mod/channels.mod/channels.So \
-        mod/console.mod/console.So \
-        mod/ctcp.mod/ctcp.So \
-        mod/irc.mod/irc.So \
-        mod/server.mod/server.So \
-        mod/share.mod/share.So \
-        mod/transfer.mod/transfer.So \
-        mod/update.mod/update.So
-
-
-MAKE_GENERIC = $(MAKE) 'MAKE=$(MAKE)' 'MAKEFLAGS=$(MAKEFLAGS)' 'CXX=$(CXX)' 'LD=$(LD)' 'STRIP=$(STRIP)' 'CFLGS=$(CFLGS)' 'CCDEPMODE=$(CCDEPMODE)'
+MAKE_GENERIC = $(MAKE) 'MAKE=$(MAKE)' 'MAKEFLAGS=$(MAKEFLAGS)' 'CXX=$(CXX)' 'LD=$(LD)' 'STRIP=$(STRIP)' 'CXXFLAGS=$(CXXFLAGS)' 'CFLGS=$(CFLGS)' 'CCDEPMODE=$(CCDEPMODE)'
 
 blah:
 	@echo ""
 	@echo "Use the build script."
 	@echo ""
 
-makeres: makeres.c ../lib/bdlib/src/libbdlib.a
-	@echo -e "Compiling: \033[1mmakeres\033[0m"
-	@$(CXX) $(CXXFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CPPFLAGS) $< ../lib/bdlib/src/libbdlib.a -o $@
+set.cc: set_default.h
+
+set_default.h: $(SETTINGSFILE) $(top_srcdir)/build/makeset.sh
+	@echo -e "[GEN]	\033[1m$<\033[0m -> \033[1m$@\033[0m"
+	$(top_srcdir)/build/makeset.sh < $(SETTINGSFILE) > $@
+
+response.cc: responses.cc
+
+responses.cc: $(RESPONSESFILE) $(top_srcdir)/build/makeres.sh
+	@echo -e "[GEN]	\033[1m$<\033[0m -> \033[1m$@\033[0m"
+	$(top_srcdir)/build/makeres.sh < $(RESPONSESFILE) > $@
+
+cmds.cc: help.h
+
+help.h: $(HELPFILE) $(top_srcdir)/build/makehelp.sh $(STRINGFIX)
+	@echo -e "{GEN}	\033[1m$<\033[0m -> \033[1m$@\033[0m"
+	$(top_srcdir)/build/makehelp.sh < $(HELPFILE) | $(STRINGFIX) help > $@
+
+sorthelp: sorthelp.cc $(top_builddir)/lib/bdlib/src/libbdlib.a
+	@echo -e "[CXX]	\033[1m$<\033[0m"
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $< $(top_builddir)/lib/bdlib/libbdlib.a $(LDFLAGS) -o $@
 	@$(STRIP) $@@EXEEXT@
 
-makeset: makeset.c ../lib/bdlib/src/libbdlib.a
-	@echo -e "Compiling: \033[1mmakeset\033[0m"
-	@$(CXX) $(CXXFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CPPFLAGS) $< ../lib/bdlib/src/libbdlib.a -o $@
-	@$(STRIP) $@@EXEEXT@
-
-makehelp: makehelp.c ../lib/bdlib/src/libbdlib.a
-	@echo -e "Compiling: \033[1mmakehelp\033[0m"
-	@$(CXX) $(CXXFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CPPFLAGS) $< ../lib/bdlib/src/libbdlib.a -o $@
-	@$(STRIP) $@@EXEEXT@
-
-sorthelp: sorthelp.c ../lib/bdlib/src/libbdlib.a
-	@echo -e "Compiling: \033[1msorthelp\033[0m"
-	@$(CXX) $(CXXFLAGS) -I$(top_srcdir)/src -I$(top_srcdir)/pack $(CPPFLAGS) $< ../lib/bdlib/src/libbdlib.a -o $@
-	@$(STRIP) $@@EXEEXT@
-
-stringfix: stringfix.c common.h config.h eggdrop.h
-	@echo -e "Compiling: \033[1mstringfix\033[0m"
-	@$(CXX) $(CXXFLAGS) -I$(top_srcdir) -I$(top_srcdir)/pack $(CPPFLAGS) $< -o stringfix
-	@$(STRIP) $@@EXEEXT@
-
-#../$(EGGEXEC): build_msg $(OBJS) mycrypto compatability
-../$(EGGEXEC): build_msg $(OBJS) mycrypto compatability ../lib/bdlib/src/libbdlib.a
-	@echo "[*] Linking"
-	@echo ""
-	@echo "Linking wraith... $(EGGBUILD)"
-	@echo ""
-	$(LD) -o ../$(EGGEXEC) $(OBJS) $(MODOBJS) compat/*.o crypto/*.o ../lib/bdlib/src/libbdlib.a $(LIBS)
-#	$(LD) -o ../$(EGGEXEC) $(OBJS) $(MODOBJS) $(LIBS) compat/*.o crypto/*.o
+../$(EGGEXEC): $(OBJS) $(top_builddir)/lib/bdlib/libbdlib.a @LIBELF_BUNDLED@
+	@echo -e "[LD ]	\033[1m$@\033[0m"
+	$(LD) $(LDFLAGS) -o ../$(EGGEXEC) $(OBJS) $(top_builddir)/lib/bdlib/libbdlib.a $(LIBS) @LIBELF_LIB@
 	@$(STRIP) ../$(EGGEXEC)
 	@$(OBJCOPY) ../$(EGGEXEC)
 	@echo "Successful compile: $(EGGEXEC)"
-	@echo ""
-
-$(EGGEXEC): stringfix ../$(EGGEXEC)
 
 clean:
-	@rm -f .depend *.o *.So *~ _*.c
-
-build_msg:
-	@echo "[*] Compiling core components"
-
-compatability:
-	@echo "[*] Compiling compatability components"
-	+@cd compat && $(MAKE_GENERIC) compat
-
-mycrypto:
-	@echo "[*] Compiling crypto"
-	+@cd crypto && $(MAKE_GENERIC) crypto
+	@rm -f .depend *.o $(OBJS) *~ _*.c _*.cc *.ii *.i set_default.h \
+	    responses.cc help.h $(STRINGFIX)
 
 include ./.deps/includes
