@@ -28,7 +28,6 @@
 
 #include "common.h"
 #include "bg.h"
-#include "thread.h"
 #include "main.h"
 #include <signal.h>
 #ifdef HAVE_SYS_PTRACE_H
