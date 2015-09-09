@@ -1,7 +1,7 @@
 master
   * Require C++11 compiler support (G++ 4.7+, clang32+)
 
-maint
+1.4.6
   * Disable demo TCL support by default to prevent confusion during build.
   * Avoid apparmor ptrace(2) warnings on Ubuntu
   * Allow 'set trace ignore' again. Undoes a change from 2005.
