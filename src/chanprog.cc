@@ -865,7 +865,7 @@ samechans(const char *nick, const char *delim)
   return ret;
 }
 
-struct chanset_t* find_common_opped_chan(bd::String nick) {
+static struct chanset_t* find_common_opped_chan(bd::String nick) {
   for (struct chanset_t* chan = chanset; chan; chan = chan->next) {
     if (channel_active(chan) && (me_op(chan) || me_voice(chan))) {
       if (ismember(chan, nick.c_str()))

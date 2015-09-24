@@ -21,6 +21,8 @@ int write_userfile(int);
 void touch_laston(struct userrec *, char *, time_t);
 void user_del_chan(char *);
 struct userrec *host_conflicts(char *);
+struct userrec *get_user_by_handle(struct userrec *, const char *);
+struct userrec *get_user_by_host(char *);
 
 extern struct userrec  		*userlist, *lastuser;
 extern int			cache_hit, cache_miss, userfile_perm;

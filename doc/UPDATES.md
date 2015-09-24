@@ -12,6 +12,9 @@
 # master
   * Require C++11 compiler support (G++ 4.7+, clang32+)
 
+# maint
+  * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
+
 # 1.4.6
   * Disable demo TCL support by default to prevent confusion during build.
   * Avoid apparmor ptrace(2) warnings on Ubuntu
