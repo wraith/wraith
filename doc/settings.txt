@@ -35,9 +35,9 @@ irc.homelien.no
 irc.inet.tele.dk
 irc.underworld.no
 #CA
-irc.arcti.ca
 irc.choopa.ca
 irc.teksavvy.ca
+irc.shaw.ca
 
 :servers6
 efnet.ipv6.port80.se
