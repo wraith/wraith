@@ -56,6 +56,8 @@ irc.underworld.no
 :servers6_ssl
 irc.choopa.net:9999
 irc.underworld.no
+irc.ipv6.homelien.no
+efnet.ipv6.port80.se
 
 :rbl
 dnsbl.proxybl.org
