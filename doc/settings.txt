@@ -25,7 +25,6 @@ irc2.choopa.net
 #EU
 efnet.port80.se
 efnet.portlane.se
-efnet.xs4all.nl
 irc.ac.za
 irc.du.se
 irc.efnet.fr
@@ -40,7 +39,6 @@ irc.shaw.ca
 
 :servers6
 efnet.ipv6.port80.se
-efnet.ipv6.xs4all.nl
 efnet.portlane.se
 irc.ac.za
 irc.choopa.ca
@@ -51,7 +49,6 @@ irc.underworld.no
 irc.teksavvy.ca
 
 :servers_ssl
-efnet.xs4all.nl
 irc.choopa.ca:9999
 irc.choopa.net:9999
 irc.eversible.com:9999
@@ -60,7 +57,6 @@ irc.umich.edu:9999
 irc.underworld.no
 
 :servers6_ssl
-efnet.ipv6.xs4all.nl
 irc.choopa.ca:9999
 irc.choopa.net:9999
 irc.underworld.no
