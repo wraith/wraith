@@ -33,7 +33,6 @@ irc.homelien.no
 irc.inet.tele.dk
 irc.underworld.no
 #CA
-irc.choopa.ca
 irc.teksavvy.ca
 irc.shaw.ca
 
@@ -41,7 +40,6 @@ irc.shaw.ca
 efnet.ipv6.port80.se
 efnet.portlane.se
 irc.ac.za
-irc.choopa.ca
 irc.choopa.net
 irc.inet.tele.dk
 irc.ipv6.homelien.no
@@ -49,7 +47,6 @@ irc.underworld.no
 irc.teksavvy.ca
 
 :servers_ssl
-irc.choopa.ca:9999
 irc.choopa.net:9999
 irc.eversible.com:9999
 irc.servercentral.net:9999
@@ -57,7 +54,6 @@ irc.umich.edu:9999
 irc.underworld.no
 
 :servers6_ssl
-irc.choopa.ca:9999
 irc.choopa.net:9999
 irc.underworld.no
 
