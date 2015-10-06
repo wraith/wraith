@@ -1,6 +1,7 @@
 # maint
   * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
   * Fix binary compat on FreeBSD due to lack of ptrace(2).
+  * Avoid warnings from Debian's FORTIFY_SOURCE
 
 # 1.4.6
   * Disable demo TCL support by default to prevent confusion during build.

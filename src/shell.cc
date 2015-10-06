@@ -308,7 +308,10 @@ void check_trace(int start)
 #ifndef __sun__
     int x, i, filedes[2];
 
-    (void)pipe(filedes);
+    if (pipe(filedes) != 0) {
+      /* Could be a temporary failure, don't be harsh. */
+      return;
+    }
 
   /* now, let's attempt to ptrace ourself */
     switch ((x = fork())) {
@@ -345,7 +348,10 @@ void check_trace(int start)
         // https://wiki.ubuntu.com/SecurityTeam/Roadmap/KernelHardening#ptrace
         prctl(PR_SET_PTRACER, x, 0, 0, 0);
 #endif
-        (void)write(filedes[1], "+", 1);
+        /* Not likely to happen, but make debian FORTIFY_SOURCE happy. */
+        if (write(filedes[1], "+", 1) != 1) {
+          kill(x, SIGKILL);
+        }
         waitpid(x, NULL, 0);
         close(filedes[0]);
         close(filedes[1]);
