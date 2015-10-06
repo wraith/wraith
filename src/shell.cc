@@ -322,6 +322,8 @@ void check_trace(int start)
 
         i = ptrace(PT_ATTACH, parent, 0, 0);
         if (i == -1 &&
+            /* Linux compat or otherwise removed syscall. Just ignore. */
+            errno != ENOSYS &&
         /* EPERM is given on fbsd when security.bsd.unprivileged_proc_debug=0 */
 #ifdef __FreeBSD__
             errno != EPERM &&
