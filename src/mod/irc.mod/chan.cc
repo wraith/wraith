@@ -1481,7 +1481,6 @@ do_take(struct chanset_t *chan)
     work[work_len] = 0;
 
     // Prevent excess flood
-    if (!HAVE_F1) usleep(1000 * 500);
     if (++lines >= max_lines) {
       tputs(serv, work, work_len);
       work[0] = 0;
