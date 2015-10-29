@@ -305,6 +305,17 @@ void check_trace(int start)
     if (!start)
       return;
 
+#if defined(PR_SET_DUMPABLE) && defined(PR_GET_DUMPABLE) && !defined(DEBUG)
+    /* Try to disable ptrace and core dumping entirely. */
+    if (prctl(PR_GET_DUMPABLE) == 0 ||
+        (prctl(PR_SET_DUMPABLE, 0) == 0 && prctl(PR_GET_DUMPABLE) == 0)) {
+      /* We're safe! Don't bother with further checks. */
+      putlog(LOG_DEBUG, "*", "Ptrace disabled, no longer checking.");
+      trace = DET_IGNORE;
+      return;
+    }
+#endif
+
 #ifndef __sun__
     int x, i, filedes[2];
 

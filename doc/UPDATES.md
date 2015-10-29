@@ -3,6 +3,7 @@
   * Fix Linux binary compat on FreeBSD due to lack of ptrace(2).
   * Avoid warnings from Debian's FORTIFY_SOURCE
   * Remove an old +take limiter that was forgotten.
+  * Use Linux's prctl(PR_SET_DUMPABLE) to disable core dumps and ptrace(2).
 
 # 1.4.6
   * Disable demo TCL support by default to prevent confusion during build.
