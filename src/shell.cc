@@ -56,6 +56,9 @@
 #include <signal.h>
 #ifdef HAVE_SYS_PRCTL_H
 #include <sys/prctl.h>
+#ifndef PR_SET_PTRACER
+#define PR_SET_PTRACER 0x59616d61
+#endif
 #endif
 #ifdef HAVE_SYS_PTRACE_H
 # include <sys/ptrace.h>
@@ -269,7 +272,7 @@ static void got_sigtrap(int z)
 void check_trace(int start)
 {
 #ifdef DEBUG
-#ifdef PR_SET_PTRACER
+#ifdef PR_SET_PTRACER_ANY
   if (start == 1)
     prctl(PR_SET_PTRACER, PR_SET_PTRACER_ANY, 0, 0, 0);
 #endif
@@ -304,6 +307,17 @@ void check_trace(int start)
   } else {
     if (!start)
       return;
+
+#if defined(PR_SET_DUMPABLE) && defined(PR_GET_DUMPABLE) && !defined(DEBUG)
+    /* Try to disable ptrace and core dumping entirely. */
+    if (prctl(PR_GET_DUMPABLE) == 0 ||
+        (prctl(PR_SET_DUMPABLE, 0) == 0 && prctl(PR_GET_DUMPABLE) == 0)) {
+      /* We're safe! Don't bother with further checks. */
+      putlog(LOG_DEBUG, "*", "Ptrace disabled, no longer checking.");
+      trace = DET_IGNORE;
+      return;
+    }
+#endif
 
 #ifndef __sun__
     int x, i, filedes[2];
@@ -344,8 +358,8 @@ void check_trace(int start)
         exit(0);
       default:		//parent
 #ifdef PR_SET_PTRACER
-        // Allow the child to debug the parent on Ubuntu
-        // https://wiki.ubuntu.com/SecurityTeam/Roadmap/KernelHardening#ptrace
+        // Allow the child to debug the parent on Linux 3.4+
+        // https://github.com/torvalds/linux/commit/2d514487faf188938a4ee4fb3464eeecfbdcf8eb
         prctl(PR_SET_PTRACER, x, 0, 0, 0);
 #endif
         /* Not likely to happen, but make debian FORTIFY_SOURCE happy. */
@@ -416,8 +430,8 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool
     size_t fs = 0;
 
 #ifdef PR_SET_PTRACER
-    // Allow the child to debug the parent on Ubuntu
-    // https://wiki.ubuntu.com/SecurityTeam/Roadmap/KernelHardening#ptrace
+    // Allow the child to debug the parent on Linux 3.4+
+    // https://github.com/torvalds/linux/commit/2d514487faf188938a4ee4fb3464eeecfbdcf8eb
     prctl(PR_SET_PTRACER, x, 0, 0, 0);
 #endif
 
