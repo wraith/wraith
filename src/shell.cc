@@ -280,6 +280,8 @@ void check_trace(int start)
     prctl(PR_SET_PTRACER, PR_SET_PTRACER_ANY, 0, 0, 0);
 #endif
   return;
+#elif defined(HAVE_PROCCTL) && defined(PROC_TRACE_CTL)
+  int status = 0;
 #endif
 
   if (start == 0 && trace == DET_IGNORE)
@@ -287,12 +289,26 @@ void check_trace(int start)
 
   pid_t parent = getpid();
 
-  /* we send ourselves a SIGTRAP, if we recieve, we're not being traced, otherwise we are. */
-  signal(SIGTRAP, got_sigtrap);
-  traced = 1;
-  raise(SIGTRAP);
-  /* no longer need this__asm__("INT3"); //SIGTRAP */
-  signal(SIGTRAP, SIG_DFL);
+#if !defined DEBUG && defined(HAVE_PROCCTL) && defined(PROC_TRACE_CTL)
+  /* FreeBSD let's us know if we're being traced already. */
+  if (procctl(P_PID, parent, PROC_TRACE_STATUS, &status) == 0 &&
+      status > 0) {
+    /* status contains the pid of the tracer. Be mean. */
+    kill(status, SIGSEGV);
+    traced = 1;
+  }
+#endif
+
+  if (!traced) {
+    /* we send ourselves a SIGTRAP, if we recieve, we're not being traced,
+     * otherwise we might be. The debugger may smartly just forward the
+     * signal if it knows it didn't request it, such as FreeBSD truss
+     * after r288903. */
+    signal(SIGTRAP, got_sigtrap);
+    traced = 1;
+    raise(SIGTRAP);
+    signal(SIGTRAP, SIG_DFL);
+  }
 
   if (!traced) {
     signal(SIGINT, got_sigtrap);
@@ -321,8 +337,6 @@ void check_trace(int start)
       tracing_safe = 1;
     }
 #elif defined(HAVE_PROCCTL) && defined(PROC_TRACE_CTL)
-    int status = 0;
-
     if ((procctl(P_PID, parent, PROC_TRACE_STATUS, &status) == 0 &&
         status == -1) ||
         (status = PROC_TRACE_CTL_DISABLE,
