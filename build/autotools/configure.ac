@@ -94,7 +94,8 @@ AC_HEADER_STAT
 #checkpoint
 AC_CACHE_SAVE 
 AC_CHECK_HEADERS([stdarg.h arpa/inet.h fcntl.h limits.h locale.h netdb.h netinet/in.h])
-AC_CHECK_HEADERS([sys/file.h sys/ioctl.h sys/param.h sys/socket.h wchar.h sys/ptrace.h paths.h sys/prctl.h])
+AC_CHECK_HEADERS([sys/file.h sys/ioctl.h sys/param.h sys/socket.h wchar.h])
+AC_CHECK_HEADERS([sys/ptrace.h paths.h sys/prctl.h sys/procctl.h])
 
 #checkpoint
 AC_CACHE_SAVE
@@ -215,7 +216,7 @@ AC_CHECK_FUNCS([clock fsync getrusage isascii getpassphrase posix_madvise madvis
 AC_CHECK_FUNCS([memcpy memmem memset random rename snprintf srandom gettime])
 #checkpoint
 AC_CACHE_SAVE
-AC_CHECK_FUNCS([strcasecmp strncasecmp vsnprintf inet_ntop])
+AC_CHECK_FUNCS([strcasecmp strncasecmp vsnprintf inet_ntop prctl procctl])
 
 #autoscan suggested this....
 #These are recommended by autoscan, but no code supports it currently

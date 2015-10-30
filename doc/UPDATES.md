@@ -18,6 +18,7 @@
   * Avoid warnings from Debian's FORTIFY_SOURCE
   * Remove an old +take limiter that was forgotten.
   * Use Linux's prctl(PR_SET_DUMPABLE) to disable core dumps and ptrace(2).
+  * Use FreeBSD 10's procctl(PROC_TRACE_CTL) to disable core dumps and tracing.
   * Fix binary compat issue causing ptrace permission errors on Linux 3.4+
 
 # 1.4.6

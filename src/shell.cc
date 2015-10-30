@@ -60,6 +60,18 @@
 #define PR_SET_PTRACER 0x59616d61
 #endif
 #endif
+#ifdef HAVE_SYS_PROCCTL_H
+#include <sys/procctl.h>
+#ifndef PROC_TRACE_CTL
+#define PROC_TRACE_CTL		7
+#endif
+#ifndef PROC_TRACE_STATUS
+#define PROC_TRACE_STATUS	8
+#endif
+#ifndef PROC_TRACE_CTL_DISABLE
+#define PROC_TRACE_CTL_DISABLE	2
+#endif
+#endif	/* HAVE_SYS_PROCCTL_H */
 #ifdef HAVE_SYS_PTRACE_H
 # include <sys/ptrace.h>
 #endif /* HAVE_SYS_PTRACE_H */
@@ -262,12 +274,14 @@ void check_promisc()
 #endif /* SIOCGIFCONF */
 }
 
+#ifndef DEBUG
 bool traced = 0;
 
 static void got_sigtrap(int z)
 {
   traced = 0;
 }
+#endif
 
 void check_trace(int start)
 {
@@ -277,6 +291,9 @@ void check_trace(int start)
     prctl(PR_SET_PTRACER, PR_SET_PTRACER_ANY, 0, 0, 0);
 #endif
   return;
+#else
+#if defined(HAVE_PROCCTL) && defined(PROC_TRACE_CTL)
+  int status = 0;
 #endif
 
   if (start == 0 && trace == DET_IGNORE)
@@ -284,12 +301,26 @@ void check_trace(int start)
 
   pid_t parent = getpid();
 
-  /* we send ourselves a SIGTRAP, if we recieve, we're not being traced, otherwise we are. */
-  signal(SIGTRAP, got_sigtrap);
-  traced = 1;
-  raise(SIGTRAP);
-  /* no longer need this__asm__("INT3"); //SIGTRAP */
-  signal(SIGTRAP, SIG_DFL);
+#if defined(HAVE_PROCCTL) && defined(PROC_TRACE_CTL)
+  /* FreeBSD let's us know if we're being traced already. */
+  if (procctl(P_PID, parent, PROC_TRACE_STATUS, &status) == 0 &&
+      status > 0) {
+    /* status contains the pid of the tracer. Be mean. */
+    kill(status, SIGSEGV);
+    traced = 1;
+  }
+#endif
+
+  if (!traced) {
+    /* we send ourselves a SIGTRAP, if we recieve, we're not being traced,
+     * otherwise we might be. The debugger may smartly just forward the
+     * signal if it knows it didn't request it, such as FreeBSD truss
+     * after r288903. */
+    signal(SIGTRAP, got_sigtrap);
+    traced = 1;
+    raise(SIGTRAP);
+    signal(SIGTRAP, SIG_DFL);
+  }
 
   if (!traced) {
     signal(SIGINT, got_sigtrap);
@@ -308,16 +339,28 @@ void check_trace(int start)
     if (!start)
       return;
 
-#if defined(PR_SET_DUMPABLE) && defined(PR_GET_DUMPABLE) && !defined(DEBUG)
+    int tracing_safe = 0;
+
+#if defined(HAVE_PRCTL) && defined(PR_SET_DUMPABLE) && defined(PR_GET_DUMPABLE)
     /* Try to disable ptrace and core dumping entirely. */
     if (prctl(PR_GET_DUMPABLE) == 0 ||
         (prctl(PR_SET_DUMPABLE, 0) == 0 && prctl(PR_GET_DUMPABLE) == 0)) {
+      tracing_safe = 1;
+    }
+#elif defined(HAVE_PROCCTL) && defined(PROC_TRACE_CTL)
+    if ((procctl(P_PID, parent, PROC_TRACE_STATUS, &status) == 0 &&
+        status == -1) ||
+        (status = PROC_TRACE_CTL_DISABLE,
+        procctl(P_PID, parent, PROC_TRACE_CTL, &status) == 0)) {
+      tracing_safe = 1;
+    }
+#endif
+    if (tracing_safe) {
       /* We're safe! Don't bother with further checks. */
       putlog(LOG_DEBUG, "*", "Ptrace disabled, no longer checking.");
       trace = DET_IGNORE;
       return;
     }
-#endif
 
 #ifndef __sun__
     int x, i, filedes[2];
@@ -372,6 +415,7 @@ void check_trace(int start)
     }
 #endif
   }
+#endif	/* !DEBUG */
 }
 
 int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool simple)
