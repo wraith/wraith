@@ -62,7 +62,16 @@
 #endif
 #ifdef HAVE_SYS_PROCCTL_H
 #include <sys/procctl.h>
+#ifndef PROC_TRACE_CTL
+#define PROC_TRACE_CTL		7
 #endif
+#ifndef PROC_TRACE_STATUS
+#define PROC_TRACE_STATUS	8
+#endif
+#ifndef PROC_TRACE_CTL_DISABLE
+#define PROC_TRACE_CTL_DISABLE	2
+#endif
+#endif	/* HAVE_SYS_PROCCTL_H */
 #ifdef HAVE_SYS_PTRACE_H
 # include <sys/ptrace.h>
 #endif /* HAVE_SYS_PTRACE_H */
