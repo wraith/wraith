@@ -35,3 +35,6 @@ script:
 
 # Skip install
 install: true
+
+# State we need old build infrastructure for now
+sudo: required
