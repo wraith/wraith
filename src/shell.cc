@@ -265,12 +265,14 @@ void check_promisc()
 #endif /* SIOCGIFCONF */
 }
 
+#ifndef DEBUG
 bool traced = 0;
 
 static void got_sigtrap(int z)
 {
   traced = 0;
 }
+#endif
 
 void check_trace(int start)
 {
@@ -280,7 +282,8 @@ void check_trace(int start)
     prctl(PR_SET_PTRACER, PR_SET_PTRACER_ANY, 0, 0, 0);
 #endif
   return;
-#elif defined(HAVE_PROCCTL) && defined(PROC_TRACE_CTL)
+#else
+#if defined(HAVE_PROCCTL) && defined(PROC_TRACE_CTL)
   int status = 0;
 #endif
 
@@ -289,7 +292,7 @@ void check_trace(int start)
 
   pid_t parent = getpid();
 
-#if !defined DEBUG && defined(HAVE_PROCCTL) && defined(PROC_TRACE_CTL)
+#if defined(HAVE_PROCCTL) && defined(PROC_TRACE_CTL)
   /* FreeBSD let's us know if we're being traced already. */
   if (procctl(P_PID, parent, PROC_TRACE_STATUS, &status) == 0 &&
       status > 0) {
@@ -327,7 +330,6 @@ void check_trace(int start)
     if (!start)
       return;
 
-#ifndef DEBUG
     int tracing_safe = 0;
 
 #if defined(HAVE_PRCTL) && defined(PR_SET_DUMPABLE) && defined(PR_GET_DUMPABLE)
@@ -350,7 +352,6 @@ void check_trace(int start)
       trace = DET_IGNORE;
       return;
     }
-#endif	/* DEBUG */
 
 #ifndef __sun__
     int x, i, filedes[2];
@@ -405,6 +406,7 @@ void check_trace(int start)
     }
 #endif
   }
+#endif	/* !DEBUG */
 }
 
 int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool simple)
