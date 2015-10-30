@@ -60,6 +60,9 @@
 #define PR_SET_PTRACER 0x59616d61
 #endif
 #endif
+#ifdef HAVE_SYS_PROCCTL_H
+#include <sys/procctl.h>
+#endif
 #ifdef HAVE_SYS_PTRACE_H
 # include <sys/ptrace.h>
 #endif /* HAVE_SYS_PTRACE_H */
@@ -308,16 +311,32 @@ void check_trace(int start)
     if (!start)
       return;
 
-#if defined(PR_SET_DUMPABLE) && defined(PR_GET_DUMPABLE) && !defined(DEBUG)
+#ifndef DEBUG
+    int tracing_safe = 0;
+
+#if defined(HAVE_PRCTL) && defined(PR_SET_DUMPABLE) && defined(PR_GET_DUMPABLE)
     /* Try to disable ptrace and core dumping entirely. */
     if (prctl(PR_GET_DUMPABLE) == 0 ||
         (prctl(PR_SET_DUMPABLE, 0) == 0 && prctl(PR_GET_DUMPABLE) == 0)) {
+      tracing_safe = 1;
+    }
+#elif defined(HAVE_PROCCTL) && defined(PROC_TRACE_CTL)
+    int status = 0;
+
+    if ((procctl(P_PID, parent, PROC_TRACE_STATUS, &status) == 0 &&
+        status == -1) ||
+        (status = PROC_TRACE_CTL_DISABLE,
+        procctl(P_PID, parent, PROC_TRACE_CTL, &status) == 0)) {
+      tracing_safe = 1;
+    }
+#endif
+    if (tracing_safe) {
       /* We're safe! Don't bother with further checks. */
       putlog(LOG_DEBUG, "*", "Ptrace disabled, no longer checking.");
       trace = DET_IGNORE;
       return;
     }
-#endif
+#endif	/* DEBUG */
 
 #ifndef __sun__
     int x, i, filedes[2];
