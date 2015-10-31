@@ -9,6 +9,7 @@
   * Use Linux's prctl(PR_SET_DUMPABLE) to disable core dumps and ptrace(2).
   * Use FreeBSD 10's procctl(PROC_TRACE_CTL) to disable core dumps and tracing.
   * Fix binary compat issue causing ptrace permission errors on Linux 3.4+
+  * Fix ban/exempt/invite masking not working with 10-char idents.
 
 # 1.4.6
   * Disable demo TCL support by default to prevent confusion during build.

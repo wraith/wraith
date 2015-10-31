@@ -267,6 +267,12 @@ void maskaddr(const char *s, char *nw, int type)
       *nw++ = '*';
       if (strchr("~+-^=", *u))
         u++; /* trim leading crap */
+      /*
+       * Take last 9 chars to avoid running up against 10-char limit for
+       * username on ratbox.  The older eggdrop code used this limit as well.
+       */
+      while (h - u > 9)
+        u++;
     }
     strncpy(nw, u, h - u);
     nw += h - u;
