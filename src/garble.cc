@@ -26,7 +26,7 @@ const char *degarble(int len, const char *g)
     garble_ptr = 0;
   if (garble_buffer[garble_ptr])
     free(garble_buffer[garble_ptr]);
-  garble_buffer[garble_ptr] = (unsigned char *) my_calloc(1, len + 1);
+  garble_buffer[garble_ptr] = (unsigned char *) calloc(1, len + 1);
   x = 0xFF;
   for (int i = 0; i < len; i++) {
     garble_buffer[garble_ptr][i] = g[i] ^ x;

@@ -8684,61 +8684,6 @@ fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
 
-for ac_func in strftime
-do :
-  ac_fn_cxx_check_func "$LINENO" "strftime" "ac_cv_func_strftime"
-if test "x$ac_cv_func_strftime" = xyes; then :
-  cat >>build/confdefs.h <<_ACEOF
-#define HAVE_STRFTIME 1
-_ACEOF
-
-else
-  # strftime is in -lintl on SCO UNIX.
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for strftime in -lintl" >&5
-$as_echo_n "checking for strftime in -lintl... " >&6; }
-if ${ac_cv_lib_intl_strftime+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lintl  $LIBS"
-cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end build/confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char strftime ();
-int
-main ()
-{
-return strftime ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_lib_intl_strftime=yes
-else
-  ac_cv_lib_intl_strftime=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_intl_strftime" >&5
-$as_echo "$ac_cv_lib_intl_strftime" >&6; }
-if test "x$ac_cv_lib_intl_strftime" = xyes; then :
-  $as_echo "#define HAVE_STRFTIME 1" >>build/confdefs.h
-
-LIBS="-lintl $LIBS"
-fi
-
-fi
-done
-
 
 #checkpoint
 cat >confcache <<\_ACEOF
@@ -8826,7 +8771,7 @@ $as_echo "$as_me: not updating unwritable cache $cache_file" >&6;}
   fi
 fi
 rm -f confcache
-for ac_func in clock fsync getrusage isascii getpassphrase posix_madvise madvise
+for ac_func in getrusage getpassphrase posix_madvise madvise
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_cxx_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -8838,7 +8783,7 @@ _ACEOF
 fi
 done
 
-for ac_func in memcpy memmem memset random rename snprintf srandom gettime
+for ac_func in memmem random snprintf srandom gettime
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_cxx_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -8936,7 +8881,7 @@ $as_echo "$as_me: not updating unwritable cache $cache_file" >&6;}
   fi
 fi
 rm -f confcache
-for ac_func in strcasecmp strncasecmp vsnprintf inet_ntop prctl procctl
+for ac_func in vsnprintf prctl procctl
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_cxx_check_func "$LINENO" "$ac_func" "$as_ac_var"

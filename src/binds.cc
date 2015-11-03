@@ -104,7 +104,7 @@ bind_table_t *bind_table_add(const char *name, int nargs, const char *syntax, in
 
 	/* If it doesn't exist, create it. */
 	if (!table) {
-		table = (bind_table_t *) my_calloc(1, sizeof(*table));
+		table = (bind_table_t *) calloc(1, sizeof(*table));
 		table->name = strdup(name);
 		table->next = bind_table_list_head;
 		bind_table_list_head = table;
@@ -233,7 +233,7 @@ int bind_entry_add(bind_table_t *table, const char *flags, int cflags, const cha
 
 	if (old_entry) {
 		if (table->flags & BIND_STACKABLE) {
-			entry = (bind_entry_t *) my_calloc(1, sizeof(*entry));
+			entry = (bind_entry_t *) calloc(1, sizeof(*entry));
 			entry->prev = old_entry;
 			entry->next = old_entry->next;
 			old_entry->next = entry;
@@ -249,7 +249,7 @@ int bind_entry_add(bind_table_t *table, const char *flags, int cflags, const cha
 		for (old_entry = table->entries; old_entry && old_entry->next; old_entry = old_entry->next) {
 			; /* empty loop */
 		}
-		entry = (bind_entry_t *) my_calloc(1, sizeof(*entry));
+		entry = (bind_entry_t *) calloc(1, sizeof(*entry));
 		if (old_entry) old_entry->next = entry;
 		else table->entries = entry;
 		entry->prev = old_entry;

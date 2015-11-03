@@ -125,7 +125,7 @@ bool DH1080_comp(const bd::String privateKey, const bd::String theirPublicKeyB64
   b_HisPubkey = BN_bin2bn(reinterpret_cast<const unsigned char*>(theirPublicKey.data()), theirPublicKey.length(), NULL);
 
   // Compute the Shared key
-  char *key = (char *)my_calloc(1, DH_size(dh));
+  char *key = (char *)calloc(1, DH_size(dh));
   size_t len = DH_compute_key((unsigned char *)key, b_HisPubkey, dh);
   DH_free(dh);
   BN_clear_free(b_HisPubkey);

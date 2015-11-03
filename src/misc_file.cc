@@ -82,9 +82,7 @@ int copyfile(const char *oldpath, const char *newpath)
       }
     }
   }
-#ifdef HAVE_FSYNC
   fsync(fo);
-#endif /* HAVE_FSYNC */
   close(fo);
   close(fi);
   return 0;
@@ -92,11 +90,9 @@ int copyfile(const char *oldpath, const char *newpath)
 
 int movefile(const char *oldpath, const char *newpath)
 {
-#ifdef HAVE_RENAME
   /* Try to use rename first */
   if (!rename(oldpath, newpath))
     return 0;
-#endif /* HAVE_RENAME */
 
   /* If that fails, fall back to just copying and then
    * deleting the file.

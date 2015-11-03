@@ -128,7 +128,7 @@ bool def_set_real(struct userrec *u, struct user_entry *e, void *buf, bool prote
       l = 160;
 
 
-    e->u.string = (char *) my_realloc (e->u.string, l + 1);
+    e->u.string = (char *) realloc (e->u.string, l + 1);
 
     strlcpy (e->u.string, string, l + 1);
 
@@ -300,7 +300,7 @@ static bool set_unpack(struct userrec *u, struct user_entry *e)
   char *key = NULL, *data = NULL;
 
   while (curr) {
-    t = (struct xtra_key *) my_calloc(1, sizeof(struct xtra_key));
+    t = (struct xtra_key *) calloc(1, sizeof(struct xtra_key));
     data = curr->extra;
     key = newsplit(&data);
     if (data[0]) {
@@ -348,7 +348,7 @@ static bool set_gotshare(struct userrec *u, struct user_entry *e, char *buf, int
   /* not else if as the hub might have gotten a botset for itself */
   if (conf.bot->hub || conf.bot->localhub) {
   /* only hubs need to bother saving this stuff, leaf bots just store it in vars[] */
-    struct xtra_key *xk = (struct xtra_key *) my_calloc(1, sizeof(struct xtra_key));
+    struct xtra_key *xk = (struct xtra_key *) calloc(1, sizeof(struct xtra_key));
 
     xk->key = strdup(name);
     xk->data = (buf && buf[0]) ? strdup(buf) : NULL;
@@ -679,7 +679,7 @@ struct user_entry_type USERENTRY_SECPASS =
 static bool laston_unpack(struct userrec *u, struct user_entry *e)
 {
   char *par = e->u.list->extra, *arg = newsplit(&par);
-  struct laston_info *li = (struct laston_info *) my_calloc(1, sizeof(struct laston_info));
+  struct laston_info *li = (struct laston_info *) calloc(1, sizeof(struct laston_info));
 
   if (!par[0])
     par = "???";
@@ -760,7 +760,7 @@ struct user_entry_type USERENTRY_LASTON =
 static bool botaddr_unpack(struct userrec *u, struct user_entry *e)
 {
   char p[1024] = "", *q1 = NULL, *q2 = NULL;
-  struct bot_addr *bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
+  struct bot_addr *bi = (struct bot_addr *) calloc(1, sizeof(struct bot_addr));
 
   /* address:port/port:hublevel:uplink */
 
@@ -793,7 +793,7 @@ static bool botaddr_unpack(struct userrec *u, struct user_entry *e)
   if (!bi->relay_port)
     bi->relay_port = bi->telnet_port;
   if (!bi->uplink) {
-    bi->uplink = (char *) my_calloc(1, 1);
+    bi->uplink = (char *) calloc(1, 1);
   }
   list_type_kill(e->u.list);
   e->u.extra = bi;
@@ -865,7 +865,7 @@ static void botaddr_display(int idx, struct user_entry *e, struct userrec *u)
 
 static bool botaddr_gotshare(struct userrec *u, struct user_entry *e, char *buf, int idx)
 {
-  struct bot_addr *bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
+  struct bot_addr *bi = (struct bot_addr *) calloc(1, sizeof(struct bot_addr));
   char *arg = newsplit(&buf);
 
   bi->address = strdup(arg);
@@ -981,7 +981,7 @@ static bool hosts_set(struct userrec *u, struct user_entry *e, void *buf)
       } else
 	t = &((*t)->next);
     }
-    *t = (struct list_type *) my_calloc(1, sizeof(struct list_type));
+    *t = (struct list_type *) calloc(1, sizeof(struct list_type));
 
     (*t)->next = NULL;
     (*t)->extra = strdup(host);
@@ -1098,7 +1098,7 @@ bool set_user(struct user_entry_type *et, struct userrec *u, void *d)
   bool r;
 
   if (!(e = find_user_entry(et, u))) {
-    e = (struct user_entry *) my_calloc(1, sizeof(struct user_entry));
+    e = (struct user_entry *) calloc(1, sizeof(struct user_entry));
 
     e->type = et;
     e->name = NULL;
