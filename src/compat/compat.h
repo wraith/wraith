@@ -37,7 +37,6 @@ void *memmem(const void *l, size_t l_len, const void *s, size_t s_len);
 /* These apparently are unsafe without recasting. */
 #define egg_isdigit(x)  isdigit((int)  (unsigned char) (x))
 #define egg_isxdigit(x) isxdigit((int) (unsigned char) (x))
-#define egg_isascii(x)  isascii((int)  (unsigned char) (x))
 #define egg_isspace(x)  isspace((int)  (unsigned char) (x))
 #define egg_islower(x)  islower((int)  (unsigned char) (x))
 #define egg_isupper(x)  isupper((int)  (unsigned char) (x))
