@@ -72,14 +72,9 @@ OBJS = auth.So \
 	mod/update.mod/update.So \
 	compat/dirname.o \
 	compat/dn_expand.o \
-	compat/inet_ntop.o \
 	compat/snprintf.o \
-	compat/memcpy.o \
 	compat/memmem.o \
-	compat/memset.o \
 	compat/memutil.o \
-	compat/strcasecmp.o \
-	compat/strftime.o \
 	compat/strlcpy.o \
 	compat/strsep.o \
 	crypto/aes_util.o \

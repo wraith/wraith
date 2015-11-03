@@ -13,13 +13,8 @@
 
 #include "dirname.h"
 #include "dn_expand.h"
-#include "inet_ntop.h"
 #include "snprintf.h"
-#include "memset.h"
-#include "memcpy.h"
 #include "memutil.h"
-#include "strcasecmp.h"
-#include "strftime.h"
 #include "strlcpy.h"
 #include "strsep.h"
 #include "timespec.h"

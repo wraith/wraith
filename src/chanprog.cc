@@ -256,9 +256,7 @@ void tell_verbose_uptime(int idx)
 #if HAVE_GETRUSAGE
   struct rusage ru;
 #else
-# if HAVE_CLOCK
   clock_t cl;
-# endif
 #endif /* HAVE_GETRUSAGE */
 
   daysdur(now, online_since, s, sizeof(s), false);
@@ -285,14 +283,10 @@ void tell_verbose_uptime(int idx)
   min = (int) (total - (hr * 60));
   egg_snprintf(s2, sizeof(s2), "CPU %02d:%02d (load avg %3.1f%%)", (int) hr, (int) min, 100.0 * ((float) total / (float) (now - online_since)));
 #else
-# if HAVE_CLOCK
   cl = (clock() / CLOCKS_PER_SEC);
   hr = (int) (cl / 60);
   min = (int) (cl - (hr * 60));
   egg_snprintf(s2, sizeof(s2), "CPU %02d:%02d (load avg %3.1f%%)", (int) hr, (int) min,  100.0 * ((float) cl / (float) (now - online_since)));
-# else
-  simple_snprintf(s2, sizeof(s2), "CPU ???");
-# endif
 #endif /* HAVE_GETRUSAGE */
   dprintf(idx, "%s  (%s)  %s  cache hit %4.1f%%\n",
           outbuf, s1, s2,

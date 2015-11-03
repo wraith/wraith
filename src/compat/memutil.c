@@ -1,5 +1,4 @@
 #include <string.h>
-#include "memcpy.h"
 #include "memutil.h"
 #include <stdlib.h>
 
@@ -17,16 +16,6 @@ str_redup(char **str, const char *newstr)
         len = strlen(newstr) + 1;
         *str = (char *) my_realloc(*str, len);
         memcpy(*str, newstr, len);
-}
-
-char *
-strdup(const char *entry)
-{
-  size_t len = strlen(entry);
-  char *target = (char *) my_calloc(1, len + 1);
-  if (target == NULL) return NULL;
-  target[len] = 0;
-  return (char *) memcpy(target, entry, len);
 }
 
 char *
