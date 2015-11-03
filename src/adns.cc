@@ -311,7 +311,7 @@ static int get_dns_id() {
 
 static dns_query_t *alloc_query(void *client_data, dns_callback_t callback, const char *query)
 {
-	dns_query_t *q = (dns_query_t *) my_calloc(1, sizeof(*q));
+	dns_query_t *q = (dns_query_t *) calloc(1, sizeof(*q));
 
 	q->id = get_dns_id();
 	q->query = strdup(query);
@@ -335,14 +335,14 @@ static void query_transform_ip(dns_query_t* q, const char* ip) {
 
 		socket_ipv6_to_dots(ip, temp);
 		size_t iplen = strlen(temp) + 9 + 1;
-		q->ip = (char *) my_calloc(1, iplen);
+		q->ip = (char *) calloc(1, iplen);
 //		reverse_ip(temp, q->ip);
 		strlcat(q->ip, temp, iplen);
 		strlcat(q->ip, "ip6.arpa", iplen);
 	}
 	else {
 		size_t iplen = strlen(ip) + 13 + 1;
-		q->ip = (char *) my_calloc(1, iplen);
+		q->ip = (char *) calloc(1, iplen);
 		reverse_ip(ip, q->ip);
 		strlcat(q->ip, ".in-addr.arpa", iplen);
 	}
@@ -842,7 +842,7 @@ static const char *dns_next_server()
 
 static void add_dns_server(char *ip)
 {
-	servers = (dns_server_t *) my_realloc(servers, (nservers+1) *
+	servers = (dns_server_t *) realloc(servers, (nservers+1) *
 	    sizeof(*servers));
 	servers[nservers].ip = strdup(ip);
 	nservers++;
@@ -851,7 +851,7 @@ static void add_dns_server(char *ip)
 
 static void add_host(char *host, char *ip)
 {
-	hosts = (dns_host_t *) my_realloc(hosts, (nhosts+1) * sizeof(*hosts));
+	hosts = (dns_host_t *) realloc(hosts, (nhosts+1) * sizeof(*hosts));
 	hosts[nhosts].host = strdup(host);
 	hosts[nhosts].ip = strdup(ip);
 	nhosts++;
@@ -877,13 +877,13 @@ static void cache_del(int id)
 	else
 		bzero(&cache[id], sizeof(dns_cache_t));
 
-	cache = (dns_cache_t *) my_realloc(cache, (ncache+1) *
+	cache = (dns_cache_t *) realloc(cache, (ncache+1) *
 	    sizeof(*cache));
 }
 
 static void cache_add(const char *query, bd::Array<bd::String> answer, int ttl)
 {
-	cache = (dns_cache_t *) my_realloc(cache, (ncache+1) * sizeof(*cache));
+	cache = (dns_cache_t *) realloc(cache, (ncache+1) * sizeof(*cache));
 	bzero(&cache[ncache], sizeof(cache[ncache]));
 	cache[ncache].query = strdup(query);
 	cache[ncache].answer = new bd::Array<bd::String>;

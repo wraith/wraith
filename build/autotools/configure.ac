@@ -208,15 +208,14 @@ AC_FUNC_MMAP
 AC_FUNC_REALLOC
 AC_FUNC_STAT
 EGG_FUNC_TIMESPEC
-AC_FUNC_STRFTIME
 
 #checkpoint
 AC_CACHE_SAVE
-AC_CHECK_FUNCS([clock fsync getrusage isascii getpassphrase posix_madvise madvise])
-AC_CHECK_FUNCS([memcpy memmem memset random rename snprintf srandom gettime])
+AC_CHECK_FUNCS([getrusage getpassphrase posix_madvise madvise])
+AC_CHECK_FUNCS([memmem random snprintf srandom gettime])
 #checkpoint
 AC_CACHE_SAVE
-AC_CHECK_FUNCS([strcasecmp strncasecmp vsnprintf inet_ntop prctl procctl])
+AC_CHECK_FUNCS([vsnprintf prctl procctl])
 
 #autoscan suggested this....
 #These are recommended by autoscan, but no code supports it currently

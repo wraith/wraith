@@ -59,7 +59,7 @@ struct console_info {
 static bool
 console_unpack(struct userrec *u, struct user_entry *e)
 {
-  struct console_info *ci = (struct console_info *) my_calloc(1, sizeof(struct console_info));
+  struct console_info *ci = (struct console_info *) calloc(1, sizeof(struct console_info));
   char *par = e->u.list->extra, *arg = NULL;
 
   arg = newsplit(&par);
@@ -155,7 +155,7 @@ console_gotshare(struct userrec *u, struct user_entry *e, char *par, int idx)
     free(ci->channel);
     free(ci);
   }
-  ci = (struct console_info *) my_calloc(1, sizeof(struct console_info));
+  ci = (struct console_info *) calloc(1, sizeof(struct console_info));
   ci->channel = strdup(arg);
   arg = newsplit(&par);
   ci->conflags = logmodes(arg);
@@ -311,7 +311,7 @@ console_store(int idx, char *par, bool displaySave)
   struct console_info *i = (struct console_info *) get_user(&USERENTRY_CONSOLE, dcc[idx].user);
 
   if (!i) 
-    i = (struct console_info *) my_calloc(1, sizeof(struct console_info));
+    i = (struct console_info *) calloc(1, sizeof(struct console_info));
   
   if (i->channel)
     free(i->channel);

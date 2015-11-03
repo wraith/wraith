@@ -317,7 +317,7 @@ fatal:
 void
 init_conf()
 {
-//  conf.bots = (conf_bot *) my_calloc(1, sizeof(conf_bot));
+//  conf.bots = (conf_bot *) calloc(1, sizeof(conf_bot));
 //  conf.bots->nick = NULL;
 //  conf.bots->next = NULL;
   conf.bots = NULL;
@@ -418,7 +418,7 @@ checkpid(const char *nick, conf_bot *bot)
 void
 conf_addbot(const char *nick, const char *ip, const char *host, const char *ip6)
 {
-  conf_bot *bot = (conf_bot *) my_calloc(1, sizeof(conf_bot));
+  conf_bot *bot = (conf_bot *) calloc(1, sizeof(conf_bot));
 
   bot->next = NULL;
   bot->pid_file = NULL;
@@ -879,7 +879,7 @@ conf_bot *conf_bots_dup(conf_bot *src)
     conf_bot *bot = NULL, *newbot = NULL;
 
     for (bot = src; bot && bot->nick; bot = bot->next) {
-      newbot = (conf_bot *) my_calloc(1, sizeof(conf_bot));
+      newbot = (conf_bot *) calloc(1, sizeof(conf_bot));
       conf_bot_dup(newbot, bot);
       list_append((struct list_type **) &(ret), (struct list_type *) newbot);
     }
@@ -954,7 +954,7 @@ fill_conf_bot(bool fatal)
       sdprintf(STR("I am localhub!"));
 
     /* for future, we may just want to make this a pointer to ->bots if we do an emech style currentbot-> */
-    conf.bot = (conf_bot *) my_calloc(1, sizeof(conf_bot));
+    conf.bot = (conf_bot *) calloc(1, sizeof(conf_bot));
     conf_bot_dup(conf.bot, me);
   }
 }
@@ -1086,10 +1086,10 @@ void conf_add_userlist_bots()
         simple_snprintf(tmp, sizeof(tmp), "%li %s", (long)now, conf.bot->nick);
         set_user(&USERENTRY_ADDED, u, tmp);
 
-        bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
+        bi = (struct bot_addr *) calloc(1, sizeof(struct bot_addr));
 
-        bi->address = (char *) my_calloc(1, 1);
-        bi->uplink = (char *) my_calloc(1, 1);
+        bi->address = (char *) calloc(1, 1);
+        bi->uplink = (char *) calloc(1, 1);
         bi->telnet_port = bi->relay_port = 3333;
         bi->hublevel = 999;
         set_user(&USERENTRY_BOTADDR, u, bi);

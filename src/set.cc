@@ -175,7 +175,7 @@ char *var_sanitize(variable_t *var, const char *data)
     else if (var->b && (number > var->b))
       number = var->b;
 
-    dataout = (char*) my_calloc(1, 11);
+    dataout = (char*) calloc(1, 11);
     simple_snprintf(dataout, 11, "%d", number);
   } else if (var->flags & VAR_DETECTED) {
     if (data) {
@@ -205,7 +205,7 @@ char *var_sanitize(variable_t *var, const char *data)
       else if (num < 0 || !strcasecmp(data, "false") || !strcasecmp(data, "off"))
         num = 0;
     }
-    dataout = (char*) my_calloc(1, 2);
+    dataout = (char*) calloc(1, 2);
     simple_snprintf(dataout, 2, "%u", num ? 1 : 0);
   } else if (var->flags & VAR_STRING) {
     dataout = data ? strdup(data) : NULL;
@@ -236,7 +236,7 @@ char *var_sanitize(variable_t *var, const char *data)
     }
 
     /* No limit enforcing yet */
-    dataout = (char*) my_calloc(1, 21);
+    dataout = (char*) calloc(1, 21);
     simple_snprintf(dataout, 21, "%d:%d", rate.count, rate.time);
   } else if ((var->flags & VAR_SERVERS)) {
     dataout = data ? strdup(data) : NULL;
@@ -455,7 +455,7 @@ const char *var_string(variable_t *var)
       data = strdup(det_translate_num(*(int *) (var->mem)));
     } else {
       if (*(int *) (var->mem)) {
-        data = (char *) my_calloc(1, 11);
+        data = (char *) calloc(1, 11);
         simple_snprintf(data, 11, "%d", *(int *) (var->mem));
       }
     }
@@ -463,7 +463,7 @@ const char *var_string(variable_t *var)
     /* only bother setting if we have a value that's not 0 */
     if (*(int *) (var->mem)) {
       bool num = *(bool *) (var->mem);
-      data = (char *) my_calloc(1, 2);
+      data = (char *) calloc(1, 2);
       /* Only actually set 0 or 1 */
       simple_snprintf(data, 2, "%d", num ? 1 : 0);
     }
@@ -474,7 +474,7 @@ const char *var_string(variable_t *var)
   } else if (var->flags & VAR_RATE) {
     /* only bother setting if we don't have 0:0 */
     if ((*(rate_t *) (var->mem)).count && (*(rate_t *) (var->mem)).time) {
-      data = (char *) my_calloc(1, 21);
+      data = (char *) calloc(1, 21);
       simple_snprintf(data, 21, "%d:%d", (*(rate_t *) (var->mem)).count, (*(rate_t *) (var->mem)).time);
     }
   } else if (var->flags & VAR_SERVERS) {
@@ -643,7 +643,7 @@ void var_set_userentry(const char *target, const char *name, const char *data)
     u = get_user_by_handle(userlist, (char *) target);
 
   if (u) {
-    struct xtra_key *xk = (struct xtra_key *) my_calloc(1, sizeof(struct xtra_key));
+    struct xtra_key *xk = (struct xtra_key *) calloc(1, sizeof(struct xtra_key));
 
     xk->key = strdup(name);
     xk->data = data ? strdup(data) : NULL;
@@ -833,7 +833,7 @@ static int var_add_list(const char *botnick, variable_t *var, const char *elemen
   if (olddata && osiz) {
     size_t esiz = strlen(element) + 1;		// element + ,
 
-    data = (char *) my_calloc(1, osiz + esiz + 1);
+    data = (char *) calloc(1, osiz + esiz + 1);
     simple_snprintf(data, osiz + esiz + 1, "%s,%s", olddata, element);
   } else /* otherwise, just set the data to the element to be added */
     data = strdup(element);
@@ -877,7 +877,7 @@ static char *var_rem_list(const char *botnick, variable_t *var, const char *elem
   olddata = olddatap = strdup(olddatacp);
   size_t tsiz = strlen(olddata) + 1;
 
-  char *data = (char *) my_calloc(1, tsiz);
+  char *data = (char *) calloc(1, tsiz);
   char *word = NULL;
   while ((word = strsep(&olddata, delim))) {
     ++i;

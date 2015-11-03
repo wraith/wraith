@@ -47,7 +47,7 @@ char *decrypt_string(const char *keydata, char *in)
     free(buf);
     return res;
   } else {
-    res = (char *) my_calloc(1, len + 1);
+    res = (char *) calloc(1, len + 1);
     strlcpy(res, in, len + 1);
     return res;
   }
@@ -79,7 +79,7 @@ char *salted_sha1(const char *in, const char* saltin)
   tmp = SHA1(buf);
 
   ret_size = SHA1_SALTED_LEN + 1;
-  ret = (char *) my_calloc(1, ret_size);
+  ret = (char *) calloc(1, ret_size);
   simple_snprintf(ret, ret_size, STR("+%s$%s"), salt, tmp);
 
   /* Wipe cleartext pass from sha1 buffers/tmp */

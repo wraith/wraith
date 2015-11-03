@@ -79,7 +79,7 @@ static int egg_connect_timeout(void *client_data)
 
 static connect_info_t *attach(int idx, const char *host, int port, interval_t timeout)
 {
-        connect_info_t *connect_info = (connect_info_t *) my_calloc(1, sizeof(*connect_info));
+        connect_info_t *connect_info = (connect_info_t *) calloc(1, sizeof(*connect_info));
 
         connect_info->port = port;
         connect_info->idx = idx;

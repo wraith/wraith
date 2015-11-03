@@ -95,7 +95,7 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
 
 void resolve_to_member(struct chanset_t *chan, char *nick, char *host)
 {
-  resolv_member *r = (resolv_member *) my_calloc(1, sizeof(resolv_member));
+  resolv_member *r = (resolv_member *) calloc(1, sizeof(resolv_member));
 
   r->chan = strdup(chan->dname);
   r->host = strdup(host);
@@ -175,7 +175,7 @@ void resolve_to_rbl(struct chanset_t *chan, const char *host, resolv_member *r)
   if (p)
     host = p + 1;
   if (!r) {
-    r = (resolv_member *) my_calloc(1, sizeof(resolv_member));
+    r = (resolv_member *) calloc(1, sizeof(resolv_member));
 
     r->chan = strdup(chan->dname);
     r->host = strdup(host);
@@ -205,7 +205,7 @@ void resolve_to_rbl(struct chanset_t *chan, const char *host, resolv_member *r)
   } else
     iplen += strlen(host) + 1;
 
-  char *ip = (char *) my_calloc(1, iplen);
+  char *ip = (char *) calloc(1, iplen);
   if (v6)
     socket_ipv6_to_dots(host, ip);
   else {
@@ -256,7 +256,7 @@ static memberlist *newmember(struct chanset_t *chan, char *nick)
 {
   memberlist *x = chan->channel.member, 
              *lx = NULL, 
-             *n = (memberlist *) my_calloc(1, sizeof(memberlist));
+             *n = (memberlist *) calloc(1, sizeof(memberlist));
 
   /* This sorts the list */
   while (x && x->nick[0] && (rfc_casecmp(x->nick, nick) < 0)) {
@@ -1369,8 +1369,8 @@ inline static char *
 take_massopline(char *op, char **to_op)
 {
   const size_t modes_len = 31, nicks_len = 151;
-  char *nicks = (char *) my_calloc(1, nicks_len),
-       *modes = (char *) my_calloc(1, modes_len),
+  char *nicks = (char *) calloc(1, nicks_len),
+       *modes = (char *) calloc(1, modes_len),
        *nick = NULL;
   bool useop = 0;
   static char ret[182] = "";
@@ -2595,7 +2595,7 @@ static void set_topic(struct chanset_t *chan, char *k)
     free(chan->channel.topic);
   if (k && k[0]) {
     size_t tlen = strlen(k) + 1;
-    chan->channel.topic = (char *) my_calloc(1, tlen);
+    chan->channel.topic = (char *) calloc(1, tlen);
     strlcpy(chan->channel.topic, k, tlen);
   } else
     chan->channel.topic = NULL;
@@ -2673,7 +2673,7 @@ static int gotjoin(char *from, char *chname)
     size_t l_chname = strlen(chname);
 
     if (l_chname > (CHANNEL_ID_LEN + 1)) {
-      char* ch_dname = (char *) my_calloc(1, l_chname + 1);
+      char* ch_dname = (char *) calloc(1, l_chname + 1);
       simple_snprintf(ch_dname, l_chname + 2, "!%s", chname + (CHANNEL_ID_LEN + 1));
       chan = findchan_by_dname(ch_dname);
       if (!chan) {

@@ -111,7 +111,7 @@ static void new_tbuf(char *bot)
 {
   tandbuf **old = &tbuf, *newbuf = NULL;
 
-  newbuf = (tandbuf *) my_calloc(1, sizeof(tandbuf));
+  newbuf = (tandbuf *) calloc(1, sizeof(tandbuf));
   strlcpy(newbuf->bot, bot, sizeof(newbuf->bot));
   newbuf->q = NULL;
   newbuf->timer = now;
@@ -165,11 +165,11 @@ static struct share_msgq *q_addmsg(struct share_msgq *qq, char *s)
   size_t siz = 0;
 
   if (!qq) {
-    q = (share_msgq *) my_calloc(1, sizeof *q);
+    q = (share_msgq *) calloc(1, sizeof *q);
 
     q->next = NULL;
     siz = strlen(s) + 1;
-    q->msg = (char *) my_calloc(1, siz);
+    q->msg = (char *) calloc(1, siz);
     strlcpy(q->msg, s, siz);
     return q;
   }
@@ -178,12 +178,12 @@ static struct share_msgq *q_addmsg(struct share_msgq *qq, char *s)
     cnt++;
   if (cnt > 1000)
     return NULL;                /* Return null: did not alter queue */
-  q->next = (share_msgq *) my_calloc(1, sizeof *q->next);
+  q->next = (share_msgq *) calloc(1, sizeof *q->next);
 
   q = q->next;
   q->next = NULL;
   siz = strlen(s) + 1;
-  q->msg = (char *) my_calloc(1, siz);
+  q->msg = (char *) calloc(1, siz);
   strlcpy(q->msg, s, siz);
   return qq;
 }
@@ -253,13 +253,13 @@ void dump_resync(int idx)
 static void
 add_delay(struct chanset_t *chan, int plsmns, int mode, char *mask)
 {
-  struct delay_mode *d = (struct delay_mode *) my_calloc(1, sizeof(struct delay_mode));
+  struct delay_mode *d = (struct delay_mode *) calloc(1, sizeof(struct delay_mode));
 
   d->chan = chan;
   d->plsmns = plsmns;
   d->mode = mode;
   size_t mlen = strlen(mask) + 1;
-  d->mask = (char *) my_calloc(1, mlen);
+  d->mask = (char *) calloc(1, mlen);
 
   strlcpy(d->mask, mask, mlen);
   d->seconds = (int) (now + randint(20));
@@ -657,7 +657,7 @@ share_change(int idx, char *par)
 
       if (uet->got_share) {
         if (!(e = find_user_entry(uet, u))) {
-          e = (struct user_entry *) my_calloc(1, sizeof(struct user_entry));
+          e = (struct user_entry *) calloc(1, sizeof(struct user_entry));
 
           e->type = uet;
           e->name = NULL;

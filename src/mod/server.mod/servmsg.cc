@@ -1680,7 +1680,7 @@ hide_chans(const char *nick, struct userrec *u, char *_channels, bool publicOnly
   struct chanset_t *chan = NULL;
   struct flag_record fr = { FR_CHAN | FR_GLOBAL, 0, 0, 0 };
 
-  char *chans = (char *) my_calloc(1, len), *p = NULL;
+  char *chans = (char *) calloc(1, len), *p = NULL;
 
   while ((chname = newsplit(&channels))[0]) {
     /* skip any modes in front of #chan */
