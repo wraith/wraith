@@ -920,10 +920,10 @@ append_line(int idx, char *line)
   } else {
     ++c->current_lines;
 
-    p = (struct msgq *) my_calloc(1, sizeof(struct msgq));
+    p = (struct msgq *) calloc(1, sizeof(struct msgq));
 
     p->len = l;
-    p->msg = (char *) my_calloc(1, l + 1);
+    p->msg = (char *) calloc(1, l + 1);
     p->next = NULL;
     strlcpy(p->msg, line, l + 1);
 
@@ -997,7 +997,7 @@ dcc_chat_pass(int idx, char *buf, int atr)
       dcc[idx].encrypt = 2;
       if (dcc[idx].bot) {
         dcc[idx].type = &DCC_BOT_NEW;
-        dcc[idx].u.bot = (struct bot_info *) my_calloc(1, sizeof(struct bot_info));
+        dcc[idx].u.bot = (struct bot_info *) calloc(1, sizeof(struct bot_info));
         if (dcc[idx].status & STAT_UNIXDOMAIN)
           dcc[idx].status = STAT_UNIXDOMAIN|STAT_CALLED;
         else
@@ -1806,11 +1806,11 @@ dcc_telnet_id(int idx, char *buf, int atr)
     } else if (in_chain(dcc[idx].nick)) {
 
       dcc[idx].type = &DCC_DUPWAIT;
-      dcc[idx].u.dupwait = (struct dupwait_info *) my_calloc(1, sizeof(struct dupwait_info));
+      dcc[idx].u.dupwait = (struct dupwait_info *) calloc(1, sizeof(struct dupwait_info));
       dcc[idx].u.dupwait->atr = atr;
       return;
     }
-//    dcc[idx].u.enc = (struct enc_link_dcc *) my_calloc(1, sizeof(struct enc_link_dcc));
+//    dcc[idx].u.enc = (struct enc_link_dcc *) calloc(1, sizeof(struct enc_link_dcc));
 //    dcc[idx].u.enc->method_number = 0;
 //    link_get_method(idx);
   } else {
@@ -1879,7 +1879,7 @@ dcc_telnet_pass(int idx, int atr)
 
   if (!dcc[idx].bot) {
     //bots dont need this
-    dcc[idx].u.chat = (struct chat_info *) my_calloc(1, sizeof(struct chat_info));
+    dcc[idx].u.chat = (struct chat_info *) calloc(1, sizeof(struct chat_info));
     struct chat_info dummy;
     strlcpy(dcc[idx].u.chat->con_chan, chanset ? chanset->dname : "*", sizeof(dummy.con_chan));
   }

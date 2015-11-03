@@ -86,7 +86,7 @@ void botnet_send_cmdpass(int idx, char *cmd, char *pass)
     char *buf = NULL;
     size_t siz = strlen(cmd) + strlen(pass) + 5 + 1;
 
-    buf = (char *) my_calloc(1, siz);
+    buf = (char *) calloc(1, siz);
 
     size_t len = simple_snprintf(buf, siz, "cp %s %s\n", cmd, pass);
     send_tand_but(idx, buf, len);

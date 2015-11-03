@@ -153,7 +153,7 @@ bf_encrypt_ecb_binary(const char *keydata, unsigned char *in, size_t *inlen)
   if (len % CRYPT_BLOCKSIZE)             /* more than 1 block? */
     len += (CRYPT_BLOCKSIZE - (len % CRYPT_BLOCKSIZE));
 
-  out = (unsigned char *) my_calloc(1, len + 1);
+  out = (unsigned char *) calloc(1, len + 1);
   memcpy(out, in, *inlen);
   *inlen = len;
 
@@ -179,7 +179,7 @@ bf_decrypt_ecb_binary(const char *keydata, unsigned char *in, size_t *len)
   unsigned char *out = NULL;
 
   *len -= *len % CRYPT_BLOCKSIZE;
-  out = (unsigned char *) my_calloc(1, *len + 1);
+  out = (unsigned char *) calloc(1, *len + 1);
   memcpy(out, in, *len);
 
   if (!keydata || !*keydata) {
@@ -209,7 +209,7 @@ bf_encrypt_cbc_binary(const char *keydata, unsigned char *in, size_t *inlen, uns
   if (len % CRYPT_BLOCKSIZE)             /* more than 1 block? */
     len += (CRYPT_BLOCKSIZE - (len % CRYPT_BLOCKSIZE));
 
-  out = (unsigned char *) my_calloc(1, len + 1);
+  out = (unsigned char *) calloc(1, len + 1);
   *inlen = len;
 
   if (!keydata || !*keydata) {
@@ -230,7 +230,7 @@ bf_decrypt_cbc_binary(const char *keydata, unsigned char *in, size_t *len, unsig
   unsigned char *out = NULL;
 
   *len -= *len % CRYPT_BLOCKSIZE;
-  out = (unsigned char *) my_calloc(1, *len + 1);
+  out = (unsigned char *) calloc(1, *len + 1);
 
   if (!keydata || !*keydata) {
     /* No key, no decryption */

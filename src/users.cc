@@ -138,7 +138,7 @@ void addignore(char *ign, char *from, const char *mnote, time_t expire_time)
     }
 
   if (p == NULL) {
-    p = (struct igrec *) my_calloc(1, sizeof(struct igrec));
+    p = (struct igrec *) calloc(1, sizeof(struct igrec));
     p->next = global_ign;
     global_ign = p;
   } else {
@@ -243,7 +243,7 @@ static void addmask_fully(struct chanset_t *chan, maskrec **m, maskrec **global,
 			 char *note, time_t expire_time, int flags,
 			 time_t added, time_t last)
 {
-  maskrec *p = (maskrec *) my_calloc(1, sizeof(maskrec));
+  maskrec *p = (maskrec *) calloc(1, sizeof(maskrec));
   maskrec **u = (chan) ? m : global;
 
   p->next = *u;
@@ -353,7 +353,7 @@ static void restore_ignore(char *host)
 	added = "0";
 	desc = NULL;
       }
-      p = (struct igrec *) my_calloc(1, sizeof(struct igrec));
+      p = (struct igrec *) calloc(1, sizeof(struct igrec));
 
       p->next = global_ign;
       global_ign = p;
@@ -703,7 +703,7 @@ int stream_readuserfile(bd::Stream& stream, struct userrec **ret)
 		if (!rfc_casecmp(cr->channel, chname))
 		  break;
 	      if (!cr) {
-		cr = (struct chanuserrec *) my_calloc(1, sizeof(struct chanuserrec));
+		cr = (struct chanuserrec *) calloc(1, sizeof(struct chanuserrec));
 
 		cr->next = u->chanrec;
 		u->chanrec = cr;
@@ -807,7 +807,7 @@ int stream_readuserfile(bd::Stream& stream, struct userrec **ret)
 	      if (ue->name && !strcasecmp(code + 2, ue->name)) {
 		struct list_type *list = NULL;
 
-		list = (struct list_type *) my_calloc(1, sizeof(struct list_type));
+		list = (struct list_type *) calloc(1, sizeof(struct list_type));
 
 		list->next = NULL;
                 list->extra = strdup(s);
@@ -816,13 +816,13 @@ int stream_readuserfile(bd::Stream& stream, struct userrec **ret)
 	      }
             /* if we don't have the entry, make it */
 	    if (!ok) {
-	      ue = (struct user_entry *) my_calloc(1, sizeof(struct user_entry));
+	      ue = (struct user_entry *) calloc(1, sizeof(struct user_entry));
 
-//	      ue->name = (char *) my_calloc(1, strlen(code + 1));
+//	      ue->name = (char *) calloc(1, strlen(code + 1));
               ue->name = strdup(code + 2);
 	      ue->type = NULL;
 //	      strcpy(ue->name, code + 2);
-	      ue->u.list = (struct list_type *) my_calloc(1, sizeof(struct list_type));
+	      ue->u.list = (struct list_type *) calloc(1, sizeof(struct list_type));
 
 	      ue->u.list->next = NULL;
               ue->u.list->extra = strdup(s);
@@ -1094,7 +1094,7 @@ static void autolink_random_hub(char *avoidbot) {
     if (glob_bot(fr) && strcasecmp(u->handle, conf.bot->nick) && (bot_hublevel(u) < 999)) {
       if (strcmp(u->handle, avoidbot)) {
         hl2 = hl;
-        hl = (struct hublist_entry *) my_calloc(1, sizeof(struct hublist_entry));
+        hl = (struct hublist_entry *) calloc(1, sizeof(struct hublist_entry));
 
         hl->next = hl2;
         hlc++;
@@ -1107,7 +1107,7 @@ static void autolink_random_hub(char *avoidbot) {
   /* We probably have 1 hub and avoided it :/ */
   if (!hlc && tmpu) {
     hl2 = hl;
-    hl = (struct hublist_entry *) my_calloc(1, sizeof(struct hublist_entry));
+    hl = (struct hublist_entry *) calloc(1, sizeof(struct hublist_entry));
     hl->next = hl2;
     hlc++;
     hl->u = tmpu;

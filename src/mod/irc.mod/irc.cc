@@ -301,7 +301,7 @@ void notice_invite(struct chanset_t *chan, char *handle, char *nick, char *uhost
 #ifdef CACHE
 static cache_t *cache_new(char *nick)
 {
-  cache_t *cache = (cache_t *) my_calloc(1, sizeof(cache_t));
+  cache_t *cache = (cache_t *) calloc(1, sizeof(cache_t));
 
   cache->next = NULL;
   strlcpy(cache->nick, nick, sizeof(cache->nick));
@@ -317,7 +317,7 @@ static cache_t *cache_new(char *nick)
 
 static cache_chan_t *cache_chan_add(cache_t *cache, char *chname)
 {
-  cache_chan_t *cchan = (cache_chan_t *) my_calloc(1, sizeof(cache_chan_t));
+  cache_chan_t *cchan = (cache_chan_t *) calloc(1, sizeof(cache_chan_t));
   
   cchan->next = NULL;
   strlcpy(cchan->dname, chname, sizeof(cchan->dname));
@@ -824,7 +824,7 @@ getin_request(char *botnick, char *code, char *par)
     if (chan->channel.mode & CHANKEY) {
       char *key = chan->channel.key[0] ? chan->channel.key : chan->key_prot;
       size_t siz = strlen(chan->dname) + strlen(key ? key : 0) + 6 + 1;
-      tmp = (char *) my_calloc(1, siz);
+      tmp = (char *) calloc(1, siz);
       simple_snprintf(tmp, siz, "gi K %s %s", chan->dname, key ? key : "");
       putbot(botnick, tmp);
       putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Sent key (%s)", botnick, nick, chan->dname, key ? key : "");
@@ -1125,7 +1125,7 @@ void
 my_setkey(struct chanset_t *chan, char *k)
 {
   free(chan->channel.key);
-  chan->channel.key = k ? strdup(k) : (char *) my_calloc(1, 1);
+  chan->channel.key = k ? strdup(k) : (char *) calloc(1, 1);
 }
 
 /* Adds a ban, exempt or invite mask to the list
@@ -1138,9 +1138,9 @@ new_mask(masklist *m, char *s, char *who)
   if (m->mask[0])
     return 1;                     /* Already existent mask */
 
-  m->next = (masklist *) my_calloc(1, sizeof(masklist));
+  m->next = (masklist *) calloc(1, sizeof(masklist));
   m->next->next = NULL;
-  m->next->mask = (char *) my_calloc(1, 1);
+  m->next->mask = (char *) calloc(1, 1);
   free(m->mask);
   m->mask = strdup(s);
   m->who = strdup(who);
@@ -1193,7 +1193,7 @@ killmember(struct chanset_t *chan, char *nick, bool cacheMember)
     putlog(LOG_MISC, "*", "(!) actually I know of %d members.", chan->channel.members);
   }
   if (unlikely(!chan->channel.member)) {
-    chan->channel.member = (memberlist *) my_calloc(1, sizeof(memberlist));
+    chan->channel.member = (memberlist *) calloc(1, sizeof(memberlist));
     chan->channel.member->nick[0] = 0;
     chan->channel.member->next = NULL;
   }

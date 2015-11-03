@@ -116,7 +116,7 @@ char *int_to_base64(unsigned int val)
 char *
 b64enc(const unsigned char *data, size_t len)
 {
-  char *dest = (char *) my_calloc(1, (len << 2) / 3 + 4 + 1);
+  char *dest = (char *) calloc(1, (len << 2) / 3 + 4 + 1);
 
   b64enc_buf(data, len, dest);
   return (dest);
@@ -171,7 +171,7 @@ b64enc_buf(const unsigned char *data, size_t len, char *dest)
 char *
 b64dec(const unsigned char *data, size_t *len)
 {
-  char *dest = (char *) my_calloc(1, ((*len * 3) >> 2) + 6 + 1);
+  char *dest = (char *) calloc(1, ((*len * 3) >> 2) + 6 + 1);
 
   b64dec_buf(data, len, dest);
   return (dest);
@@ -201,7 +201,7 @@ static char *
 b64enc_bd(const unsigned char *data, size_t *len)
 {
   size_t dlen = (((*len + (NUM_ASCII_BYTES - 1)) / NUM_ASCII_BYTES) * NUM_ENCODED_BYTES);
-  char *dest = (char *) my_calloc(1, dlen + 1);
+  char *dest = (char *) calloc(1, dlen + 1);
   b64enc_buf(data, *len, dest);
   *len = dlen;
   return (dest);
@@ -238,7 +238,7 @@ b64dec_bd_buf(const unsigned char *data, size_t *len, char *dest)
 static char *
 b64dec_bd(const unsigned char *data, size_t *len)
 {
-  char *dest = (char *) my_calloc(1, ((*len * 3) >> 2) + 6 + 1);
+  char *dest = (char *) calloc(1, ((*len * 3) >> 2) + 6 + 1);
   b64dec_bd_buf(data, len, dest);
   return dest;
 }

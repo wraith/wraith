@@ -696,7 +696,7 @@ void queue_server(int which, char *buf, int len)
       }
     }
 
-    struct msgq *q = (struct msgq *) my_calloc(1, sizeof(struct msgq));
+    struct msgq *q = (struct msgq *) calloc(1, sizeof(struct msgq));
 
     if (h->head) {
       if (!qnext) { //Not next, add to end of queue
@@ -709,7 +709,7 @@ void queue_server(int which, char *buf, int len)
     } else
       h->head = h->last = q;
     q->len = len;
-    q->msg = (char *) my_calloc(1, len + 1);
+    q->msg = (char *) calloc(1, len + 1);
     strlcpy(q->msg, buf, len + 1);
     ++(h->tot);
     h->warned = 0;
@@ -740,7 +740,7 @@ void add_server(char *ss)
     p = strchr(ss, ',');
     if (p)
       *p++ = 0;
-    x = (struct server_list *) my_calloc(1, sizeof(struct server_list));
+    x = (struct server_list *) calloc(1, sizeof(struct server_list));
 
     x->next = 0;
     x->port = 0;
@@ -762,7 +762,7 @@ void add_server(char *ss)
       }
 #endif /* USE_IPV6 */
       *q++ = 0;
-      x->name = (char *) my_calloc(1, q - ss);
+      x->name = (char *) calloc(1, q - ss);
       strlcpy(x->name, ss, q - ss);
       ss = q;
       q = strchr(ss, ':');
@@ -822,7 +822,7 @@ void next_server(int *ptr, char *servname, in_port_t *port, char *pass)
       i++;
     }
     /* Gotta add it: */
-    x = (struct server_list *) my_calloc(1, sizeof(struct server_list));
+    x = (struct server_list *) calloc(1, sizeof(struct server_list));
 
     x->next = 0;
     x->name = strdup(servname);

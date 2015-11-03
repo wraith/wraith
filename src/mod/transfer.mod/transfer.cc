@@ -92,7 +92,7 @@ static unsigned long pump_file_to_sock(FILE *file, long sock,
 {
   const unsigned long		 buf_len = pending_data >= PMAX_SIZE ?
 	  					PMAX_SIZE : pending_data;
-  char				*bf = (char *) my_calloc(1, buf_len);
+  char				*bf = (char *) calloc(1, buf_len);
   unsigned long	 actual_size;
 
   if (bf) {
@@ -467,7 +467,7 @@ void dcc_send(int idx, char *buf, int len)
     putlog(LOG_FILES, "*", "Problem writing file");
     fclose(dcc[idx].u.xfer->f);
     siz = strlen(tempdir) + strlen(dcc[idx].u.xfer->filename) + 1;
-    b = (char *) my_calloc(1, siz);
+    b = (char *) calloc(1, siz);
     strlcpy(b, tempdir, siz);
     strlcat(b, dcc[idx].u.xfer->filename, siz);
     unlink(b);
@@ -497,7 +497,7 @@ void dcc_send(int idx, char *buf, int len)
 	   dcc[idx].u.xfer->origname, dcc[idx].nick, dcc[idx].host);
     fclose(dcc[idx].u.xfer->f);
     siz = strlen(tempdir) + strlen(dcc[idx].u.xfer->filename) + 1;
-    b = (char *) my_calloc(1, siz);
+    b = (char *) calloc(1, siz);
     strlcpy(b, tempdir, siz);
     strlcat(b, dcc[idx].u.xfer->filename, siz);
     unlink(b);

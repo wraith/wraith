@@ -410,7 +410,7 @@ void load_internal_users()
     simple_snprintf(tmp, sizeof(tmp), "%li [internal]", (long)now);
     set_user(&USERENTRY_ADDED, u, tmp);
 
-    struct bot_addr *bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
+    struct bot_addr *bi = (struct bot_addr *) calloc(1, sizeof(struct bot_addr));
 
     bi->address = strdup(address.c_str());
     bi->telnet_port = bi->relay_port = port;
@@ -418,7 +418,7 @@ void load_internal_users()
     if (conf.bot->hub && (!bi->hublevel) && (!strcasecmp(handle.c_str(), conf.bot->nick))) {
       bi->hublevel = 99;
     }
-    bi->uplink = (char *) my_calloc(1, 1);
+    bi->uplink = (char *) calloc(1, 1);
     set_user(&USERENTRY_BOTADDR, u, bi);
     /* set_user(&USERENTRY_PASS, get_user_by_handle(userlist, handle.c_str()), SALT2); */
   }
@@ -498,9 +498,9 @@ static struct userrec* add_bot_userlist(char* bot) {
     userlist = adduser(userlist, bot, "none", "-", USER_OP, 1);
     u = get_user_by_handle(userlist, bot);
 
-    struct bot_addr *bi = (struct bot_addr *) my_calloc(1, sizeof(struct bot_addr));
-    bi->uplink = (char *) my_calloc(1, 1);
-    bi->address = (char *) my_calloc(1, 1);
+    struct bot_addr *bi = (struct bot_addr *) calloc(1, sizeof(struct bot_addr));
+    bi->uplink = (char *) calloc(1, 1);
+    bi->address = (char *) calloc(1, 1);
     bi->telnet_port = 3333;
     bi->relay_port = 3333;
     bi->hublevel = 999;
@@ -790,7 +790,7 @@ int do_chanset(char *result, struct chanset_t *chan, const char *options, int fl
     else
       bufsiz = strlen(options) + 1 + 5 + 1 + 1;
     
-    char *buf = (char*) my_calloc(1, bufsiz);
+    char *buf = (char*) calloc(1, bufsiz);
 
     strlcat(buf, "cset ", bufsiz);
     if (chan)
@@ -943,7 +943,7 @@ void set_fish_key(char *target, bd::String key)
     if (key == "rand") {
       // Set a RANDOM key
       const size_t randomKeyLength = 32;
-      char *rand_key = (char*)my_calloc(1, randomKeyLength+1);
+      char *rand_key = (char*)calloc(1, randomKeyLength+1);
       make_rand_str(rand_key, randomKeyLength);
       fishData->sharedKey = rand_key;
       free(rand_key);

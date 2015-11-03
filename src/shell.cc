@@ -114,7 +114,7 @@ void clear_tmp()
         strcmp(dir_ent->d_name, "..")) {
 
       flen = strlen(dir_ent->d_name) + strlen(tempdir) + 1;
-      file = (char *) my_calloc(1, flen);
+      file = (char *) calloc(1, flen);
 
       strlcat(file, tempdir, flen);
       strlcat(file, dir_ent->d_name, flen);
@@ -211,7 +211,7 @@ void check_last() {
               char *work = NULL;
               size_t siz = strlen(out) + 7 + 2 + 1;
 
-              work = (char *) my_calloc(1, siz);
+              work = (char *) calloc(1, siz);
 
               simple_snprintf(work, siz, STR("Login: %s"), out);
               detected(DETECT_LOGIN, work);
@@ -492,7 +492,7 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool
       if (fs == 0) {
         (*erroutput) = NULL;
       } else {
-        buf = (char *) my_calloc(1, fs + 1);
+        buf = (char *) calloc(1, fs + 1);
         fseek(err->f, 0, SEEK_SET);
         if (!fread(buf, 1, fs, err->f))
           fs = 0;
@@ -509,7 +509,7 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool
       if (fs == 0) {
         (*output) = NULL;
       } else {
-        buf = (char *) my_calloc(1, fs + 1);
+        buf = (char *) calloc(1, fs + 1);
         fseek(out->f, 0, SEEK_SET);
         if (!fread(buf, 1, fs, out->f))
           fs = 0;
