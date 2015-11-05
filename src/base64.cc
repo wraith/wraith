@@ -26,7 +26,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "base64.h"
-#include "src/compat/compat.h"
 #include <bdlib/src/String.h>
 
 static char *b64enc_bd(const unsigned char *data, size_t *len);
