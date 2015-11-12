@@ -1152,6 +1152,23 @@ static void got303(char *from, char *msg)
     nicks_available(msg, ' ', 0);
 }
 
+/*
+ * :<server> 421 <nick> <command> :Unknown command
+ */
+static void got421(char *from, char *msg)
+{
+  char *command = NULL;
+
+  newsplit(&msg);	/* nick */
+  command = newsplit(&msg);
+
+  if (use_monitor && !strcasecmp(command, "MONITOR")) {
+    /* The command doesn't work despite 005 claiming to have it.
+     * Disable MONITOR usage to fallback on ISON. */
+    use_monitor = 0;
+  }
+}
+
 /* 432 : Bad nickname (RESV)
  */
 static int got432(char *from, char *msg)
@@ -1988,6 +2005,7 @@ static cmd_t my_raw_binds[] =
   {"005",	"",	(Function) got005,		NULL, LEAF},
   {"302",       "",     (Function) got302,		NULL, LEAF},
   {"303",	"",	(Function) got303,		NULL, LEAF},
+  {"421",	"",	(Function) got421,		NULL, LEAF},
   {"432",	"",	(Function) got432,		NULL, LEAF},
   {"433",	"",	(Function) got433,		NULL, LEAF},
   {"437",	"",	(Function) got437,		NULL, LEAF},
