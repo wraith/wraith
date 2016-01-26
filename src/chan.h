@@ -314,7 +314,7 @@ struct chanset_t {
 #define CHAN_NOUSERINVITES  BIT21
 #define CHAN_FLAGGED        BIT22	/* flagged during rehash for delete   */
 #define CHAN_AUTOOP         BIT23
-//#define CHAN_MEANKICKS      BIT24	/* use mean/offensive kicks/bans */
+#define CHAN_MEANKICKS      BIT24	/* use mean/offensive kicks/bans */
 #define CHAN_VOICEBITCH     BIT25
 #define CHAN_FLOODBAN       BIT26
 
