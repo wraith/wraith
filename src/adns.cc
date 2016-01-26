@@ -1350,7 +1350,6 @@ int egg_dns_init()
 	if (!read_resolv(".resolv.conf")) {
 		read_resolv("/etc/resolv.conf");
 		/* some backup servers, probably will never be used. */
-		add_dns_server("4.2.2.2");
 		add_dns_server("8.8.8.8");
 		add_dns_server("8.8.4.4");
 	}

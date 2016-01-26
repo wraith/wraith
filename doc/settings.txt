@@ -3,7 +3,7 @@ bc botcmd
 bl botcmd ?
 gc botcmd *
 bm botmsg
-bs botset 
+bs botset
 op botcmd ? op
 cq clearqueue play
 +list set +
@@ -12,56 +12,21 @@ list set list
 -bot -user
 +bot newleaf
 
-# From http://stats.efnet.org with hubs removed
 :servers
-#US
-irc.choopa.net
-irc.colosolutions.net
-irc.mzima.net
-irc.servercentral.net
-irc.umich.edu
-irc2.choopa.net
-#EU
-efnet.port80.se
-efnet.portlane.se
-irc.ac.za
-irc.du.se
-irc.efnet.fr
-irc.efnet.pl
-irc.homelien.no
-irc.inet.tele.dk
-irc.underworld.no
-#CA
-irc.teksavvy.ca
 
 :servers6
-efnet.ipv6.port80.se
-efnet.portlane.se
-irc.ac.za
-irc.choopa.net
-irc.inet.tele.dk
-irc.ipv6.homelien.no
-irc.underworld.no
-irc.teksavvy.ca
+
+fc13.6176.aaca.8c7f.9f55.924f.26b3.4b14.h
+fc34.8675.ed95.600c.38d7.6eb8.f5b9.5bfa.h
+fca8.2dd7.4987.a9be.c8fc.34d7.5a1.4606.h
+fcec.ae97.8902.d810.6c92.ec67.efb2.3ec5.h
+fcf2.ff45.a10.2ca1.fb5c.426d.3505.4f18.h
+fcf4.e309.14b5.5498.cafd.4f59.4b9c.7f84.h
 
 :servers_ssl
-irc.choopa.net:9999
-irc.servercentral.net:9999
-irc.umich.edu:9999
-irc.underworld.no
 
 :servers6_ssl
-irc.choopa.net:9999
-irc.underworld.no
-irc.ipv6.homelien.no
-efnet.ipv6.port80.se
 
 :rbl
-dnsbl.proxybl.org
-rbl.efnetrbl.org
-tor.efnet.org
-dnsbl.swiftbl.org
-xbl.spamhaus.org
-rbl.efnetpro.com
 
 :end
