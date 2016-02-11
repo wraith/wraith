@@ -16,14 +16,16 @@ default: normal
 
 clean:
 	-+@cd bdlib && $(MAKE) clean
-	-+@[ -n "${LIBELF_BUNDLED}" ] && [ -f libelf/Makefile && \
-	    cd libelf && $(MAKE) clean
+	-+@if [ -n "${LIBELF_BUNDLED}" ] && [ -f libelf/Makefile ]; then \
+	    cd libelf && $(MAKE) clean; \
+	   fi
 	@rm -f *.a
 
 distclean: clean
 	-+@cd bdlib && $(MAKE) distclean
-	-+@[ -n "${LIBELF_BUNDLED}" ] && [ -f libelf/Makefile ] && \
-	    cd libelf && $(MAKE) distclean
+	-+@if [ -n "${LIBELF_BUNDLED}" ] && [ -f libelf/Makefile ]; then \
+	    cd libelf && $(MAKE) distclean; \
+	   fi
 
 notice:
 	@echo "[*] Making libraries"
