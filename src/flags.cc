@@ -51,6 +51,7 @@ struct rolecount role_counts[] = {
   {"revenge",	ROLE_REVENGE,	3},
   {"chanmode",	ROLE_CHANMODE,	1},
   {"protect",	ROLE_PROTECT,	2},
+  {"invite",	ROLE_INVITE,	1},
   {NULL,	0,		0},
 };
 

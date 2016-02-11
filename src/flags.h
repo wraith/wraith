@@ -78,6 +78,7 @@ extern struct rolecount role_counts[];
 #define ROLE_REVENGE  BIT9
 #define ROLE_CHANMODE BIT10
 #define ROLE_PROTECT  BIT11
+#define ROLE_INVITE   BIT12
 
 #define USER_DEFAULT	0
 
