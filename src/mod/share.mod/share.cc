@@ -929,7 +929,7 @@ share_ufyes(int idx, char *par)
         dcc[idx].u.bot->uff_flags |= UFF_CHDEFAULT;
 
     if (strstr(par, "stream")) {
-      updatebot(-1, dcc[idx].nick, '+', 0, 0, 0, NULL);
+      updatebot(-1, dcc[idx].nick, '+', 0, 0, 0, NULL, -1);
       /* Start up a tbuf to queue outgoing changes for this bot until the
        * userlist is done transferring.
        */
@@ -1480,7 +1480,7 @@ static void share_read_stream(int idx, bd::Stream& stream) {
   checkchans(1);                /* remove marked channels */
   var_parse_my_botset();
   reaffirm_owners();            /* Make sure my owners are +a   */
-  updatebot(-1, dcc[idx].nick, '+', 0, 0, 0, NULL);
+  updatebot(-1, dcc[idx].nick, '+', 0, 0, 0, NULL, -1);
   send_sysinfo();
 
   if (restarting && !keepnick) {
@@ -1590,7 +1590,7 @@ start_sending_users(int idx)
            i == DCCSEND_BADFN ? "BAD FILE" : i == DCCSEND_FEMPTY ? "EMPTY FILE" : "UNKNOWN REASON!");
     dcc[idx].status &= ~(STAT_SHARE | STAT_SENDING | STAT_AGGRESSIVE);
   } else {
-    updatebot(-1, dcc[idx].nick, '+', 0, 0, 0, NULL);
+    updatebot(-1, dcc[idx].nick, '+', 0, 0, 0, NULL, -1);
     dcc[idx].status |= STAT_SENDING;
     strlcpy(dcc[j].host, dcc[idx].nick, sizeof(dcc[j].host)); /* Store bot's nick */
     dprintf(idx, "s us %lu %d %lu\n", iptolong(getmyip()), dcc[j].port, dcc[j].u.xfer->length);
@@ -1615,7 +1615,7 @@ cancel_user_xfer(int idx, void *x)
   int i, j = -1;
   if (cancel_user_xfer_staylinked) {
     /* turn off sharing flag */
-    updatebot(-1, dcc[idx].nick, '-', 0, 0, 0, NULL);
+    updatebot(-1, dcc[idx].nick, '-', 0, 0, 0, NULL, -1);
   }
   flush_tbuf(dcc[idx].nick);
 

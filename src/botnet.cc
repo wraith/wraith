@@ -83,7 +83,7 @@ extern void counter_clear(const char* botnick);
 
 /* Add a tandem bot to our chain list
  */
-void addbot(char *who, char *from, char *next, char flag, int vlocalhub, time_t vbuildts, char *vcommit, char *vversion)
+void addbot(char *who, char *from, char *next, char flag, int vlocalhub, time_t vbuildts, char *vcommit, char *vversion, int fflags)
 {
   tand_t **ptr = &tandbot, *ptr2 = NULL;
 
@@ -98,6 +98,7 @@ void addbot(char *who, char *from, char *next, char flag, int vlocalhub, time_t 
   ptr2->share = flag;
   ptr2->localhub = vlocalhub;
   ptr2->buildts = vbuildts;
+  ptr2->fflags = fflags;
   strlcpy(ptr2->commit, vcommit, sizeof(ptr2->commit));
   if (vversion && vversion[0])
     strlcpy(ptr2->version, vversion, 121);
@@ -132,7 +133,7 @@ void check_should_backup()
 }
 #endif /* G_BACKUP */
 
-void updatebot(int idx, char *who, char share, int vlocalhub, time_t vbuildts, char *vcommit, char *vversion)
+void updatebot(int idx, char *who, char share, int vlocalhub, time_t vbuildts, char *vcommit, char *vversion, int fflags)
 {
   tand_t *ptr = findbot(who);
 
@@ -147,6 +148,10 @@ void updatebot(int idx, char *who, char share, int vlocalhub, time_t vbuildts, c
       strlcpy(ptr->commit, vcommit, sizeof(ptr->commit));
     if (vversion && vversion[0])
       strlcpy(ptr->version, vversion, 121);
+    /* -1 = unknown (do not modify) */
+    if (fflags != -1)
+      ptr->fflags = fflags;
+    /* Assign flags here */
     botnet_send_update(idx, ptr);
   }
 }

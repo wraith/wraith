@@ -293,6 +293,7 @@ bot_version(int idx, char *par)
   char x[1024] = "", *vversion = NULL, *vcommit = NULL;
   int vlocalhub = -1;
   time_t vbuildts = 0;
+  int fflags = -1;
 
   strlcpy(dcc[idx].u.bot->version, par, 120);
   newsplit(&par);               /* 'ver' */
@@ -334,7 +335,7 @@ bot_version(int idx, char *par)
       dcc[idx].hub = 1;
     }
 
-    botnet_send_nlinked(idx, dcc[idx].nick, conf.bot->nick, '!', vlocalhub, vbuildts, vcommit, vversion);
+    botnet_send_nlinked(idx, dcc[idx].nick, conf.bot->nick, '!', vlocalhub, vbuildts, vcommit, vversion, fflags);
   } else {
         // This is now done in share_endstartup
         //have_linked_to_hub = 1;
@@ -346,7 +347,7 @@ bot_version(int idx, char *par)
 
   touch_laston(dcc[idx].user, "linked", now);
   dcc[idx].type = &DCC_BOT;
-  addbot(dcc[idx].nick, dcc[idx].nick, conf.bot->nick, '-', vlocalhub, vbuildts, vcommit, vversion);
+  addbot(dcc[idx].nick, dcc[idx].nick, conf.bot->nick, '-', vlocalhub, vbuildts, vcommit, vversion, fflags);
   simple_snprintf(x, sizeof x, "v 1001500");
   bot_share(idx, x);
   dprintf(idx, "el\n");
