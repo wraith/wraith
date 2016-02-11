@@ -1785,6 +1785,10 @@ static void rebalance_roles_chan(struct chanset_t* chan)
     if (!chk_op(fr, chan)) {
       continue;
     }
+    /* Only consider bots that have the roles feature. */
+    if (!(m->user->fflags & FEATURE_ROLES)) {
+      continue;
+    }
     bots << m->user->handle;
   }
   botcount = bots.length();
