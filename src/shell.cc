@@ -56,7 +56,22 @@
 #include <signal.h>
 #ifdef HAVE_SYS_PRCTL_H
 #include <sys/prctl.h>
+#ifndef PR_SET_PTRACER
+#define PR_SET_PTRACER 0x59616d61
 #endif
+#endif
+#ifdef HAVE_SYS_PROCCTL_H
+#include <sys/procctl.h>
+#ifndef PROC_TRACE_CTL
+#define PROC_TRACE_CTL		7
+#endif
+#ifndef PROC_TRACE_STATUS
+#define PROC_TRACE_STATUS	8
+#endif
+#ifndef PROC_TRACE_CTL_DISABLE
+#define PROC_TRACE_CTL_DISABLE	2
+#endif
+#endif	/* HAVE_SYS_PROCCTL_H */
 #ifdef HAVE_SYS_PTRACE_H
 # include <sys/ptrace.h>
 #endif /* HAVE_SYS_PTRACE_H */
@@ -99,7 +114,7 @@ void clear_tmp()
         strcmp(dir_ent->d_name, "..")) {
 
       flen = strlen(dir_ent->d_name) + strlen(tempdir) + 1;
-      file = (char *) my_calloc(1, flen);
+      file = (char *) calloc(1, flen);
 
       strlcat(file, tempdir, flen);
       strlcat(file, dir_ent->d_name, flen);
@@ -196,7 +211,7 @@ void check_last() {
               char *work = NULL;
               size_t siz = strlen(out) + 7 + 2 + 1;
 
-              work = (char *) my_calloc(1, siz);
+              work = (char *) calloc(1, siz);
 
               simple_snprintf(work, siz, STR("Login: %s"), out);
               detected(DETECT_LOGIN, work);
@@ -259,21 +274,26 @@ void check_promisc()
 #endif /* SIOCGIFCONF */
 }
 
+#ifndef DEBUG
 bool traced = 0;
 
 static void got_sigtrap(int z)
 {
   traced = 0;
 }
+#endif
 
 void check_trace(int start)
 {
 #ifdef DEBUG
-#ifdef PR_SET_PTRACER
+#ifdef PR_SET_PTRACER_ANY
   if (start == 1)
     prctl(PR_SET_PTRACER, PR_SET_PTRACER_ANY, 0, 0, 0);
 #endif
   return;
+#else
+#if defined(HAVE_PROCCTL) && defined(PROC_TRACE_CTL)
+  int status = 0;
 #endif
 
   if (start == 0 && trace == DET_IGNORE)
@@ -281,12 +301,26 @@ void check_trace(int start)
 
   pid_t parent = getpid();
 
-  /* we send ourselves a SIGTRAP, if we recieve, we're not being traced, otherwise we are. */
-  signal(SIGTRAP, got_sigtrap);
-  traced = 1;
-  raise(SIGTRAP);
-  /* no longer need this__asm__("INT3"); //SIGTRAP */
-  signal(SIGTRAP, SIG_DFL);
+#if defined(HAVE_PROCCTL) && defined(PROC_TRACE_CTL)
+  /* FreeBSD let's us know if we're being traced already. */
+  if (procctl(P_PID, parent, PROC_TRACE_STATUS, &status) == 0 &&
+      status > 0) {
+    /* status contains the pid of the tracer. Be mean. */
+    kill(status, SIGSEGV);
+    traced = 1;
+  }
+#endif
+
+  if (!traced) {
+    /* we send ourselves a SIGTRAP, if we recieve, we're not being traced,
+     * otherwise we might be. The debugger may smartly just forward the
+     * signal if it knows it didn't request it, such as FreeBSD truss
+     * after r288903. */
+    signal(SIGTRAP, got_sigtrap);
+    traced = 1;
+    raise(SIGTRAP);
+    signal(SIGTRAP, SIG_DFL);
+  }
 
   if (!traced) {
     signal(SIGINT, got_sigtrap);
@@ -305,10 +339,36 @@ void check_trace(int start)
     if (!start)
       return;
 
+    int tracing_safe = 0;
+
+#if defined(HAVE_PRCTL) && defined(PR_SET_DUMPABLE) && defined(PR_GET_DUMPABLE)
+    /* Try to disable ptrace and core dumping entirely. */
+    if (prctl(PR_GET_DUMPABLE) == 0 ||
+        (prctl(PR_SET_DUMPABLE, 0) == 0 && prctl(PR_GET_DUMPABLE) == 0)) {
+      tracing_safe = 1;
+    }
+#elif defined(HAVE_PROCCTL) && defined(PROC_TRACE_CTL)
+    if ((procctl(P_PID, parent, PROC_TRACE_STATUS, &status) == 0 &&
+        status == -1) ||
+        (status = PROC_TRACE_CTL_DISABLE,
+        procctl(P_PID, parent, PROC_TRACE_CTL, &status) == 0)) {
+      tracing_safe = 1;
+    }
+#endif
+    if (tracing_safe) {
+      /* We're safe! Don't bother with further checks. */
+      putlog(LOG_DEBUG, "*", "Ptrace disabled, no longer checking.");
+      trace = DET_IGNORE;
+      return;
+    }
+
 #ifndef __sun__
     int x, i, filedes[2];
 
-    (void)pipe(filedes);
+    if (pipe(filedes) != 0) {
+      /* Could be a temporary failure, don't be harsh. */
+      return;
+    }
 
   /* now, let's attempt to ptrace ourself */
     switch ((x = fork())) {
@@ -322,6 +382,8 @@ void check_trace(int start)
 
         i = ptrace(PT_ATTACH, parent, 0, 0);
         if (i == -1 &&
+            /* Linux compat or otherwise removed syscall. Just ignore. */
+            errno != ENOSYS &&
         /* EPERM is given on fbsd when security.bsd.unprivileged_proc_debug=0 */
 #ifdef __FreeBSD__
             errno != EPERM &&
@@ -339,17 +401,21 @@ void check_trace(int start)
         exit(0);
       default:		//parent
 #ifdef PR_SET_PTRACER
-        // Allow the child to debug the parent on Ubuntu
-        // https://wiki.ubuntu.com/SecurityTeam/Roadmap/KernelHardening#ptrace
+        // Allow the child to debug the parent on Linux 3.4+
+        // https://github.com/torvalds/linux/commit/2d514487faf188938a4ee4fb3464eeecfbdcf8eb
         prctl(PR_SET_PTRACER, x, 0, 0, 0);
 #endif
-        (void)write(filedes[1], "+", 1);
+        /* Not likely to happen, but make debian FORTIFY_SOURCE happy. */
+        if (write(filedes[1], "+", 1) != 1) {
+          kill(x, SIGKILL);
+        }
         waitpid(x, NULL, 0);
         close(filedes[0]);
         close(filedes[1]);
     }
 #endif
   }
+#endif	/* !DEBUG */
 }
 
 int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool simple)
@@ -408,8 +474,8 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool
     size_t fs = 0;
 
 #ifdef PR_SET_PTRACER
-    // Allow the child to debug the parent on Ubuntu
-    // https://wiki.ubuntu.com/SecurityTeam/Roadmap/KernelHardening#ptrace
+    // Allow the child to debug the parent on Linux 3.4+
+    // https://github.com/torvalds/linux/commit/2d514487faf188938a4ee4fb3464eeecfbdcf8eb
     prctl(PR_SET_PTRACER, x, 0, 0, 0);
 #endif
 
@@ -426,7 +492,7 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool
       if (fs == 0) {
         (*erroutput) = NULL;
       } else {
-        buf = (char *) my_calloc(1, fs + 1);
+        buf = (char *) calloc(1, fs + 1);
         fseek(err->f, 0, SEEK_SET);
         if (!fread(buf, 1, fs, err->f))
           fs = 0;
@@ -443,7 +509,7 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool
       if (fs == 0) {
         (*output) = NULL;
       } else {
-        buf = (char *) my_calloc(1, fs + 1);
+        buf = (char *) calloc(1, fs + 1);
         fseek(out->f, 0, SEEK_SET);
         if (!fread(buf, 1, fs, out->f))
           fs = 0;

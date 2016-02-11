@@ -373,7 +373,7 @@ readcfg(const char *cfgfile, bool read_stdin)
 #define ADD_ERROR(str) \
   if (line != -1) { \
     fprintf(stderr, "\n[Line %2d]: %s\n", line, str); \
-    error_line = (line_list_t *) my_calloc(1, sizeof(line_list_t)); \
+    error_line = (line_list_t *) calloc(1, sizeof(line_list_t)); \
     error_line->line = line; \
     error_line->next = NULL; \
     list_append((struct list_type **) &(error_list), (struct list_type *) error_line); \
@@ -693,7 +693,7 @@ int check_bin_initialized(const char *fname)
 bool check_bin_compat(const char *fname)
 {
   size_t len = strlen(shell_escape(fname)) + 3 + 1;
-  char *path = (char *) my_calloc(1, len);
+  char *path = (char *) calloc(1, len);
 
   char *out = NULL;
 
@@ -822,7 +822,7 @@ void reload_bin_data() {
       oldbots = conf_bots_dup(conf.bots);
 
     /* Save the old conf.bot */
-    oldbot = (conf_bot *) my_calloc(1, sizeof(conf_bot));
+    oldbot = (conf_bot *) calloc(1, sizeof(conf_bot));
     conf_bot_dup(oldbot, conf.bot);
 
     /* free up our current conf struct */

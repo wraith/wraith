@@ -35,6 +35,11 @@ void privmsg(bd::String target, bd::String msg, int idx);
 void notice(bd::String target, bd::String msg, int idx);
 void keyx(const bd::String& target);
 void set_fish_key(char *, bd::String);
+struct userrec *check_chanlist(const char *);
+struct userrec *check_chanlist_hand(const char *);
+memberlist *ismember(const struct chanset_t *, const char *);
+struct chanset_t *findchan(const char *name);
+struct chanset_t *findchan_by_dname(const char *name);
 
 extern struct chanset_t		*chanset, *chanset_default;
 extern char			admin[], origbotnick[HANDLEN + 1], origbotname[NICKLEN], jupenick[NICKLEN], botname[NICKLEN], *def_chanset;

@@ -17,16 +17,13 @@ list set list
 #US
 irc.choopa.net
 irc.colosolutions.net
-irc.eversible.com
 irc.mzima.net
-irc.paraphysics.net
 irc.servercentral.net
 irc.umich.edu
 irc2.choopa.net
 #EU
 efnet.port80.se
 efnet.portlane.se
-efnet.xs4all.nl
 irc.ac.za
 irc.du.se
 irc.efnet.fr
@@ -35,39 +32,29 @@ irc.homelien.no
 irc.inet.tele.dk
 irc.underworld.no
 #CA
-irc.arcti.ca
-irc.choopa.ca
 irc.teksavvy.ca
 
 :servers6
 efnet.ipv6.port80.se
-efnet.ipv6.xs4all.nl
 efnet.portlane.se
 irc.ac.za
-irc.choopa.ca
 irc.choopa.net
 irc.inet.tele.dk
 irc.ipv6.homelien.no
-irc.ipv6.paraphysics.net
 irc.underworld.no
 irc.teksavvy.ca
 
 :servers_ssl
-efnet.xs4all.nl
-irc.choopa.ca:9999
 irc.choopa.net:9999
-irc.eversible.com:9999
-irc.paraphysics.net
 irc.servercentral.net:9999
 irc.umich.edu:9999
 irc.underworld.no
 
 :servers6_ssl
-efnet.ipv6.xs4all.nl
-irc.choopa.ca:9999
 irc.choopa.net:9999
-irc.ipv6.paraphysics.net
 irc.underworld.no
+irc.ipv6.homelien.no
+efnet.ipv6.port80.se
 
 :rbl
 dnsbl.proxybl.org

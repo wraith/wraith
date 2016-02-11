@@ -70,9 +70,9 @@ init_dcc()
   if (max_dcc < 1)
     max_dcc = 1;
   if (dcc)
-    dcc = (struct dcc_t *) my_realloc(dcc, sizeof(struct dcc_t) * max_dcc);
+    dcc = (struct dcc_t *) realloc(dcc, sizeof(struct dcc_t) * max_dcc);
   else
-    dcc = (struct dcc_t *) my_calloc(1, sizeof(struct dcc_t) * max_dcc);
+    dcc = (struct dcc_t *) calloc(1, sizeof(struct dcc_t) * max_dcc);
 }
 
 /* Replace \n with \r\n */
@@ -375,7 +375,7 @@ dprintf_real(int idx, char* buf, size_t len, size_t bufsiz, const char* target)
       bounce_simul(idx, buf);
     } else if (unlikely(dcc[idx].irc)) {
 //      size_t size = strlen(dcc[idx].simulbot) + strlen(buf) + 20;
-//      char *ircbuf = (char *) my_calloc(1, size);
+//      char *ircbuf = (char *) calloc(1, size);
 
 //      simple_snprintf(ircbuf, size, "PRIVMSG %s :%s", dcc[idx].simulbot, buf);
 //      tputs(dcc[idx].sock, ircbuf, strlen(ircbuf));
@@ -771,7 +771,7 @@ new_dcc(struct dcc_table *type, int xtra_size)
 
   dcc[i].type = type;
   if (xtra_size)
-    dcc[i].u.other = (char *) my_calloc(1, xtra_size);
+    dcc[i].u.other = (char *) calloc(1, xtra_size);
   else
     dcc[i].u.other = NULL;
   dcc[i].simul = -1;
@@ -795,7 +795,7 @@ changeover_dcc(int i, struct dcc_table *type, int xtra_size)
   }
   dcc[i].type = type;
   if (xtra_size)
-    dcc[i].u.other = (char *) my_calloc(1, xtra_size);
+    dcc[i].u.other = (char *) calloc(1, xtra_size);
 }
 
 int
@@ -983,7 +983,7 @@ listen_all(in_port_t lport, bool off, bool should_v6)
           if (i > 0) {
 #endif /* USE_IPV6 */
             if (!pmap) {
-              pmap = (struct portmap *) my_calloc(1, sizeof(struct portmap));
+              pmap = (struct portmap *) calloc(1, sizeof(struct portmap));
               pmap->next = root;
               root = pmap;
             }
@@ -1210,7 +1210,7 @@ void set_cmd_pass(char *ln, int shareit)
       free(cp);
   } else if (ln[0]) {
     /* create */
-    cp = (struct cmd_pass *) my_calloc(1, sizeof(struct cmd_pass));
+    cp = (struct cmd_pass *) calloc(1, sizeof(struct cmd_pass));
     cp->next = cmdpass;
     cmdpass = cp;
     cp->name = strdup(cmd);

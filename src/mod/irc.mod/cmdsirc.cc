@@ -679,9 +679,9 @@ static void cmd_mmode(int idx, char *par)
   }
 
 
-  memberlist** targets = (memberlist**) my_calloc(1, chan->channel.members * sizeof(memberlist *));
-  int* overlaps = (int *) my_calloc(1, chan->channel.members * sizeof(int *));
-  memberlist** chanbots = (memberlist **) my_calloc(1, chan->channel.members * sizeof(memberlist *));
+  memberlist** targets = (memberlist**) calloc(1, chan->channel.members * sizeof(memberlist *));
+  int* overlaps = (int *) calloc(1, chan->channel.members * sizeof(int *));
+  memberlist** chanbots = (memberlist **) calloc(1, chan->channel.members * sizeof(memberlist *));
   memberlist *m = NULL;
   int chanbotcount = 0, targetcount = 0;
 
@@ -888,13 +888,13 @@ static void cmd_mmode(int idx, char *par)
   dprintf(idx, "  %d assumed modes per target nick.\n", overlap);
 
   int tpos = 0, bpos = 0, i = 0;
-  char **work_list = (char**) my_calloc((int)bots, sizeof(char**));
+  char **work_list = (char**) calloc((int)bots, sizeof(char**));
   char *work = NULL;
   size_t work_size = 2048;
 
   /* now use bots/modes to distribute nicks to MODE on */
   while (bots) {
-    work = work_list[bpos] = (char*) my_calloc(1, work_size);
+    work = work_list[bpos] = (char*) calloc(1, work_size);
 
     if (local) {
       strlcpy(work, mode, work_size);
@@ -1290,8 +1290,8 @@ static void cmd_find(int idx, char *par)
         if ((!lookup_user && wild_match(par, m->from)) || (lookup_user && m->user == u)) {
           fcount++;
           if (!found) {
-            found = (memberlist **) my_calloc(1, sizeof(memberlist *) * 100);
-            cfound = (struct chanset_t **) my_calloc(1, sizeof(struct chanset_t *) * 100);
+            found = (memberlist **) calloc(1, sizeof(memberlist *) * 100);
+            cfound = (struct chanset_t **) calloc(1, sizeof(struct chanset_t *) * 100);
           }
           found[fcount - 1] = m;
           cfound[fcount - 1] = chan;

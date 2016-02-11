@@ -145,9 +145,9 @@ void init_net()
   MAXSOCKS = max_dcc + 10;
 
   if (socklist)
-    socklist = (sock_list *) my_realloc((void *) socklist, sizeof(sock_list) * MAXSOCKS);
+    socklist = (sock_list *) realloc((void *) socklist, sizeof(sock_list) * MAXSOCKS);
   else
-    socklist = (sock_list *) my_calloc(1, sizeof(sock_list) * MAXSOCKS);
+    socklist = (sock_list *) calloc(1, sizeof(sock_list) * MAXSOCKS);
 
   for (int i = 0; i < MAXSOCKS; i++) {
     bzero(&socklist[i], sizeof(socklist[i]));

@@ -151,7 +151,7 @@ static const char *ghost_write(int snum, const char *src, size_t *len)
   char *srcbuf = NULL, *line = NULL, *eol = NULL, *eline = NULL;
 
   const size_t bufsiz = *len + 9 + 1;
-  srcbuf = (char *) my_calloc(1, bufsiz);
+  srcbuf = (char *) calloc(1, bufsiz);
   strlcpy(srcbuf, src, bufsiz);
   line = srcbuf;
   buf[0] = 0;
