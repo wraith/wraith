@@ -242,7 +242,8 @@ greet_new_bot(int idx)
     dcc[idx].status |= STAT_LEAF;
   dcc[idx].status |= STAT_LINKING;
 
-  dprintf(idx, "v 1001500 9 Wraith %s <%s> %d %li %s %s\n", egg_version, "-", conf.bot->localhub, (long)buildts, commit, egg_version);
+  dprintf(idx, "v 1001500 9 Wraith %s %d %d %li %s %s\n", egg_version,
+      ALL_FEATURE_FLAGS, conf.bot->localhub, (long)buildts, commit, egg_version);
 
   for (int i = 0; i < dcc_total; i++) {
     if (dcc[i].type && dcc[i].type == &DCC_FORK_BOT) {
@@ -255,6 +256,8 @@ greet_new_bot(int idx)
 static void
 bot_version(int idx, char *par)
 {
+  char *work;
+
   dcc[idx].timeval = now;
   if (in_chain(dcc[idx].nick)) {
     dprintf(idx, "error Sorry, already connected.\n");
@@ -265,8 +268,6 @@ bot_version(int idx, char *par)
   }
 
   if ((par[0] >= '0') && (par[0] <= '9')) {
-    char *work = NULL;
-
     work = newsplit(&par);
     dcc[idx].u.bot->numver = atoi(work);
     /* old numver crap */
@@ -298,7 +299,14 @@ bot_version(int idx, char *par)
   strlcpy(dcc[idx].u.bot->version, par, 120);
   newsplit(&par);               /* 'ver' */
   newsplit(&par);               /* handlen */
-  newsplit(&par);               /* network */
+  /* fflags / (backward compat: network) */
+  if (par[0]) {
+    work = newsplit(&par);
+    /* Must support older bots which sent '<->' here for network. */
+    if (strcmp(work, "<->")) {
+      fflags = atoi(work);
+    }
+  }
   if (par[0])
     vlocalhub = atoi(newsplit(&par));
   if (par[0])

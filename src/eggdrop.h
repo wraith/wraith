@@ -144,6 +144,7 @@ enum {		/* TAKE A GUESS */
 #define have_cmd(name, flags) ((!is_restricted_cmd(name)) && (!(flags & (HUB|LEAF)) || (flags & HUB && conf.bot->hub) || (flags & LEAF && !conf.bot->hub)))
 
 
+#define FEATURE_ROLES		BIT0
+#define ALL_FEATURE_FLAGS	(FEATURE_ROLES)
+
 #endif				/* _EGG_EGGDROP_H */
-
-
