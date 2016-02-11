@@ -98,7 +98,6 @@ void addbot(char *who, char *from, char *next, char flag, int vlocalhub, time_t 
   ptr2->share = flag;
   ptr2->localhub = vlocalhub;
   ptr2->buildts = vbuildts;
-  ptr2->fflags = fflags;
   strlcpy(ptr2->commit, vcommit, sizeof(ptr2->commit));
   if (vversion && vversion[0])
     strlcpy(ptr2->version, vversion, 121);
@@ -110,6 +109,13 @@ void addbot(char *who, char *from, char *next, char flag, int vlocalhub, time_t 
   ptr2->hub = is_hub(who);
   /* Cache user record */
   ptr2->u = userlist ? get_user_by_handle(userlist, who) : NULL;
+  ptr2->fflags = fflags;
+  if (fflags != -1) {
+    char buf[15];
+
+    simple_snprintf(buf, sizeof(buf), "%d", ptr2->fflags);
+    set_user(&USERENTRY_FFLAGS, ptr2->u ? ptr2->u : get_user_by_handle(userlist, who), buf);
+  }
   if (!strcasecmp(next, conf.bot->nick))
     ptr2->uplink = (tand_t *) 1;
   else
@@ -149,8 +155,13 @@ void updatebot(int idx, char *who, char share, int vlocalhub, time_t vbuildts, c
     if (vversion && vversion[0])
       strlcpy(ptr->version, vversion, 121);
     /* -1 = unknown (do not modify) */
-    if (fflags != -1)
+    if (fflags != -1) {
+      char buf[15];
+
       ptr->fflags = fflags;
+      simple_snprintf(buf, sizeof(buf), "%d", ptr->fflags);
+      set_user(&USERENTRY_FFLAGS, ptr->u ? ptr->u : get_user_by_handle(userlist, who), buf);
+    }
     /* Assign flags here */
     botnet_send_update(idx, ptr);
   }
