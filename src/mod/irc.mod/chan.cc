@@ -1222,7 +1222,7 @@ static void check_this_member(struct chanset_t *chan, char *nick, struct flag_re
        (!loading && userlist && chan_bitch(chan) && !chk_op(*fr, chan)) ) ) {
     /* if (target_priority(chan, m, 1)) */
       add_mode(chan, '-', 'o', m);
-  } else if (!chan_hasop(m) && dovoice(chan) && m->user && !u_pass_match(m->user, "-") && chk_autoop(*fr, chan)) {
+  } else if (!chan_hasop(m) && dovoice(chan) && chk_autoop(m, *fr, chan)) {
     do_op(m, chan, 1, 0);
   }
   if (dovoice(chan)) {
@@ -2857,17 +2857,15 @@ static int gotjoin(char *from, char *chname)
         }
 #endif /* CACHE */
         if (!splitjoin) {
-          bool common_checks = dovoice(chan) && !glob_bot(fr);
-
           /* Autoop */
           if (!chan_hasop(m) && 
                (op || 
-               (common_checks && !u_pass_match(m->user, "-") && chk_autoop(fr, chan)))) {
+               (dovoice(chan) && chk_autoop(m, fr, chan)))) {
             do_op(m, chan, 1, 0);
           }
 
           /* +v or +voice */
-          if (!chan_hasvoice(m) && common_checks) {
+          if (!chan_hasvoice(m) && dovoice(chan)) {
             if (m->user) {
               if (!(m->flags & EVOICE) &&
                   (
