@@ -12,6 +12,7 @@
   * Fix invites not being applied in -dynamicinvites channels when +i is set.
   * Fix not handling auto-op in minutely channel rechecks.
   * Fix auto-voice and auto-op not applying after a nick change.
+  * Don't truncate bot's join time on .reset.
 
 # 1.4.6
   * Disable demo TCL support by default to prevent confusion during build.
