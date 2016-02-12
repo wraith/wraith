@@ -2721,8 +2721,7 @@ static int gotjoin(char *from, char *chname)
 //	m->flags |= STOPWHO;
         irc_log(chan, "%s returned from netsplit", m->nick);
 
-
-        if (m && !m->user) {
+        if (!m->user) {
           member_getuser(m);
  
           if (!m->user && !m->userip[0] && doresolv(chan)) {
