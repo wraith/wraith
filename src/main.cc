@@ -205,6 +205,8 @@ void fatal(const char *s, int recoverable)
 //    if (conf.bot && conf.bot->pid_file)
 //      unlink(conf.bot->pid_file);
     exit(1);
+  } else {
+    ContextNote(__func__, s);
   }
 }
 
