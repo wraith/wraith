@@ -1230,7 +1230,7 @@ static void check_this_member(struct chanset_t *chan, char *nick, struct flag_re
        (!loading && userlist && chan_bitch(chan) && !chk_op(*fr, chan)) ) ) {
     /* if (target_priority(chan, m, 1)) */
       add_mode(chan, '-', 'o', m);
-  } else if (!chan_hasop(m) && (chan->role & ROLE_OP) && chk_autoop(m->user, *fr, chan)) {
+  } else if (!chan_hasop(m) && (chan->role & ROLE_OP) && chk_autoop(m, *fr, chan)) {
     do_op(m, chan, 1, 0);
   }
   if (dovoice(chan)) {
@@ -2891,7 +2891,7 @@ static int gotjoin(char *from, char *chname)
           /* Autoop */
           if (!chan_hasop(m) && 
                (op || 
-               ((chan->role & ROLE_OP) && chk_autoop(m->user, fr, chan)))) {
+               ((chan->role & ROLE_OP) && chk_autoop(m, fr, chan)))) {
             do_op(m, chan, 1, 0);
           }
 
