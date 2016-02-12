@@ -182,6 +182,10 @@ void clear_cached_users()
 
   conf.bot->u = NULL;
 
+  for (conf_bot *bot = conf.bots; bot; bot = bot->next) {
+    bot->u = NULL;
+  }
+
   for (tand_t* bot = tandbot; bot; bot = bot->next) {
     bot->u = NULL;
   }
@@ -201,6 +205,12 @@ void cache_users()
 
   if (conf.bot->u == NULL) {
     conf.bot->u = get_user_by_handle(userlist, conf.bot->nick);
+  }
+
+  for (conf_bot *bot = conf.bots; bot; bot = bot->next) {
+    if (bot->u == NULL) {
+      bot->u = get_user_by_handle(userlist, bot->nick);
+    }
   }
 
   for (tand_t* bot = tandbot; bot; bot = bot->next) {
