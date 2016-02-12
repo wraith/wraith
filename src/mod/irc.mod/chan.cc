@@ -2865,7 +2865,7 @@ static int gotjoin(char *from, char *chname)
           }
 
           /* +v or +voice */
-          if (!chan_hasvoice(m) && dovoice(chan)) {
+          if (!chan_hasvoice(m) && !glob_bot(fr) && dovoice(chan)) {
             if (m->user) {
               if (!(m->flags & EVOICE) &&
                   (
