@@ -1215,13 +1215,10 @@ void recheck_channel_modes(struct chanset_t *chan)
   }
 }
 
-static void check_this_member(struct chanset_t *chan, char *nick, struct flag_record *fr)
+static void check_this_member(struct chanset_t *chan, memberlist *m,
+    struct flag_record *fr)
 {
-  if (match_my_nick(nick) || !me_op(chan))
-    return;
-
-  memberlist *m = ismember(chan, nick);
-  if (!m)
+  if (!m || m->is_me || !me_op(chan))
     return;
 
   /* +d or bitch and not an op
@@ -1338,7 +1335,7 @@ void check_this_user(char *hand, int del, char *host)
       }
       if (check_member) {
         get_user_flagrec(u, &fr, chan->dname, chan);
-        check_this_member(chan, m->nick, &fr);
+        check_this_member(chan, m, &fr);
       }
     }
   }
@@ -1589,7 +1586,7 @@ void recheck_channel(struct chanset_t *chan, int dobans)
       //Already a bot opped, dont bother resetting masks
       if (glob_bot(fr) && chan_hasop(m) && !m->is_me)
         stop_reset = 1;
-      check_this_member(chan, m->nick, &fr);
+      check_this_member(chan, m, &fr);
     }
 
     //Only reset masks if the bot has already received the ban list before (meaning it has already been opped once)
@@ -3122,7 +3119,7 @@ static int gotnick(char *from, char *msg)
 
       /* nick-ban or nick is +k or something? */
       get_user_flagrec(m->user, &fr, chan->dname, chan);
-      check_this_member(chan, m->nick, &fr);
+      check_this_member(chan, m, &fr);
     }
   }
   return 0;
