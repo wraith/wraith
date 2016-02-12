@@ -543,7 +543,7 @@ static void cmd_op(int idx, char *par)
     return;
   }
 
-  if (do_op(nick, chan, 0, 1)) {
+  if (do_op(m, chan, 0, 1)) {
     dprintf(idx, "Gave op to %s on %s.\n", nick, chan->dname);
     stats_add(u, 0, 1);
   }
@@ -1235,7 +1235,7 @@ static void cmd_mop(int idx, char *par)
         if (!chan_hasop(m) && !glob_bot(victim) && chk_op(victim, chan)) {
           found = 1;
           dprintf(idx, "Gave op to '%s' as '%s' on %s\n", m->user->handle, m->nick, chan->dname);
-          do_op(m->nick, chan, 0, 0);
+          do_op(m, chan, 0, 0);
         }
       }
     } else {

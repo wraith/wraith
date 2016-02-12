@@ -108,6 +108,27 @@ void sdprintf (const char *format, ...)
 #endif
 }
 
+void _assert(int recoverable, const char *file, int line, const char *function,
+    const char *exp, const char *format, ...)
+{
+    char msg[1024], buf[1024];
+    va_list va;
+
+    if (format != NULL) {
+      va_start(va, format);
+      egg_vsnprintf(msg, sizeof(msg), format, va);
+      va_end(va);
+    }
+
+    simple_snprintf(buf, sizeof(buf),
+        STR("Assertion failed%s: (%s:%d:%s) [%s]%s%s"),
+        recoverable == 0 ? "" : " (ignoring)",
+        file, line, function, exp,
+        format != NULL ? ": ": "",
+        format != NULL ? msg : "");
+    fatal(buf, recoverable);
+}
+
 static void write_debug(bool fatal = 1)
 {
   if (fatal) {

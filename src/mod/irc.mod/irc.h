@@ -86,7 +86,7 @@ static void rebalance_roles_chan(struct chanset_t* chan);
 
 static int detect_offense(memberlist*, struct chanset_t *, char *);
 /* static int target_priority(struct chanset_t *, memberlist *, int); */
-static bool do_op(char *, struct chanset_t *, bool, bool);
+static bool do_op(memberlist *, struct chanset_t *, bool, bool);
 static void request_op(struct chanset_t *);
 static void request_in(struct chanset_t *);
 static bool detect_chan_flood(memberlist *m, const char* from, struct chanset_t *chan, flood_t which, const char *msg = NULL);
