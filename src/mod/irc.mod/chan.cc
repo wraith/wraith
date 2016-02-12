@@ -3074,22 +3074,13 @@ static int gotnick(char *from, char *msg)
 
       detect_chan_flood(m, from, chan, FLOOD_NICK);
 
-      /* don't fill the serverqueue with modes or kicks in a nickflood */
-      if (chan_sentkick(m) || chan_sentdeop(m) || chan_sentop(m) ||
-	  chan_sentdevoice(m) || chan_sentvoice(m))
-	m->flags |= STOPCHECK;
       /* Any pending kick or mode to the old nick is lost. */
-	m->flags &= ~(SENTKICK | SENTDEOP | SENTOP |
-		      SENTVOICE | SENTDEVOICE);
-
-
-      /* make sure they stay devoiced if EVOICE! */
+      m->flags &= ~(SENTKICK | SENTDEOP | SENTOP |
+          SENTVOICE | SENTDEVOICE);
 
       /* nick-ban or nick is +k or something? */
-      if (!chan_stopcheck(m)) {
-	get_user_flagrec(m->user, &fr, chan->dname, chan);
-	check_this_member(chan, m->nick, &fr);
-      }
+      get_user_flagrec(m->user, &fr, chan->dname, chan);
+      check_this_member(chan, m->nick, &fr);
     }
   }
   return 0;
