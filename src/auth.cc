@@ -41,6 +41,7 @@
 
 bd::HashTable<bd::String, Auth*> Auth::ht_handle(10);
 bd::HashTable<bd::String, Auth*> Auth::ht_host(10);
+bd::HashTable<bd::String, Auth*> Auth::ht_nick(10);
 
 Auth::Auth(const char *_nick, const char *_host, struct userrec *u)
 {
@@ -58,6 +59,7 @@ Auth::Auth(const char *_nick, const char *_host, struct userrec *u)
 
 
   ht_host[host] = this;
+  ht_nick[_nick] = this;
   if (user)
     ht_handle[handle] = this;
 
@@ -72,6 +74,7 @@ Auth::~Auth()
   if (user)
     ht_handle.remove(handle);
   ht_host.remove(host);
+  ht_nick.remove(nick);
 }
 
 void Auth::MakeHash()
@@ -120,9 +123,20 @@ static void auth_clear_users_block(const bd::String key, Auth* auth, void *param
   }
 }
 
-void Auth::NullUsers()
+void Auth::NullUsers(const char *nick)
 {
-  ht_host.each(auth_clear_users_block);
+  if (nick == NULL) {
+    ht_host.each(auth_clear_users_block);
+  } else {
+    if (ht_nick.contains(nick)) {
+      Auth *auth = ht_nick[nick];
+      if (auth->user) {
+        ht_handle.remove(auth->handle);
+      }
+      auth->user = NULL;
+      auth->handle[0] = '\0';
+    }
+  }
 }
 
 static void auth_fill_users_block(const bd::String key, Auth* auth, void* param)
@@ -143,7 +157,8 @@ static void auth_expire_block(const bd::String key, Auth* auth, void* param)
 {
   if (auth->Authed() && ((now - auth->atime) >= (60 * 60))) {
     Auth::ht_host.remove(key);
-    Auth::ht_handle.remove(key);
+    Auth::ht_nick.remove(auth->nick);
+    Auth::ht_handle.remove(auth->handle);
     delete auth;
   }
 }
@@ -168,6 +183,7 @@ void Auth::DeleteAll()
     putlog(LOG_DEBUG, "*", STR("Removing auth entries."));
     ht_host.each(auth_delete_all_block);
     ht_host.clear();
+    ht_nick.clear();
     ht_handle.clear();
   }
 }

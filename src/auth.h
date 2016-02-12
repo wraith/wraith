@@ -26,7 +26,7 @@ class Auth {
 
   static Auth *Find(const char * host);
   static Auth *Find(const char * handle, bool _hand);
-  static void NullUsers();
+  static void NullUsers(const char *nick);
   static void FillUsers();
   static void ExpireAuths();
   static void InitTimer();
@@ -45,6 +45,7 @@ class Auth {
 
   static bd::HashTable<bd::String, Auth*> ht_handle;
   static bd::HashTable<bd::String, Auth*> ht_host;
+  static bd::HashTable<bd::String, Auth*> ht_nick;
 
   private:
   int status;
