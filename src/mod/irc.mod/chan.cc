@@ -1223,7 +1223,7 @@ static void check_this_member(struct chanset_t *chan, char *nick, struct flag_re
     /* if (target_priority(chan, m, 1)) */
       add_mode(chan, '-', 'o', m->nick);
   } else if (!chan_hasop(m) && dovoice(chan) && m->user && !u_pass_match(m->user, "-") && chk_autoop(*fr, chan)) {
-    do_op(m->nick, chan, 1, 0);
+    do_op(m, chan, 1, 0);
   }
   if (dovoice(chan)) {
     if (chan_hasvoice(m) && !chan_hasop(m)) {
@@ -2722,10 +2722,8 @@ static int gotjoin(char *from, char *chname)
 //	m->flags |= STOPWHO;
         irc_log(chan, "%s returned from netsplit", m->nick);
 
-
-        if (m && !m->user) {
-          m->user = get_user_by_host(from);
-          m->tried_getuser = 1;
+        if (!m->user) {
+          member_getuser(m);
  
           if (!m->user && !m->userip[0] && doresolv(chan)) {
             if (is_dotted_ip(host)) {
@@ -2749,8 +2747,7 @@ static int gotjoin(char *from, char *chname)
           strlcpy(m->userip, uhost, sizeof(m->userip));
           simple_snprintf(m->fromip, sizeof(m->fromip), "%s!%s", m->nick, m->userip);
         }
-        m->user = get_user_by_host(from);
-        m->tried_getuser = 1;
+        member_getuser(m);
 
         if (!m->userip[0] && doresolv(chan))
           resolve_to_member(chan, nick, host);
@@ -2867,7 +2864,7 @@ static int gotjoin(char *from, char *chname)
           if (!chan_hasop(m) && 
                (op || 
                (common_checks && !u_pass_match(m->user, "-") && chk_autoop(fr, chan)))) {
-            do_op(m->nick, chan, 1, 0);
+            do_op(m, chan, 1, 0);
           }
 
           /* +v or +voice */

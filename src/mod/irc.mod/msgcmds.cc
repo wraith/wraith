@@ -157,12 +157,15 @@ static int msg_op(char *nick, char *host, struct userrec *u, char *par)
 
   if (u_pass_match(u, pass)) {
     if (!u_pass_match(u, "-")) {
+      memberlist *m = NULL;
+
       if (par[0]) {
         chan = findchan_by_dname(par);
         if (chan && channel_active(chan)) {
+          m = ismember(chan, nick);
           get_user_flagrec(u, &fr, par, chan);
           if (chk_op(fr, chan)) {
-            if (do_op(nick, chan, 0, 1)) {
+            if (do_op(m, chan, 0, 1)) {
               stats_add(u, 0, 1);
               putlog(LOG_CMDS, "*", "(%s!%s) !%s! OP %s", nick, host, u->handle, par);
               if (manop_warn && chan->manop) {
@@ -176,9 +179,10 @@ static int msg_op(char *nick, char *host, struct userrec *u, char *par)
       } else {
         int stats = 0;
         for (chan = chanset; chan; chan = chan->next) {
+          m = ismember(chan, nick);
           get_user_flagrec(u, &fr, chan->dname, chan);
           if (chk_op(fr, chan)) {
-            if (do_op(nick, chan, 0, 1)) {
+            if (do_op(m, chan, 0, 1)) {
               stats++;
               if (manop_warn && chan->manop) {
                 msg = bd::String::printf("%s is currently set to punish for manual op.", chan->dname);
