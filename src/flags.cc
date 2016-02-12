@@ -40,7 +40,7 @@ flag_t FLAG[128];
 
 struct rolecount role_counts[] = {
   {"voice",	ROLE_VOICE,	1},
-  {"flood",	ROLE_FLOOD,	2},
+  {"flood",	ROLE_FLOOD,	3},
   {"op",	ROLE_OP,	1},
   {"deop",	ROLE_DEOP,	1},
   {"kick",	ROLE_KICK,	2},

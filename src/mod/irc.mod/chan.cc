@@ -554,7 +554,8 @@ static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t 
   /* Do not punish non-existant channel members and IRC services like
    * ChanServ
    */
-  if (!chan || (which < 0) || (which >= FLOOD_CHAN_MAX) || !m)
+  if (!chan || (which < 0) || (which >= FLOOD_CHAN_MAX) || !m ||
+      !(chan->role & ROLE_FLOOD))
     return 0;
 
   /* Okay, make sure i'm not flood-checking myself */
@@ -2815,7 +2816,8 @@ static int gotjoin(char *from, char *chname)
         bool is_op = chk_op(fr, chan);
 
         /* Check for a mass join */
-        if (!splitjoin && chan->flood_mjoin_time && chan->flood_mjoin_thr && !is_op) {
+        if (chan->role & ROLE_FLOOD &&
+            !splitjoin && chan->flood_mjoin_time && chan->flood_mjoin_thr && !is_op) {
           if (chan->channel.drone_jointime < now - chan->flood_mjoin_time) {      //expired, reset counter
             chan->channel.drone_joins = 0;
           }
@@ -2837,7 +2839,8 @@ static int gotjoin(char *from, char *chname)
 	    u_match_mask(chan->invites, from))
 	  refresh_invite(chan, from);
 
-	if (!(use_exempts && (u_match_mask(global_exempts,from) || u_match_mask(chan->exempts, from)))) {
+	if (chan->role & ROLE_BAN &&
+            !(use_exempts && (u_match_mask(global_exempts,from) || u_match_mask(chan->exempts, from)))) {
           if (channel_enforcebans(chan) && !chan_sentkick(m) && !is_op &&
               !(use_exempts && (isexempted(chan, from) || (chan->ircnet_status & CHAN_ASKED_EXEMPTS)))) {
             for (masklist* b = chan->channel.ban; b->mask[0]; b = b->next) {
