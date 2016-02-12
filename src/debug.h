@@ -38,4 +38,22 @@ void sdprintf (const char *, ...) __attribute__((format(printf, 1, 2)));
 void init_signals();
 void init_debug();
 void got_int(int z);
+
+#ifdef DEBUG
+void _assert(int, const char *, int, const char *, const char *,
+    const char *, ...) __attribute__((format(printf, 6, 7)));
+#define _ASSERT(recoverable, cond, msg...) do { \
+  if (__predict_false(!(cond))) { \
+    _assert(recoverable, __FILE__, __LINE__, __func__, # cond, msg); \
+  } \
+  Context; \
+} while (0)
+#else
+#define _ASSERT(recoverable, cond, msg...) do { \
+} while (0)
+#endif
+#define ASSERT(cond, msg...) _ASSERT(0, cond, msg)
+#define ASSERT0(cond) ASSERT(cond, NULL)
+#define WARN(cond, msg...) _ASSERT(1, cond, msg)
+
 #endif /* !_DEBUG_H */
