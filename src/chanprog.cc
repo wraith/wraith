@@ -187,6 +187,8 @@ void clear_chanlist_member(const char *nick)
       }
     }
   }
+
+  Auth::NullUsers(nick);
 }
 
 /* If this user@host is in a channel, set it (it was null)

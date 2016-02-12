@@ -191,7 +191,6 @@ void clear_cached_users()
   }
 
   if (!conf.bot->hub) {
-    Auth::NullUsers();
     clear_chanlist();           /* Remove all user references from the
                                  * channel lists.                       */
   }
