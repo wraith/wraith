@@ -1038,7 +1038,7 @@ static void recheck_invites(struct chanset_t *chan)
        * only) or invite is sticky.
        */
       if (!isinvited(chan, ir->mask) && ((!channel_dynamicinvites(chan) &&
-          !(chan->channel.mode & CHANINV)) || ir->flags & MASKREC_STICKY))
+          (chan->channel.mode & CHANINV)) || ir->flags & MASKREC_STICKY))
 	add_mode(chan, '+', 'I', ir->mask);
 	/* do_mask(chan, chan->channel.invite, ir->mask, 'I');*/
     }
