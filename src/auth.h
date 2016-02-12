@@ -25,7 +25,7 @@ class Auth {
   void NewNick(const char *nick);
 
   static Auth *Find(const char * host);
-  static void NullUsers(const char *nick);
+  static void NullUsers(const char *nick = NULL);
   static void FillUsers();
   static void ExpireAuths();
   static void InitTimer();
