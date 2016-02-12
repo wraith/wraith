@@ -212,7 +212,7 @@ void set_devoice(struct chanset_t *chan, memberlist* m) {
 const char* punish_flooder(struct chanset_t* chan, memberlist* m, const char *reason) {
   if (channel_voice(chan) && chan->voice_moderate) {
     if (!chan_sentdevoice(m)) {
-      add_mode(chan, '-', 'v', m->nick);
+      add_mode(chan, '-', 'v', m);
       m->flags |= SENTDEVOICE;
       set_devoice(chan, m);
       return "devoicing";
@@ -1598,11 +1598,11 @@ check_expired_chanstuff(struct chanset_t *chan)
                      (!channel_voice(chan) && !privchan(fr, chan, PRIV_VOICE) && chk_voice(fr, chan))
                     )
                    ) {
-                  add_mode(chan, '+', 'v', m->nick);
+                  add_mode(chan, '+', 'v', m);
                 }
               }
             } else if (!m->user && channel_voice(chan) && !channel_voicebitch(chan) && voice_ok(m, chan)) {
-              add_mode(chan, '+', 'v', m->nick);
+              add_mode(chan, '+', 'v', m);
             }
           }
         }
@@ -1697,7 +1697,7 @@ flush_modes()
         }
         if (chan_sentvoice(m)) {
           m->flags &= ~SENTVOICE;
-          add_mode(chan, '+', 'v', m->nick);
+          add_mode(chan, '+', 'v', m);
         }
       }
     }

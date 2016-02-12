@@ -305,8 +305,8 @@ static void cmd_kickban(int idx, char *par)
       dprintf(idx, "%s is permanently exempted!\n", nick);
       return;
     }
-    if (m->flags & CHANOP)
-      add_mode(chan, '-', 'o', m->nick);
+    if (chan_hasop(m))
+      add_mode(chan, '-', 'o', m);
     check_exemptlist(chan, s);
     switch (bantype) {
       case '@':
@@ -396,7 +396,7 @@ static void cmd_voice(int idx, char *par)
       dprintf(idx, "%s is not on %s.\n", nick, chan->dname);
       return;
     }
-    add_mode(chan, '+', 'v', nick);
+    add_mode(chan, '+', 'v', m);
     dprintf(idx, "Gave voice to %s on %s\n", nick, chan->dname);
     next:;
     if (!all)
@@ -459,7 +459,7 @@ static void cmd_devoice(int idx, char *par)
     return;
   }
 
-  add_mode(chan, '-', 'v', nick);
+  add_mode(chan, '-', 'v', m);
   dprintf(idx, "Devoiced %s on %s\n", nick, chan->dname);
   next:;
   if (!all)
@@ -1041,7 +1041,7 @@ static void cmd_deop(int idx, char *par)
       if (all) goto next;  
       return;
     }
-    add_mode(chan, '-', 'o', nick);
+    add_mode(chan, '-', 'o', m);
     dprintf(idx, "Deopped %s on %s.\n", nick, chan->dname);
     next:;
     if (!all)
