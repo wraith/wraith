@@ -1389,8 +1389,6 @@ static void share_read_stream(int idx, bd::Stream& stream) {
 
     Context;
     clear_userlist(u);          /* Clear new, obsolete, user list.      */
-    clear_chanlist();           /* Remove all user references from the
-                                 * channel lists.                       */
 
     userlist = ou;              /* Revert to old user list.             */
     lastuser = NULL;            /* Reset last accessed user ptr.        */
@@ -1416,8 +1414,7 @@ static void share_read_stream(int idx, bd::Stream& stream) {
   /* SUCCESS! */
 
   loading = 0;
-  clear_chanlist();             /* Remove all user references from the
-                                 * channel lists.                       */
+
   userlist = u;                 /* Set new user list.                   */
   lastuser = NULL;              /* Reset last accessed user ptr.        */
   putlog(LOG_BOTS, "*", "%s.", "Userlist transfer complete; switched over");

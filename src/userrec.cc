@@ -192,6 +192,8 @@ void clear_cached_users()
 
   if (!conf.bot->hub) {
     Auth::NullUsers();
+    clear_chanlist();           /* Remove all user references from the
+                                 * channel lists.                       */
   }
 }
 
@@ -234,8 +236,6 @@ void clear_userlist(struct userrec *bu)
     struct chanset_t *cst = NULL;
 
     clear_cached_users();
-
-    clear_chanlist();
     lastuser = NULL;
 
     while (global_ign)
