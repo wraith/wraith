@@ -2723,8 +2723,7 @@ static int gotjoin(char *from, char *chname)
 
 
         if (m && !m->user) {
-          m->user = get_user_by_host(from);
-          m->tried_getuser = 1;
+          member_getuser(m);
  
           if (!m->user && !m->userip[0] && doresolv(chan)) {
             if (is_dotted_ip(host)) {
@@ -2748,8 +2747,7 @@ static int gotjoin(char *from, char *chname)
           strlcpy(m->userip, uhost, sizeof(m->userip));
           simple_snprintf(m->fromip, sizeof(m->fromip), "%s!%s", m->nick, m->userip);
         }
-        m->user = get_user_by_host(from);
-        m->tried_getuser = 1;
+        member_getuser(m);
 
         if (!m->userip[0] && doresolv(chan))
           resolve_to_member(chan, nick, host);
