@@ -1388,8 +1388,7 @@ static void share_read_stream(int idx, bd::Stream& stream) {
     Auth::NullUsers();
   }
 
-  if (conf.bot->u)
-    conf.bot->u = NULL;
+  conf.bot->u = NULL;
 
   struct cmd_pass *old_cmdpass = cmdpass;
   cmdpass = NULL;
