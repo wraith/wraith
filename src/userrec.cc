@@ -191,6 +191,27 @@ void clear_cached_users()
   }
 }
 
+void cache_users()
+{
+  for (int i = 0; i < dcc_total; i++) {
+    if (dcc[i].type) {
+      dcc[i].user = get_user_by_handle(userlist, dcc[i].nick);
+    }
+  }
+
+  if (conf.bot->u == NULL) {
+    conf.bot->u = get_user_by_handle(userlist, conf.bot->nick);
+  }
+
+  for (tand_t* bot = tandbot; bot; bot = bot->next) {
+    bot->u = get_user_by_handle(userlist, bot->bot);
+  }
+
+  if (!conf.bot->hub) {
+    Auth::FillUsers();
+  }
+}
+
 void clear_userlist(struct userrec *bu)
 {
   struct userrec *v = NULL;

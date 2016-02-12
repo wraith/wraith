@@ -668,15 +668,13 @@ void reload()
   else if (!conf.bot->hub)
     add_localhub();
 
+  cache_users();
+
   /* Make sure no removed users/bots are still connected. */
   check_stale_dcc_users();
 
-  for (tand_t* bot = tandbot; bot; bot = bot->next)
-    bot->u = get_user_by_handle(userlist, bot->bot);
-
   /* I don't think these will ever be called anyway. */
   if (!conf.bot->hub) {
-    Auth::FillUsers();
     check_hostmask();
   }
 
