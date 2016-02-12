@@ -166,24 +166,6 @@ struct userrec *check_chanlist_hand(const char *hand)
   return NULL;
 }
 
-/* Clear the user pointers in the chanlists.
- *
- * Necessary when a hostmask is added/removed, a user is added or a new
- * userfile is loaded.
- */
-void clear_chanlist(void)
-{
-  memberlist		*m = NULL;
-  struct chanset_t	*chan = NULL;
-
-  for (chan = chanset; chan; chan = chan->next)
-    for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-      m->user = NULL;
-      m->tried_getuser = 0;
-    }
-
-}
-
 /* Clear the user pointer of a specific nick in the chanlists.
  *
  * Necessary when a hostmask is added/removed, a nick changes, etc.
@@ -194,13 +176,17 @@ void clear_chanlist_member(const char *nick)
   memberlist		*m = NULL;
   struct chanset_t	*chan = NULL;
 
-  for (chan = chanset; chan; chan = chan->next)
-    for (m = chan->channel.member; m && m->nick[0]; m = m->next)
-      if (!rfc_casecmp(m->nick, nick)) {
+  for (chan = chanset; chan; chan = chan->next) {
+    for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
+      if (nick == NULL || !rfc_casecmp(m->nick, nick)) {
 	m->user = NULL;
         m->tried_getuser = 0;
-	break;
+        if (nick != NULL) {
+          break;
+        }
       }
+    }
+  }
 }
 
 /* If this user@host is in a channel, set it (it was null)
