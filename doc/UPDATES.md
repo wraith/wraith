@@ -1,3 +1,5 @@
+* Fix some various internal caching issues.
+
 # maint
   * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
   * Fix Linux binary compat on FreeBSD due to lack of ptrace(2).
