@@ -502,7 +502,12 @@ static struct userrec* add_bot_userlist(char* bot) {
 }
 
 void add_myself_to_userlist() {
+  char buf[15];
+
   conf.bot->u = add_bot_userlist(conf.bot->nick);
+
+  simple_snprintf(buf, sizeof(buf), "%d", ALL_FEATURE_FLAGS);
+  set_user(&USERENTRY_FFLAGS, conf.bot->u, buf);
 }
 
 void add_child_bots() {
@@ -582,7 +587,6 @@ void rehash_ip() {
 void chanprog()
 {
   struct utsname un;
-
 
   sdprintf("I am: %s", conf.bot->nick);
 

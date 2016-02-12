@@ -13,6 +13,7 @@ typedef struct tand_t_struct {
   struct tand_t_struct *next;
   time_t buildts;
   int localhub;
+  int fflags;
   struct userrec* u;
   char commit[10];
   char bot[HANDLEN + 1];
@@ -58,7 +59,7 @@ void botnet_send_trace(int, char *, char *, char *);
 void botnet_send_unlink(int, char *, char *, char *, char *);
 void botnet_send_link(int, char *, char *, char *);
 void botnet_send_update(int, tand_t *);
-void botnet_send_nlinked(int, char *, char *, char, int, time_t, char *, char *);
+void botnet_send_nlinked(int, char *, char *, char, int, time_t, char *, char *, int);
 void botnet_send_reject(int, char *, char *, char *, char *, char *);
 void botnet_send_log(int, const char *, int, const char *, bool = 0);
 void botnet_send_zapf(int, const char *, const char *, const char *);

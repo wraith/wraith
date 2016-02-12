@@ -1316,7 +1316,6 @@ reset_chan_info(struct chanset_t *chan)
     send_chan_who(DP_MODE, chan, 1);
     /* clear_channel nuked the data...so */
     dprintf(DP_HELP, "TOPIC %s\n", chan->name);//Topic is very low priority
-    rebalance_roles_chan(chan);
   }
 }
 
@@ -1791,6 +1790,10 @@ static void rebalance_roles_chan(struct chanset_t* chan)
 
     /* Only consider bots that can be opped to be roled. */
     if (!chk_op(fr, chan)) {
+      continue;
+    }
+    /* Only consider bots that have the roles feature. */
+    if (!(m->user->fflags & FEATURE_ROLES)) {
       continue;
     }
     bots << m->user->handle;
