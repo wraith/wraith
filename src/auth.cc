@@ -80,7 +80,11 @@ void Auth::Done()
 }
 
 void Auth::NewNick(const char *newnick) {
+  if (ht_nick.contains(nick)) {
+    Auth::ht_nick.remove(nick);
+  }
   strlcpy(nick, newnick, NICKLEN);
+  ht_nick[newnick] = this;
 }
 
 Auth *Auth::Find(const char *_host)
