@@ -1,4 +1,3 @@
-/* I hereby release this into the Public Domain - Bryan Drewery */
 /*
  * auth.c -- handles:
  *   auth system functions
@@ -130,9 +129,16 @@ static void auth_fill_users_block(const bd::String key, Auth* auth, void* param)
   auth->user = get_user_by_host(from);
 }
 
-void Auth::FillUsers()
+void Auth::FillUsers(const char *nick)
 {
-  ht_host.each(auth_fill_users_block);
+  if (nick == NULL) {
+    ht_host.each(auth_fill_users_block);
+  } else {
+    if (ht_nick.contains(nick)) {
+      Auth *auth = ht_nick[nick];
+      auth_fill_users_block(nick, auth, NULL);
+    }
+  }
 }
 
 
