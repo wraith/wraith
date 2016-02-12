@@ -1313,7 +1313,6 @@ reset_chan_info(struct chanset_t *chan)
     send_chan_who(DP_MODE, chan, 1);
     /* clear_channel nuked the data...so */
     dprintf(DP_HELP, "TOPIC %s\n", chan->name);//Topic is very low priority
-    rebalance_roles_chan(chan);
   }
 }
 

@@ -2142,6 +2142,7 @@ static int got315(char *from, char *msg)
   } else {
     me->is_me = 1;
     me->joined = now;				/* set this to keep the whining masses happy */
+    rebalance_roles_chan(chan);
     if (me_op(chan))
       recheck_channel(chan, 2);
     else if (chan->channel.members == 1)
