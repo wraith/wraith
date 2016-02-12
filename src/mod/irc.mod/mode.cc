@@ -108,6 +108,9 @@ do_op(memberlist *m, struct chanset_t *chan, bool delay, bool force)
     add_mode(chan, '+', 'o', m);
   } else if (!connect_bursting) {
     add_cookie(chan, m);
+  } else {
+    /* Failed to give the mode, so requeue it. */
+    do_op(m, chan, 1, 0);
   }
   return 1;
 }
