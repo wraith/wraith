@@ -101,6 +101,7 @@ do_op(memberlist *m, struct chanset_t *chan, bool delay, bool force)
   if (delay) {
     m->delay = now + chan->auto_delay;
     m->flags |= SENTOP;
+    return 1;
   }
 
   if (channel_fastop(chan) || channel_take(chan) || cookies_disabled) {
