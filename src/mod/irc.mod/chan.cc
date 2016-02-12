@@ -3081,9 +3081,6 @@ static int gotnick(char *from, char *msg)
 	m->flags &= ~(SENTKICK | SENTDEOP | SENTOP |
 		      SENTVOICE | SENTDEVOICE);
 
-
-      /* make sure they stay devoiced if EVOICE! */
-
       /* nick-ban or nick is +k or something? */
       if (!chan_stopcheck(m)) {
 	get_user_flagrec(m->user, &fr, chan->dname, chan);
