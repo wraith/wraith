@@ -111,7 +111,7 @@ void Auth::NullUsers(const char *nick)
   } else {
     if (ht_nick.contains(nick)) {
       Auth *auth = ht_nick[nick];
-      auth->user = NULL;
+      auth_clear_users_block(nick, auth, NULL);
     }
   }
 }
