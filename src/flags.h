@@ -175,7 +175,7 @@ char geticon(int);
 int privchan(const struct flag_record, const struct chanset_t *, int);
 #define chk_op(fr, chan) real_chk_op(fr, chan, 1)
 int real_chk_op(const struct flag_record, const struct chanset_t *, bool);
-int chk_autoop(struct userrec *, const struct flag_record, const struct chanset_t *);
+int chk_autoop(memberlist *, const struct flag_record, const struct chanset_t *);
 #define chk_deop(fr, chan) real_chk_deop(fr, chan, 1)
 int real_chk_deop(const struct flag_record, const struct chanset_t *, bool);
 #define chk_voice(fr, chan) (\

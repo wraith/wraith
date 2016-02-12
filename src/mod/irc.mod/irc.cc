@@ -212,7 +212,7 @@ void set_devoice(struct chanset_t *chan, memberlist* m) {
 const char* punish_flooder(struct chanset_t* chan, memberlist* m, const char *reason) {
   if (channel_voice(chan) && chan->voice_moderate) {
     if (!chan_sentdevoice(m)) {
-      add_mode(chan, '-', 'v', m->nick);
+      add_mode(chan, '-', 'v', m);
       m->flags |= SENTDEVOICE;
       set_devoice(chan, m);
       return "devoicing";
@@ -1584,26 +1584,31 @@ check_expired_chanstuff(struct chanset_t *chan)
       }
 
       if (im_opped) {
-        if (dovoice(chan) && !loading) {      /* autovoice of +v users if bot is +y */
-          if (!chan_hasop(m) && !chan_hasvoice(m) && !chan_sentvoice(m)) {
+        if ((chan->role & (ROLE_OP|ROLE_VOICE)) && !loading && !chan_hasop(m)) {      /* autovoice of +v users if bot is +y */
+          get_user_flagrec(m->user, &fr, chan->dname, chan);
+
+          /* Autoop */
+          if ((chan->role & ROLE_OP) && !chan_sentop(m) && chk_autoop(m, fr, chan)) {
+            do_op(m, chan, 0, 0);
+          }
+
+          /* +v or +voice */
+          if ((chan->role & ROLE_VOICE) && !chan_hasvoice(m) && !chan_sentvoice(m)) {
             member_getuser(m, 1);
 
             if (m->user) {
-              get_user_flagrec(m->user, &fr, chan->dname, chan);
-              if (!glob_bot(fr)) {
-                if (!(m->flags & EVOICE) &&
-                    (
-                     /* +voice: Voice all clients who are not flag:+q. If the chan is +voicebitch, only op flag:+v clients */
-                     (channel_voice(chan) && !chk_devoice(fr) && (!channel_voicebitch(chan) || (channel_voicebitch(chan) && chk_voice(fr, chan)))) ||
-                     /* Or, if the channel is -voice but they still qualify to be voiced */
-                     (!channel_voice(chan) && !privchan(fr, chan, PRIV_VOICE) && chk_voice(fr, chan))
-                    )
-                   ) {
-                  add_mode(chan, '+', 'v', m->nick);
-                }
+              if (!(m->flags & EVOICE) &&
+                  (
+                   /* +voice: Voice all clients who are not flag:+q. If the chan is +voicebitch, only op flag:+v clients */
+                   (channel_voice(chan) && !chk_devoice(fr) && (!channel_voicebitch(chan) || (channel_voicebitch(chan) && chk_voice(fr, chan)))) ||
+                   /* Or, if the channel is -voice but they still qualify to be voiced */
+                   (!channel_voice(chan) && !privchan(fr, chan, PRIV_VOICE) && chk_voice(fr, chan))
+                  )
+                 ) {
+                add_mode(chan, '+', 'v', m);
               }
             } else if (!m->user && channel_voice(chan) && !channel_voicebitch(chan) && voice_ok(m, chan)) {
-              add_mode(chan, '+', 'v', m->nick);
+              add_mode(chan, '+', 'v', m);
             }
           }
         }
@@ -1698,7 +1703,7 @@ flush_modes()
         }
         if (chan_sentvoice(m)) {
           m->flags &= ~SENTVOICE;
-          add_mode(chan, '+', 'v', m->nick);
+          add_mode(chan, '+', 'v', m);
         }
       }
     }
