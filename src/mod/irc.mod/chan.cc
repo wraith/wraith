@@ -455,7 +455,7 @@ static void priority_do(struct chanset_t * chan, bool opsonly, int action, bool 
             if ((action == PRIO_DEOP) && !chan_sentdeop(m)) {
               ++actions;
               ++sent;
-              add_mode(chan, '-', 'o', m->nick);
+              add_mode(chan, '-', 'o', m);
               if (!floodless && (actions >= ct || (n == 1 && sent > 20))) {
                 if (flush)
                   flush_mode(chan, QUICK);
@@ -901,7 +901,7 @@ static void refresh_ban_kick(struct chanset_t* chan, memberlist *m, const char *
     for (maskrec* b = cycle ? chan->bans : global_bans; b; b = b->next) {
       if (wild_match(b->mask, user) || match_cidr(b->mask, user)) {
         if ((chan->role & ROLE_DEOP) && chan_hasop(m))
-  	  add_mode(chan, '-', 'o', m->nick);	/* Guess it can't hurt.	*/
+          add_mode(chan, '-', 'o', m);	/* Guess it can't hurt.	*/
 	check_exemptlist(chan, user);
 	do_mask(chan, chan->channel.ban, b->mask, 'b');
 	b->lastactive = now;
@@ -1229,7 +1229,7 @@ static void check_this_member(struct chanset_t *chan, char *nick, struct flag_re
       (chk_deop(*fr, chan) ||
        (!loading && userlist && chan_bitch(chan) && !chk_op(*fr, chan)) ) ) {
     /* if (target_priority(chan, m, 1)) */
-      add_mode(chan, '-', 'o', m->nick);
+      add_mode(chan, '-', 'o', m);
   } else if (!chan_hasop(m) && (chan->role & ROLE_OP) && chk_autoop(m->user, *fr, chan)) {
     do_op(m, chan, 1, 0);
   }
@@ -1237,11 +1237,11 @@ static void check_this_member(struct chanset_t *chan, char *nick, struct flag_re
     if (chan_hasvoice(m) && !chan_hasop(m)) {
       /* devoice +q users .. */
       if (chk_devoice(*fr) || (channel_voicebitch(chan) && !chk_voice(*fr, chan)))
-        add_mode(chan, '-', 'v', m->nick);
+        add_mode(chan, '-', 'v', m);
     } else if (!chan_hasvoice(m) && !chan_hasop(m)) {
       /* voice +v users */
       if (chk_voice(*fr, chan)) {
-        add_mode(chan, '+', 'v', m->nick);
+        add_mode(chan, '+', 'v', m);
         if (m->flags & EVOICE)
           m->flags &= ~EVOICE;
       }

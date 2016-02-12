@@ -21,8 +21,8 @@ void check_timers();
 void check_utimers();
 void rmspace(char *s);
 void set_chanlist(const char *host, struct userrec *rec);
-void clear_chanlist(void);
 void clear_chanlist_member(const char *nick);
+#define clear_chanlist() clear_chanlist_member(NULL)
 bool bot_shouldjoin(struct userrec* , struct flag_record *, const struct chanset_t *, bool = 0);
 bool shouldjoin(const struct chanset_t *);
 char *samechans(const char *, const char *);

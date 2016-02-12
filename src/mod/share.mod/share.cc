@@ -1342,7 +1342,6 @@ finish_share(int idx)
 static void share_read_stream(int idx, bd::Stream& stream) {
   struct userrec *u = NULL, *ou = NULL;
   struct chanset_t *chan = NULL;
-  int i;
 
   /*
    * This is where we remove all global and channel bans/exempts/invites and
@@ -1373,23 +1372,7 @@ static void share_read_stream(int idx, bd::Stream& stream) {
   //userlist = (struct userrec *) -1;       /* Do this to prevent .user messups     */
   userlist = NULL;
 
-  /* Bot user pointers are updated to point to the new list, all others
-   * are set to NULL. If our userfile will be overriden, just set _all_
-   * to NULL directly.
-   */
-  for (i = 0; i < dcc_total; i++)
-    if (dcc[i].type)
-      dcc[i].user = NULL;
-
-  for (tand_t* bot = tandbot; bot; bot = bot->next)
-    bot->u = NULL;
-
-  if (!conf.bot->hub) {
-    Auth::NullUsers();
-  }
-
-  if (conf.bot->u)
-    conf.bot->u = NULL;
+  clear_cached_users();
 
   struct cmd_pass *old_cmdpass = cmdpass;
   cmdpass = NULL;
@@ -1406,22 +1389,11 @@ static void share_read_stream(int idx, bd::Stream& stream) {
 
     Context;
     clear_userlist(u);          /* Clear new, obsolete, user list.      */
-    clear_chanlist();           /* Remove all user references from the
-                                 * channel lists.                       */
-    for (i = 0; i < dcc_total; i++)
-      if (dcc[i].type)
-        dcc[i].user = get_user_by_handle(ou, dcc[i].nick);
-
-    for (tand_t* bot = tandbot; bot; bot = bot->next)
-      bot->u = get_user_by_handle(ou, bot->bot);
-
-    conf.bot->u = get_user_by_handle(ou, conf.bot->nick);
 
     userlist = ou;              /* Revert to old user list.             */
     lastuser = NULL;            /* Reset last accessed user ptr.        */
 
-    Auth::FillUsers();
-
+    cache_users();
     cmdpass = old_cmdpass;
 
     checkchans(2);              /* un-flag the channels, we are keeping them.. */
@@ -1442,8 +1414,7 @@ static void share_read_stream(int idx, bd::Stream& stream) {
   /* SUCCESS! */
 
   loading = 0;
-  clear_chanlist();             /* Remove all user references from the
-                                 * channel lists.                       */
+
   userlist = u;                 /* Set new user list.                   */
   lastuser = NULL;              /* Reset last accessed user ptr.        */
   putlog(LOG_BOTS, "*", "%s.", "Userlist transfer complete; switched over");
@@ -1461,17 +1432,10 @@ static void share_read_stream(int idx, bd::Stream& stream) {
   if (conf.bot->localhub)
     add_child_bots();
 
+  cache_users();
+
   /* Make sure no removed users/bots are still connected. */
   check_stale_dcc_users();
-
-  /* Refill tand list with cached user entries */
-  for (tand_t* bot = tandbot; bot; bot = bot->next)
-    bot->u = get_user_by_handle(userlist, bot->bot);
-
-  if (!conf.bot->hub) {  
-    /* copy over any auth users */
-    Auth::FillUsers();
-  }
 
   write_userfile(-1);
 

@@ -212,7 +212,7 @@ void set_devoice(struct chanset_t *chan, memberlist* m) {
 const char* punish_flooder(struct chanset_t* chan, memberlist* m, const char *reason) {
   if (channel_voice(chan) && chan->voice_moderate) {
     if (!chan_sentdevoice(m)) {
-      add_mode(chan, '-', 'v', m->nick);
+      add_mode(chan, '-', 'v', m);
       m->flags |= SENTDEVOICE;
       set_devoice(chan, m);
       return "devoicing";
@@ -1170,6 +1170,9 @@ killmember(struct chanset_t *chan, char *nick, bool cacheMember)
 
   if (cacheMember) {
     x->last = now;
+    x->user = NULL;
+    x->next = NULL;
+    x->tried_getuser = 0;
     // Don't delete here, will delete when it expires from the cache.
     (*chan->channel.cached_members)[x->userhost] = x;
   } else {
@@ -1600,11 +1603,11 @@ check_expired_chanstuff(struct chanset_t *chan)
                      (!channel_voice(chan) && !privchan(fr, chan, PRIV_VOICE) && chk_voice(fr, chan))
                     )
                    ) {
-                  add_mode(chan, '+', 'v', m->nick);
+                  add_mode(chan, '+', 'v', m);
                 }
               }
             } else if (!m->user && channel_voice(chan) && !channel_voicebitch(chan) && voice_ok(m, chan)) {
-              add_mode(chan, '+', 'v', m->nick);
+              add_mode(chan, '+', 'v', m);
             }
           }
         }
@@ -1699,7 +1702,7 @@ flush_modes()
         }
         if (chan_sentvoice(m)) {
           m->flags &= ~SENTVOICE;
-          add_mode(chan, '+', 'v', m->nick);
+          add_mode(chan, '+', 'v', m);
         }
       }
     }

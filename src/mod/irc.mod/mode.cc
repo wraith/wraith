@@ -101,12 +101,16 @@ do_op(memberlist *m, struct chanset_t *chan, bool delay, bool force)
   if (delay) {
     m->delay = now + chan->auto_delay;
     m->flags |= SENTOP;
+    return 1;
   }
 
   if (channel_fastop(chan) || channel_take(chan) || cookies_disabled) {
-    add_mode(chan, '+', 'o', m->nick);
+    add_mode(chan, '+', 'o', m);
   } else if (!connect_bursting) {
-    add_cookie(chan, m->nick);
+    add_cookie(chan, m);
+  } else {
+    /* Failed to give the mode, so requeue it. */
+    do_op(m, chan, 1, 0);
   }
   return 1;
 }
@@ -332,15 +336,14 @@ flush_mode(struct chanset_t *chan, int pri)
 /* Queue a channel mode change
  */
 void
-real_add_mode(struct chanset_t *chan, const char plus, const char mode, const char *op, bool cookie)
+real_add_mode(struct chanset_t *chan, const char plus, const char mode, const char *op, bool cookie, memberlist *mx)
 {
   if (!me_op(chan))
     return;
 
-  memberlist *mx = NULL;
-
   if (mode == 'o' || mode == 'v') {
-    mx = ismember(chan, op);
+    if (!mx)
+      mx = ismember(chan, op);
     if (!mx)
       return;
     if (plus == '-' && mode == 'o') {
@@ -599,7 +602,7 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
         m->flags |= SENTDEOP;
 #endif
       if (num == 5) {
-        add_mode(chan, '-', 'o', m->nick);
+        add_mode(chan, '-', 'o', m);
       } else if (bitch && num == 6) {
         len = simple_snprintf(outbuf, sizeof(outbuf), "KICK %s %s :%s\r\n", chan->name, mv->nick, response(RES_BITCHOPPED));
         mv->flags |= SENTKICK;
@@ -607,7 +610,7 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
         len = simple_snprintf(outbuf, sizeof(outbuf), "KICK %s %s :%s\r\n", chan->name, m->nick, response(RES_BITCHOP));
         m->flags |= SENTKICK;
       } else
-        add_mode(chan, '-', 'o', mv->nick);
+        add_mode(chan, '-', 'o', mv);
 
       if (len)
         dprintf_real(DP_MODE_NEXT, outbuf, len, sizeof(outbuf));
@@ -615,13 +618,13 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
 
 
   } else if (reversing && !me_opped)
-    add_mode(chan, '-', 'o', mv->nick);
+    add_mode(chan, '-', 'o', mv);
 
   /* server op */
   if (!m && meop && !me_opped) {
     if (chk_deop(victim, chan) || (chan_bitch(chan) && !chk_op(victim, chan))) {
       mv->flags |= FAKEOP;
-      add_mode(chan, '-', 'o', mv->nick);
+      add_mode(chan, '-', 'o', mv);
     } 
   }
   mv->flags |= WASOP;
@@ -1470,9 +1473,9 @@ gotmode(char *from, char *msg)
                 mv->flags |= CHANVOICE;
                 if (channel_active(chan) && dovoice(chan)) {
                   if (dv || chk_devoice(victim) || (channel_voicebitch(chan) && !chk_voice(victim, chan))) {
-                    add_mode(chan, '-', 'v', mparam);
+                    add_mode(chan, '-', 'v', mv);
                   } else if (reversing) {
-                    add_mode(chan, '-', 'v', mparam);
+                    add_mode(chan, '-', 'v', mv);
                   }
                 }
               } else if (msign == '-') {
@@ -1481,9 +1484,9 @@ gotmode(char *from, char *msg)
                 if (channel_active(chan) && dovoice(chan) && !chan_hasop(mv)) {
                   /* revoice +v users */
                   if (chk_voice(victim, chan)) {
-                    add_mode(chan, '+', 'v', mparam);
+                    add_mode(chan, '+', 'v', mv);
                   } else if (reversing) {
-                    add_mode(chan, '+', 'v', mparam);
+                    add_mode(chan, '+', 'v', mv);
                     /* if they arent +v|v and VOICER is m+ then EVOICE them */
                   } else {
                     if (!match_my_nick(nick) && channel_voice(chan) &&
