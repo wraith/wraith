@@ -1223,7 +1223,7 @@ static void check_this_member(struct chanset_t *chan, char *nick, struct flag_re
     /* if (target_priority(chan, m, 1)) */
       add_mode(chan, '-', 'o', m->nick);
   } else if (!chan_hasop(m) && dovoice(chan) && m->user && !u_pass_match(m->user, "-") && chk_autoop(*fr, chan)) {
-    do_op(m->nick, chan, 1, 0);
+    do_op(m, chan, 1, 0);
   }
   if (dovoice(chan)) {
     if (chan_hasvoice(m) && !chan_hasop(m)) {
@@ -2866,7 +2866,7 @@ static int gotjoin(char *from, char *chname)
           if (!chan_hasop(m) && 
                (op || 
                (common_checks && !u_pass_match(m->user, "-") && chk_autoop(fr, chan)))) {
-            do_op(m->nick, chan, 1, 0);
+            do_op(m, chan, 1, 0);
           }
 
           /* +v or +voice */

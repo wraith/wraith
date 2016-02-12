@@ -93,10 +93,8 @@ static size_t egg_strcatn(char *dst, const char *src, size_t max)
 }
 
 static bool
-do_op(char *nick, struct chanset_t *chan, bool delay, bool force)
+do_op(memberlist *m, struct chanset_t *chan, bool delay, bool force)
 {
-  memberlist *m = ismember(chan, nick);
-
   if (!me_op(chan) || !m || (!force && (chan_hasop(m) || chan_sentop(m))))
     return 0;
 
@@ -106,9 +104,9 @@ do_op(char *nick, struct chanset_t *chan, bool delay, bool force)
   }
 
   if (channel_fastop(chan) || channel_take(chan) || cookies_disabled) {
-    add_mode(chan, '+', 'o', nick);
+    add_mode(chan, '+', 'o', m->nick);
   } else if (!connect_bursting) {
-    add_cookie(chan, nick);
+    add_cookie(chan, m->nick);
   }
   return 1;
 }
@@ -682,7 +680,7 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
         )
        ) {
       /* Then we'll bless the victim */
-      do_op(mv->nick, chan, 0, 0);
+      do_op(mv, chan, 0, 0);
     }
   }
 
@@ -1315,7 +1313,7 @@ gotmode(char *from, char *msg)
         } else if (!chan_hasop(m) && !channel_nodesynch(chan)) {
           if (u && u->bot && chk_op(user, chan)) {
             putlog(LOG_MODES, ch, "Mode change by friendly non-chanop on %s!  Opping...", ch);
-            do_op(m->nick, chan, 0, 0);
+            do_op(m, chan, 0, 0);
           } else {
             putlog(LOG_MODES, ch, "Mode change by non-chanop on %s!  Reversing...", ch);
             dprintf(DP_MODE, "KICK %s %s :%sAbusing desync\n", ch, m->nick, kickprefix);
