@@ -1373,22 +1373,7 @@ static void share_read_stream(int idx, bd::Stream& stream) {
   //userlist = (struct userrec *) -1;       /* Do this to prevent .user messups     */
   userlist = NULL;
 
-  /* Bot user pointers are updated to point to the new list, all others
-   * are set to NULL. If our userfile will be overriden, just set _all_
-   * to NULL directly.
-   */
-  for (i = 0; i < dcc_total; i++)
-    if (dcc[i].type)
-      dcc[i].user = NULL;
-
-  for (tand_t* bot = tandbot; bot; bot = bot->next)
-    bot->u = NULL;
-
-  if (!conf.bot->hub) {
-    Auth::NullUsers();
-  }
-
-  conf.bot->u = NULL;
+  clear_cached_users();
 
   struct cmd_pass *old_cmdpass = cmdpass;
   cmdpass = NULL;

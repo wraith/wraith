@@ -172,6 +172,25 @@ void clear_masks(maskrec *m)
 
 static void freeuser(struct userrec *);
 
+void clear_cached_users()
+{
+  for (int i = 0; i < dcc_total; i++) {
+    if (dcc[i].type) {
+      dcc[i].user = NULL;
+    }
+  }
+
+  conf.bot->u = NULL;
+
+  for (tand_t* bot = tandbot; bot; bot = bot->next) {
+    bot->u = NULL;
+  }
+
+  if (!conf.bot->hub) {
+    Auth::NullUsers();
+  }
+}
+
 void clear_userlist(struct userrec *bu)
 {
   struct userrec *v = NULL;
@@ -183,18 +202,7 @@ void clear_userlist(struct userrec *bu)
   if (userlist == bu) {
     struct chanset_t *cst = NULL;
 
-    for (int i = 0; i < dcc_total; i++)
-      if (dcc[i].type)
-        dcc[i].user = NULL;
-
-    conf.bot->u = NULL;
-
-    for (tand_t* bot = tandbot; bot; bot = bot->next)
-      bot->u = NULL;
-
-    if (!conf.bot->hub) {
-      Auth::NullUsers();
-    }
+    clear_cached_users();
 
     clear_chanlist();
     lastuser = NULL;
