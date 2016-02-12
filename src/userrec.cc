@@ -189,6 +189,13 @@ void clear_userlist(struct userrec *bu)
 
     conf.bot->u = NULL;
 
+    for (tand_t* bot = tandbot; bot; bot = bot->next)
+      bot->u = NULL;
+
+    if (!conf.bot->hub) {
+      Auth::NullUsers();
+    }
+
     clear_chanlist();
     lastuser = NULL;
 
