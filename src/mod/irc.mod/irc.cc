@@ -1584,11 +1584,18 @@ check_expired_chanstuff(struct chanset_t *chan)
 
       if (im_opped) {
         if (dovoice(chan) && !loading) {      /* autovoice of +v users if bot is +y */
+          get_user_flagrec(m->user, &fr, chan->dname, chan);
+
+          /* Autoop */
+          if (!chan_hasop(m) && !chan_sentop(m) && chk_autoop(m, fr, chan)) {
+            do_op(m, chan, 0, 0);
+          }
+
+          /* +v or +voice */
           if (!chan_hasop(m) && !chan_hasvoice(m) && !chan_sentvoice(m)) {
             member_getuser(m, 1);
 
             if (m->user) {
-              get_user_flagrec(m->user, &fr, chan->dname, chan);
               if (!glob_bot(fr)) {
                 if (!(m->flags & EVOICE) &&
                     (
