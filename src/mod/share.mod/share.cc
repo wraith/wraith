@@ -1308,7 +1308,7 @@ finish_share(int idx)
   int i, j = -1;
 
   for (i = 0; i < dcc_total; i++)
-    if (dcc[i].type && !strcasecmp(dcc[i].nick, dcc[idx].host) && (dcc[i].type->flags & DCT_BOT)) {
+    if (dcc[i].type && (dcc[i].type->flags & DCT_BOT) && !strcasecmp(dcc[i].nick, dcc[idx].host)) {
       j = i;
       break;
     }
