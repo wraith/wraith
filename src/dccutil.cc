@@ -604,12 +604,9 @@ lostdcc(int n)
   else if (n == servidx)
     servidx = -1;
 
-//  This is also done when we new_dcc(), so don't bother for now, we set sock/type to NULL, so it won't even be 
-//  parsed by anything.
-//  bzero(&dcc[n], sizeof(struct dcc_t));
+  bzero(&dcc[n], sizeof(struct dcc_t));
 
   dcc[n].sock = -1;
-  dcc[n].type = NULL;
 
   dccn--;
 
