@@ -471,6 +471,8 @@ free_dcc_bot_(int n, void *x)
 {
   if (dcc[n].type == &DCC_BOT) {
     unvia(n, findbot(dcc[n].nick));
+    /* Stop sharing with this bot in case rembot->laston is shared out. */
+    dcc[n].status &= ~STAT_SHARE;
     rembot(dcc[n].nick);
   }
   free(x);
