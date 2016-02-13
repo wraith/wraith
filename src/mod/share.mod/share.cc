@@ -1233,7 +1233,8 @@ shareout_prot(struct userrec *u, const char *format, ...)
     if (dcc[i].type && (dcc[i].type->flags & DCT_BOT) && 
        (dcc[i].status & STAT_SHARE) && !(dcc[i].status & (STAT_GETTING | STAT_SENDING)) &&
        /* only send to hubs, the bot itself, or the localhub in the chain */
-       (dcc[i].hub || dcc[i].user == u || (localhub != -1 && i == localhub))) {
+       /* SA set_write_userfile */
+       (dcc[i].hub || dcc[i].user == u || (localhub == -1 || i == localhub))) {
       tputs(dcc[i].sock, s, l + 2);
     }
   }

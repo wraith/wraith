@@ -29,6 +29,8 @@
   * Fix auto-voice and auto-op not applying after a nick change.
   * Don't truncate bot's join time on .reset.
   * Fix various small memory leaks.
+  * Fix case where .[bot]set would not share to new bots until their localhub
+    was relinked.
 
 # 1.4.6
   * Disable demo TCL support by default to prevent confusion during build.

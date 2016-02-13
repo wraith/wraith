@@ -404,7 +404,7 @@ int nextbot(const char *who)
     return -1;
 
   for (int j = 0; j < dcc_total; j++) {
-    if (dcc[j].type && bot->via && !strcasecmp(bot->via->bot, dcc[j].nick) && (dcc[j].type == &DCC_BOT))
+    if (dcc[j].type && bot->via && (dcc[j].type == &DCC_BOT) && !strcasecmp(bot->via->bot, dcc[j].nick))
       return j;
   }
 
