@@ -590,20 +590,19 @@ lostdcc(int n)
   if (n < 0 || n >= max_dcc)
     return;
 
-  if (n == uplink_idx)
-    uplink_idx = -1;
-  else if (n == dns_idx)
-    dns_idx = -1;
-  else if (n == servidx)
-    servidx = -1;
-
-
   if (dcc[n].type && dcc[n].type->kill)
     dcc[n].type->kill(n, dcc[n].u.other);
   else if (dcc[n].u.other)
     free(dcc[n].u.other);
 
   dcc[n].u.other = NULL;
+
+  if (n == uplink_idx)
+    uplink_idx = -1;
+  else if (n == dns_idx)
+    dns_idx = -1;
+  else if (n == servidx)
+    servidx = -1;
 
 //  This is also done when we new_dcc(), so don't bother for now, we set sock/type to NULL, so it won't even be 
 //  parsed by anything.
