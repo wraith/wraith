@@ -1416,14 +1416,14 @@ void tputs(int z, const char *s, size_t len)
   static int inhere = 0;
 
   if (unlikely(!inhere)) {
+    char *tmp;
+
     inhere = 1;
 
+    tmp = strldup(s, len); /* To null-terminate */
     putlog(LOG_MISC, "*", "!!! writing to nonexistent socket: %d", z);
-    if (strlen(s)) {
-      char *tmp = strdup(s); /* To null-terminate */
-      putlog(LOG_MISC, "*", "!-> '%s'", tmp);
-      free(tmp);
-    }
+    putlog(LOG_MISC, "*", "!-> '%s'", tmp);
+    free(tmp);
 
     inhere = 0;
   }
