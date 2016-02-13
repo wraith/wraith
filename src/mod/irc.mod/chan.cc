@@ -1207,13 +1207,10 @@ void recheck_channel_modes(struct chanset_t *chan)
   }
 }
 
-static void check_this_member(struct chanset_t *chan, char *nick, struct flag_record *fr)
+static void check_this_member(struct chanset_t *chan, memberlist *m,
+    struct flag_record *fr)
 {
-  if (match_my_nick(nick) || !me_op(chan))
-    return;
-
-  memberlist *m = ismember(chan, nick);
-  if (!m)
+  if (!m || m->is_me || !me_op(chan))
     return;
 
   /* +d or bitch and not an op
@@ -1330,7 +1327,7 @@ void check_this_user(char *hand, int del, char *host)
       }
       if (check_member) {
         get_user_flagrec(u, &fr, chan->dname, chan);
-        check_this_member(chan, m->nick, &fr);
+        check_this_member(chan, m, &fr);
       }
     }
   }
@@ -1581,7 +1578,7 @@ void recheck_channel(struct chanset_t *chan, int dobans)
       //Already a bot opped, dont bother resetting masks
       if (glob_bot(fr) && chan_hasop(m) && !m->is_me)
         stop_reset = 1;
-      check_this_member(chan, m->nick, &fr);
+      check_this_member(chan, m, &fr);
     }
 
     //Only reset masks if the bot has already received the ban list before (meaning it has already been opped once)
@@ -2141,7 +2138,8 @@ static int got315(char *from, char *msg)
     force_join_chan(chan);
   } else {
     me->is_me = 1;
-    me->joined = now;				/* set this to keep the whining masses happy */
+    if (!me->joined)
+      me->joined = now;				/* set this to keep the whining masses happy */
     rebalance_roles_chan(chan);
     if (me_op(chan))
       recheck_channel(chan, 2);
@@ -3108,22 +3106,13 @@ static int gotnick(char *from, char *msg)
 
       detect_chan_flood(m, from, chan, FLOOD_NICK);
 
-      /* don't fill the serverqueue with modes or kicks in a nickflood */
-      if (chan_sentkick(m) || chan_sentdeop(m) || chan_sentop(m) ||
-	  chan_sentdevoice(m) || chan_sentvoice(m))
-	m->flags |= STOPCHECK;
       /* Any pending kick or mode to the old nick is lost. */
-	m->flags &= ~(SENTKICK | SENTDEOP | SENTOP |
-		      SENTVOICE | SENTDEVOICE);
-
-
-      /* make sure they stay devoiced if EVOICE! */
+      m->flags &= ~(SENTKICK | SENTDEOP | SENTOP |
+          SENTVOICE | SENTDEVOICE);
 
       /* nick-ban or nick is +k or something? */
-      if (!chan_stopcheck(m)) {
-	get_user_flagrec(m->user, &fr, chan->dname, chan);
-	check_this_member(chan, m->nick, &fr);
-      }
+      get_user_flagrec(m->user, &fr, chan->dname, chan);
+      check_this_member(chan, m, &fr);
     }
   }
   return 0;

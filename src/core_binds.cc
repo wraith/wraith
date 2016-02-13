@@ -85,8 +85,8 @@ bool check_aliases(int idx, const char *cmd, const char *args)
       /* Simple loop check */
       if (!strcasecmp(cmd, p)) {
         putlog(LOG_WARN, "*", "Loop detected in alias '%s'", p);
-        if (argsp)
-          free(argsp);
+        free(aliasp);
+        free(argsp);
         return 0;
       }
 
@@ -103,16 +103,14 @@ bool check_aliases(int idx, const char *cmd, const char *args)
       if (!find) {
         /* Does the cmd exist though? (Hub-only cmd from a leaf or a leaf-only cmd from a hub, or restricted cmd) */
         if (findcmd(cmd, 0)) {
-          if (argsp)
-            free(argsp);
+          free(argsp);
           free(aliasp);
           return 0; /* Show bad cmd */
         } else {
           /* nope, show alias error */
           dprintf(idx, "'%s' is an invalid alias: references alias '%s'.\n", cmd, p);
           putlog(LOG_ERROR, "*", "Invalid alias '%s' attempted: references alias '%s'.", cmd, p);
-          if (argsp)
-            free(argsp);
+          free(argsp);
           free(aliasp);
           return 1; /* Alias was found -- just not accepted */
         }
@@ -154,15 +152,13 @@ bool check_aliases(int idx, const char *cmd, const char *args)
         putlog(LOG_CMDS, "*", "@ #%s# [%s -> %s] ...", dcc[idx].nick, cmd, p);
       check_bind_dcc(p, idx, myargs);
 
-      if (myargs)
-        free(myargs);
+      free(myargs);
       break;
     }
   }
 
   free(aliasp);
-  if (argsp)
-    free(argsp);
+  free(argsp);
 
   return found;
 }
@@ -233,8 +229,10 @@ int real_check_bind_dcc(const char *cmd, int idx, const char *text, Auth *auth)
   }
 
   if (entry && auth) {
-    if (!(entry->cflags & AUTH))
+    if (!(entry->cflags & AUTH)) {
+      free(args);
       return 0;
+    }
   }
 
   hits = 0;

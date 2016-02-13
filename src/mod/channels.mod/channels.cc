@@ -655,8 +655,6 @@ void remove_channel(struct chanset_t *chan)
    }
    delete chan->bot_roles;
    delete chan->role_bots;
-   delete chan->channel.floodtime;
-   delete chan->channel.floodnum;
    free(chan);
 }
 
