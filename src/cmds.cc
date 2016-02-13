@@ -1051,7 +1051,7 @@ static void cmd_boot(int idx, char *par)
     return;
   }
   for (i = 0; i < dcc_total; i++) {
-    if (dcc[i].type && dcc[i].simul == -1 && !strcasecmp(dcc[i].nick, who) && (dcc[i].type->flags & DCT_CANBOOT)) {
+    if (dcc[i].type && dcc[i].simul == -1 && (dcc[i].type->flags & DCT_CANBOOT) && !strcasecmp(dcc[i].nick, who)) {
       if (!whois_access(dcc[idx].user, dcc[i].user)) {
         dprintf(idx, "Sorry, you cannot boot %s.\n", dcc[i].nick);
         return;
@@ -2168,7 +2168,7 @@ static void cmd_simul(int idx, char *par)
   bool ok = 0;
 
   for (int i = 0; i < dcc_total; i++) {
-    if (dcc[i].type && !strcasecmp(nick, dcc[i].nick) && !ok && (dcc[i].type->flags & DCT_SIMUL)) {
+    if (dcc[i].type && (dcc[i].type->flags & DCT_SIMUL) && !ok && !strcasecmp(nick, dcc[i].nick)) {
       putlog(LOG_CMDS, "*", "#%s# simul %s %s", dcc[idx].nick, nick, par);
       if (dcc[i].type && dcc[i].type->activity) {
 	dcc[i].type->activity(i, par, strlen(par));
