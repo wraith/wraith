@@ -115,7 +115,7 @@ void eof_dcc_fork_send(int idx)
     int x, y = -1;
 
     for (x = 0; x < dcc_total; x++)
-      if (dcc[x].type && (!strcasecmp(dcc[x].nick, dcc[idx].host)) && (dcc[x].type->flags & DCT_BOT)) {
+      if (dcc[x].type && (dcc[x].type->flags & DCT_BOT) && (!strcasecmp(dcc[x].nick, dcc[idx].host))) {
 	y = x;
 	break;
       }
@@ -129,7 +129,7 @@ void eof_dcc_fork_send(int idx)
     int x, y = -1;
 
     for (x = 0; x < dcc_total; x++)
-      if (dcc[x].type && (!strcasecmp(dcc[x].nick, dcc[idx].host)) && (dcc[x].type->flags & DCT_BOT)) {
+      if (dcc[x].type && (dcc[x].type->flags & DCT_BOT) && (!strcasecmp(dcc[x].nick, dcc[idx].host))) {
 	y = x;
 	break;
       }
@@ -169,7 +169,7 @@ static void eof_dcc_send(int idx)
     int x, y = -1;
 
     for (x = 0; x < dcc_total; x++) {
-      if (dcc[x].type && (!strcasecmp(dcc[x].nick, dcc[idx].host)) && (dcc[x].type->flags & DCT_BOT)) {
+      if (dcc[x].type && (dcc[x].type->flags & DCT_BOT) && (!strcasecmp(dcc[x].nick, dcc[idx].host))) {
 	y = x;
         break;
       }
@@ -201,7 +201,7 @@ static void eof_dcc_send(int idx)
     int x, y = -1;
 
     for (x = 0; x < dcc_total; x++)
-      if (dcc[x].type && (!strcasecmp(dcc[x].nick, dcc[idx].host)) && (dcc[x].type->flags & DCT_BOT)) {
+      if (dcc[x].type && (dcc[x].type->flags & DCT_BOT) && (!strcasecmp(dcc[x].nick, dcc[idx].host))) {
 	y = x;
         break;
       }
@@ -357,7 +357,7 @@ void dcc_get(int idx, char *buf, int len)
       int x, y = -1;
 
       for (x = 0; x < dcc_total; x++)
-	if (dcc[x].type && !strcasecmp(dcc[x].nick, dcc[idx].host) && (dcc[x].type->flags & DCT_BOT)) {
+        if (dcc[x].type && (dcc[x].type->flags & DCT_BOT) && (!strcasecmp(dcc[x].nick, dcc[idx].host))) {
 	  y = x;
           break;
         }
@@ -372,7 +372,7 @@ void dcc_get(int idx, char *buf, int len)
       int x, y = -1;
 
       for (x = 0; x < dcc_total; x++)
-	if (dcc[x].type && !strcasecmp(dcc[x].nick, dcc[idx].host) && (dcc[x].type->flags & DCT_BOT)) {
+        if (dcc[x].type && (dcc[x].type->flags & DCT_BOT) && (!strcasecmp(dcc[x].nick, dcc[idx].host))) {
 	  y = x;
           break;
         }
@@ -405,7 +405,7 @@ void eof_dcc_get(int idx)
     int x, y = -1;
 
     for (x = 0; x < dcc_total; x++)
-      if (dcc[x].type && !strcasecmp(dcc[x].nick, dcc[idx].host) && (dcc[x].type->flags & DCT_BOT)) {
+      if (dcc[x].type && (dcc[x].type->flags & DCT_BOT) && (!strcasecmp(dcc[x].nick, dcc[idx].host))) {
 	y = x;
         break;
       }
@@ -429,7 +429,7 @@ void eof_dcc_get(int idx)
     int x, y = -1;
 
     for (x = 0; x < dcc_total; x++)
-      if (dcc[x].type && !strcasecmp(dcc[x].nick, dcc[idx].host) && (dcc[x].type->flags & DCT_BOT)) {
+      if (dcc[x].type && (dcc[x].type->flags & DCT_BOT) && (!strcasecmp(dcc[x].nick, dcc[idx].host))) {
 	y = x;
         break;
       }
@@ -516,7 +516,7 @@ static void transfer_get_timeout(int i)
     int x, y = -1;
 
     for (x = 0; x < dcc_total; x++)
-      if (dcc[x].type && (!strcasecmp(dcc[x].nick, dcc[i].host)) && (dcc[x].type->flags & DCT_BOT)) {
+      if (dcc[x].type && (dcc[x].type->flags & DCT_BOT) && (!strcasecmp(dcc[x].nick, dcc[i].host))) {
 	y = x;
         break;
       }
@@ -546,7 +546,7 @@ static void transfer_get_timeout(int i)
     int x, y = -1;
 
     for (x = 0; x < dcc_total; x++)
-      if (dcc[x].type && (!strcasecmp(dcc[x].nick, dcc[i].host)) && (dcc[x].type->flags & DCT_BOT)) {
+      if (dcc[x].type && (dcc[x].type->flags & DCT_BOT) && (!strcasecmp(dcc[x].nick, dcc[i].host))) {
 	y = x;
         break;
       }
@@ -583,7 +583,7 @@ void tout_dcc_send(int idx)
     int x, y = -1;
 
     for (x = 0; x < dcc_total; x++)
-      if (dcc[x].type && !strcasecmp(dcc[x].nick, dcc[idx].host) && (dcc[x].type->flags & DCT_BOT)) {
+      if (dcc[x].type && (dcc[x].type->flags & DCT_BOT) && (!strcasecmp(dcc[x].nick, dcc[idx].host))) {
 	y = x;
         break;
       }
@@ -597,7 +597,7 @@ void tout_dcc_send(int idx)
     int x, y = -1;
 
     for (x = 0; x < dcc_total; x++)
-      if (dcc[x].type && !strcasecmp(dcc[x].nick, dcc[idx].host) && (dcc[x].type->flags & DCT_BOT)) {
+      if (dcc[x].type && (dcc[x].type->flags & DCT_BOT) && (!strcasecmp(dcc[x].nick, dcc[idx].host))) {
 	y = x;
         break;
       }
