@@ -362,8 +362,14 @@ static void set_write_userfile(bd::Stream& stream, const struct userrec *u, cons
   struct xtra_key *x = (struct xtra_key *) e->u.extra;
 
   for (; x; x = x->next) {
-    /* only write if saving local, or if sending to hub, or if sending to same user as entry, or the localhub in the chain, or sending 'groups' */
-    if (idx == -1 || dcc[idx].hub || dcc[idx].user == u || (localhub != -1 && idx == localhub) || !strcmp(x->key, "groups")) {
+    /*
+     * only write if saving local, or if sending to hub, or if sending to
+     * same user as entry, or they are not connected,
+     * or the localhub in the chain, or sending 'groups'.
+     * SA shareout_prot
+     */
+    if (idx == -1 || dcc[idx].hub || dcc[idx].user == u ||
+        (localhub == -1 || idx == localhub) || !strcmp(x->key, "groups")) {
       stream << bd::String::printf("--%s %s %s\n", e->type->name, x->key, x->data ? x->data : "");
     }
   }
