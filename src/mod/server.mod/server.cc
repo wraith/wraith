@@ -117,7 +117,7 @@ bd::HashTable<bd::String, fish_data_t*> FishKeys;
 static bool double_warned = 0;
 
 static void empty_msgq(void);
-static void disconnect_server(int, int);
+static void disconnect_server(int);
 static void calc_penalty(char *, size_t);
 static bool fast_deq(int);
 static char *splitnicks(char **);
@@ -1090,7 +1090,8 @@ static void server_check_lag()
     waiting_for_awake = 1;
   } else if (servidx != -1 && waiting_for_awake && ((now - lastpingtime) >= stoned_timeout)) {
     // Not checking server_online as this will handle connect timeouts as well where the connect() works, but the server gets stoned afterwards
-    disconnect_server(servidx, DO_LOST);
+    disconnect_server(servidx);
+    lostdcc(servidx);
     putlog(LOG_SERV, "*", "Server got stoned; jumping...");
   }
 }

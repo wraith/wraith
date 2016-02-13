@@ -12,8 +12,6 @@
 #include <bdlib/src/String.h>
 #include <bdlib/src/HashTable.h>
 
-#define DO_LOST 1
-#define NO_LOST 0
 #define DEQ_RATE 200
 
 #define fixcolon(x)             do {                                    \

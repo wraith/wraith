@@ -320,6 +320,7 @@ got004(char *from, char *msg)
   bool connect_burst = 0;
 
   /* cookies won't work on ircu or Unreal or snircd */
+  cookies_disabled = false;
   if (strstr(tmp, "u2.") || strstr(tmp, "Unreal") || strstr(tmp, "snircd")) {
     putlog(LOG_DEBUG, "*", "Disabling cookies as they are not supported on %s", cursrvname);
     cookies_disabled = true;
@@ -490,7 +491,8 @@ void nuke_server(const char *reason)
       dprintf(-serv, "QUIT :%s\n", reason);
 
     sleep(1);
-    disconnect_server(servidx, DO_LOST);
+    disconnect_server(servidx);
+    lostdcc(servidx);
   }
 }
 
@@ -1414,22 +1416,20 @@ static int gotmode(char *from, char *msg)
 static void end_burstmode();
 void irc_init();
 
-static void disconnect_server(int idx, int dolost)
+static void disconnect_server(int idx)
 {
+  server_online = 0;
   if ((serv != dcc[idx].sock) && serv >= 0)
     killsock(serv);
   if (dcc[idx].sock >= 0)
     killsock(dcc[idx].sock);
-
   dcc[idx].sock = -1;
   serv = -1;
-  servidx = -1;
-  server_online = 0;
-  use_monitor = 0;
-  cookies_disabled = false;
-  floodless = 0;
   botuserhost[0] = 0;
   botuserip[0] = 0; 
+  /* Features should have a struct that can be bzero'd */
+  use_monitor = 0;
+  floodless = 0;
   use_penalties = 0;
   use_354 = 0;
   deaf_char = 0;
@@ -1442,34 +1442,16 @@ static void disconnect_server(int idx, int dolost)
   have_cnotice = 0;
   use_flood_count = 0;
   modesperline = 0;
-  if (dolost) {
-    Auth::DeleteAll();
-    trying_server = 0;
-    lostdcc(idx);
-  }
+  trying_server = 0;
   end_burstmode();
-  if (reset_chans == 2)
-    irc_init();
-  reset_chans = 0;
   keepnick = 1;
-  /* Invalidate the cmd_swhois cache callback data */
-  for (int i = 0; i < dcc_total; i++) {
-    if (dcc[i].type && dcc[i].whois[0]) {
-      dcc[i].whois[0] = 0;
-      dcc[i].whowas = 0;
-    }
-  }
-
-  if (!segfaulted) //Avoid if crashed, too many free()/malloc() in here
-    for (struct chanset_t *chan = chanset; chan; chan = chan->next)
-      clear_channel(chan, 1);
-
 }
 
 static void eof_server(int idx)
 {
   putlog(LOG_SERV, "*", "Disconnected from %s (EOF)", dcc[idx].host);
-  disconnect_server(idx, DO_LOST);
+  disconnect_server(idx);
+  lostdcc(idx);
 }
 
 static void display_server(int idx, char *buf, size_t bufsiz)
@@ -1481,7 +1463,25 @@ static void connect_server(void);
 
 static void kill_server(int idx, void *x)
 {
-  disconnect_server(idx, NO_LOST);	/* eof_server will lostdcc() it. */
+  disconnect_server(idx);
+  Auth::DeleteAll();
+  if (reset_chans == 2) {
+    irc_init();
+  }
+  reset_chans = 0;
+  /* Invalidate the cmd_swhois cache callback data */
+  for (int i = 0; i < dcc_total; i++) {
+    if (dcc[i].type && dcc[i].whois[0]) {
+      dcc[i].whois[0] = 0;
+      dcc[i].whowas = 0;
+    }
+  }
+  if (!segfaulted) { //Avoid if crashed, too many free()/malloc() in here
+    for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
+      clear_channel(chan, 1);
+    }
+  }
+  servidx = -1;
   /* A new server connection will be automatically initiated in
      about 2 seconds. */
 }
@@ -1489,7 +1489,8 @@ static void kill_server(int idx, void *x)
 static void timeout_server(int idx)
 {
   putlog(LOG_SERV, "*", "Timeout: connect to %s", dcc[idx].host);
-  disconnect_server(idx, DO_LOST);
+  disconnect_server(idx);
+  lostdcc(idx);
 }
 
 static void server_activity(int, char *, int);
