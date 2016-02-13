@@ -320,6 +320,7 @@ got004(char *from, char *msg)
   bool connect_burst = 0;
 
   /* cookies won't work on ircu or Unreal or snircd */
+  cookies_disabled = false;
   if (strstr(tmp, "u2.") || strstr(tmp, "Unreal") || strstr(tmp, "snircd")) {
     putlog(LOG_DEBUG, "*", "Disabling cookies as they are not supported on %s", cursrvname);
     cookies_disabled = true;
@@ -1426,7 +1427,6 @@ static void disconnect_server(int idx, int dolost)
   servidx = -1;
   server_online = 0;
   use_monitor = 0;
-  cookies_disabled = false;
   floodless = 0;
   botuserhost[0] = 0;
   botuserip[0] = 0; 
