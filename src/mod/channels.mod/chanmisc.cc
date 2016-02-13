@@ -1149,15 +1149,6 @@ int channel_add(char *result, const char *newname, char *options, bool isdefault
     chan->ban_time = global_ban_time;
     chan->exempt_time = global_exempt_time;
     chan->invite_time = global_invite_time;
-    chan->channel.jointime = 0;
-    chan->channel.parttime = 0;
-    chan->channel.fighting = 0;
-    chan->channel.drone_set_mode = 0;
-    chan->channel.drone_jointime = 0;
-    chan->channel.drone_joins = 0;
-    chan->channel.last_eI = 0;
-    chan->channel.floodtime = NULL;
-    chan->channel.floodnum = NULL;
 
     /* We _only_ put the dname (display name) in here so as not to confuse
      * any code later on. chan->name gets updated with the channel name as
