@@ -13,6 +13,7 @@
   * Fix not handling auto-op in minutely channel rechecks.
   * Fix auto-voice and auto-op not applying after a nick change.
   * Don't truncate bot's join time on .reset.
+  * Fix various small memory leaks.
 
 # 1.4.6
   * Disable demo TCL support by default to prevent confusion during build.

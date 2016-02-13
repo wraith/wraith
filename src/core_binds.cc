@@ -233,8 +233,10 @@ int real_check_bind_dcc(const char *cmd, int idx, const char *text, Auth *auth)
   }
 
   if (entry && auth) {
-    if (!(entry->cflags & AUTH))
+    if (!(entry->cflags & AUTH)) {
+      free(args);
       return 0;
+    }
   }
 
   hits = 0;
