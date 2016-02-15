@@ -789,6 +789,9 @@ restart(int idx)
     botnet_send_bye(reason);
   }
 
+  /* Stop sharing to prevent writing LASTON to lostdcc() DCC_BOT sockets. */
+  noshare = 1;
+
   /* kill all connections except STDOUT/server */
   for (fd = 0; fd < dcc_total; fd++) {
     if (dcc[fd].type && dcc[fd].type != &SERVER_SOCKET && dcc[fd].sock != STDOUT) {
