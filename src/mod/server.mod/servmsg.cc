@@ -799,7 +799,7 @@ static int gotmsg(char *from, char *msg)
         if (my_u && FishKeys.contains(nick)) {
           // FiSH paranoid mode. Invalidate the current key and re-key-exchange with the user.
           if (fish_paranoid) {
-            keyx(nick);
+            keyx(nick, "fish-paranoid is set");
           }
         }
       }
@@ -1978,7 +1978,7 @@ static int got718(char *from, char *msg)
         dprintf(DP_HELP, "ACCEPT %s\n", nick);
         dprintf(DP_HELP, "PRIVMSG %s :You have been accepted. Please send your message again.\n", nick);
         if (fish_auto_keyx) {
-          keyx(nick);
+          keyx(nick, "Callerid accepted");
         }
       } else {
         putlog(LOG_WALL, "*", "(CALLERID) !%s! (%s!%s) %s (User is not +o or +v)", u->handle, nick, uhost, msg);

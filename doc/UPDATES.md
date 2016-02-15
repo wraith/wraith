@@ -21,6 +21,7 @@
   * Disallow negative 'chanset limit' (#96).
   * Raise server cycle time from 15 to 30 seconds and add
     'set server-cycle-wait for configuring it. (#81)
+  * Show reason when initiating FiSH Key exchange
 
 # 1.4.6
   * Disable demo TCL support by default to prevent confusion during build.
