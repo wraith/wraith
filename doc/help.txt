@@ -1686,6 +1686,7 @@ See also: reload, backup
 [N]  $bserver-port$b         Default port to use for server connections.
 [N]  $bserver-port-ssl$b     Default port to use for SSL server connections.
 [B]  $bserver-use-ssl$b      Use SSL for IRC server connections?
+[N]  $bwait-split$b          How long in seconds to track netsplit members.
  
  
 [B]  $bauth-chan$b           If set, auth cmds will work in channels as well as in msg, otherwise 

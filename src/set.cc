@@ -76,6 +76,7 @@ char usermode[15] = "";
 bool fish_auto_keyx = 0;
 bool fish_paranoid = 0;
 int server_cycle_wait;
+int wait_split;
 
 ////// THIS MUST REMAIN SORTED: !LC_ALL=C sort
 // VAR("bad-process",	&badprocess,		VAR_INT|VAR_DETECTED,				0, 4, "ignore"),
@@ -137,6 +138,7 @@ static variable_t vars[] = {
  VAR("servers6-ssl",	&serverlist,		VAR_SERVERS|VAR_LIST|VAR_SHUFFLE|VAR_NOLHUB|VAR_NOLDEF,	0, 0, DEFAULT_SERVERS6_SSL),
  VAR("trace",		&trace,			VAR_INT|VAR_DETECTED,				0, 4, "die"),
  VAR("usermode",	&usermode,		VAR_WORD|VAR_NOLHUB,				0, 0, "+iws"),
+ VAR("wait-split",	&wait_split,		VAR_INT|VAR_NOLHUB,				0, 86400, "1000"),
  VAR(NULL,		NULL,			0,						0, 0, NULL)
 };
 
