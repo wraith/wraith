@@ -2104,7 +2104,7 @@ static void connect_server(void)
     dcc[newidx].sock = -1;
     dcc[newidx].u.dns->cbuf = strdup(pass);
 
-    cycle_time = 15;		/* wait 15 seconds before attempting next server connect */
+    cycle_time = server_cycle_wait;		/* wait N seconds before attempting next server connect */
 
     /* I'm resolving... don't start another server connect request */
     resolvserv = 1;

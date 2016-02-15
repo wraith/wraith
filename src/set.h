@@ -20,7 +20,7 @@
 #define VAR_SHUFFLE	BIT9
 /* no local */
 #define VAR_NOLOC	BIT10	
-/* no local hub */
+/* no hub local */
 #define VAR_NOLHUB	BIT11
 /* trigger cloak script changing? */
 #define VAR_CLOAK	BIT12
@@ -73,7 +73,7 @@ extern char		auth_key[], auth_prefix[2], motd[], alias[], rbl_servers[1024], gro
 extern bool		dccauth, auth_obscure, manop_warn, auth_chan, oidentd, ident_botnick, irc_autoaway, link_cleartext, use_deaf, use_callerid, fish_auto_keyx, fish_paranoid;
 extern int		cloak_script, fight_threshold, in_bots, set_noshare, dcc_autoaway,
 			kill_threshold, lag_threshold, op_bots, hijack, login, promisc, trace,
-                        ison_time, msgrate, msgburst;
+                        ison_time, msgrate, msgburst, server_cycle_wait;
 extern rate_t		op_requests, close_threshold;
 
 namespace bd {
