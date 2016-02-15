@@ -19,7 +19,8 @@
   * Fix various small memory leaks.
   * Fix case where .[bot]set would not share to new bots until their localhub
     was relinked.
-  * Raise netsplit timeout to 1000 seconds.
+  * Raise netsplit timeout to 1000 seconds and allow it to be configured with
+    'set wait-split' (#60).
   * Indent BOTNET entries some in .whois.
   * Disallow negative 'chanset limit' (#96).
   * Raise server cycle time from 15 to 30 seconds and add
