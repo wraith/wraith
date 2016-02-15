@@ -18,6 +18,7 @@
     was relinked.
   * Raise netsplit timeout to 1000 seconds.
   * Indent BOTNET entries some in .whois.
+  * Disallow negative 'chanset limit' (#96).
 
 # 1.4.6
   * Disable demo TCL support by default to prevent confusion during build.
