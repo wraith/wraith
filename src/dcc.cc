@@ -306,6 +306,9 @@ bot_version(int idx, char *par)
     /* Must support older bots which sent '<->' here for network. */
     if (strcmp(work, "<->")) {
       fflags = atoi(work);
+    } else {
+      /* Older bot doesn't have feature flags. */
+      fflags = 0;
     }
   }
   if (par[0])
