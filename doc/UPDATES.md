@@ -32,6 +32,7 @@
   * Fix case where .[bot]set would not share to new bots until their localhub
     was relinked.
   * Raise netsplit timeout to 1000 seconds.
+  * Indent BOTNET entries some in .whois.
 
 # 1.4.6
   * Disable demo TCL support by default to prevent confusion during build.
