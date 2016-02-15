@@ -74,7 +74,7 @@ static cache_t *irccache = NULL;
 
 #define do_eI (((now - chan->channel.last_eI) > 30) ? 1 : 0)
 
-static time_t wait_split = 900;    /* Time to wait for user to return from
+static time_t wait_split = 1000;    /* Time to wait for user to return from
                                  * net-split. */
 int max_bans;                   /* Modified by net-type 1-4 */
 int max_exempts;
