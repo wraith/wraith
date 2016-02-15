@@ -321,12 +321,13 @@ static void set_display(int idx, struct user_entry *e, struct userrec *u)
     struct xtra_key *xk = (struct xtra_key *) e->u.extra;
     struct flag_record fr = {FR_GLOBAL, 0, 0, 0 };
 
+    dprintf(idx, "  BOTSET:\n");
     get_user_flagrec(dcc[idx].user, &fr, NULL);
     /* scan thru xtra field, searching for matches */
     for (; xk; xk = xk->next) {
       /* ok, it's a valid xtra field entry */
       if (glob_owner(fr))
-        dprintf(idx, "  %s: %s\n", xk->key, xk->data ? xk->data : "");
+        dprintf(idx, "    %s: %s\n", xk->key, xk->data ? xk->data : "");
     }
   }
 }
