@@ -124,7 +124,7 @@ static void cmd_keyx(int idx, char *par) {
   }
 
   char *nick = newsplit(&par);
-  keyx(nick);
+  keyx(nick, "Requested");
   return;
 }
 

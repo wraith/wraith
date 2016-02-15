@@ -385,7 +385,13 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
           strlcpy(result, "channel limit needs argument", RESULT_LEN);
         return ERROR;
       }
-      if (chan->limitraise && !atoi(item[i]) && dolimit(chan)) //limitraise was disabled by the user
+      int limitraise = atoi(item[i]);
+      if (limitraise < 0) {
+        if (result)
+          strlcpy(result, "channel limit must be a positive number", RESULT_LEN);
+        return ERROR;
+      }
+      if (chan->limitraise && limitraise == 0 && dolimit(chan)) //limitraise was disabled by the user
         add_mode(chan, '-', 'l', "");
       chan->limitraise = atoi(item[i]);
       chan->limit_prot = 0;

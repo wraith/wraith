@@ -1660,6 +1660,7 @@ See also: reload, backup
                          matching alias is used. Normal flag checking is done
                          after the alias is expanded. 
                          $bAliases may not reference other aliases.$b
+[N]  $bserver-cycle-wait$b   Amount of time in seconds to wait between server reconnections.
 [N]  $bserver-port$b         Default port to use for server connections.
 [N]  $bserver-port-ssl$b     Default port to use for SSL server connections.
 [B]  $bserver-use-ssl$b      Use SSL for IRC server connections?
