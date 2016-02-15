@@ -164,6 +164,7 @@ static int check_bind_raw(char *from, char *code, char *msg)
     ++colon;
     if (colon) {
       if (!strncmp(colon, "+OK ", 4)) {
+        bool isValidCipherText;
         char *p = strchr(from, '!');
         const bool target_is_chan = strchr(CHANMETA, target[0]);
         bd::String ciphertext(colon), sharedKey, nick(from, p - from), key_target;
@@ -191,7 +192,7 @@ static int check_bind_raw(char *from, char *code, char *msg)
           // Decrypt the message before passing along to the binds
           const bd::String decrypted(egg_bf_decrypt(ciphertext, sharedKey));
           // Does the decrypted text make sense? If not, the key is probably invalid, reset it.
-          bool isValidCipherText = true;
+          isValidCipherText = true;
           for (size_t i = 0; i < decrypted.length(); ++i) {
             if (!isprint(decrypted[i])) {
               isValidCipherText = false;
@@ -207,6 +208,9 @@ static int check_bind_raw(char *from, char *code, char *msg)
             FishKeys.remove(key_target);
             delete fishData;
           }
+        }
+        if (fish_auto_keyx && !isValidCipherText && !target_is_chan) {
+          keyx(nick, "Invalid/Unknown key");
         }
       }
     }
@@ -799,7 +803,7 @@ static int gotmsg(char *from, char *msg)
         if (my_u && FishKeys.contains(nick)) {
           // FiSH paranoid mode. Invalidate the current key and re-key-exchange with the user.
           if (fish_paranoid) {
-            keyx(nick);
+            keyx(nick, "fish-paranoid is set");
           }
         }
       }
@@ -1978,7 +1982,7 @@ static int got718(char *from, char *msg)
         dprintf(DP_HELP, "ACCEPT %s\n", nick);
         dprintf(DP_HELP, "PRIVMSG %s :You have been accepted. Please send your message again.\n", nick);
         if (fish_auto_keyx) {
-          keyx(nick);
+          keyx(nick, "Callerid accepted");
         }
       } else {
         putlog(LOG_WALL, "*", "(CALLERID) !%s! (%s!%s) %s (User is not +o or +v)", u->handle, nick, uhost, msg);
@@ -2104,7 +2108,7 @@ static void connect_server(void)
     dcc[newidx].sock = -1;
     dcc[newidx].u.dns->cbuf = strdup(pass);
 
-    cycle_time = 15;		/* wait 15 seconds before attempting next server connect */
+    cycle_time = server_cycle_wait;		/* wait N seconds before attempting next server connect */
 
     /* I'm resolving... don't start another server connect request */
     resolvserv = 1;

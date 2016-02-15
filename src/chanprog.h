@@ -33,7 +33,7 @@ void load_internal_users();
 void setup_HQ(int);
 void privmsg(bd::String target, bd::String msg, int idx);
 void notice(bd::String target, bd::String msg, int idx);
-void keyx(const bd::String& target);
+void keyx(const bd::String& target, const char *);
 void set_fish_key(char *, bd::String);
 struct userrec *check_chanlist(const char *);
 struct userrec *check_chanlist_hand(const char *);

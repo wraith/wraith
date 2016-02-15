@@ -907,14 +907,15 @@ void notice(bd::String target, bd::String msg, int idx) {
 }
 
 
-void keyx(const bd::String &target) {
+void keyx(const bd::String &target, const char *reason) {
   bd::String myPublicKeyB64, myPrivateKey, sharedKey;
 
   DH1080_gen(myPrivateKey, myPublicKeyB64);
 
   fish_data_t* fishData = FishKeys.contains(target) ? FishKeys[target] : new fish_data_t;
   fishData->sharedKey.clear();
-  putlog(LOG_MSGS, "*", "[FiSH] Initiating DH1080 key-exchange with %s - sending my public key", target.c_str());
+  putlog(LOG_MSGS, "*", "[FiSH] Initiating DH1080 key-exchange with %s - "
+      "sending my public key (%s)", target.c_str(), reason);
   notice(target, "DH1080_INIT " + myPublicKeyB64, DP_HELP);
   fishData->myPublicKeyB64 = myPublicKeyB64;
   fishData->myPrivateKey = myPrivateKey;
