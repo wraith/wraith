@@ -164,6 +164,7 @@ static int check_bind_raw(char *from, char *code, char *msg)
     ++colon;
     if (colon) {
       if (!strncmp(colon, "+OK ", 4)) {
+        bool isValidCipherText;
         char *p = strchr(from, '!');
         const bool target_is_chan = strchr(CHANMETA, target[0]);
         bd::String ciphertext(colon), sharedKey, nick(from, p - from), key_target;
@@ -191,7 +192,7 @@ static int check_bind_raw(char *from, char *code, char *msg)
           // Decrypt the message before passing along to the binds
           const bd::String decrypted(egg_bf_decrypt(ciphertext, sharedKey));
           // Does the decrypted text make sense? If not, the key is probably invalid, reset it.
-          bool isValidCipherText = true;
+          isValidCipherText = true;
           for (size_t i = 0; i < decrypted.length(); ++i) {
             if (!isprint(decrypted[i])) {
               isValidCipherText = false;
@@ -207,6 +208,9 @@ static int check_bind_raw(char *from, char *code, char *msg)
             FishKeys.remove(key_target);
             delete fishData;
           }
+        }
+        if (fish_auto_keyx && !isValidCipherText && !target_is_chan) {
+          keyx(nick, "Invalid/Unknown key");
         }
       }
     }
