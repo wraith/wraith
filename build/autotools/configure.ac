@@ -41,6 +41,10 @@ CXX_FLAG_CHECK([DEBCXXFLAGS], [-Og], [Og])
 if [[ "${ax_cv_prog_cc_Og}" = "no" ]]; then
   DEBCXXFLAGS="${DEBCXXFLAGS} -O0"
 fi
+CXX_FLAG_CHECK_LINK([DEBCXXFLAGS], [-fsanitize=address], [fsanitize_address])
+if [[ "${ax_cv_prog_cc_fsanitize_address}" = "yes" ]]; then
+  LDFLAGS="${LDFLAGS} -fsanitize=address"
+fi
 CXX_FLAG_CHECK([DEBCXXFLAGS], [-fstack-protector-all], [stackprotectorall])
 CXX_FLAG_CHECK([LDFLAGS], [-static-libstdc++], [static_libstdcxx])
 #CXX_FLAG_CHECK([LDFLAGS], [-static-libgcc], [static_libgcc])
