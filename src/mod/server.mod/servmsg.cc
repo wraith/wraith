@@ -208,6 +208,8 @@ static int check_bind_raw(char *from, char *code, char *msg)
             FishKeys.remove(key_target);
             delete fishData;
           }
+        } else {
+          isValidCipherText = false;
         }
         if (fish_auto_keyx && !isValidCipherText && !target_is_chan) {
           keyx(nick, "Invalid/Unknown key");
