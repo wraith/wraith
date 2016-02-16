@@ -26,5 +26,5 @@ struct userrec *get_user_by_host(char *);
 
 extern struct userrec  		*userlist, *lastuser;
 extern int			cache_hit, cache_miss, userfile_perm;
-extern bool			noshare;
+extern int			noshare;
 #endif /* !_USERREC_H */
