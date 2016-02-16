@@ -14,8 +14,8 @@ int get_addr(const char *, my_addr_t *);
 
 /* can be static if ever combined with net.h or a more integrated 1.9 is used ... */
 typedef struct {
-        int len;
         int family;
+        socklen_t len;
         union {
                 struct sockaddr addr;
                 struct sockaddr_in ipv4;

@@ -325,8 +325,11 @@ void rembot(const char *whoin)
 
   struct userrec *u = get_user_by_handle(userlist, (char *) who);
 
-  if (u)
+  if (u) {
+    noshare++;
     touch_laston(u, "unlinked", now);
+    noshare--;
+  }
 
   ptr2 = *ptr;
   *ptr = ptr2->next;

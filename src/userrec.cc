@@ -53,7 +53,7 @@
 #include <bdlib/src/AtomicFile.h>
 #include <bdlib/src/String.h>
 
-bool             noshare = 1;		/* don't send out to sharebots	    */
+int             noshare = 1;		/* don't send out to sharebots	    */
 struct userrec	*userlist = NULL;	/* user records are stored here	    */
 struct userrec	*lastuser = NULL;	/* last accessed user record	    */
 maskrec		*global_bans = NULL,
