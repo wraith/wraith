@@ -9,6 +9,8 @@
     bots know which bots have which roles. (#39)
   * Add cmd_roles (leaf only) to display roles for a channel. (#39)
   * Fix some various internal caching issues.
+  * Stop trying to regain jupenick when it is unavailable and main nick is
+    temporarily juped (#101).
 
 # master
   * Require C++11 compiler support (G++ 4.7+, clang32+)
