@@ -181,7 +181,7 @@ AC_DEFUN([EGG_CHECK_CCWALL],
   fi
 ])
 
-dnl @synopsis CXX_FLAGS_CHECK [var] [compiler flags] [cache name] [required]
+dnl @synopsis CXX_FLAG_CHECK [var] [compiler flags] [cache name] [required]
 dnl @summary check whether compiler supports given C++ flags or not
 AC_DEFUN([CXX_FLAG_CHECK],
 [
@@ -190,6 +190,36 @@ AC_DEFUN([CXX_FLAG_CHECK],
     ac_saved_flags="$CXXFLAGS"
     CXXFLAGS="-Werror $2"
     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([])],
+      [ax_cv_prog_cc_$3="yes"],
+      [ax_cv_prog_cc_$3="no"],
+    )
+    CXXFLAGS="$ac_saved_flags"
+    AC_LANG_POP([C++])
+  ])
+
+  if [[ "$ax_cv_prog_cc_$3" = "yes" ]]; then
+    $1="$$1 $2"
+  elif [[ -n "$4" ]]; then
+      cat << 'EOF' >&2
+configure: error:
+
+  Your OS or C++ compiler does not support $2.
+  This compile flag is required.
+
+EOF
+    exit 1
+  fi
+])
+
+dnl @synopsis CXX_FLAG_CHECK_LINK [var] [compiler flags] [cache name] [required]
+dnl @summary check whether linker supports given C++ flags or not
+AC_DEFUN([CXX_FLAG_CHECK_LINK],
+[
+  AC_CACHE_CHECK([whether the linker supports $2], ax_cv_prog_cc_$3, [
+    AC_LANG_PUSH([C++])
+    ac_saved_flags="$CXXFLAGS"
+    CXXFLAGS="-Werror $2"
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([])],
       [ax_cv_prog_cc_$3="yes"],
       [ax_cv_prog_cc_$3="no"],
     )
