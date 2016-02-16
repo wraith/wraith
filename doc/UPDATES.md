@@ -1,3 +1,6 @@
+* Stop trying to regain jupenick when it is unavailable and main nick is
+  temporarily juped (#101).
+
 # maint
   * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
   * Fix Linux binary compat on FreeBSD due to lack of ptrace(2).
