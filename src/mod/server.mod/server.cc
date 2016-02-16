@@ -1025,6 +1025,7 @@ static void server_secondly()
     } else if (!keepnick && release_time && ((now - release_time) >= RELEASE_TIME)) {
       release_time = 0;
       keepnick = 1;
+      /* The release time has expired, try to regain the jupenick. */
       nick_available(1, 0);
     }
 
