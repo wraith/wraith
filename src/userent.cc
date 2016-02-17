@@ -770,7 +770,7 @@ static bool laston_set(struct userrec *u, struct user_entry *e, void *buf)
   }
 
   if (!noshare)
-    shareout("c LASTON %s %s %li\n", u->handle, li->lastonplace ? li->lastonplace : "-", (long) li->laston);
+    shareout_hub("c LASTON %s %s %li\n", u->handle, li->lastonplace ? li->lastonplace : "-", (long) li->laston);
 
   return 1;
 }
