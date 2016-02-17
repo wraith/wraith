@@ -206,10 +206,6 @@ void set_chanlist(const char *host, struct userrec *rec)
     for (m = chan->channel.member; m && m->nick[0]; m = m->next)
       if (!rfc_casecmp(nick, m->nick) && !strcasecmp(uhost, m->userhost))
 	m->user = rec;
-
-  if (!conf.bot->hub) {
-    Auth::FillUsers(nick);
-  }
 }
 
 /* 0 marks all channels
