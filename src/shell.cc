@@ -567,7 +567,7 @@ int simple_exec(const char* argv[]) {
 
   switch ((pid = fork())) {
     case -1:
-      break;
+      return -1;
     case 0:		//child
       // Close all sockets
       for (int fd = 3; fd < MAX_SOCKETS; ++fd) close(fd);
@@ -578,9 +578,8 @@ int simple_exec(const char* argv[]) {
       do {
         pid = wait4(savedpid, &status, 0, (struct rusage *)0);
       } while (pid == -1 && errno == EINTR);
-      break;
+      return (pid == -1 ? -1 : status);
   }
-  return(pid == -1 ? -1 : status);
 }
 
 void suicide(const char *msg)
