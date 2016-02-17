@@ -16,6 +16,7 @@
 void sharein(int, char *);
 void shareout(const char *, ...) __attribute__((format(printf, 1, 2)));
 void shareout_prot(struct userrec *, const char *, ...) __attribute__((format(printf, 2, 3)));
+void shareout_hub(const char *, ...) __attribute__((format(printf, 1, 2)));
 void finish_share(int);
 void dump_resync(int);
 void share_report(int, int);

@@ -1241,6 +1241,31 @@ shareout_prot(struct userrec *u, const char *format, ...)
   q_resync(s);
 }
 
+void
+shareout_hub(const char *format, ...)
+{
+  char s[601] = "";
+  int l;
+  va_list va;
+
+  va_start(va, format);
+
+  strlcpy(s, "s ", 3);
+  if ((l = egg_vsnprintf(s + 2, 509, format, va)) < 0)
+    s[2 + (l = 509)] = 0;
+  va_end(va);
+
+  for (int i = 0; i < dcc_total; i++) {
+    if (dcc[i].type && (dcc[i].type->flags & DCT_BOT) &&
+       (dcc[i].status & STAT_SHARE) && !(dcc[i].status & (STAT_GETTING | STAT_SENDING)) &&
+       /* only send to hubs */
+       dcc[i].hub) {
+      tputs(dcc[i].sock, s, l + 2);
+    }
+  }
+  q_resync(s);
+}
+
 static void
 shareout_but(int x, const char *format, ...)
 {
