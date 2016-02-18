@@ -650,7 +650,7 @@ void var_set_userentry(const char *target, const char *name, const char *data)
     struct xtra_key *xk = (struct xtra_key *) calloc(1, sizeof(struct xtra_key));
 
     xk->key = strdup(name);
-    xk->data = data ? strdup(data) : NULL;
+    xk->data = (data && data[0]) ? strdup(data) : NULL;
     set_user(&USERENTRY_SET, u, xk);                //This will send the change to the specified bot
   }
 }
