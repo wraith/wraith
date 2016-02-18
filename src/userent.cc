@@ -341,18 +341,11 @@ static bool set_gotshare(struct userrec *u, struct user_entry *e, char *buf, int
 
   if (!strcasecmp(u->handle, conf.bot->nick)) {
     set_noshare = 1;
+    /* This will also call set_user(). */
     var_set_by_name(conf.bot->nick, name, buf[0] ? buf : NULL);
     set_noshare = 0;
-  /* var_set_by_name() called set_user(), no need to do it again... */
-  } 
-  /* not else if as the hub might have gotten a botset for itself */
-  if (conf.bot->hub || conf.bot->localhub) {
-  /* only hubs need to bother saving this stuff, leaf bots just store it in vars[] */
-    struct xtra_key *xk = (struct xtra_key *) calloc(1, sizeof(struct xtra_key));
-
-    xk->key = strdup(name);
-    xk->data = (buf && buf[0]) ? strdup(buf) : NULL;
-    set_set(u, e, xk);	/* set the USERENTRY */
+  } else if (conf.bot->hub || conf.bot->localhub) {
+    var_set_userentry(u->handle, name, buf);
   }
   return 1;
 }

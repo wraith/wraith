@@ -541,8 +541,17 @@ const char *var_get_gdata(const char *name) {
 
 void var_set(variable_t *var, const char *target, const char *datain)
 {
-  /* Don't set locally if the variable doesn't permit it. */
   if (target) {
+    /*
+     * Setting user entry despite possibly not setting memory due to
+     * historically setting this after var_set() without checking
+     * return value.
+     */
+    if (!parsing_botset) {
+      var_set_userentry(target, var->name, datain);
+    }
+
+    /* Don't set locally if the variable doesn't permit it. */
     if (var->flags & VAR_NOLOC)
       return;
 
@@ -839,8 +848,6 @@ static int var_add_list(const char *botnick, variable_t *var, const char *elemen
     data = strdup(element);
 
   var_set(var, botnick, data);
-  if (botnick)
-    var_set_userentry(botnick, var->name, data);
   free(data);
   return 1;
 }
@@ -900,8 +907,6 @@ static char *var_rem_list(const char *botnick, variable_t *var, const char *elem
 
   if (num <= i && ret[0]) {
     var_set(var, botnick, data);
-    if (botnick)
-      var_set_userentry(botnick, var->name, data);
   } else
     ret[0] = 0;
  
@@ -1188,8 +1193,6 @@ int cmd_set_real(const char *botnick, int idx, char *par)
       }
 
       var_set(var, botnick, data);
-      if (botnick)
-        var_set_userentry(botnick, name, data);
 
       display_set_value(idx, var, botnick);
 

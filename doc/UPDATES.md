@@ -1,3 +1,6 @@
+* Fix bots not tracking botset for other bots, which may be relevant for
+  them making decisions based on groups.
+
 # maint
   * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
   * Fix Linux binary compat on FreeBSD due to lack of ptrace(2).
