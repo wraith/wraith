@@ -655,7 +655,8 @@ readsocks(const char *fname)
   if (!conf.bot->hub)
     restarting = 1;
 
-  char *_botname = NULL, *ip4 = NULL, *ip6 = NULL;
+  char *_botname = NULL, *ip4 = NULL, *ip6 = NULL,
+       *_origbotname = NULL, *_jupenick = NULL;
   time_t old_buildts = 0, _server_online = 0;
 
   bool cached_005 = 0;
@@ -698,6 +699,10 @@ readsocks(const char *fname)
       old_buildts = strtol(str.c_str(), NULL, 10);
     else if (type == STR("+botname"))
       _botname = str.dup();
+    else if (type == STR("+origbotname"))
+      _origbotname = str.dup();
+    else if (type == STR("+jupenick"))
+      _jupenick = str.dup();
     else if (type == STR("+rolls"))
       rolls = atoi(str.c_str());
     else if (type == STR("+altnick_char"))
@@ -730,6 +735,13 @@ readsocks(const char *fname)
 
   unlink(fname);
 
+  /* server_online is not yet set so these will safely not send NICK. */
+  if (_origbotname) {
+    var_set_by_name(conf.bot->nick, "nick", _origbotname);
+  }
+  if (_jupenick) {
+    var_set_by_name(conf.bot->nick, "jupenick", _jupenick);
+  }
   if (servidx >= 0) {
     char nserv[50] = "";
 
@@ -765,6 +777,8 @@ readsocks(const char *fname)
     }
   }
   delete[] _botname;
+  delete[] _origbotname;
+  delete[] _jupenick;
   delete[] ip4;
   delete[] ip6;
   if (socksfile)
@@ -817,6 +831,10 @@ restart(int idx)
   if (server_online) {
     if (botname[0])
       stream << bd::String::printf(STR("+botname %s\n"), botname);
+    if (origbotname[0])
+      stream << bd::String::printf(STR("+origbotname %s\n"), origbotname);
+    if (jupenick[0])
+      stream << bd::String::printf(STR("+jupenick %s\n"), jupenick);
     if (rolls)
       stream << bd::String::printf(STR("+rolls %d\n"), rolls);
     if (altnick_char)

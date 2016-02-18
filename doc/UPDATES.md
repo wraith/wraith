@@ -1,4 +1,7 @@
 * Fix bots not tracking groups for other bots.
+* Fix bot forgetting its nick/jupenick during restart and reverting to
+  botnick if restarting in the middle of a server connect or attempted
+  NICK change that fails.
 
 # maint
   * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
