@@ -655,7 +655,7 @@ readsocks(const char *fname)
   if (!conf.bot->hub)
     restarting = 1;
 
-  char *nick = NULL, *ip4 = NULL, *ip6 = NULL;
+  char *_botname = NULL, *ip4 = NULL, *ip6 = NULL;
   time_t old_buildts = 0, _server_online = 0;
 
   bool cached_005 = 0;
@@ -697,7 +697,7 @@ readsocks(const char *fname)
     else if (type == STR("+buildts"))
       old_buildts = strtol(str.c_str(), NULL, 10);
     else if (type == STR("+botname"))
-      nick = str.dup();
+      _botname = str.dup();
     else if (type == STR("+rolls"))
       rolls = atoi(str.c_str());
     else if (type == STR("+altnick_char"))
@@ -755,7 +755,7 @@ readsocks(const char *fname)
       if (!_server_online)
 	_server_online = now;
       server_online = _server_online;
-      rehash_server(dcc[servidx].host, nick);
+      rehash_server(dcc[servidx].host, _botname);
       if (cached_005)
         replay_cache(servidx, NULL);
       else
@@ -764,7 +764,7 @@ readsocks(const char *fname)
         reset_chans = 1;
     }
   }
-  delete[] nick;
+  delete[] _botname;
   delete[] ip4;
   delete[] ip6;
   if (socksfile)
