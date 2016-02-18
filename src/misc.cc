@@ -655,7 +655,7 @@ readsocks(const char *fname)
   if (!conf.bot->hub)
     restarting = 1;
 
-  char *nick = NULL, *jnick = NULL, *ip4 = NULL, *ip6 = NULL;
+  char *nick = NULL, *ip4 = NULL, *ip6 = NULL;
   time_t old_buildts = 0, _server_online = 0;
 
   bool cached_005 = 0;
@@ -767,8 +767,6 @@ readsocks(const char *fname)
   delete[] nick;
   delete[] ip4;
   delete[] ip6;
-  if (jnick)
-    free(jnick);
   if (socksfile)
     free(socksfile);
 }
