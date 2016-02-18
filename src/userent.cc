@@ -253,9 +253,15 @@ static bool set_set(struct userrec *u, struct user_entry *e, void *buf)
   }
   
   /* we will possibly free new below, so let's send the information to the botnet now */
-  if (!noshare && !set_noshare)
-    /* only share to pertinent bots */
-    shareout_prot(u, "c %s %s %s %s\n", e->type->name, u->handle, newxk->key, newxk->data ? newxk->data : "");
+  if (!noshare && !set_noshare) {
+    /* Always share groups to all bots. */
+    if (!strcmp(newxk->key, "groups")) {
+      shareout("c %s %s %s %s\n", e->type->name, u->handle, newxk->key, newxk->data ? newxk->data : "");
+    } else {
+      /* only share to pertinent bots */
+      shareout_prot(u, "c %s %s %s %s\n", e->type->name, u->handle, newxk->key, newxk->data ? newxk->data : "");
+    }
+  }
 
   /* unset and bail out if the new data is empty and the old doesn't exist, why'd we even get this change? */
   if (!old && (!newxk->data || !newxk->data[0])) {
