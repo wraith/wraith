@@ -12,6 +12,9 @@
   * Stop trying to regain jupenick when it is unavailable and main nick is
     temporarily juped (#101).
   * Fix bots not tracking groups for other bots.
+  * Fix bot forgetting its nick/jupenick during restart and reverting to
+    botnick if restarting in the middle of a server connect or attempted
+    NICK change that fails.
 
 # master
   * Require C++11 compiler support (G++ 4.7+, clang32+)
