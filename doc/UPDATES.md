@@ -11,6 +11,7 @@
   * Fix some various internal caching issues.
   * Stop trying to regain jupenick when it is unavailable and main nick is
     temporarily juped (#101).
+  * Fix bots not tracking groups for other bots.
 
 # master
   * Require C++11 compiler support (G++ 4.7+, clang32+)
