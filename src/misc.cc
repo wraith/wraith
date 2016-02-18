@@ -656,7 +656,7 @@ readsocks(const char *fname)
     restarting = 1;
 
   char *nick = NULL, *jnick = NULL, *ip4 = NULL, *ip6 = NULL;
-  time_t old_buildts = 0;
+  time_t old_buildts = 0, _server_online = 0;
 
   bool cached_005 = 0;
   const char salt1[] = SALT1;
@@ -678,7 +678,7 @@ readsocks(const char *fname)
     else if (type == STR("+online_since"))
       online_since = strtol(str.c_str(), NULL, 10);
     else if (type == STR("+server_online"))
-      server_online = strtol(str.c_str(), NULL, 10);
+      _server_online = strtol(str.c_str(), NULL, 10);
     else if (type == STR("+server_floodless"))
       floodless = 1;
     else if (type == STR("+in_deaf"))
@@ -752,7 +752,9 @@ readsocks(const char *fname)
       curserv = 0;
       keepnick = 0; /* Wait to change nicks until relinking, fixes nick/jupenick switching issues during restart */
       reset_flood();
-      if (!server_online) server_online = now;
+      if (!_server_online)
+	_server_online = now;
+      server_online = _server_online;
       rehash_server(dcc[servidx].host, nick);
       if (cached_005)
         replay_cache(servidx, NULL);
