@@ -13,19 +13,20 @@ before_install:
   - if [ "$CXX" = "clang++" ]; then sudo apt-get -y install clang-3.6; fi
   - if [ "$CXX" = "clang++" ]; then svn co --quiet --trust-server-cert --non-interactive https://llvm.org/svn/llvm-project/libcxxabi/trunk@r249649 libcxxabi; fi
   - if [ "$CXX" = "clang++" ]; then svn co --quiet --trust-server-cert --non-interactive https://llvm.org/svn/llvm-project/libcxx/trunk@r249595 libcxx; fi
-  - if [ "$CXX" = "clang++" ]; then (cd libcxx/lib && env CXX="clang++ -I ../../libcxxabi/include" sh buildit); fi
+  - if [ "$CXX" = "clang++" ]; then (cd libcxx/lib && env CXX="clang++-3.6 -I ../../libcxxabi/include" sh buildit); fi
   - if [ "$CXX" = "clang++" ]; then sudo cp libcxx/lib/libc++.so.1.0 /usr/lib/; fi
   - if [ "$CXX" = "clang++" ]; then sudo mkdir /usr/include/c++/v1; fi
   - if [ "$CXX" = "clang++" ]; then sudo cp -r libcxx/include/* /usr/include/c++/v1/; fi
   - if [ "$CXX" = "clang++" ]; then sudo ln -sf libc++.so.1.0 /usr/lib/libc++.so; fi
   - if [ "$CXX" = "clang++" ]; then sudo ln -sf libc++.so.1.0 /usr/lib/libc++.so.1; fi
-  - if [ "$CXX" = "clang++" ]; then (cd libcxxabi/lib && env CXX="clang++ -I ../../libcxx/include" sh buildit); fi
+  - if [ "$CXX" = "clang++" ]; then (cd libcxxabi/lib && env CXX="clang++-3.6 -I ../../libcxx/include" sh buildit); fi
   - if [ "$CXX" = "clang++" ]; then sudo cp libcxxabi/lib/libc++abi.so.1.0 /usr/lib/; fi
   - if [ "$CXX" = "clang++" ]; then sudo ln -sf libc++abi.so.1.0 /usr/lib/libc++abi.so; fi
   - if [ "$CXX" = "clang++" ]; then sudo ln -sf libc++abi.so.1.0 /usr/lib/libc++abi.so.1; fi
   - if [ "$CXX" = "clang++" ]; then export CXXFLAGS="-stdlib=libc++" LDFLAGS="-stdlib=libc++ -lc++abi"; fi
   - if [ "$CXX" = "clang++" ]; then (wget http://dev-www.libreoffice.org/src/cppunit-1.13.2.tar.gz && tar -zxvf cppunit-1.13.2.tar.gz && cd cppunit-1.13.2 && ./configure --prefix=/usr --disable-doc --disable-doxygen --disable-html-docs && make -j2 && sudo make install); fi
   - export CPPFLAGS="-D_FORTIFY_SOURCE=2"
+  - if [ "$CXX" = "clang++" ]; then export CXX="clang++-3.6" CC="clang-3.6"; fi
 
 script:
   - if [ "${COVERITY_SCAN_BRANCH}" != "1" ]; then ./configure; fi
