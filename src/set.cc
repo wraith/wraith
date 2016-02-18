@@ -684,10 +684,6 @@ void init_vars()
     if (!vars[i].gdata && !vars[i].ldata && !(!conf.bot->hub && (vars[i].flags & VAR_NOLDEF)))
       var_set(&vars[i], NULL, NULL);		//empty out and set to defaults
   }
-#ifdef DEBUG
-  if (!strncmp(conf.bot->nick, "wtest", 5))
-    var_set_by_name(NULL, "homechan", "#bryan");
-#endif
 }
 
 /* This is used to parse (GLOBAL) userfile var lines and changes via .set from a remote hub */
