@@ -27,6 +27,10 @@ AC_CACHE_SAVE
 # Speedup compile
 EGG_CHECK_CCWALL
 EGG_CHECK_CCPIPE
+AX_CXX_COMPILE_STDCXX_11([noext], [optional])
+if [[ "${HAVE_CXX11}" -eq 0 ]]; then
+  CXX_FLAG_CHECK([CXXFLAGS], [-std=c++0x], [cxx0x])
+fi
 CXX_FLAG_CHECK([CXXFLAGS], [-fcolor-diagnostics], [colordiagnostics])
 #CXX_FLAG_CHECK([CXXFLAGS], [-Qunused-arguments], [unusedarguments])
 CXX_FLAG_CHECK([CXXFLAGS], [-Wno-invalid-source-encoding], [invalid_source_encoding])
