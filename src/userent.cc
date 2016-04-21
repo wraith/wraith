@@ -351,7 +351,7 @@ static bool set_gotshare(struct userrec *u, struct user_entry *e, char *buf, int
     /* This will also call set_user(). */
     var_set_by_name(conf.bot->nick, name, buf[0] ? buf : NULL);
     set_noshare = 0;
-  } else if (conf.bot->hub || conf.bot->localhub) {
+  } else if (conf.bot->hub || conf.bot->localhub || !strcmp(name, "groups")) {
     var_set_userentry(u->handle, name, buf);
   }
   return 1;
