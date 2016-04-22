@@ -1780,7 +1780,7 @@ static void rebalance_roles_chan(struct chanset_t* chan)
   /* Gather list of all bots in the channel. */
   /* XXX: Keep this known in chan->bots */
   for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-    if (!member_getuser(m) || !is_bot(m->user)) {
+    if (!member_getuser(m) || !is_bot(m->user) || m->split) {
       continue;
     }
 
