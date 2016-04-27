@@ -15,7 +15,7 @@ EGG_SAVE_PARAMETERS
 dnl Search for newer gcc versions before older
 #AC_REQUIRE_CPP
 AC_LANG(C++)
-AC_PROG_CXX([g++49 g++-4.9 g++48 g++-4.8 g++47 g++-4.7 g++46 g++-4.6 g++45 g++-4.5 g++-4.4 g++-4.4.1 g++-4.4.2 g++-4.4.0 g++44 g++4 eg++ g++-3.3 g++33 g++-3 g++3 g++ c++ gpp aCC CC cxx cc++ cl FCC KCC RCC xlC_r xlC])
+AC_PROG_CXX([g++6 g++5 g++49 g++-4.9 g++48 g++-4.8 g++47 g++-4.7 g++46 g++-4.6 g++ c++ CC cxx cc++])
 CC="${CXX} -x c"
 AC_SUBST(CC)
 EGG_CHECK_CC
