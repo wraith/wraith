@@ -52,6 +52,15 @@ CXX_FLAG_CHECK([DEBCXXFLAGS], [-fstack-protector-all], [stackprotectorall])
 CXX_FLAG_CHECK([DEBCXXFLAGS], [-Wconditional-uninitialized], [w_conditional_uninitialized])
 CXX_FLAG_CHECK([LDFLAGS], [-static-libstdc++], [static_libstdcxx])
 #CXX_FLAG_CHECK([LDFLAGS], [-static-libgcc], [static_libgcc])
+if [[ "${ax_cv_prog_cc_static_libstdcxx}" = "yes" ]]; then
+  AC_MSG_CHECKING([for static libstdc++])
+  AC_TRY_LINK([], [], [AC_MSG_RESULT(OK)],
+    [
+     AC_MSG_RESULT([not found.])
+     AC_MSG_ERROR([Static libstdc++ is rquired to build.], 1)
+    ]
+  )
+fi
 
 EGG_CHECK_DEPMODE
 

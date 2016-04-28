@@ -46,6 +46,8 @@
   * Show reason when initiating FiSH Key exchange
   * Auto initiate FiSH key exchange (with fish-auto=1) when invalid message
     received. (Invalid or unknown key) (#74)
+  * Show more clear error on Centos 7 that static-libstdc++ is required,
+    rather than an obscure Libcrypto error.
 
 # 1.4.6
   * Disable demo TCL support by default to prevent confusion during build.

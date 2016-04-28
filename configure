@@ -4044,6 +4044,34 @@ EOF
   fi
 
 #CXX_FLAG_CHECK([LDFLAGS], [-static-libgcc], [static_libgcc])
+if [ "${ax_cv_prog_cc_static_libstdcxx}" = "yes" ]; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for static libstdc++" >&5
+$as_echo_n "checking for static libstdc++... " >&6; }
+  cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: OK" >&5
+$as_echo "OK" >&6; }
+else
+
+     { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found." >&5
+$as_echo "not found." >&6; }
+     as_fn_error 1 "Static libstdc++ is rquired to build." "$LINENO" 5
+
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+fi
 
 
 CCDEPMODE=gcc
