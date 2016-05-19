@@ -1342,6 +1342,9 @@ static void cmd_chanset(int idx, char *par)
     } else if ((strstr(par, "+inactive") || strstr(par, "-inactive")) && (!glob_owner(user))) {
       dprintf(idx, "You don't have access to set +/-inactive on %s (halting command).\n", chan->dname);
       return;
+    } else if (strstr(par, "groups") && !glob_owner(user)) {
+      dprintf(idx, "You don't have access to set groups on %s (halting command).\n", chan->dname);
+      return;
     }
   }
 
