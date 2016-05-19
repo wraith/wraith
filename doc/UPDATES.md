@@ -48,6 +48,7 @@
     received. (Invalid or unknown key) (#74)
   * Show more clear error on Centos 7 that static-libstdc++ is required,
     rather than an obscure Libcrypto error.
+  * Restrict 'chanset groups' to owners.
 
 # 1.4.6
   * Disable demo TCL support by default to prevent confusion during build.
