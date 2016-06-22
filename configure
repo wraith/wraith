@@ -4612,7 +4612,6 @@ $as_echo "$egg_cv_var_system_machine" >&6; }
 
 BUILDOS="$egg_cv_var_system_type"
 BUILDARCH="$egg_cv_var_system_machine"
-USE_GENERIC_I486="yes"
 
 case "$egg_cv_var_system_type" in
   BSD/OS)
@@ -4667,7 +4666,6 @@ $as_echo "#define BROKEN_SNPRINTF 1" >>build/confdefs.h
   ;;
   Darwin)
     USE_STATIC="no"
-    USE_GENERIC_I486="no"
   ;;
   *BSD)
     # FreeBSD/OpenBSD/NetBSD
@@ -4697,17 +4695,6 @@ $as_echo "no" >&6; }
 $as_echo "Something unknown!" >&6; }
       fi
     fi
-  ;;
-esac
-
-case "$egg_cv_var_system_machine" in
-  i*)
-    if test "$USE_GENERIC_I486" = "yes"; then
-      CXX="$CXX -march=i486"
-      BUILDARCH="i486"
-    fi
-  ;;
-  *)
   ;;
 esac
 
