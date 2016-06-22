@@ -422,7 +422,6 @@ AC_CACHE_CHECK(system machine, egg_cv_var_system_machine, egg_cv_var_system_mach
 
 BUILDOS="$egg_cv_var_system_type"
 BUILDARCH="$egg_cv_var_system_machine"
-USE_GENERIC_I486="yes"
 
 case "$egg_cv_var_system_type" in
   BSD/OS)
@@ -471,7 +470,6 @@ case "$egg_cv_var_system_type" in
   ;;
   Darwin)
     USE_STATIC="no"
-    USE_GENERIC_I486="no"
   ;;
   *BSD)
     # FreeBSD/OpenBSD/NetBSD
@@ -493,17 +491,6 @@ case "$egg_cv_var_system_type" in
         AC_MSG_RESULT(Something unknown!)
       fi
     fi
-  ;;
-esac
-
-case "$egg_cv_var_system_machine" in
-  i*)
-    if test "$USE_GENERIC_I486" = "yes"; then
-      CXX="$CXX -march=i486"
-      BUILDARCH="i486"
-    fi
-  ;;
-  *)
   ;;
 esac
 
