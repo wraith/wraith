@@ -1025,6 +1025,7 @@ static void server_secondly()
     } else if (!keepnick && release_time && ((now - release_time) >= RELEASE_TIME)) {
       release_time = 0;
       keepnick = 1;
+      /* The release time has expired, try to regain the jupenick. */
       nick_available(1, 0);
     }
 
@@ -1108,7 +1109,7 @@ static void server_minutely()
     // Ratbox sets a nick_delay (default:15min) timer when a nick splits off to prevent collisions,
     // We must check periodically to see if the local server has unjuped our wanted nicks.
     if (keepnick && (jnick_juped == 2 || nick_juped == 2)) {
-      nick_available(1, 1);
+      nick_available(jnick_juped == 2, nick_juped == 2);
     }
   }
 }

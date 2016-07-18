@@ -1027,17 +1027,14 @@ static int gotpong(char *from, char *msg)
   return 0;
 }
 
-static int nick_which(const char* nick, bool& is_jupe, bool& is_orig) {
-  if (jupenick[0] && !rfc_ncasecmp(nick, jupenick, nick_len)) {
-    is_jupe = 1;
-    // If some stupid reason they have the same jupenick/nick, make sure to mark it as on
-    if (!rfc_ncasecmp(nick, origbotname, nick_len))
-      is_orig = 1;
-    return 1;
-  } else if (!rfc_ncasecmp(nick, origbotname, nick_len)) {
+static void nick_which(const char* nick, bool& is_jupe, bool& is_orig) {
+  if (is_orig == 0 && !rfc_ncasecmp(nick, origbotname, nick_len)) {
     is_orig = 1;
   }
-  return 0;
+  /* It's possible jupenick==nick.  Set both flags. */
+  if (is_jupe == 0 && jupenick[0] && !rfc_ncasecmp(nick, jupenick, nick_len)) {
+    is_jupe = 1;
+  }
 }
 
 static void nick_available(bool is_jupe, bool is_orig) {
@@ -1070,8 +1067,10 @@ void nicks_available(char* buf, char delim, bool buf_contains_available) {
   char *nick = NULL;
   if (delim) {
     while ((nick = newsplit(&buf, delim))[0]) {
-      if (nick_which(nick, is_jupe, is_orig))
+      nick_which(nick, is_jupe, is_orig);
+      if (is_jupe && is_orig) {
         break;
+      }
     }
   } else {
     nick = buf;
