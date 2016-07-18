@@ -1,4 +1,3 @@
-/* I hereby release this into the Public Domain - Bryan Drewery */
 /*
  * auth.c -- handles:
  *   auth system functions
@@ -39,39 +38,31 @@
 
 #include "stat.h"
 
-bd::HashTable<bd::String, Auth*> Auth::ht_handle(10);
 bd::HashTable<bd::String, Auth*> Auth::ht_host(10);
+bd::HashTable<bd::String, Auth*> Auth::ht_nick(10);
 
 Auth::Auth(const char *_nick, const char *_host, struct userrec *u)
 {
   Status(AUTHING);
   strlcpy(nick, _nick, NICKLEN);
   strlcpy(host, _host, UHOSTLEN);
-  if (u) {
-    user = u;
-    strlcpy(handle, u->handle, sizeof(handle));
-  } else {
-    user = NULL;
-    handle[0] = '*';
-    handle[1] = 0;
-  }
-
+  user = u;
 
   ht_host[host] = this;
-  if (user)
-    ht_handle[handle] = this;
+  ht_nick[_nick] = this;
 
-  sdprintf(STR("New auth created! (%s!%s) [%s]"), nick, host, handle);
+  sdprintf(STR("New auth created! (%s!%s) [%s]"), nick, host,
+      u ? u->handle : "*");
   authtime = atime = now;
   idx = -1;
 }
 
 Auth::~Auth()
 {
-  sdprintf(STR("Removing auth: (%s!%s) [%s]"), nick, host, handle);
-  if (user)
-    ht_handle.remove(handle);
+  sdprintf(STR("Removing auth: (%s!%s) [%s]"), nick, host,
+      user ? user->handle : "*");
   ht_host.remove(host);
+  ht_nick.remove(nick);
 }
 
 void Auth::MakeHash()
@@ -88,7 +79,11 @@ void Auth::Done()
 }
 
 void Auth::NewNick(const char *newnick) {
+  if (ht_nick.contains(nick)) {
+    Auth::ht_nick.remove(nick);
+  }
   strlcpy(nick, newnick, NICKLEN);
+  ht_nick[newnick] = this;
 }
 
 Auth *Auth::Find(const char *_host)
@@ -96,17 +91,8 @@ Auth *Auth::Find(const char *_host)
 
   if (ht_host.contains(_host)) {
     Auth *auth = ht_host[_host];
-    sdprintf(STR("Found auth: (%s!%s) [%s]"), auth->nick, auth->host, auth->handle);
-    return auth;
-  }
-  return NULL;
-}
-
-Auth *Auth::Find(const char *handle, bool _hand)
-{
-  if (ht_handle.contains(handle)) {
-    Auth *auth = ht_handle[handle];
-    sdprintf(STR("Found auth (by handle): %s (%s!%s)"), handle, auth->nick, auth->host);
+    sdprintf(STR("Found auth: (%s!%s) [%s]"), auth->nick, auth->host,
+        auth->user ? auth->user->handle : "*");
     return auth;
   }
   return NULL;
@@ -115,27 +101,44 @@ Auth *Auth::Find(const char *handle, bool _hand)
 static void auth_clear_users_block(const bd::String key, Auth* auth, void *param)
 {
   if (auth->user) {
-    sdprintf(STR("Clearing USER for auth: (%s!%s) [%s]"), auth->nick, auth->host, auth->handle);
+    sdprintf(STR("Clearing USER for auth: (%s!%s) [%s]"), auth->nick,
+        auth->host, auth->user ? auth->user->handle : "*");
     auth->user = NULL;
   }
 }
 
-void Auth::NullUsers()
+void Auth::NullUsers(const char *nick)
 {
-  ht_host.each(auth_clear_users_block);
+  if (nick == NULL) {
+    ht_host.each(auth_clear_users_block);
+  } else {
+    if (ht_nick.contains(nick)) {
+      Auth *auth = ht_nick[nick];
+      auth_clear_users_block(nick, auth, NULL);
+    }
+  }
 }
 
 static void auth_fill_users_block(const bd::String key, Auth* auth, void* param)
 {
-  if (strcmp(auth->handle, "*")) {
-    sdprintf(STR("Filling USER for auth: (%s!%s) [%s]"), auth->nick, auth->host, auth->handle);
-    auth->user = get_user_by_handle(userlist, auth->handle);
-  }
+  char from[NICKLEN + UHOSTLEN];
+
+  sdprintf(STR("Filling USER for auth: (%s!%s) [%s]"), auth->nick, auth->host,
+      auth->user ? auth->user->handle : "*");
+  simple_snprintf(from, sizeof(from), "%s!%s", auth->nick, auth->host);
+  auth->user = get_user_by_host(from);
 }
 
-void Auth::FillUsers()
+void Auth::FillUsers(const char *nick)
 {
-  ht_host.each(auth_fill_users_block);
+  if (nick == NULL) {
+    ht_host.each(auth_fill_users_block);
+  } else {
+    if (ht_nick.contains(nick)) {
+      Auth *auth = ht_nick[nick];
+      auth_fill_users_block(nick, auth, NULL);
+    }
+  }
 }
 
 
@@ -143,7 +146,7 @@ static void auth_expire_block(const bd::String key, Auth* auth, void* param)
 {
   if (auth->Authed() && ((now - auth->atime) >= (60 * 60))) {
     Auth::ht_host.remove(key);
-    Auth::ht_handle.remove(key);
+    Auth::ht_nick.remove(auth->nick);
     delete auth;
   }
 }
@@ -158,7 +161,8 @@ void Auth::ExpireAuths()
 
 static void auth_delete_all_block(const bd::String, Auth* auth, void* param)
 {
-  putlog(LOG_DEBUG, "*", STR("Removing (%s!%s) [%s], from auth list."), auth->nick, auth->host, auth->handle);
+  putlog(LOG_DEBUG, "*", STR("Removing (%s!%s) [%s], from auth list."),
+      auth->nick, auth->host, auth->user ? auth->user->handle : "*");
   delete auth;
 }
 
@@ -168,7 +172,7 @@ void Auth::DeleteAll()
     putlog(LOG_DEBUG, "*", STR("Removing auth entries."));
     ht_host.each(auth_delete_all_block);
     ht_host.clear();
-    ht_handle.clear();
+    ht_nick.clear();
   }
 }
 
@@ -185,7 +189,7 @@ sdprintf(STR("GETIDX: auth: %s, idx: %d"), nick, idx);
       idx = -1;
     else if (!dcc[idx].irc || dcc[idx].simul == -1)
       idx = -1;
-    else if (strcmp(dcc[idx].nick, handle))
+    else if (user && strcmp(dcc[idx].nick, user->handle))
       idx = -1;
     else {
       sdprintf(STR("FIRST FOUND: %d"), idx);
@@ -199,7 +203,8 @@ sdprintf(STR("GETIDX: auth: %s, idx: %d"), nick, idx);
 
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type && dcc[i].irc &&
-       (((chname && chname[0]) && !strcmp(dcc[i].simulbot, chname) && !strcmp(dcc[i].nick, handle)) ||
+       (((chname && chname[0]) && !strcmp(dcc[i].simulbot, chname) &&
+         user && !strcmp(dcc[i].nick, user->handle)) ||
        (!(chname && chname[0]) && !strcmp(dcc[i].simulbot, nick)))) {
       putlog(LOG_DEBUG, "*", STR("Simul found old idx for %s/%s: (%s!%s)"), nick, chname, nick, host);
       dcc[i].simultime = now;
@@ -214,6 +219,8 @@ sdprintf(STR("GETIDX: auth: %s, idx: %d"), nick, idx);
   idx = new_dcc(&DCC_CHAT, sizeof(struct chat_info));
 
   if (idx != -1) {
+    char from[NICKLEN + UHOSTLEN];
+
     dcc[idx].sock = -1;
     dcc[idx].timeval = now;
     dcc[idx].irc = 1;
@@ -224,10 +231,11 @@ sdprintf(STR("GETIDX: auth: %s, idx: %d"), nick, idx);
     strlcpy(dcc[idx].simulbot, nick, sizeof(dcc[idx].simulbot));
     strlcpy(dcc[idx].u.chat->con_chan, chname ? chname : "*", sizeof(dcc[idx].u.chat->con_chan));
     dcc[idx].u.chat->strip_flags = STRIP_ALL;
-    strlcpy(dcc[idx].nick, handle, sizeof(dcc[idx].nick));
+    strlcpy(dcc[idx].nick, user ? user->handle : "*", sizeof(dcc[idx].nick));
     strlcpy(dcc[idx].host, host, sizeof(dcc[idx].host));
     dcc[idx].addr = 0L;
-    dcc[idx].user = user ? user : get_user_by_handle(userlist, handle);
+    simple_snprintf(from, sizeof(from), "%s!%s", nick, host);
+    dcc[idx].user = user ? user : get_user_by_host(from);
     return 1;
   }
 
@@ -240,7 +248,8 @@ static void auth_tell_block(const bd::String key, Auth* auth, void* param)
   int idx = (int) lparam;
 
   dprintf(idx, "(%s!%s) [%s] authtime: %li, atime: %li, Status: %d\n", auth->nick, 
-        auth->host, auth->handle, (long)auth->authtime, (long)auth->atime, auth->Status());
+        auth->host, auth->user ? auth->user->handle : "*",
+        (long)auth->authtime, (long)auth->atime, auth->Status());
 }
 
 void Auth::TellAuthed(int idx)

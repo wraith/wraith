@@ -8,6 +8,8 @@ namespace bd {
 struct userrec *adduser(struct userrec *, const char *, char *, char *, flag_t, int);
 void addhost_by_handle(char *, char *);
 void clear_masks(struct maskrec *);
+void clear_cached_users();
+void cache_users();
 void clear_userlist(struct userrec *);
 int u_pass_match(struct userrec *, const char *);
 int delhost_by_handle(char *, char *);

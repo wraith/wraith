@@ -39,6 +39,7 @@
   * Fix bot forgetting its nick/jupenick during restart and reverting to
     botnick if restarting in the middle of a server connect or attempted
     NICK change that fails.
+  * Fix some various internal caching issues.
 
 # 1.4.6
   * Disable demo TCL support by default to prevent confusion during build.

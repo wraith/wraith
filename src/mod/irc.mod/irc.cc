@@ -1168,6 +1168,9 @@ killmember(struct chanset_t *chan, char *nick, bool cacheMember)
 
   if (cacheMember) {
     x->last = now;
+    x->user = NULL;
+    x->next = NULL;
+    x->tried_getuser = 0;
     // Don't delete here, will delete when it expires from the cache.
     (*chan->channel.cached_members)[x->userhost] = x;
   } else {
