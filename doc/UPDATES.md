@@ -33,6 +33,9 @@
     temporarily juped (#101).
   * Fix bots not tracking groups for other bots.  This also fixes slowjoin
     with groups.
+  * Fix bot forgetting its nick/jupenick during restart and reverting to
+    botnick if restarting in the middle of a server connect or attempted
+    NICK change that fails.
 
 # 1.4.6
   * Disable demo TCL support by default to prevent confusion during build.
