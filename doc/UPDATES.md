@@ -8,7 +8,6 @@
     will properly assign roles out to bots to not cause overlap. Only leaf
     bots know which bots have which roles. (#39)
   * Add cmd_roles (leaf only) to display roles for a channel. (#39)
-  * Fix some various internal caching issues.
 
 # master
   * Require C++11 compiler support (G++ 4.7+, clang32+)
@@ -51,6 +50,7 @@
   * Fix bot forgetting its nick/jupenick during restart and reverting to
     botnick if restarting in the middle of a server connect or attempted
     NICK change that fails.
+  * Fix some various internal caching issues.
 
 # 1.4.6
   * Disable demo TCL support by default to prevent confusion during build.
