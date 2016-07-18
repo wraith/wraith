@@ -29,6 +29,8 @@
     rather than an obscure Libcrypto error.
   * Restrict 'chanset groups' to owners.
   * Stop building the binary as i486.  Let it use modern x86/x86_64.
+  * Stop trying to regain jupenick when it is unavailable and main nick is
+    temporarily juped (#101).
 
 # 1.4.6
   * Disable demo TCL support by default to prevent confusion during build.
