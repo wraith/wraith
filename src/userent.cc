@@ -253,9 +253,15 @@ static bool set_set(struct userrec *u, struct user_entry *e, void *buf)
   }
   
   /* we will possibly free new below, so let's send the information to the botnet now */
-  if (!noshare && !set_noshare)
-    /* only share to pertinent bots */
-    shareout_prot(u, "c %s %s %s %s\n", e->type->name, u->handle, newxk->key, newxk->data ? newxk->data : "");
+  if (!noshare && !set_noshare) {
+    /* Always share groups to all bots. */
+    if (!strcmp(newxk->key, "groups")) {
+      shareout("c %s %s %s %s\n", e->type->name, u->handle, newxk->key, newxk->data ? newxk->data : "");
+    } else {
+      /* only share to pertinent bots */
+      shareout_prot(u, "c %s %s %s %s\n", e->type->name, u->handle, newxk->key, newxk->data ? newxk->data : "");
+    }
+  }
 
   /* unset and bail out if the new data is empty and the old doesn't exist, why'd we even get this change? */
   if (!old && (!newxk->data || !newxk->data[0])) {
@@ -341,18 +347,11 @@ static bool set_gotshare(struct userrec *u, struct user_entry *e, char *buf, int
 
   if (!strcasecmp(u->handle, conf.bot->nick)) {
     set_noshare = 1;
+    /* This will also call set_user(). */
     var_set_by_name(conf.bot->nick, name, buf[0] ? buf : NULL);
     set_noshare = 0;
-  /* var_set_by_name() called set_user(), no need to do it again... */
-  } 
-  /* not else if as the hub might have gotten a botset for itself */
-  if (conf.bot->hub || conf.bot->localhub) {
-  /* only hubs need to bother saving this stuff, leaf bots just store it in vars[] */
-    struct xtra_key *xk = (struct xtra_key *) calloc(1, sizeof(struct xtra_key));
-
-    xk->key = strdup(name);
-    xk->data = (buf && buf[0]) ? strdup(buf) : NULL;
-    set_set(u, e, xk);	/* set the USERENTRY */
+  } else if (conf.bot->hub || conf.bot->localhub || !strcmp(name, "groups")) {
+    var_set_userentry(u->handle, name, buf);
   }
   return 1;
 }

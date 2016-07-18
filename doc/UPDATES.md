@@ -31,6 +31,8 @@
   * Stop building the binary as i486.  Let it use modern x86/x86_64.
   * Stop trying to regain jupenick when it is unavailable and main nick is
     temporarily juped (#101).
+  * Fix bots not tracking groups for other bots.  This also fixes slowjoin
+    with groups.
 
 # 1.4.6
   * Disable demo TCL support by default to prevent confusion during build.
