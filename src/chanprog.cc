@@ -166,24 +166,6 @@ struct userrec *check_chanlist_hand(const char *hand)
   return NULL;
 }
 
-/* Clear the user pointers in the chanlists.
- *
- * Necessary when a hostmask is added/removed, a user is added or a new
- * userfile is loaded.
- */
-void clear_chanlist(void)
-{
-  memberlist		*m = NULL;
-  struct chanset_t	*chan = NULL;
-
-  for (chan = chanset; chan; chan = chan->next)
-    for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-      m->user = NULL;
-      m->tried_getuser = 0;
-    }
-
-}
-
 /* Clear the user pointer of a specific nick in the chanlists.
  *
  * Necessary when a hostmask is added/removed, a nick changes, etc.
@@ -194,13 +176,19 @@ void clear_chanlist_member(const char *nick)
   memberlist		*m = NULL;
   struct chanset_t	*chan = NULL;
 
-  for (chan = chanset; chan; chan = chan->next)
-    for (m = chan->channel.member; m && m->nick[0]; m = m->next)
-      if (!rfc_casecmp(m->nick, nick)) {
+  for (chan = chanset; chan; chan = chan->next) {
+    for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
+      if (nick == NULL || !rfc_casecmp(m->nick, nick)) {
 	m->user = NULL;
         m->tried_getuser = 0;
-	break;
+        if (nick != NULL) {
+          break;
+        }
       }
+    }
+  }
+
+  Auth::NullUsers(nick);
 }
 
 /* If this user@host is in a channel, set it (it was null)
@@ -668,15 +656,13 @@ void reload()
   else if (!conf.bot->hub)
     add_localhub();
 
+  cache_users();
+
   /* Make sure no removed users/bots are still connected. */
   check_stale_dcc_users();
 
-  for (tand_t* bot = tandbot; bot; bot = bot->next)
-    bot->u = get_user_by_handle(userlist, bot->bot);
-
   /* I don't think these will ever be called anyway. */
   if (!conf.bot->hub) {
-    Auth::FillUsers();
     check_hostmask();
   }
 
