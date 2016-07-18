@@ -9,12 +9,6 @@
     bots know which bots have which roles. (#39)
   * Add cmd_roles (leaf only) to display roles for a channel. (#39)
   * Fix some various internal caching issues.
-  * Stop trying to regain jupenick when it is unavailable and main nick is
-    temporarily juped (#101).
-  * Fix bots not tracking groups for other bots.
-  * Fix bot forgetting its nick/jupenick during restart and reverting to
-    botnick if restarting in the middle of a server connect or attempted
-    NICK change that fails.
 
 # master
   * Require C++11 compiler support (G++ 4.7+, clang32+)
@@ -50,6 +44,13 @@
     rather than an obscure Libcrypto error.
   * Restrict 'chanset groups' to owners.
   * Stop building the binary as i486.  Let it use modern x86/x86_64.
+  * Stop trying to regain jupenick when it is unavailable and main nick is
+    temporarily juped (#101).
+  * Fix bots not tracking groups for other bots.  This also fixes slowjoin
+    with groups.
+  * Fix bot forgetting its nick/jupenick during restart and reverting to
+    botnick if restarting in the middle of a server connect or attempted
+    NICK change that fails.
 
 # 1.4.6
   * Disable demo TCL support by default to prevent confusion during build.
