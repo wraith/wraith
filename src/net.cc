@@ -1354,17 +1354,6 @@ void tputs(int z, const char *s, size_t len)
     if (len && socklist[i].encstatus)
       s = link_write(i, s, &len);
 
-#ifdef HAVE_ZLIB_H
-    /*
-       if (socklist[i].gz) {
-       FILE *fp;
-       fp = gzdopen(z, "wb0");
-       x = gzwrite(fp, s, len);
-
-       } else
-       */
-#endif /* HAVE_ZLIB_H */
-
     if (socklist[i].outbuf != NULL) {
       /* Already queueing: just add it */
       *(socklist[i].outbuf) += bd::String(s, len);

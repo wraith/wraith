@@ -115,7 +115,6 @@ AC_CHECK_HEADERS([sys/ptrace.h paths.h sys/prctl.h sys/procctl.h])
 AC_CACHE_SAVE
 #AC_CHECK_HEADERS(openssl/ssl.h openssl/crypto.h)
 #AC_CHECK_HEADERS(zlib.h)
-#EGG_CHECK_ZLIB
 CHECK_SSL
 
 # TCL checks
@@ -174,8 +173,6 @@ EGG_TCL_CHECK_SETNOTIFIER
 EGG_TCL_LIB_REQS
 
 AC_CACHE_SAVE
-
-#AC_SUBST(ZLIB)dnl
 
 # Checks for typedefs, structures, and compiler characteristics
 AC_TYPE_PID_T
