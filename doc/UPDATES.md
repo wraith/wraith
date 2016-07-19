@@ -2,6 +2,8 @@
   * Require C++11 compiler support (G++ 4.7+, clang32+)
 
 # maint
+  * Support Debian/Ubuntu's libssl1.0.0[:i386] package.
+  * Improve hints about OpenSSL library packages to install.
 
 # 1.4.7
   * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
