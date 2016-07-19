@@ -5036,7 +5036,6 @@ _ACEOF
 fi
 
 
-#  AC_CHECK_LIB(z, gzopen, ZLIB="-lz")
   if test "$SUNOS" = "yes"; then
     # For suns without yp
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -ldl" >&5
@@ -6001,7 +6000,6 @@ fi
 rm -f confcache
 #AC_CHECK_HEADERS(openssl/ssl.h openssl/crypto.h)
 #AC_CHECK_HEADERS(zlib.h)
-#EGG_CHECK_ZLIB
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for path to OpenSSL" >&5
 $as_echo_n "checking for path to OpenSSL... " >&6; }
@@ -6897,8 +6895,6 @@ $as_echo "$as_me: not updating unwritable cache $cache_file" >&6;}
   fi
 fi
 rm -f confcache
-
-#AC_SUBST(ZLIB)dnl
 
 # Checks for typedefs, structures, and compiler characteristics
 ac_fn_cxx_check_type "$LINENO" "pid_t" "ac_cv_type_pid_t" "$ac_includes_default"

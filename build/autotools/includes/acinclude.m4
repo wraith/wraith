@@ -506,7 +506,6 @@ AC_DEFUN([EGG_CHECK_LIBS],
 #  AC_CHECK_LIB(nsl, connect)
   AC_CHECK_LIB(dl, dlopen)
 
-#  AC_CHECK_LIB(z, gzopen, ZLIB="-lz")
   if test "$SUNOS" = "yes"; then
     # For suns without yp
     AC_CHECK_LIB(dl, main)
@@ -551,34 +550,6 @@ EOF
   exit 1
 fi
 ])
-
-dnl  EGG_CHECK_ZLIB()
-dnl
-AC_DEFUN([EGG_CHECK_ZLIB], 
-[
-if test "x${ZLIB}" = x; then
-  cat >&2 <<EOF
-configure: error:
-
-  Your system does not provide a working zlib compression library. 
-  It is required.
-
-EOF
-  exit 1
-else
-  if test "${ac_cv_header_zlib_h}" != yes; then
-    cat >&2 <<EOF
-configure: error:
-
-  Your system does not provide the necessary zlib header file. 
-  It is required.
-
-EOF
-    exit 1
-  fi
-fi
-])
-
 
 dnl  CHECK_SSL()
 dnl
