@@ -642,6 +642,7 @@ LIBELF_BUNDLED
 EGREP
 GREP
 CXXCPP
+DEBLDFLAGS
 DEBCXXFLAGS
 STATIC
 BUILDARCH
@@ -3762,7 +3763,7 @@ EOF
   fi
 
 if [ "${ax_cv_prog_cc_fsanitize_address}" = "yes" ]; then
-  LDFLAGS="${LDFLAGS} -fsanitize=address"
+  DEBLDFLAGS="${DEBLDFLAGS} -fsanitize=address"
 fi
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -fstack-protector-all" >&5
@@ -4744,6 +4745,7 @@ fi
 else
   STATIC=""
 fi
+
 
 
 
