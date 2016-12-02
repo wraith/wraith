@@ -41,6 +41,7 @@ LIBS = @LIBS@
 INCLUDES = @TCL_INCLUDES@ @SSL_INCLUDES@
 
 DEBCXXFLAGS = -DDEBUG -fno-inline -g3 -ggdb3 -fno-omit-frame-pointer -fno-optimize-sibling-calls -Wshadow -Wpointer-arith @GCC3DEB@ @GCC4DEB@ @DEBCXXFLAGS@
+DEBLDFLAGS= @DEBLDFLAGS@
 CFLGS = @GCC3_CFLAGS@
 CXXFLAGS = @CXXFLAGS@ $(CFLGS) @GCC3_CXXFLAGS@ -fno-rtti
 
@@ -59,10 +60,10 @@ MAKE_DYNAMIC = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CXX)' 'CC=$(CC)' 'LD=$(LD_DYNAMIC)'
 MAKE_DEBUG = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CXX)' 'CC=$(CC)' 'LD=$(LD_DEBUG) -g' 'INCLUDES=$(INCLUDES)' \
 'CCDEPMODE=$(CCDEPMODE)' 'BRANCH=$(BRANCH)' 'COMMIT=$(COMMIT_SHORT)' 'BUILDTS=$(BUILDTS)' 'VERSION=$(VERSION)' \
 'STRIP=touch' 'CXXFLAGS=$(CXXFLAGS) $(DEBCXXFLAGS)' 'CFLGS=$(CFLGS) $(DEBCXXFLAGS) -DBIN_TYPE_DYNAMIC' \
-'LIBS=$(LIBS)' 'EGGEXEC=$(BINEXEC)' 'EGGBUILD=(debug)'
+'DEBLDFLAGS=$(DEBLDFLAGS)' 'LIBS=$(LIBS)' 'EGGEXEC=$(BINEXEC)' 'EGGBUILD=(debug)'
 
 MAKE_UTILS = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CXX)' 'CC=$(CC)' 'STRIP=touch' 'INCLUDES=$(INCLUDES)' \
-'CCDEPMODE=$(CCDEPMODE)' \
+'CCDEPMODE=$(CCDEPMODE)' 'DEBLDFLAGS=$(DEBLDFLAGS)' \
 'CXXFLAGS=$(CXXFLAGS) $(DEBCXXFLAGS)' 'CFLGS=$(CFLGS) $(DEBCXXFLAGS)' 'LIBS=$(LIBS)' 'LD=$(LD_DEBUG) -g'
 
 .PHONY: checkclean.static checkclean.dynamic checkclean.debug lib wraith dwraith lib.debug debug test general sorthelp sort indent tar distrib distclean clean cleanutils test all dynamic static tags

@@ -15,6 +15,10 @@
 # maint
   * Support Debian/Ubuntu's libssl1.0.0[:i386] package.
   * Improve hints about OpenSSL library packages to install.
+  * Fix AddressSanitizer [1] being enabled by default causing 16TB+ of VM to be
+    used.  On most systems this was harmless since the memory was not actually
+    used.  This feature is still enabled by default for debug binaries.
+    [1] http://clang.llvm.org/docs/AddressSanitizer.html
 
 # 1.4.7
   * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
