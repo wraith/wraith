@@ -46,7 +46,7 @@ if [[ "${ax_cv_prog_cc_Og}" = "no" ]]; then
 fi
 CXX_FLAG_CHECK_LINK([DEBCXXFLAGS], [-fsanitize=address], [fsanitize_address])
 if [[ "${ax_cv_prog_cc_fsanitize_address}" = "yes" ]]; then
-  LDFLAGS="${LDFLAGS} -fsanitize=address"
+  DEBLDFLAGS="${DEBLDFLAGS} -fsanitize=address"
 fi
 CXX_FLAG_CHECK([DEBCXXFLAGS], [-fstack-protector-all], [stackprotectorall])
 CXX_FLAG_CHECK([DEBCXXFLAGS], [-Wconditional-uninitialized], [w_conditional_uninitialized])
@@ -92,6 +92,7 @@ EGG_CHECK_RANDOM_MAX
 # Create static binaries
 EGG_CHECK_CCSTATIC
 AC_SUBST(DEBCXXFLAGS)
+AC_SUBST(DEBLDFLAGS)
 
 #checkpoint
 AC_CACHE_SAVE 
