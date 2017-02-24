@@ -29,6 +29,8 @@ tags
 /lib/libelf/config.cache
 /lib/libelf/config.h
 /lib/libelf/config.status
+/lib/libelf/config.log
+/lib/libelf/libelf.pc
 /lib/libelf/lib/Makefile
 /lib/libelf/lib/stamp-h
 /lib/libelf/lib/sys_elf.h
