@@ -11,7 +11,7 @@
 BF_KEY bf_e_key, bf_d_key;
 
 static const char eggdrop_blowfish_base64[65] = "./0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-static const char eggdrop_blowfish_base64_index[256] = {
+static const int eggdrop_blowfish_base64_index[256] = {
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,  0,  1,
@@ -107,7 +107,7 @@ bd::String egg_bf_decrypt(bd::String in, const bd::String& key)
 
   BF_set_key(&bf_d_key, key.length(), (unsigned char *)key.data());
   bf_data data;
-  char val;
+  int val;
   size_t part;
   char *s = (char *)in.data();
   for (size_t i = 0; i < in.length(); i += 12) {
@@ -115,11 +115,11 @@ bd::String egg_bf_decrypt(bd::String in, const bd::String& key)
     data.lr.right = 0;
     for (part = 0; part < 6; part++) {
       if ((val = eggdrop_blowfish_base64_index[int(*s++)]) == -1) return out;
-      data.lr.right |= val << part * 6;
+      data.lr.right |= (char)val << part * 6;
     }
     for (part = 0; part < 6; part++) {
       if ((val = eggdrop_blowfish_base64_index[int(*s++)]) == -1) return out;
-      data.lr.left |= val << part * 6;
+      data.lr.left |= (char)val << part * 6;
     }
     BF_decrypt(&data.bf_long, &bf_d_key);
     for (part = 0; part < 4; part++) {
