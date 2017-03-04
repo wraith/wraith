@@ -7,6 +7,7 @@
     [1] http://clang.llvm.org/docs/AddressSanitizer.html
   * Fix './wraith -C' file being immediately modified when saving on
     FreeBSD (#94)
+  * Support FreeBSD closefrom(2)
 
 # 1.4.7
   * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.

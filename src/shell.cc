@@ -537,7 +537,12 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool
     }
 
     // Close all sockets
-    for (int fd = 3; fd < MAX_SOCKETS; ++fd) close(fd);
+#ifdef HAVE_CLOSEFROM
+    closefrom(3);
+#else
+    for (int fd = 3; fd < MAX_SOCKETS; ++fd)
+      close(fd);
+#endif
 
     char *argv[15];
     if (simple) {
@@ -570,7 +575,12 @@ int simple_exec(const char* argv[]) {
       return -1;
     case 0:		//child
       // Close all sockets
-      for (int fd = 3; fd < MAX_SOCKETS; ++fd) close(fd);
+#ifdef HAVE_CLOSEFROM
+      closefrom(3);
+#else
+      for (int fd = 3; fd < MAX_SOCKETS; ++fd)
+        close(fd);
+#endif
       execvp(argv[0], (char* const*) &argv[0]);
       _exit(127);
     default:		//parent
