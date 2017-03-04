@@ -192,6 +192,7 @@ confedit()
   um = umask(077);
 
   autowrote = writeconf(NULL, tmpconf.fd, CONF_COMMENT);
+  fsync(tmpconf.fd);
   fstat(tmpconf.fd, &st);		/* for file modification compares */
 //  tmpconf.my_close();
 
