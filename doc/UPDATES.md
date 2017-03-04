@@ -8,6 +8,8 @@
     used.  On most systems this was harmless since the memory was not actually
     used.  This feature is still enabled by default for debug binaries.
     [1] http://clang.llvm.org/docs/AddressSanitizer.html
+  * Fix './wraith -C' file being immediately modified when saving on
+    FreeBSD (#94)
 
 # 1.4.7
   * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
