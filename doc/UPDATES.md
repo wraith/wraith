@@ -8,6 +8,7 @@
   * Fix './wraith -C' file being immediately modified when saving on
     FreeBSD (#94)
   * Support FreeBSD closefrom(2)
+  * Use vfork(2) in some places
 
 # 1.4.7
   * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.

@@ -570,7 +570,7 @@ int simple_exec(const char* argv[]) {
   pid_t pid, savedpid;
   int status;
 
-  switch ((pid = fork())) {
+  switch ((pid = vfork())) {
     case -1:
       return -1;
     case 0:		//child
