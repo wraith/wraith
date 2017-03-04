@@ -222,7 +222,7 @@ AC_CHECK_FUNCS([getrusage getpassphrase posix_madvise madvise])
 AC_CHECK_FUNCS([memmem random snprintf srandom gettime])
 #checkpoint
 AC_CACHE_SAVE
-AC_CHECK_FUNCS([vsnprintf prctl procctl])
+AC_CHECK_FUNCS([vsnprintf prctl procctl closefrom])
 
 #autoscan suggested this....
 #These are recommended by autoscan, but no code supports it currently
