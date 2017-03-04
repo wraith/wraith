@@ -406,7 +406,7 @@ checkpid(const char *nick, conf_bot *bot)
     }
 
 
-    if (bufp[0] && pid && can_stat(bufp) && (getpid() == pid) &&
+    if (bufp[0] && pid && can_stat(bufp) && (mypid == pid) &&
         !strncasecmp(nick, origbotnick, HANDLEN)) {
       socksfile = strdup(bufp);
       return 0;
