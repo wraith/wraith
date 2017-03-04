@@ -423,30 +423,18 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool
   if (!cmdline)
     return 0;
 
-  Tempfile *in = NULL, *out = NULL, *err = NULL;
+  Tempfile *out = NULL, *err = NULL;
+  int filedes_stdin[2];
   int x;
 
-  /* Set up temp files */
-  in = new Tempfile("in");
-  if (!in || in->error) {
-//    putlog(LOG_ERRORS, "*" , "exec: Couldn't open '%s': %s", in->file, strerror(errno)); 
-    delete in;
-    return 0;
-  }
-
   if (input) {
-    if (fwrite(input, strlen(input), 1, in->f) != 1) {
-//      putlog(LOG_ERRORS, "*", "exec: Couldn't write to '%s': %s", in->file, strerror(errno));
-      delete in;
+    if (pipe(filedes_stdin) != 0)
       return 0;
-    }
-    fseek(in->f, 0, SEEK_SET);
   }
 
   err = new Tempfile("err");
   if (!err || err->error) {
 //    putlog(LOG_ERRORS, "*", "exec: Couldn't open '%s': %s", err->file, strerror(errno));
-    delete in;
     delete err;
     return 0;
   }
@@ -454,7 +442,6 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool
   out = new Tempfile("out");
   if (!out || out->error) {
 //    putlog(LOG_ERRORS, "*", "exec: Couldn't open '%s': %s", out->file, strerror(errno));
-    delete in;
     delete err;
     delete out;
     return 0;
@@ -463,7 +450,6 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool
   x = fork();
   if (x == -1) {
     putlog(LOG_ERRORS, "*", "exec: fork() failed: %s", strerror(errno));
-    delete in;
     delete err;
     delete out;
     return 0;
@@ -472,6 +458,7 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool
   if (x) {		/* Parent: wait for the child to complete */
     int st = 0;
     size_t fs = 0;
+    FILE *in = NULL;
 
 #ifdef PR_SET_PTRACER
     // Allow the child to debug the parent on Linux 3.4+
@@ -479,9 +466,20 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool
     prctl(PR_SET_PTRACER, x, 0, 0, 0);
 #endif
 
+    if (input) {
+      size_t inlen = strlen(input);
+
+      close(filedes_stdin[0]);
+      in = fdopen(filedes_stdin[1], "w");
+      if (fwrite(input, inlen, 1, in) != 1) {
+        fclose(in);
+        return 0;
+      }
+      fclose(in);
+    }
+
     waitpid(x, &st, 0);
     /* child is now complete, read the files into buffers */
-    delete in;
     fflush(out->f);
     fflush(err->f);
     if (erroutput) {
@@ -521,14 +519,14 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool
     return 1;
   } else {
     /* Child: make fd's and set them up as std* */
-//    int ind, outd, errd;
-//    ind = fileno(inpFile);
+//    int outd, errd;
 //    outd = fileno(outFile);
 //    errd = fileno(errFile);
 
-    if (dup2(in->fd, STDIN_FILENO) == (-1)) {
+    close(filedes_stdin[1]);
+    if (dup2(filedes_stdin[0], STDIN_FILENO) == -1)
       exit(1);
-    }
+    close(filedes_stdin[0]);
     if (dup2(out->fd, STDOUT_FILENO) == (-1)) {
       exit(1);
     }
@@ -562,7 +560,7 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool
     }
 
     execvp(argv[0], &argv[0]);
-    exit(1);
+    exit(127);
   }
 }
 
