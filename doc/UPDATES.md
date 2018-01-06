@@ -1,4 +1,6 @@
 # maint
+  * Fix various compile warnings
+  * Fix ptrace detection on OpenBSD (after 1.4.6 regression for the Linux fix)
 
 # 1.4.8
   * Support Debian/Ubuntu's libssl1.0.0[:i386] package.
