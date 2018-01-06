@@ -385,7 +385,7 @@ void check_trace(int start)
             /* Linux compat or otherwise removed syscall. Just ignore. */
             errno != ENOSYS &&
         /* EPERM is given on fbsd when security.bsd.unprivileged_proc_debug=0 */
-#ifdef __FreeBSD__
+#ifndef __linux__
             errno != EPERM &&
 #endif
             errno != EINVAL) {
