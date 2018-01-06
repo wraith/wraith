@@ -4044,7 +4044,7 @@ static void rcmd_timesync(char *frombot, char *fromhand, char *fromidx, char *pa
   char tmp[100] = "";
   long net = atol(par);
 
-  simple_snprintf(tmp, sizeof(tmp), "NET: %li    ME: %li   DIFF: %d", net, (long)timesync + now, (int) ((timesync+now) - net));
+  simple_snprintf(tmp, sizeof(tmp), "NET: %li    ME: %li   DIFF: %d", net, (long)(timesync + now), (int) ((timesync+now) - net));
   botnet_send_cmdreply(conf.bot->nick, frombot, fromhand, fromidx, tmp);
 }
 
