@@ -108,6 +108,7 @@ void sdprintf (const char *format, ...)
 #endif
 }
 
+#ifdef DEBUG
 void _assert(int recoverable, const char *file, int line, const char *function,
     const char *exp, const char *format, ...)
 {
@@ -128,6 +129,7 @@ void _assert(int recoverable, const char *file, int line, const char *function,
         format != NULL ? msg : "");
     fatal(buf, recoverable);
 }
+#endif
 
 static void write_debug(bool fatal = 1)
 {

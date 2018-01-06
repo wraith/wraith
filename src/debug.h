@@ -40,6 +40,7 @@ void init_debug();
 void got_int(int z);
 
 #ifdef DEBUG
+#undef _assert
 void _assert(int, const char *, int, const char *, const char *,
     const char *, ...) __attribute__((format(printf, 6, 7)));
 #define _ASSERT(recoverable, cond, msg...) do { \
