@@ -19,42 +19,38 @@ irc.choopa.net
 irc.colosolutions.net
 irc.mzima.net
 irc.servercentral.net
-irc.umich.edu
 irc2.choopa.net
 #EU
 efnet.port80.se
 efnet.portlane.se
-irc.ac.za
 irc.du.se
 irc.efnet.fr
-irc.efnet.pl
 irc.homelien.no
 irc.inet.tele.dk
 irc.underworld.no
-#CA
-irc.teksavvy.ca
+irc.nordunet.se
 
 :servers6
 efnet.ipv6.port80.se
 efnet.portlane.se
-irc.ac.za
 irc.choopa.net
 irc.inet.tele.dk
 irc.ipv6.homelien.no
 irc.underworld.no
-irc.teksavvy.ca
+irc.nordunet.se
 
 :servers_ssl
 irc.choopa.net:9999
 irc.servercentral.net:9999
-irc.umich.edu:9999
 irc.underworld.no
+irc.nordunet.se
 
 :servers6_ssl
 irc.choopa.net:9999
 irc.underworld.no
 irc.ipv6.homelien.no
 efnet.ipv6.port80.se
+irc.nordunet.se
 
 :rbl
 dnsbl.proxybl.org
