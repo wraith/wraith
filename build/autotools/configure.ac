@@ -278,6 +278,7 @@ if test -d .git; then
 fi
 ]
 
+export CC CXX
 if [[ -f lib/bdlib/configure ]]; then
   AC_CONFIG_SUBDIRS([lib/bdlib])
 fi
