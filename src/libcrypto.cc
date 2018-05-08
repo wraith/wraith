@@ -86,6 +86,7 @@ static int load_symbols(void *handle) {
   DLSYM_GLOBAL(handle, DH_get0_key);
   DLSYM_GLOBAL(handle, DH_set0_key);
   DLSYM_GLOBAL(handle, DH_set0_pqg);
+  DLSYM_GLOBAL(handle, BN_free);
 #endif
   DLSYM_GLOBAL(handle, EVP_cleanup);
   DLSYM_GLOBAL(handle, CRYPTO_cleanup_all_ex_data);
