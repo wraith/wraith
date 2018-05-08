@@ -81,6 +81,12 @@ static int load_symbols(void *handle) {
   DLSYM_GLOBAL(handle, DH_new);
   DLSYM_GLOBAL(handle, DH_size);
 
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+  /* For dh_util.cc */
+  DLSYM_GLOBAL(handle, DH_get0_key);
+  DLSYM_GLOBAL(handle, DH_set0_key);
+  DLSYM_GLOBAL(handle, DH_set0_pqg);
+#endif
   DLSYM_GLOBAL(handle, EVP_cleanup);
   DLSYM_GLOBAL(handle, CRYPTO_cleanup_all_ex_data);
 
