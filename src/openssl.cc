@@ -121,9 +121,11 @@ int uninit_openssl () {
     RAND_write_file(tls_rand_file);
 #endif
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
   ERR_free_strings();
   EVP_cleanup();
   CRYPTO_cleanup_all_ex_data();
+#endif
 
   unload_libssl();
   unload_libcrypto();
