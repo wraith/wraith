@@ -51,7 +51,7 @@ for file in ${files}; do
   mv $TMPFILE.sed $TMPFILE
   cd ..
 
-  for symbol in $($SED -n -e 's/.*DLSYM_GLOBAL(.*, \([^)]*\).*/\1/p' $TMPFILE|sort -u); do
+  for symbol in $($SED -n -e 's/.*DLSYM_GLOBAL[^ (]*(.*, \([^)]*\).*/\1/p' $TMPFILE|sort -u); do
     # Check if the typedef is already defined ...
     typedef=$(grep "^typedef .*(\*${symbol}_t)" ${dirname}/${basename}.h)
     # ... if not, generate it

@@ -38,8 +38,6 @@ void *libcrypto_handle = NULL;
 static bd::Array<bd::String> my_symbols;
 
 static int load_symbols(void *handle) {
-  const char *dlsym_error = NULL;
-
   DLSYM_GLOBAL(handle, AES_cbc_encrypt);
   DLSYM_GLOBAL(handle, AES_decrypt);
   DLSYM_GLOBAL(handle, AES_encrypt);
@@ -87,9 +85,9 @@ static int load_symbols(void *handle) {
   DLSYM_GLOBAL(handle, DH_set0_pqg);
   DLSYM_GLOBAL(handle, BN_free);
 #else
-  DLSYM_GLOBAL(handle, ERR_free_strings);
-  DLSYM_GLOBAL(handle, EVP_cleanup);
-  DLSYM_GLOBAL(handle, CRYPTO_cleanup_all_ex_data);
+  DLSYM_GLOBAL_FWDCOMPAT(handle, ERR_free_strings);
+  DLSYM_GLOBAL_FWDCOMPAT(handle, EVP_cleanup);
+  DLSYM_GLOBAL_FWDCOMPAT(handle, CRYPTO_cleanup_all_ex_data);
 #endif
 
   return 0;

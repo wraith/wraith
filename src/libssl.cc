@@ -38,8 +38,6 @@ void *libssl_handle = NULL;
 static bd::Array<bd::String> my_symbols;
 
 static int load_symbols(void *handle) {
-  const char *dlsym_error = NULL;
-
   DLSYM_GLOBAL(handle, SSL_get_error);
   DLSYM_GLOBAL(handle, SSL_connect);
   DLSYM_GLOBAL(handle, SSL_CTX_free);
@@ -58,8 +56,9 @@ static int load_symbols(void *handle) {
   /* For SSL_library_init and SSL_load_error_strings. */
   DLSYM_GLOBAL(handle, OPENSSL_init_ssl);
 #else
-  DLSYM_GLOBAL(handle, SSL_library_init);
-  DLSYM_GLOBAL(handle, SSL_load_error_strings);
+  DLSYM_GLOBAL_FWDCOMPAT(handle, SSL_library_init);
+  DLSYM_GLOBAL_FWDCOMPAT(handle, SSL_load_error_strings);
+  /* Some forward-compat is handled in src/compat/openssl.cc. */
 #endif
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
   /* For SSLv23_client_method */
@@ -68,7 +67,8 @@ static int load_symbols(void *handle) {
   DLSYM_GLOBAL(handle, TLS_method);
   DLSYM_GLOBAL(handle, SSL_CTX_set_options);
 #else
-  DLSYM_GLOBAL(handle, SSLv23_client_method);
+  DLSYM_GLOBAL_FWDCOMPAT(handle, SSLv23_client_method);
+  /* Some forward-compat is handled in src/compat/openssl.cc. */
 #endif
 
   return 0;
