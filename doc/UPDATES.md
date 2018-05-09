@@ -1,9 +1,8 @@
 # maint
-  * Fix various compile warnings
+  * Fix various compile warnings and spam
   * Fix ptrace detection on OpenBSD (after 1.4.6 regression for the Linux fix)
   * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
   * Fix command executions.
-  * Reduce compilation spam.
   * Fix OpenSSL 1.1 build (API) and forward-runtime (ABI) compatibility. (#116)
   * Properly honor exemptions when kicking matched RBL clients
   * Fix LASTON not being shared
