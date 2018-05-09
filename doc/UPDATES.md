@@ -1,6 +1,9 @@
 # next
   * Properly honor exemptions when kicking matched RBL clients
   * Fix LASTON not being shared
+
+# master
+  * Require C++11 compiler support (G++ 4.7+, clang32+)
   * Wraith now automatically assigns roles to bots for channels, no longer
     requiring manually assigning them with flags +flry for flood, limit,
     resolve, auto-voice, auto-op. These roles are decentralized and per-chan
@@ -8,9 +11,6 @@
     will properly assign roles out to bots to not cause overlap. Only leaf
     bots know which bots have which roles. (#39)
   * Add cmd_roles (leaf only) to display roles for a channel. (#39)
-
-# master
-  * Require C++11 compiler support (G++ 4.7+, clang32+)
 
 # maint
   * Fix various compile warnings
