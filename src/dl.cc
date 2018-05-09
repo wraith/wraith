@@ -32,5 +32,6 @@
 #include <bdlib/src/Array.h>
 #include <bdlib/src/HashTable.h>
 
+const char *dlsym_error;
 bd::HashTable<bd::String, FunctionPtr> dl_symbol_table;
 /* vim: set sts=2 sw=2 ts=8 et: */

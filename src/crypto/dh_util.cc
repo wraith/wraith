@@ -81,10 +81,17 @@ bd::String fishBase64Decode(const bd::String& str) {
 
 void DH1080_gen(bd::String& privateKey, bd::String& publicKeyB64) {
   DH *dh = NULL;
+  const BIGNUM *priv_key, *pub_key;
 
   dh = DH_new();
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+  if (b_prime == NULL || b_generator == NULL ||
+      !DH_set0_pqg(dh, BN_dup(b_prime), NULL, BN_dup(b_generator)))
+    return;
+#else
   dh->p = BN_dup(b_prime);
   dh->g = BN_dup(b_generator);
+#endif
 
   if (!DH_generate_key(dh)) {
     DH_free(dh);
@@ -92,14 +99,20 @@ void DH1080_gen(bd::String& privateKey, bd::String& publicKeyB64) {
   }
 
   // Get private key
-  privateKey.resize(BN_num_bytes(dh->priv_key), 0);
-  BN_bn2bin(dh->priv_key, reinterpret_cast<unsigned char*>(privateKey.mdata()));
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+  DH_get0_key(dh, &pub_key, &priv_key);
+#else
+  priv_key = dh->priv_key;
+  pub_key = dh->pub_key;
+#endif
+  privateKey.resize(BN_num_bytes(priv_key), 0);
+  BN_bn2bin(priv_key, reinterpret_cast<unsigned char*>(privateKey.mdata()));
 
   // Get public key
   bd::String publicKey;
   // Resize as the mdata() modification won't update the internal length, but resize() will
-  publicKey.resize(static_cast<size_t>(BN_num_bytes(dh->pub_key)));
-  BN_bn2bin(dh->pub_key, reinterpret_cast<unsigned char*>(publicKey.mdata()));;
+  publicKey.resize(static_cast<size_t>(BN_num_bytes(pub_key)));
+  BN_bn2bin(pub_key, reinterpret_cast<unsigned char*>(publicKey.mdata()));;
 
   // base64 encode
   publicKeyB64 = fishBase64Encode(publicKey);
@@ -113,12 +126,22 @@ bool DH1080_comp(const bd::String privateKey, const bd::String theirPublicKeyB64
 
 
   dh = DH_new();
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+  if (b_prime == NULL || b_generator == NULL ||
+      !DH_set0_pqg(dh, BN_dup(b_prime), NULL, BN_dup(b_generator)))
+    return false;
+#else
   dh->p = BN_dup(b_prime);
   dh->g = BN_dup(b_generator);
+#endif
 
   // Setup my private key
   b_myPrivkey = BN_bin2bn(reinterpret_cast<const unsigned char*>(privateKey.data()), privateKey.length(), NULL);
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+  DH_set0_key(dh, NULL, b_myPrivkey);
+#else
   dh->priv_key = b_myPrivkey;
+#endif
 
   // Prep their public key
   bd::String theirPublicKey(fishBase64Decode(theirPublicKeyB64));
