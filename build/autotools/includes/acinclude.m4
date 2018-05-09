@@ -211,6 +211,36 @@ EOF
   fi
 ])
 
+dnl @synopsis CXX_FLAG_CHECK_NO [var] [compiler flags] [no flag] [cache name] [required]
+dnl @summary check whether compiler supports given C++ flags or not
+AC_DEFUN([CXX_FLAG_CHECK_NO],
+[
+  AC_CACHE_CHECK([whether the compiler understands $3], ax_cv_prog_cc_$4, [
+    AC_LANG_PUSH([C++])
+    ac_saved_flags="$CXXFLAGS"
+    CXXFLAGS="-Werror $2"
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([])],
+      [ax_cv_prog_cc_$4="yes"],
+      [ax_cv_prog_cc_$4="no"],
+    )
+    CXXFLAGS="$ac_saved_flags"
+    AC_LANG_POP([C++])
+  ])
+
+  if [[ "$ax_cv_prog_cc_$4" = "yes" ]]; then
+    $1="$$1 $3"
+  elif [[ -n "$5" ]]; then
+      cat << 'EOF' >&2
+configure: error:
+
+  Your OS or C++ compiler does not support $3.
+  This compile flag is required.
+
+EOF
+    exit 1
+  fi
+])
+
 dnl @synopsis CXX_FLAG_CHECK_LINK [var] [compiler flags] [cache name] [required]
 dnl @summary check whether linker supports given C++ flags or not
 AC_DEFUN([CXX_FLAG_CHECK_LINK],

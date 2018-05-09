@@ -18,6 +18,7 @@
   * Fix ptrace detection on OpenBSD (after 1.4.6 regression for the Linux fix)
   * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
   * Fix command executions.
+  * Reduce compilation spam.
 
 # 1.4.8
   * Support Debian/Ubuntu's libssl1.0.0[:i386] package.
