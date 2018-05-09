@@ -45,8 +45,6 @@ void initialize_binds_tcl();
 
 static int load_symbols(void *handle) {
 #ifdef USE_SCRIPT_TCL
-  const char *dlsym_error = NULL;
-
   DLSYM_GLOBAL(handle, Tcl_Eval);
   DLSYM_GLOBAL(handle, Tcl_GetStringResult);
   DLSYM_GLOBAL(handle, Tcl_DeleteInterp);

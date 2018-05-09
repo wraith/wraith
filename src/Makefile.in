@@ -75,6 +75,7 @@ OBJS = auth.So \
 	compat/snprintf.o \
 	compat/memmem.o \
 	compat/memutil.o \
+	compat/openssl.o \
 	compat/strlcpy.o \
 	compat/strsep.o \
 	crypto/aes_util.o \

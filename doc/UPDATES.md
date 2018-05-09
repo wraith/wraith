@@ -7,6 +7,7 @@
   * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
   * Fix command executions.
   * Reduce compilation spam.
+  * Fix OpenSSL 1.1 build (API) and forward-runtime (ABI) compatibility.
 
 # 1.4.8
   * Support Debian/Ubuntu's libssl1.0.0[:i386] package.
