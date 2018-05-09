@@ -243,7 +243,7 @@ comp_with_mask(void *addr, void *dest, unsigned int mask)
     if (leftover == 0)
       return (1);
 
-    int m = ((-1) << (8 - leftover));
+    int m = ((~0U) << (8 - leftover));
 
     if ((((unsigned char *) addr)[n] & m) == (((unsigned char *) dest)[n] & m))
       return (1);
