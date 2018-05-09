@@ -234,13 +234,18 @@ int _wild_match(unsigned char *m, unsigned char *n)
 static inline int
 comp_with_mask(void *addr, void *dest, unsigned int mask)
 {
-  if (memcmp(addr, dest, mask >> 3) == 0)
-  {
-    int n = mask >> 3;
-    int m = ((-1) << (8 - (mask % 8)));
+  int n = mask >> 3;
 
-    if (mask % 8 == 0 ||
-       (((unsigned char *) addr)[n] & m) == (((unsigned char *) dest)[n] & m))
+  if (memcmp(addr, dest, n) == 0)
+  {
+    int leftover = mask % 8;
+
+    if (leftover == 0)
+      return (1);
+
+    int m = ((~0U) << (8 - leftover));
+
+    if ((((unsigned char *) addr)[n] & m) == (((unsigned char *) dest)[n] & m))
       return (1);
   }
   return (0);
