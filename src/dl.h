@@ -24,7 +24,7 @@ extern const char *dlsym_error;
   if ((dl_symbol_table[#x] = (FunctionPtr) ((x##_t) dlsym(_handle, #x))) == \
     NULL) { \
     if ((dl_symbol_table[#x] = \
-      (FunctionPtr) ((x##_t) dlsym(RTLD_SELF, "_" #x))) == NULL) { \
+      (FunctionPtr) ((x##_t) dlsym(NULL, "_" #x))) == NULL) { \
       dlsym_error = dlerror(); \
       if (dlsym_error) { \
         fprintf(stderr, "%s", dlsym_error); \
