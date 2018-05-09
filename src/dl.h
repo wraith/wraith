@@ -20,12 +20,12 @@
 #define DLSYM_GLOBAL(_handle, x) do { \
   dlerror(); \
   dl_symbol_table[#x] = (FunctionPtr) ((x##_t) dlsym(_handle, #x)); \
-  my_symbols << #x; \
   dlsym_error = dlerror(); \
   if (dlsym_error) { \
     fprintf(stderr, "%s", dlsym_error); \
     return(1); \
   } \
+  my_symbols << #x; \
 } while (0)
 
 #define DLSYM_VAR(x) ((x##_t)dl_symbol_table[#x])
