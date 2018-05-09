@@ -49,6 +49,9 @@ static DH* tmp_dh_callback(SSL* ssl, int is_export, int keylength) {
   DH *ret = NULL;
 
   switch (keylength) {
+    case 4096:
+      ret = get_dh4096();
+      break;
     case 2048:
       ret = get_dh2048();
       break;
