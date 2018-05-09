@@ -49,6 +49,9 @@ static DH* tmp_dh_callback(SSL* ssl, int is_export, int keylength) {
   DH *ret = NULL;
 
   switch (keylength) {
+    case 4096:
+      ret = get_dh4096();
+      break;
     case 2048:
       ret = get_dh2048();
       break;
@@ -118,9 +121,11 @@ int uninit_openssl () {
     RAND_write_file(tls_rand_file);
 #endif
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
   ERR_free_strings();
   EVP_cleanup();
   CRYPTO_cleanup_all_ex_data();
+#endif
 
   unload_libssl();
   unload_libcrypto();

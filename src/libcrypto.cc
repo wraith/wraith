@@ -38,8 +38,6 @@ void *libcrypto_handle = NULL;
 static bd::Array<bd::String> my_symbols;
 
 static int load_symbols(void *handle) {
-  const char *dlsym_error = NULL;
-
   DLSYM_GLOBAL(handle, AES_cbc_encrypt);
   DLSYM_GLOBAL(handle, AES_decrypt);
   DLSYM_GLOBAL(handle, AES_encrypt);
@@ -49,7 +47,6 @@ static int load_symbols(void *handle) {
   DLSYM_GLOBAL(handle, BF_encrypt);
   DLSYM_GLOBAL(handle, BF_set_key);
   DLSYM_GLOBAL(handle, ERR_error_string);
-  DLSYM_GLOBAL(handle, ERR_free_strings);
   DLSYM_GLOBAL(handle, ERR_get_error);
   DLSYM_GLOBAL(handle, OPENSSL_cleanse);
   DLSYM_GLOBAL(handle, RAND_file_name);
@@ -81,9 +78,17 @@ static int load_symbols(void *handle) {
   DLSYM_GLOBAL(handle, DH_new);
   DLSYM_GLOBAL(handle, DH_size);
 
-  DLSYM_GLOBAL(handle, EVP_cleanup);
-  DLSYM_GLOBAL(handle, CRYPTO_cleanup_all_ex_data);
-
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+  /* For dh_util.cc */
+  DLSYM_GLOBAL(handle, DH_get0_key);
+  DLSYM_GLOBAL(handle, DH_set0_key);
+  DLSYM_GLOBAL(handle, DH_set0_pqg);
+  DLSYM_GLOBAL(handle, BN_free);
+#else
+  DLSYM_GLOBAL_FWDCOMPAT(handle, ERR_free_strings);
+  DLSYM_GLOBAL_FWDCOMPAT(handle, EVP_cleanup);
+  DLSYM_GLOBAL_FWDCOMPAT(handle, CRYPTO_cleanup_all_ex_data);
+#endif
 
   return 0;
 }
@@ -96,7 +101,7 @@ int load_libcrypto() {
 
   sdprintf("Loading libcrypto");
 
-  bd::Array<bd::String> libs_list(bd::String("libcrypto.so." SHLIB_VERSION_NUMBER " libcrypto.so libcrypto.so.1.0.0 libcrypto.so.0.9.8 libcrypto.so.8 libcrypto.so.7 libcrypto.so.6").split(' '));
+  bd::Array<bd::String> libs_list(bd::String("libcrypto.so." SHLIB_VERSION_NUMBER " libcrypto.so libcrypto.so.1.1 libcrypto.so.1.0.0 libcrypto.so.0.9.8 libcrypto.so.10 libcrypto.so.9 libcrypto.so.8 libcrypto.so.7 libcrypto.so.6").split(' '));
 
   for (size_t i = 0; i < libs_list.length(); ++i) {
     dlerror(); // Clear Errors

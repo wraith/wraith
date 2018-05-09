@@ -38,25 +38,38 @@ void *libssl_handle = NULL;
 static bd::Array<bd::String> my_symbols;
 
 static int load_symbols(void *handle) {
-  const char *dlsym_error = NULL;
-
   DLSYM_GLOBAL(handle, SSL_get_error);
   DLSYM_GLOBAL(handle, SSL_connect);
   DLSYM_GLOBAL(handle, SSL_CTX_free);
   DLSYM_GLOBAL(handle, SSL_CTX_new);
   DLSYM_GLOBAL(handle, SSL_free);
-  DLSYM_GLOBAL(handle, SSL_library_init);
-  DLSYM_GLOBAL(handle, SSL_load_error_strings);
   DLSYM_GLOBAL(handle, SSL_new);
   DLSYM_GLOBAL(handle, SSL_pending);
   DLSYM_GLOBAL(handle, SSL_read);
   DLSYM_GLOBAL(handle, SSL_set_fd);
   DLSYM_GLOBAL(handle, SSL_shutdown);
-  DLSYM_GLOBAL(handle, SSLv23_client_method);
   DLSYM_GLOBAL(handle, SSL_write);
   DLSYM_GLOBAL(handle, SSL_CTX_ctrl);
   DLSYM_GLOBAL(handle, SSL_CTX_set_cipher_list);
   DLSYM_GLOBAL(handle, SSL_CTX_set_tmp_dh_callback);
+#if defined(OPENSSL_API_COMPAT) && OPENSSL_API_COMPAT < 0x10100000L
+  /* For SSL_library_init and SSL_load_error_strings. */
+  DLSYM_GLOBAL(handle, OPENSSL_init_ssl);
+#else
+  DLSYM_GLOBAL_FWDCOMPAT(handle, SSL_library_init);
+  DLSYM_GLOBAL_FWDCOMPAT(handle, SSL_load_error_strings);
+  /* Some forward-compat is handled in src/compat/openssl.cc. */
+#endif
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+  /* For SSLv23_client_method */
+  DLSYM_GLOBAL(handle, TLS_client_method);
+  /* For SSLv23_method */
+  DLSYM_GLOBAL(handle, TLS_method);
+  DLSYM_GLOBAL(handle, SSL_CTX_set_options);
+#else
+  DLSYM_GLOBAL_FWDCOMPAT(handle, SSLv23_client_method);
+  /* Some forward-compat is handled in src/compat/openssl.cc. */
+#endif
 
   return 0;
 }
@@ -69,7 +82,7 @@ int load_libssl() {
 
   sdprintf("Loading libssl");
 
-  bd::Array<bd::String> libs_list(bd::String("libssl.so." SHLIB_VERSION_NUMBER " libssl.so libssl.so.1.0.0 libssl.so.0.9.8 libssl.so.8 libssl.so.7 libssl.so.6").split(' '));
+  bd::Array<bd::String> libs_list(bd::String("libssl.so." SHLIB_VERSION_NUMBER " libssl.so libssl.so.1.1 libssl.so.1.0.0 libssl.so.0.9.8 libssl.so.10 libssl.so.9 libssl.so.8 libssl.so.7 libssl.so.6").split(' '));
 
   for (size_t i = 0; i < libs_list.length(); ++i) {
     dlerror(); // Clear Errors

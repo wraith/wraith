@@ -1,3 +1,5 @@
+* Fix OpenSSL 1.1 build (API) and forward-runtime (ABI) compatibility.
+
 # maint
   * Fix various compile warnings
   * Fix ptrace detection on OpenBSD (after 1.4.6 regression for the Linux fix)
