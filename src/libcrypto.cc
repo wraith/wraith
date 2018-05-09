@@ -103,7 +103,7 @@ int load_libcrypto() {
 
   sdprintf("Loading libcrypto");
 
-  bd::Array<bd::String> libs_list(bd::String("libcrypto.so." SHLIB_VERSION_NUMBER " libcrypto.so libcrypto.so.1.0.1 libcrypto.so.1.0.0 libcrypto.so.0.9.8 libcrypto.so.10 libcrypto.so.9 libcrypto.so.8 libcrypto.so.7 libcrypto.so.6").split(' '));
+  bd::Array<bd::String> libs_list(bd::String("libcrypto.so." SHLIB_VERSION_NUMBER " libcrypto.so libcrypto.so.1.1 libcrypto.so.1.0.0 libcrypto.so.0.9.8 libcrypto.so.10 libcrypto.so.9 libcrypto.so.8 libcrypto.so.7 libcrypto.so.6").split(' '));
 
   for (size_t i = 0; i < libs_list.length(); ++i) {
     dlerror(); // Clear Errors
