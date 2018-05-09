@@ -3590,7 +3590,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
     ac_saved_flags="$CXXFLAGS"
-    CXXFLAGS="-Werror -Wno-invalid-source-encoding"
+    CXXFLAGS="-Werror -Winvalid-source-encoding"
     cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end build/confdefs.h.  */
 
@@ -3636,7 +3636,7 @@ EOF
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -Wno-narrowing" >&5
 $as_echo_n "checking whether the compiler understands -Wno-narrowing... " >&6; }
-if ${ax_cv_prog_cc_wnonarrowing+:} false; then :
+if ${ax_cv_prog_cc_nonarrowing+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
@@ -3647,7 +3647,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
     ac_saved_flags="$CXXFLAGS"
-    CXXFLAGS="-Werror -Wno-narrowing"
+    CXXFLAGS="-Werror -Wnarrowing"
     cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end build/confdefs.h.  */
 
@@ -3660,9 +3660,9 @@ main ()
 }
 _ACEOF
 if ac_fn_cxx_try_compile "$LINENO"; then :
-  ax_cv_prog_cc_wnonarrowing="yes"
+  ax_cv_prog_cc_nonarrowing="yes"
 else
-  ax_cv_prog_cc_wnonarrowing="no"
+  ax_cv_prog_cc_nonarrowing="no"
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     CXXFLAGS="$ac_saved_flags"
@@ -3674,16 +3674,73 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_prog_cc_wnonarrowing" >&5
-$as_echo "$ax_cv_prog_cc_wnonarrowing" >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_prog_cc_nonarrowing" >&5
+$as_echo "$ax_cv_prog_cc_nonarrowing" >&6; }
 
-  if [ "$ax_cv_prog_cc_wnonarrowing" = "yes" ]; then
+  if [ "$ax_cv_prog_cc_nonarrowing" = "yes" ]; then
     CXXFLAGS="$CXXFLAGS -Wno-narrowing"
   elif [ -n "" ]; then
       cat << 'EOF' >&2
 configure: error:
 
   Your OS or C++ compiler does not support -Wno-narrowing.
+  This compile flag is required.
+
+EOF
+    exit 1
+  fi
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -Wno-cast-function-type" >&5
+$as_echo_n "checking whether the compiler understands -Wno-cast-function-type... " >&6; }
+if ${ax_cv_prog_cc_no_cast_function_type+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+    ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+    ac_saved_flags="$CXXFLAGS"
+    CXXFLAGS="-Werror -Wcast-function-type"
+    cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  ax_cv_prog_cc_no_cast_function_type="yes"
+else
+  ax_cv_prog_cc_no_cast_function_type="no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+    CXXFLAGS="$ac_saved_flags"
+    ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_prog_cc_no_cast_function_type" >&5
+$as_echo "$ax_cv_prog_cc_no_cast_function_type" >&6; }
+
+  if [ "$ax_cv_prog_cc_no_cast_function_type" = "yes" ]; then
+    CXXFLAGS="$CXXFLAGS -Wno-cast-function-type"
+  elif [ -n "" ]; then
+      cat << 'EOF' >&2
+configure: error:
+
+  Your OS or C++ compiler does not support -Wno-cast-function-type.
   This compile flag is required.
 
 EOF
