@@ -130,21 +130,29 @@ static void resolve_rbl_callback(int id, void *client_data, const char *host, bd
 
   bd::String reason = "Listed in RBL: " + *(r->server);
 
-  u_addmask('b', chan, s1, conf.bot->nick, reason.c_str(), now + (60 * (chan->ban_time ? chan->ban_time : 300)), 0);
+  if (!(use_exempts && (u_match_mask(global_exempts, s1) || u_match_mask(chan->exempts, s1)))) {
 
-  if (me_op(chan)) {
-    do_mask(chan, chan->channel.ban, s1, 'b');
+    u_addmask('b', chan, s1, conf.bot->nick, reason.c_str(), now + (60 * (chan->ban_time ? chan->ban_time : 300)), 0);
 
-    memberlist *m = NULL;
-    char *pe = NULL;
+    if (me_op(chan)) {
+      do_mask(chan, chan->channel.ban, s1, 'b');
 
-    /* Apply lookup results to all matching members by host */
-    for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-      if (!m->user && !chan_sentkick(m) && m->userip[0]) {
-        pe = strchr(m->userip, '@');
-        if (pe && !strcmp(pe + 1, r->host)) {
-          m->flags |= SENTKICK;
-          dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, m->nick, bankickprefix, reason.c_str());
+      memberlist *m = NULL;
+      char *pe = NULL;
+
+      /* Apply lookup results to all matching members by host */
+      for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
+        if (!m->user && !chan_sentkick(m) && m->userip[0]) {
+          pe = strchr(m->userip, '@');
+          if (pe && !strcmp(pe + 1, r->host)) {
+            simple_snprintf(s1, sizeof(s1), "%s!%s", m->nick, m->userhost);
+            // Don't kick if exempted
+            if (!(use_exempts && (u_match_mask(global_exempts, s1) || u_match_mask(chan->exempts, s1)) &&
+                                  isexempted(chan, s1))) {
+              m->flags |= SENTKICK;
+              dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, m->nick, bankickprefix, reason.c_str());
+            }
+          }
         }
       }
     }
