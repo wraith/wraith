@@ -6,7 +6,7 @@
 
 extern "C" {
 typedef int (*OPENSSL_init_ssl_t)(uint64_t a1, const void *a2);
-int _OPENSSL_init_ssl(uint64_t a1 __unused, const void *a2 __unused) {
+int _OPENSSL_init_ssl(uint64_t a1, const void *a2) {
   if (DLSYM_VAR(OPENSSL_init_ssl) == NULL)
     if (DLSYM_GLOBAL_SIMPLE(RTLD_NEXT, OPENSSL_init_ssl) == NULL)
       return 0;
