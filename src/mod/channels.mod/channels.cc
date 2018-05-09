@@ -290,12 +290,6 @@ static void got_down(char *botnick, char *code, char *par)
   add_mode(chan, '-', 'o', botname);
 }
 
-static void got_role(char *botnick, char *code, char *par)
-{
-  role = atoi(newsplit(&par));
-  putlog(LOG_DEBUG, "@", "Got role index %d", role);
-}
-
 void got_kl(char *botnick, char *code, char *par)
 {
   killed_bots++;
@@ -303,59 +297,6 @@ void got_kl(char *botnick, char *code, char *par)
     for (struct chanset_t *ch = chanset; ch; ch = ch->next)
       do_chanset(NULL, ch, "+closed +bitch +backup", DO_LOCAL | DO_NET);
   /* FIXME: we should randomize nick here ... */
-  }
-}
-
-
-static void rebalance_roles()
-{
-  struct bot_addr *ba = NULL;
-  int r[5] = { 0, 0, 0, 0, 0 };
-  unsigned int hNdx, lNdx, i;
-  char tmp[10] = "";
-
-  for (i = 0; i < (unsigned) dcc_total; i++) {
-    if (dcc[i].type && dcc[i].user && dcc[i].user->bot && bot_hublevel(dcc[i].user) == 999) {
-      ba = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, dcc[i].user);
-      if (ba && (ba->roleid > 0) && (ba->roleid < 5))
-        r[(ba->roleid - 1)]++;
-    }
-  }
-  /*
-     Find high & low
-     while (high-low) > 2
-     move from highNdx to lowNdx
-   */
-
-  hNdx = 0;
-  lNdx = 0;
-  for (i = 1; i <= 4; i++) {
-    if (r[i] < r[lNdx])
-      lNdx = i;
-    if (r[i] > r[hNdx])
-      hNdx = i;
-  }
-  while (r[hNdx] - r[lNdx] >= 2) {
-    for (i = 0; i < (unsigned) dcc_total; i++) {
-      if (dcc[i].type && dcc[i].user && dcc[i].user->bot && bot_hublevel(dcc[i].user) == 999) {
-        ba = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, dcc[i].user);
-        if (ba && (ba->roleid == (hNdx + 1))) {
-          ba->roleid = lNdx + 1;
-          simple_snprintf(tmp, sizeof(tmp), "rl %d", lNdx + 1);
-          putbot(dcc[i].nick, tmp);
-        }
-      }
-    }
-    r[hNdx]--;
-    r[lNdx]++;
-    hNdx = 0;
-    lNdx = 0;
-    for (i = 1; i <= 4; i++) {
-      if (r[i] < r[lNdx])
-        lNdx = i;
-      if (r[i] > r[hNdx])
-        hNdx = i;
-    }
   }
 }
 
@@ -712,6 +653,8 @@ void remove_channel(struct chanset_t *chan)
    if (chan->groups) {
      delete(chan->groups);
    }
+   delete chan->bot_roles;
+   delete chan->role_bots;
    free(chan);
 }
 
@@ -891,7 +834,6 @@ cmd_t channels_bot[] = {
   {"cset",	"", 	(Function) got_cset,  	NULL, 0},
   {"cycle",	"", 	(Function) got_cycle, 	NULL, LEAF},
   {"down",	"", 	(Function) got_down,  	NULL, LEAF},
-  {"rl",	"", 	(Function) got_role,  	NULL, 0},
   {"kl",	"", 	(Function) got_kl,    	NULL, 0},
   {"sj",	"", 	(Function) got_sj,    	NULL, 0},
   {"sp",	"", 	(Function) got_sp,    	NULL, 0},
@@ -911,7 +853,6 @@ void channels_init()
 {
   timer_create_secs(60, "check_expired_masks", (Function) check_expired_masks);
   if (conf.bot->hub) {
-    timer_create_secs(30, "rebalance_roles", (Function) rebalance_roles);
     timer_create_secs(30, "check_should_close", (Function) check_should_close);
 #ifdef G_BACKUP
     timer_create_secs(30, "check_should_backup", (Function) check_should_backup);

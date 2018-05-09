@@ -58,6 +58,28 @@ enum deflag_event_t {
   DEFLAG_EVENT_MOP,
 };
 
+struct rolecount {
+  const char* name;
+  short role;
+  int count;
+};
+
+extern struct rolecount role_counts[];
+
+#define ROLE_VOICE    BIT0
+#define ROLE_FLOOD    BIT1
+#define ROLE_OP       BIT2
+#define ROLE_DEOP     BIT3
+#define ROLE_KICK     BIT4
+#define ROLE_BAN      BIT5
+#define ROLE_TOPIC    BIT6
+#define ROLE_LIMIT    BIT7
+#define ROLE_RESOLV   BIT8
+#define ROLE_REVENGE  BIT9
+#define ROLE_CHANMODE BIT10
+#define ROLE_PROTECT  BIT11
+#define ROLE_INVITE   BIT12
+
 #define USER_DEFAULT	0
 
 #define USER_ADMIN	FLAG[(int) 'a']

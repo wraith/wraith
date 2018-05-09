@@ -75,6 +75,7 @@ static char *getchanmode(struct chanset_t *);
 static void flush_mode(struct chanset_t *, int);
 static bool member_getuser(memberlist* m, bool act_on_lookup = 0);
 static void do_protect(struct chanset_t* chan, const char* reason);
+static void rebalance_roles_chan(struct chanset_t* chan);
 
 /* reset(bans|exempts|invites) are now just macros that call resetmasks
  * in order to reduce the code duplication. <cybah>

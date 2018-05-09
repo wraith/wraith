@@ -49,8 +49,9 @@ struct user_entry_type {
 extern struct user_entry_type USERENTRY_COMMENT, USERENTRY_LASTON,
  USERENTRY_INFO, USERENTRY_BOTADDR, USERENTRY_HOSTS,
  USERENTRY_PASS, USERENTRY_STATS, USERENTRY_ADDED, USERENTRY_MODIFIED,
- USERENTRY_SET, USERENTRY_SECPASS, USERENTRY_USERNAME, USERENTRY_NODENAME, USERENTRY_OS,
- USERENTRY_PASS1, USERENTRY_ARCH, USERENTRY_OSVER;
+ USERENTRY_SET, USERENTRY_SECPASS, USERENTRY_USERNAME, USERENTRY_NODENAME,
+ USERENTRY_OS, USERENTRY_PASS1, USERENTRY_ARCH, USERENTRY_OSVER,
+ USERENTRY_FFLAGS;
 
 struct laston_info {
   time_t laston;
@@ -58,7 +59,6 @@ struct laston_info {
 };
 
 struct bot_addr {
-  unsigned int roleid;
   char *address;
   char *uplink;
   unsigned short hublevel;
@@ -127,6 +127,7 @@ struct userrec {
   struct chanuserrec *chanrec;
   struct userrec *next;
   flag_t flags;
+  int fflags;
   char handle[HANDLEN + 1];
   char bot;
 };

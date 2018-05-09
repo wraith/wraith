@@ -62,6 +62,7 @@ void init_userent()
   add_entry_type(&USERENTRY_ADDED);
   add_entry_type(&USERENTRY_MODIFIED);
   add_entry_type(&USERENTRY_SET);
+  add_entry_type(&USERENTRY_FFLAGS);
 }
 
 void list_type_kill(struct list_type *t)
@@ -470,6 +471,49 @@ struct user_entry_type USERENTRY_ARCH = {
  set_protected,
  botmisc_display,
  "ARCH"
+};
+
+bool fflags_unpack(struct userrec *u, struct user_entry *e)
+{
+  bool ret = def_unpack(u, e);
+  /* Cache the value in the user record. */
+  u->fflags = atoi((char *) def_get(u, e));
+  return ret;
+}
+
+bool fflags_set(struct userrec *u, struct user_entry *e, void *buf)
+{
+  bool ret;
+
+  /* No need to share since it is sent over the tandem/botlink. */
+  noshare = 1;
+  ret = def_set(u, e, buf);
+  noshare = 0;
+  /* Cache the value in the user record. */
+  u->fflags = atoi((char *) def_get(u, e));
+  return ret;
+}
+
+bool fflags_gotshare(struct userrec *u, struct user_entry *e, char *data,
+    int idx)
+{
+  /* Don't let another bot dictate our features. */
+  if (u == conf.bot->u) {
+    return false;
+  }
+  return def_gotshare(u, e, data, idx);
+}
+
+struct user_entry_type USERENTRY_FFLAGS = {
+ 0,
+ fflags_gotshare,
+ fflags_unpack,
+ def_write_userfile,
+ def_kill,
+ def_get,
+ fflags_set,
+ botmisc_display,
+ "FFLAGS"
 };
 
 void stats_add(struct userrec *u, int islogin, int op)

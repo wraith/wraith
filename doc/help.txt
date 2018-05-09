@@ -1089,7 +1089,7 @@ See also: console, channels%{+m}, status%{-}
 :hub:groups
 ###  $bgroups$b [bot]
    Shows the list of groups and which bots are in them.
-
+ 
    Specify a bot to only show which groups it is in.
  
 See also: bots, downbots%{+n}, bottree%{-}
@@ -1608,6 +1608,28 @@ See also: resetbans, resetinvites
    Makes the bot restart, but keeps its connection to IRC active.
  
 See also: rehash, reload, save
+:leaf:roles
+###  $broles$b [channel]
+   Displays which bots are fullfilling which roles for a channel.
+ 
+   Some roles replace older botflags. See '%dhelp whois' for more
+   information.
+ 
+   $bRole$b         $bFlag$b     $bDescription$b
+   voice        y        Voice any +v users and handle +voice.
+   flood        f        Handle channel flood controls.
+   op           y        Auto-op +O users and handle autoop.
+   deop                  Deop clients on +bitch or +revenge needs.
+   kick                  Kick clients on +bitch, +revenge or +k needs.
+   ban                   Kick clients on +bitch, +revenge or +k needs.
+   topic                 Set the topic as needed for topic protect.
+   limit        l        Handle automatically raising limit as needed.
+   resolv       r        DNS all clients to look for ban/op matching.
+   revenge               React to +revenge needs.
+   chanmode              Set channel protect modes as needed.
+   protect               Handle +protect needs.
+ 
+See also: whois%{+m|m}, chanset, chaninfo%{-}
 :hub:save
 ###  $bsave$b
    This makes the bot write its entire userfile to disk. This is useful if you
@@ -1718,10 +1740,10 @@ See also: reload, backup
                          known users. Note that this will break msg-ident.
 [B]  $bfish-auto-keyx$b      Whether to automatically do a DH1010 FiSH Key exchange when
                          accepting users. This is only supported if using callerid.
-
+ 
 [B]  $bfish-paranoid$b       Whether to automatically re-keyexchange after every message. This
                          mitigates replay attacks.
-
+ 
 [S]  $baltchars$b            Define string of characters to cycle when generating alternative
                          nicks when nick is taken. Ie: _-`[].
 [S]  $bjupenick$b            The bot will attempt to jupe this nick. It will never use a variation
@@ -1909,7 +1931,7 @@ See also: find
 ###  $btopic$b [channel] [new topic]
    Changes the channel's topic, assuming the bot is a chanop or the
    channel is not +t (uses your current console channel).
-
+ 
    If no chanel is specified, the console channel is used.
    If no new topic is specified, the current topic of the channel will be displayed.
  

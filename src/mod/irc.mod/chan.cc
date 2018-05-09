@@ -554,7 +554,8 @@ static bool detect_chan_flood(memberlist* m, const char *from, struct chanset_t 
   /* Do not punish non-existant channel members and IRC services like
    * ChanServ
    */
-  if (!chan || (which < 0) || (which >= FLOOD_CHAN_MAX) || !m)
+  if (!chan || (which < 0) || (which >= FLOOD_CHAN_MAX) || !m ||
+      !(chan->role & ROLE_FLOOD))
     return 0;
 
   /* Okay, make sure i'm not flood-checking myself */
@@ -892,12 +893,12 @@ static void refresh_ban_kick(struct chanset_t* chan, memberlist *m, const char *
   for (int cycle = 0; cycle < 2; cycle++) {
     for (maskrec* b = cycle ? chan->bans : global_bans; b; b = b->next) {
       if (wild_match(b->mask, user) || match_cidr(b->mask, user)) {
-        if (role == 1 && chan_hasop(m))
+        if ((chan->role & ROLE_DEOP) && chan_hasop(m))
           add_mode(chan, '-', 'o', m);	/* Guess it can't hurt.	*/
 	check_exemptlist(chan, user);
 	do_mask(chan, chan->channel.ban, b->mask, 'b');
 	b->lastactive = now;
-        if (role == 2) {
+        if (chan->role & ROLE_KICK) {
           char c[512] = "";		/* The ban comment.	*/
 
           if (b->desc && b->desc[0] != '@')
@@ -1219,7 +1220,7 @@ static void check_this_member(struct chanset_t *chan, memberlist *m,
        (!loading && userlist && chan_bitch(chan) && !chk_op(*fr, chan)) ) ) {
     /* if (target_priority(chan, m, 1)) */
       add_mode(chan, '-', 'o', m);
-  } else if (!chan_hasop(m) && dovoice(chan) && chk_autoop(m, *fr, chan)) {
+  } else if (!chan_hasop(m) && (chan->role & ROLE_OP) && chk_autoop(m, *fr, chan)) {
     do_op(m, chan, 1, 0);
   }
   if (dovoice(chan)) {
@@ -1283,12 +1284,26 @@ void check_this_user(char *hand, int del, char *host)
     for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
       bool check_member = 0;
       bool had_user = m->user ? 1 : 0;
+      struct userrec* u;
+      bool matches_hand = false;
+
       m->tried_getuser = 0;
       member_getuser(m);
-      struct userrec* u = m->user;
+      u = m->user;
+      if (u) {
+        matches_hand = (strcasecmp(u->handle, hand) == 0);
+      }
+
+      if (u && u->bot && matches_hand) {
+        /* Newly discovered bot, or deleted bot which fullfilled a role,
+         * need to rebalance. */
+        if (!del || (del && (*chan->bot_roles)[u->handle] != 0)) {
+          chan->needs_role_rebalance = 1;
+        }
+      }
       if (m->user && !had_user) // If a member is newly recognized, act on it
         check_member = 1;
-      else if (del != 2 && m->user && !strcasecmp(m->user->handle, hand)) { //general check / -user, match specified user
+      else if (del != 2 && m->user && matches_hand) { //general check / -user, match specified user
         check_member = 1;
         if (del == 1)
           u = NULL; // Pretend user doesn't exist when checking
@@ -1769,7 +1784,7 @@ static int got710(char *from, char *msg)
 
   chan = findchan(chname);
 
-  if (!chan->knock_flags || !dovoice(chan))
+  if (!chan->knock_flags || !(chan->role & ROLE_INVITE))
     return 0;
 
   struct userrec *u = get_user_by_host(uhost);
@@ -2125,6 +2140,7 @@ static int got315(char *from, char *msg)
     me->is_me = 1;
     if (!me->joined)
       me->joined = now;				/* set this to keep the whining masses happy */
+    rebalance_roles_chan(chan);
     if (me_op(chan))
       recheck_channel(chan, 2);
     else if (chan->channel.members == 1)
@@ -2716,6 +2732,10 @@ static int gotjoin(char *from, char *chname)
 	m->last = now;
 	m->delay = 0L;
 	m->flags = (chan_hasop(m) ? WASOP : 0);
+        /* New bot available for roles, rebalance. */
+        if (is_bot(m->user)) {
+          chan->needs_role_rebalance = 1;
+        }
 	set_handle_laston(chan->dname, m->user, now);
 //	m->flags |= STOPWHO;
         irc_log(chan, "%s returned from netsplit", m->nick);
@@ -2775,6 +2795,10 @@ static int gotjoin(char *from, char *chname)
 	} else {
           irc_log(chan, "Join: %s (%s)", nick, uhost);
           detect_chan_flood(m, from, chan, FLOOD_JOIN);
+          /* New bot available for roles, rebalance. */
+          if (is_bot(m->user)) {
+            chan->needs_role_rebalance = 1;
+          }
 	  set_handle_laston(chan->dname, m->user, now);
 	}
       }
@@ -2788,7 +2812,8 @@ static int gotjoin(char *from, char *chname)
         bool is_op = chk_op(fr, chan);
 
         /* Check for a mass join */
-        if (!splitjoin && chan->flood_mjoin_time && chan->flood_mjoin_thr && !is_op) {
+        if (chan->role & ROLE_FLOOD &&
+            !splitjoin && chan->flood_mjoin_time && chan->flood_mjoin_thr && !is_op) {
           if (chan->channel.drone_jointime < now - chan->flood_mjoin_time) {      //expired, reset counter
             chan->channel.drone_joins = 0;
           }
@@ -2810,7 +2835,8 @@ static int gotjoin(char *from, char *chname)
 	    u_match_mask(chan->invites, from))
 	  refresh_invite(chan, from);
 
-	if (!(use_exempts && (u_match_mask(global_exempts,from) || u_match_mask(chan->exempts, from)))) {
+	if (chan->role & ROLE_BAN &&
+            !(use_exempts && (u_match_mask(global_exempts,from) || u_match_mask(chan->exempts, from)))) {
           if (channel_enforcebans(chan) && !chan_sentkick(m) && !is_op &&
               !(use_exempts && (isexempted(chan, from) || (chan->ircnet_status & CHAN_ASKED_EXEMPTS)))) {
             for (masklist* b = chan->channel.ban; b->mask[0]; b = b->next) {
@@ -2859,7 +2885,7 @@ static int gotjoin(char *from, char *chname)
           /* Autoop */
           if (!chan_hasop(m) && 
                (op || 
-               (dovoice(chan) && chk_autoop(m, fr, chan)))) {
+               ((chan->role & ROLE_OP) && chk_autoop(m, fr, chan)))) {
             do_op(m, chan, 1, 0);
           }
 
@@ -2921,6 +2947,10 @@ static int gotpart(char *from, char *msg)
       chan->ircnet_status |= CHAN_ACTIVE;
       chan->ircnet_status &= ~(CHAN_PEND | CHAN_JOINING);
       reset_chan_info(chan);
+    }
+    /* This bot fullfilled a role, need to rebalance. */
+    if (u && u->bot && (*chan->bot_roles)[u->handle] != 0) {
+      chan->needs_role_rebalance = 1;
     }
     set_handle_laston(chan->dname, u, now);
 
@@ -2997,7 +3027,7 @@ static int gotkick(char *from, char *origmsg)
     if (mv->user) {
       // Revenge kick clients that kick our bots
       if (chan->revenge && !mv->is_me && m && m != mv && mv->user->bot && !(m->user && m->user->bot)) {
-        if (role < 5 && !chan_sentkick(m) && me_op(chan)) {
+        if ((chan->role & ROLE_REVENGE) && !chan_sentkick(m) && me_op(chan)) {
           m->flags |= SENTKICK;
           dprintf(DP_MODE_NEXT, "KICK %s %s :%s%s\r\n", chan->name, m->nick, kickprefix, response(RES_REVENGE));
         } else {
@@ -3010,6 +3040,10 @@ static int gotkick(char *from, char *origmsg)
       }
 
       set_handle_laston(chan->dname, mv->user, now);
+      /* This bot fullfilled a role, need to rebalance. */
+      if (mv->user->bot && (*chan->bot_roles)[mv->user->handle] != 0) {
+        chan->needs_role_rebalance = 1;
+      }
     }
     irc_log(chan, "%s was kicked by %s (%s)", s1, from, msg);
     /* Kicked ME?!? the sods! */
@@ -3175,8 +3209,13 @@ static int gotquit(char *from, char *msg)
       member_getuser(m);
       u = m->user;
       if (u) {
-        if (u->bot)
+        if (u->bot) {
           counter_clear(u->handle);
+          /* This bot fullfilled a role, need to rebalance. */
+          if ((*chan->bot_roles)[u->handle] != 0) {
+            chan->needs_role_rebalance = 1;
+          }
+        }
         set_handle_laston(chan->dname, u, now); /* If you remove this, the bot will crash when the user record in question
 						   is removed/modified during the tcl binds below, and the users was on more
 						   than one monitored channel */
