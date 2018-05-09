@@ -8,7 +8,6 @@
     will properly assign roles out to bots to not cause overlap. Only leaf
     bots know which bots have which roles. (#39)
   * Add cmd_roles (leaf only) to display roles for a channel. (#39)
-  * Fix OpenSSL 1.1 build (API) and forward-runtime (ABI) compatibility.
 
 # master
   * Require C++11 compiler support (G++ 4.7+, clang32+)
@@ -19,6 +18,7 @@
   * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
   * Fix command executions.
   * Reduce compilation spam.
+  * Fix OpenSSL 1.1 build (API) and forward-runtime (ABI) compatibility.
 
 # 1.4.8
   * Support Debian/Ubuntu's libssl1.0.0[:i386] package.
