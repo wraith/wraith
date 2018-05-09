@@ -16,6 +16,7 @@
   * Reduce compilation spam.
   * Fix OpenSSL 1.1 build (API) and forward-runtime (ABI) compatibility. (#116)
   * Properly honor exemptions when kicking matched RBL clients
+  * Fix LASTON not being shared
 
 # 1.4.8
   * Support Debian/Ubuntu's libssl1.0.0[:i386] package.
