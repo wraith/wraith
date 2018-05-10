@@ -1,5 +1,5 @@
 #include <openssl/opensslv.h>
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#if !defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER < 0x10100000L
 #include <stdlib.h>
 #include <stdint.h>
 #include "dl.h"

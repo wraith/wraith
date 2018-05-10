@@ -60,7 +60,7 @@ static int load_symbols(void *handle) {
   DLSYM_GLOBAL_FWDCOMPAT(handle, SSL_load_error_strings);
   /* Some forward-compat is handled in src/compat/openssl.cc. */
 #endif
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+#if !defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
   /* For SSLv23_client_method */
   DLSYM_GLOBAL(handle, TLS_client_method);
   /* For SSLv23_method */
