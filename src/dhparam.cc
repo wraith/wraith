@@ -32,7 +32,7 @@ DH *get_dh2048() {
   if ((dh=DH_new()) == NULL) return(NULL);
   dhp_bn = BN_bin2bn(dh2048_p, sizeof(dh2048_p), NULL);
   dhg_bn = BN_bin2bn(dh2048_g, sizeof(dh2048_g), NULL);
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+#if !defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
   if (dhp_bn == NULL || dhg_bn == NULL
       || !DH_set0_pqg(dh, dhp_bn, NULL, dhg_bn)) {
     DH_free(dh);
@@ -82,7 +82,7 @@ DH *get_dh1024() {
   if ((dh=DH_new()) == NULL) return(NULL);
   dhp_bn = BN_bin2bn(dh1024_p, sizeof(dh1024_p), NULL);
   dhg_bn = BN_bin2bn(dh1024_g, sizeof(dh1024_g), NULL);
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+#if !defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
   if (dhp_bn == NULL || dhg_bn == NULL
       || !DH_set0_pqg(dh, dhp_bn, NULL, dhg_bn)) {
     DH_free(dh);
@@ -123,7 +123,7 @@ DH *get_dh512() {
   if ((dh=DH_new()) == NULL) return(NULL);
   dhp_bn = BN_bin2bn(dh512_p, sizeof(dh512_p), NULL);
   dhg_bn = BN_bin2bn(dh512_g, sizeof(dh512_g), NULL);
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+#if !defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
   if (dhp_bn == NULL || dhg_bn == NULL
       || !DH_set0_pqg(dh, dhp_bn, NULL, dhg_bn)) {
     DH_free(dh);
@@ -212,7 +212,7 @@ DH *get_dh4096()
         return NULL;
     dhp_bn = BN_bin2bn(dhp_4096, sizeof(dhp_4096), NULL);
     dhg_bn = BN_bin2bn(dhg_4096, sizeof(dhg_4096), NULL);
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+#if !defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
   if (dhp_bn == NULL || dhg_bn == NULL
       || !DH_set0_pqg(dh, dhp_bn, NULL, dhg_bn)) {
     DH_free(dh);

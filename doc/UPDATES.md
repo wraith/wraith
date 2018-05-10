@@ -7,6 +7,7 @@
   * Properly honor exemptions when kicking matched RBL clients
   * Fix LASTON not being shared
   * Fix OpenBSD eg++ detection
+  * Add LibreSSL support
 
 # 1.4.8
   * Support Debian/Ubuntu's libssl1.0.0[:i386] package.
