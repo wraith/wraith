@@ -8,7 +8,7 @@
     bots know which bots have which roles. (#39)
   * Add cmd_roles (leaf only) to display roles for a channel. (#39)
 
-# maint
+# 1.4.9
   * Fix various compile warnings and spam
   * Fix ptrace detection on OpenBSD (after 1.4.6 regression for the Linux fix)
   * Update server list, 'set -yes servers -' and 'set -yes servers6 -' to get new list.
