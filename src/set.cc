@@ -383,8 +383,7 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
       if (server_online && should_reset_monitor)
         rehash_monitor_list();
     }
-    if (olddata)
-      free(olddata);
+    free(olddata);
   } else if (var->flags & VAR_RATE) {
     char *p = NULL;
     
@@ -428,8 +427,7 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
     }
   }
 
-  if (datap)
-    free(datap);
+  free(datap);
 
 //  if (var->changed)
 //    var->changed(var);
@@ -594,8 +592,8 @@ void var_set(variable_t *var, const char *target, const char *datain)
   if (target) {
     if (!strcasecmp(conf.bot->nick, target)) {
       domem = 1;				/* always set the mem if it's local */
-      if (var->ldata)
-        free(var->ldata);
+      free(var->ldata);
+      var->ldata = NULL;
 
 #ifdef DEBUG
 sdprintf("var: %s (local): %s", var->name, data ? data : "(NULL)");
@@ -611,8 +609,8 @@ sdprintf("var: %s (local): %s", var->name, data ? data : "(NULL)");
   } else if (target == NULL) {
     if (var->ldata)
       domem = 0;
-    if (var->gdata)
-      free(var->gdata);
+    free(var->gdata);
+    var->gdata = NULL;
 #ifdef DEBUG
 sdprintf("var: %s (global): %s", var->name, data ? data : "(NULL)");
 #endif
@@ -630,8 +628,7 @@ sdprintf("var: %s (global): %s", var->name, data ? data : "(NULL)");
   }
 //  if (freedata)
 //    free(data);
-  if (sdata)
-    free(sdata);
+  free(sdata);
 }
 
 void var_set_by_name(const char *target, const char *name, const char *data)
@@ -1196,8 +1193,7 @@ int cmd_set_real(const char *botnick, int idx, char *par)
 
       display_set_value(idx, var, botnick);
 
-      if (sdata)
-        free(sdata);
+      free(sdata);
     }
     return 1;
   }
