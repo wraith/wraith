@@ -274,23 +274,22 @@ static bool set_set(struct userrec *u, struct user_entry *e, void *buf)
   }
 
   /* if we have a new entry and an old entry.. or our new entry is empty -> clear out the old entry */
-  if ((old && old != newxk) || !newxk->data || !newxk->data[0]) {
+  if (old && old != newxk && (!newxk->data || !newxk->data[0])) {
     list_delete((struct list_type **) (&e->u.extra), (struct list_type *) old);
 
     free(old->key);
     free(old->data);
     free(old);
+    old = NULL;
   }
 
   /* add the new entry if it's not empty */
-  if (old != newxk && newxk->data) {
-    if (newxk->data[0]) {
-      list_insert((struct xtra_key **) (&e->u.extra), newxk);
-    } else {
-      free(newxk->data);
-      free(newxk->key);
-      free(newxk);
-    }
+  if ((!old || old != newxk) && newxk->data && newxk->data[0]) {
+    list_insert((struct xtra_key **) (&e->u.extra), newxk);
+  } else {
+    free(newxk->data);
+    free(newxk->key);
+    free(newxk);
   }
   return 1;
 }
@@ -306,15 +305,14 @@ static bool set_unpack(struct userrec *u, struct user_entry *e)
   char *key = NULL, *data = NULL;
 
   while (curr) {
-    t = (struct xtra_key *) calloc(1, sizeof(struct xtra_key));
     data = curr->extra;
     key = newsplit(&data);
     if (data[0]) {
+      t = (struct xtra_key *) calloc(1, sizeof(struct xtra_key));
       t->key = strdup(key);
       t->data = strdup(data);
       list_insert((struct xtra_key **) (&e->u.extra), t);
-    } else
-      free(t);
+    }
     curr = curr->next;
   }
 

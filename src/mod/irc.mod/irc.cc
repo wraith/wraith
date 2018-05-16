@@ -91,7 +91,7 @@ static bool ban_fun = 1;
 static bool prevent_mixing = 1;  /* To prevent mixing old/new modes */
 bool include_lk = 1;      /* For correct calculation
                                  * in real_add_mode. */
-bd::HashTable<bd::String, unsigned long> bot_counters;
+static bd::HashTable<bd::String, unsigned long> bot_counters;
 unsigned long my_cookie_counter = 0;
 
 static std::deque<bd::String> chained_who;
