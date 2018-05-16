@@ -242,7 +242,7 @@ struct user_entry_type USERENTRY_ADDED = {
 
 static bool set_set(struct userrec *u, struct user_entry *e, void *buf)
 {
-  struct xtra_key *curr = (struct xtra_key *) e->u.extra, 
+  struct xtra_key *curr = e->u.xk,
                   *newxk = (struct xtra_key *) buf, *old = NULL;
 
   /* find the curr key if it exists */
@@ -285,7 +285,7 @@ static bool set_set(struct userrec *u, struct user_entry *e, void *buf)
 
   /* add the new entry if it's not empty */
   if ((!old || old != newxk) && newxk->data && newxk->data[0]) {
-    list_insert((struct xtra_key **) (&e->u.extra), newxk);
+    list_insert((&e->u.xk), newxk);
   } else {
     free(newxk->data);
     free(newxk->key);
@@ -311,7 +311,7 @@ static bool set_unpack(struct userrec *u, struct user_entry *e)
       t = (struct xtra_key *) calloc(1, sizeof(struct xtra_key));
       t->key = strdup(key);
       t->data = strdup(data);
-      list_insert((struct xtra_key **) (&e->u.extra), t);
+      list_insert((&e->u.xk), t);
     }
     curr = curr->next;
   }
@@ -323,7 +323,7 @@ static bool set_unpack(struct userrec *u, struct user_entry *e)
 static void set_display(int idx, struct user_entry *e, struct userrec *u)
 {
   if (conf.bot->hub) {
-    struct xtra_key *xk = (struct xtra_key *) e->u.extra;
+    struct xtra_key *xk = e->u.xk;
     struct flag_record fr = {FR_GLOBAL, 0, 0, 0 };
 
     dprintf(idx, "  BOTSET:\n");
@@ -358,7 +358,7 @@ static bool set_gotshare(struct userrec *u, struct user_entry *e, char *buf, int
 static void set_write_userfile(bd::Stream& stream, const struct userrec *u, const struct user_entry *e, int idx)
 {
   int localhub = nextbot(u->handle);
-  struct xtra_key *x = (struct xtra_key *) e->u.extra;
+  struct xtra_key *x = e->u.xk;
 
   for (; x; x = x->next) {
     /*
@@ -376,7 +376,7 @@ static void set_write_userfile(bd::Stream& stream, const struct userrec *u, cons
 
 static bool set_kill(struct user_entry *e)
 {
-  struct xtra_key *x = (struct xtra_key *) e->u.extra, *y = NULL;
+  struct xtra_key *x = e->u.xk, *y = NULL;
 
   for (; x; x = y) {
     y = x->next;

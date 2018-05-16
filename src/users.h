@@ -66,22 +66,23 @@ struct bot_addr {
   in_port_t relay_port;
 };
 
+struct xtra_key {
+  struct xtra_key *next;
+  char *key;
+  char *data;
+};
+
 struct user_entry {
   struct user_entry *next;
   struct user_entry_type *type;
   union {
     char *string;
     void *extra;
+    struct xtra_key *xk;
     struct list_type *list;
     unsigned long ulong;
   } u;
   char *name;
-};
-
-struct xtra_key {
-  struct xtra_key *next;
-  char *key;
-  char *data;
 };
 
 struct filesys_stats {
