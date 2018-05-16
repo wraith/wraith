@@ -279,10 +279,11 @@ static bool set_set(struct userrec *u, struct user_entry *e, void *buf)
     free(old->key);
     free(old->data);
     free(old);
+    old = NULL;
   }
 
   /* add the new entry if it's not empty */
-  if (old != newxk && newxk->data) {
+  if ((!old || old != newxk) && newxk->data) {
     if (newxk->data[0]) {
       list_insert((struct xtra_key **) (&e->u.extra), newxk);
     } else {
