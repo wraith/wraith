@@ -3204,6 +3204,7 @@ static int gotquit(char *from, char *msg)
    */
   if (keepnick && !match_my_nick(nick))
     nicks_available(nick);
+  set_fish_key(nick, "");
 #ifdef CACHE
   /* see if they were in our cache at all */
   cache_t *cache = cache_find(nick);

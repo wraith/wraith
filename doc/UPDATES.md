@@ -1,3 +1,6 @@
+# maint
+  * Clear FiSH keys when a client quits.
+
 # 1.4.9
   * Fix various compile warnings and spam
   * Fix ptrace detection on OpenBSD (after 1.4.6 regression for the Linux fix)
