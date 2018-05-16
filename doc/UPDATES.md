@@ -8,6 +8,9 @@
     bots know which bots have which roles. (#39)
   * Add cmd_roles (leaf only) to display roles for a channel. (#39)
 
+# maint
+  * Clear FiSH keys when a client quits.
+
 # 1.4.9
   * Fix various compile warnings and spam
   * Fix ptrace detection on OpenBSD (after 1.4.6 regression for the Linux fix)
