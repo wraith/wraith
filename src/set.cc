@@ -416,7 +416,7 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
     // Need to reload the server settings since we may want a different list now
     sdprintf("server-use-ssl changed, reprocessing server list");
     variable_t *servers = var_get_var_by_name(get_server_type());
-    var_set_mem(servers, servers->ldata ? servers->ldata : servers->gdata ? servers->gdata : NULL);
+    var_set_mem(servers, servers->ldata ? servers->ldata : servers->gdata);
   }
 
   // Check if should part/join channels based on groups changing
@@ -606,7 +606,7 @@ sdprintf("var: %s (local): %s", var->name, data ? data : "(NULL)");
         var->ldata = NULL;
       /* if ldata is blank, see about setting the memory to the global setting... */
       if (domem && var->mem)
-        var_set_mem(var, var->ldata ? var->ldata : var->gdata ? var->gdata : NULL);
+        var_set_mem(var, var->ldata ? var->ldata : var->gdata);
     } 
   } else if (target == NULL) {
     if (var->ldata)
@@ -795,9 +795,9 @@ static bool var_find_list(const char *botnick, variable_t *var, const char *elem
 
   if (botnick) {                          //fetch data from bot's USERENTRY_SET
     char *botdata = (char *) var_get_bot_data(get_user_by_handle(userlist, (char *) botnick), var->name);
-    olddata = botdata ? botdata : NULL;
+    olddata = botdata;
   } else                                  //use global, no bot specified
-    olddata = var->gdata ? var->gdata : NULL;
+    olddata = var->gdata;
 
   if (!olddata)
     return false;
@@ -832,9 +832,9 @@ static int var_add_list(const char *botnick, variable_t *var, const char *elemen
 
   if (botnick) {                          //fetch data from bot's USERENTRY_SET
     botdata = (char *) var_get_bot_data(get_user_by_handle(userlist, (char *) botnick), var->name, true);
-    olddata = botdata ? botdata : NULL;
+    olddata = botdata;
   } else                                  //use global, no bot specified
-    olddata = var->gdata ? var->gdata : NULL;
+    olddata = var->gdata;
 
   /* Append to the olddata if there...*/
   size_t osiz = olddata ? strlen(olddata) : 0;
@@ -865,9 +865,9 @@ static char *var_rem_list(const char *botnick, variable_t *var, const char *elem
 
   if (botnick) {                          //fetch data from bot's USERENTRY_SET
     botdata = (char *) var_get_bot_data(get_user_by_handle(userlist, (char *) botnick), var->name);
-    olddatacp = botdata ? botdata : NULL;
+    olddatacp = botdata;
   } else                                  //use global, no bot specified
-    olddatacp = var->gdata ? var->gdata : NULL;
+    olddatacp = var->gdata;
 
   if (!olddatacp)
     return 0;
@@ -948,9 +948,9 @@ static void display_set_value(int idx, const variable_t *var, const char *botnic
   if (botnick) {				//fetch data from bot's USERENTRY_SET
     struct userrec *botu = get_user_by_handle(userlist, (char *) botnick);
     const char *botdata = var_get_bot_data(botu, var->name);
-    data = botdata ? botdata : NULL;
+    data = botdata;
   } else {					//use global, no bot specified
-    data = var->gdata ? var->gdata : NULL;
+    data = var->gdata;
   }
 
   if (format) {
@@ -1080,9 +1080,9 @@ int cmd_set_real(const char *botnick, int idx, char *par)
          ) {		//Just display the data
         if (botnick) {				//fetch data from bot's USERENTRY_SET
           botdata = var_get_bot_data(botu, var->name);
-          data = botdata ? botdata : NULL;
+          data = botdata;
         } else 					//use global, no bot specified
-          data = var->gdata ? var->gdata : NULL;
+          data = var->gdata;
        
         if (list && data)
           var_print_list(idx, var->name, data);
