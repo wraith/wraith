@@ -251,6 +251,10 @@ static bool set_set(struct userrec *u, struct user_entry *e, void *buf)
       break;
     }
   }
+
+  /* Nothing to do if the old and new entry match. Can this even happen? */
+  if (old == newxk)
+    return 1;
   
   /* we will possibly free new below, so let's send the information to the botnet now */
   if (!noshare && !set_noshare) {
@@ -273,7 +277,7 @@ static bool set_set(struct userrec *u, struct user_entry *e, void *buf)
   }
 
   /* if we have a new entry and an old entry.. or our new entry is empty -> clear out the old entry */
-  if (old && old != newxk && (!newxk->data || !newxk->data[0])) {
+  if (old && (!newxk->data || !newxk->data[0])) {
     list_delete((struct list_type **) (&e->u.extra), (struct list_type *) old);
 
     free(old->key);
@@ -283,7 +287,7 @@ static bool set_set(struct userrec *u, struct user_entry *e, void *buf)
   }
 
   /* add the new entry if it's not empty */
-  if ((!old || old != newxk) && newxk->data && newxk->data[0]) {
+  if (newxk->data && newxk->data[0]) {
     list_insert((&e->u.xk), newxk);
   } else {
     free(newxk->data);
