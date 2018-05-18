@@ -335,6 +335,8 @@ static bool set_gotshare(struct userrec *u, struct user_entry *e, char *buf, int
 {
   char *name = newsplit(&buf);
 
+  ASSERT(e == NULL, "set_gotshare should not be passed a user_entry");
+
   if (!name || !name[0])
     return 1;
 

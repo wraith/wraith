@@ -1,5 +1,6 @@
 # maint
   * Clear FiSH keys when a client quits.
+  * Fix crash when clearing last botset entry for a bot.
 
 # 1.4.9
   * Fix various compile warnings and spam
