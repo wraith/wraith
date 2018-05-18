@@ -267,15 +267,6 @@ static bool set_set(struct userrec *u, struct user_entry *e, void *buf)
     }
   }
 
-  /* unset and bail out if the new data is empty and the old doesn't exist, why'd we even get this change? */
-  if (!old && (!newxk->data || !newxk->data[0])) {
-    /* or simply ... delete non-existant entry */
-    free(newxk->key);
-    free(newxk->data);
-    free(newxk);
-    return 1;
-  }
-
   /* if we have a new entry and an old entry.. or our new entry is empty -> clear out the old entry */
   if (old) {
     list_delete((struct list_type **) (&e->u.extra), (struct list_type *) old);
