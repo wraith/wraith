@@ -277,7 +277,7 @@ static bool set_set(struct userrec *u, struct user_entry *e, void *buf)
   }
 
   /* if we have a new entry and an old entry.. or our new entry is empty -> clear out the old entry */
-  if (old && (!newxk->data || !newxk->data[0])) {
+  if (old) {
     list_delete((struct list_type **) (&e->u.extra), (struct list_type *) old);
 
     free(old->key);
