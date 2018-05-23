@@ -655,7 +655,7 @@ share_change(int idx, char *par)
         return;
       }
 
-      if (uet->got_share) {
+      if (uet->got_share && uet != &USERENTRY_SET) {
         if (!(e = find_user_entry(uet, u))) {
           e = (struct user_entry *) calloc(1, sizeof(struct user_entry));
 
@@ -669,6 +669,14 @@ share_change(int idx, char *par)
           list_delete((struct list_type **) &(u->entries), (struct list_type *) e);
           free(e);
         }
+      } else if (uet == &USERENTRY_SET) {
+        /*
+         * set_set() chains down to set_user() which mimics
+         * the above and leads to deleting/freeing 'e' when
+         * already done in set_user(). set_gotshare() ignores
+         * e.
+         */
+        uet->got_share(u, NULL, par, idx);
       }
       noshare = 0;
     }
