@@ -13,6 +13,7 @@
 # maint
   * Clear FiSH keys when a client quits.
   * Fix crash when clearing last botset entry for a bot.
+  * Bots now share channel key to other bots even if not opped.
 
 # 1.4.9
   * Fix various compile warnings and spam

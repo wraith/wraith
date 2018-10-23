@@ -786,6 +786,39 @@ getin_request(char *botnick, char *code, char *par)
 
     putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - Opped", botnick, nick, chan->dname);
   } else if (what[0] == 'i') {
+    if (mem) {
+      putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - %s is already on %s", botnick, nick, chan->dname, nick, chan->dname);
+      return;
+    }
+
+    get_user_flagrec(u, &fr, chan->dname, chan);
+
+    if (unlikely(!chk_op(fr, chan) || chan_kick(fr) || glob_kick(fr))) {
+      putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - %s doesn't have acces for chan.", botnick, nick, chan->dname, botnick);
+      return;
+    }
+
+    char uip[UHOSTLEN] = "";
+    tmp = newsplit(&par);		/* userip */
+    if (tmp[0])
+      simple_snprintf(uip, sizeof uip, "%s!%s", nick, tmp);
+
+    char chankey[128] = "";
+    tmp = newsplit(&par);		/* what the bot thinks the key is */
+    if (tmp[0])
+      simple_snprintf(chankey, sizeof(chankey), "%s", tmp);
+
+    if (chan->channel.mode & CHANKEY && chan->channel.key[0] &&
+        (!chankey[0] || strcmp(chan->channel.key, chankey))) {
+      char *key = chan->channel.key[0] ? chan->channel.key : NULL;
+      size_t siz = strlen(chan->dname) + strlen(key ? key : 0) + 6 + 1;
+      tmp = (char *) calloc(1, siz);
+      simple_snprintf(tmp, siz, "gi K %s %s", chan->dname, key ? key : "");
+      putbot(botnick, tmp);
+      putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Sent key (%s)", botnick, nick, chan->dname, key ? key : "");
+      free(tmp);
+    }
+
     // Should I respond to this request?
     // If there's 18 eligible bots in the channel, and in-bots is 2, I have a 2/18 chance of replying.
     int eligible_bots = 0;
@@ -807,28 +840,6 @@ getin_request(char *botnick, char *code, char *par)
       return;
     }
 
-    if (mem) {
-      putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - %s is already on %s", botnick, nick, chan->dname, nick, chan->dname);
-      return;
-    }
-
-    get_user_flagrec(u, &fr, chan->dname, chan);
-
-    if (unlikely(!chk_op(fr, chan) || chan_kick(fr) || glob_kick(fr))) {
-      putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - %s doesn't have acces for chan.", botnick, nick, chan->dname, botnick);
-      return;
-    }
-
-    if (chan->channel.mode & CHANKEY) {
-      char *key = chan->channel.key[0] ? chan->channel.key : chan->key_prot;
-      size_t siz = strlen(chan->dname) + strlen(key ? key : 0) + 6 + 1;
-      tmp = (char *) calloc(1, siz);
-      simple_snprintf(tmp, siz, "gi K %s %s", chan->dname, key ? key : "");
-      putbot(botnick, tmp);
-      putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Sent key (%s)", botnick, nick, chan->dname, key ? key : "");
-      free(tmp);
-    }
-
     if (!me_op(chan)) {
       putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - I haven't got ops", botnick, nick, chan->dname);
       return;
@@ -842,11 +853,6 @@ getin_request(char *botnick, char *code, char *par)
         putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - Raised limit", botnick, nick, chan->dname);
       }
     }
-
-    char uip[UHOSTLEN] = "";
-    tmp = newsplit(&par);		/* userip */
-    if (tmp[0])
-      simple_snprintf(uip, sizeof uip, "%s!%s", nick, tmp);
 
     struct maskrec **mr = NULL, *tmr = NULL;
 
@@ -1112,7 +1118,7 @@ request_in(struct chanset_t *chan)
     return;
   }
 
-  bd::String request(bd::String::printf("gi i %s %s %s!%s %s", chan->dname, botname, botname, botuserhost, botuserip));
+  bd::String request(bd::String::printf("gi i %s %s %s!%s %s %s", chan->dname, botname, botname, botuserhost, botuserip, chan->channel.key[0] ? chan->channel.key : ""));
   putallbots(request.c_str());
   putlog(LOG_GETIN, "*", "Requested help to join %s", chan->dname);
 }
