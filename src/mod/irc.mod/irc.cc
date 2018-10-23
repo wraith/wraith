@@ -820,7 +820,7 @@ getin_request(char *botnick, char *code, char *par)
     }
 
     if (chan->channel.mode & CHANKEY) {
-      char *key = chan->channel.key[0] ? chan->channel.key : chan->key_prot;
+      char *key = chan->channel.key[0] ? chan->channel.key : NULL;
       size_t siz = strlen(chan->dname) + strlen(key ? key : 0) + 6 + 1;
       tmp = (char *) calloc(1, siz);
       simple_snprintf(tmp, siz, "gi K %s %s", chan->dname, key ? key : "");
