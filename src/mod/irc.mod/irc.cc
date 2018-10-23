@@ -786,6 +786,18 @@ getin_request(char *botnick, char *code, char *par)
 
     putlog(LOG_GETIN, "*", "opreq from %s/%s on %s - Opped", botnick, nick, chan->dname);
   } else if (what[0] == 'i') {
+    if (mem) {
+      putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - %s is already on %s", botnick, nick, chan->dname, nick, chan->dname);
+      return;
+    }
+
+    get_user_flagrec(u, &fr, chan->dname, chan);
+
+    if (unlikely(!chk_op(fr, chan) || chan_kick(fr) || glob_kick(fr))) {
+      putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - %s doesn't have acces for chan.", botnick, nick, chan->dname, botnick);
+      return;
+    }
+
     // Should I respond to this request?
     // If there's 18 eligible bots in the channel, and in-bots is 2, I have a 2/18 chance of replying.
     int eligible_bots = 0;
@@ -804,18 +816,6 @@ getin_request(char *botnick, char *code, char *par)
 
     if (!((randint(eligible_bots) + 1) <= static_cast<unsigned int>(in_bots))) {
       // Not my turn
-      return;
-    }
-
-    if (mem) {
-      putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - %s is already on %s", botnick, nick, chan->dname, nick, chan->dname);
-      return;
-    }
-
-    get_user_flagrec(u, &fr, chan->dname, chan);
-
-    if (unlikely(!chk_op(fr, chan) || chan_kick(fr) || glob_kick(fr))) {
-      putlog(LOG_GETIN, "*", "inreq from %s/%s for %s - %s doesn't have acces for chan.", botnick, nick, chan->dname, botnick);
       return;
     }
 
