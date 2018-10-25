@@ -10,6 +10,7 @@
 
 #include <functional>
 #include <lib/bdlib/src/Array.h>
+#include <lib/bdlib/src/HashTable.h>
 #include <lib/bdlib/src/String.h>
 
 /* chan & global */

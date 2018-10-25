@@ -1185,6 +1185,7 @@ int channel_add(char *result, const char *newname, char *options, bool isdefault
      * the server knows it, when we join the channel. <cybah>
      */
     strlcpy(chan->dname, newname, sizeof(chan->dname));
+    chanset_by_dname[chan->dname] = chan;
 
     /* Initialize chan->channel info */
     if (isdefault) {

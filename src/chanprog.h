@@ -2,10 +2,13 @@
 #define _CHANPROG_H
 
 #include "src/chan.h"
+#include "RfcString.h"
 
 #define DO_LOCAL	1
 #define DO_NET		2
 #define CMD		4
+
+extern bd::HashTable<RfcString, struct chanset_t *> chanset_by_dname;
 
 int do_chanset(char *, struct chanset_t *, const char *, int);
 void checkchans(int);
@@ -39,7 +42,13 @@ struct userrec *check_chanlist(const char *);
 struct userrec *check_chanlist_hand(const char *);
 memberlist *ismember(const struct chanset_t *, const char *);
 struct chanset_t *findchan(const char *name);
-struct chanset_t *findchan_by_dname(const char *name);
+/*
+ * Find a chanset by display name (ie !channel)
+ */
+static inline struct chanset_t *
+findchan_by_dname(const char *name) {
+  return chanset_by_dname[name];
+}
 
 extern struct chanset_t		*chanset, *chanset_default;
 extern char			admin[], origbotnick[HANDLEN + 1], origbotname[NICKLEN], jupenick[NICKLEN], botname[NICKLEN], *def_chanset;

@@ -55,7 +55,10 @@
 #endif
 #include <sys/utsname.h>
 #include <bdlib/src/Array.h>
+#include <bdlib/src/HashTable.h>
 #include <bdlib/src/String.h>
+
+bd::HashTable<RfcString, struct chanset_t *> chanset_by_dname;
 
 char *def_chanset = "+enforcebans +dynamicbans +userbans -bitch +cycle -inactive +userexempts -dynamicexempts +userinvites -dynamicinvites -nodesynch -closed -take -voice -private -fastop ban-type 3 protect-backup 1 groups { main } revenge react";
 struct chanset_t 	*chanset = NULL;	/* Channel list			*/
@@ -113,18 +116,6 @@ struct chanset_t *findchan(const char *name)
 
   for (chan = chanset; chan; chan = chan->next)
     if (chan->name[0] && !rfc_casecmp(chan->name, name))
-      return chan;
-  return NULL;
-}
-
-/* Find a chanset by display name (ie !channel)
- */
-struct chanset_t *findchan_by_dname(const char *name)
-{
-  struct chanset_t	*chan = NULL;
-
-  for (chan = chanset; chan; chan = chan->next)
-    if (!rfc_casecmp(chan->dname, name))
       return chan;
   return NULL;
 }
