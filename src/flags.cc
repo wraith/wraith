@@ -489,6 +489,16 @@ chk_autoop(memberlist *m, const struct flag_record fr, const struct chanset_t *c
 }
 
 int
+chk_voice(struct flag_record fr, const struct chanset_t *chan)
+{
+  if (!chan || privchan(fr, chan, PRIV_VOICE) || chk_devoice(fr))
+    return 0;
+  if (chan_voice(fr) || (glob_voice(fr) && !chan_quiet(fr)))
+    return 1;
+  return 0;
+}
+
+int
 real_chk_deop(const struct flag_record fr, const struct chanset_t *chan, bool botbitch)
 {
   if (chan && botbitch && channel_botbitch(chan) && !glob_bot(fr))

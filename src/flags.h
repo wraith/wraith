@@ -178,11 +178,7 @@ int real_chk_op(const struct flag_record, const struct chanset_t *, bool);
 int chk_autoop(memberlist *, const struct flag_record, const struct chanset_t *);
 #define chk_deop(fr, chan) real_chk_deop(fr, chan, 1)
 int real_chk_deop(const struct flag_record, const struct chanset_t *, bool);
-#define chk_voice(fr, chan) (\
-    (\
-     (!chan || (!privchan(fr, chan, PRIV_VOICE) && !chk_devoice(fr))) \
-     && (chan_voice(fr) || (glob_voice(fr) && !chan_quiet(fr))) \
-    ) ? 1 : 0)
+int chk_voice(const struct flag_record, const struct chanset_t *);
 #define chk_noflood(fr) (chan_noflood(fr) || glob_noflood(fr))
 #define chk_devoice(fr) ((chan_quiet(fr) || (glob_quiet(fr) && !chan_voice(fr))) ? 1 : 0)
 #define isupdatehub() ((conf.bot->hub && conf.bot->u && (conf.bot->u->flags & BOT_UPDATEHUB)) ? 1 : 0)
