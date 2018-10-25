@@ -371,7 +371,7 @@ static void cmd_voice(int idx, char *par)
       dprintf(idx, "No such channel.\n");
       return;
     }
-    else if (!chk_voice(user, chan) && !chk_op(user, chan)) {
+    else if (!chk_voice(NULL, user, chan) && !chk_op(user, chan)) {
       if (all) goto next;
       dprintf(idx, "You don't have access to voice on %s\n", chan->dname);
       return;
@@ -435,7 +435,7 @@ static void cmd_devoice(int idx, char *par)
     dprintf(idx, "No such channel.\n");
     return;
   }
-  else if (!chk_voice(user, chan) && !chk_op(user, chan)) {
+  else if (!chk_voice(NULL, user, chan) && !chk_op(user, chan)) {
     if (all) goto next;
     dprintf(idx, "You don't have access to devoice on %s\n", chan->dname);
     return;

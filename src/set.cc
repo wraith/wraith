@@ -102,7 +102,7 @@ static variable_t vars[] = {
  VAR("flood-msg",	&flood_msg,		VAR_RATE|VAR_NOLHUB,				0, 0, "5:60"),
  VAR("groups",		groups,			VAR_STRING|VAR_LIST|VAR_NOLHUB,			0, 0, "main"),
  VAR("hijack",		&hijack,		VAR_INT|VAR_DETECTED|VAR_PERM,			0, 4, "die"),
- VAR("homechan",	homechan,		VAR_WORD|VAR_NOLOC|VAR_HIDE,			0, 0, NULL),
+ VAR("homechan",	homechan,		VAR_WORD|VAR_NOLOC,				0, 0, NULL),
  VAR("ident-botnick",   &ident_botnick,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "0"),
  VAR("in-bots",		&in_bots,		VAR_INT|VAR_NOLOC,				1, MAX_BOTS, "2"),
  VAR("irc-autoaway",	&irc_autoaway,		VAR_INT|VAR_NOLHUB|VAR_BOOL,			0, 1, "1"),

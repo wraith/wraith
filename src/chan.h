@@ -111,6 +111,12 @@ enum deflag_t {
   DEFLAG_REACT = 4,
 };
 
+enum homechan_user_t {
+  HOMECHAN_USER_NONE = 0,
+  HOMECHAN_USER_VOICE = 1,
+  HOMECHAN_USER_OP = 2,
+};
+
 /* Why duplicate this struct for exempts and invites only under another
  * name? <cybah>
  */
@@ -244,6 +250,7 @@ struct chanset_t {
   deflag_t mdop;
   deflag_t mop;
   deflag_t revenge;
+  homechan_user_t homechan_user;
   int voice_non_ident;
   int ban_type;
   interval_t auto_delay;

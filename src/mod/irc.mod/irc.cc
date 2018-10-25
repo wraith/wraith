@@ -1607,9 +1607,9 @@ check_expired_chanstuff(struct chanset_t *chan)
               if (!(m->flags & EVOICE) &&
                   (
                    /* +voice: Voice all clients who are not flag:+q. If the chan is +voicebitch, only op flag:+v clients */
-                   (channel_voice(chan) && !chk_devoice(fr) && (!channel_voicebitch(chan) || (channel_voicebitch(chan) && chk_voice(fr, chan)))) ||
+                   (channel_voice(chan) && !chk_devoice(fr) && (!channel_voicebitch(chan) || (channel_voicebitch(chan) && chk_voice(m, fr, chan)))) ||
                    /* Or, if the channel is -voice but they still qualify to be voiced */
-                   (!channel_voice(chan) && !privchan(fr, chan, PRIV_VOICE) && chk_voice(fr, chan))
+                   (!channel_voice(chan) && !privchan(fr, chan, PRIV_VOICE) && chk_voice(m, fr, chan))
                   )
                  ) {
                 add_mode(chan, '+', 'v', m);

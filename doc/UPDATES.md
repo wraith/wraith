@@ -7,6 +7,8 @@
     will properly assign roles out to bots to not cause overlap. Only leaf
     bots know which bots have which roles. (#39)
   * Add cmd_roles (leaf only) to display roles for a channel. (#39)
+  * Add 'chanset homechan-user [nothing/voice/op]' to auto-voice or auto-op
+    clients who are opped in 'set homechan'.
 
 # maint
   * Clear FiSH keys when a client quits.

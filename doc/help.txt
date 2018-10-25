@@ -453,6 +453,13 @@ See also: link%{+a}, newhub%{-}
       $bmdop$b                Mass deop.
       $bmop$b                 Mass op.
       $brevenge$b             Client kicking/banning/deopping another bot.
+
+   The following are only used if '%dset homechan' is configured.
+     $bhomechan-user$b         Set to treat clients who are in the homechan
+                           special in non-homechan channels.
+                              nothing/0      Do nothing special.
+                              voice/1        Voice clients who are in homechan.
+                              op/2           Op clients who are in homechan.
  
    The following can be set + or - (e.g. '%dchanset #channel -enforcebans')
         $bautoop$b         Bots that are +y will auto-op all users with 
