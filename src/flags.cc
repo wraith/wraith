@@ -478,9 +478,10 @@ real_chk_op(const struct flag_record fr, const struct chanset_t *chan, bool botb
 int
 chk_autoop(memberlist *m, const struct flag_record fr, const struct chanset_t *chan)
 {
-  if (glob_bot(fr) || !chan || !m->user || u_pass_match(m->user, "-"))
+  if (glob_bot(fr) || !chan || (m->user && u_pass_match(m->user, "-")) ||
+      channel_take(chan) || privchan(fr, chan, PRIV_OP) || chk_deop(fr, chan))
     return 0;
-  if (!channel_take(chan) && !privchan(fr, chan, PRIV_OP) && chk_op(fr, chan) && !chk_deop(fr, chan)) {
+  if (chk_op(fr, chan)) {
     if (channel_autoop(chan) || chan_autoop(fr) || glob_autoop(fr))
       return 1;
   }
