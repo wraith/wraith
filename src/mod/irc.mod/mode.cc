@@ -1463,7 +1463,7 @@ gotmode(char *from, char *msg)
 
               if (msign == '+') {
                 if (mv->flags & EVOICE) {
-                  if (!chk_op(user, chan) && !chk_voice(victim, chan)) {
+                  if (!chk_op(user, chan) && !chk_voice(mv, victim, chan)) {
                     dv = 1;
                   } else {
                     mv->flags &= ~EVOICE;
@@ -1472,7 +1472,7 @@ gotmode(char *from, char *msg)
                 mv->flags &= ~SENTVOICE;
                 mv->flags |= CHANVOICE;
                 if (channel_active(chan) && dovoice(chan)) {
-                  if (dv || chk_devoice(victim) || (channel_voicebitch(chan) && !chk_voice(victim, chan))) {
+                  if (dv || chk_devoice(victim) || (channel_voicebitch(chan) && !chk_voice(mv, victim, chan))) {
                     add_mode(chan, '-', 'v', mv);
                   } else if (reversing) {
                     add_mode(chan, '-', 'v', mv);
@@ -1483,7 +1483,7 @@ gotmode(char *from, char *msg)
                 mv->flags &= ~CHANVOICE;
                 if (channel_active(chan) && dovoice(chan) && !chan_hasop(mv)) {
                   /* revoice +v users */
-                  if (chk_voice(victim, chan)) {
+                  if (chk_voice(mv, victim, chan)) {
                     add_mode(chan, '+', 'v', mv);
                   } else if (reversing) {
                     add_mode(chan, '+', 'v', mv);

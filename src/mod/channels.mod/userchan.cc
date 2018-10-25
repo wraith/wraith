@@ -710,6 +710,7 @@ bd::String channel_to_string(struct chanset_t* chan, bool force_inactive) {
   get_mode_protect(chan, w, sizeof(w));
   return bd::String::printf("\
 chanmode { %s } groups { %s } bad-cookie %d manop %d mdop %d mop %d limit %d revenge %d ban-type %d \
+homechan-user %d \
 flood-chan %d:%d flood-bytes %d:%d flood-ctcp %d:%d flood-join %d:%d \
 flood-kick %d:%d flood-deop %d:%d flood-nick %d:%d flood-mjoin %d:%d \
 flood-mpub %d:%d flood-mbytes %d:%d flood-mctcp %d:%d \
@@ -733,6 +734,7 @@ flood-exempt %d flood-lock-time %d knock %d fish-key { %s } \
         chan->limitraise,
 	chan->revenge,
         chan->ban_type,
+	chan->homechan_user,
 	chan->flood_pub_thr, chan->flood_pub_time,
 	chan->flood_bytes_thr, chan->flood_bytes_time,
         chan->flood_ctcp_thr, chan->flood_ctcp_time,

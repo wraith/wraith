@@ -627,6 +627,14 @@ int channel_modify(char *result, struct chanset_t *chan, int items, char **item,
         return ERROR;
       }
       chan->ban_type = atoi(item[i]);
+    } else if (!strcmp(item[i], "homechan-user")) {
+      i++;
+      if (i >= items) {
+        if (result)
+          strlcpy(result, "channel homechan-user needs argument", RESULT_LEN);
+        return ERROR;
+      }
+      chan->homechan_user = homechan_user_translate(item[i]);
     } else if (!strcmp(item[i], "protect-backup")) {
       i++;
       if (i >= items) {
