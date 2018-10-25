@@ -595,24 +595,6 @@ bool ismasked(masklist *m, const char *username)
   return 0;
 }
 
-/* Unlink chanset element from chanset list.
- */
-static inline bool chanset_unlink(struct chanset_t *chan)
-{
-  struct chanset_t *c_old = NULL;
-
-  for (struct chanset_t *c = chanset; c; c_old = c, c = c->next) {
-    if (c == chan) {
-      if (c_old)
-	c_old->next = c->next;
-      else
-	chanset = c->next;
-      return 1;
-    }
-  }
-  return 0;
-}
-
 /* Completely removes a channel.
  *
  * This includes the removal of all channel-bans, -exempts and -invites, as
@@ -624,7 +606,7 @@ void remove_channel(struct chanset_t *chan)
      irc_log(chan, "Parting");
      /* Remove the channel from the list, so that noone can pull it
         away from under our feet during the check_part() call. */
-     chanset_unlink(chan);
+     list_delete((struct list_type **) &chanset, (struct list_type *) chan);
 
     /* Using chan->name is important here, especially for !chans <cybah> */
     if (!conf.bot->hub && shouldjoin(chan) && chan->name[0])

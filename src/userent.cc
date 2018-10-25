@@ -1050,33 +1050,6 @@ struct user_entry_type USERENTRY_HOSTS =
   "HOSTS"
 };
 
-bool list_append(struct list_type **h, struct list_type *i)
-{
-  for (; *h; h = &((*h)->next))
-    ;
-  *h = i;
-  return 1;
-}
-
-bool list_delete(struct list_type **h, struct list_type *i)
-{
-  for (; *h; h = &((*h)->next))
-    if (*h == i) {
-      *h = i->next;
-      return 1;
-    }
-  return 0;
-}
-
-bool list_contains(struct list_type *h, struct list_type *i)
-{
-  for (; h; h = h->next)
-    if (h == i) {
-      return 1;
-    }
-  return 0;
-}
-
 bool add_entry_type(struct user_entry_type *type)
 {
   struct userrec *u = NULL;

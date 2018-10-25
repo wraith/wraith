@@ -21,9 +21,36 @@ struct list_type {
     	(b)->next = *(a);						\
 	*(a) = (b);							\
 }
-bool list_append(struct list_type **, struct list_type *);
-bool list_delete(struct list_type **, struct list_type *);
-bool list_contains(struct list_type *, struct list_type *);
+
+static inline bool
+list_append(struct list_type **h, struct list_type *i)
+{
+  for (; *h; h = &((*h)->next))
+    ;
+  *h = i;
+  return 1;
+}
+
+static inline bool
+list_delete(struct list_type **h, struct list_type *i)
+{
+  for (; *h; h = &((*h)->next))
+    if (*h == i) {
+      *h = i->next;
+      return 1;
+    }
+  return 0;
+}
+
+static inline bool
+list_contains(struct list_type *h, struct list_type *i)
+{
+  for (; h; h = h->next)
+    if (h == i) {
+      return 1;
+    }
+  return 0;
+}
 
 namespace bd {
   class Stream;
