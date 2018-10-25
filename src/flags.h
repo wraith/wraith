@@ -175,10 +175,10 @@ char geticon(int);
 int privchan(const struct flag_record, const struct chanset_t *, int);
 #define chk_op(fr, chan) real_chk_op(fr, chan, 1)
 int real_chk_op(const struct flag_record, const struct chanset_t *, bool);
-int chk_autoop(memberlist *, const struct flag_record, const struct chanset_t *);
+int chk_autoop(const memberlist *, const struct flag_record, const struct chanset_t *);
 #define chk_deop(fr, chan) real_chk_deop(fr, chan, 1)
 int real_chk_deop(const struct flag_record, const struct chanset_t *, bool);
-int chk_voice(const struct flag_record, const struct chanset_t *);
+int chk_voice(const memberlist *, const struct flag_record, const struct chanset_t *);
 #define chk_noflood(fr) (chan_noflood(fr) || glob_noflood(fr))
 #define chk_devoice(fr) ((chan_quiet(fr) || (glob_quiet(fr) && !chan_voice(fr))) ? 1 : 0)
 #define isupdatehub() ((conf.bot->hub && conf.bot->u && (conf.bot->u->flags & BOT_UPDATEHUB)) ? 1 : 0)
@@ -188,6 +188,7 @@ int dovoice(const struct chanset_t *);
 int doflood(const struct chanset_t *);
 int dolimit(const struct chanset_t *);
 int whois_access(struct userrec *, struct userrec *);
+homechan_user_t homechan_user_translate(const char *);
 void deflag_user(struct userrec *, deflag_event_t, const char *, const struct chanset_t *);
 deflag_t deflag_translate(const char *);
 

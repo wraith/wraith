@@ -1136,6 +1136,7 @@ static void show_int(int idx, char *work, int *cnt, const char *desc, int state,
 #define SHOW_FLAG(name, state) show_flag(idx, work, &cnt, name, state, sizeof(work))
 #define SHOW_INT(desc, state, yes, no) show_int(idx, work, &cnt, desc, state, yes, no, sizeof(work))
 #define DEFLAG_STR deflag == DEFLAG_KICK ? "Kick" : (deflag == DEFLAG_DEOP ? "Deop" : (deflag == DEFLAG_DELETE ? "Remove" : (deflag == DEFLAG_REACT ? "React" : NULL)))
+#define HOMECHAN_USER_STR homechan_user == HOMECHAN_USER_NONE ? "None" : (homechan_user == HOMECHAN_USER_VOICE ? "Voice" : (homechan_user == HOMECHAN_USER_OP ? "Op" : NULL))
 #define F_STR(x) x == CHAN_FLAG_OP ? "Op" : (x == CHAN_FLAG_VOICE ? "Voice" : (x == CHAN_FLAG_USER ? "User" : NULL))
 static void cmd_chaninfo(int idx, char *par)
 {
@@ -1167,6 +1168,7 @@ static void cmd_chaninfo(int idx, char *par)
   } else {
     char nick[HANDLEN + 1] = "", date[81] = "";
     int deflag = 0;
+    int homechan_user = 0;
 
     if (chan->added_ts) {
       strftime(date, sizeof date, "%c %Z", gmtime(&(chan->added_ts)));
@@ -1244,6 +1246,8 @@ static void cmd_chaninfo(int idx, char *par)
     SHOW_INT("Flood-lock-time: ", chan->flood_lock_time, NULL, "Don't");
     SHOW_INT("Caps-Limit(%): ", chan->capslimit, NULL, "None");
     SHOW_INT("Color-Limit: ", chan->colorlimit, NULL, "None");
+    homechan_user = chan->homechan_user;
+    SHOW_INT("Homechan-User:" , chan->homechan_user, HOMECHAN_USER_STR, "None");
     SHOW_INT("Invite-time: ", chan->invite_time, NULL, "Forever");
     SHOW_INT("Knock: ", chan->knock_flags, F_STR(chan->knock_flags), "None");
     SHOW_INT("Limit raise (limit): ", chan->limitraise, NULL, "Disabled");

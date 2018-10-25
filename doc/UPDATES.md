@@ -1,3 +1,6 @@
+* Add 'chanset homechan-user [nothing/voice/op]' to auto-voice or auto-op
+  clients who are opped in 'set homechan'.
+
 # master
   * Require C++11 compiler support (G++ 4.7+, clang32+)
   * Wraith now automatically assigns roles to bots for channels, no longer

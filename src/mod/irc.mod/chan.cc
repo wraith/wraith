@@ -1234,11 +1234,11 @@ static void check_this_member(struct chanset_t *chan, memberlist *m,
   if (dovoice(chan)) {
     if (chan_hasvoice(m) && !chan_hasop(m)) {
       /* devoice +q users .. */
-      if (chk_devoice(*fr) || (channel_voicebitch(chan) && !chk_voice(*fr, chan)))
+      if (chk_devoice(*fr) || (channel_voicebitch(chan) && !chk_voice(m, *fr, chan)))
         add_mode(chan, '-', 'v', m);
     } else if (!chan_hasvoice(m) && !chan_hasop(m)) {
       /* voice +v users */
-      if (chk_voice(*fr, chan)) {
+      if (chk_voice(m, *fr, chan)) {
         add_mode(chan, '+', 'v', m);
         if (m->flags & EVOICE)
           m->flags &= ~EVOICE;
@@ -1808,7 +1808,7 @@ static int got710(char *from, char *msg)
 
   // PASSING: +o and op || +v and op/voice || user
   if (!((chan->knock_flags == CHAN_FLAG_OP && chk_op(fr, chan)) ||
-       (chan->knock_flags == CHAN_FLAG_VOICE && (chk_op(fr, chan) || chk_voice(fr, chan))) ||
+       (chan->knock_flags == CHAN_FLAG_VOICE && (chk_op(fr, chan) || chk_voice(NULL, fr, chan))) ||
        (chan->knock_flags == CHAN_FLAG_USER)) ||
       chan_kick(fr) || glob_kick(fr)) {
     return 0;
@@ -2903,9 +2903,9 @@ static int gotjoin(char *from, char *chname)
               if (!(m->flags & EVOICE) &&
                   (
                    /* +voice: Voice all clients who are not flag:+q. If the chan is +voicebitch, only op flag:+v clients */
-                   (channel_voice(chan) && !chk_devoice(fr) && (!channel_voicebitch(chan) || (channel_voicebitch(chan) && chk_voice(fr, chan)))) ||
+                   (channel_voice(chan) && !chk_devoice(fr) && (!channel_voicebitch(chan) || (channel_voicebitch(chan) && chk_voice(m, fr, chan)))) ||
                    /* Or, if the channel is -voice but they still qualify to be voiced */
-                   (!channel_voice(chan) && !privchan(fr, chan, PRIV_VOICE) && chk_voice(fr, chan))
+                   (!channel_voice(chan) && !privchan(fr, chan, PRIV_VOICE) && chk_voice(m, fr, chan))
                   )
                  ) {
                 m->delay = now + chan->auto_delay;
