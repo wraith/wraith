@@ -55,6 +55,7 @@ OBJS = auth.So \
 	adns.So \
 	response.So \
 	rfc1459.So \
+	RfcString.o \
 	set.So \
 	shell.So \
 	socket.So \
