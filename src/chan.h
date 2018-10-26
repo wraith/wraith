@@ -12,6 +12,7 @@
 #include <lib/bdlib/src/Array.h>
 #include <lib/bdlib/src/HashTable.h>
 #include <lib/bdlib/src/String.h>
+#include "RfcString.h"
 
 /* chan & global */
 enum flood_t {
@@ -176,6 +177,8 @@ struct chan_t {
 
   // Member caching to cache cyclers
   bd::HashTable<bd::String, memberlist*> *cached_members;
+
+  bd::HashTable<RfcString, memberlist*> *hashed_members;
 };
 
 #define CHANINV    BIT0		/* +i					*/

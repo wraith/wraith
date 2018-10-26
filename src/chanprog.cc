@@ -95,19 +95,6 @@ void rmspace(char *s)
     memmove(s, p, q - p + 2);
 }
 
-/* Returns memberfields if the nick is in the member list.
- */
-memberlist *ismember(const struct chanset_t *chan, const char *nick)
-{
-  memberlist	*x = NULL;
-
-  if (chan && nick && nick[0])
-    for (x = chan->channel.member; x && x->nick[0]; x = x->next)
-      if (!rfc_casecmp(x->nick, nick))
-        return x;
-  return NULL;
-}
-
 /* Find a chanset by channel name as the server knows it (ie !ABCDEchannel)
  */
 struct chanset_t *findchan(const char *name)

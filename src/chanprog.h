@@ -40,7 +40,21 @@ void keyx(const bd::String& target, const char *);
 void set_fish_key(char *, bd::String);
 struct userrec *check_chanlist(const char *);
 struct userrec *check_chanlist_hand(const char *);
-memberlist *ismember(const struct chanset_t *, const char *);
+/*
+ * Returns memberfields if the nick is in the member list.
+ */
+static inline memberlist *
+ismember(const struct chanset_t *chan, const RfcString nick) {
+  if (!chan || !nick)
+    return NULL;
+  return (*chan->channel.hashed_members)[nick];
+}
+static inline memberlist *
+ismember(const struct chanset_t *chan, const char *nick) {
+  if (!chan || !nick || !nick[0])
+    return NULL;
+  return ismember(chan, RfcString(nick));
+}
 struct chanset_t *findchan(const char *name);
 /*
  * Find a chanset by display name (ie !channel)

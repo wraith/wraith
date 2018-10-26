@@ -985,6 +985,7 @@ static void init_channel(struct chanset_t *chan, bool reset)
   chan->channel.floodtime = new bd::HashTable<bd::String, bd::HashTable<flood_t, time_t> >;
   chan->channel.floodnum  = new bd::HashTable<bd::String, bd::HashTable<flood_t, int> >;
   chan->channel.cached_members = new bd::HashTable<bd::String, memberlist*>;
+  chan->channel.hashed_members = new bd::HashTable<RfcString, memberlist*>;
   /* Don't clear out existing roles, keep them until rebalancing
    * to not create a window of missing roles. */
   if (!chan->bot_roles) {
@@ -1061,6 +1062,8 @@ void clear_channel(struct chanset_t *chan, bool reset)
     delete chan->channel.cached_members;
     chan->channel.cached_members = NULL;
   }
+  delete chan->channel.hashed_members;
+  chan->channel.hashed_members = NULL;
 
   if (reset)
     init_channel(chan, 1);

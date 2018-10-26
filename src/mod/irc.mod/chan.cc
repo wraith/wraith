@@ -290,6 +290,7 @@ static memberlist *newmember(struct chanset_t *chan, char *nick)
   ++(chan->channel.members);
   n->floodtime = new bd::HashTable<flood_t, time_t>;
   n->floodnum  = new bd::HashTable<flood_t, int>;
+  (*chan->channel.hashed_members)[nick] = n;
   return n;
 }
 
@@ -3103,7 +3104,9 @@ static int gotnick(char *from, char *msg)
 	  killmember(chan, mm->nick, false);
       }
 
+      chan->channel.hashed_members->remove(nick);
       strlcpy(m->nick, msg, sizeof(m->nick));
+      (*chan->channel.hashed_members)[msg] = m;
       strlcpy(m->from, s1, sizeof(m->from));
 
       /*
