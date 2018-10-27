@@ -3878,6 +3878,7 @@ EOF
 
 if [ "${ax_cv_prog_cc_fsanitize_address}" = "yes" ]; then
   DEBLDFLAGS="${DEBLDFLAGS} -fsanitize=address"
+  DEBCXXFLAGS="${DEBCXXFLAGS} -D__SANITIZE_ADDRESS__"
 fi
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -fstack-protector-all" >&5

@@ -184,6 +184,7 @@ static void write_debug(bool fatal = 1)
 static void got_bus(int) __attribute__ ((noreturn));
 #endif /* DEBUG */
 
+#ifndef __SANITIZE_ADDRESS__
 static void got_bus(int z)
 {
   signal(SIGBUS, SIG_DFL);
@@ -195,11 +196,13 @@ static void got_bus(int z)
   exit(1);
 #endif /* DEBUG */
 }
+#endif /* !__SANITIZE_ADDRESS__ */
 
 #ifndef DEBUG
 static void got_segv(int) __attribute__ ((noreturn));
 #endif /* DEBUG */
 
+#ifndef __SANITIZE_ADDRESS__
 static void got_segv(int z)
 {
   signal(SIGSEGV, SIG_DFL);
@@ -211,6 +214,7 @@ static void got_segv(int z)
   exit(1);
 #endif /* DEBUG */
 }
+#endif /* !__SANITIZE_ADDRESS__ */
 
 #ifndef DEBUG
 static void got_fpe(int) __attribute__ ((noreturn));
@@ -295,8 +299,10 @@ got_usr1(int z)
 
 void init_signals() 
 {
+#ifndef __SANITIZE_ADDRESS__
   signal(SIGBUS, got_bus);
   signal(SIGSEGV, got_segv);
+#endif
   signal(SIGFPE, got_fpe);
   signal(SIGTERM, got_term);
   signal(SIGCONT, got_cont);

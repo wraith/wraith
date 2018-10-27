@@ -50,6 +50,7 @@ fi
 CXX_FLAG_CHECK_LINK([DEBCXXFLAGS], [-fsanitize=address], [fsanitize_address])
 if [[ "${ax_cv_prog_cc_fsanitize_address}" = "yes" ]]; then
   DEBLDFLAGS="${DEBLDFLAGS} -fsanitize=address"
+  DEBCXXFLAGS="${DEBCXXFLAGS} -D__SANITIZE_ADDRESS__"
 fi
 CXX_FLAG_CHECK([DEBCXXFLAGS], [-fstack-protector-all], [stackprotectorall])
 CXX_FLAG_CHECK([DEBCXXFLAGS], [-Wconditional-uninitialized], [w_conditional_uninitialized])
