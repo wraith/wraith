@@ -51,6 +51,7 @@ typedef struct memstruct {
   int tried_getuser;
   unsigned short flags;
   char nick[NICKLEN];
+  RfcString *rfc_nick;
   char userhost[UHOSTLEN];
   char userip[UHOSTLEN];
   char from[NICKLEN + UHOSTLEN];   /* nick!user@host */

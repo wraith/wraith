@@ -272,6 +272,7 @@ static memberlist *newmember(struct chanset_t *chan, char *nick)
    */
 
   strlcpy(n->nick, nick, sizeof(n->nick));
+  n->rfc_nick = new RfcString(n->nick);
   n->hops = -1;
   if (!lx) {
     // Free the pseudo-member created in init_channel()
@@ -290,13 +291,15 @@ static memberlist *newmember(struct chanset_t *chan, char *nick)
   ++(chan->channel.members);
   n->floodtime = new bd::HashTable<flood_t, time_t>;
   n->floodnum  = new bd::HashTable<flood_t, int>;
-  (*chan->channel.hashed_members)[nick] = n;
+  (*chan->channel.hashed_members)[*n->rfc_nick] = n;
   return n;
 }
 
 void delete_member(memberlist* m) {
   delete m->floodtime;
   delete m->floodnum;
+  delete m->rfc_nick;
+  m->rfc_nick = NULL;
   free(m);
 }
 
@@ -3084,6 +3087,8 @@ static int gotnick(char *from, char *msg)
   if (auth)
     auth->NewNick(msg);
 
+  RfcString rfc_nick(nick);
+  RfcString new_rfc_nick(msg);
 
   /* Compose a nick!user@host for the new nick */
   simple_snprintf(s1, sizeof(s1), "%s!%s", msg, uhost);
@@ -3092,7 +3097,7 @@ static int gotnick(char *from, char *msg)
   struct userrec *u = get_user_by_host(s1);
 
   for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
-    m = ismember(chan, nick);
+    m = ismember(chan, rfc_nick);
 
     if (m) {
       m->user = u;
@@ -3100,13 +3105,16 @@ static int gotnick(char *from, char *msg)
       /* Not just a capitalization change */
       if (rfc_casecmp(nick, msg)) {
         /* Someone on channel with old nick?! */
-	if ((mm = ismember(chan, msg)))
+	if ((mm = ismember(chan, new_rfc_nick)))
 	  killmember(chan, mm->nick, false);
       }
 
-      chan->channel.hashed_members->remove(nick);
+      chan->channel.hashed_members->remove(*m->rfc_nick);
+      delete m->rfc_nick;
+      m->rfc_nick = NULL;
       strlcpy(m->nick, msg, sizeof(m->nick));
-      (*chan->channel.hashed_members)[msg] = m;
+      m->rfc_nick = new RfcString(new_rfc_nick);
+      (*chan->channel.hashed_members)[*m->rfc_nick] = m;
       strlcpy(m->from, s1, sizeof(m->from));
 
       /*

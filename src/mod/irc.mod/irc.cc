@@ -1172,7 +1172,7 @@ killmember(struct chanset_t *chan, char *nick, bool cacheMember)
   else
     chan->channel.member = x->next;
 
-  chan->channel.hashed_members->remove(x->nick);
+  chan->channel.hashed_members->remove(*x->rfc_nick);
 
   if (cacheMember) {
     x->last = now;
