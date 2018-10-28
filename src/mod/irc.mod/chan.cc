@@ -256,20 +256,13 @@ static memberlist *newmember(struct chanset_t *chan, char *nick)
 {
   memberlist *x = chan->channel.member, 
              *lx = NULL, 
-             *n = (memberlist *) calloc(1, sizeof(memberlist));
+             *n = new memberlist;
 
   /* This sorts the list */
   while (x && x->nick[0] && (rfc_casecmp(x->nick, nick) < 0)) {
     lx = x;
     x = x->next;
   }
-  /*
-   * redundant as calloc is used
-   n->next = NULL;
-   n->split = 0L;
-   n->last = 0L;
-   n->delay = 0L;
-   */
 
   strlcpy(n->nick, nick, sizeof(n->nick));
   n->rfc_nick = new RfcString(n->nick);
@@ -300,7 +293,7 @@ void delete_member(memberlist* m) {
   delete m->floodnum;
   delete m->rfc_nick;
   m->rfc_nick = NULL;
-  free(m);
+  delete m;
 }
 
 static bool member_getuser(memberlist* m, bool act_on_lookup) {

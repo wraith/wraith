@@ -978,7 +978,7 @@ static void init_channel(struct chanset_t *chan, bool reset)
   chan->channel.invite = (masklist *) calloc(1, sizeof(masklist));
   init_masklist(chan->channel.invite);
 
-  chan->channel.member = (memberlist *) calloc(1, sizeof(memberlist));
+  chan->channel.member = new memberlist;
   chan->channel.member->nick[0] = 0;
   chan->channel.member->next = NULL;
   chan->channel.topic = NULL;

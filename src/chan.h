@@ -59,6 +59,13 @@ typedef struct memstruct {
   bool is_me;
   bd::HashTable<flood_t, time_t>     *floodtime; // floodtime[FLOOD_PRIVMSG] = now;
   bd::HashTable<flood_t, int>         *floodnum; // floodnum[FLOOD_PRIVMSG] = 1;
+
+  void* operator new (size_t size) {
+    return calloc(1, size);
+  }
+  void operator delete (void* p) {
+    free(p);
+  }
 } memberlist;
 
 namespace std {

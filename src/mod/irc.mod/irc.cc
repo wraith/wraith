@@ -1201,11 +1201,8 @@ killmember(struct chanset_t *chan, char *nick, bool cacheMember)
     }
     putlog(LOG_MISC, "*", "(!) actually I know of %d members.", chan->channel.members);
   }
-  if (unlikely(!chan->channel.member)) {
-    chan->channel.member = (memberlist *) calloc(1, sizeof(memberlist));
-    chan->channel.member->nick[0] = 0;
-    chan->channel.member->next = NULL;
-  }
+  if (unlikely(!chan->channel.member))
+    chan->channel.member = new memberlist;
   return 1;
 }
 
