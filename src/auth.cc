@@ -65,20 +65,21 @@ Auth::~Auth()
   ht_nick.remove(nick);
 }
 
-void Auth::MakeHash()
+void Auth::MakeHash() noexcept
 {
  make_rand_str(rand, 50);
  makehash(user, rand, hash, 50);
 }
 
-void Auth::Done()
+void Auth::Done() noexcept
 {
   hash[0] = 0;
   rand[0] = 0;
   Status(AUTHED);
 }
 
-void Auth::NewNick(const char *newnick) {
+void Auth::NewNick(const char *newnick) noexcept
+{
   if (ht_nick.contains(nick)) {
     Auth::ht_nick.remove(nick);
   }
@@ -86,7 +87,7 @@ void Auth::NewNick(const char *newnick) {
   ht_nick[newnick] = this;
 }
 
-Auth *Auth::Find(const char *_host)
+Auth *Auth::Find(const char *_host) noexcept
 {
 
   if (ht_host.contains(_host)) {
@@ -107,7 +108,7 @@ static void auth_clear_users_block(const bd::String key, Auth* auth, void *param
   }
 }
 
-void Auth::NullUsers(const char *nick)
+void Auth::NullUsers(const char *nick) noexcept
 {
   if (nick == NULL) {
     ht_host.each(auth_clear_users_block);
@@ -129,7 +130,7 @@ static void auth_fill_users_block(const bd::String key, Auth* auth, void* param)
   auth->user = get_user_by_host(from);
 }
 
-void Auth::FillUsers(const char *nick)
+void Auth::FillUsers(const char *nick) noexcept
 {
   if (nick == NULL) {
     ht_host.each(auth_fill_users_block);
@@ -151,7 +152,7 @@ static void auth_expire_block(const bd::String key, Auth* auth, void* param)
   }
 }
 
-void Auth::ExpireAuths()
+void Auth::ExpireAuths() noexcept
 {
   if (!ischanhub())
     return;
@@ -166,7 +167,7 @@ static void auth_delete_all_block(const bd::String, Auth* auth, void* param)
   delete auth;
 }
 
-void Auth::DeleteAll()
+void Auth::DeleteAll() noexcept
 {
   if (ischanhub()) {
     putlog(LOG_DEBUG, "*", STR("Removing auth entries."));
@@ -176,12 +177,12 @@ void Auth::DeleteAll()
   }
 }
 
-void Auth::InitTimer()
+void Auth::InitTimer() noexcept
 {
   timer_create_secs(60, STR("Auth::ExpireAuths"), (Function) Auth::ExpireAuths);
 }
 
-bool Auth::GetIdx(const char *chname)
+bool Auth::GetIdx(const char *chname) noexcept
 {
 sdprintf(STR("GETIDX: auth: %s, idx: %d"), nick, idx);
   if (idx != -1) {
@@ -252,7 +253,7 @@ static void auth_tell_block(const bd::String key, Auth* auth, void* param)
         (long)auth->authtime, (long)auth->atime, auth->Status());
 }
 
-void Auth::TellAuthed(int idx)
+void Auth::TellAuthed(int idx) noexcept
 {
   ht_host.each(auth_tell_block, (void *) (long) idx);
 }

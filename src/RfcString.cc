@@ -5,14 +5,15 @@
 #include "RfcString.h"
 
 bool
-RfcString::rfc_equal(const char c1, const char c2) {
+RfcString::rfc_equal(const char c1, const char c2) noexcept {
   if (c1 == c2)
     return true;
   return (rfc_toupper(c1) == rfc_toupper(c2));
 }
 
 int
-RfcString::compare(const RfcString& str, size_t n) const {
+RfcString::compare(const RfcString& str, size_t n) const noexcept
+{
   /* Same string? */
   if (cbegin() == str.cbegin() && length() == str.length())
     return 0;
@@ -41,7 +42,7 @@ RfcString::compare(const RfcString& str, size_t n) const {
 }
 
 size_t
-RfcString::hash() const {
+RfcString::hash() const noexcept {
   if (my_hash != 0) return my_hash;
   std::hash<value_type> hasher;
   size_t _hash = 5381;

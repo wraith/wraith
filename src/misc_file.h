@@ -29,7 +29,7 @@ class Tempfile
     void AllocTempfile();			//constructor with file prefix
     void my_close();
     ~Tempfile();				//destructor
-    static bool FindDir();
+    static bool FindDir() noexcept;
 
     bool error;					//exceptions are lame.
     FILE *f;
@@ -40,7 +40,7 @@ class Tempfile
   private:
     char *prefix;
     int plen;
-    void MakeTemp();				//Used for mktemp() and checking
+    void MakeTemp() noexcept;			//Used for mktemp() and checking
     bool useFopen;
 };
 

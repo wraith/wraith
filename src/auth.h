@@ -17,20 +17,24 @@ class Auth {
   Auth(const char *, const char *, struct userrec * = NULL);
   ~Auth();
 
-  int Status(int newstat = -1) { if (newstat >= 0) { status = newstat; } return status; }
-  void MakeHash();
-  bool Authed() { return (status == AUTHED); }
-  bool GetIdx(const char *);
-  void Done();
-  void NewNick(const char *nick);
+  int Status(int newstat = -1) noexcept {
+    if (newstat >= 0) { status = newstat; } return status;
+  }
+  void MakeHash() noexcept;
+  bool Authed() const noexcept __attribute__((pure)) {
+    return (status == AUTHED);
+  }
+  bool GetIdx(const char *) noexcept;
+  void Done() noexcept;
+  void NewNick(const char *nick) noexcept;
 
-  static Auth *Find(const char * host);
-  static void NullUsers(const char *nick = NULL);
-  static void FillUsers(const char *nick = NULL);
-  static void ExpireAuths();
-  static void InitTimer();
-  static void DeleteAll();
-  static void TellAuthed(int);
+  static Auth *Find(const char * host) noexcept __attribute__((pure));
+  static void NullUsers(const char *nick = NULL) noexcept;
+  static void FillUsers(const char *nick = NULL) noexcept;
+  static void ExpireAuths() noexcept;
+  static void InitTimer() noexcept;
+  static void DeleteAll() noexcept;
+  static void TellAuthed(int) noexcept;
 
   struct userrec *user;
   time_t authtime;              /* what time they authed at */

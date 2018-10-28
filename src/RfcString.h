@@ -9,7 +9,8 @@ namespace bd {
 
 class RfcString : public bd::String {
   private:
-    static bool rfc_equal(const char c1, const char c2) __attribute__((pure));
+    static bool rfc_equal(const char c1, const char c2) noexcept
+      __attribute__((pure));
 
   protected:
 
@@ -18,7 +19,7 @@ class RfcString : public bd::String {
     RfcString(const String &str) : String(str) {};
     RfcString(String &&str) : String(std::move(str)) {};
 
-    int compare(const RfcString& str, size_t n = npos) const
+    int compare(const RfcString& str, size_t n = npos) const noexcept
       __attribute__((pure));
     friend bool operator==(const RfcString&, const RfcString&);
     friend bool operator!=(const RfcString&, const RfcString&);
@@ -27,7 +28,7 @@ class RfcString : public bd::String {
     friend bool operator>(const RfcString&, const RfcString&);
     friend bool operator>=(const RfcString&, const RfcString&);
 
-    virtual size_t hash() const;
+    virtual size_t hash() const noexcept;
 };
 
 inline bool __attribute__((pure))
