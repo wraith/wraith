@@ -9,6 +9,7 @@
 #define _EGG_CHAN_H
 
 #include <functional>
+#include <memory>
 #include <lib/bdlib/src/Array.h>
 #include <lib/bdlib/src/HashTable.h>
 #include <lib/bdlib/src/String.h>
@@ -51,7 +52,7 @@ typedef struct memstruct {
   int tried_getuser;
   unsigned short flags;
   char nick[NICKLEN];
-  RfcString *rfc_nick;
+  std::shared_ptr<RfcString> rfc_nick;
   char userhost[UHOSTLEN];
   char userip[UHOSTLEN];
   char from[NICKLEN + UHOSTLEN];   /* nick!user@host */

@@ -265,7 +265,7 @@ static memberlist *newmember(struct chanset_t *chan, char *nick)
   }
 
   strlcpy(n->nick, nick, sizeof(n->nick));
-  n->rfc_nick = new RfcString(n->nick);
+  n->rfc_nick = std::make_shared<RfcString>(n->nick);
   n->hops = -1;
   if (!lx) {
     // Free the pseudo-member created in init_channel()
@@ -291,8 +291,6 @@ static memberlist *newmember(struct chanset_t *chan, char *nick)
 void delete_member(memberlist* m) {
   delete m->floodtime;
   delete m->floodnum;
-  delete m->rfc_nick;
-  m->rfc_nick = NULL;
   delete m;
 }
 
@@ -3080,8 +3078,8 @@ static int gotnick(char *from, char *msg)
   if (auth)
     auth->NewNick(msg);
 
-  RfcString rfc_nick(nick);
-  RfcString new_rfc_nick(msg);
+  const RfcString rfc_nick(nick);
+  auto new_rfc_nick = std::make_shared<RfcString>(msg);
 
   /* Compose a nick!user@host for the new nick */
   simple_snprintf(s1, sizeof(s1), "%s!%s", msg, uhost);
@@ -3098,15 +3096,13 @@ static int gotnick(char *from, char *msg)
       /* Not just a capitalization change */
       if (rfc_casecmp(nick, msg)) {
         /* Someone on channel with old nick?! */
-	if ((mm = ismember(chan, new_rfc_nick)))
+	if ((mm = ismember(chan, *new_rfc_nick)))
 	  killmember(chan, mm->nick, false);
       }
 
       chan->channel.hashed_members->remove(*m->rfc_nick);
-      delete m->rfc_nick;
-      m->rfc_nick = NULL;
       strlcpy(m->nick, msg, sizeof(m->nick));
-      m->rfc_nick = new RfcString(new_rfc_nick);
+      m->rfc_nick = new_rfc_nick;
       (*chan->channel.hashed_members)[*m->rfc_nick] = m;
       strlcpy(m->from, s1, sizeof(m->from));
 
