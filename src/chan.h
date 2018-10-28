@@ -61,10 +61,10 @@ typedef struct memstruct {
   bd::HashTable<flood_t, time_t>     *floodtime; // floodtime[FLOOD_PRIVMSG] = now;
   bd::HashTable<flood_t, int>         *floodnum; // floodnum[FLOOD_PRIVMSG] = 1;
 
-  void* operator new (size_t size) {
+  void* operator new (size_t size) noexcept {
     return calloc(1, size);
   }
-  void operator delete (void* p) {
+  void operator delete (void* p) noexcept {
     free(p);
   }
 } memberlist;
