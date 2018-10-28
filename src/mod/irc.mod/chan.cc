@@ -2969,7 +2969,7 @@ static int gotkick(char *from, char *origmsg)
     return 0; /* rejoin if kicked before getting needed info <Wcc[08/08/02]> */
   }
   if (channel_active(chan)) {
-    char *whodid = NULL, s1[UHOSTLEN] = "", buf[UHOSTLEN] = "", *uhost = buf;
+    char *whodid = NULL, buf[UHOSTLEN] = "", *uhost = buf;
     memberlist *m = NULL, *mv = NULL;
     struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
@@ -3018,7 +3018,7 @@ static int gotkick(char *from, char *origmsg)
 
       set_handle_laston(chan->dname, mv->user, now);
     }
-    irc_log(chan, "%s was kicked by %s (%s)", s1, from, msg);
+    irc_log(chan, "%s!%s was kicked by %s (%s)", mv->nick, mv->userhost, from, msg);
     /* Kicked ME?!? the sods! */
     if (mv->is_me) {
       check_rejoin(chan);
