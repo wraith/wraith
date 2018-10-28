@@ -44,7 +44,7 @@ struct userrec *check_chanlist_hand(const char *);
  * Returns memberfields if the nick is in the member list.
  */
 static inline memberlist *
-ismember(const struct chanset_t *chan, const RfcString nick) {
+ismember(const struct chanset_t *chan, const RfcString& nick) {
   if (!chan || !nick)
     return NULL;
   return (*chan->channel.hashed_members)[nick];
