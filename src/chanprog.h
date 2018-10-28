@@ -15,7 +15,7 @@ void checkchans(int);
 void tell_verbose_uptime(int);
 void tell_verbose_status(int);
 void tell_settings(int);
-int isowner(char *);
+int isowner(const char *) __attribute__((pure));
 void reaffirm_owners();
 void reload();
 void chanprog();
@@ -26,40 +26,43 @@ void rmspace(char *s);
 void set_chanlist(const char *host, struct userrec *rec);
 void clear_chanlist_member(const char *nick);
 #define clear_chanlist() clear_chanlist_member(NULL)
-bool bot_shouldjoin(struct userrec* , struct flag_record *, const struct chanset_t *, bool = 0);
+bool bot_shouldjoin(struct userrec*, const struct flag_record *, const struct chanset_t *, bool = 0);
 bool shouldjoin(const struct chanset_t *);
-char *samechans(const char *, const char *);
+const char *samechans(const char *, const char *);
 void add_myself_to_userlist();
 void add_child_bots();
-bool is_hub(const char*);
+bool is_hub(const char*) __attribute__((pure));
 void load_internal_users();
 void setup_HQ(int);
 void privmsg(bd::String target, bd::String msg, int idx);
 void notice(bd::String target, bd::String msg, int idx);
 void keyx(const bd::String& target, const char *);
 void set_fish_key(char *, bd::String);
-struct userrec *check_chanlist(const char *);
-struct userrec *check_chanlist_hand(const char *);
+struct userrec *check_chanlist(const char *) __attribute__((pure));
+struct userrec *check_chanlist_hand(const char *) __attribute__((pure));
 /*
  * Returns memberfields if the nick is in the member list.
  */
 static inline memberlist *
+__attribute__((pure))
 ismember(const struct chanset_t *chan, const RfcString& nick) {
   if (!chan || !nick)
     return NULL;
   return (*chan->channel.hashed_members)[nick];
 }
 static inline memberlist *
+__attribute__((pure))
 ismember(const struct chanset_t *chan, const char *nick) {
   if (!chan || !nick || !nick[0])
     return NULL;
   return ismember(chan, RfcString(nick));
 }
-struct chanset_t *findchan(const char *name);
+struct chanset_t *findchan(const char *name) __attribute__((pure));
 /*
  * Find a chanset by display name (ie !channel)
  */
 static inline struct chanset_t *
+__attribute__((pure))
 findchan_by_dname(const char *name) {
   return chanset_by_dname[name];
 }

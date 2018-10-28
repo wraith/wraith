@@ -64,13 +64,13 @@
 #define PERMATCH (match+saved+sofar)
 
 /* binds matching */
-int _wild_match_per(unsigned char *m, unsigned char *n)
+int _wild_match_per(const unsigned char *m, const unsigned char *n)
 {
   /* null strings should never match */
   if ((m == 0) || (n == 0) || (!*n))
     return NOMATCH;
 
-  unsigned char *ma = m, *lsm = NULL, *lsn = NULL, *lpm = NULL, *lpn = NULL;
+  const unsigned char *ma = m, *lsm = NULL, *lsn = NULL, *lpm = NULL, *lpn = NULL;
   int match = 1, saved = 0, space;
   int sofar = 0;
 
@@ -162,15 +162,15 @@ int _wild_match_per(unsigned char *m, unsigned char *n)
 
 
 /* general/host matching */
-int _wild_match(unsigned char *m, unsigned char *n)
+int _wild_match(const unsigned char *m, const unsigned char *n)
 {
-  unsigned char *ma = m, *na = n;
+  const unsigned char *ma = m, *na = n;
 
   /* null strings should never match */
   if ((ma == 0) || (na == 0) || (!*ma) || (!*na))
     return NOMATCH;
 
-  unsigned char *lsm = NULL, *lsn = NULL;
+  const unsigned char *lsm = NULL, *lsn = NULL;
   int match = 1;
   int sofar = 0;
 

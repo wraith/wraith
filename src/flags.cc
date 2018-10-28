@@ -299,7 +299,7 @@ build_flags(char *string, struct flag_record *plus, struct flag_record *minus)
 
 /* Returns 1 if flags match, 0 if they don't. */
 int
-flagrec_ok(struct flag_record *req, struct flag_record *have)
+flagrec_ok(const struct flag_record *req, const struct flag_record *have)
 {
   if (req->match & FR_AND) {
     return flagrec_eq(req, have);
@@ -320,7 +320,7 @@ flagrec_ok(struct flag_record *req, struct flag_record *have)
 
 /* Returns 1 if flags match, 0 if they don't. */
 int
-flagrec_eq(struct flag_record *req, struct flag_record *have)
+flagrec_eq(const struct flag_record *req, const struct flag_record *have)
 {
   if (req->match & FR_AND) {
     if (req->match & FR_GLOBAL) {

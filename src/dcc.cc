@@ -1145,7 +1145,8 @@ struct dcc_table DCC_CHAT_PASS = {
 /* Make sure ansi code is just for color-changing
  */
 static int
-check_ansi(char *v)
+__attribute__((pure))
+check_ansi(const char *v)
 {
   int count = 2;
 
@@ -1164,9 +1165,9 @@ check_ansi(char *v)
   return count;
 }
 
-int ansi_len(char *s)
+int ansi_len(const char *s)
 {
-  char *c = s;
+  const char *c = s;
   int count = 0;
 
   while (*c) {

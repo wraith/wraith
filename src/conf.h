@@ -72,7 +72,7 @@ void conf_checkpids(conf_bot *bots, bool all = 1);
 void conf_add_userlist_bots();
 conf_bot *conf_bots_dup(conf_bot *);
 void deluser_removed_bots(conf_bot *, conf_bot *);
-conf_bot *conf_getlocalhub(conf_bot *);
+conf_bot *conf_getlocalhub(conf_bot *) __attribute__((pure));
 void conf_setmypid(pid_t);
 void conf_bot_dup(conf_bot *dest, conf_bot *src);
 void conf_update_hubs(struct userrec* list);

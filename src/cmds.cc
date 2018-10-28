@@ -608,21 +608,13 @@ static void cmd_nohelp(int idx, char *par)
   dumplots(idx, "", buf);
 }
 
-bool is_restricted_cmd(const char* name) {
-  if (name) {
-    if (!HAVE_MDOP && !strcasecmp(name, "mmode"))
-      return 1;
-  }
-  return 0;
-}
-
 static int comp_help_t(const void *m1, const void *m2) {
   const help_t *mi1 = (const help_t *) m1;
   const help_t *mi2 = (const help_t *) m2;
   return strcasecmp(mi1->cmd, mi2->cmd);
 }
 
-help_t *
+const help_t *
 findcmd(const char *lookup, bool care_about_type)
 {
   help_t key;
@@ -679,7 +671,7 @@ static void cmd_help(int idx, char *par)
         flg[0] = 0;
         build_flags(flg, &(cmdlist[n].flags), NULL);
         dprintf(idx, "Showing you help for '%s' (%s):\n", match, flg);
-        help_t *h_entry = NULL;
+        const help_t *h_entry = NULL;
         if ((h_entry = findhelp(match)) != NULL) {
           if (h_entry->garble_len)
             showhelp(idx, &fr, degarble(h_entry->garble_len, h_entry->desc));
@@ -3033,7 +3025,7 @@ static void cmd_color(int idx, char *par)
   console_dostore(idx);
 }
 
-int stripmodes(char *s)
+int stripmodes(const char *s)
 {
   int res = 0;
 
@@ -3064,7 +3056,7 @@ int stripmodes(char *s)
   return res;
 }
 
-char *stripmasktype(int x)
+const char *stripmasktype(int x)
 {
   static char s[20] = "";
   char *p = s;
@@ -3087,7 +3079,7 @@ char *stripmasktype(int x)
   return s;
 }
 
-static char *stripmaskname(int x)
+static const char *stripmaskname(int x)
 {
   static char s[161] = "";
   size_t i = 0;

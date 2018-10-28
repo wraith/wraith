@@ -1119,17 +1119,9 @@ identd_close()
   }
 }
 
-bool
-valid_idx(int idx)
-{
-  if ((idx == -1) || (idx >= dcc_total) || (!dcc[idx].type))
-    return 0;
-  return 1;
-}
-
 int check_cmd_pass(const char *cmd, char *pass)
 {
-  struct cmd_pass *cp = NULL;
+  const struct cmd_pass *cp = NULL;
 
   for (cp = cmdpass; cp; cp = cp->next)
     if (!strcasecmp(cmd, cp->name)) {
@@ -1166,7 +1158,7 @@ int check_cmd_pass(const char *cmd, char *pass)
 
 int has_cmd_pass(const char *cmd)
 {
-  struct cmd_pass *cp = NULL;
+  const struct cmd_pass *cp = NULL;
 
   for (cp = cmdpass; cp; cp = cp->next)
     if (!strcasecmp(cmd, cp->name))

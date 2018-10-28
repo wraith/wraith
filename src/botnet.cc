@@ -245,7 +245,7 @@ void partysetidle(char *bot, int sock, int secs)
 
 /* Return someone's chat channel.
  */
-int getparty(char *bot, int sock)
+int getparty(const char *bot, int sock)
 {
   for (int i = 0; i < parties; i++) {
     if (!strcasecmp(party[i].bot, bot) &&
@@ -852,7 +852,7 @@ void dump_links(int z)
   }
 }
 
-int in_chain(char *who)
+int in_chain(const char *who)
 {
   if (!strcasecmp(who, conf.bot->nick))
     return 1;
@@ -861,7 +861,7 @@ int in_chain(char *who)
   return 0;
 }
 
-int bots_in_subtree(tand_t *bot)
+int bots_in_subtree(const tand_t *bot)
 {
   if (!bot)
     return 0;
@@ -877,7 +877,7 @@ int bots_in_subtree(tand_t *bot)
   return nr;
 }
 
-int users_in_subtree(tand_t *bot)
+int users_in_subtree(const tand_t *bot)
 {
   if (!bot)
     return 0;

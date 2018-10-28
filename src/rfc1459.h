@@ -1,8 +1,8 @@
 #ifndef _RFC1459_H
 #define _RFC1459_H
 
-int _rfc_casecmp(const char *, const char *) __attribute__((const));
-int _rfc_ncasecmp(const char *, const char *, size_t) __attribute__((const));
+int _rfc_casecmp(const char *, const char *) __attribute__((pure));
+int _rfc_ncasecmp(const char *, const char *, size_t) __attribute__((pure));
 
 static const unsigned char rfc_touppertab[] = {
   0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa,
@@ -58,7 +58,7 @@ _rfc_char_equal(const char c1, const char c2)
 }
 
 extern bool (*rfc_char_equal) (const char, const char) __attribute__((const));
-extern int (*rfc_casecmp) (const char *, const char *) __attribute__((const));
-extern int (*rfc_ncasecmp) (const char *, const char *, size_t) __attribute__((const));
+extern int (*rfc_casecmp) (const char *, const char *) __attribute__((pure));
+extern int (*rfc_ncasecmp) (const char *, const char *, size_t) __attribute__((pure));
 
 #endif /* !_RFC1459_H */

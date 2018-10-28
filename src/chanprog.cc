@@ -117,8 +117,8 @@ struct chanset_t *findchan(const char *name)
 struct userrec *check_chanlist(const char *host)
 {
   char				*nick = NULL, *uhost = NULL, buf[UHOSTLEN] = "";
-  memberlist		*m = NULL;
-  struct chanset_t	*chan = NULL;
+  const memberlist		*m = NULL;
+  const struct chanset_t	*chan = NULL;
 
   strlcpy(buf, host, sizeof buf);
   uhost = buf;
@@ -134,8 +134,8 @@ struct userrec *check_chanlist(const char *host)
  */
 struct userrec *check_chanlist_hand(const char *hand)
 {
-  struct chanset_t	*chan = NULL;
-  memberlist		*m = NULL;
+  const struct chanset_t	*chan = NULL;
+  const memberlist		*m = NULL;
 
   for (chan = chanset; chan; chan = chan->next)
     for (m = chan->channel.member; m && m->nick[0]; m = m->next)
@@ -344,8 +344,10 @@ void reaffirm_owners()
 }
 
 bool is_hub(const char* nick) {
+  bd::String hub(size_t(HANDLEN));
+
   for (size_t idx = 0; idx < conf.hubs.length(); ++idx) {
-    bd::String hub(conf.hubs[idx]);
+    hub = conf.hubs[idx];
     if (!strncasecmp(nick, newsplit(hub).c_str(), HANDLEN)) {
       return true;
     }
@@ -674,14 +676,14 @@ void setup_HQ(int n) {
 
 /* Oddly enough, written by proton (Emech's coder)
  */
-int isowner(char *name)
+int isowner(const char *name)
 {
   if (!owner[0])
     return (0);
   if (!name || !name[0])
     return (0);
 
-  char *pa = owner, *pb = owner;
+  const char *pa = owner, *pb = owner;
   size_t nl = strlen(name), pl;
 
   while (1) {
@@ -704,7 +706,8 @@ int isowner(char *name)
   }
 }
 
-bool bot_shouldjoin(struct userrec* u, struct flag_record* fr, const struct chanset_t* chan, bool ignore_inactive)
+bool bot_shouldjoin(struct userrec* u, const struct flag_record* fr,
+    const struct chanset_t* chan, bool ignore_inactive)
 {
   // If restarting, keep this channel.
   if (restarting && (reset_chans == 2) && (channel_active(chan) || channel_pending(chan))) return 1;
@@ -810,11 +813,11 @@ int do_chanset(char *result, struct chanset_t *chan, const char *options, int fl
   return ret;
 }
 
-char *
+const char *
 samechans(const char *nick, const char *delim)
 {
   static char ret[1024] = "";
-  struct chanset_t *chan = NULL;
+  const struct chanset_t *chan = NULL;
 
   ret[0] = 0;		/* may be filled from last time */
   for (chan = chanset; chan; chan = chan->next) {
@@ -827,7 +830,9 @@ samechans(const char *nick, const char *delim)
   return ret;
 }
 
-static struct chanset_t* find_common_opped_chan(bd::String nick) {
+static struct chanset_t*
+__attribute__((pure))
+find_common_opped_chan(bd::String nick) {
   for (struct chanset_t* chan = chanset; chan; chan = chan->next) {
     if (channel_active(chan) && (me_op(chan) || me_voice(chan))) {
       if (ismember(chan, nick.c_str()))
