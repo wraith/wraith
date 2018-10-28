@@ -89,6 +89,10 @@ void sdprintf (const char *format, ...)
   char s[2001] = "";
   va_list va;
 
+#ifndef DEBUG
+  if (!sdebug)
+    return;
+#endif
   va_start(va, format);
   egg_vsnprintf(s, sizeof(s), format, va);
   va_end(va);
