@@ -4,16 +4,11 @@
 #include <stdlib.h>
 #include "RfcString.h"
 
-bool
-RfcString::rfc_equal(const char c1, const char c2) noexcept {
-  if (c1 == c2)
-    return true;
-  return (rfc_toupper(c1) == rfc_toupper(c2));
-}
-
 int
 RfcString::compare(const RfcString& str, size_t n) const noexcept
 {
+  if (rfc_casecmp != _rfc_casecmp)
+    return String::compare(str, n);
   /* Same string? */
   if (cbegin() == str.cbegin() && length() == str.length())
     return 0;
@@ -24,7 +19,7 @@ RfcString::compare(const RfcString& str, size_t n) const noexcept
   /* XXX: std::lexicographical_compare_3way would be nice ... */
   int cmp = 0;
   while (n > 0 && s1 != cend() && s2 != str.cend()) {
-    if ((cmp = rfc_toupper(*s1) - rfc_toupper(*s2)) != 0)
+    if ((cmp = _rfc_toupper(*s1) - _rfc_toupper(*s2)) != 0)
       return cmp;
     ++s1;
     ++s2;
@@ -38,16 +33,18 @@ RfcString::compare(const RfcString& str, size_t n) const noexcept
     return -1;
   else
     return 0;
-  return rfc_toupper(*s1) - rfc_toupper(*s2);
+  return _rfc_toupper(*s1) - _rfc_toupper(*s2);
 }
 
 size_t
 RfcString::hash() const noexcept {
   if (my_hash != 0) return my_hash;
+  if (rfc_casecmp != _rfc_casecmp)
+    return String::hash();
   std::hash<value_type> hasher;
   size_t _hash = 5381;
 
   for(size_t i = 0; i < this->length(); ++i)
-    _hash = ((_hash << 5) + _hash) + hasher(rfc_toupper(this->data()[i]));
+    _hash = ((_hash << 5) + _hash) + hasher(_rfc_toupper(this->data()[i]));
   return (my_hash = (_hash & 0x7FFFFFFF));
 }

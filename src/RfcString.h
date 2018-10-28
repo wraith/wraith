@@ -9,8 +9,6 @@ namespace bd {
 
 class RfcString : public bd::String {
   private:
-    static bool rfc_equal(const char c1, const char c2) noexcept
-      __attribute__((pure));
 
   protected:
 

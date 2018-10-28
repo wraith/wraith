@@ -455,7 +455,7 @@ got005(char *from, char *msg)
       if (strcasecmp(p, "rfc1459")) {
         rfc_casecmp = strcasecmp;
         rfc_ncasecmp = strncasecmp;
-        rfc_toupper = toupper;
+        rfc_char_equal = char_equal;
       }
     }
   }

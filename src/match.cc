@@ -130,7 +130,7 @@ int _wild_match_per(unsigned char *m, unsigned char *n)
       case QUOTE:
         m++;                    /* Handle quoting */
       }
-      if (rfc_toupper(*m) == rfc_toupper(*n)) { /* If matching */
+      if (rfc_char_equal(*m, *n)) { /* If matching */
         m++;
         n++;
         sofar++;
@@ -210,7 +210,7 @@ int _wild_match(unsigned char *m, unsigned char *n)
       n--;
       continue;                 /* '?' always matches */
     }
-    if (rfc_toupper(*m) == rfc_toupper(*n)) {   /* If matching char */
+    if (rfc_char_equal(*m, *n)) {   /* If matching char */
       m--;
       n--;
       sofar++;                  /* Tally the match */
