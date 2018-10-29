@@ -832,7 +832,7 @@ samechans(const char *nick, const char *delim)
 
 static struct chanset_t*
 __attribute__((pure))
-find_common_opped_chan(bd::String nick) {
+find_common_opped_chan(const bd::String& nick) {
   for (struct chanset_t* chan = chanset; chan; chan = chan->next) {
     if (channel_active(chan) && (me_op(chan) || me_voice(chan))) {
       if (ismember(chan, nick.c_str()))
@@ -842,7 +842,7 @@ find_common_opped_chan(bd::String nick) {
   return NULL;
 }
 
-void privmsg(bd::String target, bd::String msg, int idx) {
+void privmsg(const bd::String& target, bd::String msg, int idx) {
   struct chanset_t* chan = NULL;
   bool talking_to_chan = strchr(CHANMETA, target[0]);
   if (have_cprivmsg && !talking_to_chan)
@@ -864,7 +864,7 @@ void privmsg(bd::String target, bd::String msg, int idx) {
     dprintf(idx, "PRIVMSG %s :%s\n", target.c_str(), msg.c_str());
 }
 
-void notice(bd::String target, bd::String msg, int idx) {
+void notice(const bd::String& target, bd::String msg, int idx) {
   struct chanset_t* chan = NULL;
   bool talking_to_chan = strchr(CHANMETA, target[0]);
   if (have_cnotice && !talking_to_chan)
@@ -902,7 +902,7 @@ void keyx(const bd::String &target, const char *reason) {
   FishKeys[target] = fishData;
 }
 
-void set_fish_key(char *target, bd::String key)
+void set_fish_key(const char *target, const bd::String key)
 {
   fish_data_t* fishData = FishKeys.contains(target) ? FishKeys[target] : NULL;
 

@@ -34,10 +34,10 @@ void add_child_bots();
 bool is_hub(const char*) __attribute__((pure));
 void load_internal_users();
 void setup_HQ(int);
-void privmsg(bd::String target, bd::String msg, int idx);
-void notice(bd::String target, bd::String msg, int idx);
+void privmsg(const bd::String& target, bd::String msg, int idx);
+void notice(const bd::String& target, bd::String msg, int idx);
 void keyx(const bd::String& target, const char *);
-void set_fish_key(char *, bd::String);
+void set_fish_key(const char *, const bd::String);
 struct userrec *check_chanlist(const char *) __attribute__((pure));
 struct userrec *check_chanlist_hand(const char *) __attribute__((pure));
 /*
