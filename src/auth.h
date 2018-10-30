@@ -17,8 +17,12 @@ class Auth {
   Auth(const char *, const char *, struct userrec * = NULL);
   ~Auth();
 
-  int Status(int newstat = -1) noexcept {
-    if (newstat >= 0) { status = newstat; } return status;
+  inline int Status(void) const noexcept __attribute__((pure)) {
+    return status;
+  }
+  int Status(int newstat) noexcept {
+    status = newstat;
+    return Status();
   }
   void MakeHash() noexcept;
   bool Authed() const noexcept __attribute__((pure)) {
