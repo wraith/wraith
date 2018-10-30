@@ -1047,16 +1047,10 @@ void clear_channel(struct chanset_t *chan, bool reset)
 
   if (chan->channel.cached_members) {
     if (chan->channel.cached_members->size()) {
-      bd::Array<bd::String> member_uhosts(chan->channel.cached_members->keys());
-      for (size_t i = 0; i < member_uhosts.length(); ++i) {
-        const bd::String uhost(member_uhosts[i]);
-
+      for (const auto& uhost : chan->channel.cached_members->keys()) {
         // Delete the cached member
         m = (*chan->channel.cached_members)[uhost];
         delete_member(m);
-
-        // Remove the cached member (not technically needed as it is deleted below, but for completeness.)
-        chan->channel.cached_members->remove(uhost);
       }
     }
     delete chan->channel.cached_members;

@@ -481,8 +481,7 @@ void show_channels(int idx, char *handle)
       dprintf(idx, "%s %s access to %zu channel%s:\n", handle ? u->handle : "You", handle ? "has" : "have", channelNames.length(), (channelNames.length() > 1) ? "s" : "");
     }
 
-    for (size_t i = 0; i < channelNames.length(); ++i) {
-      const bd::String chname(channelNames[i]);
+    for (const auto& chname : channelNames) {
       const struct chanset_t* chan = findchan_by_dname(chname);
       dprintf(idx, format, !conf.bot->hub && me_op(chan) ? '@' : ' ', chan->dname, ((conf.bot->hub && channel_inactive(chan)) || (!conf.bot->hub && !shouldjoin(chan))) ? "(inactive) " : "",
           channel_privchan(chan) ? "(private)  " : "", chan->manop ? "(no manop) " : "", 

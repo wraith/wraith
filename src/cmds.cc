@@ -922,8 +922,7 @@ static void cmd_groups(int idx, char *par)
     if (u->bot && bot_hublevel(u) == 999) {
       // Gather all the groups for this bot
       botGroups[u->handle] = bd::String(var_get_bot_data(u, "groups", true)).split(",");
-      for (size_t i = 0; i < botGroups[u->handle].length(); ++i) {
-        const bd::String group(botGroups[u->handle][i]);
+      for (const auto& group : botGroups[u->handle]) {
         if (group.length() > maxGroupLen) {
           maxGroupLen = group.length();
         }
@@ -943,8 +942,7 @@ static void cmd_groups(int idx, char *par)
     dprintf(idx, "Total groups: %zu/%zu\n", botGroups[botnick].length(), allgroups.length());
   } else {
     // Display all groups and which bots are in them
-    for (size_t i = 0; i < allgroups.length(); ++i) {
-      const bd::String group(allgroups[i]);
+    for (const auto& group : allgroups) {
       const bd::Array<bd::String> bots(groupBots[group]);
       dumplots(idx, bd::String::printf("%-*s: ", int(maxGroupLen), group.c_str()).c_str(), static_cast<bd::String>(bots.join(" ")).c_str());
     }
