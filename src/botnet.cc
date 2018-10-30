@@ -54,6 +54,7 @@
 #include <bdlib/src/String.h>
 #include <bdlib/src/Array.h>
 #include <algorithm>
+#include <unordered_map>
 
 tand_t			*tandbot = NULL;		/* Keep track of tandem bots on the
 							   botnet */
@@ -581,7 +582,7 @@ tell_bots(int idx, int up, const char *nodename)
 {
   size_t total = 0, maxNodeNameLength = 0;;
   bd::Array<bd::String> nodes;
-  bd::HashTable<bd::String, bd::Array<bd::String> > nodeBots;
+  std::unordered_map<bd::String, bd::Array<bd::String> > nodeBots;
   bd::Array<bd::String> bots;
   bd::String group;
 
