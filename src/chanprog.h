@@ -50,13 +50,6 @@ ismember(const struct chanset_t *chan, const RfcString& nick) {
     return NULL;
   return (*chan->channel.hashed_members)[nick];
 }
-static inline memberlist *
-__attribute__((pure))
-ismember(const struct chanset_t *chan, const char *nick) {
-  if (!chan || !nick || !nick[0])
-    return NULL;
-  return ismember(chan, RfcString(nick));
-}
 struct chanset_t *findchan(const char *name) __attribute__((pure));
 /*
  * Find a chanset by display name (ie !channel)
