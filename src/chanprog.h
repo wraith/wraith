@@ -48,7 +48,10 @@ __attribute__((pure))
 ismember(const struct chanset_t *chan, const RfcString& nick) {
   if (!chan || !nick)
     return NULL;
-  return (*chan->channel.hashed_members)[nick];
+  auto kv = chan->channel.hashed_members->find(nick);
+  if (kv == chan->channel.hashed_members->end())
+    return NULL;
+  return kv->second;
 }
 struct chanset_t *findchan(const char *name) __attribute__((pure));
 /*
@@ -56,8 +59,11 @@ struct chanset_t *findchan(const char *name) __attribute__((pure));
  */
 static inline struct chanset_t *
 __attribute__((pure))
-findchan_by_dname(const char *name) {
-  return chanset_by_dname[name];
+findchan_by_dname(const RfcString& name) {
+  auto kv = chanset_by_dname.find(name);
+  if (kv == chanset_by_dname.end())
+    return NULL;
+  return kv->second;
 }
 
 extern struct chanset_t		*chanset, *chanset_default;
