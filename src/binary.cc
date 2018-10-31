@@ -651,6 +651,8 @@ check_sum(const char *fname, const char *cfgfile, bool read_stdin)
       printf(STR("* Wrote settings to binary.\n")); 
     exit(0);
   } else {
+    if (cfgfile || read_stdin)
+      werr(ERR_ALREADYINIT);
     char *hash = bin_checksum(fname, GET_CHECKSUM);
 
 // tellconfig(&settings); 
