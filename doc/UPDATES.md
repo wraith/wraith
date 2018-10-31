@@ -2,7 +2,8 @@
   * Clear FiSH keys when a client quits.
   * Fix crash when clearing last botset entry for a bot.
   * Bots now share channel key to other bots even if not opped.
-  * Some small performance improvements
+  * Some small performance improvements.
+  * Fix rare issue with writing binary config.
 
 # 1.4.9
   * Fix various compile warnings and spam

@@ -639,7 +639,7 @@ tellconfig(settings_t *incfg)
 void
 check_sum(const char *fname, const char *cfgfile, bool read_stdin)
 {
-   if (!settings.hash[0]) {
+   if (!settings_initialized()) {
 
     if (!cfgfile && !read_stdin)
       fatal(STR("Binary not initialized."), 0);
