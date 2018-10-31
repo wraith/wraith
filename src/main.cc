@@ -743,11 +743,11 @@ int main(int argc, char **argv)
 //  if (!(argc == 2 && (!strcmp(argv[1], "-2") || !strcmp(argv[1], "0")))) {
 //  doesn't work correctly yet, if we don't go in here, our settings stay encrypted
   if (argc == 2 && !strcmp(argv[1], STR("-q"))) {
-    if (settings.hash[0]) exit(4);	/* initialized */
+    if (settings_initialized()) exit(4);	/* initialized */
     exit(5);				/* not initialized */
   }
   if (argc == 2 && !strcmp(argv[1], STR("-p"))) {
-    if (settings.hash[0]) exit(4);	/* initialized */
+    if (settings_initialized()) exit(4);	/* initialized */
     exit(5);				/* not initialized */
   }
 

@@ -639,7 +639,7 @@ tellconfig(settings_t *incfg)
 void
 check_sum(const char *fname, const char *cfgfile, bool read_stdin)
 {
-   if (!settings.hash[0]) {
+   if (!settings_initialized()) {
 
     if (!cfgfile && !read_stdin)
       fatal(STR("Binary not initialized."), 0);
@@ -651,6 +651,8 @@ check_sum(const char *fname, const char *cfgfile, bool read_stdin)
       printf(STR("* Wrote settings to binary.\n")); 
     exit(0);
   } else {
+    if (cfgfile || read_stdin)
+      werr(ERR_ALREADYINIT);
     char *hash = bin_checksum(fname, GET_CHECKSUM);
 
 // tellconfig(&settings); 

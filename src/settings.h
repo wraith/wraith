@@ -1,6 +1,8 @@
 #ifndef _SETTINGS_H
 #define _SETTINGS_H
 
+#include <string.h>
+
 // If changing this, need to also change the usage in main.c which assumes all of it is \200
 #define SETTINGS_HEADER "\200\200\200\200\200\200\200\200\200\200\200\200\200\200\200"
 #define PREFIXLEN sizeof(SETTINGS_HEADER)
@@ -10,7 +12,7 @@
 
 #define DYNAMIC_HEADER dynamic_initialized
 
-typedef struct settings_struct {
+struct settings_struct {
   char prefix[PREFIXLEN];
   /* -- STATIC -- */
 //  char hash[33];
@@ -37,7 +39,8 @@ typedef struct settings_struct {
   char portmax[17];       /* for hubs, the reserved port range for incoming connections */
   /* -- PADDING -- */
   char padding[6];        // (16 - (sizeof(settings_t) % 16)) % 16]
-} settings_t;
+} __attribute__((packed, aligned(16)));
+typedef struct settings_struct settings_t;
 
 #define SALT1 {s1_1[0],s1_1[1],s1_5[0],s1_5[1],s1_8[0],s1_8[1],s1_4[0],s1_9[1],s1_2[0],s1_13[0],s1_6[0],s1_6[1],s1_7[0],s1_7[1],s1_3[0],s1_13[1],s1_16[1],s1_4[1],s1_15[0],s1_10[1],s1_14[0],s1_14[1],s1_12[0],s1_12[1],s1_2[1],s1_3[1],s1_11[0],s1_11[1],s1_10[0],s1_15[1],s1_16[0],s1_9[0],'\0'}
 #define SALT2 {s2_5[0],s2_5[1],s2_2[0],s2_2[1],s2_8[1],s2_4[0],s2_7[1],s2_4[1],s2_1[0],s2_6[0],s2_1[1],s2_6[1],s2_3[0],s2_3[1],s2_8[0],s2_7[0],'\0'}
@@ -63,5 +66,13 @@ sizeof(settings.portmin) + sizeof(settings.portmin) + sizeof(settings.datadir)
 #define SIZE_SETTINGS sizeof(settings_t)
 
 extern settings_t       settings;
+
+static inline bool
+__attribute__((pure))
+settings_initialized(void)
+{
+  static const char p[sizeof(settings.hash)] = "";
+  return memcmp(settings.hash, p, sizeof(settings.hash)) != 0;
+}
 
 #endif /* !_SETTINGS_H */

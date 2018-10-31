@@ -24,7 +24,8 @@
 #define ERR_NOTINIT	22
 #define ERR_TOOMANYBOTS 23
 #define ERR_LIBS	24
-#define ERR_MAX         25
+#define ERR_ALREADYINIT 25
+#define ERR_MAX         26
 
 #define DETECT_LOGIN 	1
 #define DETECT_TRACE 	2
