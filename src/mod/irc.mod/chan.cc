@@ -296,7 +296,7 @@ void delete_member(memberlist* m) {
 
 static bool member_getuser(memberlist* m, bool act_on_lookup) {
   if (!m) return 0;
-  if (!m->user && !m->tried_getuser) {
+  if (!m->user && !m->tried_getuser && !m->is_me) {
     m->user = get_user_by_host(m->from);
     if (!m->user && m->userip[0]) {
       m->user = get_user_by_host(m->fromip);
@@ -307,6 +307,9 @@ static bool member_getuser(memberlist* m, bool act_on_lookup) {
     if (act_on_lookup && m->user)
       check_this_user(m->user->handle, 0, NULL);
 
+  } else if (!m->user && m->is_me) {
+    m->user = conf.bot->u;
+    m->tried_getuser = 1;
   }
   return !(m->user == NULL);
 }
@@ -2141,6 +2144,8 @@ static int got315(char *from, char *msg)
     force_join_chan(chan);
   } else {
     me->is_me = 1;
+    me->user = conf.bot->u;
+    me->tried_getuser = 1;
     if (!me->joined)
       me->joined = now;				/* set this to keep the whining masses happy */
     rebalance_roles_chan(chan);
@@ -2779,6 +2784,8 @@ static int gotjoin(char *from, char *chname)
 
 	if (match_my_nick(nick)) {
           m->is_me = 1;
+          m->user = conf.bot->u;
+          m->tried_getuser = 1;
 	  /* It was me joining! Need to update the channel record with the
 	   * unique name for the channel (as the server see's it). <cybah>
 	   */
