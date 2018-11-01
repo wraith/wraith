@@ -124,10 +124,13 @@ struct userrec *check_chanlist(const char *host)
   strlcpy(buf, host, sizeof buf);
   uhost = buf;
   nick = splitnick(&uhost);
-  for (chan = chanset; chan; chan = chan->next)
-    for (m = chan->channel.member; m && m->nick[0]; m = m->next) 
-      if (!rfc_casecmp(nick, m->nick) && !strcasecmp(uhost, m->userhost))
-	return m->user;
+  const RfcString rfc_nick(nick);
+  for (chan = chanset; chan; chan = chan->next) {
+    if ((m = ismember(chan, rfc_nick)) != NULL &&
+        !strcasecmp(uhost, m->userhost)) {
+      return m->user;
+    }
+  }
   return NULL;
 }
 
@@ -196,10 +199,13 @@ void set_chanlist(const char *host, struct userrec *rec)
   strlcpy(buf, host, sizeof buf);
   uhost = buf;
   nick = splitnick(&uhost);
-  for (chan = chanset; chan; chan = chan->next)
-    for (m = chan->channel.member; m && m->nick[0]; m = m->next)
-      if (!rfc_casecmp(nick, m->nick) && !strcasecmp(uhost, m->userhost))
-	m->user = rec;
+  const RfcString rfc_nick(nick);
+  for (chan = chanset; chan; chan = chan->next) {
+    if ((m = ismember(chan, rfc_nick)) != NULL &&
+        !strcasecmp(uhost, m->userhost)) {
+      m->user = rec;
+    }
+  }
 }
 
 /* 0 marks all channels
