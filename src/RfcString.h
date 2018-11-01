@@ -14,8 +14,29 @@ class RfcString : public bd::String {
 
   public:
     using String::String;
-    RfcString(const String &str) : String(str) {};
-    RfcString(String &&str) : String(std::move(str)) {};
+    RfcString() = default;
+    RfcString(const RfcString& str) : String(str) {}
+    RfcString(RfcString&& str) : String(std::move(str)) {}
+    RfcString(const String &str) : String(str) {}
+    RfcString(String &&str) : String(std::move(str)) {}
+    using String::operator=;
+    RfcString& operator=(const RfcString& rhs) {
+      String::operator=(rhs);
+      return *this;
+    }
+    RfcString& operator=(RfcString&& rhs) {
+      String::operator=(std::move(rhs));
+      return *this;
+    }
+    RfcString& operator=(const String& rhs) {
+      String::operator=(rhs);
+      return *this;
+    }
+
+    RfcString& operator=(String&& rhs) {
+      String::operator=(std::move(rhs));
+      return *this;
+    }
 
     int compare(const RfcString& str, size_t n = npos) const noexcept
       __attribute__((pure));

@@ -291,14 +291,14 @@ static int msg_invite(char *nick, char *host, struct userrec *u, char *par)
   return BIND_RET_BREAK;
 }
 
-static void logc(const char *cmd, Auth *a, char *chname, char *par)
+static void logc(const char *cmd, Auth *auth, char *chname, char *par)
 {
   if (chname && chname[0])
-    putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %c%s %s", a->nick, a->host,
-        a->user ? a->user->handle : "*", chname, auth_prefix[0], cmd, par ? par : "");
+    putlog(LOG_CMDS, "*", "(%s!%s) !%s! %s %c%s %s", auth->nick.c_str(), auth->host,
+        auth->user ? auth->user->handle : "*", chname, auth_prefix[0], cmd, par ? par : "");
   else
-    putlog(LOG_CMDS, "*", "(%s!%s) !%s! %c%s %s", a->nick, a->host,
-        a->user ? a->user->handle : "*", auth_prefix[0], cmd, par ? par : "");
+    putlog(LOG_CMDS, "*", "(%s!%s) !%s! %c%s %s", auth->nick.c_str(), auth->host,
+        auth->user ? auth->user->handle : "*", auth_prefix[0], cmd, par ? par : "");
 }
 #define LOGC(cmd) logc(cmd, a, chname, par)
   
@@ -326,7 +326,7 @@ static int msg_authstart(char *nick, char *host, struct userrec *u, char *par)
       return 0;
     }
   } else
-    auth = new Auth(nick, host, u);
+    auth = new Auth(RfcString(nick), host, u);
 
   /* Send "auth." if they are recognized, otherwise "auth!" */
   auth->Status(AUTH_PASS);
@@ -340,11 +340,11 @@ static int msg_authstart(char *nick, char *host, struct userrec *u, char *par)
 static void
 AuthFinish(Auth *auth)
 {
-  putlog(LOG_CMDS, "*", STR("(%s!%s) !%s! +AUTH"), auth->nick, auth->host, auth->user ? auth->user->handle : "*");
+  putlog(LOG_CMDS, "*", STR("(%s!%s) !%s! +AUTH"), auth->nick.c_str(), auth->host, auth->user ? auth->user->handle : "*");
   auth->Done();
   bd::String msg;
   msg = bd::String::printf(STR("You are now authorized for cmds, see %chelp"), auth_prefix[0]);
-  notice(auth->nick, msg, DP_HELP);
+  notice(auth->nick.c_str(), msg, DP_HELP);
 }
 
 static int msg_auth(char *nick, char *host, struct userrec *u, char *par)

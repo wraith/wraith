@@ -165,7 +165,7 @@ void clear_chanlist(void)
     }
   }
 
-  Auth::NullUsers(NULL);
+  Auth::NullUsers();
 }
 
 /* Clear the user pointer of a specific nick in the chanlists.
@@ -185,7 +185,7 @@ void clear_chanlist_member(const RfcString& nick)
     }
   }
 
-  Auth::NullUsers(nick.c_str());
+  Auth::NullUsers(nick);
 }
 
 /* If this user@host is in a channel, set it (it was null)

@@ -3082,11 +3082,11 @@ static int gotnick(char *from, char *msg)
   const RfcString rfc_nick(nick);
   clear_chanlist_member(rfc_nick);	/* Cache for nick 'nick' is meaningless now. */
 
+  auto new_rfc_nick = std::make_shared<RfcString>(msg);
+
   Auth *auth = Auth::Find(uhost);
   if (auth)
-    auth->NewNick(msg);
-
-  auto new_rfc_nick = std::make_shared<RfcString>(msg);
+    auth->NewNick(*new_rfc_nick);
 
   /* Compose a nick!user@host for the new nick */
   simple_snprintf(s1, sizeof(s1), "%s!%s", msg, uhost);
