@@ -331,9 +331,9 @@ void init_signals()
 {
 #ifndef __SANITIZE_ADDRESS__
   signal(SIGBUS, got_bus);
-  signal(SIGTRAP, got_trap);
   signal(SIGSEGV, got_segv);
 #endif
+  signal(SIGTRAP, got_trap);
   signal(SIGFPE, got_fpe);
   signal(SIGTERM, got_term);
   signal(SIGCONT, got_cont);
