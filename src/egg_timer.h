@@ -20,7 +20,8 @@ void timer_get_now(egg_timeval_t *_now);
 int timer_get_now_sec(int *sec);
 void timer_update_now(egg_timeval_t *_now);
 int timer_diff(egg_timeval_t *from_time, egg_timeval_t *to_time, egg_timeval_t *diff);
-long timeval_diff(const egg_timeval_t *tv1, const egg_timeval_t *tv2);
+long timeval_diff(const egg_timeval_t *tv1, const egg_timeval_t *tv2)
+  __attribute__((pure));
 int timer_create_secs(int, const char *, Function);
 int timer_create_complex(egg_timeval_t *howlong, const char *name, Function callback, void *client_data, int flags);
 int timer_destroy(int timer_id);

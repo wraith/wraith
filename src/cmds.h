@@ -3,8 +3,6 @@
 
 #include "types.h"
 
-bool is_restricted_cmd(const char*);
-
 typedef struct {
   const char          *name;
   const char          *flags;
@@ -44,12 +42,23 @@ typedef struct cmd_pass {
 extern mycmds 		cmdlist[]; 
 extern int		cmdi;
 
+static inline bool
+__attribute__((pure))
+is_restricted_cmd(const char* name)
+{
+  if (name) {
+    if (!HAVE_MDOP && !strcasecmp(name, "mmode"))
+      return 1;
+  }
+  return 0;
+}
+
 #define findhelp(x) findcmd(x, 1)
-help_t *findcmd(const char *lookup, bool care_about_type);
+const help_t *findcmd(const char *lookup, bool care_about_type) __attribute__((pure));
 int check_dcc_attrs(struct userrec *, flag_t);
 int check_dcc_chanattrs(struct userrec *, char *, flag_t, flag_t);
-int stripmodes(char *);
-char *stripmasktype(int);
+int stripmodes(const char *) __attribute__((pure));
+const char *stripmasktype(int);
 void gotremotecmd(char * forbot, char * frombot, char * fromhand, char * fromidx, char * cmd);
 void gotremotereply(char * frombot, char * tohand, char * toidx, char * ln);
 

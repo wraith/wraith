@@ -445,7 +445,6 @@ void show_channels(int idx, char *handle)
   struct userrec *u = NULL;
   size_t maxChannelLength = 0;
   bd::Array<bd::String> channelNames;
-  bd::HashTable<bd::String, struct chanset_t*> channels;
   bd::String group;
 
   if (handle && handle[0] != '%') {
@@ -470,7 +469,6 @@ void show_channels(int idx, char *handle)
         maxChannelLength = chname.length();
       }
       channelNames << chname;
-      channels[chname] = chan;
     }
   }
 
@@ -483,9 +481,8 @@ void show_channels(int idx, char *handle)
       dprintf(idx, "%s %s access to %zu channel%s:\n", handle ? u->handle : "You", handle ? "has" : "have", channelNames.length(), (channelNames.length() > 1) ? "s" : "");
     }
 
-    for (size_t i = 0; i < channelNames.length(); ++i) {
-      const bd::String chname(channelNames[i]);
-      const struct chanset_t* chan = channels[chname];
+    for (const auto& chname : channelNames) {
+      const struct chanset_t* chan = findchan_by_dname(chname);
       dprintf(idx, format, !conf.bot->hub && me_op(chan) ? '@' : ' ', chan->dname, ((conf.bot->hub && channel_inactive(chan)) || (!conf.bot->hub && !shouldjoin(chan))) ? "(inactive) " : "",
           channel_privchan(chan) ? "(private)  " : "", chan->manop ? "(no manop) " : "", 
           channel_bitch(chan) && !channel_botbitch(chan) ? "(bitch)    " : channel_botbitch(chan) ? "(botbitch) " : "",

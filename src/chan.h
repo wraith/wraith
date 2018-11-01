@@ -9,8 +9,11 @@
 #define _EGG_CHAN_H
 
 #include <functional>
+#include <memory>
 #include <lib/bdlib/src/Array.h>
+#include <lib/bdlib/src/HashTable.h>
 #include <lib/bdlib/src/String.h>
+#include "RfcString.h"
 
 /* chan & global */
 enum flood_t {
@@ -49,6 +52,7 @@ typedef struct memstruct {
   int tried_getuser;
   unsigned short flags;
   char nick[NICKLEN];
+  std::shared_ptr<RfcString> rfc_nick;
   char userhost[UHOSTLEN];
   char userip[UHOSTLEN];
   char from[NICKLEN + UHOSTLEN];   /* nick!user@host */
@@ -56,6 +60,13 @@ typedef struct memstruct {
   bool is_me;
   bd::HashTable<flood_t, time_t>     *floodtime; // floodtime[FLOOD_PRIVMSG] = now;
   bd::HashTable<flood_t, int>         *floodnum; // floodnum[FLOOD_PRIVMSG] = 1;
+
+  void* operator new (size_t size) noexcept {
+    return calloc(1, size);
+  }
+  void operator delete (void* p) noexcept {
+    free(p);
+  }
 } memberlist;
 
 namespace std {
@@ -175,6 +186,8 @@ struct chan_t {
 
   // Member caching to cache cyclers
   bd::HashTable<bd::String, memberlist*> *cached_members;
+
+  bd::HashTable<RfcString, memberlist*> *hashed_members;
 };
 
 #define CHANINV    BIT0		/* +i					*/

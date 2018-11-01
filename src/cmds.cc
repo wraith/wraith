@@ -608,21 +608,13 @@ static void cmd_nohelp(int idx, char *par)
   dumplots(idx, "", buf);
 }
 
-bool is_restricted_cmd(const char* name) {
-  if (name) {
-    if (!HAVE_MDOP && !strcasecmp(name, "mmode"))
-      return 1;
-  }
-  return 0;
-}
-
 static int comp_help_t(const void *m1, const void *m2) {
   const help_t *mi1 = (const help_t *) m1;
   const help_t *mi2 = (const help_t *) m2;
   return strcasecmp(mi1->cmd, mi2->cmd);
 }
 
-help_t *
+const help_t *
 findcmd(const char *lookup, bool care_about_type)
 {
   help_t key;
@@ -679,7 +671,7 @@ static void cmd_help(int idx, char *par)
         flg[0] = 0;
         build_flags(flg, &(cmdlist[n].flags), NULL);
         dprintf(idx, "Showing you help for '%s' (%s):\n", match, flg);
-        help_t *h_entry = NULL;
+        const help_t *h_entry = NULL;
         if ((h_entry = findhelp(match)) != NULL) {
           if (h_entry->garble_len)
             showhelp(idx, &fr, degarble(h_entry->garble_len, h_entry->desc));
@@ -930,8 +922,7 @@ static void cmd_groups(int idx, char *par)
     if (u->bot && bot_hublevel(u) == 999) {
       // Gather all the groups for this bot
       botGroups[u->handle] = bd::String(var_get_bot_data(u, "groups", true)).split(",");
-      for (size_t i = 0; i < botGroups[u->handle].length(); ++i) {
-        const bd::String group(botGroups[u->handle][i]);
+      for (const auto& group : botGroups[u->handle]) {
         if (group.length() > maxGroupLen) {
           maxGroupLen = group.length();
         }
@@ -951,8 +942,7 @@ static void cmd_groups(int idx, char *par)
     dprintf(idx, "Total groups: %zu/%zu\n", botGroups[botnick].length(), allgroups.length());
   } else {
     // Display all groups and which bots are in them
-    for (size_t i = 0; i < allgroups.length(); ++i) {
-      const bd::String group(allgroups[i]);
+    for (const auto& group : allgroups) {
       const bd::Array<bd::String> bots(groupBots[group]);
       dumplots(idx, bd::String::printf("%-*s: ", int(maxGroupLen), group.c_str()).c_str(), static_cast<bd::String>(bots.join(" ")).c_str());
     }
@@ -3033,7 +3023,7 @@ static void cmd_color(int idx, char *par)
   console_dostore(idx);
 }
 
-int stripmodes(char *s)
+int stripmodes(const char *s)
 {
   int res = 0;
 
@@ -3064,7 +3054,7 @@ int stripmodes(char *s)
   return res;
 }
 
-char *stripmasktype(int x)
+const char *stripmasktype(int x)
 {
   static char s[20] = "";
   char *p = s;
@@ -3087,7 +3077,7 @@ char *stripmasktype(int x)
   return s;
 }
 
-static char *stripmaskname(int x)
+static const char *stripmaskname(int x)
 {
   static char s[161] = "";
   size_t i = 0;

@@ -52,7 +52,6 @@ void not_away(int);
 void set_away(int, char *);
 void dcc_remove_lost(void);
 void flush_lines(int, struct chat_info *);
-struct dcc_t *find_idx(int);
 int new_dcc(struct dcc_table *, int);
 void del_dcc(int);
 char *add_cr(char *);
@@ -62,11 +61,18 @@ int detect_dcc_flood(time_t *, struct chat_info *, int);
 void identd_open(const char * = NULL, const char * = NULL, int identd = 1);
 void identd_close();
 int listen_all(in_port_t, bool, bool);
-bool valid_idx(int);
+static inline bool __attribute__((pure))
+valid_idx(int idx)
+{
+  if ((idx == -1) || (idx >= dcc_total) || (!dcc[idx].type))
+    return false;
+  return true;
+}
+
 int dcc_read(bd::Stream&);
 void dcc_write(bd::Stream&, int);
 int check_cmd_pass(const char *, char *);
-int has_cmd_pass(const char *);
+int has_cmd_pass(const char *) __attribute__((pure));
 void set_cmd_pass(char *, int);
 void cmdpass_free(struct cmd_pass *);
 

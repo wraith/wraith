@@ -607,6 +607,7 @@ void remove_channel(struct chanset_t *chan)
      /* Remove the channel from the list, so that noone can pull it
         away from under our feet during the check_part() call. */
      list_delete((struct list_type **) &chanset, (struct list_type *) chan);
+     chanset_by_dname.remove(chan->dname);
 
     /* Using chan->name is important here, especially for !chans <cybah> */
     if (!conf.bot->hub && shouldjoin(chan) && chan->name[0])

@@ -16,8 +16,8 @@
 
 
 void restart(int);
-int coloridx(int);
-const char *color(int, int, int);
+int coloridx(int) __attribute__((pure));
+const char *color(int, int, int) __attribute__((pure));
 void shuffle(char *, char *, size_t);
 void shuffleArray(char **, size_t);
 void showhelp(int, struct flag_record *, const char *);
@@ -31,7 +31,6 @@ size_t my_strcpy(char *, const char *);
 void maskaddr(const char *, char *, int);
 #define maskhost(a,b) maskaddr((a),(b),3)
 #define maskban(a,b)  maskaddr((a),(b),3)
-char *stristr(char *, char *);
 void splitc(char *, char *, char);
 void splitcn(char *, char *, char, size_t);
 int remove_crlf(char *);
@@ -49,7 +48,7 @@ void make_rand_str(char *, size_t, bool = 1);
 char *str_escape(const char *, const char, const char);
 char *strchr_unescape(char *, const char, const char);
 void str_unescape(char *, const char);
-int str_isdigit(const char *);
+int str_isdigit(const char *) __attribute__((pure));
 void kill_bot(char *, char *);
 char *strtolower(char *);
 char *strtoupper(char *);
