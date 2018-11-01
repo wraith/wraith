@@ -848,10 +848,10 @@ samechans(const char *nick, const char *delim)
 
 static struct chanset_t*
 __attribute__((pure))
-find_common_opped_chan(const bd::String& nick) {
+find_common_opped_chan(const RfcString& nick) {
   for (struct chanset_t* chan = chanset; chan; chan = chan->next) {
     if (channel_active(chan) && (me_op(chan) || me_voice(chan))) {
-      if (ismember(chan, nick.c_str()))
+      if (ismember(chan, nick))
         return chan;
     }
   }
