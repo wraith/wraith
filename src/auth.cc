@@ -133,15 +133,10 @@ static void auth_fill_users_block(const bd::String& key, Auth* auth)
   auth->user = get_user_by_host(from);
 }
 
-void Auth::FillUsers(const char *nick) noexcept
+void Auth::FillUsers(void) noexcept
 {
-  if (nick == NULL) {
-    for (auto& kv : ht_host) {
-      auth_fill_users_block(kv.first, kv.second);
-    }
-  } else if (ht_nick.contains(nick)) {
-    Auth *auth = ht_nick[nick];
-    auth_fill_users_block(nick, auth);
+  for (auto& kv : ht_host) {
+    auth_fill_users_block(kv.first, kv.second);
   }
 }
 

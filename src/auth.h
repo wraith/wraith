@@ -37,7 +37,7 @@ class Auth {
   static Auth *Find(const char * host) noexcept __attribute__((pure));
   static void NullUsers(const RfcString&) noexcept;
   static void NullUsers(void) noexcept;
-  static void FillUsers(const char *nick = NULL) noexcept;
+  static void FillUsers(void) noexcept;
   static void ExpireAuths() noexcept;
   static void InitTimer() noexcept;
   static void DeleteAll() noexcept;
