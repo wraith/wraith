@@ -9,6 +9,7 @@
   * Add cmd_roles (leaf only) to display roles for a channel. (#39)
   * Add 'chanset homechan-user [nothing/voice/op]' to auto-voice or auto-op
     clients who are opped in 'set homechan'.
+  * Some small performance improvements.
 
 # maint
   * Clear FiSH keys when a client quits.
