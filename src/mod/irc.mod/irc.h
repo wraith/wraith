@@ -6,7 +6,6 @@
 #ifndef _EGG_MOD_IRC_IRC_H
 #define _EGG_MOD_IRC_IRC_H
 
-#include "src/auth.h"
 #include "src/chanprog.h"
 
 enum { BC_NOCOOKIE = 1, BC_SLACK, BC_HASH, BC_COUNTER };
@@ -17,6 +16,8 @@ enum { BC_NOCOOKIE = 1, BC_SLACK, BC_HASH, BC_COUNTER };
 /* For flushmodes */
 #define NORMAL          0
 #define QUICK           1
+
+class Auth;
 
 #ifdef MAKING_IRC
 

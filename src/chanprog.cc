@@ -32,6 +32,7 @@
 #include "common.h"
 #include "chanprog.h"
 #include "settings.h"
+#include "auth.h"
 #include "src/mod/irc.mod/irc.h"
 #include "src/mod/channels.mod/channels.h"
 #include "src/mod/server.mod/server.h"

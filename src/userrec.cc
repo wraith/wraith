@@ -29,6 +29,7 @@
 
 #include <sys/stat.h>
 #include "common.h"
+#include "auth.h"
 #include "userrec.h"
 #include "misc.h"
 #include "misc_file.h"
