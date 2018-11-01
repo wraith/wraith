@@ -1235,7 +1235,7 @@ static void member_update_from_cache(struct chanset_t* chan, memberlist *m) {
 bool
 me_voice(const struct chanset_t *chan)
 {
-  memberlist *mx = ismember(chan, botname);
+  const memberlist *mx = ismember(chan, botname);
 
   if (!mx)
     return 0;
