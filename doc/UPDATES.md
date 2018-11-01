@@ -11,12 +11,12 @@
   * Add cmd_roles (leaf only) to display roles for a channel. (#39)
   * Add 'chanset homechan-user [nothing/voice/op]' to auto-voice or auto-op
     clients who are opped in 'set homechan'.
+  * Some small performance improvements.
 
 # maint
   * Clear FiSH keys when a client quits.
   * Fix crash when clearing last botset entry for a bot.
   * Bots now share channel key to other bots even if not opped.
-  * Some small performance improvements.
   * Fix rare issue with writing binary config.
   * Make ./wraith -q and -Q clearly exit when already written.
 
