@@ -101,9 +101,8 @@ typedef struct {
 
 # define killsock(x)     	real_killsock((x),__FILE__,__LINE__)
 
-unsigned long my_atoul(const char *);
-char *myipstr(int);
-in_addr_t getmyip();
+unsigned long my_atoul(const char *) __attribute__((pure));
+const char *myipstr(int);
 void cache_my_ip();
 void setsock(int, int);
 int allocsock(int, int);
@@ -117,11 +116,11 @@ int real_getsock(int, const char *, int);
 #endif /* USE_IPV6 */
 
 
-int sockprotocol(int);
+int sockprotocol(int) __attribute__((pure));
 void real_killsock(int, const char *, int);
 int answer(int, char *, in_addr_t *, in_port_t *, int);
-int findanysnum(int);
-int findanyidx(int sock);
+int findanysnum(int) __attribute__((pure));
+int findanyidx(int sock) __attribute__((pure));
 int open_listen(in_port_t *);
 int open_listen_by_af(in_port_t *, int);
 int open_listen_addr_by_af(const char*, in_port_t *, int);
@@ -137,8 +136,8 @@ void tputs(int, const char *, size_t);
 void dequeue_sockets();
 int sockgets(char *, int *);
 void tell_netdebug(int);
-char *iptostr(in_addr_t);
-bool sock_has_data(int, int);
+const char *iptostr(in_addr_t);
+bool sock_has_data(int, int) __attribute__((pure));
 int sockoptions(int sock, int operation, int sock_options);
 void init_net(void);
 int sock_read(bd::Stream&);
@@ -158,5 +157,11 @@ extern bool				identd_hack, cached_ip;
 extern in_port_t				firewallport;
 extern jmp_buf				alarmret;
 extern sock_list			*socklist;
+
+static inline in_addr_t
+__attribute__((pure))
+getmyip() {
+  return cached_myip4_so.sin.sin_addr.s_addr;
+}
 
 #endif /* !_NET_H */

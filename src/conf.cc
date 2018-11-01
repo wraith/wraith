@@ -1137,20 +1137,6 @@ void conf_add_userlist_bots()
 
 }
 
-conf_bot *conf_getlocalhub(conf_bot *bots) {
-  if (!bots)
-    return NULL;
-
-  conf_bot *localhub = bots;
-  if (localhub->disabled)
-    while (localhub && localhub->disabled)
-      localhub = localhub->next;
-
-  if (!localhub) return NULL;
-  return !localhub->disabled ? localhub : NULL;
-}
-
-
 void conf_setmypid(pid_t pid) {
   conf.bot->pid = pid;
   conf_bot *bot = conf.bots;

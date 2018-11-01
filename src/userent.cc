@@ -1068,7 +1068,7 @@ bool add_entry_type(struct user_entry_type *type)
   return 1;
 }
 
-struct user_entry_type *find_entry_type(char *name)
+struct user_entry_type *find_entry_type(const char *name)
 {
   struct user_entry_type *p = NULL;
 

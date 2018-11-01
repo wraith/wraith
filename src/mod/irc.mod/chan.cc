@@ -256,22 +256,16 @@ static memberlist *newmember(struct chanset_t *chan, char *nick)
 {
   memberlist *x = chan->channel.member, 
              *lx = NULL, 
-             *n = (memberlist *) calloc(1, sizeof(memberlist));
+             *n = new memberlist;
 
   /* This sorts the list */
   while (x && x->nick[0] && (rfc_casecmp(x->nick, nick) < 0)) {
     lx = x;
     x = x->next;
   }
-  /*
-   * redundant as calloc is used
-   n->next = NULL;
-   n->split = 0L;
-   n->last = 0L;
-   n->delay = 0L;
-   */
 
   strlcpy(n->nick, nick, sizeof(n->nick));
+  n->rfc_nick = std::make_shared<RfcString>(n->nick);
   n->hops = -1;
   if (!lx) {
     // Free the pseudo-member created in init_channel()
@@ -290,13 +284,14 @@ static memberlist *newmember(struct chanset_t *chan, char *nick)
   ++(chan->channel.members);
   n->floodtime = new bd::HashTable<flood_t, time_t>;
   n->floodnum  = new bd::HashTable<flood_t, int>;
+  (*chan->channel.hashed_members)[*n->rfc_nick] = n;
   return n;
 }
 
 void delete_member(memberlist* m) {
   delete m->floodtime;
   delete m->floodnum;
-  free(m);
+  delete m;
 }
 
 static bool member_getuser(memberlist* m, bool act_on_lookup) {
@@ -3083,6 +3078,8 @@ static int gotnick(char *from, char *msg)
   if (auth)
     auth->NewNick(msg);
 
+  const RfcString rfc_nick(nick);
+  auto new_rfc_nick = std::make_shared<RfcString>(msg);
 
   /* Compose a nick!user@host for the new nick */
   simple_snprintf(s1, sizeof(s1), "%s!%s", msg, uhost);
@@ -3091,7 +3088,7 @@ static int gotnick(char *from, char *msg)
   struct userrec *u = get_user_by_host(s1);
 
   for (struct chanset_t *chan = chanset; chan; chan = chan->next) {
-    m = ismember(chan, nick);
+    m = ismember(chan, rfc_nick);
 
     if (m) {
       m->user = u;
@@ -3099,11 +3096,14 @@ static int gotnick(char *from, char *msg)
       /* Not just a capitalization change */
       if (rfc_casecmp(nick, msg)) {
         /* Someone on channel with old nick?! */
-	if ((mm = ismember(chan, msg)))
+	if ((mm = ismember(chan, *new_rfc_nick)))
 	  killmember(chan, mm->nick, false);
       }
 
+      chan->channel.hashed_members->remove(*m->rfc_nick);
       strlcpy(m->nick, msg, sizeof(m->nick));
+      m->rfc_nick = new_rfc_nick;
+      (*chan->channel.hashed_members)[*m->rfc_nick] = m;
       strlcpy(m->from, s1, sizeof(m->from));
 
       /*

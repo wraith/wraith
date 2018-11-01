@@ -29,8 +29,6 @@ char *encrypt_string(const char *, char *);
 char *decrypt_string(const char *, char *);
 char *salted_sha1(const char *, const char* = NULL);
 int salted_sha1cmp(const char *, const char*);
-char *cryptit (char *);
-char *decryptit (char *);
 void Encrypt_File(char *, char *);
 void Decrypt_File(char *, char *);
 void btoh(const unsigned char *md, size_t md_len, char *buf, const size_t buf_len);

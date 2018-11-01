@@ -197,7 +197,7 @@ void Tempfile::AllocTempfile()
   MakeTemp();
 }
 
-void Tempfile::MakeTemp()
+void Tempfile::MakeTemp() noexcept
 {
   if ((fd = mkstemp(file)) < 0) {
     f = NULL;
@@ -284,7 +284,7 @@ static bool check_tempdir(bool do_mod)
   return 1;
 }
 
-bool Tempfile::FindDir()
+bool Tempfile::FindDir() noexcept
 {
   /* this is temporary until we make tmpdir customizable */
 

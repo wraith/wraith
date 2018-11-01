@@ -978,13 +978,14 @@ static void init_channel(struct chanset_t *chan, bool reset)
   chan->channel.invite = (masklist *) calloc(1, sizeof(masklist));
   init_masklist(chan->channel.invite);
 
-  chan->channel.member = (memberlist *) calloc(1, sizeof(memberlist));
+  chan->channel.member = new memberlist;
   chan->channel.member->nick[0] = 0;
   chan->channel.member->next = NULL;
   chan->channel.topic = NULL;
   chan->channel.floodtime = new bd::HashTable<bd::String, bd::HashTable<flood_t, time_t> >;
   chan->channel.floodnum  = new bd::HashTable<bd::String, bd::HashTable<flood_t, int> >;
   chan->channel.cached_members = new bd::HashTable<bd::String, memberlist*>;
+  chan->channel.hashed_members = new bd::HashTable<RfcString, memberlist*>;
   /* Don't clear out existing roles, keep them until rebalancing
    * to not create a window of missing roles. */
   if (!chan->bot_roles) {
@@ -1046,21 +1047,17 @@ void clear_channel(struct chanset_t *chan, bool reset)
 
   if (chan->channel.cached_members) {
     if (chan->channel.cached_members->size()) {
-      bd::Array<bd::String> member_uhosts(chan->channel.cached_members->keys());
-      for (size_t i = 0; i < member_uhosts.length(); ++i) {
-        const bd::String uhost(member_uhosts[i]);
-
+      for (const auto& uhost : chan->channel.cached_members->keys()) {
         // Delete the cached member
         m = (*chan->channel.cached_members)[uhost];
         delete_member(m);
-
-        // Remove the cached member (not technically needed as it is deleted below, but for completeness.)
-        chan->channel.cached_members->remove(uhost);
       }
     }
     delete chan->channel.cached_members;
     chan->channel.cached_members = NULL;
   }
+  delete chan->channel.hashed_members;
+  chan->channel.hashed_members = NULL;
 
   if (reset)
     init_channel(chan, 1);
@@ -1185,6 +1182,7 @@ int channel_add(char *result, const char *newname, char *options, bool isdefault
      * the server knows it, when we join the channel. <cybah>
      */
     strlcpy(chan->dname, newname, sizeof(chan->dname));
+    chanset_by_dname[chan->dname] = chan;
 
     /* Initialize chan->channel info */
     if (isdefault) {

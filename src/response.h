@@ -25,9 +25,10 @@
 typedef const char* response_t;
 
 void init_responses();
-const char *response(response_t);
+const char *response(response_t) __attribute__((pure));
 
 inline const char *
+__attribute__((pure))
 r_banned(struct chanset_t *chan)
 {
   return response(RES_BANNED);

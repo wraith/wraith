@@ -54,6 +54,7 @@
 #include <bdlib/src/String.h>
 #include <bdlib/src/Array.h>
 #include <algorithm>
+#include <unordered_map>
 
 tand_t			*tandbot = NULL;		/* Keep track of tandem bots on the
 							   botnet */
@@ -245,7 +246,7 @@ void partysetidle(char *bot, int sock, int secs)
 
 /* Return someone's chat channel.
  */
-int getparty(char *bot, int sock)
+int getparty(const char *bot, int sock)
 {
   for (int i = 0; i < parties; i++) {
     if (!strcasecmp(party[i].bot, bot) &&
@@ -581,7 +582,7 @@ tell_bots(int idx, int up, const char *nodename)
 {
   size_t total = 0, maxNodeNameLength = 0;;
   bd::Array<bd::String> nodes;
-  bd::HashTable<bd::String, bd::Array<bd::String> > nodeBots;
+  std::unordered_map<bd::String, bd::Array<bd::String> > nodeBots;
   bd::Array<bd::String> bots;
   bd::String group;
 
@@ -852,7 +853,7 @@ void dump_links(int z)
   }
 }
 
-int in_chain(char *who)
+int in_chain(const char *who)
 {
   if (!strcasecmp(who, conf.bot->nick))
     return 1;
@@ -861,7 +862,7 @@ int in_chain(char *who)
   return 0;
 }
 
-int bots_in_subtree(tand_t *bot)
+int bots_in_subtree(const tand_t *bot)
 {
   if (!bot)
     return 0;
@@ -877,7 +878,7 @@ int bots_in_subtree(tand_t *bot)
   return nr;
 }
 
-int users_in_subtree(tand_t *bot)
+int users_in_subtree(const tand_t *bot)
 {
   if (!bot)
     return 0;

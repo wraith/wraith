@@ -7,7 +7,7 @@ namespace bd {
 };
 
 char *int_to_base64(unsigned int);
-int base64_to_int(const char *);
+int base64_to_int(const char *) __attribute__((pure));
 
 bd::String broken_base64Encode(const bd::String&);
 char *b64enc(const unsigned char *data, size_t len);

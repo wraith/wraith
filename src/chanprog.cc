@@ -55,7 +55,10 @@
 #endif
 #include <sys/utsname.h>
 #include <bdlib/src/Array.h>
+#include <bdlib/src/HashTable.h>
 #include <bdlib/src/String.h>
+
+bd::HashTable<RfcString, struct chanset_t *> chanset_by_dname;
 
 char *def_chanset = "+enforcebans +dynamicbans +userbans -bitch +cycle -inactive +userexempts -dynamicexempts +userinvites -dynamicinvites -nodesynch -closed -take -voice -private -fastop ban-type 3 protect-backup 1 groups { main } revenge react";
 struct chanset_t 	*chanset = NULL;	/* Channel list			*/
@@ -92,19 +95,6 @@ void rmspace(char *s)
     memmove(s, p, q - p + 2);
 }
 
-/* Returns memberfields if the nick is in the member list.
- */
-memberlist *ismember(const struct chanset_t *chan, const char *nick)
-{
-  memberlist	*x = NULL;
-
-  if (chan && nick && nick[0])
-    for (x = chan->channel.member; x && x->nick[0]; x = x->next)
-      if (!rfc_casecmp(x->nick, nick))
-        return x;
-  return NULL;
-}
-
 /* Find a chanset by channel name as the server knows it (ie !ABCDEchannel)
  */
 struct chanset_t *findchan(const char *name)
@@ -113,18 +103,6 @@ struct chanset_t *findchan(const char *name)
 
   for (chan = chanset; chan; chan = chan->next)
     if (chan->name[0] && !rfc_casecmp(chan->name, name))
-      return chan;
-  return NULL;
-}
-
-/* Find a chanset by display name (ie !channel)
- */
-struct chanset_t *findchan_by_dname(const char *name)
-{
-  struct chanset_t	*chan = NULL;
-
-  for (chan = chanset; chan; chan = chan->next)
-    if (!rfc_casecmp(chan->dname, name))
       return chan;
   return NULL;
 }
@@ -139,8 +117,8 @@ struct chanset_t *findchan_by_dname(const char *name)
 struct userrec *check_chanlist(const char *host)
 {
   char				*nick = NULL, *uhost = NULL, buf[UHOSTLEN] = "";
-  memberlist		*m = NULL;
-  struct chanset_t	*chan = NULL;
+  const memberlist		*m = NULL;
+  const struct chanset_t	*chan = NULL;
 
   strlcpy(buf, host, sizeof buf);
   uhost = buf;
@@ -156,8 +134,8 @@ struct userrec *check_chanlist(const char *host)
  */
 struct userrec *check_chanlist_hand(const char *hand)
 {
-  struct chanset_t	*chan = NULL;
-  memberlist		*m = NULL;
+  const struct chanset_t	*chan = NULL;
+  const memberlist		*m = NULL;
 
   for (chan = chanset; chan; chan = chan->next)
     for (m = chan->channel.member; m && m->nick[0]; m = m->next)
@@ -366,8 +344,10 @@ void reaffirm_owners()
 }
 
 bool is_hub(const char* nick) {
+  bd::String hub(size_t(HANDLEN));
+
   for (size_t idx = 0; idx < conf.hubs.length(); ++idx) {
-    bd::String hub(conf.hubs[idx]);
+    hub = conf.hubs[idx];
     if (!strncasecmp(nick, newsplit(hub).c_str(), HANDLEN)) {
       return true;
     }
@@ -696,14 +676,14 @@ void setup_HQ(int n) {
 
 /* Oddly enough, written by proton (Emech's coder)
  */
-int isowner(char *name)
+int isowner(const char *name)
 {
   if (!owner[0])
     return (0);
   if (!name || !name[0])
     return (0);
 
-  char *pa = owner, *pb = owner;
+  const char *pa = owner, *pb = owner;
   size_t nl = strlen(name), pl;
 
   while (1) {
@@ -726,7 +706,8 @@ int isowner(char *name)
   }
 }
 
-bool bot_shouldjoin(struct userrec* u, struct flag_record* fr, const struct chanset_t* chan, bool ignore_inactive)
+bool bot_shouldjoin(struct userrec* u, const struct flag_record* fr,
+    const struct chanset_t* chan, bool ignore_inactive)
 {
   // If restarting, keep this channel.
   if (restarting && (reset_chans == 2) && (channel_active(chan) || channel_pending(chan))) return 1;
@@ -832,11 +813,11 @@ int do_chanset(char *result, struct chanset_t *chan, const char *options, int fl
   return ret;
 }
 
-char *
+const char *
 samechans(const char *nick, const char *delim)
 {
   static char ret[1024] = "";
-  struct chanset_t *chan = NULL;
+  const struct chanset_t *chan = NULL;
 
   ret[0] = 0;		/* may be filled from last time */
   for (chan = chanset; chan; chan = chan->next) {
@@ -849,7 +830,9 @@ samechans(const char *nick, const char *delim)
   return ret;
 }
 
-static struct chanset_t* find_common_opped_chan(bd::String nick) {
+static struct chanset_t*
+__attribute__((pure))
+find_common_opped_chan(const bd::String& nick) {
   for (struct chanset_t* chan = chanset; chan; chan = chan->next) {
     if (channel_active(chan) && (me_op(chan) || me_voice(chan))) {
       if (ismember(chan, nick.c_str()))
@@ -859,7 +842,7 @@ static struct chanset_t* find_common_opped_chan(bd::String nick) {
   return NULL;
 }
 
-void privmsg(bd::String target, bd::String msg, int idx) {
+void privmsg(const bd::String& target, bd::String msg, int idx) {
   struct chanset_t* chan = NULL;
   bool talking_to_chan = strchr(CHANMETA, target[0]);
   if (have_cprivmsg && !talking_to_chan)
@@ -881,7 +864,7 @@ void privmsg(bd::String target, bd::String msg, int idx) {
     dprintf(idx, "PRIVMSG %s :%s\n", target.c_str(), msg.c_str());
 }
 
-void notice(bd::String target, bd::String msg, int idx) {
+void notice(const bd::String& target, bd::String msg, int idx) {
   struct chanset_t* chan = NULL;
   bool talking_to_chan = strchr(CHANMETA, target[0]);
   if (have_cnotice && !talking_to_chan)
@@ -919,7 +902,7 @@ void keyx(const bd::String &target, const char *reason) {
   FishKeys[target] = fishData;
 }
 
-void set_fish_key(char *target, bd::String key)
+void set_fish_key(const char *target, const bd::String key)
 {
   fish_data_t* fishData = FishKeys.contains(target) ? FishKeys[target] : NULL;
 

@@ -241,6 +241,6 @@ void send_timesync(int);
 void failed_link(int);
 void dupwait_notify(const char *);
 void send_sysinfo();
-int ansi_len(char *);
+int ansi_len(const char *) __attribute__((pure));
 
 #endif /* !_DCC_H */

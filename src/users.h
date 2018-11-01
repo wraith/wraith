@@ -42,8 +42,8 @@ list_delete(struct list_type **h, struct list_type *i)
   return 0;
 }
 
-static inline bool
-list_contains(struct list_type *h, struct list_type *i)
+static inline bool __attribute__((pure))
+list_contains(const struct list_type *h, const struct list_type *i)
 {
   for (; h; h = h->next)
     if (h == i) {
@@ -120,7 +120,7 @@ struct filesys_stats {
 };
 
 bool add_entry_type(struct user_entry_type *);
-struct user_entry_type *find_entry_type(char *);
+struct user_entry_type *find_entry_type(const char *) __attribute__((pure));
 struct user_entry *find_user_entry(struct user_entry_type *, struct userrec *);
 void *get_user(struct user_entry_type *, struct userrec *);
 bool user_has_host(const char *, struct userrec *, char *);

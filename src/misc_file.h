@@ -13,11 +13,11 @@
 
 int copyfile(const char *, const char *);
 int movefile(const char *, const char *);
-int is_file(const char *);
-int can_stat(const char *);
-int can_lstat(const char *);
-int is_symlink(const char *);
-int is_dir(const char *);
+int is_file(const char *) __attribute__((pure));
+int can_stat(const char *) __attribute__((pure));
+int can_lstat(const char *) __attribute__((pure));
+int is_symlink(const char *) __attribute__((pure));
+int is_dir(const char *) __attribute__((pure));
 int fixmod(const char *);
 
 class Tempfile 
@@ -29,7 +29,7 @@ class Tempfile
     void AllocTempfile();			//constructor with file prefix
     void my_close();
     ~Tempfile();				//destructor
-    static bool FindDir();
+    static bool FindDir() noexcept;
 
     bool error;					//exceptions are lame.
     FILE *f;
@@ -40,7 +40,7 @@ class Tempfile
   private:
     char *prefix;
     int plen;
-    void MakeTemp();				//Used for mktemp() and checking
+    void MakeTemp() noexcept;			//Used for mktemp() and checking
     bool useFopen;
 };
 

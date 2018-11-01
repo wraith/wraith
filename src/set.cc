@@ -525,14 +525,16 @@ static int comp_variable_t(const void *m1, const void *m2) {
   return strcasecmp(mi1->name, mi2->name);
 }
 
-static inline variable_t *var_get_var_by_name(const char *name)
+static inline variable_t * __attribute__((pure))
+var_get_var_by_name(const char *name)
 {
   variable_t key;
   key.name = name;
   return (variable_t*) bsearch(&key, &vars, lengthof(vars) - 1, sizeof(variable_t), comp_variable_t);
 }
 
-const char *var_get_gdata(const char *name) {
+const char * __attribute__((pure))
+var_get_gdata(const char *name) {
   variable_t* var = var_get_var_by_name(name);
   return var && var->gdata ? var->gdata : NULL;
 }

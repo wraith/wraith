@@ -10,7 +10,7 @@
 #include "main.h"
 
 #define GARBLE_BUFFERS 40
-unsigned char *garble_buffer[GARBLE_BUFFERS] = {
+static unsigned char *garble_buffer[GARBLE_BUFFERS] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
