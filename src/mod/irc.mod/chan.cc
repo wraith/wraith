@@ -3072,13 +3072,13 @@ static int gotnick(char *from, char *msg)
   nick = splitnick(&uhost);
   fixcolon(msg);
   irc_log(NULL, "[%s] Nick change: %s -> %s", samechans(nick, ","), nick, msg);
-  clear_chanlist_member(nick);	/* Cache for nick 'nick' is meaningless now. */
+  const RfcString rfc_nick(nick);
+  clear_chanlist_member(rfc_nick);	/* Cache for nick 'nick' is meaningless now. */
 
   Auth *auth = Auth::Find(uhost);
   if (auth)
     auth->NewNick(msg);
 
-  const RfcString rfc_nick(nick);
   auto new_rfc_nick = std::make_shared<RfcString>(msg);
 
   /* Compose a nick!user@host for the new nick */

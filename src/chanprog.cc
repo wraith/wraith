@@ -144,29 +144,44 @@ struct userrec *check_chanlist_hand(const char *hand)
   return NULL;
 }
 
-/* Clear the user pointer of a specific nick in the chanlists.
+/* Clear the user pointers in the chanlists.
  *
- * Necessary when a hostmask is added/removed, a nick changes, etc.
- * Does not completely invalidate the channel cache like clear_chanlist().
+ * Necessary when a hostmask is added/removed, a user is added or a new
+ * userfile is loaded.
  */
-void clear_chanlist_member(const char *nick)
+void clear_chanlist(void)
 {
   memberlist		*m = NULL;
   struct chanset_t	*chan = NULL;
 
   for (chan = chanset; chan; chan = chan->next) {
     for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-      if (nick == NULL || !rfc_casecmp(m->nick, nick)) {
-	m->user = NULL;
-        m->tried_getuser = 0;
-        if (nick != NULL) {
-          break;
-        }
-      }
+      m->user = NULL;
+      m->tried_getuser = 0;
     }
   }
 
-  Auth::NullUsers(nick);
+  Auth::NullUsers(NULL);
+}
+
+/* Clear the user pointer of a specific nick in the chanlists.
+ *
+ * Necessary when a hostmask is added/removed, a nick changes, etc.
+ * Does not completely invalidate the channel cache like clear_chanlist().
+ */
+void clear_chanlist_member(const RfcString& nick)
+{
+  memberlist		*m = NULL;
+  struct chanset_t	*chan = NULL;
+
+  for (chan = chanset; chan; chan = chan->next) {
+    if ((m = ismember(chan, nick)) != NULL) {
+      m->user = NULL;
+      m->tried_getuser = 0;
+    }
+  }
+
+  Auth::NullUsers(nick.c_str());
 }
 
 /* If this user@host is in a channel, set it (it was null)
