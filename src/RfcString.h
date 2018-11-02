@@ -16,15 +16,17 @@ class RfcString : public bd::String {
     using String::String;
     RfcString() = default;
     RfcString(const RfcString& str) : String(str) {}
-    RfcString(RfcString&& str) : String(std::move(str)) {}
+    RfcString(RfcString&& str) noexcept :
+      String(std::move(str)) {}
     RfcString(const String &str) : String(str) {}
-    RfcString(String &&str) : String(std::move(str)) {}
+    RfcString(String &&str) noexcept :
+      String(std::move(str)) {}
     using String::operator=;
     RfcString& operator=(const RfcString& rhs) {
       String::operator=(rhs);
       return *this;
     }
-    RfcString& operator=(RfcString&& rhs) {
+    RfcString& operator=(RfcString&& rhs) noexcept {
       String::operator=(std::move(rhs));
       return *this;
     }
@@ -33,7 +35,7 @@ class RfcString : public bd::String {
       return *this;
     }
 
-    RfcString& operator=(String&& rhs) {
+    RfcString& operator=(String&& rhs) noexcept {
       String::operator=(std::move(rhs));
       return *this;
     }
