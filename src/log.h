@@ -36,7 +36,7 @@ char *maskname(int);
 #if 0
 void irc_log(struct chanset_t *, const char *, ...) __attribute__((format(printf, 2, 3)));
 #else
-#define irc_log(...)
+#define irc_log(...) do {} while (0)
 #endif
 void logfile(int type, const char *msg);
 
