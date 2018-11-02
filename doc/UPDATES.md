@@ -10,6 +10,7 @@
   * Add 'chanset homechan-user [nothing/voice/op]' to auto-voice or auto-op
     clients who are opped in 'set homechan'.
   * Some small performance improvements.
+  * CPRIVMSG/CNOTICE/TIME/TOPIC/OPER should end connection bursting on ratbox.
 
 # maint
   * Clear FiSH keys when a client quits.

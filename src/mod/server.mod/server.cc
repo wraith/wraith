@@ -184,11 +184,10 @@ burst_mode_ok(const char *msg, size_t len) {
   return 0;
 }
 
-// Hybrid/ratbox allows bursting 5*8 lines on connect until certain commands are sent, for up to 30 seconds
+// Hybrid/ratbox allows bursting MAX_FLOOD_BURST=5(MAX_FLOOD)*8 lines on connect until certain commands are sent, for up to 30 seconds
 /*
-   BAD:
+   BAD (src/packet.c flood_endgrace()):
      JOIN 0
-     MODE #chan b
      NICK
      PART
      KICK
@@ -206,6 +205,8 @@ burst_mode_ok(const char *msg, size_t len) {
      WHO !
      WHO #Chan
      WHO NICK
+     MODE #chan
+     MODE #chan b
 */
 static inline bool
 __attribute__((pure))
@@ -213,10 +214,15 @@ burst_ok(const char* msg, size_t len) {
   if (strstr(msg, "JOIN 0") ||
       (strstr(msg, "MODE") && !burst_mode_ok(msg, len)) ||
       strstr(msg, "NICK") ||
+      strstr(msg, "CPRIVMSG") ||
       strstr(msg, "PRIVMSG") ||
+      strstr(msg, "CNOTICE") ||
       strstr(msg, "NOTICE") ||
       strstr(msg, "PART") ||
       strstr(msg, "KICK") ||
+      strstr(msg, "TIME") ||
+      strstr(msg, "OPER") ||
+      strstr(msg, "TOPIC") ||
       strstr(msg, "INVITE") ||
       strstr(msg, "AWAY")) {
     return 0;
