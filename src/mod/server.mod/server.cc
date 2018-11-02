@@ -51,6 +51,7 @@
 #include <bdlib/src/Array.h>
 #include "server.h"
 #include <stdarg.h>
+#include <vector>
 
 int default_alines = 5;		/* How many mode lines are assumed will work before throttling */
 bool floodless = 0;		/* floodless iline? */
@@ -1051,10 +1052,10 @@ static void server_secondly()
       }
 
       // Clear expired key exchanges that aren't finished (7 seconds)
-      const bd::Array<bd::String> fish_targets(FishKeys.keys());
-      for (size_t i = 0; i < fish_targets.length(); ++i) {
-        const bd::String target(fish_targets[i]);
-        fish_data_t* fishData = FishKeys[target];
+      std::vector<bd::String> expired_keys;
+      for (const auto& kv : FishKeys) {
+        auto& target = kv.first;
+        const auto fishData = kv.second;
         bool should_delete = false;
         if (fishData->key_created_at && !fishData->sharedKey && ((now - 7) >= fishData->key_created_at)) {
           putlog(LOG_DEBUG, "*", "Deleting expired DH1080 FiSH exchange with %s", target.c_str());
@@ -1063,13 +1064,14 @@ static void server_secondly()
           putlog(LOG_DEBUG, "*", "Deleting expired (60 min) FiSH key with %s", target.c_str());
           should_delete = true;
         }
-
         if (should_delete) {
-          FishKeys.remove(target);
           delete fishData;
+          expired_keys.push_back(target);
         }
       }
-
+      for (const auto& target : expired_keys) {
+        FishKeys.remove(target);
+      }
 
       cnt_10 = 0;
     } else {

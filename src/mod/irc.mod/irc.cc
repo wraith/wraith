@@ -60,6 +60,7 @@ using std::swap;
 #include <bdlib/src/HashTable.h>
 #include <bdlib/src/base64.h>
 #include <deque>
+#include <vector>
 
 #include <stdarg.h>
 
@@ -1636,17 +1637,19 @@ check_expired_chanstuff(struct chanset_t *chan)
   }
   // Clear out expired cached members
   if (chan->channel.cached_members && chan->channel.cached_members->size()) {
-    bd::Array<bd::String> member_uhosts(chan->channel.cached_members->keys());
-    for (size_t i = 0; i < member_uhosts.length(); ++i) {
-      const bd::String uhost(member_uhosts[i]);
-
-      m = (*chan->channel.cached_members)[uhost];
+    std::vector<bd::String> expired_hosts;
+    for (const auto& kv : *(chan->channel.cached_members)) {
+      auto& uhost = kv.first;
+      m = kv.second;
 
       // Delete the expired member
       if (now - m->last > wait_split) {
         delete_member(m);
-        chan->channel.cached_members->remove(uhost);
+        expired_hosts.push_back(uhost);
       }
+    }
+    for (const auto& uhost : expired_hosts) {
+      chan->channel.cached_members->remove(uhost);
     }
   }
 }
