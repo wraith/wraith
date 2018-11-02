@@ -722,7 +722,6 @@ int main(int argc, char **argv)
   srandom(now % (mypid + getppid()) * randint(1000));
 
   setlimits();
-  init_debug();
   init_signals();
 
   if (strcmp(fake_md5, STR("596a96cc7bf9108cd896f33c44aedc8a"))) {
