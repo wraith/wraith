@@ -171,8 +171,8 @@ static const struct {
  *     Bot server queues
  */
 static bool burst_mode_ok(const char *msg, size_t len) {
-  bd::String mode(msg, len);
-  bd::Array<bd::String> list(mode.split(' '));
+  const bd::String mode(msg, len);
+  const auto list(mode.split(' '));
   if (list.length() == 2) return 1;
   if (list.length() == 3) {
     if (!strchr(CHANMETA, bd::String(list[1]).at(0))) return 1;
