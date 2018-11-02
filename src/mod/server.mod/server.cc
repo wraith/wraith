@@ -171,7 +171,9 @@ static const struct {
 /*
  *     Bot server queues
  */
-static bool burst_mode_ok(const char *msg, size_t len) {
+static bool
+__attribute__((pure))
+burst_mode_ok(const char *msg, size_t len) {
   const bd::String mode(msg, len);
   const auto list(mode.split(' '));
   if (list.length() == 2) return 1;
@@ -205,7 +207,9 @@ static bool burst_mode_ok(const char *msg, size_t len) {
      WHO #Chan
      WHO NICK
 */
-static bool burst_ok(const char* msg, size_t len) {
+static inline bool
+__attribute__((pure))
+burst_ok(const char* msg, size_t len) {
   if (strstr(msg, "JOIN 0") ||
       (strstr(msg, "MODE") && !burst_mode_ok(msg, len)) ||
       strstr(msg, "NICK") ||
@@ -215,7 +219,6 @@ static bool burst_ok(const char* msg, size_t len) {
       strstr(msg, "KICK") ||
       strstr(msg, "INVITE") ||
       strstr(msg, "AWAY")) {
-    sdprintf("BURST MODE VIOLATION!!!: %s\n", msg);
     return 0;
   }
   return 1;
@@ -645,8 +648,10 @@ void queue_server(int which, char *buf, int len)
 
   // If connect bursting, hold off any commands which would end the gracetime (flood_endgrace)
   if (connect_bursting && (which == DP_MODE || which == DP_MODE_NEXT || which == DP_SERVER || which == DP_SERVER_NEXT)) {
-    if (!burst_ok(buf, len))
+    if (!burst_ok(buf, len)) {
+      sdprintf("BURST MODE VIOLATION!!!: %s\n", buf);
       which = DP_HELP;
+    }
   }
 
   int qnext = 0;

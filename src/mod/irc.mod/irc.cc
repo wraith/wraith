@@ -1250,6 +1250,7 @@ me_voice(const struct chanset_t *chan)
 /* Check if there are any ops on the channel. Returns boolean 1 or 0.
  */
 static bool
+__attribute__((pure))
 any_ops(struct chanset_t *chan)
 {
   memberlist *x = NULL;

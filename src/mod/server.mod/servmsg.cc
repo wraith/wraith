@@ -618,11 +618,12 @@ static bool detect_flood(char *floodnick, char *floodhost, char *from, int which
 /* Check for more than 8 control characters in a line.
  * This could indicate: beep flood CTCP avalanche.
  */
-bool detect_avalanche(char *msg)
+bool
+detect_avalanche(const char *msg)
 {
   int count = 0;
 
-  for (unsigned char *p = (unsigned char *) msg; (*p) && (count < 8); p++)
+  for (const unsigned char *p = (const unsigned char *) msg; (*p) && (count < 8); p++)
     if ((*p == 7) || (*p == 1))
       count++;
   if (count >= 8)
