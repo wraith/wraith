@@ -15,21 +15,14 @@ class RfcString : public bd::String {
   public:
     using String::String;
     RfcString() = default;
-    RfcString(const RfcString& str) : String(str) {}
-    RfcString(RfcString&& str) noexcept :
-      String(std::move(str)) {}
+    RfcString(const RfcString& str) = default;
+    RfcString(RfcString&& str) noexcept = default;
     RfcString(const String &str) : String(str) {}
     RfcString(String &&str) noexcept :
       String(std::move(str)) {}
     using String::operator=;
-    RfcString& operator=(const RfcString& rhs) {
-      String::operator=(rhs);
-      return *this;
-    }
-    RfcString& operator=(RfcString&& rhs) noexcept {
-      String::operator=(std::move(rhs));
-      return *this;
-    }
+    RfcString& operator=(const RfcString& rhs) = default;
+    RfcString& operator=(RfcString&& rhs) noexcept = default;
     RfcString& operator=(const String& rhs) {
       String::operator=(rhs);
       return *this;
