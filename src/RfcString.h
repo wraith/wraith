@@ -47,7 +47,7 @@ class RfcString : public bd::String {
     friend bool operator>(const RfcString&, const RfcString&);
     friend bool operator>=(const RfcString&, const RfcString&);
 
-    virtual size_t hash() const noexcept;
+    size_t hash() const noexcept;
 };
 
 inline bool __attribute__((pure))
