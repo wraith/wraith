@@ -23,22 +23,19 @@ namespace bd {
 class EncryptedStream : public bd::Stream {
   private:
         bd::String key;
-        mutable char enc_flags;
+        mutable char enc_flags{ENC_DEFAULT};
         void apply_filters(bd::String& buf, const bd::String& IV) const;
         void unapply_filters(bd::String& buf, const bd::String& IV) const;
 
   protected:
 
   public:
-        EncryptedStream(const char* keyStr) : Stream(), key(bd::String(keyStr)), enc_flags(ENC_DEFAULT) {};
-        EncryptedStream(const bd::String& keyStr) : Stream(), key(keyStr), enc_flags(ENC_DEFAULT) {};
+        EncryptedStream(const char* keyStr) : key(bd::String(keyStr)) {};
+        EncryptedStream(const bd::String& keyStr) : key(keyStr) {};
         EncryptedStream(bd::String&& keyStr) noexcept :
-          Stream(), key(std::move(keyStr)), enc_flags(ENC_DEFAULT) {};
-        EncryptedStream(const EncryptedStream& stream) : Stream(stream), key(stream.key), enc_flags(ENC_DEFAULT) {};
-        EncryptedStream(EncryptedStream&& stream) noexcept :
-          Stream(std::move(stream)),
-          key(std::move(stream.key)),
-          enc_flags(ENC_DEFAULT) {};
+          key(std::move(keyStr)) {};
+        EncryptedStream(const EncryptedStream& stream) = default;
+        EncryptedStream(EncryptedStream&& stream) noexcept = default;
 
         inline void setFlags(const char _enc_flags) const noexcept {
           enc_flags = _enc_flags;
