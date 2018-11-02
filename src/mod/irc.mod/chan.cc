@@ -2271,6 +2271,7 @@ static int got349(char *from, char *msg)
   return 0;
 }
 
+#if 0
 static void got353(char *from, char *msg)
 {
   char *chname = NULL;
@@ -2283,6 +2284,7 @@ static void got353(char *from, char *msg)
   fixcolon(msg);
   irc_log(chan, "%s", msg);
 }
+#endif
 
 /* got 346: invite exemption info
  * <server> 346 <to> <chan> <exemption>
@@ -3553,7 +3555,9 @@ static cmd_t irc_raw[] =
   {"347",	"",	(Function) got347,	"irc:347", LEAF},
   {"348",	"",	(Function) got348,	"irc:348", LEAF},
   {"349",	"",	(Function) got349,	"irc:349", LEAF},
+#if 0
   {"353",	"",	(Function) got353,	"irc:353", LEAF},
+#endif
   {"710",	"",	(Function) got710,	"irc:710", LEAF},
   {NULL,	NULL,	NULL,			NULL, 0}
 };
