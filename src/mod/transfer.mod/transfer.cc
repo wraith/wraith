@@ -904,8 +904,4 @@ void transfer_report(int idx, int details)
 	    dcc_block, (dcc_block == 0) ? " (turbo dcc)" : "", dcc_limit);
   }
 }
-
-void transfer_init()
-{
-}
 /* vim: set sts=2 sw=2 ts=8 et: */

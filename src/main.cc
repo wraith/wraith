@@ -699,7 +699,6 @@ void irc_init();
 void channels_init();
 void compress_init();
 void share_init();
-void transfer_init();
 
 int main(int argc, char **argv)
 {
@@ -835,7 +834,6 @@ int main(int argc, char **argv)
     server_init();
     ctcp_init();
   }
-  transfer_init();
   share_init();
   update_init();
   console_init();
