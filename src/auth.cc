@@ -173,7 +173,7 @@ void Auth::DeleteAll() noexcept
 {
   if (!ischanhub())
     return;
-  putlog(LOG_DEBUG, "*", STR("Removing auth entries."));
+  putlog(LOG_DEBUG, "*", STR("Removing %zd auth entries."), ht_host.size());
   std::vector<const Auth*> delete_auths;
   delete_auths.reserve(ht_host.size());
   for (const auto& kv : ht_host) {
