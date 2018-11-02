@@ -4103,6 +4103,63 @@ EOF
   fi
 
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -Wsuggest-attribute=pure -Wsuggest-attribute=const" >&5
+$as_echo_n "checking whether the compiler understands -Wsuggest-attribute=pure -Wsuggest-attribute=const... " >&6; }
+if ${ax_cv_prog_cc_wsuggest_attribute+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+    ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+    ac_saved_flags="$CXXFLAGS"
+    CXXFLAGS="-Werror -Wsuggest-attribute=pure -Wsuggest-attribute=const"
+    cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end build/confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  ax_cv_prog_cc_wsuggest_attribute="yes"
+else
+  ax_cv_prog_cc_wsuggest_attribute="no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+    CXXFLAGS="$ac_saved_flags"
+    ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_prog_cc_wsuggest_attribute" >&5
+$as_echo "$ax_cv_prog_cc_wsuggest_attribute" >&6; }
+
+  if [ "$ax_cv_prog_cc_wsuggest_attribute" = "yes" ]; then
+    DEBCXXFLAGS="$DEBCXXFLAGS -Wsuggest-attribute=pure -Wsuggest-attribute=const"
+  elif [ -n "" ]; then
+      cat << 'EOF' >&2
+configure: error:
+
+  Your OS or C++ compiler does not support -Wsuggest-attribute=pure -Wsuggest-attribute=const.
+  This compile flag is required.
+
+EOF
+    exit 1
+  fi
+
+
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -Wconditional-uninitialized" >&5
 $as_echo_n "checking whether the compiler understands -Wconditional-uninitialized... " >&6; }
 if ${ax_cv_prog_cc_w_conditional_uninitialized+:} false; then :
