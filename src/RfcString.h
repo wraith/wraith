@@ -8,10 +8,6 @@ namespace bd {
 #include <bdlib/src/String.h>
 
 class RfcString : public bd::String {
-  private:
-
-  protected:
-
   public:
     using String::String;
     RfcString() = default;
@@ -21,14 +17,14 @@ class RfcString : public bd::String {
     RfcString(String &&str) noexcept :
       String(std::move(str)) {}
     using String::operator=;
-    RfcString& operator=(const RfcString& rhs) = default;
-    RfcString& operator=(RfcString&& rhs) noexcept = default;
-    RfcString& operator=(const String& rhs) {
+    RfcString& operator=(const RfcString& rhs) & = default;
+    RfcString& operator=(RfcString&& rhs) & noexcept = default;
+    RfcString& operator=(const String& rhs) & {
       String::operator=(rhs);
       return *this;
     }
 
-    RfcString& operator=(String&& rhs) noexcept {
+    RfcString& operator=(String&& rhs) & noexcept {
       String::operator=(std::move(rhs));
       return *this;
     }
