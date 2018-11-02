@@ -12,6 +12,7 @@
   * Some small performance improvements.
   * CPRIVMSG/CNOTICE/TIME/TOPIC/OPER should end connection bursting on ratbox.
   * Fix server connect bursting for joining channels with help from other bots.
+  * Tweak server connect burst to progress quicker.
 
 # maint
   * Clear FiSH keys when a client quits.

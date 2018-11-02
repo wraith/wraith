@@ -339,7 +339,7 @@ got004(char *from, char *msg)
   if (!replaying_cache && connect_burst) {
     connect_bursting = now;
     msgburst = SERVER_CONNECT_BURST_RATE;
-    msgrate = 200;
+    msgrate = 0;
     reset_flood();
     putlog(LOG_DEBUG, "*", "Server allows connect bursting, bursting for %d seconds", SERVER_CONNECT_BURST_TIME);
   }
