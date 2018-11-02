@@ -1813,8 +1813,4 @@ void zapfbot(int idx)
   lostdcc(idx);
 }
 
-void lower_bot_linked(int idx)
-{
-}
-
 /* vim: set sts=2 sw=2 ts=8 et: */
