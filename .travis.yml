@@ -8,8 +8,8 @@ before_install:
   - sudo apt-get -y update
   - sudo apt-get -y install tcl tcl-dev
   - if [ "$CXX" = "g++" ]; then sudo apt-get -y install libcppunit-dev libcppunit-1.13-0; fi
-  - if [ "$CXX" = "g++" ]; then sudo apt-get -y install gcc-4.8 g++-4.8; fi
-  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
+  - if [ "$CXX" = "g++" ]; then sudo apt-get -y install gcc-4.9 g++-4.9; fi
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.9" CC="gcc-4.9"; fi
   - if [ "$CXX" = "clang++" ]; then sudo apt-get -y install clang-3.6; fi
   - if [ "$CXX" = "clang++" ]; then svn co --quiet --trust-server-cert --non-interactive https://llvm.org/svn/llvm-project/libcxxabi/trunk@r249649 libcxxabi; fi
   - if [ "$CXX" = "clang++" ]; then svn co --quiet --trust-server-cert --non-interactive https://llvm.org/svn/llvm-project/libcxx/trunk@r249595 libcxx; fi
