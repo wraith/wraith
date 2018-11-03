@@ -5,6 +5,7 @@ compiler:
   - gcc
 
 before_install:
+  - if [ "$CXX" = "g++" ]; then sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y; fi
   - sudo apt-get -y update
   - sudo apt-get -y install tcl tcl-dev
   - if [ "$CXX" = "g++" ]; then sudo apt-get -y install libcppunit-dev libcppunit-1.13-0; fi
