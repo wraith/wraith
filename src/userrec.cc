@@ -29,6 +29,7 @@
 
 #include <sys/stat.h>
 #include "common.h"
+#include "auth.h"
 #include "userrec.h"
 #include "misc.h"
 #include "misc_file.h"
@@ -69,16 +70,19 @@ int		userfile_perm = 0600;	/* Userfile permissions,
 
 static bool		 sort_users = 1;	/* sort the userlist when saving    */
 
-int count_users(struct userrec *bu)
+int
+count_users(const struct userrec *bu)
 {
   int tot = 0;
 
-  for (struct userrec *u = bu; u; u = u->next)
+  for (const struct userrec *u = bu; u; u = u->next)
     tot++;
   return tot;
 }
 
-static struct userrec *check_dcclist_hand(const char *handle)
+static struct userrec *
+__attribute__((pure))
+check_dcclist_hand(const char *handle)
 {
   for (int i = 0; i < dcc_total; i++)
     if (dcc[i].type && !strcasecmp(dcc[i].nick, handle))
@@ -86,7 +90,7 @@ static struct userrec *check_dcclist_hand(const char *handle)
   return NULL;
 }
 
-struct userrec *host_conflicts(char *host)
+struct userrec *host_conflicts(const char *host)
 {
   struct userrec *u = NULL;
   struct list_type *q = NULL;

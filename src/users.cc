@@ -62,7 +62,8 @@ interval_t ignore_time = 10;		/* how many minutes will ignores last? */
 bool	dont_restructure = 0;		/* set when we botlink() to a hub with +U, only stops bot from restructuring */
 
 /* is this nick!user@host being ignored? */
-bool match_ignore(char *uhost)
+bool
+match_ignore(const char *uhost)
 {
   for (struct igrec *ir = global_ign; ir; ir = ir->next)
     if (wild_match(ir->igmask, uhost))

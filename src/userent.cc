@@ -107,7 +107,9 @@ void def_write_userfile(bd::Stream& stream, const struct userrec *u, const struc
   stream << bd::String::printf("--%s %s\n", e->type->name, e->u.string);
 }
 
-void *def_get(struct userrec *u, struct user_entry *e)
+void *
+__attribute__((pure))
+def_get(struct userrec *u, struct user_entry *e)
 {
   return e->u.string;
 }

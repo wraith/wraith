@@ -11,7 +11,7 @@ extern tand_t		*tandbot;
 extern party_t		*party;
 extern int		tands;
 
-void lower_bot_linked(int idx);
+#define lower_bot_linked(idx) do {} while (0)
 void answer_local_whom(int, int);
 char *lastbot(const char *) __attribute__((pure));
 int nextbot(const char *) __attribute__((pure));

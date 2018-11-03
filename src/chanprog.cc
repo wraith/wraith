@@ -32,6 +32,7 @@
 #include "common.h"
 #include "chanprog.h"
 #include "settings.h"
+#include "auth.h"
 #include "src/mod/irc.mod/irc.h"
 #include "src/mod/channels.mod/channels.h"
 #include "src/mod/server.mod/server.h"
@@ -123,10 +124,13 @@ struct userrec *check_chanlist(const char *host)
   strlcpy(buf, host, sizeof buf);
   uhost = buf;
   nick = splitnick(&uhost);
-  for (chan = chanset; chan; chan = chan->next)
-    for (m = chan->channel.member; m && m->nick[0]; m = m->next) 
-      if (!rfc_casecmp(nick, m->nick) && !strcasecmp(uhost, m->userhost))
-	return m->user;
+  const RfcString rfc_nick(nick);
+  for (chan = chanset; chan; chan = chan->next) {
+    if ((m = ismember(chan, rfc_nick)) != NULL &&
+        !strcasecmp(uhost, m->userhost)) {
+      return m->user;
+    }
+  }
   return NULL;
 }
 
@@ -144,25 +148,40 @@ struct userrec *check_chanlist_hand(const char *hand)
   return NULL;
 }
 
-/* Clear the user pointer of a specific nick in the chanlists.
+/* Clear the user pointers in the chanlists.
  *
- * Necessary when a hostmask is added/removed, a nick changes, etc.
- * Does not completely invalidate the channel cache like clear_chanlist().
+ * Necessary when a hostmask is added/removed, a user is added or a new
+ * userfile is loaded.
  */
-void clear_chanlist_member(const char *nick)
+void clear_chanlist(void)
 {
   memberlist		*m = NULL;
   struct chanset_t	*chan = NULL;
 
   for (chan = chanset; chan; chan = chan->next) {
     for (m = chan->channel.member; m && m->nick[0]; m = m->next) {
-      if (nick == NULL || !rfc_casecmp(m->nick, nick)) {
-	m->user = NULL;
-        m->tried_getuser = 0;
-        if (nick != NULL) {
-          break;
-        }
-      }
+      m->user = NULL;
+      m->tried_getuser = 0;
+    }
+  }
+
+  Auth::NullUsers();
+}
+
+/* Clear the user pointer of a specific nick in the chanlists.
+ *
+ * Necessary when a hostmask is added/removed, a nick changes, etc.
+ * Does not completely invalidate the channel cache like clear_chanlist().
+ */
+void clear_chanlist_member(const RfcString& nick)
+{
+  memberlist		*m = NULL;
+  struct chanset_t	*chan = NULL;
+
+  for (chan = chanset; chan; chan = chan->next) {
+    if ((m = ismember(chan, nick)) != NULL) {
+      m->user = NULL;
+      m->tried_getuser = 0;
     }
   }
 
@@ -180,10 +199,13 @@ void set_chanlist(const char *host, struct userrec *rec)
   strlcpy(buf, host, sizeof buf);
   uhost = buf;
   nick = splitnick(&uhost);
-  for (chan = chanset; chan; chan = chan->next)
-    for (m = chan->channel.member; m && m->nick[0]; m = m->next)
-      if (!rfc_casecmp(nick, m->nick) && !strcasecmp(uhost, m->userhost))
-	m->user = rec;
+  const RfcString rfc_nick(nick);
+  for (chan = chanset; chan; chan = chan->next) {
+    if ((m = ismember(chan, rfc_nick)) != NULL &&
+        !strcasecmp(uhost, m->userhost)) {
+      m->user = rec;
+    }
+  }
 }
 
 /* 0 marks all channels
@@ -832,10 +854,10 @@ samechans(const char *nick, const char *delim)
 
 static struct chanset_t*
 __attribute__((pure))
-find_common_opped_chan(const bd::String& nick) {
+find_common_opped_chan(const RfcString& nick) {
   for (struct chanset_t* chan = chanset; chan; chan = chan->next) {
     if (channel_active(chan) && (me_op(chan) || me_voice(chan))) {
-      if (ismember(chan, nick.c_str()))
+      if (ismember(chan, nick))
         return chan;
     }
   }

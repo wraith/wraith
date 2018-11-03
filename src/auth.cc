@@ -39,19 +39,19 @@
 #include "stat.h"
 
 bd::HashTable<bd::String, Auth*> Auth::ht_host(10);
-bd::HashTable<bd::String, Auth*> Auth::ht_nick(10);
+bd::HashTable<RfcString, Auth*> Auth::ht_nick(10);
 
-Auth::Auth(const char *_nick, const char *_host, struct userrec *u)
+Auth::Auth(const RfcString& _nick, const char *_host, struct userrec *u)
 {
   Status(AUTHING);
-  strlcpy(nick, _nick, NICKLEN);
+  nick = _nick;
   strlcpy(host, _host, UHOSTLEN);
   user = u;
 
   ht_host[host] = this;
   ht_nick[_nick] = this;
 
-  sdprintf(STR("New auth created! (%s!%s) [%s]"), nick, host,
+  sdprintf(STR("New auth created! (%s!%s) [%s]"), nick.c_str(), host,
       u ? u->handle : "*");
   authtime = atime = now;
   idx = -1;
@@ -59,7 +59,7 @@ Auth::Auth(const char *_nick, const char *_host, struct userrec *u)
 
 Auth::~Auth()
 {
-  sdprintf(STR("Removing auth: (%s!%s) [%s]"), nick, host,
+  sdprintf(STR("Removing auth: (%s!%s) [%s]"), nick.c_str(), host,
       user ? user->handle : "*");
   ht_host.remove(host);
   ht_nick.remove(nick);
@@ -78,12 +78,12 @@ void Auth::Done() noexcept
   Status(AUTHED);
 }
 
-void Auth::NewNick(const char *newnick) noexcept
+void Auth::NewNick(const RfcString& newnick) noexcept
 {
   if (ht_nick.contains(nick)) {
     ht_nick.remove(nick);
   }
-  strlcpy(nick, newnick, NICKLEN);
+  nick = newnick;
   ht_nick[newnick] = this;
 }
 
@@ -92,7 +92,7 @@ Auth *Auth::Find(const char *_host) noexcept
 
   if (ht_host.contains(_host)) {
     Auth *auth = ht_host[_host];
-    sdprintf(STR("Found auth: (%s!%s) [%s]"), auth->nick, auth->host,
+    sdprintf(STR("Found auth: (%s!%s) [%s]"), auth->nick.c_str(), auth->host,
         auth->user ? auth->user->handle : "*");
     return auth;
   }
@@ -102,21 +102,24 @@ Auth *Auth::Find(const char *_host) noexcept
 static void auth_clear_users_block(const bd::String& key, Auth* auth)
 {
   if (auth->user) {
-    sdprintf(STR("Clearing USER for auth: (%s!%s) [%s]"), auth->nick,
+    sdprintf(STR("Clearing USER for auth: (%s!%s) [%s]"), auth->nick.c_str(),
         auth->host, auth->user ? auth->user->handle : "*");
     auth->user = NULL;
   }
 }
 
-void Auth::NullUsers(const char *nick) noexcept
+void Auth::NullUsers(const RfcString& nick) noexcept
 {
-  if (nick == NULL) {
-    for (auto& kv : ht_host) {
-      auth_clear_users_block(kv.first, kv.second);
-    }
-  } else if (ht_nick.contains(nick)) {
-    Auth* auth = ht_nick[nick];
-    auth_clear_users_block(nick, auth);
+  if (!ht_nick.contains(nick))
+    return;
+  auto auth = ht_nick[nick];
+  auth_clear_users_block(nick, auth);
+}
+
+void Auth::NullUsers(void) noexcept
+{
+  for (auto& kv : ht_host) {
+    auth_clear_users_block(kv.first, kv.second);
   }
 }
 
@@ -124,21 +127,16 @@ static void auth_fill_users_block(const bd::String& key, Auth* auth)
 {
   char from[NICKLEN + UHOSTLEN];
 
-  sdprintf(STR("Filling USER for auth: (%s!%s) [%s]"), auth->nick, auth->host,
+  sdprintf(STR("Filling USER for auth: (%s!%s) [%s]"), auth->nick.c_str(), auth->host,
       auth->user ? auth->user->handle : "*");
-  simple_snprintf(from, sizeof(from), "%s!%s", auth->nick, auth->host);
+  simple_snprintf(from, sizeof(from), "%s!%s", auth->nick.c_str(), auth->host);
   auth->user = get_user_by_host(from);
 }
 
-void Auth::FillUsers(const char *nick) noexcept
+void Auth::FillUsers(void) noexcept
 {
-  if (nick == NULL) {
-    for (auto& kv : ht_host) {
-      auth_fill_users_block(kv.first, kv.second);
-    }
-  } else if (ht_nick.contains(nick)) {
-    Auth *auth = ht_nick[nick];
-    auth_fill_users_block(nick, auth);
+  for (auto& kv : ht_host) {
+    auth_fill_users_block(kv.first, kv.second);
   }
 }
 
@@ -155,9 +153,9 @@ void Auth::ExpireAuths() noexcept
   for (const auto& kv : ht_host) {
     const bd::String& host = kv.first;
     const auto& auth = kv.second;
-    if (auth->Authed() && ((now - auth->atime) >= (60 * 60))) {
+    if (auth->Authed() && ((now - auth->atime) >= (1 * 60))) {
       putlog(LOG_DEBUG, "*", STR("Auth (%s!%s) [%s] expired."),
-          auth->nick, auth->host, auth->user ? auth->user->handle : "*");
+          auth->nick.c_str(), auth->host, auth->user ? auth->user->handle : "*");
       expired_hosts.push_back(host);
       ht_nick.remove(auth->nick);
       delete_auths.push_back(auth);
@@ -175,13 +173,13 @@ void Auth::DeleteAll() noexcept
 {
   if (!ischanhub())
     return;
-  putlog(LOG_DEBUG, "*", STR("Removing auth entries."));
+  putlog(LOG_DEBUG, "*", STR("Removing %zd auth entries."), ht_host.size());
   std::vector<const Auth*> delete_auths;
   delete_auths.reserve(ht_host.size());
   for (const auto& kv : ht_host) {
     const auto& auth = kv.second;
     putlog(LOG_DEBUG, "*", STR("Removing (%s!%s) [%s], from auth list."),
-        auth->nick, auth->host, auth->user ? auth->user->handle : "*");
+        auth->nick.c_str(), auth->host, auth->user ? auth->user->handle : "*");
     delete_auths.push_back(auth);
   }
   ht_host.clear();
@@ -198,7 +196,7 @@ void Auth::InitTimer() noexcept
 
 bool Auth::GetIdx(const char *chname) noexcept
 {
-sdprintf(STR("GETIDX: auth: %s, idx: %d"), nick, idx);
+sdprintf(STR("GETIDX: auth: %s, idx: %d"), nick.c_str(), idx);
   if (idx != -1) {
     if (!valid_idx(idx))
       idx = -1;
@@ -208,7 +206,7 @@ sdprintf(STR("GETIDX: auth: %s, idx: %d"), nick, idx);
       idx = -1;
     else {
       sdprintf(STR("FIRST FOUND: %d"), idx);
-      strlcpy(dcc[idx].simulbot, nick, sizeof(dcc[idx].simulbot));
+      strlcpy(dcc[idx].simulbot, nick.c_str(), sizeof(dcc[idx].simulbot));
       strlcpy(dcc[idx].u.chat->con_chan, chname ? chname : "*", sizeof(dcc[idx].u.chat->con_chan));
       return 1;
     }
@@ -220,11 +218,11 @@ sdprintf(STR("GETIDX: auth: %s, idx: %d"), nick, idx);
     if (dcc[i].type && dcc[i].irc &&
        (((chname && chname[0]) && !strcmp(dcc[i].simulbot, chname) &&
          user && !strcmp(dcc[i].nick, user->handle)) ||
-       (!(chname && chname[0]) && !strcmp(dcc[i].simulbot, nick)))) {
-      putlog(LOG_DEBUG, "*", STR("Simul found old idx for %s/%s: (%s!%s)"), nick, chname, nick, host);
+       (!(chname && chname[0]) && !strcmp(dcc[i].simulbot, nick.c_str())))) {
+      putlog(LOG_DEBUG, "*", STR("Simul found old idx for %s/%s: (%s!%s)"), nick.c_str(), chname, nick.c_str(), host);
       dcc[i].simultime = now;
       idx = i;
-      strlcpy(dcc[idx].simulbot, nick, sizeof(dcc[idx].simulbot));
+      strlcpy(dcc[idx].simulbot, nick.c_str(), sizeof(dcc[idx].simulbot));
       strlcpy(dcc[idx].u.chat->con_chan, chname ? chname : "*", sizeof(dcc[idx].u.chat->con_chan));
 
       return 1;
@@ -243,13 +241,13 @@ sdprintf(STR("GETIDX: auth: %s, idx: %d"), nick, idx);
     dcc[idx].simul = 0;		/* not -1, so it's cleaned up later */
     dcc[idx].status = STAT_COLOR;
     dcc[idx].u.chat->con_flags = 0;
-    strlcpy(dcc[idx].simulbot, nick, sizeof(dcc[idx].simulbot));
+    strlcpy(dcc[idx].simulbot, nick.c_str(), sizeof(dcc[idx].simulbot));
     strlcpy(dcc[idx].u.chat->con_chan, chname ? chname : "*", sizeof(dcc[idx].u.chat->con_chan));
     dcc[idx].u.chat->strip_flags = STRIP_ALL;
     strlcpy(dcc[idx].nick, user ? user->handle : "*", sizeof(dcc[idx].nick));
     strlcpy(dcc[idx].host, host, sizeof(dcc[idx].host));
     dcc[idx].addr = 0L;
-    simple_snprintf(from, sizeof(from), "%s!%s", nick, host);
+    simple_snprintf(from, sizeof(from), "%s!%s", nick.c_str(), host);
     dcc[idx].user = user ? user : get_user_by_host(from);
     return 1;
   }
@@ -262,7 +260,7 @@ void Auth::TellAuthed(int idx) noexcept
   for (const auto& kv : ht_host) {
     const Auth* auth = kv.second;
     dprintf(idx, "(%s!%s) [%s] authtime: %li, atime: %li, Status: %d\n",
-        auth->nick,
+        auth->nick.c_str(),
         auth->host, auth->user ? auth->user->handle : "*",
         (long)auth->authtime, (long)auth->atime, auth->Status());
   }

@@ -296,7 +296,7 @@ void delete_member(memberlist* m) {
 
 static bool member_getuser(memberlist* m, bool act_on_lookup) {
   if (!m) return 0;
-  if (!m->user && !m->tried_getuser) {
+  if (!m->user && !m->tried_getuser && !m->is_me) {
     m->user = get_user_by_host(m->from);
     if (!m->user && m->userip[0]) {
       m->user = get_user_by_host(m->fromip);
@@ -307,6 +307,9 @@ static bool member_getuser(memberlist* m, bool act_on_lookup) {
     if (act_on_lookup && m->user)
       check_this_user(m->user->handle, 0, NULL);
 
+  } else if (!m->user && m->is_me) {
+    m->user = conf.bot->u;
+    m->tried_getuser = 1;
   }
   return !(m->user == NULL);
 }
@@ -2141,6 +2144,8 @@ static int got315(char *from, char *msg)
     force_join_chan(chan);
   } else {
     me->is_me = 1;
+    me->user = conf.bot->u;
+    me->tried_getuser = 1;
     if (!me->joined)
       me->joined = now;				/* set this to keep the whining masses happy */
     rebalance_roles_chan(chan);
@@ -2266,6 +2271,7 @@ static int got349(char *from, char *msg)
   return 0;
 }
 
+#if 0
 static void got353(char *from, char *msg)
 {
   char *chname = NULL;
@@ -2278,6 +2284,7 @@ static void got353(char *from, char *msg)
   fixcolon(msg);
   irc_log(chan, "%s", msg);
 }
+#endif
 
 /* got 346: invite exemption info
  * <server> 346 <to> <chan> <exemption>
@@ -2779,6 +2786,8 @@ static int gotjoin(char *from, char *chname)
 
 	if (match_my_nick(nick)) {
           m->is_me = 1;
+          m->user = conf.bot->u;
+          m->tried_getuser = 1;
 	  /* It was me joining! Need to update the channel record with the
 	   * unique name for the channel (as the server see's it). <cybah>
 	   */
@@ -3072,14 +3081,14 @@ static int gotnick(char *from, char *msg)
   nick = splitnick(&uhost);
   fixcolon(msg);
   irc_log(NULL, "[%s] Nick change: %s -> %s", samechans(nick, ","), nick, msg);
-  clear_chanlist_member(nick);	/* Cache for nick 'nick' is meaningless now. */
+  const RfcString rfc_nick(nick);
+  clear_chanlist_member(rfc_nick);	/* Cache for nick 'nick' is meaningless now. */
+
+  auto new_rfc_nick = std::make_shared<RfcString>(msg);
 
   Auth *auth = Auth::Find(uhost);
   if (auth)
-    auth->NewNick(msg);
-
-  const RfcString rfc_nick(nick);
-  auto new_rfc_nick = std::make_shared<RfcString>(msg);
+    auth->NewNick(*new_rfc_nick);
 
   /* Compose a nick!user@host for the new nick */
   simple_snprintf(s1, sizeof(s1), "%s!%s", msg, uhost);
@@ -3546,7 +3555,9 @@ static cmd_t irc_raw[] =
   {"347",	"",	(Function) got347,	"irc:347", LEAF},
   {"348",	"",	(Function) got348,	"irc:348", LEAF},
   {"349",	"",	(Function) got349,	"irc:349", LEAF},
+#if 0
   {"353",	"",	(Function) got353,	"irc:353", LEAF},
+#endif
   {"710",	"",	(Function) got710,	"irc:710", LEAF},
   {NULL,	NULL,	NULL,			NULL, 0}
 };

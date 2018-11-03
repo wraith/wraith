@@ -6,7 +6,6 @@
 #ifndef _EGG_MOD_IRC_IRC_H
 #define _EGG_MOD_IRC_IRC_H
 
-#include "src/auth.h"
 #include "src/chanprog.h"
 
 enum { BC_NOCOOKIE = 1, BC_SLACK, BC_HASH, BC_COUNTER };
@@ -17,6 +16,8 @@ enum { BC_NOCOOKIE = 1, BC_SLACK, BC_HASH, BC_COUNTER };
 /* For flushmodes */
 #define NORMAL          0
 #define QUICK           1
+
+class Auth;
 
 #ifdef MAKING_IRC
 
@@ -70,7 +71,6 @@ static void cache_invite(struct chanset_t *, char *, char *, char *, bool, bool)
 void makecookie(char*, size_t, const char *, const memberlist*, const memberlist*, const memberlist* = NULL, const memberlist* = NULL);
 static int checkcookie(const char*, const memberlist*, const memberlist*, const char*, int);
 extern void counter_clear(const char*);
-static bool any_ops(struct chanset_t *);
 static char *getchanmode(struct chanset_t *);
 static void flush_mode(struct chanset_t *, int);
 static bool member_getuser(memberlist* m, bool act_on_lookup = 0);

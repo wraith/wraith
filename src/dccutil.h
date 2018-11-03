@@ -3,7 +3,6 @@
 
 #include "common.h"
 #include "dcc.h"
-#include "auth.h"
 
 /* Public structure for the listening port map */
 struct portmap {

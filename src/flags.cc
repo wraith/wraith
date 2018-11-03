@@ -487,7 +487,7 @@ chk_homechan_user_op(const memberlist *m, const struct chanset_t *chan)
     return 0;
   if (homechan_chan == chan)
     return 0;
-  if (!(homechan_m = ismember(homechan_chan, m->nick)))
+  if (!(homechan_m = ismember(homechan_chan, *m->rfc_nick)))
     return 0;
   if (chan_hasop(homechan_m))
     return 1;

@@ -108,7 +108,7 @@ static unsigned long pump_file_to_sock(FILE *file, long sock,
   return pending_data;
 }
 
-void eof_dcc_fork_send(int idx)
+static void eof_dcc_fork_send(int idx)
 {
   fclose(dcc[idx].u.xfer->f);
   if (!strcmp(dcc[idx].nick, "*users")) {
@@ -266,7 +266,7 @@ inline static void handle_resend_packet(int idx, transfer_reget *reget_data)
  * Note: The first received packet during reget is a special 8 bit packet
  *       containing special information.
  */
-void dcc_get(int idx, char *buf, int len)
+static void dcc_get(int idx, char *buf, int len)
 {
   unsigned char bbuf[4] = "";
   unsigned long cmp, l;
@@ -396,7 +396,7 @@ void dcc_get(int idx, char *buf, int len)
   dcc[idx].status += l;
 }
 
-void eof_dcc_get(int idx)
+static void eof_dcc_get(int idx)
 {
   char s[1024] = "";
 
@@ -457,7 +457,7 @@ void eof_dcc_get(int idx)
   lostdcc(idx);
 }
 
-void dcc_send(int idx, char *buf, int len)
+static void dcc_send(int idx, char *buf, int len)
 {
   char s[SGRAB + 2] = "", *b = NULL;
   size_t siz = 0;
@@ -576,7 +576,7 @@ static void transfer_get_timeout(int i)
   }
 }
 
-void tout_dcc_send(int idx)
+static void tout_dcc_send(int idx)
 {
   fclose(dcc[idx].u.xfer->f);
   if (!strcmp(dcc[idx].nick, "*users")) {
@@ -610,7 +610,7 @@ void tout_dcc_send(int idx)
   lostdcc(idx);
 }
 
-void display_dcc_get(int idx, char *buf, size_t bufsiz)
+static void display_dcc_get(int idx, char *buf, size_t bufsiz)
 {
   if (dcc[idx].status == dcc[idx].u.xfer->length)
     simple_snprintf(buf, bufsiz, "send  (%lu)/%lu\n    Filename: %s\n", dcc[idx].u.xfer->acked,
@@ -620,22 +620,22 @@ void display_dcc_get(int idx, char *buf, size_t bufsiz)
 	    dcc[idx].u.xfer->length, dcc[idx].u.xfer->origname);
 }
 
-void display_dcc_get_p(int idx, char *buf, size_t bufsiz)
+static void display_dcc_get_p(int idx, char *buf, size_t bufsiz)
 {
   simple_snprintf(buf, bufsiz, "send  waited %ds\n    Filename: %s\n", (int) (now - dcc[idx].timeval), dcc[idx].u.xfer->origname);
 }
 
-void display_dcc_send(int idx, char *buf, size_t bufsiz)
+static void display_dcc_send(int idx, char *buf, size_t bufsiz)
 {
   simple_snprintf(buf, bufsiz, "send  (%lu)/%lu\n    Filename: %s\n", dcc[idx].status, dcc[idx].u.xfer->length, dcc[idx].u.xfer->origname);
 }
 
-void display_dcc_fork_send(int idx, char *buf, size_t bufsiz)
+static void display_dcc_fork_send(int idx, char *buf, size_t bufsiz)
 {
   simple_snprintf(buf, bufsiz, "conn  send");
 }
 
-void kill_dcc_xfer(int idx, void *x)
+static void kill_dcc_xfer(int idx, void *x)
 {
   struct xfer_info *p = (struct xfer_info *) x;
 
@@ -649,7 +649,9 @@ void kill_dcc_xfer(int idx, void *x)
   free(x);
 }
 
-void out_dcc_xfer(int idx, char *buf, void *x)
+static void
+__attribute__((const))
+out_dcc_xfer(int idx, char *buf, void *x)
 {
 }
 
@@ -675,7 +677,7 @@ struct dcc_table DCC_SEND =
   NULL
 };
 
-void dcc_fork_send(int idx, char *x, int y);
+static void dcc_fork_send(int idx, char *x, int y);
 
 struct dcc_table DCC_FORK_SEND =
 {
@@ -691,7 +693,7 @@ struct dcc_table DCC_FORK_SEND =
   NULL
 };
 
-void dcc_fork_send(int idx, char *x, int y)
+static void dcc_fork_send(int idx, char *x, int y)
 {
   if (dcc[idx].type != &DCC_FORK_SEND)
     return;
@@ -903,9 +905,5 @@ void transfer_report(int idx, int details)
     dprintf(idx,"    DCC block is %d%s, max concurrent d/ls is %d\n",
 	    dcc_block, (dcc_block == 0) ? " (turbo dcc)" : "", dcc_limit);
   }
-}
-
-void transfer_init()
-{
 }
 /* vim: set sts=2 sw=2 ts=8 et: */

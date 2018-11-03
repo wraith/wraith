@@ -27,9 +27,9 @@
 #include "common.h"
 #include "rfc1459.h"
 
-int (*rfc_casecmp) (const char *, const char *) __attribute__((pure)) = _rfc_casecmp;
-int (*rfc_ncasecmp) (const char *, const char *, size_t) __attribute__((pure)) = _rfc_ncasecmp;
-bool (*rfc_char_equal) (const char, const char) __attribute__((const)) = _rfc_char_equal;
+int (*rfc_casecmp) (const char *, const char *) = _rfc_casecmp;
+int (*rfc_ncasecmp) (const char *, const char *, size_t) = _rfc_ncasecmp;
+bool (*rfc_char_equal) (const char, const char)  = _rfc_char_equal;
 
 int
 _rfc_casecmp(const char *s1, const char *s2)

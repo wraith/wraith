@@ -99,7 +99,7 @@ bd::String egg_bf_decrypt(bd::String in, const bd::String& key)
   if (in.size() < 12) return out;
 
   // Not valid base64
-  if (eggdrop_blowfish_base64_index[in[0]] == -1) return out;
+  if (eggdrop_blowfish_base64_index[int(in[0])] == -1) return out;
 
   int cut_off = in.length() % 12;
   if (cut_off > 0)

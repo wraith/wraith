@@ -1047,9 +1047,8 @@ void clear_channel(struct chanset_t *chan, bool reset)
 
   if (chan->channel.cached_members) {
     if (chan->channel.cached_members->size()) {
-      for (const auto& uhost : chan->channel.cached_members->keys()) {
-        // Delete the cached member
-        m = (*chan->channel.cached_members)[uhost];
+      for (const auto& kv : *(chan->channel.cached_members)) {
+        m = kv.second;
         delete_member(m);
       }
     }

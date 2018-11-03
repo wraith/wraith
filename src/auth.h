@@ -5,6 +5,8 @@
 #include <bdlib/src/String.h>
 #include <bdlib/src/HashTable.h>
 
+class RfcString;
+
 #define AUTHED	    1
 #define AUTHING     2
 /* These are what we are expecting back from the user */
@@ -14,7 +16,7 @@
 
 class Auth {
   public:
-  Auth(const char *, const char *, struct userrec * = NULL);
+  Auth(const RfcString&, const char *, struct userrec * = NULL);
   ~Auth();
 
   inline int Status(void) const noexcept __attribute__((pure)) {
@@ -30,11 +32,12 @@ class Auth {
   }
   bool GetIdx(const char *) noexcept;
   void Done() noexcept;
-  void NewNick(const char *nick) noexcept;
+  void NewNick(const RfcString&) noexcept;
 
   static Auth *Find(const char * host) noexcept __attribute__((pure));
-  static void NullUsers(const char *nick = NULL) noexcept;
-  static void FillUsers(const char *nick = NULL) noexcept;
+  static void NullUsers(const RfcString&) noexcept;
+  static void NullUsers(void) noexcept;
+  static void FillUsers(void) noexcept;
   static void ExpireAuths() noexcept;
   static void InitTimer() noexcept;
   static void DeleteAll() noexcept;
@@ -46,11 +49,11 @@ class Auth {
   int idx;			/* do they have an associated idx? */
   char hash[MD5_HASH_LENGTH + 1];       /* used for dcc authing */
   char rand[51];
-  char nick[NICKLEN];
+  RfcString nick;
   char host[UHOSTLEN];
 
   static bd::HashTable<bd::String, Auth*> ht_host;
-  static bd::HashTable<bd::String, Auth*> ht_nick;
+  static bd::HashTable<RfcString, Auth*> ht_nick;
 
   private:
   int status;

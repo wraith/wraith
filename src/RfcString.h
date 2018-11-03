@@ -8,14 +8,26 @@ namespace bd {
 #include <bdlib/src/String.h>
 
 class RfcString : public bd::String {
-  private:
-
-  protected:
-
   public:
     using String::String;
-    RfcString(const String &str) : String(str) {};
-    RfcString(String &&str) : String(std::move(str)) {};
+    RfcString() = default;
+    RfcString(const RfcString& str) = default;
+    RfcString(RfcString&& str) noexcept = default;
+    RfcString(const String &str) : String(str) {}
+    RfcString(String &&str) noexcept :
+      String(std::move(str)) {}
+    using String::operator=;
+    RfcString& operator=(const RfcString& rhs) & = default;
+    RfcString& operator=(RfcString&& rhs) & noexcept = default;
+    RfcString& operator=(const String& rhs) & {
+      String::operator=(rhs);
+      return *this;
+    }
+
+    RfcString& operator=(String&& rhs) & noexcept {
+      String::operator=(std::move(rhs));
+      return *this;
+    }
 
     int compare(const RfcString& str, size_t n = npos) const noexcept
       __attribute__((pure));
@@ -26,7 +38,7 @@ class RfcString : public bd::String {
     friend bool operator>(const RfcString&, const RfcString&);
     friend bool operator>=(const RfcString&, const RfcString&);
 
-    virtual size_t hash() const noexcept;
+    size_t hash() const noexcept;
 };
 
 inline bool __attribute__((pure))

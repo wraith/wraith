@@ -339,7 +339,7 @@ got004(char *from, char *msg)
   if (!replaying_cache && connect_burst) {
     connect_bursting = now;
     msgburst = SERVER_CONNECT_BURST_RATE;
-    msgrate = 200;
+    msgrate = 0;
     reset_flood();
     putlog(LOG_DEBUG, "*", "Server allows connect bursting, bursting for %d seconds", SERVER_CONNECT_BURST_TIME);
   }
@@ -618,11 +618,12 @@ static bool detect_flood(char *floodnick, char *floodhost, char *from, int which
 /* Check for more than 8 control characters in a line.
  * This could indicate: beep flood CTCP avalanche.
  */
-bool detect_avalanche(char *msg)
+bool
+detect_avalanche(const char *msg)
 {
   int count = 0;
 
-  for (unsigned char *p = (unsigned char *) msg; (*p) && (count < 8); p++)
+  for (const unsigned char *p = (const unsigned char *) msg; (*p) && (count < 8); p++)
     if ((*p == 7) || (*p == 1))
       count++;
   if (count >= 8)
