@@ -13,7 +13,7 @@ void cache_users();
 void clear_userlist(struct userrec *);
 int u_pass_match(struct userrec *, const char *);
 int delhost_by_handle(char *, char *);
-int count_users(struct userrec *);
+int count_users(const struct userrec *) __attribute__((pure));
 int deluser(char *);
 int change_handle(struct userrec *, char *);
 void correct_handle(char *);
@@ -22,7 +22,7 @@ int real_write_userfile(int);
 int write_userfile(int);
 void touch_laston(struct userrec *, char *, time_t);
 void user_del_chan(char *);
-struct userrec *host_conflicts(char *);
+struct userrec *host_conflicts(const char *);
 struct userrec *get_user_by_handle(struct userrec *, const char *);
 struct userrec *get_user_by_host(char *);
 

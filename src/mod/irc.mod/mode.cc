@@ -158,8 +158,10 @@ flush_cookies(struct chanset_t *chan, int pri)
   if (post[0]) {
     memberlist* me = ismember(chan, botname);
 
-    if (me)
-      member_getuser(me);
+    if (me) {
+      me->user = conf.bot->u;
+      me->tried_getuser = 1;
+    }
 
     /* Am I even on the channel? */
     if (!me || !me->user)

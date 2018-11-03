@@ -577,7 +577,8 @@ static void get_mode_protect(struct chanset_t *chan, char *s, size_t ssiz)
 
 /* Returns true if this is one of the channel masks
  */
-bool ismodeline(masklist *m, const char *username)
+bool
+ismodeline(const masklist *m, const char *username)
 {
   for (; m && m->mask[0]; m = m->next)  
     if (!rfc_casecmp(m->mask, username))
@@ -587,7 +588,8 @@ bool ismodeline(masklist *m, const char *username)
 
 /* Returns true if user matches one of the masklist -- drummer
  */
-bool ismasked(masklist *m, const char *username)
+bool
+ismasked(const masklist *m, const char *username)
 {
   for (; m && m->mask[0]; m = m->next)
     if (wild_match(m->mask, (char *) username))

@@ -51,6 +51,7 @@
 #include <bdlib/src/Array.h>
 #include "server.h"
 #include <stdarg.h>
+#include <vector>
 
 int default_alines = 5;		/* How many mode lines are assumed will work before throttling */
 bool floodless = 0;		/* floodless iline? */
@@ -130,7 +131,7 @@ static bind_table_t *BT_raw = NULL, *BT_msg = NULL;
 bind_table_t *BT_ctcr = NULL, *BT_ctcp = NULL;
 // Ratbox is (5*8):30, ircd-seven is (5*8):20, try to not push th elimits.
 #define SERVER_CONNECT_BURST_TIME 18
-#define SERVER_CONNECT_BURST_RATE 5 * 7
+#define SERVER_CONNECT_BURST_RATE 5 * 8
 
 #include "servmsg.cc"
 
@@ -170,9 +171,11 @@ static const struct {
 /*
  *     Bot server queues
  */
-static bool burst_mode_ok(const char *msg, size_t len) {
-  bd::String mode(msg, len);
-  bd::Array<bd::String> list(mode.split(' '));
+static bool
+__attribute__((pure))
+burst_mode_ok(const char *msg, size_t len) {
+  const bd::String mode(msg, len);
+  const auto list(mode.split(' '));
   if (list.length() == 2) return 1;
   if (list.length() == 3) {
     if (!strchr(CHANMETA, bd::String(list[1]).at(0))) return 1;
@@ -181,11 +184,10 @@ static bool burst_mode_ok(const char *msg, size_t len) {
   return 0;
 }
 
-// Hybrid/ratbox allows bursting 5*8 lines on connect until certain commands are sent, for up to 30 seconds
+// Hybrid/ratbox allows bursting MAX_FLOOD_BURST=5(MAX_FLOOD)*8 lines on connect until certain commands are sent, for up to 30 seconds
 /*
-   BAD:
+   BAD (src/packet.c flood_endgrace()):
      JOIN 0
-     MODE #chan b
      NICK
      PART
      KICK
@@ -203,18 +205,26 @@ static bool burst_mode_ok(const char *msg, size_t len) {
      WHO !
      WHO #Chan
      WHO NICK
+     MODE #chan
+     MODE #chan b
 */
-static bool burst_ok(const char* msg, size_t len) {
+static inline bool
+__attribute__((pure))
+burst_ok(const char* msg, size_t len) {
   if (strstr(msg, "JOIN 0") ||
       (strstr(msg, "MODE") && !burst_mode_ok(msg, len)) ||
       strstr(msg, "NICK") ||
+      strstr(msg, "CPRIVMSG") ||
       strstr(msg, "PRIVMSG") ||
+      strstr(msg, "CNOTICE") ||
       strstr(msg, "NOTICE") ||
       strstr(msg, "PART") ||
       strstr(msg, "KICK") ||
+      strstr(msg, "TIME") ||
+      strstr(msg, "OPER") ||
+      strstr(msg, "TOPIC") ||
       strstr(msg, "INVITE") ||
       strstr(msg, "AWAY")) {
-    sdprintf("BURST MODE VIOLATION!!!: %s\n", msg);
     return 0;
   }
   return 1;
@@ -644,8 +654,10 @@ void queue_server(int which, char *buf, int len)
 
   // If connect bursting, hold off any commands which would end the gracetime (flood_endgrace)
   if (connect_bursting && (which == DP_MODE || which == DP_MODE_NEXT || which == DP_SERVER || which == DP_SERVER_NEXT)) {
-    if (!burst_ok(buf, len))
+    if (!burst_ok(buf, len)) {
+      sdprintf("BURST MODE VIOLATION!!!: %s\n", buf);
       which = DP_HELP;
+    }
   }
 
   int qnext = 0;
@@ -1051,10 +1063,10 @@ static void server_secondly()
       }
 
       // Clear expired key exchanges that aren't finished (7 seconds)
-      const bd::Array<bd::String> fish_targets(FishKeys.keys());
-      for (size_t i = 0; i < fish_targets.length(); ++i) {
-        const bd::String target(fish_targets[i]);
-        fish_data_t* fishData = FishKeys[target];
+      std::vector<bd::String> expired_keys;
+      for (const auto& kv : FishKeys) {
+        auto& target = kv.first;
+        const auto fishData = kv.second;
         bool should_delete = false;
         if (fishData->key_created_at && !fishData->sharedKey && ((now - 7) >= fishData->key_created_at)) {
           putlog(LOG_DEBUG, "*", "Deleting expired DH1080 FiSH exchange with %s", target.c_str());
@@ -1063,13 +1075,14 @@ static void server_secondly()
           putlog(LOG_DEBUG, "*", "Deleting expired (60 min) FiSH key with %s", target.c_str());
           should_delete = true;
         }
-
         if (should_delete) {
-          FishKeys.remove(target);
           delete fishData;
+          expired_keys.push_back(target);
         }
       }
-
+      for (const auto& target : expired_keys) {
+        FishKeys.remove(target);
+      }
 
       cnt_10 = 0;
     } else {

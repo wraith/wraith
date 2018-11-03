@@ -60,6 +60,7 @@ using std::swap;
 #include <bdlib/src/HashTable.h>
 #include <bdlib/src/base64.h>
 #include <deque>
+#include <vector>
 
 #include <stdarg.h>
 
@@ -677,11 +678,6 @@ getin_request(char *botnick, char *code, char *par)
     return;
   }
 
-  if (connect_bursting) {
-    putlog(LOG_GETIN, "*", "%sreq from %s/%s %s %s - I'm in connect burst mode.", type, botnick, nick, desc, chan->dname);
-    return;
-  }
-
   if (server_lag > lag_threshold) {
     putlog(LOG_GETIN, "*", "%sreq from %s/%s %s %s - I'm too lagged", type, botnick, nick, desc, chan->dname);
     return;
@@ -1235,7 +1231,7 @@ static void member_update_from_cache(struct chanset_t* chan, memberlist *m) {
 bool
 me_voice(const struct chanset_t *chan)
 {
-  memberlist *mx = ismember(chan, botname);
+  const memberlist *mx = ismember(chan, botname);
 
   if (!mx)
     return 0;
@@ -1249,6 +1245,7 @@ me_voice(const struct chanset_t *chan)
 /* Check if there are any ops on the channel. Returns boolean 1 or 0.
  */
 static bool
+__attribute__((pure))
 any_ops(struct chanset_t *chan)
 {
   memberlist *x = NULL;
@@ -1636,17 +1633,19 @@ check_expired_chanstuff(struct chanset_t *chan)
   }
   // Clear out expired cached members
   if (chan->channel.cached_members && chan->channel.cached_members->size()) {
-    bd::Array<bd::String> member_uhosts(chan->channel.cached_members->keys());
-    for (size_t i = 0; i < member_uhosts.length(); ++i) {
-      const bd::String uhost(member_uhosts[i]);
-
-      m = (*chan->channel.cached_members)[uhost];
+    std::vector<bd::String> expired_hosts;
+    for (const auto& kv : *(chan->channel.cached_members)) {
+      auto& uhost = kv.first;
+      m = kv.second;
 
       // Delete the expired member
       if (now - m->last > wait_split) {
         delete_member(m);
-        chan->channel.cached_members->remove(uhost);
+        expired_hosts.push_back(uhost);
       }
+    }
+    for (const auto& uhost : expired_hosts) {
+      chan->channel.cached_members->remove(uhost);
     }
   }
 }

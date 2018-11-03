@@ -699,7 +699,6 @@ void irc_init();
 void channels_init();
 void compress_init();
 void share_init();
-void transfer_init();
 
 int main(int argc, char **argv)
 {
@@ -722,7 +721,6 @@ int main(int argc, char **argv)
   srandom(now % (mypid + getppid()) * randint(1000));
 
   setlimits();
-  init_debug();
   init_signals();
 
   if (strcmp(fake_md5, STR("596a96cc7bf9108cd896f33c44aedc8a"))) {
@@ -836,7 +834,6 @@ int main(int argc, char **argv)
     server_init();
     ctcp_init();
   }
-  transfer_init();
   share_init();
   update_init();
   console_init();

@@ -57,8 +57,8 @@ _rfc_char_equal(const char c1, const char c2)
   return _rfc_toupper(c1) == _rfc_toupper(c2);
 }
 
-extern bool (*rfc_char_equal) (const char, const char) __attribute__((const));
-extern int (*rfc_casecmp) (const char *, const char *) __attribute__((pure));
-extern int (*rfc_ncasecmp) (const char *, const char *, size_t) __attribute__((pure));
+extern bool (*rfc_char_equal) (const char, const char);
+extern int (*rfc_casecmp) (const char *, const char *);
+extern int (*rfc_ncasecmp) (const char *, const char *, size_t);
 
 #endif /* !_RFC1459_H */

@@ -53,6 +53,7 @@ if [[ "${ax_cv_prog_cc_fsanitize_address}" = "yes" ]]; then
   DEBCXXFLAGS="${DEBCXXFLAGS} -D__SANITIZE_ADDRESS__"
 fi
 CXX_FLAG_CHECK([DEBCXXFLAGS], [-fstack-protector-all], [stackprotectorall])
+CXX_FLAG_CHECK([DEBCXXFLAGS], [-Wsuggest-attribute=pure -Wsuggest-attribute=const], [wsuggest_attribute])
 CXX_FLAG_CHECK([DEBCXXFLAGS], [-Wconditional-uninitialized], [w_conditional_uninitialized])
 CXX_FLAG_CHECK([LDFLAGS], [-static-libstdc++], [static_libstdcxx])
 #CXX_FLAG_CHECK([LDFLAGS], [-static-libgcc], [static_libgcc])

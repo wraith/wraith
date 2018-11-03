@@ -40,7 +40,7 @@ struct enc_link_dcc {
 extern struct enc_link enclink[];
 
 
-extern int link_find_by_type(int);
+extern int link_find_by_type(int) __attribute__((pure));
 
 extern void link_link(int, int, int, direction_t);
 extern const char *link_write(int, const char *, size_t *);

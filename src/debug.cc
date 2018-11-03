@@ -80,10 +80,6 @@ void setlimits()
   setrlimit(RLIMIT_NOFILE, &fdlim);
 }
 
-void init_debug()
-{
-}
-
 void sdprintf (const char *format, ...)
 {
   char s[2001] = "";
