@@ -127,9 +127,8 @@ int unload_libtcl() {
 #endif
 
     // Cleanup symbol table
-    for (size_t i = 0; i < my_symbols.length(); ++i) {
-      dl_symbol_table.remove(my_symbols[i]);
-      static_cast<bd::String>(my_symbols[i]).clear();
+    for (const auto& symbol : my_symbols) {
+      dl_symbol_table.remove(symbol);
     }
     my_symbols.clear();
 
