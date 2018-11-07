@@ -3371,7 +3371,7 @@ static void cmd_newleaf(int idx, char *par)
 
 static void cmd_newhub(int idx, char *par)
 {
-  bd::Array<bd::String> params(bd::String(par).split(' '));
+  const auto& params(bd::String(par).split(' '));
   if (!par[0] || params.length() < 3) {
     dprintf(idx, "Usage: newhub <handle> <address> <port> [hublevel]\n");
     return;
@@ -3384,7 +3384,7 @@ static void cmd_newhub(int idx, char *par)
   if (handle.length() > HANDLEN) {
     handle.resize(HANDLEN);
   }
-  if (get_user_by_handle(userlist, const_cast<char*>(handle.c_str()))) {
+  if (get_user_by_handle(userlist, handle.c_str())) {
     dprintf(idx, "Already got a %s hub\n", handle.c_str());
     return;
   } else if (strchr(BADHANDCHARS, handle[0]) != NULL) {
@@ -3392,13 +3392,13 @@ static void cmd_newhub(int idx, char *par)
     return;
   }
 
-  bd::String address(params[1]);
-  in_port_t port = atoi(static_cast<bd::String>(params[2]).c_str());
+  const auto& address(params[1]);
+  in_port_t port = atoi(params[2].c_str());
 
   unsigned short hublevel = 0;
   // Was a hublevel passed in?
   if (params.length() == 4) {
-    hublevel = atoi(static_cast<bd::String>(params[3]).c_str());
+    hublevel = atoi(params[3].c_str());
   } else {
     // Find next available hublevel
     for (struct userrec *u = userlist; u; u = u->next) {
@@ -3415,7 +3415,7 @@ static void cmd_newhub(int idx, char *par)
   char tmp[81] = "";
 
   userlist = adduser(userlist, handle.c_str(), "none", "-", USER_OP, 1);
-  u1 = get_user_by_handle(userlist, const_cast<char*>(handle.c_str()));
+  u1 = get_user_by_handle(userlist, handle.c_str());
   bi = (struct bot_addr *) calloc(1, sizeof(struct bot_addr));
   bi->uplink = (char *) calloc(1, 1);
   bi->address = strdup(address.c_str());
@@ -4310,7 +4310,8 @@ static void cmd_crontab(int idx, char *par) {
   }
 }
 
-static void my_dns_callback(int id, void *client_data, const char *host, bd::Array<bd::String> ips)
+static void my_dns_callback(int id, void *client_data, const char *host,
+    const bd::Array<bd::String>& ips)
 {
   //64bit hacks
   long data = (long) client_data;
@@ -4322,8 +4323,8 @@ static void my_dns_callback(int id, void *client_data, const char *host, bd::Arr
     return;
 
   if (ips.size())
-    for (size_t i = 0; i < ips.size(); ++i)
-      dprintf(idx, "Resolved %s using (%s) to: %s\n", host, dns_ip, bd::String(ips[i]).c_str());
+    for (const auto& ip : ips)
+      dprintf(idx, "Resolved %s using (%s) to: %s\n", host, dns_ip, ip.c_str());
   else
     dprintf(idx, "Failed to lookup via (%s): %s\n", dns_ip, host);
 

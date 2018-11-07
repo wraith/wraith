@@ -386,15 +386,15 @@ void load_internal_users()
 
   /* hubs */
   for (size_t idx = 0; idx < conf.hubs.length(); ++idx) {
-    bd::Array<bd::String> params(static_cast<bd::String>(conf.hubs[idx]).split(' '));
-    const bd::String handle(params[0]);
-    const bd::String address(params[1]);
-    const in_port_t port = atoi(static_cast<bd::String>(params[2]).c_str());
-    const unsigned short hublevel = params.length() == 4 ? atoi(static_cast<bd::String>(params[3]).c_str()) : (idx + 1);
+    const auto& params(conf.hubs.at(idx).split(' '));
+    const auto& handle(params[0]);
+    const auto& address(params[1]);
+    const in_port_t port = atoi(params[2].c_str());
+    const unsigned short hublevel = params.length() == 4 ? atoi(params[3].c_str()) : (idx + 1);
 
-    if (!(u = get_user_by_handle(userlist, const_cast<char*>(handle.c_str())))) {
+    if (!(u = get_user_by_handle(userlist, handle.c_str()))) {
       userlist = adduser(userlist, handle.c_str(), "none", "-", USER_OP, 1);
-      u = get_user_by_handle(userlist, const_cast<char*>(handle.c_str()));
+      u = get_user_by_handle(userlist, handle.c_str());
     }
 
     simple_snprintf(tmp, sizeof(tmp), "%li [internal]", (long)now);

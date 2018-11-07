@@ -178,8 +178,8 @@ burst_mode_ok(const char *msg, size_t len) {
   const auto list(mode.split(' '));
   if (list.length() == 2) return 1;
   if (list.length() == 3) {
-    if (!strchr(CHANMETA, bd::String(list[1]).at(0))) return 1;
-    else if (bd::String(list[2]).at(0) == 'b') return 1;
+    if (!strchr(CHANMETA, list[1][0])) return 1;
+    else if (list[2][0] == 'b') return 1;
   }
   return 0;
 }
