@@ -1244,7 +1244,7 @@ int sockgets(char *s, int *len)
   }
   /* Might be necessary to prepend stored-up data! */
   if (socklist[ret].inbuf != NULL) {
-    *(socklist[ret].inbuf) += bd::String(xx);
+    *(socklist[ret].inbuf) += xx;
     if (socklist[ret].inbuf->length() < (SGRAB + 2)) {
       strlcpy(xx, socklist[ret].inbuf->c_str(), sizeof(xx));
       delete socklist[ret].inbuf;
