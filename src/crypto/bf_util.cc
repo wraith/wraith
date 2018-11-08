@@ -57,10 +57,10 @@ bd::String egg_bf_encrypt(bd::String in, const bd::String& key)
     datalen += 8 - (datalen % 8);
     in.resize(datalen, 0);
   }
-  BF_set_key(&bf_e_key, key.length(), (unsigned char *)key.data());
+  BF_set_key(&bf_e_key, key.length(), (unsigned char *)key.cbegin());
   bf_data data;
   size_t part;
-  unsigned char *s = (unsigned char *)in.data();
+  unsigned char *s = (unsigned char *)in.cbegin();
   for (size_t i = 0; i < in.length(); i += 8) {
     data.lr.left = *s++ << 24;
     data.lr.left += *s++ << 16;
@@ -105,11 +105,11 @@ bd::String egg_bf_decrypt(bd::String in, const bd::String& key)
   if (cut_off > 0)
     in.resize(in.length() - cut_off);
 
-  BF_set_key(&bf_d_key, key.length(), (unsigned char *)key.data());
+  BF_set_key(&bf_d_key, key.length(), (unsigned char *)key.cbegin());
   bf_data data;
   int val;
   size_t part;
-  char *s = (char *)in.data();
+  char *s = (char *)in.cbegin();
   for (size_t i = 0; i < in.length(); i += 12) {
     data.lr.left = 0;
     data.lr.right = 0;

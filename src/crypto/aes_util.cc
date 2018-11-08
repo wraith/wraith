@@ -45,7 +45,7 @@ bd::String encrypt_string_cbc(const bd::String& key, bd::String data, bd::String
   data.resize(data.length() + padding, padding);
 
   AES_set_encrypt_key((const unsigned char *) key.c_str(), CRYPT_KEYBITS, &e_key);
-  AES_cbc_encrypt((const unsigned char*)data.data(), (unsigned char*)data.mdata(), data.length(), &e_key, (unsigned char*)IV.mdata(), AES_ENCRYPT);
+  AES_cbc_encrypt((const unsigned char*)data.cbegin(), (unsigned char*)data.begin(), data.length(), &e_key, (unsigned char*)IV.begin(), AES_ENCRYPT);
   OPENSSL_cleanse(&e_key, sizeof(e_key));
 
   return data;
@@ -79,7 +79,7 @@ bd::String decrypt_string_cbc(const bd::String& key, bd::String data, bd::String
 
   data.resize(data.length() - (data.length() % CRYPT_BLOCKSIZE));
   AES_set_decrypt_key((const unsigned char *) key.c_str(), CRYPT_KEYBITS, &d_key);
-  AES_cbc_encrypt((const unsigned char*)data.data(), (unsigned char*)data.mdata(), data.length(), &d_key, (unsigned char*)IV.mdata(), AES_DECRYPT);
+  AES_cbc_encrypt((const unsigned char*)data.cbegin(), (unsigned char*)data.begin(), data.length(), &d_key, (unsigned char*)IV.begin(), AES_DECRYPT);
   OPENSSL_cleanse(&d_key, sizeof(d_key));
 
   // How much padding?

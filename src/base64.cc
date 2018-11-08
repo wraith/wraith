@@ -128,7 +128,7 @@ b64enc(const unsigned char *data, size_t len)
  */
 bd::String broken_base64Encode(const bd::String& string) {
   size_t len = string.length();
-  char *p = b64enc_bd((unsigned char*) string.data(), &len);
+  char *p = b64enc_bd((unsigned char*) string.cbegin(), &len);
   bd::String encoded(p, len);
   free(p);
   return encoded;
@@ -141,7 +141,7 @@ bd::String broken_base64Encode(const bd::String& string) {
  */
 bd::String broken_base64Decode(const bd::String& string) {
   size_t len = string.length();
-  char *p = b64dec_bd((unsigned char*) string.data(), &len);
+  char *p = b64dec_bd((unsigned char*) string.cbegin(), &len);
   bd::String decoded(p, len);
   free(p);
   return decoded;
