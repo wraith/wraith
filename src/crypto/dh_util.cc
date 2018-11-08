@@ -106,13 +106,13 @@ void DH1080_gen(bd::String& privateKey, bd::String& publicKeyB64) {
   pub_key = dh->pub_key;
 #endif
   privateKey.resize(BN_num_bytes(priv_key), 0);
-  BN_bn2bin(priv_key, reinterpret_cast<unsigned char*>(privateKey.mdata()));
+  BN_bn2bin(priv_key, reinterpret_cast<unsigned char*>(privateKey.begin()));
 
   // Get public key
   bd::String publicKey;
-  // Resize as the mdata() modification won't update the internal length, but resize() will
+  // Resize as the begin() modification won't update the internal length, but resize() will
   publicKey.resize(static_cast<size_t>(BN_num_bytes(pub_key)));
-  BN_bn2bin(pub_key, reinterpret_cast<unsigned char*>(publicKey.mdata()));;
+  BN_bn2bin(pub_key, reinterpret_cast<unsigned char*>(publicKey.begin()));;
 
   // base64 encode
   publicKeyB64 = fishBase64Encode(publicKey);
@@ -136,7 +136,7 @@ bool DH1080_comp(const bd::String privateKey, const bd::String theirPublicKeyB64
 #endif
 
   // Setup my private key
-  b_myPrivkey = BN_bin2bn(reinterpret_cast<const unsigned char*>(privateKey.data()), privateKey.length(), NULL);
+  b_myPrivkey = BN_bin2bn(reinterpret_cast<const unsigned char*>(privateKey.cbegin()), privateKey.length(), NULL);
 #if !defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
   DH_set0_key(dh, NULL, b_myPrivkey);
 #else
@@ -145,7 +145,7 @@ bool DH1080_comp(const bd::String privateKey, const bd::String theirPublicKeyB64
 
   // Prep their public key
   bd::String theirPublicKey(fishBase64Decode(theirPublicKeyB64));
-  b_HisPubkey = BN_bin2bn(reinterpret_cast<const unsigned char*>(theirPublicKey.data()), theirPublicKey.length(), NULL);
+  b_HisPubkey = BN_bin2bn(reinterpret_cast<const unsigned char*>(theirPublicKey.cbegin()), theirPublicKey.length(), NULL);
 
   // Compute the Shared key
   char *key = (char *)calloc(1, DH_size(dh));
@@ -168,7 +168,7 @@ bool DH1080_comp(const bd::String privateKey, const bd::String theirPublicKeyB64
 
   SHA256_Init(&c);
   SHA256_Update(&c, key, len);
-  SHA256_Final(reinterpret_cast<unsigned char*>(SHA256Digest.mdata()), &c);
+  SHA256_Final(reinterpret_cast<unsigned char*>(SHA256Digest.begin()), &c);
   sharedKey = fishBase64Encode(SHA256Digest);
 
   free(key);

@@ -1303,8 +1303,11 @@ void tell_dnsdebug(int idx)
 
 	for (int i = 0; i < ncache; i++) {
 		dprintf(idx, "cache(%d) %s expires in %ds\n", i, cache[i].query, (int) (cache[i].expiretime - now));
-		for (size_t n = 0; n < cache[i].answer->size(); n++)
-			dprintf(idx, "%zu: %s\n", n, bd::String((*(cache[i].answer))[n]).c_str());
+		size_t n = 0;
+		for (const auto& answer : *cache[i].answer) {
+			dprintf(idx, "%zu: %s\n", n, answer.c_str());
+			n++;
+		}
 	}
 }
 
@@ -1396,10 +1399,10 @@ bool valid_dns_id(int idx, int id)
 	return 0;
 }
 
-bd::String dns_find_ip(bd::Array<bd::String> ips, int af_type) {
-	for (size_t i = 0; i < ips.size(); ++i) {
-		if (is_dotted_ip(bd::String(ips[i]).c_str()) == af_type) {
-			return ips[i];
+bd::String dns_find_ip(const bd::Array<bd::String>& ips, int af_type) {
+	for (const auto& ip : ips) {
+		if (is_dotted_ip(ip.c_str()) == af_type) {
+			return ip;
 		}
 	}
 	return bd::String();

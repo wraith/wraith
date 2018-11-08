@@ -1403,8 +1403,10 @@ detect_telnet_flood(char *floodhost)
   return 0;
 }
 
-static void dcc_telnet_dns_callback(int, void *, const char *, bd::Array<bd::String>);
-static void dcc_telnet_dns_forward_callback(int, void *, const char *, bd::Array<bd::String>);
+static void dcc_telnet_dns_callback(int, void *, const char *,
+    const bd::Array<bd::String>&);
+static void dcc_telnet_dns_forward_callback(int, void *, const char *,
+    const bd::Array<bd::String>&);
 
 static void
 dcc_telnet(int idx, char *buf, int ii)
@@ -1499,7 +1501,8 @@ dcc_telnet(int idx, char *buf, int ii)
     dcc[i].dns_id = dns_id;
 }
 
-static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, bd::Array<bd::String> hosts)
+static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip,
+    const bd::Array<bd::String>& hosts)
 {
   // 64bit hacks
   long data = (long) client_data;
@@ -1525,23 +1528,24 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip, b
   //Clear the ip (still saved in dcc[i].addr)
   dcc[i].host[0] = 0;
   if (hosts.size()) {
-    strlcpy(dcc[i].host, bd::String(hosts[0]).c_str(), sizeof(dcc[i].host));
+    strlcpy(dcc[i].host, hosts[0].c_str(), sizeof(dcc[i].host));
 
     //Check forward; only check the protocol of which this connection is.
     //If they connected on V4, lookup A, if V6, lookup AAAA
     int dns_type = DNS_LOOKUP_A;
     if (is_dotted_ip(iptostr(htonl(dcc[i].addr))) == AF_INET6)//Is this even valid?
       dns_type = DNS_LOOKUP_AAAA;
-    int dns_id = egg_dns_lookup(bd::String(hosts[0]).c_str(), 20, dcc_telnet_dns_forward_callback, (void *) (long) i, dns_type);
+    int dns_id = egg_dns_lookup(hosts[0].c_str(), 20, dcc_telnet_dns_forward_callback, (void *) (long) i, dns_type);
     if (dns_id >= 0)
       dcc[i].dns_id = dns_id;
   } else {
-    bd::Array<bd::String> empty;
+    const bd::Array<bd::String> empty;
     dcc_telnet_dns_forward_callback(id, client_data, ip, empty);
   }
 }
 
-static void dcc_telnet_dns_forward_callback(int id, void *client_data, const char *host, bd::Array<bd::String> ips) {
+static void dcc_telnet_dns_forward_callback(int id, void *client_data,
+    const char *host, const bd::Array<bd::String>& ips) {
   // 64bit hacks
   long data = (long) client_data;
   int i = (int) data;
@@ -1565,10 +1569,10 @@ static void dcc_telnet_dns_forward_callback(int id, void *client_data, const cha
   }
 
   bool forward_matched = false;
-  bd::String look_for_ip(iptostr(htonl(dcc[i].addr)));
+  const auto& look_for_ip(iptostr(htonl(dcc[i].addr)));
   // Look for any match
-  for (size_t n = 0; n < ips.size(); ++n) {
-    if (ips[n] == look_for_ip) {
+  for (const auto& ip : ips) {
+    if (ip == look_for_ip) {
       forward_matched = true;
       break;
     }

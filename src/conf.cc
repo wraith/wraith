@@ -707,16 +707,18 @@ readconf(const char *fname, int bits)
 
 char s1_9[3] = "",s1_5[3] = "",s1_1[3] = "";
 
-bool hubSort (bd::String hub1, bd::String hub2) {
-  bd::Array<bd::String> hub1params(static_cast<bd::String>(hub1).split(' '));
-  bd::Array<bd::String> hub2params(static_cast<bd::String>(hub2).split(' '));
+static bool
+__attribute__((pure))
+hubSort (const bd::String& hub1, const bd::String& hub2) {
+  const auto& hub1params(hub1.split(' '));
+  const auto& hub2params(hub2.split(' '));
 
   unsigned short hub1level = 99, hub2level = 99;
   if (hub1params.length() == 4) {
-    hub1level = atoi(static_cast<bd::String>(hub1params[3]).c_str());
+    hub1level = atoi(hub1params[3].c_str());
   }
   if (hub2params.length() == 4) {
-    hub2level = atoi(static_cast<bd::String>(hub2params[3]).c_str());
+    hub2level = atoi(hub2params[3].c_str());
   }
   return hub1level < hub2level;
 }
@@ -814,10 +816,10 @@ writeconf(char *filename, int fd, int bits)
     bd::Array<bd::String> sortedhubs(conf.hubs);
     std::sort(sortedhubs.begin(), sortedhubs.end(), hubSort);
 
-    for (size_t idx = 0; idx < sortedhubs.length(); ++idx) {
-      bd::Array<bd::String> hubparams(static_cast<bd::String>(sortedhubs[idx]).split(' '));
-      bd::String hubnick(hubparams[0]), address(hubparams[1]);
-      in_port_t port = atoi(static_cast<bd::String>(hubparams[2]).c_str());
+    for (const auto& hubLine : sortedhubs) {
+      const auto& hubparams(hubLine.split(' '));
+      const auto& hubnick(hubparams[0]), address(hubparams[1]);
+      const in_port_t port = atoi(hubparams[2].c_str());
       *stream << bd::String::printf(STR("! hub %s %s %d\n"), hubnick.c_str(), address.c_str(), port);
     }
     comment("");
@@ -1044,9 +1046,9 @@ void conf_update_hubs(struct userrec* list) {
   }
 
   conf.hubs.clear();
-  conf.hubs.Reserve(hubUsers.length());
-  for (size_t idx = 0; idx < hubUsers.length(); ++idx) {
-    struct userrec *u = get_user_by_handle(list, const_cast<char*>(static_cast<bd::String>(hubUsers[idx]).c_str()));
+  conf.hubs.reserve(hubUsers.length());
+  for (const auto& hubUser : hubUsers) {
+    struct userrec *u = get_user_by_handle(list, hubUser.c_str());
     struct bot_addr *bi = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, u);
     conf.hubs << bd::String::printf("%s %s %d %d", u->handle, bi->address, bi->telnet_port, bi->hublevel);
   }

@@ -82,13 +82,13 @@ int load_libssl() {
 
   sdprintf("Loading libssl");
 
-  bd::Array<bd::String> libs_list(bd::String("libssl.so." SHLIB_VERSION_NUMBER " libssl.so libssl.so.1.1 libssl.so.1.0.0 libssl.so.0.9.8 libssl.so.10 libssl.so.9 libssl.so.8 libssl.so.7 libssl.so.6").split(' '));
+  const auto& libs_list(bd::String("libssl.so." SHLIB_VERSION_NUMBER " libssl.so libssl.so.1.1 libssl.so.1.0.0 libssl.so.0.9.8 libssl.so.10 libssl.so.9 libssl.so.8 libssl.so.7 libssl.so.6").split(' '));
 
-  for (size_t i = 0; i < libs_list.length(); ++i) {
+  for (const auto& lib : libs_list) {
     dlerror(); // Clear Errors
-    libssl_handle = dlopen(bd::String(libs_list[i]).c_str(), RTLD_LAZY);
+    libssl_handle = dlopen(lib.c_str(), RTLD_LAZY);
     if (libssl_handle) {
-      sdprintf("Found libssl: %s", bd::String(libs_list[i]).c_str());
+      sdprintf("Found libssl: %s", lib.c_str());
       break;
     }
   }
@@ -108,9 +108,8 @@ int load_libssl() {
 int unload_libssl() {
   if (libssl_handle) {
     // Cleanup symbol table
-    for (size_t i = 0; i < my_symbols.length(); ++i) {
-      dl_symbol_table.remove(my_symbols[i]);
-      static_cast<bd::String>(my_symbols[i]).clear();
+    for (const auto& symbol : my_symbols) {
+      dl_symbol_table.remove(symbol);
     }
     my_symbols.clear();
 

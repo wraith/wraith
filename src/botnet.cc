@@ -994,7 +994,8 @@ int botunlink(int idx, const char *nick, const char *reason)
   return 0;
 }
 
-static void botlink_dns_callback(int, void *, const char *, bd::Array<bd::String>);
+static void botlink_dns_callback(int, void *, const char *,
+    const bd::Array<bd::String>&);
 static void botlink_real(int);
 
 /* Link to another bot
@@ -1094,7 +1095,8 @@ int botlink(char *linker, int idx, char *nick)
   return 0;
 }
 
-static void botlink_dns_callback(int id, void *client_data, const char *host, bd::Array<bd::String> ips)
+static void botlink_dns_callback(int id, void *client_data, const char *host,
+    const bd::Array<bd::String>& ips)
 {
   long data = (long) client_data;
   int i = (int) data;
@@ -1207,7 +1209,8 @@ static void failed_tandem_relay(int idx)
   return;
 }
 
-static void tandem_relay_dns_callback(int, void *, const char *, bd::Array<bd::String>);
+static void tandem_relay_dns_callback(int, void *, const char *,
+    const bd::Array<bd::String>&);
 
 /* Relay to another tandembot
  */
@@ -1271,7 +1274,8 @@ void tandem_relay(int idx, char *nick, int i)
   /* wait for async reply */
 }
 
-static void tandem_relay_dns_callback(int id, void *client_data, const char *host, bd::Array<bd::String> ips)
+static void tandem_relay_dns_callback(int id, void *client_data,
+    const char *host, const bd::Array<bd::String>& ips)
 {
   //64bit hacks
   long data = (long) client_data;

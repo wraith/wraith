@@ -44,7 +44,8 @@ typedef struct resolvstruct {
   bd::String* server;
 } resolv_member;
 
-static void resolv_member_callback(int id, void *client_data, const char *host, bd::Array<bd::String> ips)
+static void resolv_member_callback(int id, void *client_data, const char *host,
+    const bd::Array<bd::String>& ips)
 {
   resolv_member *r = (resolv_member *) client_data;
   struct chanset_t* chan = NULL;
@@ -68,7 +69,7 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
       pe = strchr(m->userhost, '@');
       if (pe && !strcmp(pe + 1, r->host)) {
         strlcpy(user, m->userhost, pe - m->userhost + 1);
-        simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, bd::String(ips[0]).c_str());
+        simple_snprintf(m->userip, sizeof(m->userip), "%s@%s", user, ips[0].c_str());
         simple_snprintf(m->fromip, sizeof(m->fromip), "%s!%s", m->nick, m->userip);
         if (!m->user) {
           m->user = get_user_by_host(m->fromip);
@@ -84,7 +85,7 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
   }
 
   if (!matched_user && channel_rbl(chan))
-    resolve_to_rbl(chan, bd::String(ips[0]).c_str());
+    resolve_to_rbl(chan, ips[0].c_str());
 
   free(r->host);
   free(r->chan);
@@ -110,7 +111,8 @@ void resolve_to_member(struct chanset_t *chan, char *nick, char *host)
 }
 
 /* RBL */
-static void resolve_rbl_callback(int id, void *client_data, const char *host, bd::Array<bd::String> ips)
+static void resolve_rbl_callback(int id, void *client_data, const char *host,
+    const bd::Array<bd::String>& ips)
 {
   resolv_member *r = (resolv_member *) client_data;
   struct chanset_t* chan = NULL;
@@ -123,7 +125,7 @@ static void resolve_rbl_callback(int id, void *client_data, const char *host, bd
     return;
   }
 
-  sdprintf("RBL match for %s:%s: %s", chan->dname, r->host, bd::String(ips[0]).c_str());
+  sdprintf("RBL match for %s:%s: %s", chan->dname, r->host, ips[0].c_str());
 
   char s1[UHOSTLEN] = "";
   simple_snprintf(s1, sizeof(s1), "*!*@%s", r->host);

@@ -101,13 +101,13 @@ int load_libcrypto() {
 
   sdprintf("Loading libcrypto");
 
-  bd::Array<bd::String> libs_list(bd::String("libcrypto.so." SHLIB_VERSION_NUMBER " libcrypto.so libcrypto.so.1.1 libcrypto.so.1.0.0 libcrypto.so.0.9.8 libcrypto.so.10 libcrypto.so.9 libcrypto.so.8 libcrypto.so.7 libcrypto.so.6").split(' '));
+  const auto& libs_list(bd::String("libcrypto.so." SHLIB_VERSION_NUMBER " libcrypto.so libcrypto.so.1.1 libcrypto.so.1.0.0 libcrypto.so.0.9.8 libcrypto.so.10 libcrypto.so.9 libcrypto.so.8 libcrypto.so.7 libcrypto.so.6").split(' '));
 
-  for (size_t i = 0; i < libs_list.length(); ++i) {
+  for (const auto& lib : libs_list) {
     dlerror(); // Clear Errors
-    libcrypto_handle = dlopen(bd::String(libs_list[i]).c_str(), RTLD_LAZY|RTLD_GLOBAL);
+    libcrypto_handle = dlopen(lib.c_str(), RTLD_LAZY|RTLD_GLOBAL);
     if (libcrypto_handle) {
-      sdprintf("Found libcrypto: %s", bd::String(libs_list[i]).c_str());
+      sdprintf("Found libcrypto: %s", lib.c_str());
       break;
     }
   }
@@ -127,9 +127,8 @@ int load_libcrypto() {
 int unload_libcrypto() {
   if (libcrypto_handle) {
     // Cleanup symbol table
-    for (size_t i = 0; i < my_symbols.length(); ++i) {
-      dl_symbol_table.remove(my_symbols[i]);
-      static_cast<bd::String>(my_symbols[i]).clear();
+    for (const auto& symbol : my_symbols) {
+      dl_symbol_table.remove(symbol);
     }
     my_symbols.clear();
 

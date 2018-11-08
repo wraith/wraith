@@ -119,12 +119,12 @@ static int get_ip(char *hostname, union sockaddr_union *so, int dns_type)
   memset(so, 0, sizeof(union sockaddr_union));
   debug1("get_ip(%s)", hostname);
 
-  bd::Array<bd::String> hosts = dns_lookup_block(hostname, 10, dns_type);
+  const auto& hosts = dns_lookup_block(hostname, 10, dns_type);
   if (hosts.length() == 0)
     return -1;
 
   my_addr_t addr;
-  get_addr(bd::String(hosts[0]).c_str(), &addr);
+  get_addr(hosts[0].c_str(), &addr);
 
   if (addr.family == AF_INET) {
     so->sin.sin_family = AF_INET;
@@ -1244,7 +1244,7 @@ int sockgets(char *s, int *len)
   }
   /* Might be necessary to prepend stored-up data! */
   if (socklist[ret].inbuf != NULL) {
-    *(socklist[ret].inbuf) += bd::String(xx);
+    *(socklist[ret].inbuf) += xx;
     if (socklist[ret].inbuf->length() < (SGRAB + 2)) {
       strlcpy(xx, socklist[ret].inbuf->c_str(), sizeof(xx));
       delete socklist[ret].inbuf;

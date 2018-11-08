@@ -25,6 +25,6 @@ init_responses()
 const char *
 response(response_t type)
 {
-  return res_map[type].at(randint(res_map[type].size()));
+  return res_map[type][randint(res_map[type].size())];
 }
 /* vim: set sts=2 sw=2 ts=8 et: */

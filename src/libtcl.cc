@@ -67,11 +67,11 @@ int load_libtcl() {
   }
 #endif
 
-  bd::Array<bd::String> libs_list(bd::String("libtcl.so libtcl83.so libtcl8.3.so libtcl84.so libtcl8.4.so libtcl85.so libtcl8.5.so libtcl86.so libtcl8.6.so").split(' '));
+  const auto& libs_list(bd::String("libtcl.so libtcl83.so libtcl8.3.so libtcl84.so libtcl8.4.so libtcl85.so libtcl8.5.so libtcl86.so libtcl8.6.so").split(' '));
 
-  for (size_t i = 0; i < libs_list.length(); ++i) {
+  for (const auto& lib : libs_list) {
     dlerror(); // Clear Errors
-    libtcl_handle = dlopen(bd::String(libs_list[i]).c_str(), RTLD_LAZY);
+    libtcl_handle = dlopen(lib.c_str(), RTLD_LAZY);
     if (libtcl_handle) break;
   }
   if (!libtcl_handle) {
@@ -127,9 +127,8 @@ int unload_libtcl() {
 #endif
 
     // Cleanup symbol table
-    for (size_t i = 0; i < my_symbols.length(); ++i) {
-      dl_symbol_table.remove(my_symbols[i]);
-      static_cast<bd::String>(my_symbols[i]).clear();
+    for (const auto& symbol : my_symbols) {
+      dl_symbol_table.remove(symbol);
     }
     my_symbols.clear();
 

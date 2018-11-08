@@ -2043,7 +2043,8 @@ static cmd_t my_raw_binds[] =
   {NULL,	NULL,	NULL,				NULL, 0}
 };
 
-static void server_dns_callback(int, void *, const char *, bd::Array<bd::String>);
+static void server_dns_callback(int, void *, const char *,
+    const bd::Array<bd::String>&);
 
 /* Hook up to a server
  */
@@ -2122,7 +2123,8 @@ static void connect_server(void)
   }
 }
 
-static void server_dns_callback(int id, void *client_data, const char *host, bd::Array<bd::String> ips)
+static void server_dns_callback(int id, void *client_data, const char *host,
+    const bd::Array<bd::String>& ips)
 {
   //64bit hacks
   long data = (long) client_data;
