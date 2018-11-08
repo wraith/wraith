@@ -1539,7 +1539,7 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip,
     if (dns_id >= 0)
       dcc[i].dns_id = dns_id;
   } else {
-    const bd::Array<bd::String> empty;
+    const bd::Array<bd::String> empty{};
     dcc_telnet_dns_forward_callback(id, client_data, ip, empty);
   }
 }
