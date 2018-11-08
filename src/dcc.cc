@@ -1998,7 +1998,6 @@ struct dcc_table DCC_SOCKET = {
 };
 
 static void
-__attribute__((const))
 dcc_identwait(int idx, char *buf, int len)
 {
   /* Ignore anything now */

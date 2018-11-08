@@ -650,7 +650,6 @@ static void kill_dcc_xfer(int idx, void *x)
 }
 
 static void
-__attribute__((const))
 out_dcc_xfer(int idx, char *buf, void *x)
 {
 }
