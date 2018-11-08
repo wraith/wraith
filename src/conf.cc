@@ -1046,7 +1046,7 @@ void conf_update_hubs(struct userrec* list) {
   }
 
   conf.hubs.clear();
-  conf.hubs.Reserve(hubUsers.length());
+  conf.hubs.reserve(hubUsers.length());
   for (const auto& hubUser : hubUsers) {
     struct userrec *u = get_user_by_handle(list, hubUser.c_str());
     struct bot_addr *bi = (struct bot_addr *) get_user(&USERENTRY_BOTADDR, u);
