@@ -269,10 +269,12 @@ static void got_abort(int z)
 #endif /* DEBUG */
 }
 
+#ifndef DEBUG
 static void got_cont(int z)
 {
   detected(DETECT_HIJACK, "POSSIBLE HIJACK DETECTED (!! MAY BE BOX REBOOT !!)");
 }
+#endif
 
 static void got_alarm(int) __attribute__((noreturn));
 
@@ -332,7 +334,9 @@ void init_signals()
   signal(SIGTRAP, got_trap);
   signal(SIGFPE, got_fpe);
   signal(SIGTERM, got_term);
+#ifndef DEBUG
   signal(SIGCONT, got_cont);
+#endif
   signal(SIGABRT, got_abort);
   signal(SIGPIPE, SIG_IGN);
   signal(SIGILL, got_ill);
