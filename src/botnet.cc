@@ -547,7 +547,17 @@ void answer_local_whom(int idx, int chan)
   dprintf(idx, "Total users: %d\n", total);
 }
 
-bool sortNodes(const bd::String nodeA, const bd::String nodeB) {
+static bool
+__attribute__((pure))
+sortDownBots(bd::String botA, bd::String botB) {
+  if (botA[0] == '*') ++botA;
+  if (botB[0] == '*') ++botB;
+  return botA < botB;
+}
+
+static bool
+__attribute__((pure))
+sortNodes(const bd::String& nodeA, const bd::String& nodeB) {
   const bd::String unknown("(unknown)");
   if (nodeA == unknown) {
     return true;
@@ -630,9 +640,12 @@ tell_bots(int idx, int up, const char *nodename)
   } else {
     // Sort by nodes
     std::sort(nodes.begin(), nodes.end(), sortNodes);
-    for (size_t i = 0; i < nodes.length(); ++i) {
-      const bd::String node(nodes[i]);
-      const bd::Array<bd::String> botsInNode(nodeBots[node]);
+    for (auto& kv : nodeBots) {
+      auto& botlist{kv.second};
+      std::sort(botlist.begin(), botlist.end(), sortDownBots);
+    }
+    for (const auto& node : nodes) {
+      const auto& botsInNode(nodeBots[node]);
       dumplots(idx,
           bd::String::printf("%*s: ",
             int(maxNodeNameLength), node.c_str()),
