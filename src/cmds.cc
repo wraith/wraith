@@ -911,8 +911,6 @@ static void cmd_groups(int idx, char *par)
     return;
   }
 
-  bd::Array<bd::String> globalgroups = bd::String(var_get_gdata("groups")).split(",");
-  bd::Array<bd::String> allgroups;
   bd::HashTable<bd::String, bd::Array<bd::String> > groupBots;
   bd::HashTable<bd::String, bd::Array<bd::String> > botGroups;
   size_t maxGroupLen = 0;
@@ -926,10 +924,6 @@ static void cmd_groups(int idx, char *par)
         if (group.length() > maxGroupLen) {
           maxGroupLen = group.length();
         }
-        // Add their groups into the master list
-        if (allgroups.find(group) == allgroups.npos) {
-          allgroups << group;
-        }
         // Add them to the list for this group
         groupBots[group] << u->handle;
 
@@ -938,17 +932,25 @@ static void cmd_groups(int idx, char *par)
   }
 
   if (botnick.length()) {
-    dprintf(idx, "%s is in groups: %s\n", botnick.c_str(), static_cast<bd::String>(botGroups[botnick].join(" ")).c_str());
-    dprintf(idx, "Total groups: %zu/%zu\n", botGroups[botnick].length(), allgroups.length());
+    dprintf(idx, "%s is in groups: %s\n", botnick.c_str(),
+        static_cast<bd::String>(botGroups[botnick].join(" ")).c_str());
+    dprintf(idx, "Total groups: %zu/%zu\n", botGroups[botnick].length(),
+        groupBots.size());
   } else {
+    std::vector<bd::String> allgroups;
+    allgroups.reserve(groupBots.size());
+    for (const auto& kv : groupBots) {
+      allgroups.push_back(kv.first);
+    }
+    std::sort(allgroups.begin(), allgroups.end());
     // Display all groups and which bots are in them
     for (const auto& group : allgroups) {
-      const bd::Array<bd::String> bots(groupBots[group]);
+      const auto& bots = groupBots[group];
       dumplots(idx,
           bd::String::printf("%-*s: ", int(maxGroupLen), group.c_str()),
           bots.join(" "));
     }
-    dprintf(idx, "Total groups: %zu\n", allgroups.length());
+    dprintf(idx, "Total groups: %zu\n", groupBots.size());
   }
 
   return;
