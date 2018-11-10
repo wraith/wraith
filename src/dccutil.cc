@@ -217,7 +217,7 @@ colorbuf(char *buf, size_t len, int idx, size_t bufsiz)
 
 /* Dump a potentially super-long string of text.
  */
-void dumplots(int idx, const char *prefix, const bd::String data)
+void dumplots(int idx, const char *prefix, const bd::String& data)
 {
   if (unlikely(!*data)) {
     dprintf(idx, "%s\n", prefix);
