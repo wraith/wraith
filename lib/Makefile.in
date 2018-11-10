@@ -42,11 +42,13 @@ general:
 libelf_notice:
 	@echo "[*] Building libelf"
 
+.PHONY: $(top_builddir)/lib/libelf/lib/libelf.a
 $(top_builddir)/lib/libelf/lib/libelf.a: libelf_notice
 	+@cd libelf/lib && $(MAKE) CFLAGS="-g -O2 -w" libelf.a
 
 libelf: $(LIBELF_BUNDLED)
 
+.PHONY: $(top_builddir)/lib/bdlib/libbdlib.a
 $(top_builddir)/lib/bdlib/libbdlib.a:
 	+@cd bdlib && $(MAKE)
 
