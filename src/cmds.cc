@@ -939,8 +939,9 @@ static void cmd_groups(int idx, char *par)
   } else {
     std::vector<bd::String> allgroups;
     allgroups.reserve(groupBots.size());
-    for (const auto& kv : groupBots) {
+    for (auto& kv : groupBots) {
       allgroups.push_back(kv.first);
+      std::sort(kv.second.begin(), kv.second.end());
     }
     std::sort(allgroups.begin(), allgroups.end());
     // Display all groups and which bots are in them
