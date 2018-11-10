@@ -547,7 +547,17 @@ void answer_local_whom(int idx, int chan)
   dprintf(idx, "Total users: %d\n", total);
 }
 
-bool sortNodes(const bd::String nodeA, const bd::String nodeB) {
+bool
+__attribute__((pure))
+sortDownBots(bd::String botA, bd::String botB) {
+  if (botA[0] == '*') ++botA;
+  if (botB[0] == '*') ++botB;
+  return botA < botB;
+}
+
+static bool
+__attribute__((pure))
+sortNodes(const bd::String& nodeA, const bd::String& nodeB) {
   const bd::String unknown("(unknown)");
   if (nodeA == unknown) {
     return true;
@@ -561,12 +571,12 @@ bool sortNodes(const bd::String nodeA, const bd::String nodeB) {
   bd::String reversedNodeA, reversedNodeB;
 
   if (partsA.length()) {
-    for (size_t i = partsA.length() - 1; i > 0; --i) {
+    for (size_t i = partsA.length(); i > 0; --i) {
       reversedPartsA << partsA[i - 1];
     }
   }
   if (partsB.length()) {
-    for (size_t i = partsB.length() - 1; i > 0; --i) {
+    for (size_t i = partsB.length(); i > 0; --i) {
       reversedPartsB << partsB[i - 1];
     }
   }
@@ -625,14 +635,21 @@ tell_bots(int idx, int up, const char *nodename)
   }
 
   if (group.length() == 0 && !nodename) {
-    dumplots(idx, nodename ? "Matching: " : (up ? "Up: " : "Down: "), static_cast<bd::String>(bots.join(" ")).c_str());
+    dumplots(idx, nodename ? "Matching: " : (up ? "Up: " : "Down: "),
+        bots.join(" "));
   } else {
     // Sort by nodes
     std::sort(nodes.begin(), nodes.end(), sortNodes);
-    for (size_t i = 0; i < nodes.length(); ++i) {
-      const bd::String node(nodes[i]);
-      const bd::Array<bd::String> botsInNode(nodeBots[node]);
-      dumplots(idx, bd::String::printf("%*s: ", int(maxNodeNameLength), node.c_str()).c_str(), static_cast<bd::String>(botsInNode.join(" ")).c_str());
+    for (auto& kv : nodeBots) {
+      auto& botlist{kv.second};
+      std::sort(botlist.begin(), botlist.end(), sortDownBots);
+    }
+    for (const auto& node : nodes) {
+      const auto& botsInNode(nodeBots[node]);
+      dumplots(idx,
+          bd::String::printf("%*s: ",
+            int(maxNodeNameLength), node.c_str()),
+            botsInNode.join(" "));
     }
   }
 
