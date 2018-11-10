@@ -944,7 +944,9 @@ static void cmd_groups(int idx, char *par)
     // Display all groups and which bots are in them
     for (const auto& group : allgroups) {
       const bd::Array<bd::String> bots(groupBots[group]);
-      dumplots(idx, bd::String::printf("%-*s: ", int(maxGroupLen), group.c_str()).c_str(), static_cast<bd::String>(bots.join(" ")).c_str());
+      dumplots(idx,
+          bd::String::printf("%-*s: ", int(maxGroupLen), group.c_str()),
+          bots.join(" "));
     }
     dprintf(idx, "Total groups: %zu\n", allgroups.length());
   }

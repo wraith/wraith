@@ -37,7 +37,7 @@ namespace bd {
 
 
 void init_dcc(void);
-void dumplots(int, const char *, const bd::String&);
+void dumplots(int, const bd::String&, const bd::String&);
 void rdprintf(const char*, int, const char *, ...) __attribute__((format(printf, 3, 4)));
 void dprintf(int, const char *, ...) __attribute__((format(printf, 2, 3)));
 void dprintf_real(int, char*, size_t, size_t, const char* = NULL);

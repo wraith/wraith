@@ -625,14 +625,18 @@ tell_bots(int idx, int up, const char *nodename)
   }
 
   if (group.length() == 0 && !nodename) {
-    dumplots(idx, nodename ? "Matching: " : (up ? "Up: " : "Down: "), static_cast<bd::String>(bots.join(" ")).c_str());
+    dumplots(idx, nodename ? "Matching: " : (up ? "Up: " : "Down: "),
+        bots.join(" "));
   } else {
     // Sort by nodes
     std::sort(nodes.begin(), nodes.end(), sortNodes);
     for (size_t i = 0; i < nodes.length(); ++i) {
       const bd::String node(nodes[i]);
       const bd::Array<bd::String> botsInNode(nodeBots[node]);
-      dumplots(idx, bd::String::printf("%*s: ", int(maxNodeNameLength), node.c_str()).c_str(), static_cast<bd::String>(botsInNode.join(" ")).c_str());
+      dumplots(idx,
+          bd::String::printf("%*s: ",
+            int(maxNodeNameLength), node.c_str()),
+            botsInNode.join(" "));
     }
   }
 
