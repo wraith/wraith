@@ -5,6 +5,10 @@
 #  include "config.h"
 #endif
 
+namespace bd {
+  class String;
+}
+
 #include "tandem.h"
 
 extern tand_t		*tandbot;
@@ -16,6 +20,7 @@ void answer_local_whom(int, int);
 char *lastbot(const char *) __attribute__((pure));
 int nextbot(const char *) __attribute__((pure));
 int in_chain(const char *) __attribute__((pure));
+bool sortDownBots(bd::String botA, bd::String botB) __attribute__((pure));
 void tell_bots(int, int, const char *);
 void tell_bottree(int);
 void dump_links(int);

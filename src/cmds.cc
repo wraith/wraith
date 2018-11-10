@@ -913,6 +913,7 @@ static void cmd_groups(int idx, char *par)
 
   bd::HashTable<bd::String, bd::Array<bd::String> > groupBots;
   bd::HashTable<bd::String, bd::Array<bd::String> > botGroups;
+  bd::String bothandle;
   size_t maxGroupLen = 0;
 
   // Need to loop over every bot and make a list of all groups and bots which are in those groups
@@ -925,7 +926,11 @@ static void cmd_groups(int idx, char *par)
           maxGroupLen = group.length();
         }
         // Add them to the list for this group
-        groupBots[group] << u->handle;
+        if (u != conf.bot->u && !findbot(u->handle))
+          bothandle = bd::String::printf("*%s", u->handle);
+        else
+          bothandle = u->handle;
+        groupBots[group] << bothandle;
 
       }
     }
@@ -940,8 +945,10 @@ static void cmd_groups(int idx, char *par)
     std::vector<bd::String> allgroups;
     allgroups.reserve(groupBots.size());
     for (auto& kv : groupBots) {
-      allgroups.push_back(kv.first);
-      std::sort(kv.second.begin(), kv.second.end());
+      const auto& group{kv.first};
+      auto& botlist{kv.second};
+      allgroups.push_back(group);
+      std::sort(botlist.begin(), botlist.end(), sortDownBots);
     }
     std::sort(allgroups.begin(), allgroups.end());
     // Display all groups and which bots are in them

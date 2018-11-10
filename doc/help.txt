@@ -1098,6 +1098,7 @@ See also: console, channels%{+m}, status%{-}
    Shows the list of groups and which bots are in them.
  
    Specify a bot to only show which groups it is in.
+   Bots with a * preceding its name are down.
  
 See also: bots, downbots%{+n}, bottree%{-}
 ::handle

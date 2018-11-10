@@ -547,7 +547,7 @@ void answer_local_whom(int idx, int chan)
   dprintf(idx, "Total users: %d\n", total);
 }
 
-static bool
+bool
 __attribute__((pure))
 sortDownBots(bd::String botA, bd::String botB) {
   if (botA[0] == '*') ++botA;
