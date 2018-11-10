@@ -641,7 +641,7 @@ tell_bots(int idx, int up, const char *nodename)
     // Sort by nodes
     std::sort(nodes.begin(), nodes.end(), sortNodes);
     for (auto& kv : nodeBots) {
-      auto& botlist{kv.second};
+      auto& botlist = kv.second;
       std::sort(botlist.begin(), botlist.end(), sortDownBots);
     }
     for (const auto& node : nodes) {

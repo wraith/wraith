@@ -945,8 +945,8 @@ static void cmd_groups(int idx, char *par)
     std::vector<bd::String> allgroups;
     allgroups.reserve(groupBots.size());
     for (auto& kv : groupBots) {
-      const auto& group{kv.first};
-      auto& botlist{kv.second};
+      const auto& group = kv.first;
+      auto& botlist = kv.second;
       allgroups.push_back(group);
       std::sort(botlist.begin(), botlist.end(), sortDownBots);
     }
