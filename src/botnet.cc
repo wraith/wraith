@@ -561,12 +561,12 @@ bool sortNodes(const bd::String nodeA, const bd::String nodeB) {
   bd::String reversedNodeA, reversedNodeB;
 
   if (partsA.length()) {
-    for (size_t i = partsA.length() - 1; i > 0; --i) {
+    for (size_t i = partsA.length(); i > 0; --i) {
       reversedPartsA << partsA[i - 1];
     }
   }
   if (partsB.length()) {
-    for (size_t i = partsB.length() - 1; i > 0; --i) {
+    for (size_t i = partsB.length(); i > 0; --i) {
       reversedPartsB << partsB[i - 1];
     }
   }
