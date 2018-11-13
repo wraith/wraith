@@ -1,7 +1,7 @@
 # next
 
 # master
-  * Require C++11 compiler support (G++ 4.7+, clang32+)
+  * Require C++14 compiler support (GCC 5+, Clang 3.4+)
   * Wraith now automatically assigns roles to bots for channels, no longer
     requiring manually assigning them with flags +flry for flood, limit,
     resolve, auto-voice, auto-op. These roles are decentralized and per-chan

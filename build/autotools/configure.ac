@@ -16,11 +16,11 @@ EGG_SAVE_PARAMETERS
 dnl Search for newer gcc versions before older
 #AC_REQUIRE_CPP
 AC_LANG([C++])
-AC_PROG_CXX([g++8 g++7 g++6 g++5 g++49 g++-4.9 g++48 g++-4.8 g++47 g++-4.7 g++46 g++-4.6 eg++ g++ c++ CC cxx cc++])
+AC_PROG_CXX([g++8 g++7 g++6 g++5 clang++ eg++ g++ c++ CC cxx cc++])
 CC="${CXX} -x c"
 AC_SUBST(CC)
 AC_REQUIRE_CPP
-AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
+AX_CXX_COMPILE_STDCXX_14([noext], [mandatory])
 EGG_CHECK_CC
 #CXX_RPATH_CHECK
 
