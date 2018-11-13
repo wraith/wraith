@@ -565,23 +565,18 @@ sortNodes(const bd::String& nodeA, const bd::String& nodeB) {
     return false;
   }
   // Reverse the domains
-  const bd::Array<bd::String> partsA(nodeA.split("."));
-  const bd::Array<bd::String> partsB(nodeB.split("."));
-  bd::Array<bd::String> reversedPartsA, reversedPartsB;
-  bd::String reversedNodeA, reversedNodeB;
-
-  if (partsA.length()) {
-    for (size_t i = partsA.length(); i > 0; --i) {
-      reversedPartsA << partsA[i - 1];
-    }
-  }
-  if (partsB.length()) {
-    for (size_t i = partsB.length(); i > 0; --i) {
-      reversedPartsB << partsB[i - 1];
-    }
-  }
-  reversedNodeA = reversedPartsA.join(".");
-  reversedNodeB = reversedPartsB.join(".");
+  auto partsA(nodeA.split("."));
+  auto partsB(nodeB.split("."));
+  if (partsA.size() < partsB.size())
+    while (partsA.size() < partsB.size())
+      partsA.push_back(".");
+  else
+    while (partsB.size() < partsA.size())
+      partsB.push_back(".");
+  std::reverse(partsA.begin(), partsA.end());
+  std::reverse(partsB.begin(), partsB.end());
+  const auto& reversedNodeA(partsA.join("."));
+  const auto& reversedNodeB(partsB.join("."));
   return reversedNodeA < reversedNodeB;
 }
 
