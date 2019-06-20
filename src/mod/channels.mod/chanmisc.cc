@@ -1203,14 +1203,17 @@ int channel_add(char *result, const char *newname, char *options, bool isdefault
    */
   if ((channel_modify(result, chan, items, (char **) item, 0) != OK)) {
     putlog(LOG_ERROR, "*", "Error parsing channel options for %s: %s", chan->dname, result);
-    if (!loading)
+    if (!loading) {
       ret = ERROR;
+      remove_channel(chan);
+      goto out;
+    }
   }
     
-
-  free(item);
   if (join && shouldjoin(chan))
     join_chan(chan);
+out:
+  free(item);
   return ret;
 }
 /* vim: set sts=2 sw=2 ts=8 et: */

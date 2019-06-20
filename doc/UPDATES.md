@@ -23,6 +23,7 @@
   * Fix rare issue with writing binary config.
   * Make ./wraith -q and -Q clearly exit when already written.
   * Don't crash when looking up a missing response.
+  * Fix cmd_slowjoin still adding the channel on parsing error.
 
 # 1.4.9
   * Fix various compile warnings and spam
