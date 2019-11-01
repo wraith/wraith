@@ -1,0 +1,126 @@
+# '''Version 1.2.16.1 (legacy release) requires an older version of this PackConfig. Please use: http://wraith.botpack.net/wiki/PackConfig?version=28'''
+
+# '''Also see a working example at PackConfigExample'''
+
+{{{
+#!html
+<pre>
+/* Salted-SHA1 format:
+ *     rand: 12345 (This should be random)
+ *     pass: password
+ *     format: +12345$SHA1(12345password)
+ *     Result: +12345$c553b125c1f87134911fe18e02f29c7ea7027303
+ */
+</pre>
+
+# <label for="pass">Pass:</label> <input type="text=" size="50" id="pass" />
+<input type="button" value="Generate Salted SHA1" onClick="saltedSHA1();">
+<br />
+# <label for="salted_sha1">salted_sha1:</label> <input type="text" size="50" readonly id="salted_sha1" onclick="javascript:this.focus();this.select();"/>
+
+<script language="JavaScript" src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/core-min.js"></script> 
+<script language="JavaScript" src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/sha1-min.js"></script> 
+<script language="javascript" type="text/javascript">
+function randomString(n) {
+  var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
+  var string_length = n;
+  var randomstring = '';
+  for (var i=0; i<string_length; i++) {
+    var rnum = Math.floor(Math.random() * chars.length);
+    randomstring += chars.substring(rnum,rnum+1);
+  }
+        return randomstring;
+}
+
+function saltedSHA1() {
+  
+  var salt = randomString(5);
+  var pass = document.getElementById('pass').value;
+  var salted_sha1 = document.getElementById('salted_sha1');
+  salted_sha1.value = '';
+  if (!pass) return;
+  
+  salted_sha1.value = '+' + salt + '$' + CryptoJS.SHA1(salt + pass);
+}
+</script>
+<form name="randform">
+</form>
+
+<pre>
+/* The &lt; && &gt; indicates the area you must change!
+ * Do not leave the &lt;&gt;
+ * Credit to Excelsior / CELDROP for this design
+ */
+
+/* PACKNAME: name of the pack (no spaces) */
+PACKNAME &lt;name&gt;
+
+/* HASHES
+ * This must remain 100% secure/private, this key can retrieve the salts, and
+ * the entire botnet could be hijacked, a pass 8 chars or more is suggested
+ * DO NOT FORGET THE CLEARTEXT, SAVE IT IN A SAFE PLACE, IT CANNOT BE RECOVERED.
+ */
+
+/* BINARYPASS: salted-SHA1
+ *   BINARYPASS should be a salted-sha1. (Use the form at the top of this page)
+ */
+BINARYPASS &lt;salted-SHA1&gt;
+
+/* DCCPREFIX: 1 char cmd prefix for dcc. (ie, .cmd or !cmd) */
+DCCPREFIX &lt;.&gt;
+
+/* The settings below can each be defined multiple times */
+
+/* OWNER &lt;nick password&gt;
+ * Multiple OWNER lines may be defined, each will be added as a +a perm owner.
+ *   All perm owners will have remote shell access to your bots.
+ * nick: nickname what else?
+ * password: initial password for user. DO NOT MAKE THIS YOUR NORMAL PASSWORD.
+ *   Password should be a salted-sha1. (Use the form at the top of this page)
+ */
+OWNER &lt;YourNick salted-SHA1&gt;
+
+/* HUB &lt;nick host port&gt;
+ * Hubs are ranked by the order they are listed.
+ * Hubs DO NOT come on IRC.
+ * nick: nick of hub
+ * host: hostname or ip of hub (A 'dynamic' OR 'changeable' HOSTNAME IS RECOMMENDED)
+ * port: port the hub listens on
+ *
+ * Your hub hosts should NOT be vhosts. They need to be changeable dns,
+ *  so you can easily move the hubs later if needed.
+ * Use a domain you OWN/CONTROL, or a trusted friend's.
+ */
+HUB &lt;hub1 hub1.domain.tld 1234&gt;
+HUB &lt;hub2 hub2.domain.tld 1235&gt;
+
+/* You will also need to add SALTS to your packconfig. These should only be generated <strong>once per botnet.</strong>
+Click the button below to generate SALTS for your botnet. */
+
+SALT1 <span id="salt1">&nbsp;</span>
+SALT2 <span id="salt2">&nbsp;</span>
+</pre>
+
+
+<script language="javascript" type="text/javascript">
+function createSalts() {
+  var salt1 = randomString(32);
+  var salt2 = randomString(16);
+  var s1 = document.getElementById('salt1');
+  s1.innerText = salt1;
+  s1.innerHtml = salt1;
+  s1.textContent = salt1;
+  var s2 = document.getElementById('salt2');
+  s2.innerText = salt2;
+  s2.innerHtml = salt2;
+  s2.textContent = salt2;
+}
+
+</script>
+<form name="randform">
+<input type="button" value="Click to Generate Salts" onClick="createSalts();">
+</form>
+
+}}}
+
+
