@@ -1,0 +1,107 @@
+<HTML><HEAD>
+<BODY>
+<script language="JavaScript" src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/md5.js"></script> 
+<body>
+<form><table class="indented">
+  <tr><th><FONT color=green>randstring</FONT></th><td><input type="text" name="rand" size="50"></td></tr>
+  <tr><th><FONT color=blue>SECPASS</font></th><td><input type="text" name="secpass" size="15"></td></tr>
+  <tr><th><FONT color=red>AUTHKEY</font></th><td><input type="text" name="authkey" size="50"></td></tr>
+  <tr><th>Calculate</th>
+  <td style="text-align:center">
+  <input type="button" onclick="hash.value = '+Auth ' + CryptoJS.MD5(rand.value + secpass.value + authkey.value)" value="MD5">
+  </td></tr>
+  <tr><th>Result</th><td><input type="text" name="hash" size="50"></td></tr>
+</table></form>
+<!--http://pajhome.org.uk/crypt/md5/-->
+
+<BR><BR><BR>This is the concept of the auth 
+system. The hash is always different. <BR>Only chatbots will accept dcc/msg 
+authing/cmds.<BR><BR>Authing for DCC:<BR><BR>[bot] password?<BR>[you] 
+yourpass<BR>[bot] -Auth <FONT 
+color=green>i/P"R2*Go1)Cij8$-1tvT&amp;5-8d36/bA3(E.1tHl+s4#2FqNpxg</FONT> 
+botnick<BR><BR>Now, at this point, you need to know your <FONT color=blue>SECPASS</FONT> from the bot 
+and the <FONT color=green>AUTHKEY</FONT>.<BR>These can be obtained by asking your admin.<BR>Then you 
+would MD5 the three elements together: 
+<OL>
+  <LI><FONT 
+  color=green>i/P"R2*Go1)Cij8$-1tvT&amp;5-8d36/bA3(E.1tHl+s4#2FqNpxg</FONT> 
+  <LI><FONT color=blue>SECPASS</FONT> 
+  <LI><FONT color=red>AUTHKEY</FONT> </LI></OL>
+<p><BR>
+  MD5: <FONT 
+color=green>i/P"R2*Go1)Cij8$-1tvT&amp;5-8d36/bA3(E.1tHl+s4#2FqNpxg</FONT><FONT 
+color=blue>SECPASS</FONT><FONT color=red>AUTHKEY</FONT><BR>
+  The hash comes out to be: <B>8f783879950efd3e71b7de188ebfa1ad</B><BR>
+  You then paste this back to the bot like so:<BR>
+  <BR>
+  [you] +Auth 8f783879950efd3e71b7de188ebfa1ad<BR>
+  <BR>
+  If you used the correct SECPASS and AUTHKEY, then it will grant you access.<BR>
+  <BR>
+  Authing over IRC is much similar:<BR>
+  <BR>
+  /msg bot auth?<BR>
+  [bot] auth. botnick [if the bot responds with &quot;auth<b>!</b>&quot; then 
+  your host is not added, this will be used in the future.]<BR>
+  [you] auth yourpass<BR>
+  [bot] -Auth i/P"R2*Go1)Cij8$-1tvT&amp;5-8d36/bA3(E.1tHl+s4#2FqNpxg botnick<BR>
+  From here, the hash is made as described earlier<BR>
+  [you] +Auth 8f783879950efd3e71b7de188ebfa1ad<BR>
+  [bot] -notice- You are now authorized for cmds, see +help<BR>
+  <BR>
+  You remain authorized for the following commands until you haven't used a cmd 
+  for 60 minutes or when the bot reconnects.<BR>
+  <BR>
+  MSG/CHAN cmds (<B>as of version 1.0.10 </B>9/25/03):<BR>
+  [you] +help<BR>
+  [bot] op invite getkey voice channels test<BR>
+  Usage for cmds:<BR>
+  <BR>
+  <B>+op</B>/<b>+voice</b> can be used in both channels and msgs.</p>
+<p>+voice is same syntax as +op.</p>
+<p>In msg: </p>
+<UL>
+  <LI>+op #chan: Will op you in #chan if you are not already opped. 
+  <LI>+op: Will op you in all chans you are not already opped in. 
+  <LI>+op -f: Will op you in all channels, even if you are already opped. 
+  <LI>+op -f #chan: Will op you in #chan even if you are already opped.</LI>
+</UL>
+<p>In chan:<BR>
+</p>
+<UL>
+  <LI>+op: Will op you in the chan if you are not already opped. 
+  <LI>+op -f: Will op you in the channel even if you are already opped. 
+</LI></UL><BR><B>+invite</B> is msg only.<BR>
+<UL>
+  <LI>+invite: Will invite you to all +i channels you are not already on. 
+  <LI>+invite #chan: Will invite you to #chan if you are not in there and it is 
+  +i. 
+  <LI>+invite -f: Will invite you to all channels. 
+  <LI>+invite -f #chan: Will invite you to #chan even if you are already there. 
+  </LI></UL><BR><B>+getkey</B> is msg only.<BR>
+<UL>
+  <LI>+getkey #chan: Will notice you the key for #chan if there is a key set. 
+  </LI></UL>
+<p><b>+channels</b> works in both msg and channel</p>
+<UL>
+  <LI>+channels: Lists all channels you have op access to.<BR>
+</UL>
+    <BR>
+  Now that you have read all of that you deserve some scripts ;)<BR>
+    <BR>
+    Type /helpauth in these for further instructions.<BR>
+<UL>
+  <li>mIRC <a href="scripts/mIRC.tar.gz">tar.gz</a> <B>5.80 and up</B> 
+  </li>
+  <LI>BitchX/ircii <a href="scripts/BitchX.tgz">tar.gz</a>
+  <LI>irssi/perl <a href="scripts/irssi.tgz">tar.gz</a>
+  <LI>X-chat/perl (I have an unfinished one if you want it, it doesn't work though)
+</UL>
+<p><BR>
+  Any script without a link is in progress, expect it shortly.<BR>
+  Seeing how the script SHOULD operate, maybe you could write one yourself for 
+  your client? ;) [make sure to send it to me so I can post here]<BR>
+</p>
+<p>Until then, use <a href="md5.tgz">this</a> to generate the hashes (Compilable md5 executable for 
+  *nix) </p>
+</BODY></HTML>
