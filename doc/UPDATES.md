@@ -173,7 +173,7 @@
   * Add cmd_newhub for adding a new hub. All bots will add this to their config.
   * Hubs can now be overridden inside the botconfig (-C)
   * Optimize userfile writing by doing it asynchronously
-  * Groups support added. See: http://wraith.botpack.net/wiki/Groups
+  * Groups support added. See: https://github.com/wraith/wraith/wiki/Groups
     * Add [bot]set var 'groups' to configure what groups bots are in
     * Add chanset 'groups' to take a list of groups that should join. 'chanset #chan groups { main backup }'
     * Added group support to 'botcmd': 'botcmd [*|&|?] %group cmd'

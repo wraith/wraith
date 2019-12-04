@@ -427,10 +427,8 @@ static void cmd_about(int idx, char *par)
   dprintf(idx, STR(" * $bMany$b others.\n"));
   dprintf(idx, " \n");
   dprintf(idx, STR("For a list of Contributors see: git shortlog -sen master\n"));
-  dprintf(idx, STR("To Contribute see: http://wraith.botpack.net/wiki/Contributing\n"));
-  dprintf(idx, STR("Credit for suggestions/bugs can be found at: http://wraith.botpack.net/report/9\n"));
-  dprintf(idx, STR("Bugs can be reported at: http://wraith.botpack.net/newticket\n"));
-  dprintf(idx, STR("Bugs can be looked up by #, ie, '#24' in url: http://wraith.botpack.net/ticket/24\n"));
+  dprintf(idx, STR("To Contribute see: https://github.com/wraith/wraith/wiki/Contributing\n"));
+  dprintf(idx, STR("Bugs can be reported at: https://github.com/wraith/wraith/issues\n"));
   dprintf(idx, " \n");
   dprintf(idx, STR("Please support wraith by signing up for a shell at http://www.xzibition.com (coupon 'wraith' for 30%% off)\n"));
   dprintf(idx, " \n");
@@ -727,8 +725,8 @@ static void cmd_help(int idx, char *par)
   } else if (!fnd) {
     dprintf(idx, "No match for '%s'.\n", match);
   }
-  dprintf(idx, "FAQ: http://wraith.botpack.net/wiki/FrequentlyAskedQuestions\n");
-  dprintf(idx, "Documentation: http://wraith.botpack.net/wiki/Documentation\n");
+  dprintf(idx, "FAQ: https://github.com/wraith/wraith/wiki/FrequentlyAskedQuestions\n");
+  dprintf(idx, "Documentation: https://github.com/wraith/wraith/wiki/Documentation\n");
 }
 
 static void cmd_addlog(int idx, char *par)

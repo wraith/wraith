@@ -354,7 +354,7 @@ readcfg(const char *cfgfile, bool read_stdin)
       t.c_lflag &= ~(ECHO | ISIG);
       tty_changed = (tcsetattr (fileno (stdin), TCSAFLUSH | TCSASOFT, &t) == 0);
     }
-    printf(STR("// Paste in your PACKCONFIG. Reference http://wraith.botpack.net/wiki/PackConfig\n"));
+    printf(STR("// Paste in your PACKCONFIG. Reference https://github.com/wraith/wraith/wiki/PackConfig\n"));
     printf(STR("// Press <enter> if it gets hung up. If that doesn't work hit ^D (CTRL+d)\n"));
     fflush(stdout);
   } else {
