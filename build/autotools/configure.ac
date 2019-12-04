@@ -262,7 +262,7 @@ if [ "$GIT_REQUIRED" = "1" ]; then
     echo ""
     echo "You have downloaded a GIT version of wraith."
     echo "Either 'git clone' from a git repository or download a source tarball"
-    echo "A distribution version can be found at http://wraith.botpack.net/wiki/Download"
+    echo "A distribution version can be found at https://github.com/wraith/wraith/wiki/Download"
     echo ""
     echo ""
     exit 1
