@@ -1,0 +1,33 @@
+{% include header.html %}
+<pre>
+{% include PackConfig_v28.conf %}
+</pre>
+
+<script language="javascript" type="text/javascript">
+function createSalts() {
+  var salt1 = randomString(32);
+  var salt2 = randomString(16);
+  var s1 = document.getElementById('salt1');
+  s1.innerText = salt1;
+  s1.innerHtml = salt1;
+  s1.textContent = salt1;
+  var s2 = document.getElementById('salt2');
+  s2.innerText = salt2;
+  s2.innerHtml = salt2;
+  s2.textContent = salt2;
+}
+function randomString(n) {
+	var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
+	var string_length = n;
+	var randomstring = '';
+	for (var i=0; i<string_length; i++) {
+		var rnum = Math.floor(Math.random() * chars.length);
+		randomstring += chars.substring(rnum,rnum+1);
+	}
+        return randomstring;
+}
+</script>
+<form name="randform">
+<input type="button" value="Click to Generate Salts" onClick="createSalts();">
+</form>
+{% include footer.html %}
