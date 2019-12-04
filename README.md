@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/wraith/wraith.png?branch=master)](https://travis-ci.org/wraith/wraith)
 
-* http://wraith.botpack.net
+* https://github.com/wraith/wraith/wiki
 * http://github.com/wraith/wraith
 * @wraithbotpack
 
@@ -24,7 +24,7 @@ are referenced here.
 For official release announcements send an email to:
   wraith-announce-subscribe@botpack.net
 
-Download: http://wraith.botpack.net/wiki/Download
+Download: https://github.com/wraith/wraith/wiki/Download
 Git: git://github.com/wraith/wraith.git
 
 See git for a list of Contributors: git shortlog -sen master
@@ -32,8 +32,8 @@ See git for a list of Contributors: git shortlog -sen master
 Support:
 * How To Contribute: http://github.com/wraith/wraith/blob/master/CONTRIBUTING.md
 * Getting Started: http://github.com/wraith/wraith/wiki/GettingStarted
-* FAQ: http://wraith.botpack.net/wiki/FrequentlyAskedQuestions
-* Documentation Index: http://wraith.botpack.net/wiki/Documentation
+* FAQ: https://github.com/wraith/wraith/wiki/FrequentlyAskedQuestions
+* Documentation Index: https://github.com/wraith/wraith/wiki/Documentation
 * Issues can be reported at: https://github.com/wraith/wraith/issues
 * #wraith @ EFnet
 

@@ -9,7 +9,7 @@ $VERSION = "1.01";
           name        => 'wraith-auth',
           description => 'private auth script for botpack wraith',
           license     => 'ALL?',
-          url         => 'http://wraith.botpack.net/wiki/AuthSystem',
+          url         => 'https://github.com/wraith/wraith/wiki/AuthSystem',
           changed     => '$Date$ ',
 );
 
