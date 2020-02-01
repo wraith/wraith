@@ -782,7 +782,8 @@ static void match(int idx, char *par, int isbot)
   }
 
   int start = 1, limit = 20;
-  char *s = newsplit(&par), *chname = NULL;
+  char *s = newsplit(&par);
+  const char *chname = NULL;
 
   if (strchr(CHANMETA, par[0]) != NULL)
     chname = newsplit(&par);
@@ -1557,7 +1558,7 @@ static void cmd_uplink(int idx, char *par)
     return;
   }
 
-  char *handle = NULL, *uplink = NULL;
+  const char *handle = NULL, *uplink = NULL;
   struct userrec *u1 = NULL;
 
   handle = newsplit(&par);
@@ -2835,7 +2836,7 @@ static void cmd_chat(int idx, char *par)
   console_dostore(idx);
 }
 
-int exec_str(int idx, char *cmd) {
+static int exec_str(int idx, const char *cmd) {
   char *out = NULL, *err = NULL;
 
   if (shell_exec(cmd, NULL, &out, &err)) {
@@ -3121,7 +3122,8 @@ static void cmd_strip(int idx, char *par)
     return;
   }
 
-  char *nick = newsplit(&par), *changes = NULL, *c = NULL, s[2] = "";
+  const char *nick = newsplit(&par), *changes = NULL, *c = NULL;
+  char s[2] = "";
   int dest = 0, i, pls, md, ok = 0;
 
   if ((nick[0] != '+') && (nick[0] != '-') &&dcc[idx].user && (dcc[idx].user->flags & USER_MASTER)) {
@@ -3526,9 +3528,7 @@ static void cmd_pls_ignore(int idx, char *par)
       }
     }
   }
-  if (!par[0])
-    par = "requested";
-  else if (strlen(par) > 65)
+  if (par[0] && strlen(par) > 65)
     par[65] = 0;
   if (strlen(who) > UHOSTMAX - 4)
     who[UHOSTMAX - 4] = 0;
@@ -3547,6 +3547,13 @@ static void cmd_pls_ignore(int idx, char *par)
   if (match_ignore(s))
     dprintf(idx, "That already matches an existing ignore.\n");
   else {
+    const char *reason;
+
+    if (!par[0])
+      reason = "requested";
+    else
+      reason = par;
+
     dprintf(idx, "Now ignoring: %s (%s)\n", s, par);
     addignore(s, dcc[idx].nick, (const char *) par, expire_time ? now + expire_time : 0L);
     putlog(LOG_CMDS, "*", "#%s# +ignore %s %s", dcc[idx].nick, s, par);
@@ -4028,7 +4035,7 @@ static void cmd_botserver(int idx, char * par) {
 }
 
 
-static void rcmd_cursrv(char * fbot, char * fhand, char * fidx) {
+static void rcmd_cursrv(const char * fbot, const char * fhand, const char * fidx) {
   if (!conf.bot->hub) {
     char cursrv[120] = "", tmp[30] = "";
 
@@ -4055,7 +4062,7 @@ static void cmd_timesync(int idx, char *par) {
   botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, tmp);
 }
 
-static void rcmd_timesync(char *frombot, char *fromhand, char *fromidx, char *par) {
+static void rcmd_timesync(const char *frombot, const char *fromhand, const char *fromidx, const char *par) {
   char tmp[100] = "";
   long net = atol(par);
 
@@ -4082,7 +4089,7 @@ static void cmd_botversion(int idx, char * par) {
   botnet_send_cmd(conf.bot->nick, par, dcc[idx].nick, idx, "ver");
 }
 
-static void rcmd_ver(char * fbot, char * fhand, char * fidx) {
+static void rcmd_ver(const char * fbot, const char * fhand, const char * fidx) {
   char tmp[401] = "";
   struct utsname un;
 
@@ -4137,7 +4144,7 @@ static void cmd_botnick(int idx, char * par) {
   botnet_send_cmd(conf.bot->nick, par, dcc[idx].nick, idx, "curnick");
 }
 
-static void rcmd_curnick(char * fbot, char * fhand, char * fidx) {
+static void rcmd_curnick(const char * fbot, const char * fhand, const char * fidx) {
   if (!conf.bot->hub) {
     char tmp[301] = "";
 
@@ -4176,7 +4183,7 @@ static void cmd_botmsg(int idx, char * par) {
   botnet_send_cmd(conf.bot->nick, tbot, dcc[idx].nick, idx, tmp);
 }
 
-static void rcmd_msg(char * tobot, char * frombot, char * fromhand, char * fromidx, char * par) {
+static void rcmd_msg(const char * tobot, const char * frombot, const char * fromhand, const char * fromidx, char * par) {
   if (!conf.bot->hub) {
     char *nick = newsplit(&par);
 
@@ -4203,14 +4210,14 @@ static void cmd_netlag(int idx, char * par) {
   botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, tmp);
 }
 
-static void rcmd_ping(char * frombot, char *fromhand, char * fromidx, char * par) {
+static void rcmd_ping(const char * frombot, const char *fromhand, const char * fromidx, const char * par) {
   char tmp[64] = "";
 
   simple_snprintf(tmp, sizeof tmp, "pong %s", par);
   botnet_send_cmd(conf.bot->nick, frombot, fromhand, atoi(fromidx), tmp);
 }
 
-static void rcmd_pong(char *frombot, char *fromhand, char *fromidx, char *par) {
+static void rcmd_pong(const char *frombot, const char *fromhand, const char *fromidx, char *par) {
   int i = atoi(fromidx);
 
   if ((i >= 0) && (i < dcc_total) && (dcc[i].type == &DCC_CHAT) && (!strcmp(dcc[i].nick, fromhand))) {
@@ -4382,7 +4389,7 @@ static void cmd_netcrontab(int idx, char * par)
   botnet_send_cmd_broad(-1, conf.bot->nick, dcc[idx].nick, idx, buf);
 }
 
-static void rcmd_exec(char * frombot, char * fromhand, char * fromidx, char * par) {
+static void rcmd_exec(const char * frombot, const char * fromhand, const char * fromidx, char * par) {
   char *cmd = NULL, scmd[512] = "", *out = NULL, *err = NULL;
 
   cmd = newsplit(&par);
@@ -4486,7 +4493,7 @@ static void cmd_botjump(int idx, char * par) {
   botnet_send_cmd(conf.bot->nick, tbot, dcc[idx].nick, idx, buf);
 }
 
-static void rcmd_jump(char * frombot, char * fromhand, char * fromidx, char * par) {
+static void rcmd_jump(const char * frombot, const char * fromhand, const char * fromidx, char * par) {
   if (!conf.bot->hub) {
     if (par[0]) {
       char *other = newsplit(&par), *p = NULL;
@@ -4513,8 +4520,11 @@ static void rcmd_jump(char * frombot, char * fromhand, char * fromidx, char * pa
 }
 
 /* "Remotable" commands */
-void gotremotecmd (char *forbot, char *frombot, char *fromhand, char *fromidx, char *cmd) 
+void gotremotecmd (const char *forbot, const char *frombot,
+    const char *fromhand, const char *fromidx, const char *cmd_in)
 {
+  char *cmd = strdup(cmd_in);
+  char * const cmd_p = cmd;
   char *par = cmd;
 
   cmd = newsplit(&par);
@@ -4544,9 +4554,11 @@ void gotremotecmd (char *forbot, char *frombot, char *fromhand, char *fromidx, c
   } else {
     botnet_send_cmdreply(conf.bot->nick, frombot, fromhand, fromidx, "Unrecognized remote command");
   }
+
+  free(cmd_p);
 }
     
-void gotremotereply (char *frombot, char *tohand, char *toidx, char *ln) {
+void gotremotereply (const char *frombot, const char *tohand, const char *toidx, const char *ln) {
   int idx = atoi(toidx);
 
   if ((idx >= 0) && (idx < dcc_total) && (dcc[idx].type == &DCC_CHAT) && (!strcmp(dcc[idx].nick, tohand))) {

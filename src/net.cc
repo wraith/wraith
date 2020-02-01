@@ -182,7 +182,8 @@ const char *myipstr(int af_type)
       }
   }
 
-  return "";
+  static char empty[] = "";
+  return empty;
 }
 
 /* see if it's necessary to set inaddr_any... because if we can't resolve, we die anyway */

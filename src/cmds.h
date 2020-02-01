@@ -59,7 +59,7 @@ int check_dcc_attrs(struct userrec *, flag_t);
 int check_dcc_chanattrs(struct userrec *, char *, flag_t, flag_t);
 int stripmodes(const char *) __attribute__((pure));
 const char *stripmasktype(int);
-void gotremotecmd(char * forbot, char * frombot, char * fromhand, char * fromidx, char * cmd);
-void gotremotereply(char * frombot, char * tohand, char * toidx, char * ln);
+void gotremotecmd(const char * forbot, const char * frombot, const char * fromhand, const char * fromidx, const char * cmd);
+void gotremotereply(const char * frombot, const char * tohand, const char * toidx, const char * ln);
 
 #endif /* !_CMDS_H */

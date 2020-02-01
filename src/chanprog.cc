@@ -61,7 +61,7 @@
 
 bd::HashTable<RfcString, struct chanset_t *> chanset_by_dname;
 
-char *def_chanset = "+enforcebans +dynamicbans +userbans -bitch +cycle -inactive +userexempts -dynamicexempts +userinvites -dynamicinvites -nodesynch -closed -take -voice -private -fastop ban-type 3 protect-backup 1 groups { main } revenge react";
+const char *def_chanset = "+enforcebans +dynamicbans +userbans -bitch +cycle -inactive +userexempts -dynamicexempts +userinvites -dynamicinvites -nodesynch -closed -take -voice -private -fastop ban-type 3 protect-backup 1 groups { main } revenge react";
 struct chanset_t 	*chanset = NULL;	/* Channel list			*/
 struct chanset_t	*chanset_default = NULL;	/* Default channel list */
 char 			admin[121] = "";	/* Admin info			*/
@@ -117,7 +117,8 @@ struct chanset_t *findchan(const char *name)
  */
 struct userrec *check_chanlist(const char *host)
 {
-  char				*nick = NULL, *uhost = NULL, buf[UHOSTLEN] = "";
+  char *uhost = NULL, buf[UHOSTLEN] = "";
+  const char *nick = NULL;
   const memberlist		*m = NULL;
   const struct chanset_t	*chan = NULL;
 
@@ -192,7 +193,8 @@ void clear_chanlist_member(const RfcString& nick)
  */
 void set_chanlist(const char *host, struct userrec *rec)
 {
-  char				*nick = NULL, *uhost = NULL, buf[UHOSTLEN] = "";
+  char *uhost = NULL, buf[UHOSTLEN] = "";
+  const char *nick = NULL;
   memberlist		*m = NULL;
   struct chanset_t	*chan = NULL;
 
@@ -286,7 +288,7 @@ void tell_verbose_uptime(int idx)
  */
 void tell_verbose_status(int idx)
 {
-  char *vers_t = NULL, *uni_t = NULL;
+  const char *vers_t = NULL, *uni_t = NULL;
   int i;
   struct utsname un;
 

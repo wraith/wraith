@@ -51,7 +51,8 @@
 
 static char TBUF[1024] = "";		/* Static buffer for goofy bot stuff */
 
-static void fake_alert(int idx, char *item, char *extra, char *what)
+static void fake_alert(int idx, const char *item, const char *extra,
+    const char *what)
 {
   static time_t lastfake;	/* The last time fake_alert was used */
 
@@ -873,7 +874,8 @@ static void bot_reject(int idx, char *par)
           u = get_user_by_handle(userlist, from);
           if (u) {
             if (!whois_access(u, dcc[idx].user)) {
-              add_note(from, conf.bot->nick, "Sorry, you cannot boot them.", -1, 0);
+              char note[] = "Sorry, you cannot boot them.";
+              add_note(from, conf.bot->nick, note, -1, 0);
               return;
             }
             do_boot(i, from, par);
@@ -1253,13 +1255,16 @@ const botcmd_t *search_botcmd_t(const botcmd_t *table, const char* keyString, si
   return (const botcmd_t*) bsearch(&key, table, elements, sizeof(botcmd_t), comp_botcmd_t);
 }
 
-void parse_botcmd(int idx, const char* code, const char* msg) {
+void parse_botcmd(int idx, const char* code, char* msg) {
   const botcmd_t *cmd = search_botcmd_t((const botcmd_t*)&C_bot, code, lengthof(C_bot) - 1);
 
   if (cmd) {
+    static char blank[] = "";
+    if (msg == NULL)
+      msg = blank;
     /* Found a match */
     if (have_cmd(NULL, cmd->type))
-      (cmd->func) (idx, (char*)msg);
+      (cmd->func) (idx, msg);
   }
 }
 

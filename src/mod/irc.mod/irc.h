@@ -65,7 +65,7 @@ static cache_t *cache_new(char *);
 static void cache_del(char *, cache_t *);
 static void cache_debug(void);
 #endif /* CACHE */
-static void cache_invite(struct chanset_t *, char *, char *, char *, bool, bool);
+static void cache_invite(struct chanset_t *, const char *, const char *, const char *, bool, bool);
 
 //static char *makecookie(const char *, const memberlist*, const memberlist*, const memberlist* = NULL, const memberlist* = NULL);
 void makecookie(char*, size_t, const char *, const memberlist*, const memberlist*, const memberlist* = NULL, const memberlist* = NULL);
@@ -90,10 +90,10 @@ static bool do_op(memberlist *, struct chanset_t *, bool, bool);
 static void request_op(struct chanset_t *);
 static void request_in(struct chanset_t *);
 static bool detect_chan_flood(memberlist *m, const char* from, struct chanset_t *chan, flood_t which, const char *msg = NULL);
-static bool new_mask(masklist *, char *, char *);
+static bool new_mask(masklist *, const char *, const char *);
 static void do_closed_kick(struct chanset_t *, memberlist *);
 static char *quickban(struct chanset_t *, const char *);
-static bool killmember(struct chanset_t *chan, char *nick, bool cacheMember = true);
+static bool killmember(struct chanset_t *chan, const char *nick, bool cacheMember = true);
 static void member_update_from_cache(struct chanset_t* chan, memberlist *m);
 static void check_lonely_channel(struct chanset_t *chan);
 static int gotmode(char *, char *);
@@ -103,7 +103,7 @@ static void send_chan_who(int queue, struct chanset_t* chan, bool chain = 0);
 #define newban(chan, mask, who)         new_mask((chan)->channel.ban, mask, who)
 #define newexempt(chan, mask, who)      new_mask((chan)->channel.exempt, mask, who)
 #define newinvite(chan, mask, who)      new_mask((chan)->channel.invite, mask, who)
-void resolve_to_member(struct chanset_t *chan, char *nick, char *host);
+void resolve_to_member(struct chanset_t *chan, const char *nick, const char *host);
 
 typedef struct resolvstruct resolv_member;
 void resolve_to_rbl(struct chanset_t *chan, const char *host, struct resolvstruct *r = NULL);
@@ -114,7 +114,7 @@ void set_devoice(struct chanset_t* chan, memberlist* m);
 
 #endif /* MAKING_IRC */
 
-void my_setkey(struct chanset_t *, char *);
+void my_setkey(struct chanset_t *, const char *);
 void force_join_chan(struct chanset_t* chan, int idx = DP_MODE);
 void join_chan(struct chanset_t* chan, int idx = DP_MODE);
 

@@ -649,7 +649,8 @@ int change_handle(struct userrec *u, char *newh)
   return 1;
 }
 
-struct userrec *adduser(struct userrec *bu, const char *handle, char *host, char *pass, flag_t flags, int bot)
+struct userrec *adduser(struct userrec *bu, const char *handle,
+    const char *host, const char *pass, flag_t flags, int bot)
 {
   struct userrec *u = NULL, *x = NULL;
   int oldshare = noshare;
@@ -669,18 +670,8 @@ struct userrec *adduser(struct userrec *bu, const char *handle, char *host, char
   } else {
     u->flags = default_flags;
   }
-  set_user(&USERENTRY_PASS, u, pass);
-  /* Strip out commas -- they're illegal */
-  if (host && host[0]) {
-    char *p = strchr(host, ',');
-
-    while (p != NULL) {
-      *p = '?';
-      p = strchr(host, ',');
-    }
-    set_user(&USERENTRY_HOSTS, u, host);
-  } else
-    set_user(&USERENTRY_HOSTS, u, (void *) "none");
+  set_user(&USERENTRY_PASS, u, (void*)pass);/* XXX: const */
+  set_user(&USERENTRY_HOSTS, u, (void*)host);
   if (bu == userlist)
     clear_chanlist();
   noshare = oldshare;
@@ -852,7 +843,7 @@ void addhost_by_handle(char *handle, char *host)
   clear_chanlist();
 }
 
-void touch_laston(struct userrec *u, char *where, time_t timeval)
+void touch_laston(struct userrec *u, const char *where, time_t timeval)
 {
   if (!u)
     return;

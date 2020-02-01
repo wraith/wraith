@@ -137,7 +137,7 @@ void splitcn(char *first, char *rest, char divider, size_t max)
     strcpy(rest, p + 1);
 }
 
-char *splitnick(char **blah)
+const char *splitnick(char **blah)
 {
   char *p = NULL, *q = *blah;
 
@@ -185,8 +185,10 @@ int remove_crlf_r(char *line)
 
 char *newsplit(char **rest, char delim, bool trim)
 {
-  if (!rest)
-    return *rest = "";
+  if (!rest) {
+    static char end[] = "";
+    return *rest = end;
+  }
 
   char *o = *rest, *r = NULL;
 
@@ -1268,7 +1270,7 @@ void shuffleArray(char* array[], size_t n)
   }
 }
 
-void shuffle(char *string, char *delim, size_t str_len)
+void shuffle(char *string, const char *delim, size_t str_len)
 {
   char *array[501], *str = NULL, *work = NULL;
   size_t len = 0;

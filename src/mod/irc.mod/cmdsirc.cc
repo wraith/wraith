@@ -32,7 +32,7 @@ using std::swap;
 
 /* Do we have any flags that will allow us ops on a channel?
  */
-static struct chanset_t *get_channel(int idx, char *chname, bool check_console = 1, bool* all = NULL)
+static struct chanset_t *get_channel(int idx, const char *chname, bool check_console = 1, bool* all = NULL)
 {
   struct chanset_t *chan = NULL;
 
@@ -82,9 +82,9 @@ char *getnick(const char *handle, struct chanset_t *chan)
   for (memberlist *m = chan->channel.member; m && m->nick[0]; m = m->next) {
     member_getuser(m);
     if (m->user && !strcasecmp(m->user->handle, handle))
-      return m->nick;
+      return m->nick[0] ? m->nick : NULL;
   }
-  return "";
+  return NULL;
 }
 
 static void cmd_act(int idx, char *par)
@@ -237,6 +237,7 @@ static void cmd_kickban(int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# (%s) kickban %s", dcc[idx].nick, all ? "*" : chan->dname, par);
 
   char *nick = newsplit(&par), bantype = 0;
+  const char *reason = par[0] ? par : "requested";
 
   if ((nick[0] == '@') || (nick[0] == '-')) {
     bantype = nick[0];
@@ -328,11 +329,9 @@ static void cmd_kickban(int idx, char *par)
     }
     if (bantype == '@' || bantype == '-')
       do_mask(chan, chan->channel.ban, s1, 'b');
-    if (!par[0])
-      par = "requested";
-    dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, m->nick, bankickprefix, par);
+    dprintf(DP_MODE, "KICK %s %s :%s%s\n", chan->name, m->nick, bankickprefix, reason);
     m->flags |= SENTKICK;
-    u_addmask('b', chan, s1, dcc[idx].nick, par, now + (60 * chan->ban_time), 0);
+    u_addmask('b', chan, s1, dcc[idx].nick, reason, now + (60 * chan->ban_time), 0);
     dprintf(idx, "Kick-banned %s on %s.\n", nick, chan->dname);
     next:;
     if (!all)
@@ -359,7 +358,7 @@ static void cmd_voice(int idx, char *par)
     chan = chanset;
   putlog(LOG_CMDS, "*", "#%s# (%s) voice %s", dcc[idx].nick, all ? "*" : chan->dname , nick);
   while (chan) {
-    if (!nick[0] && !(nick = getnick(dcc[idx].nick, chan))[0]) {
+    if (!nick[0] && !(nick = getnick(dcc[idx].nick, chan))) {
       if (all) goto next;
       dprintf(idx, "Usage: voice <nick> [channel|*]\n");
       return;
@@ -423,7 +422,7 @@ static void cmd_devoice(int idx, char *par)
     chan = chanset;
   putlog(LOG_CMDS, "*", "#%s# (%s) devoice %s", dcc[idx].nick, all ? "*" : chan->dname, nick);
   while (chan) {
-  if (!nick[0] && !(nick = getnick(dcc[idx].nick, chan))[0]) {
+  if (!nick[0] && !(nick = getnick(dcc[idx].nick, chan))) {
     if (all) goto next;
     dprintf(idx, "Usage: devoice <nick> [channel|*]\n");
     return;
@@ -495,7 +494,7 @@ static void cmd_op(int idx, char *par)
 
   while (chan) {
   get_user_flagrec(dcc[idx].user, &user, chan->dname);
-  if (!nick[0] && !(nick = getnick(dcc[idx].nick, chan))[0]) {
+  if (!nick[0] && !(nick = getnick(dcc[idx].nick, chan))) {
     if (all) goto next;
     dprintf(idx, "Usage: op <nick> [channel|*]\n");
     return;
@@ -602,7 +601,7 @@ static void mass_mode(const char* chname, const char* mode, char *par)
   }
 }
 
-void mass_request(char *botnick, char *code, char *par)
+void mass_request(const char *botnick, const char *code, char *par)
 {
   char* mode = newsplit(&par);
 
@@ -986,7 +985,7 @@ static void cmd_deop(int idx, char *par)
 
   while (chan) {
     get_user_flagrec(dcc[idx].user, &user, chan->dname);
-    if (!nick[0] && !(nick = getnick(dcc[idx].nick, chan))[0]) {
+    if (!nick[0] && !(nick = getnick(dcc[idx].nick, chan))) {
       if (all) goto next;  
       dprintf(idx, "Usage: deop <nick> [channel|*]\n");
       return;
@@ -1072,9 +1071,8 @@ static void cmd_kick(int idx, char *par)
   putlog(LOG_CMDS, "*", "#%s# (%s) kick %s", dcc[idx].nick, all ? "*" : chan->dname, par);
 
   char *nick = newsplit(&par);
+  const char *reason = par[0] ? par : "requested";
 
-  if (!par[0])
-    par = "requested";
   if (match_my_nick(nick)) {
     dprintf(idx, "I'm not going to kick myself.\n");
     return;
@@ -1134,7 +1132,7 @@ static void cmd_kick(int idx, char *par)
       dprintf(idx, "%s is another channel bot!\n", nick);
       return;
     }
-    dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, par);
+    dprintf(DP_SERVER, "KICK %s %s :%s%s\n", chan->name, m->nick, kickprefix, reason);
     m->flags |= SENTKICK;
     dprintf(idx, "Kicked %s on %s.\n", nick, chan->dname);
     next:;

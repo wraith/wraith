@@ -50,7 +50,7 @@ int u_sticky_mask(const maskrec *, const char *) __attribute__((pure));
 int u_setsticky_mask(struct chanset_t *, maskrec *, char *, int, const char);
 int SplitList(char *, const char *, int *, const char ***);
 int channel_modify(char *, struct chanset_t *, int, char **, bool);
-int channel_add(char *, const char *, char *, bool = 0);
+int channel_add(char *, const char *, const char *, bool = 0);
 void clear_channel(struct chanset_t *, bool);
 int u_equals_mask(const maskrec *, const char *) __attribute__((pure));
 bool u_match_mask(const maskrec *, const char *) __attribute__((pure));
@@ -58,7 +58,7 @@ bool ismasked(const masklist *, const char *) __attribute__((pure));
 bool ismodeline(const masklist *, const char *) __attribute__((pure));
 void channels_report(int, int);
 void channels_writeuserfile(bd::Stream&, int = 0);
-void rcmd_chans(char *, char *, char *);
+void rcmd_chans(const char *, const char *, const char *);
 
 
 /* Macro's here because their functions were replaced by something more

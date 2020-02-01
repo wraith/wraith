@@ -512,8 +512,7 @@ dcc_bot(int idx, char *code, int i)
   if (msg) {
     *msg = 0;
     msg++;
-  } else
-    msg = "";
+  }
 
   parse_botcmd(idx, code, msg);
 }

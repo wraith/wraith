@@ -8,6 +8,7 @@
 #endif
 
 #include <sys/types.h>
+#include <bdlib/src/String.h>
 #include "libcrypto.h"
 #include "users.h"
 
@@ -29,8 +30,8 @@ char *encrypt_string(const char *, char *);
 char *decrypt_string(const char *, char *);
 char *salted_sha1(const char *, const char* = NULL);
 int salted_sha1cmp(const char *, const char*);
-void Encrypt_File(char *, char *);
-void Decrypt_File(char *, char *);
+void Encrypt_File(const bd::String&, const bd::String&);
+void Decrypt_File(const bd::String&, const bd::String&);
 void btoh(const unsigned char *md, size_t md_len, char *buf, const size_t buf_len);
 void do_crypt_console();
 
