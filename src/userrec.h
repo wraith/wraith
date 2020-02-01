@@ -5,7 +5,7 @@ namespace bd {
   class Stream;
 }
 
-struct userrec *adduser(struct userrec *, const char *, char *, char *, flag_t, int);
+struct userrec *adduser(struct userrec *, const char *, const char *, const char *, flag_t, int);
 void addhost_by_handle(char *, char *);
 void clear_masks(struct maskrec *);
 void clear_cached_users();
@@ -20,7 +20,7 @@ void correct_handle(char *);
 void stream_writeuserfile(bd::Stream&, const struct userrec *, bool = 0);
 int real_write_userfile(int);
 int write_userfile(int);
-void touch_laston(struct userrec *, char *, time_t);
+void touch_laston(struct userrec *, const char *, time_t);
 void user_del_chan(char *);
 struct userrec *host_conflicts(const char *);
 struct userrec *get_user_by_handle(struct userrec *, const char *);

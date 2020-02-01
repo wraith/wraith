@@ -179,7 +179,7 @@ static void got_cpart(char *botnick, char *code, char *par)
     write_userfile(-1);
 }
 
-void rcmd_chans(char *fbot, char *fhand, char *fidx) {
+void rcmd_chans(const char *fbot, const char *fhand, const char *fidx) {
   if (conf.bot->hub)
     return;
 

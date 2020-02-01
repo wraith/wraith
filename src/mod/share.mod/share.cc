@@ -158,7 +158,7 @@ static bool flush_tbuf(char *bot)
   return 0;
 }
 
-static struct share_msgq *q_addmsg(struct share_msgq *qq, char *s)
+static struct share_msgq *q_addmsg(struct share_msgq *qq, const char *s)
 {
   struct share_msgq *q = NULL;
   int cnt;
@@ -190,7 +190,7 @@ static struct share_msgq *q_addmsg(struct share_msgq *qq, char *s)
 
 /* Add stuff to a specific bot's tbuf.
  */
-static void q_tbuf(char *bot, char *s)
+static void q_tbuf(const char *bot, const char *s)
 {
   struct share_msgq *q = NULL;
   tandbuf *t = NULL;
@@ -205,7 +205,7 @@ static void q_tbuf(char *bot, char *s)
 
 /* Add stuff to the resync buffers.
  */
-static void q_resync(char *s)
+static void q_resync(const char *s)
 {
   struct share_msgq *q = NULL;
   tandbuf *t = NULL;
@@ -216,7 +216,7 @@ static void q_resync(char *s)
   }
 }
 
-static void q_resync_but(char *s, const char *bot)
+static void q_resync_but(const char *s, const char *bot)
 {
   struct share_msgq *q = NULL;
   tandbuf *t = NULL;

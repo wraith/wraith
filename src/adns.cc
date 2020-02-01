@@ -165,8 +165,8 @@ const char *dns_ip = NULL;
 
 static int make_header(char *buf, int id);
 static int cut_host(const char *host, char *query);
-static int read_resolv(char *fname);
-static void read_hosts(char *fname);
+static int read_resolv(const char *fname);
+static void read_hosts(const char *fname);
 static int get_dns_idx();
 //static void dns_resend_queries();
 static int cache_find(const char *) __attribute__((pure));
@@ -842,7 +842,7 @@ static const char *dns_next_server()
 	return (servers[cur_server].ip);
 }
 
-static void add_dns_server(char *ip)
+static void add_dns_server(const char *ip)
 {
 	servers = (dns_server_t *) realloc(servers, (nservers+1) *
 	    sizeof(*servers));
@@ -851,7 +851,7 @@ static void add_dns_server(char *ip)
 	sdprintf("Added NS: %s", ip);
 }
 
-static void add_host(char *host, char *ip)
+static void add_host(const char *host, const char *ip)
 {
 	hosts = (dns_host_t *) realloc(hosts, (nhosts+1) * sizeof(*hosts));
 	hosts[nhosts].host = strdup(host);
@@ -930,7 +930,7 @@ static int read_thing(char *buf, char *ip)
 	return (skip + len);
 }
 
-static int read_resolv(char *fname)
+static int read_resolv(const char *fname)
 {
 	FILE *fp;
 	char buf[512], ip[512];
@@ -951,7 +951,7 @@ static int read_resolv(char *fname)
 	return count;
 }
 
-static void read_hosts(char *fname)
+static void read_hosts(const char *fname)
 {
 	FILE *fp;
 	char buf[512], ip[512], host[512];

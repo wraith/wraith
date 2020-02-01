@@ -17,14 +17,14 @@ extern int		tands;
 
 #define lower_bot_linked(idx) do {} while (0)
 void answer_local_whom(int, int);
-char *lastbot(const char *) __attribute__((pure));
+const char *lastbot(const char *) __attribute__((pure));
 int nextbot(const char *) __attribute__((pure));
 int in_chain(const char *) __attribute__((pure));
 bool sortDownBots(bd::String botA, bd::String botB) __attribute__((pure));
 void tell_bots(int, int, const char *);
 void tell_bottree(int);
 void dump_links(int);
-int botlink(char *, int, char *);
+int botlink(const char *, int, char *);
 int botunlink(int, const char *, const char *);
 void addbot(char *, char *, char *, char, int, time_t, char *, char *, int);
 void updatebot(int, char *, char, int, time_t, char *, char *, int);
@@ -39,7 +39,7 @@ int partynick(char *, int, char *);
 bool partyidle(char *, char *);
 void partysetidle(char *, int, int);
 void partyaway(char *, int, char *);
-void botnet_send_cmdpass(int, char *, char *);
+void botnet_send_cmdpass(int, const char *, const char *);
 void zapfbot(int);
 void tandem_relay(int, char *, int);
 int getparty(const char *, int) __attribute__((pure));

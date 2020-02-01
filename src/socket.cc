@@ -169,7 +169,7 @@ int socket_set_nonblock(int sock, int value)
 
 int socket_create(const char *dest_ip, int dest_port, const char *src_ip, int src_port, int flags)
 {
-        char *passive[] = {"::", "0.0.0.0"};
+        const char *passive[] = {"::", "0.0.0.0"};
         int sock = -1, pfamily, try_ok;
         sockname_t dest_name, src_name;
 

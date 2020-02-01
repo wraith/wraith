@@ -810,7 +810,8 @@ static void dcc_get_pending(int idx, char *buf, int len)
  * Use raw_dcc_resend() and raw_dcc_send() instead of this function.
  */
 
-static int raw_dcc_resend_send(char *filename, char *nick, char *from, int resend, int *idx)
+static int raw_dcc_resend_send(const char *filename, const char *nick,
+    const char *from, int resend, int *idx)
 {
   int zz = -1;
   int i;
@@ -889,7 +890,7 @@ static int raw_dcc_resend(char *filename, char *nick, char *from, char *dir)
 
 /* Starts a DCC_SEND connection.
  */
-int raw_dcc_send(char *filename, char *nick, char *from, int *idx)
+int raw_dcc_send(const char *filename, const char *nick, const char *from, int *idx)
 {
   return raw_dcc_resend_send(filename, nick, from, 0, idx);
 }

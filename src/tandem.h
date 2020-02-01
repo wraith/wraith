@@ -46,38 +46,38 @@ typedef struct {
 #define GLOBAL_CHANS 100000
 
 
-void botnet_send_chan(int, char *, char *, int, char *);
+void botnet_send_chan(int, const char *, const char *, int, const char *);
 void botnet_send_chat(int, const char *, const char *);
-void botnet_send_act(int, char *, char *, int, char *);
+void botnet_send_act(int, const char *, const char *, int, const char *);
 void botnet_send_ping(int);
 void botnet_send_pong(int);
-void botnet_send_priv (int, char *, char *, char *, const char *, ...) __attribute__((format(printf, 5, 6)));
-void botnet_send_who(int, char *, char *, int);
-void botnet_send_unlinked(int, char *, char *);
-void botnet_send_traced(int, char *, char *);
-void botnet_send_trace(int, char *, char *, char *);
-void botnet_send_unlink(int, char *, char *, char *, char *);
-void botnet_send_link(int, char *, char *, char *);
+void botnet_send_priv (int, const char *, const char *, const char *, const char *, ...) __attribute__((format(printf, 5, 6)));
+void botnet_send_who(int, const char *, const char *, int);
+void botnet_send_unlinked(int, const char *, const char *);
+void botnet_send_traced(int, const char *, const char *);
+void botnet_send_trace(int, const char *, const char *, const char *);
+void botnet_send_unlink(int, const char *, const char *, const char *, const char *);
+void botnet_send_link(int, const char *, const char *, const char *);
 void botnet_send_update(int, tand_t *);
-void botnet_send_nlinked(int, char *, char *, char, int, time_t, char *, char *, int);
-void botnet_send_reject(int, char *, char *, char *, char *, char *);
+void botnet_send_nlinked(int, const char *, const char *, const char, int, time_t, const char *, const char *, int);
+void botnet_send_reject(int, const char *, const char *, const char *, const char *, const char *);
 void botnet_send_log(int, const char *, int, const char *, bool = 0);
 void botnet_send_zapf(int, const char *, const char *, const char *);
 void botnet_send_zapf_broad(int, const char *, const char *, const char *);
-void botnet_send_away(int, char *, int, char *, int);
-void botnet_send_idle(int, char *, int, int, char *);
+void botnet_send_away(int, const char *, int, const char *, int);
+void botnet_send_idle(int, const char *, int, int, const char *);
 void botnet_send_join_idx(int);
 void botnet_send_join_party(int, int, int);
-void botnet_send_part_idx(int, char *);
-void botnet_send_part_party(int, int, char *, int);
+void botnet_send_part_idx(int, const char *);
+void botnet_send_part_party(int, int, const char *, int);
 void botnet_send_bye(const char *);
-void botnet_send_nkch_part(int, int, char *);
-void botnet_send_nkch(int, char *);
+void botnet_send_nkch_part(int, int, const char *);
+void botnet_send_nkch(int, const char *);
 int bots_in_subtree(const tand_t *) __attribute__((pure));
 int users_in_subtree(const tand_t *) __attribute__((pure));
-int botnet_send_cmd(char * fbot, char * bot, char *fhnd, int fromidx, char * cmd);
-void botnet_send_cmd_broad(int idx, char * fbot, char *fhnd, int fromidx, char * cmd);
-void botnet_send_cmdreply(char * fbot, char * bot, char * to, char * toidx, char * ln);
+int botnet_send_cmd(const char * fbot, const char * bot, const char *fhnd, int fromidx, const char * cmd);
+void botnet_send_cmd_broad(int idx, const char * fbot, const char *fhnd, int fromidx, const char * cmd);
+void botnet_send_cmdreply(const char * fbot, const char * bot, const char * to, const char * toidx, const char * ln);
 void send_uplink(const char *, size_t);
 #define send_hubs(_s, _l) send_hubs_but(-1, (_s), (_l))
 void send_hubs_but(int , const char *, size_t);

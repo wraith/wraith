@@ -463,7 +463,7 @@ static void tell_masks(const char type, int idx, bool show_inact, char *match, b
   maskrec *mr = NULL;
 
   /* Was a channel given? */
-  if (match[0]) {
+  if (match && match[0]) {
     chname = newsplit(&match);
     if (chname[0] && (strchr(CHANMETA, chname[0]))) {
       chan = findchan_by_dname(chname);
@@ -501,7 +501,7 @@ static void tell_masks(const char type, int idx, bool show_inact, char *match, b
     dprintf(idx, "Global %ss:\n", str_type);
 
   for (mr = global_masks; mr; mr = mr->next) {
-    if (match[0]) {
+    if (match && match[0]) {
       if ((wild_match(match, mr->mask)) ||
 	  (wild_match(match, mr->desc)) ||
 	  (wild_match(match, mr->user)))
@@ -519,7 +519,7 @@ static void tell_masks(const char type, int idx, bool show_inact, char *match, b
     else
       dprintf(idx, "Channel %ss for %s:  (* = not placed by bot)\n", str_type, chan->dname);
     for (mr = chan_masks; mr; mr = mr->next) {
-      if (match[0]) {
+      if (match && match[0]) {
 	if ((wild_match(match, mr->mask)) ||
 	    (wild_match(match, mr->desc)) ||
 	    (wild_match(match, mr->user)))
@@ -532,7 +532,8 @@ static void tell_masks(const char type, int idx, bool show_inact, char *match, b
       masklist *ml = NULL;
       masklist *channel_list = (type == 'b' ? chan->channel.ban : type == 'e' ? chan->channel.exempt : chan->channel.invite);
 
-      char s[UHOSTLEN] = "", *s1 = NULL, *s2 = NULL, fill[256] = "";
+      char s[UHOSTLEN] = "", *s2 = NULL, fill[256] = "";
+      const char *s1;
       int min, sec;
 
       for (ml = channel_list; ml && ml->mask[0]; ml = ml->next) {    
@@ -551,7 +552,7 @@ static void tell_masks(const char type, int idx, bool show_inact, char *match, b
 	    simple_snprintf(s, sizeof(s), " (active %02d:%02d)", min, sec);
 	    strlcat(fill, s, sizeof(fill));
 	  }
-	  if ((!match[0]) || (wild_match(match, ml->mask)))
+	  if (!match || !match[0] || wild_match(match, ml->mask))
 	    dprintf(idx, "* [%3d] %s\n", k, fill);
 	  k++;
 	}
@@ -567,7 +568,7 @@ static void tell_masks(const char type, int idx, bool show_inact, char *match, b
 
   if (k == 1)
     dprintf(idx, "(There are no %ss, permanent or otherwise.)\n", str_type);
-  if ((!show_inact) && (!match[0]))
+  if ((!show_inact) && !(match && match[0]))
     dprintf(idx, "Use '%ss all' to see the total list.\n", str_type);
 }
 
@@ -926,7 +927,8 @@ void channels_writeuserfile(bd::Stream& stream, int old)
 bool expired_mask(struct chanset_t *chan, char *who)
 {
   memberlist *m = NULL, *m2 = NULL;
-  char buf[UHOSTLEN] = "", *snick = NULL, *sfrom = NULL;
+  char buf[UHOSTLEN] = "", *sfrom = NULL;
+  const char *snick = NULL;
   struct userrec *u = NULL;
 
   strlcpy(buf, who, sizeof(buf));

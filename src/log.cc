@@ -53,8 +53,8 @@ bool	debug_output = 1;      /* Disply output to server to LOG_SERVEROUT */
 
 typedef struct {
 	int flag;
-	char *type;
-	unsigned char c;
+	const char *type;
+	const unsigned char c;
 } logmode_mapping_t;
 
 static logmode_mapping_t logmode_mappings[] = {

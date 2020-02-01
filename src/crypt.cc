@@ -88,7 +88,7 @@ char *salted_sha1(const char *in, const char* saltin)
   return ret;
 }
 
-void Encrypt_File(char *infile, char *outfile)
+void Encrypt_File(const bd::String& infile, const bd::String &outfile)
 {
   const char salt1[] = SALT1;
   bd::Stream stream_in;
@@ -99,7 +99,7 @@ void Encrypt_File(char *infile, char *outfile)
   stream_out.writeFile(outfile);
 }
 
-void Decrypt_File(char *infile, char *outfile)
+void Decrypt_File(const bd::String &infile, const bd::String &outfile)
 {
   const char salt1[] = SALT1;
   bd::Stream stream_out;
