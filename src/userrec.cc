@@ -665,17 +665,7 @@ struct userrec *adduser(struct userrec *bu, const char *handle, char *host, char
     u->flags = default_flags;
   }
   set_user(&USERENTRY_PASS, u, pass);
-  /* Strip out commas -- they're illegal */
-  if (host && host[0]) {
-    char *p = strchr(host, ',');
-
-    while (p != NULL) {
-      *p = '?';
-      p = strchr(host, ',');
-    }
-    set_user(&USERENTRY_HOSTS, u, host);
-  } else
-    set_user(&USERENTRY_HOSTS, u, (void *) "none");
+  set_user(&USERENTRY_HOSTS, u, host);
   if (bu == userlist)
     clear_chanlist();
   noshare = oldshare;
