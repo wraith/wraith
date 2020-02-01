@@ -34,7 +34,7 @@ void setup_HQ(int);
 void privmsg(bd::String target, bd::String msg, int idx);
 void notice(bd::String target, bd::String msg, int idx);
 void keyx(const bd::String& target, const char *);
-void set_fish_key(char *, bd::String);
+void set_fish_key(const char *, bd::String);
 struct userrec *check_chanlist(const char *);
 struct userrec *check_chanlist_hand(const char *);
 memberlist *ismember(const struct chanset_t *, const char *);
@@ -42,7 +42,8 @@ struct chanset_t *findchan(const char *name);
 struct chanset_t *findchan_by_dname(const char *name);
 
 extern struct chanset_t		*chanset, *chanset_default;
-extern char			admin[], origbotnick[HANDLEN + 1], origbotname[NICKLEN], jupenick[NICKLEN], botname[NICKLEN], *def_chanset;
+extern char			admin[], origbotnick[HANDLEN + 1], origbotname[NICKLEN], jupenick[NICKLEN], botname[NICKLEN];
+extern const char		*def_chanset;
 extern in_port_t			my_port;
 extern int			reset_chans;
 extern bool			cookies_disabled;

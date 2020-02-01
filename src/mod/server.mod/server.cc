@@ -492,8 +492,10 @@ static void calc_penalty(char * msg, size_t len)
 
 char *splitnicks(char **rest)
 {
-  if (!rest)
-    return *rest = "";
+  if (!rest) {
+    static char end[] = "";
+    return *rest = end;
+  }
 
   char *o = *rest, *r = NULL;
 

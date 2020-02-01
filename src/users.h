@@ -169,7 +169,7 @@ void check_expired_ignores();
 void autolink_cycle();
 void tell_file_stats(int, char *);
 void tell_user_ident(int, char *);
-void tell_users_match(int, char *, int, int, char *, int);
+void tell_users_match(int, char *, int, int, const char *, int);
 int readuserfile(const char *, struct userrec **);
 int stream_readuserfile(bd::Stream&, struct userrec **);
 void check_pmode();

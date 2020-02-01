@@ -1044,7 +1044,7 @@ gotmode(char *from, char *msg)
       size_t z = strlen(msg);
       struct userrec *u = NULL;
       memberlist *m = NULL;
-      char *nick = NULL;
+      const char *nick = NULL;
 
       if (!strchr(from, '!'))
         strlcpy(isserver, from, sizeof(isserver));

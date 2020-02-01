@@ -51,7 +51,7 @@ void clear_tmp();
 char *homedir(bool = 1);
 char *my_username();
 void expand_tilde(char **);
-int shell_exec(char *, char *, char **, char **, bool = 0);
+int shell_exec(const char *, const char *, char **, char **, bool = 0);
 int simple_exec(const char* argv[]);
 void check_last();
 void check_promisc();

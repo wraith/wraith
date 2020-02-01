@@ -400,7 +400,7 @@ int nextbot(const char *who)
 
 /* Return name of the bot that is directly connected to bot X
  */
-char *lastbot(const char *who)
+const char *lastbot(const char *who)
 {
   tand_t *bot = findbot(who);
 
@@ -836,7 +836,7 @@ void dump_links(int z)
   }
 }
 
-int in_chain(char *who)
+int in_chain(const char *who)
 {
   if (!strcasecmp(who, conf.bot->nick))
     return 1;
@@ -952,7 +952,7 @@ int botunlink(int idx, const char *nick, const char *reason)
          sometimes. While we still search for the bug, provide
          an easy way to clear out those `ghost'-bots.
 				       Fabian (2000-08-02)  */
-      char *ghost = "BUG!!: Found bot `%s' in internal bot list, but it\n"
+      const char *ghost = "BUG!!: Found bot `%s' in internal bot list, but it\n"
 		    "   shouldn't have been there! Removing.\n"
 		    "   This is a known bug we haven't fixed yet. If this\n"
 		    "   bot is the newest eggdrop version available and you\n"
@@ -982,7 +982,7 @@ static void botlink_real(int);
 
 /* Link to another bot
  */
-int botlink(char *linker, int idx, char *nick)
+int botlink(const char *linker, int idx, char *nick)
 {
   struct userrec *u = get_user_by_handle(userlist, nick);
 

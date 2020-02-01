@@ -182,7 +182,8 @@ char *myipstr(int af_type)
       }
   }
 
-  return "";
+  static char empty[] = "";
+  return empty;
 }
 
 /* Get my ip number

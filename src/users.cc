@@ -347,18 +347,14 @@ static void restore_ignore(char *host)
 	if (desc) {
 	  *desc = 0;
 	  desc++;
-	} else
-	  desc = NULL;
-      } else {
-	added = "0";
-	desc = NULL;
+	}
       }
       p = (struct igrec *) calloc(1, sizeof(struct igrec));
 
       p->next = global_ign;
       global_ign = p;
       p->expire = atoi(expi);
-      p->added = atoi(added);
+      p->added = added ? atoi(added) : 0;
       p->flags = flags;
       p->igmask = strdup(host);
       p->user = strdup(user);
@@ -464,7 +460,8 @@ void tell_user_ident(int idx, char *id)
 /* match string:
  * wildcard to match nickname or hostmasks
  * +attr to find all with attr */
-void tell_users_match(int idx, char *mtch, int start, int limit, char *chname, int isbot)
+void tell_users_match(int idx, char *mtch, int start, int limit,
+    const char *chname, int isbot)
 {
   char format[81] = "";
   struct userrec *u = NULL;

@@ -93,7 +93,8 @@ static void resolv_member_callback(int id, void *client_data, const char *host, 
 }
 
 
-void resolve_to_member(struct chanset_t *chan, char *nick, char *host)
+void resolve_to_member(struct chanset_t *chan, const char *nick,
+    const char *host)
 {
   resolv_member *r = (resolv_member *) calloc(1, sizeof(resolv_member));
 
@@ -252,7 +253,7 @@ static void print_memberlist(memberlist *toprint)
 
 /* Returns a pointer to a new channel member structure.
  */
-static memberlist *newmember(struct chanset_t *chan, char *nick)
+static memberlist *newmember(struct chanset_t *chan, const char *nick)
 {
   memberlist *x = chan->channel.member, 
              *lx = NULL, 
@@ -318,7 +319,7 @@ static bool member_getuser(memberlist* m, bool act_on_lookup) {
 
 /* Always pass the channel dname (display name) to this function <cybah>
  */
-static void update_idle(char *chname, char *nick)
+static void update_idle(const char *chname, const char *nick)
 {
   struct chanset_t *chan = findchan_by_dname(chname);
 
@@ -1754,7 +1755,8 @@ static int got710(char *from, char *msg)
 {
   char *chname = NULL;
   struct chanset_t *chan = NULL;
-  char buf[UHOSTLEN] = "", *uhost = buf, *nick;
+  char buf[UHOSTLEN] = "", *uhost = buf;
+  const char *nick = NULL;
 
   chname = newsplit(&msg);
   if (!strcmp(chname, "*")) {
@@ -2541,7 +2543,7 @@ static int got478(char *from, char *msg)
  */
 static int gotinvite(char *from, char *msg)
 {
-  char *nick = NULL;
+  const char *nick = NULL;
   struct chanset_t *chan = NULL;
   bool flood = 0;
 
@@ -2588,7 +2590,8 @@ static void set_topic(struct chanset_t *chan, char *k)
  */
 static int gottopic(char *from, char *msg)
 {
-  char *chname = newsplit(&msg), *nick = NULL;
+  char *chname = newsplit(&msg);
+  const char *nick = NULL;
   struct chanset_t *chan = NULL;
 
   fixcolon(msg);
@@ -2687,7 +2690,8 @@ static int gotjoin(char *from, char *chname)
     chan = findchan_by_dname(chname);
   }
 
-  char *nick = NULL, buf[UHOSTLEN] = "", *uhost = buf;
+  const char *nick = NULL;
+  char buf[UHOSTLEN] = "", *uhost = buf;
 
   strlcpy(uhost, from, sizeof(buf));
   nick = splitnick(&uhost);
@@ -2901,7 +2905,8 @@ static int gotjoin(char *from, char *chname)
  */
 static int gotpart(char *from, char *msg)
 {
-  char *nick = NULL, *chname = NULL;
+  const char *nick = NULL;
+  char *chname = NULL;
   struct chanset_t *chan = NULL;
   char buf[UHOSTLEN] = "", *uhost = buf;
 
@@ -2969,7 +2974,8 @@ static int gotkick(char *from, char *origmsg)
     return 0; /* rejoin if kicked before getting needed info <Wcc[08/08/02]> */
   }
   if (channel_active(chan)) {
-    char *whodid = NULL, buf[UHOSTLEN] = "", *uhost = buf;
+    const char *whodid = NULL;
+    char buf[UHOSTLEN] = "", *uhost = buf;
     memberlist *m = NULL, *mv = NULL;
     struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
@@ -3034,7 +3040,8 @@ static int gotkick(char *from, char *origmsg)
  */
 static int gotnick(char *from, char *msg)
 {
-  char *nick = NULL, s1[UHOSTLEN] = "", buf[UHOSTLEN] = "", *uhost = buf;
+  const char *nick = NULL;
+  char s1[UHOSTLEN] = "", buf[UHOSTLEN] = "", *uhost = buf;
   memberlist *m = NULL, *mm = NULL;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
 
@@ -3136,7 +3143,8 @@ void check_should_cycle(struct chanset_t *chan)
  */
 static int gotquit(char *from, char *msg)
 {
-  char *nick = NULL, *p = NULL;
+  const char *nick = NULL;
+  char *p = NULL;
   bool split = 0;
   memberlist *m = NULL;
   char from2[NICKMAX + UHOSTMAX + 1] = "";
@@ -3231,7 +3239,8 @@ static int gotmsg(char *from, char *msg)
     return 0;			/* Private msg to an unknown channel?? */
 
 
-  char buf[UHOSTLEN] = "", *nick = NULL, buf2[512] = "", *uhost = buf, *p = NULL, *p1 = NULL, *code = NULL, *ctcp = NULL;
+  char buf[UHOSTLEN] = "", buf2[512] = "", *uhost = buf, *p = NULL, *p1 = NULL, *code = NULL, *ctcp = NULL;
+  const char *nick = NULL;
   int ctcp_count = 0;
   struct userrec *u = NULL;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
@@ -3386,7 +3395,8 @@ static int gotnotice(char *from, char *msg)
   if (!chan)
     return 0;			/* Notice to an unknown channel?? */
 
-  char *nick = NULL, buf2[512] = "", *p = NULL, *p1 = NULL, buf[512] = "", *uhost = buf;
+  char buf2[512] = "", *p = NULL, *p1 = NULL, buf[512] = "", *uhost = buf;
+  const char *nick = NULL;
   char *ctcp = NULL, *code = NULL;
   struct userrec *u = NULL;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };

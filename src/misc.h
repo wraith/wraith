@@ -18,7 +18,7 @@
 void restart(int);
 int coloridx(int);
 const char *color(int, int, int);
-void shuffle(char *, char *, size_t);
+void shuffle(char *, const char *, size_t);
 void shuffleArray(char **, size_t);
 void showhelp(int, struct flag_record *, const char *);
 char *replace(const char *, const char *, const char *);
@@ -37,7 +37,7 @@ void splitcn(char *, char *, char, size_t);
 int remove_crlf(char *);
 int remove_crlf_r(char *);
 char *newsplit(char **, char delim = ' ', bool trim = 1);
-char *splitnick(char **);
+const char *splitnick(char **);
 void stridx(char *, char *, int);
 void daysago(time_t, time_t, char *, size_t);
 void days(time_t, time_t, char *, size_t);

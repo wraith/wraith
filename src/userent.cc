@@ -519,7 +519,8 @@ struct user_entry_type USERENTRY_STATS = {
   "STATS"
 };
 
-void update_mod(char *handle, char *nick, char *cmd, char *par)
+void update_mod(const char *handle, const char *nick, const char *cmd,
+    const char *par)
 {
   char tmp[100] = "";
 
@@ -681,10 +682,8 @@ static bool laston_unpack(struct userrec *u, struct user_entry *e)
   char *par = e->u.list->extra, *arg = newsplit(&par);
   struct laston_info *li = (struct laston_info *) calloc(1, sizeof(struct laston_info));
 
-  if (!par[0])
-    par = "???";
   li->laston = atoi(arg);
-  li->lastonplace = strdup(par);
+  li->lastonplace = par[0] ? strdup(par) : strdup("???");
   list_type_kill(e->u.list);
   e->u.extra = li;
   return 1;

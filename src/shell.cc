@@ -418,7 +418,8 @@ void check_trace(int start)
 #endif	/* !DEBUG */
 }
 
-int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool simple)
+int shell_exec(const char *cmdline, const char *input, char **output,
+    char **erroutput, bool simple)
 {
   if (!cmdline)
     return 0;
@@ -555,9 +556,9 @@ int shell_exec(char *cmdline, char *input, char **output, char **erroutput, bool
       argv[n] = NULL;
 
     } else {
-      argv[0] = "/bin/sh";
-      argv[1] = "-c";
-      argv[2] = cmdline;
+      argv[0] = (char*)"/bin/sh";
+      argv[1] = (char*)"-c";
+      argv[2] = (char*)cmdline;
       argv[3] = NULL;
     }
 

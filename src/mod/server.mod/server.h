@@ -67,8 +67,8 @@ extern struct dcc_table SERVER_SOCKET;
 extern rate_t		flood_msg, flood_ctcp, flood_callerid;
 extern bd::HashTable<bd::String, fish_data_t*> FishKeys;
 
-int check_bind_ctcpr(char *, char *, struct userrec *, char *, char *, char *, bind_table_t *);
-void nicks_available(char* buf, char delim = 0, bool buf_contains_available = 1);
+int check_bind_ctcpr(const char *, const char *, struct userrec *, const char *, const char *, const char *, bind_table_t *);
+void nicks_available(const char* buf, char delim = 0, bool buf_contains_available = 1);
 void release_nick(const char* = NULL);
 
 #define check_bind_ctcp(a, b, c, d, e, f) check_bind_ctcpr(a, b, c, d, e, f, BT_ctcp)
@@ -82,7 +82,7 @@ void server_die();
 void add_server(char *);
 void clearq(struct server_list *);
 void nuke_server(const char *);
-bool match_my_nick(char *);
+bool match_my_nick(const char *);
 void rehash_server(const char *, const char *);
 void rehash_monitor_list();
 void replay_cache(int, bd::Stream*);

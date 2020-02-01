@@ -214,7 +214,9 @@ bin_checksum(const char *fname, int todo)
     munmap(map, size);
     close(fd);
 
-    return ".";
+    hash[0] = '.';
+    hash[1] = '\0';
+    return hash;
   } else if (todo & WRITE_CHECKSUM) {
     bd::AtomicFile* newbin = new bd::AtomicFile();
 
@@ -802,7 +804,8 @@ void conf_to_bin(conf_t *in, bool move, int die)
                            bot->net.ip6 ? bot->net.ip6 : "");
     }
 
-  simple_snprintf(settings.conf_hubs, sizeof(settings.conf_hubs), in->hubs.join(',').c_str());
+  strlcpy(settings.conf_hubs, in->hubs.join(',').c_str(),
+      sizeof(settings.conf_hubs));
 
   newbin = binname;
 //  tellconfig(&settings); 

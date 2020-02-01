@@ -133,7 +133,8 @@ static int gotfake433(char *nick)
  * msg: proc-name <nick> <user@host> <handle> <args...>
  */
 
-static void check_bind_msg(const char *cmd, char *nick, char *uhost, struct userrec *u, char *args)
+static void check_bind_msg(const char *cmd, const char *nick,
+    const char *uhost, struct userrec *u, const char *args)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
   int x;
@@ -227,8 +228,8 @@ static int check_bind_raw(char *from, char *code, char *msg)
 }
 
 
-int check_bind_ctcpr(char *nick, char *uhost, struct userrec *u,
-                           char *dest, char *keyword, char *args,
+int check_bind_ctcpr(const char *nick, const char *uhost, struct userrec *u,
+                           const char *dest, const char *keyword, const char *args,
                            bind_table_t *table)
 {
   struct flag_record fr = {FR_GLOBAL | FR_CHAN | FR_ANYWH, 0, 0, 0 };
@@ -237,7 +238,7 @@ int check_bind_ctcpr(char *nick, char *uhost, struct userrec *u,
 }
 
 
-bool match_my_nick(char *nick)
+bool match_my_nick(const char *nick)
 {
   return (!rfc_ncasecmp(nick, botname, nick_len));
 }
@@ -523,7 +524,8 @@ void unset_callerid(int data)
 
 /* Do on NICK, PRIVMSG, NOTICE and JOIN.
  */
-static bool detect_flood(char *floodnick, char *floodhost, char *from, int which)
+static bool detect_flood(const char *floodnick, const char *floodhost,
+    char *from, int which)
 {
   struct userrec *u = get_user_by_host(from);
   int atr = u ? u->flags : 0;
@@ -531,7 +533,8 @@ static bool detect_flood(char *floodnick, char *floodhost, char *from, int which
   if ((u && u->bot) || (atr & USER_NOFLOOD))
     return 0;
 
-  char *p = NULL, ftype[10] = "", h[1024] = "";
+  char ftype[10] = "", h[1024] = "";
+  const char *p = NULL;
   int thr = 0;
   time_t lapse = 0;
 
@@ -639,8 +642,9 @@ static int gotmsg(char *from, char *msg)
      (*msg == '@')))           /* Notice to a channel, not handled here */
     return 0;
 
-  char *to = NULL, buf[UHOSTLEN] = "", *nick = NULL, ctcpbuf[512] = "", *uhost = buf, 
+  char *to = NULL, buf[UHOSTLEN] = "", ctcpbuf[512] = "", *uhost = buf,
        *ctcp = NULL, *p = NULL, *p1 = NULL, *code = NULL;
+  const char *nick = NULL;
   struct userrec *u = NULL;
   int ctcp_count = 0;
   bool ignoring = match_ignore(from);
@@ -865,8 +869,9 @@ static int gotnotice(char *from, char *msg)
       (*msg == '@')))           /* Notice to a channel, not handled here */
     return 0;
 
-  char *to = NULL, *nick = NULL, ctcpbuf[512] = "", *p = NULL, *p1 = NULL, buf[512] = "", 
+  char *to = NULL, ctcpbuf[512] = "", *p = NULL, *p1 = NULL, buf[512] = "",
        *uhost = buf, *ctcp = NULL, *ctcpmsg = NULL, *ptr = NULL;
+  const char *nick = NULL;
   struct userrec *u = NULL;
   bool ignoring = match_ignore(from);
 
@@ -1060,9 +1065,11 @@ static void nick_available(bool is_jupe, bool is_orig) {
   }
 }
 
-void nicks_available(char* buf, char delim, bool buf_contains_available) {
-  if (!buf[0] || !keepnick) return;
+void nicks_available(const char* nicks, char delim, bool buf_contains_available) {
+  if (!nicks || !nicks[0] || !keepnick) return;
   bool is_jupe = 0, is_orig = 0;
+  char *buf = strdup(nicks);
+  char * const buf_p = buf;
 
   char *nick = NULL;
   if (delim) {
@@ -1083,6 +1090,8 @@ void nicks_available(char* buf, char delim, bool buf_contains_available) {
   }
 
   nick_available(is_jupe, is_orig);
+
+  free(buf_p);
 }
 
 void real_release_nick(void *data) {
@@ -1348,7 +1357,8 @@ static int goterror(char *from, char *msg)
  */
 static int gotnick(char *from, char *msg)
 {
-  char *nick = NULL, *buf = NULL, *buf_ptr = NULL;
+  char *buf = NULL, *buf_ptr = NULL;
+  const char *nick = NULL;
 
   //Done to prevent gotnick in irc.mod getting a mangled from
   buf = buf_ptr = strdup(from);
@@ -1539,11 +1549,13 @@ static void server_activity(int idx, char *msg, int len)
   } else if (server_online) // Only set once 001 has been received
     waiting_for_awake = 0;
 
+  static char empty[] = "";
   if (msg[0] == ':') {
     msg++;
     from = newsplit(&msg);
-  } else
-    from = "";
+  } else {
+    from = empty;
+  }
  
   code = newsplit(&msg);
 
@@ -1720,7 +1732,7 @@ hide_chans(const char *nick, struct userrec *u, char *_channels, bool publicOnly
     if (!chan || 
         
         (!publicOnly && (
-          getnick(u->handle, chan)[0] ||
+          getnick(u->handle, chan) ||
           !(channel_hidden(chan)) || 
           chk_op(fr, chan)
         )) ||

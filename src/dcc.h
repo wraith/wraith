@@ -13,7 +13,7 @@
 
 /* Public structure of all the dcc connections */
 struct dcc_table {
-  char *name;
+  const char *name;
   int flags;
   void (*eof) (int);
   void (*activity) (int, char *, int);

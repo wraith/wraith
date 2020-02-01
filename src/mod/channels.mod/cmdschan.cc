@@ -108,10 +108,13 @@ usage:
 	}
     }
   }
+  const char *reason = NULL;
   if (!par[0])
-    par = "requested";
-  else if (strlen(par) > MASKREASON_MAX)
+    reason = "requested";
+  else if (strlen(par) > MASKREASON_MAX) {
     par[MASKREASON_MAX] = 0;
+    reason = par;
+  }
   if (strlen(who) > UHOSTMAX - 4)
     who[UHOSTMAX - 4] = 0;
   /* Fix missing ! or @ BEFORE checking against myself */
@@ -139,15 +142,15 @@ usage:
     s[70] = 0;
   }
   if (chan) {
-    u_addmask(type, chan, s, dcc[idx].nick, par, expire_time ? now + expire_time : 0, 0);
-    if (par[0] == '*') {
+    u_addmask(type, chan, s, dcc[idx].nick, reason, expire_time ? now + expire_time : 0, 0);
+    if (reason[0] == '*') {
       sticky = 1;
-      par++;
-      putlog(LOG_CMDS, "*", "#%s# (%s) +%s %s %s (%s) (sticky)", dcc[idx].nick, dcc[idx].u.chat->con_chan, cmd, s, chan->dname, par);
-      dprintf(idx, "New %s sticky %s: %s (%s)\n", chan->dname, cmd, s, par);
+      reason++;
+      putlog(LOG_CMDS, "*", "#%s# (%s) +%s %s %s (%s) (sticky)", dcc[idx].nick, dcc[idx].u.chat->con_chan, cmd, s, chan->dname, reason);
+      dprintf(idx, "New %s sticky %s: %s (%s)\n", chan->dname, cmd, s, reason);
     } else {
-      putlog(LOG_CMDS, "*", "#%s# (%s) +%s %s %s (%s)", dcc[idx].nick, dcc[idx].u.chat->con_chan, cmd, s, chan->dname, par);
-      dprintf(idx, "New %s %s: %s (%s)\n", chan->dname, cmd, s, par);
+      putlog(LOG_CMDS, "*", "#%s# (%s) +%s %s %s (%s)", dcc[idx].nick, dcc[idx].u.chat->con_chan, cmd, s, chan->dname, reason);
+      dprintf(idx, "New %s %s: %s (%s)\n", chan->dname, cmd, s, reason);
     }
     if (!conf.bot->hub) {
       if (type == 'e' || type == 'I')
@@ -159,15 +162,15 @@ usage:
     } else
       write_userfile(idx);
   } else {
-    u_addmask(type, NULL, s, dcc[idx].nick, par, expire_time ? now + expire_time : 0, 0);
-    if (par[0] == '*') {
+    u_addmask(type, NULL, s, dcc[idx].nick, reason, expire_time ? now + expire_time : 0, 0);
+    if (reason[0] == '*') {
       sticky = 1;
-      par++;
-      putlog(LOG_CMDS, "*", "#%s# (GLOBAL) +%s %s (%s) (sticky)", dcc[idx].nick, cmd, s, par);
-      dprintf(idx, "New sticky %s: %s (%s)\n", cmd, s, par);
+      reason++;
+      putlog(LOG_CMDS, "*", "#%s# (GLOBAL) +%s %s (%s) (sticky)", dcc[idx].nick, cmd, s, reason);
+      dprintf(idx, "New sticky %s: %s (%s)\n", cmd, s, reason);
     } else {
-      putlog(LOG_CMDS, "*", "#%s# (GLOBAL) +%s %s (%s)", dcc[idx].nick, cmd, s, par);
-      dprintf(idx, "New %s: %s (%s)\n", cmd, s, par);
+      putlog(LOG_CMDS, "*", "#%s# (GLOBAL) +%s %s (%s)", dcc[idx].nick, cmd, s, reason);
+      dprintf(idx, "New %s: %s (%s)\n", cmd, s, reason);
     }
     if (!conf.bot->hub) {
       for (chan = chanset; chan != NULL; chan = chan->next) {
@@ -344,10 +347,10 @@ static void cmd_masks(const char type, int idx, char *par)
 
   if (!strcasecmp(par, "all")) {
     putlog(LOG_CMDS, "*", "#%s# %ss all", dcc[idx].nick, str_type);
-    tell_masks(type, idx, 1, "");
+    tell_masks(type, idx, 1, NULL);
   } else if (!strcasecmp(par, "global")) {
     putlog(LOG_CMDS, "*", "#%s# %ss global", dcc[idx].nick, str_type);
-    tell_masks(type, idx, 1, "", 1);
+    tell_masks(type, idx, 1, NULL, 1);
   } else {
     putlog(LOG_CMDS, "*", "#%s# %ss %s", dcc[idx].nick, str_type, par);
     tell_masks(type, idx, 0, par);
@@ -681,7 +684,8 @@ static void cmd_stick_yn(int idx, char *par, int yn)
 {
   int i = 0, j;
   struct chanset_t *chan = NULL;
-  char *stick_type = NULL, s[UHOSTLEN] = "", chname[81] = "", type = 0, *str_type = NULL;
+  char s[UHOSTLEN] = "", chname[81] = "", type = 0;
+  const char *stick_type = NULL, *str_type = NULL;
   maskrec *channel_list = NULL;
 
   stick_type = newsplit(&par);
