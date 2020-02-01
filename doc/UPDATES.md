@@ -6,6 +6,7 @@
   * Make ./wraith -q and -Q clearly exit when already written.
   * Don't crash when looking up a missing response.
   * Fix cmd_slowjoin still adding the channel on parsing error.
+  * Fix -Wwritable-strings warnings
 
 # 1.4.9
   * Fix various compile warnings and spam
