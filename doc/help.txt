@@ -1735,7 +1735,7 @@ See also: reload, backup
 [N]  $bmsgrate$b             How often (msecs) to dequeue msgs to the server. Only used on
                          non-ratbox servers. Too small a value can result in Excess Flood.
 [L]  $bgroups$b              List of groups that the affected bots are a part of.
-[S]  $blogfile-flags$b       Logfile modes. See '%dhelp console'.
+[S]  $blogging-flags$b       File logging modes. See '%dhelp console'.
 [B]  $blogging$b             Log to .l-botnick files.
 [L]  $brbl-servers$b         Servers to use for RBL checking in channels that are +rbl.
  
