@@ -49,6 +49,7 @@
 #include <unistd.h>
 
 int	conmask = LOG_MODES | LOG_CMDS | LOG_MISC; /* Console mask */
+int	logfile_masks = 0;      /* Defaults from 'logfile-flags' */
 bool	debug_output = 1;      /* Disply output to server to LOG_SERVEROUT */
 
 typedef struct {
@@ -311,9 +312,7 @@ void putlog(int type, const char *chname, const char *format, ...)
 
 #ifdef DEBUG
   /* FIXME: WRITE LOG HERE */
-  int logfile_masks = LOG_ALL;
-
-  if ((logfile_masks && (logfile_masks & type)) || 1)
+  if (logfile_masks & type)
     logfile(type, out);
 #endif
   /* broadcast to hubs */

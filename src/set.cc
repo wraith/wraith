@@ -54,6 +54,12 @@ int ison_time = 10;
 int kill_threshold;
 int lag_threshold;
 int login;
+static char logfile_flags_str[100] = "";
+#ifdef DEBUG
+#define LOGFILE_FLAGS_DFL "*"
+#else
+#define LOGFILE_FLAGS_DFL "mcobeuw"
+#endif
 /* Number of seconds to wait between transmitting queued lines to the server
  * lower this value at your own risk.  ircd is known to start flood control
  * at 512 bytes/2 seconds.
@@ -110,6 +116,7 @@ static variable_t vars[] = {
  VAR("kill-threshold",	&kill_threshold,	VAR_INT|VAR_NOLOC,				0, 0, "0"),
  VAR("lag-threshold",	&lag_threshold,		VAR_INT|VAR_NOLHUB,				0, 0, "15"),
  VAR("link_cleartext",	&link_cleartext,	VAR_INT|VAR_NOLOC|VAR_BOOL,			0, 1, "0"),
+ VAR("logfile-flags",	logfile_flags_str,	VAR_STRING,					0, 0, LOGFILE_FLAGS_DFL),
  VAR("login",		&login,			VAR_INT|VAR_DETECTED,				0, 4, "warn"),
  VAR("manop-warn",	&manop_warn,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "1"),
  VAR("motd",		motd,			VAR_STRING|VAR_HIDE|VAR_NOLOC,			0, 0, NULL),
@@ -416,15 +423,15 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
     sdprintf("server-use-ssl changed, reprocessing server list");
     variable_t *servers = var_get_var_by_name(get_server_type());
     var_set_mem(servers, servers->ldata ? servers->ldata : servers->gdata);
-  }
-
-  // Check if should part/join channels based on groups changing
-  if (!conf.bot->hub && !strcmp(var->name, "groups")) {
+  } else if (!conf.bot->hub && !strcmp(var->name, "groups")) {
+    // Check if should part/join channels based on groups changing
     if (server_online && !restarting && !loading && !reset_chans) {
       for (struct chanset_t* chan = chanset; chan; chan = chan->next) {
         check_shouldjoin(chan);
       }
     }
+  } else if (!strcmp(var->name, "logfile-flags")) {
+    logfile_masks = logmodes(logfile_flags_str);
   }
 
   free(datap);

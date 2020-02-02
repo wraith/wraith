@@ -40,7 +40,7 @@ void irc_log(struct chanset_t *, const char *, ...) __attribute__((format(printf
 #endif
 void logfile(int type, const char *msg);
 
-extern int		conmask;
+extern int		conmask, logfile_masks;
 extern bool		debug_output;
 
 #endif /* !_LOG_H */
