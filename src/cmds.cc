@@ -4003,7 +4003,7 @@ static void cmd_clearhosts(int idx, char *par)
   if (get_user(&USERENTRY_HOSTS, u2)) {
     shareout("ch %s\n", handle);
     noshare = 1;
-    set_user(&USERENTRY_HOSTS, u2, (void *) "none");
+    set_user(&USERENTRY_HOSTS, u2, "none");
     noshare = 0;
     dprintf(idx, "Cleared hosts for %s.\n", handle);
     if (!conf.bot->hub && server_online)
