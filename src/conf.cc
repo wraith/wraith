@@ -1019,7 +1019,7 @@ bin_to_conf(bool error)
   if (!mkdir_p(conf.datadir) && error)
     werr(ERR_DATADIR);
 
-  str_redup(&conf.datadir, replace(datadir, dirname(binname), "."));
+  str_redup(&conf.datadir, replace(datadir, bindir, "."));
 
   if (Tempfile::FindDir() == ERROR)
     werr(ERR_TMPSTAT);
