@@ -665,8 +665,8 @@ struct userrec *adduser(struct userrec *bu, const char *handle,
   } else {
     u->flags = default_flags;
   }
-  set_user(&USERENTRY_PASS, u, (void*)pass);/* XXX: const */
-  set_user(&USERENTRY_HOSTS, u, (void*)host);
+  set_user(&USERENTRY_PASS, u, pass);
+  set_user(&USERENTRY_HOSTS, u, host);
   if (bu == userlist)
     clear_chanlist();
   noshare = oldshare;
@@ -816,7 +816,7 @@ int delhost_by_handle(char *handle, char *host)
     }
   }
   if (!qprev)
-    set_user(&USERENTRY_HOSTS, u, (void *) "none");
+    set_user(&USERENTRY_HOSTS, u, "none");
   if (!noshare && i)
     shareout("-h %s %s\n", handle, host);
   clear_chanlist();

@@ -111,7 +111,7 @@ void *def_get(struct userrec *u, struct user_entry *e)
   return e->u.string;
 }
 
-bool def_set_real(struct userrec *u, struct user_entry *e, void *buf, bool protect)
+static bool def_set_real(struct userrec *u, struct user_entry *e, void *buf, bool protect)
 {
   char *string = (char *) buf;
 
@@ -155,7 +155,7 @@ bool def_set(struct userrec *u, struct user_entry *e, void *buf)
   return (def_set_real(u, e, buf, 0));
 }
 
-bool set_protected(struct userrec *u, struct user_entry *e, void *buf)
+static bool set_protected(struct userrec *u, struct user_entry *e, void *buf)
 {
   return (def_set_real(u, e, buf, 1));
 }
@@ -1086,7 +1086,7 @@ void *get_user(struct user_entry_type *et, struct userrec *u)
   return NULL;
 }
 
-bool set_user(struct user_entry_type *et, struct userrec *u, void *d)
+bool set_user(struct user_entry_type *et, struct userrec *u, const void *d)
 {
   if (!u || !et)
     return 0;
@@ -1102,7 +1102,11 @@ bool set_user(struct user_entry_type *et, struct userrec *u, void *d)
     e->u.list = NULL;
     list_insert((&(u->entries)), e);
   }
-  r = et->set(u, e, d);
+  /*
+   * d is typically having its ownership passed down except for simple strings
+   * which will be copied.
+   */
+  r = et->set(u, e, (void*)d);
   if (!e->u.list) {
     list_delete((struct list_type **) &(u->entries), (struct list_type *) e);
     free(e);

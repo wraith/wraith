@@ -698,7 +698,7 @@ share_clearhosts(int idx, char *par)
       if (!conf.bot->hub && server_online)
         check_this_user(u->handle, 1, NULL);
       noshare = 1;
-      set_user(&USERENTRY_HOSTS, u, (void *) "none");
+      set_user(&USERENTRY_HOSTS, u, "none");
       noshare = 0;
     }
   }
