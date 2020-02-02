@@ -593,7 +593,7 @@ void chanprog()
   channel_add(NULL, "default", def_chanset, 1);
 
   if (conf.bot->hub) {
-    simple_snprintf(userfile, 121, "%s/.u", dirname(binname));
+    simple_snprintf(userfile, 121, "%s/.u", bindir);
     loading = 1;
     checkchans(0);
     readuserfile(userfile, &userlist);

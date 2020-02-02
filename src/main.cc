@@ -109,6 +109,7 @@ bool	term_z = 0;		/* Foreground: use the terminal as a party line? */
 int 	updating = 0; 		/* this is set when the binary is called from itself. */
 char 	tempdir[PATH_MAX] = "";
 char 	*binname = NULL;
+char    *bindir = NULL;
 time_t	online_since;		/* Unix-time that the bot loaded up */
 time_t  restart_time;
 bool	restart_was_update = 0;
@@ -732,7 +733,9 @@ int main(int argc, char **argv)
   }
 
   binname = getfullbinname(argv[0]);
-  if (chdir(dirname(binname)))
+  char *binname_tmp = strdup(binname);
+  bindir = dirname(binname_tmp);
+  if (chdir(bindir))
     werr(ERR_BINSTAT);
 
   /* Find a temporary tempdir until we load binary data */

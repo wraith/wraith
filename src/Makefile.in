@@ -70,7 +70,6 @@ OBJS = auth.So \
 	mod/share.mod/share.So \
 	mod/transfer.mod/transfer.So \
 	mod/update.mod/update.So \
-	compat/dirname.o \
 	compat/dn_expand.o \
 	compat/snprintf.o \
 	compat/memmem.o \

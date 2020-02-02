@@ -24,6 +24,7 @@
 #include "compat/compat.h"
 
 #include <sys/param.h>
+#include <libgen.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
