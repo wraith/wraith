@@ -54,11 +54,14 @@ int ison_time = 10;
 int kill_threshold;
 int lag_threshold;
 int login;
+bool logging;
 static char logfile_flags_str[100] = "";
 #ifdef DEBUG
 #define LOGFILE_FLAGS_DFL "*"
+#define LOGGING_DFL "1"
 #else
 #define LOGFILE_FLAGS_DFL "mcobeuw"
+#define LOGGING_DFL "0"
 #endif
 /* Number of seconds to wait between transmitting queued lines to the server
  * lower this value at your own risk.  ircd is known to start flood control
@@ -117,6 +120,7 @@ static variable_t vars[] = {
  VAR("lag-threshold",	&lag_threshold,		VAR_INT|VAR_NOLHUB,				0, 0, "15"),
  VAR("link_cleartext",	&link_cleartext,	VAR_INT|VAR_NOLOC|VAR_BOOL,			0, 1, "0"),
  VAR("logfile-flags",	logfile_flags_str,	VAR_STRING,					0, 0, LOGFILE_FLAGS_DFL),
+ VAR("logging",		&logging,	VAR_INT|VAR_BOOL,					0, 1, LOGGING_DFL),
  VAR("login",		&login,			VAR_INT|VAR_DETECTED,				0, 4, "warn"),
  VAR("manop-warn",	&manop_warn,		VAR_INT|VAR_BOOL|VAR_NOLHUB,			0, 1, "1"),
  VAR("motd",		motd,			VAR_STRING|VAR_HIDE|VAR_NOLOC,			0, 0, NULL),
@@ -432,6 +436,9 @@ sdprintf("var (mem): %s -> %s", var->name, datain ? datain : "(NULL)");
     }
   } else if (!strcmp(var->name, "logfile-flags")) {
     logfile_masks = logmodes(logfile_flags_str);
+  } else if (!strcmp(var->name, "logging")) {
+    if (!logging)
+      logfile_close();
   }
 
   free(datap);

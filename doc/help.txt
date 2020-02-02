@@ -1736,6 +1736,7 @@ See also: reload, backup
                          non-ratbox servers. Too small a value can result in Excess Flood.
 [L]  $bgroups$b              List of groups that the affected bots are a part of.
 [S]  $blogfile-flags$b       Logfile modes. See '%dhelp console'.
+[B]  $blogging$b             Log to .l-botnick files.
 [L]  $brbl-servers$b         Servers to use for RBL checking in channels that are +rbl.
  
 [S]  $brealname$b            The bot's "real name" when connecting. (supports '$n' expansion)

@@ -157,8 +157,6 @@ void logidx(int idx, const char *format, ...)
     dprintf(idx, "%s\n", va_out);
 }
 
-#ifdef DEBUG
-/* CURRENTLY SPAWNS TONS OF FILES */
 FILE *log_f;
 bool flush_log = 1;
 bool init_log_exit = 0;
@@ -180,7 +178,7 @@ void logfile_close(void)
 
 bool logfile_open()
 {
-  if (!conf.bot || !conf.bot->nick) return 0;
+  if (!conf.bot || !conf.bot->nick || !logging) return 0;
 
   char filename[20] = "";
   simple_snprintf(filename, sizeof(filename), ".l-%s", conf.bot->nick);
@@ -242,7 +240,6 @@ void logfile(int type, const char *msg)
   if (flush_log)
     fflush(log_f);
 }
-#endif
 
 /* Log something
  * putlog(level,channel_name,format,...);
@@ -308,11 +305,9 @@ void putlog(int type, const char *chname, const char *format, ...)
 
   /* strcat(out, "\n"); */
 
-#ifdef DEBUG
-  /* FIXME: WRITE LOG HERE */
   if (logfile_masks & type)
     logfile(type, out);
-#endif
+
   /* broadcast to hubs */
   if (chname[0] == '*' && conf.bot && conf.bot->nick)
     botnet_send_log(-1, conf.bot->nick, type, out);
