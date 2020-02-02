@@ -274,7 +274,7 @@ void finish_update_stream(int idx, bd::Stream& stream)
 
   char rand[7] = "";
   make_rand_str(rand, sizeof(rand) - 1, 0);
-  simple_snprintf(buf, sizeof(buf), "%s/.update-%s", dirname(binname), rand);
+  simple_snprintf(buf, sizeof(buf), "%s/.update-%s", bindir, rand);
 
   stream.writeFile(buf);
   fixmod(buf);
@@ -331,9 +331,9 @@ static void start_sending_binary(int idx, bool streamable)
 
   simple_snprintf(update_file, sizeof update_file, "wraith.%s-%s", sysname, egg_version);
 
-  simple_snprintf(update_fpath, sizeof update_fpath, "%s/bins/%s", dirname(binname), update_file);
+  simple_snprintf(update_fpath, sizeof update_fpath, "%s/bins/%s", bindir, update_file);
 //  if (!can_stat(update_fpath))
-//    simple_snprintf(update_fpath, sizeof update_fpath, "%s/%s", dirname(binname), update_file);
+//    simple_snprintf(update_fpath, sizeof update_fpath, "%s/%s", bindir, update_file);
 
   if (!can_stat(update_fpath)) {
     putlog(LOG_MISC, "*", "Need to update \002%s\002 with %s but there was an error: %s", dcc[idx].nick, update_fpath,

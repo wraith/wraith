@@ -56,7 +56,7 @@
 #include "misc_file.h"
 #include "EncryptedStream.h"
 
-char userfile[121] = "";	/* where the user records are stored */
+char userfile[PATH_MAX] = "";	/* where the user records are stored */
 char autolink_failed[HANDLEN + 1] = "";
 interval_t ignore_time = 10;		/* how many minutes will ignores last? */
 bool	dont_restructure = 0;		/* set when we botlink() to a hub with +U, only stops bot from restructuring */

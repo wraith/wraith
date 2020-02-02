@@ -11,7 +11,6 @@
 #  include "config.h"
 #endif
 
-#include "dirname.h"
 #include "dn_expand.h"
 #include "snprintf.h"
 #include "memutil.h"
