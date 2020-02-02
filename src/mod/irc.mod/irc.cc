@@ -1805,7 +1805,7 @@ static void rebalance_roles_chan(struct chanset_t* chan)
      * of a bot assigning a role to a +d bot. This also allows
      * botnet splits to balance between themselves.
      */
-    if (!findbot(m->user->handle))
+    if (!in_chain(m->user->handle))
       continue;
 
     bots << m->user->handle;
