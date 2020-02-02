@@ -15,6 +15,7 @@
   * Tweak server connect burst to progress quicker.
   * Sort cmd_groups and cmd_bots better.
   * cmd_groups: Indicate which bots are down with a _*_.
+  * Logs now include timestamps for forwarded messages.
 
 # maint
   * Clear FiSH keys when a client quits.

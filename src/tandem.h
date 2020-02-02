@@ -61,7 +61,7 @@ void botnet_send_link(int, const char *, const char *, const char *);
 void botnet_send_update(int, tand_t *);
 void botnet_send_nlinked(int, const char *, const char *, const char, int, time_t, const char *, const char *, int);
 void botnet_send_reject(int, const char *, const char *, const char *, const char *, const char *);
-void botnet_send_log(int, const char *, int, const char *, bool = 0);
+void botnet_send_log(int, const char *, int, const char *);
 void botnet_send_zapf(int, const char *, const char *, const char *);
 void botnet_send_zapf_broad(int, const char *, const char *, const char *);
 void botnet_send_away(int, const char *, int, const char *, int);

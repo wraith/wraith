@@ -295,18 +295,16 @@ void putlog(int type, const char *chname, const char *format, ...)
   int idx = 0;
   char out[LOGLINEMAX + 1] = "";
 
-  if (conf.bot && conf.bot->hub) {
-    char stamp[34] = "";
+  /* Prepend timestamp into out.  */
+  {
+    char stamp[100];
     time_t synced = now + timesync;
     struct tm *t = gmtime(&synced);
 
     strftime(stamp, sizeof(stamp), LOG_TS, t);
     /* Place the timestamp in the string to be printed */
-    strlcpy(out, stamp, sizeof(out));
-    strlcat(out, " ", sizeof(out));
-    strlcat(out, va_out, sizeof(out));
-  } else
-    strlcpy(out, va_out, sizeof(out));
+    simple_snprintf(out, sizeof(out), "%s %s", stamp, va_out);
+  }
 
   /* strcat(out, "\n"); */
 
@@ -317,7 +315,7 @@ void putlog(int type, const char *chname, const char *format, ...)
 #endif
   /* broadcast to hubs */
   if (chname[0] == '*' && conf.bot && conf.bot->nick)
-    botnet_send_log(-1, conf.bot->nick, type, out, (conf.bot->hub ? 1 : 0));
+    botnet_send_log(-1, conf.bot->nick, type, out);
 
   for (idx = 0; idx < dcc_total; idx++) {
     if (dcc[idx].type && (dcc[idx].type == &DCC_CHAT && dcc[idx].simul == -1) && (dcc[idx].u.chat->con_flags & type)) {
