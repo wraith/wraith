@@ -60,6 +60,7 @@ tand_t			*tandbot = NULL;		/* Keep track of tandem bots on the
 							   botnet */
 party_t			*party = NULL;			/* Keep track of people on the botnet */
 int			tands = 0;			/* Number of bots on the botnet */
+unsigned long		tand_updates = 0;
 
 static int 		maxparty = 50;			/* Maximum space for party line members
 							   currently */
@@ -122,6 +123,8 @@ void addbot(char *who, char *from, char *next, char flag, int vlocalhub, time_t 
   else
     ptr2->uplink = findbot(next);
   tands++;
+  if (!ptr2->hub)
+    tand_updates++;
 
   counter_clear(who);
 }
@@ -334,6 +337,8 @@ void rembot(const char *whoin)
 
   ptr2 = *ptr;
   *ptr = ptr2->next;
+  if (!ptr2->hub)
+    tand_updates++;
   free(ptr2);
   tands--;
 

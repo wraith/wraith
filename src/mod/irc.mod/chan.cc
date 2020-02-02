@@ -1307,7 +1307,7 @@ void check_this_user(char *hand, int del, char *host)
         /* Newly discovered bot, or deleted bot which fullfilled a role,
          * need to rebalance. */
         if (!del || (del && (*chan->bot_roles)[u->handle] != 0)) {
-          chan->needs_role_rebalance = 1;
+          chan->role_rebalance_cookie = 0;
         }
       }
       if (m->user && !had_user) // If a member is newly recognized, act on it
@@ -2750,7 +2750,7 @@ static int gotjoin(char *from, char *chname)
 	m->flags = (chan_hasop(m) ? WASOP : 0);
         /* New bot available for roles, rebalance. */
         if (is_bot(m->user)) {
-          chan->needs_role_rebalance = 1;
+          chan->role_rebalance_cookie = 0;
         }
 	set_handle_laston(chan->dname, m->user, now);
 //	m->flags |= STOPWHO;
@@ -2815,7 +2815,7 @@ static int gotjoin(char *from, char *chname)
           detect_chan_flood(m, from, chan, FLOOD_JOIN);
           /* New bot available for roles, rebalance. */
           if (is_bot(m->user)) {
-            chan->needs_role_rebalance = 1;
+            chan->role_rebalance_cookie = 0;
           }
 	  set_handle_laston(chan->dname, m->user, now);
 	}
@@ -2969,7 +2969,7 @@ static int gotpart(char *from, char *msg)
     }
     /* This bot fullfilled a role, need to rebalance. */
     if (u && u->bot && (*chan->bot_roles)[u->handle] != 0) {
-      chan->needs_role_rebalance = 1;
+      chan->role_rebalance_cookie = 0;
     }
     set_handle_laston(chan->dname, u, now);
 
@@ -3062,7 +3062,7 @@ static int gotkick(char *from, char *origmsg)
       set_handle_laston(chan->dname, mv->user, now);
       /* This bot fullfilled a role, need to rebalance. */
       if (mv->user->bot && (*chan->bot_roles)[mv->user->handle] != 0) {
-        chan->needs_role_rebalance = 1;
+        chan->role_rebalance_cookie = 0;
       }
     }
     irc_log(chan, "%s!%s was kicked by %s (%s)", mv->nick, mv->userhost, from, msg);
@@ -3240,7 +3240,7 @@ static int gotquit(char *from, char *msg)
           counter_clear(u->handle);
           /* This bot fullfilled a role, need to rebalance. */
           if ((*chan->bot_roles)[u->handle] != 0) {
-            chan->needs_role_rebalance = 1;
+            chan->role_rebalance_cookie = 0;
           }
         }
         set_handle_laston(chan->dname, u, now); /* If you remove this, the bot will crash when the user record in question
