@@ -3554,9 +3554,9 @@ static void cmd_pls_ignore(int idx, char *par)
     else
       reason = par;
 
-    dprintf(idx, "Now ignoring: %s (%s)\n", s, par);
-    addignore(s, dcc[idx].nick, (const char *) par, expire_time ? now + expire_time : 0L);
-    putlog(LOG_CMDS, "*", "#%s# +ignore %s %s", dcc[idx].nick, s, par);
+    dprintf(idx, "Now ignoring: %s (%s)\n", s, reason);
+    addignore(s, dcc[idx].nick, (const char *) reason, expire_time ? now + expire_time : 0L);
+    putlog(LOG_CMDS, "*", "#%s# +ignore %s %s", dcc[idx].nick, s, reason);
     if (conf.bot->hub)
       write_userfile(idx);
   }
