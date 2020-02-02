@@ -49,7 +49,7 @@
 #include <unistd.h>
 
 int	conmask = LOG_MODES | LOG_CMDS | LOG_MISC; /* Console mask */
-int	logfile_masks = 0;      /* Defaults from 'logfile-flags' */
+int	logfile_masks = 0;      /* Defaults from 'logging-flags' */
 bool	debug_output = 1;      /* Disply output to server to LOG_SERVEROUT */
 
 typedef struct {
