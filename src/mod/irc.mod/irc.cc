@@ -1766,14 +1766,8 @@ static void bot_release_nick (char *botnick, char *code, char *par) {
 
 static void rebalance_roles_chan(struct chanset_t* chan)
 {
-  bd::Array<bd::String> bots;
-  int *bot_bits;
-  short role;
-  size_t botcount, mappedbot, omappedbot, botidx, roleidx, rolecount;
-  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
-  memberlist *m;
-
-  if (chan->needs_role_rebalance == 0) {
+  /* Compare to tand_updates which ensures a trigger on unlink/link. */
+  if (chan->role_rebalance_cookie == tand_updates) {
     return;
   }
 
@@ -1781,6 +1775,13 @@ static void rebalance_roles_chan(struct chanset_t* chan)
       !shouldjoin(chan) || (chan->channel.mode & CHANANON)) {
     return;
   }
+
+  bd::Array<bd::String> bots;
+  int *bot_bits;
+  short role;
+  size_t botcount, mappedbot, omappedbot, botidx, roleidx, rolecount;
+  struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
+  memberlist *m;
 
   /* Gather list of all bots in the channel. */
   /* XXX: Keep this known in chan->bots */
@@ -1799,6 +1800,14 @@ static void rebalance_roles_chan(struct chanset_t* chan)
     if (!(m->user->fflags & FEATURE_ROLES)) {
       continue;
     }
+    /*
+     * By requiring a linked bot it avoids descyning to the point
+     * of a bot assigning a role to a +d bot. This also allows
+     * botnet splits to balance between themselves.
+     */
+    if (!findbot(m->user->handle))
+      continue;
+
     bots << m->user->handle;
   }
   botcount = bots.length();
@@ -1859,7 +1868,8 @@ static void rebalance_roles_chan(struct chanset_t* chan)
   /* Set my own roles */
   chan->role = (*chan->bot_roles)[conf.bot->nick];
   free(bot_bits);
-  chan->needs_role_rebalance = 0;
+  /* Reset to tand_updates which ensures a trigger on unlink/link. */
+  chan->role_rebalance_cookie = tand_updates;
 }
 
 static void rebalance_roles()

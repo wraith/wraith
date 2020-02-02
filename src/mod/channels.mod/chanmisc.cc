@@ -993,7 +993,7 @@ static void init_channel(struct chanset_t *chan, bool reset)
     chan->role_bots = new bd::HashTable<short, bd::Array<bd::String> >;
     chan->role = 0;
   }
-  chan->needs_role_rebalance = 1;
+  chan->role_rebalance_cookie = 0;
 }
 
 static void clear_masklist(masklist *m)
