@@ -1,4 +1,5 @@
 # next
+ * Logs now include timestamps for forwarded messages.
 
 # master
   * Require C++14 compiler support (GCC 5+, Clang 3.4+)
@@ -17,7 +18,6 @@
   * Tweak server connect burst to progress quicker.
   * Sort cmd_groups and cmd_bots better.
   * cmd_groups: Indicate which bots are down with a _*_.
-  * Logs now include timestamps for forwarded messages.
 
 # maint
   * Clear FiSH keys when a client quits.
