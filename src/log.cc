@@ -330,7 +330,7 @@ void putlog(int type, const char *chname, const char *format, ...)
 
   if ((!backgrd) && (!term_z)) {
     dprintf(DP_STDOUT, "%s\n", out);
-  } else if ((type & LOG_ERRORS || type & LOG_MISC) && use_stderr) {
+  } else if ((type & (LOG_ERRORS|LOG_MISC)) && use_stderr) {
     dprintf(DP_STDERR, "%s\n", va_out);
   }
 }
