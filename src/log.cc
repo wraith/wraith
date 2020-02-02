@@ -49,6 +49,7 @@
 #include <unistd.h>
 
 int	conmask = LOG_MODES | LOG_CMDS | LOG_MISC; /* Console mask */
+int	logfile_masks = 0;      /* Defaults from 'logfile-flags' */
 bool	debug_output = 1;      /* Disply output to server to LOG_SERVEROUT */
 
 typedef struct {
@@ -156,8 +157,6 @@ void logidx(int idx, const char *format, ...)
     dprintf(idx, "%s\n", va_out);
 }
 
-#ifdef DEBUG
-/* CURRENTLY SPAWNS TONS OF FILES */
 FILE *log_f;
 bool flush_log = 1;
 bool init_log_exit = 0;
@@ -179,7 +178,7 @@ void logfile_close(void)
 
 bool logfile_open()
 {
-  if (!conf.bot || !conf.bot->nick) return 0;
+  if (!conf.bot || !conf.bot->nick || !logging) return 0;
 
   char filename[20] = "";
   simple_snprintf(filename, sizeof(filename), ".l-%s", conf.bot->nick);
@@ -241,7 +240,6 @@ void logfile(int type, const char *msg)
   if (flush_log)
     fflush(log_f);
 }
-#endif
 
 /* Log something
  * putlog(level,channel_name,format,...);
@@ -294,31 +292,25 @@ void putlog(int type, const char *chname, const char *format, ...)
   int idx = 0;
   char out[LOGLINEMAX + 1] = "";
 
-  if (conf.bot && conf.bot->hub) {
-    char stamp[34] = "";
+  /* Prepend timestamp into out.  */
+  {
+    char stamp[100];
     time_t synced = now + timesync;
     struct tm *t = gmtime(&synced);
 
     strftime(stamp, sizeof(stamp), LOG_TS, t);
     /* Place the timestamp in the string to be printed */
-    strlcpy(out, stamp, sizeof(out));
-    strlcat(out, " ", sizeof(out));
-    strlcat(out, va_out, sizeof(out));
-  } else
-    strlcpy(out, va_out, sizeof(out));
+    simple_snprintf(out, sizeof(out), "%s %s", stamp, va_out);
+  }
 
   /* strcat(out, "\n"); */
 
-#ifdef DEBUG
-  /* FIXME: WRITE LOG HERE */
-  int logfile_masks = LOG_ALL;
-
-  if ((logfile_masks && (logfile_masks & type)) || 1)
+  if (logfile_masks & type)
     logfile(type, out);
-#endif
+
   /* broadcast to hubs */
   if (chname[0] == '*' && conf.bot && conf.bot->nick)
-    botnet_send_log(-1, conf.bot->nick, type, out, (conf.bot->hub ? 1 : 0));
+    botnet_send_log(-1, conf.bot->nick, type, out);
 
   for (idx = 0; idx < dcc_total; idx++) {
     if (dcc[idx].type && (dcc[idx].type == &DCC_CHAT && dcc[idx].simul == -1) && (dcc[idx].u.chat->con_flags & type)) {
@@ -330,7 +322,7 @@ void putlog(int type, const char *chname, const char *format, ...)
 
   if ((!backgrd) && (!term_z)) {
     dprintf(DP_STDOUT, "%s\n", out);
-  } else if ((type & LOG_ERRORS || type & LOG_MISC) && use_stderr) {
+  } else if ((type & (LOG_ERRORS|LOG_MISC)) && use_stderr) {
     dprintf(DP_STDERR, "%s\n", va_out);
   }
 }

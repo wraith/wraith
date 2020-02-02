@@ -39,8 +39,9 @@ void irc_log(struct chanset_t *, const char *, ...) __attribute__((format(printf
 #define irc_log(...) do {} while (0)
 #endif
 void logfile(int type, const char *msg);
+void logfile_close(void);
 
-extern int		conmask;
+extern int		conmask, logfile_masks;
 extern bool		debug_output;
 
 #endif /* !_LOG_H */

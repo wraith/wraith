@@ -330,14 +330,9 @@ void putbot(const char *bot, const char *par)
 	 - sends to uplink if a leaf
 	 - sends to all linked hubs if a hub
 */
-void botnet_send_log(int idx, const char *from, int type, const char *msg, bool truncate_ts)
+void botnet_send_log(int idx, const char *from, int type, const char *msg)
 {
-  size_t len;
-  // Cut out timestamp
-  if (truncate_ts)
-    len = simple_snprintf(OBUF, sizeof(OBUF), "lo %s %d %s\n", from, type, &msg[LOG_TS_LEN + 1]); //+1 due to excess space
-  else
-    len = simple_snprintf(OBUF, sizeof(OBUF), "lo %s %d %s\n", from, type, msg);
+  const size_t len = simple_snprintf(OBUF, sizeof(OBUF), "lo %s %d %s\n", from, type, msg);
 
   if (conf.bot->hub) {
     send_hubs_but(idx, OBUF, len);
