@@ -368,7 +368,7 @@ AC_DEFUN([EGG_TCL_CHECK_VERSION],
 
       AC_MSG_CHECKING([for Tcl version])
       AC_CACHE_VAL(egg_cv_var_tcl_version, [
-        egg_cv_var_tcl_version=`grep TCL_VERSION $TCLINC/$TCLINCFN | $HEAD_1 | $AWK '{gsub(/\"/, "", [$]3); print [$]3}'`
+        egg_cv_var_tcl_version=`grep TCL_VERSION $TCLINC/$TCLINCFN | $HEAD_1 | $AWK '{gsub(/"/, "", [$]3); print [$]3}'`
       ])
 
       if test "x$egg_cv_var_tcl_version" != x; then
@@ -384,7 +384,7 @@ AC_DEFUN([EGG_TCL_CHECK_VERSION],
       fi
       AC_MSG_CHECKING([for Tcl patch level])
       AC_CACHE_VAL(egg_cv_var_tcl_patch_level, [
-        eval "egg_cv_var_tcl_patch_level=`grep TCL_PATCH_LEVEL $TCLINC/$TCLINCFN | $HEAD_1 | $AWK '{gsub(/\"/, "", [$]3); print [$]3}'`"
+        eval "egg_cv_var_tcl_patch_level=`grep TCL_PATCH_LEVEL $TCLINC/$TCLINCFN | $HEAD_1 | $AWK '{gsub(/"/, "", [$]3); print [$]3}'`"
       ])
 
       if test "x$egg_cv_var_tcl_patch_level" != x; then
