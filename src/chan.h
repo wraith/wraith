@@ -312,7 +312,7 @@ struct chanset_t {
   // My role bitmask
   int role;
 
-  int needs_role_rebalance;
+  unsigned long role_rebalance_cookie;
 };
 
 /* behavior modes for the channel */

@@ -14,6 +14,7 @@ namespace bd {
 extern tand_t		*tandbot;
 extern party_t		*party;
 extern int		tands;
+extern unsigned long	tand_updates;
 
 #define lower_bot_linked(idx) do {} while (0)
 void answer_local_whom(int, int);
