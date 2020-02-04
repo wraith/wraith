@@ -22,14 +22,14 @@ extern const char *dlsym_error;
 #define DLSYM_GLOBAL_FWDCOMPAT(_handle, x) do { \
   dlerror(); \
   if ((dl_symbol_table[#x] = (FunctionPtr) ((x##_t) dlsym(_handle, #x))) == \
-    NULL) { \
-    if ((dl_symbol_table[#x] = \
+    NULL && \
+    dlerror() && \
+    (dl_symbol_table[#x] = \
       (FunctionPtr) ((x##_t) dlsym(NULL, "_" #x))) == NULL) { \
-      dlsym_error = dlerror(); \
-      if (dlsym_error) { \
-        fprintf(stderr, "%s", dlsym_error); \
-        return(1); \
-      } \
+    dlsym_error = dlerror(); \
+    if (dlsym_error) { \
+      fprintf(stderr, "%s", dlsym_error); \
+      return(1); \
     } \
   } else { \
     my_symbols << #x; \

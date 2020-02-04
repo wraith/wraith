@@ -26,6 +26,8 @@
   * Fix cmd_slowjoin still adding the channel on parsing error.
   * Fix -Wwritable-strings warnings
   * Fix dirname(3) support on FreeBSD (#89).
+  * Fix OpenSSL 1.1 forward compat.
+  * SSL: Prefer TLS_client_method() over SSLv23_client_method().
 
 # 1.4.9
   * Fix various compile warnings and spam

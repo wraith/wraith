@@ -4604,7 +4604,7 @@ if [ "$num" -ge "3" ]; then
   CCDEPMODE=gcc3
   GCC3_CFLAGS="-W -Wno-unused-parameter -Wdisabled-optimization -Wno-write-strings -Wno-format-security -Wno-format-y2k"
   GCC3_CXXFLAGS="-Woverloaded-virtual"
-  GCC3DEB="-Wno-disabled-optimization -Wmissing-format-attribute -Wwrite-strings -Wformat-security"
+  GCC3DEB="-Wno-disabled-optimization -Wmissing-format-attribute -Wwrite-strings -Wformat -Wformat-security"
 fi
 
 
