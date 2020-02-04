@@ -79,9 +79,9 @@ int init_openssl() {
   SSL_load_error_strings();
   OpenSSL_add_ssl_algorithms();
 #if !defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER < 0x10100000L
-  ssl_ctx = SSL_CTX_new(TLS_client_method());
-#else
   ssl_ctx = SSL_CTX_new(SSLv23_client_method());
+#else
+  ssl_ctx = SSL_CTX_new(TLS_client_method());
 #endif
   if (!ssl_ctx) {
     sdprintf("SSL_CTX_new() failed");
