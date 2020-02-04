@@ -1,4 +1,5 @@
 #include <openssl/opensslv.h>
+/* Provide forward compat functions when built from < 1.1. */
 #if !defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER < 0x10100000L
 #include <stdlib.h>
 #include <stdint.h>
@@ -13,12 +14,15 @@ int _OPENSSL_init_ssl(uint64_t a1, const void *a2) {
   return DLSYM_VAR(OPENSSL_init_ssl)(a1, a2);
 }
 
+void _ERR_free_strings(void) __attribute__((const));
 void _ERR_free_strings(void) {
 }
 
+void _EVP_cleanup(void) __attribute__((const));
 void _EVP_cleanup(void) {
 }
 
+void _CRYPTO_cleanup_all_ex_data(void) __attribute__((const));
 void _CRYPTO_cleanup_all_ex_data(void) {
 }
 

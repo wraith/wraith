@@ -15,6 +15,7 @@ LDFLAGS = @LDFLAGS@ $(DEBLDFLAGS)
 SETTINGSFILE = $(top_srcdir)/doc/settings.txt
 RESPONSESFILE = $(top_srcdir)/doc/responses.txt
 HELPFILE = $(top_srcdir)/doc/help.txt
+EXPORTS = $(srcdir)/.defs/exports
 
 include $(top_srcdir)/build/build.mk
 
@@ -113,7 +114,8 @@ sorthelp: sorthelp.cc $(top_builddir)/lib/bdlib/src/libbdlib.a
 
 ../$(EGGEXEC): $(OBJS) $(top_builddir)/lib/bdlib/src/libbdlib.a @LIBELF_BUNDLED@
 	@echo -e "[LD ]	\033[1m$@\033[0m"
-	$(LD) $(LDFLAGS) -o ../$(EGGEXEC) $(OBJS) $(top_builddir)/lib/bdlib/src/libbdlib.a $(LIBS) @LIBELF_LIB@
+	$(LD) $(LDFLAGS) -o ../$(EGGEXEC) $(OBJS) $(top_builddir)/lib/bdlib/src/libbdlib.a \
+	    $(LIBS) @LIBELF_LIB@ -Wl,--dynamic-list=$(EXPORTS)
 	@$(STRIP) ../$(EGGEXEC)
 	@$(OBJCOPY) ../$(EGGEXEC)
 	@echo "Successful compile: $(EGGEXEC)"
