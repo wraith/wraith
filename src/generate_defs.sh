@@ -13,6 +13,7 @@ INCLUDES="${TCL_INCLUDES} ${SSL_INCLUDES}"
 mkdir -p src/.defs > /dev/null 2>&1
 TMPFILE=$(mktemp "/tmp/pre.XXXXXX")
 files=$(grep -l DLSYM_GLOBAL src/*.cc|grep -v "src/_")
+exportsFile="src/.defs/exports"
 
 for file in ${files}; do
   suffix=${file##*.}
@@ -29,6 +30,7 @@ for file in ${files}; do
   : > $defsFile_wrappers
 done
 
+echo "{" > $exportsFile
 for file in ${files}; do
   suffix=${file##*.}
   basename=${file%%.*}
@@ -51,7 +53,8 @@ for file in ${files}; do
   mv $TMPFILE.sed $TMPFILE
   cd ..
 
-  for symbol in $($SED -n -e 's/.*DLSYM_GLOBAL[^ (]*(.*, \([^)]*\).*/\1/p' $TMPFILE|sort -u); do
+  $SED -n -e 's/.*\(DLSYM_GLOBAL[^ (]*\)(.*, \([^)]*\).*/\2 \1/p' $TMPFILE | \
+    sort -u | while read symbol dlsym; do
     # Check if the typedef is already defined ...
     typedef=$(grep "^typedef .*(\*${symbol}_t)" ${dirname}/${basename}.h)
     # ... if not, generate it
@@ -70,7 +73,11 @@ for file in ${files}; do
     fi
 
     #pipe typedef into generate_symbol.sh
-    test -n "$typedef" && echo "${symbol} ${existing_typedef} ${typedef}"
+    [ -z "$typedef" ] && continue
+    if [ "${dlsym}" = "DLSYM_GLOBAL_FWDCOMPAT" ]; then
+      echo "_${symbol};" >> $exportsFile
+    fi
+    echo "${symbol} ${existing_typedef} ${typedef}"
   done | src/generate_symbol.sh $defsFile_wrappers $defsFile_pre $defsFile_post
 
   echo "}" >> $defsFile_wrappers
@@ -78,4 +85,5 @@ for file in ${files}; do
 
   echo "done"
 done
+echo "};">> $exportsFile
 rm -f $TMPFILE
