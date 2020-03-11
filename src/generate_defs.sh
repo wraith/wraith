@@ -31,6 +31,7 @@ for file in ${files}; do
 done
 
 echo "{" > $exportsFile
+echo "bfd_exports_stub;" >> $exportsFile
 for file in ${files}; do
   suffix=${file##*.}
   basename=${file%%.*}
