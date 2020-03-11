@@ -938,4 +938,9 @@ int main(int argc, char **argv)
 
   return 0;		/* never reached but what the hell */
 }
+
+/* bfd doesn't link empty --dynamic-list file. */
+void bfd_exports_stub(void)
+{
+}
 /* vim: set sts=2 sw=2 ts=8 et: */
