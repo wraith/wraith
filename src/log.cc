@@ -327,7 +327,6 @@ void putlog(int type, const char *chname, const char *format, ...)
   }
 }
 
-#if 0
 void
 irc_log(struct chanset_t *chan, const char *format, ...)
 {
@@ -355,5 +354,4 @@ irc_log(struct chanset_t *chan, const char *format, ...)
 */
 #endif 
 }
-#endif
 /* vim: set sts=2 sw=2 ts=8 et: */
