@@ -123,8 +123,7 @@ void addbot(char *who, char *from, char *next, char flag, int vlocalhub, time_t 
   else
     ptr2->uplink = findbot(next);
   tands++;
-  if (!ptr2->hub)
-    tand_updates++;
+  tand_updates++;
 
   counter_clear(who);
 }
@@ -337,8 +336,7 @@ void rembot(const char *whoin)
 
   ptr2 = *ptr;
   *ptr = ptr2->next;
-  if (!ptr2->hub)
-    tand_updates++;
+  tand_updates++;
   free(ptr2);
   tands--;
 
