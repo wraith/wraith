@@ -20,7 +20,7 @@ AC_PROG_CXX([clang++80 clang++70 clang++60 clang++50 clang++40 clang++39 clang++
 CC="${CXX} -x c"
 AC_SUBST(CC)
 AC_REQUIRE_CPP
-AX_CXX_COMPILE_STDCXX_14([noext], [mandatory])
+AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
 EGG_CHECK_CC
 #CXX_RPATH_CHECK
 
