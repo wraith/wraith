@@ -2,7 +2,7 @@
  * Logs now include timestamps for forwarded messages.
 
 # master
-  * Require C++14 compiler support (GCC 5+, Clang 3.4+)
+  * Require C++11 compiler support (GCC 48+, Clang 3.4+)
   * Wraith now automatically assigns roles to bots for channels, no longer
     requiring manually assigning them with flags +flry for flood, limit,
     resolve, auto-voice, auto-op. These roles are decentralized and per-chan
