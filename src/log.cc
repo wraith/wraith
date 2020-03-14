@@ -330,7 +330,7 @@ void putlog(int type, const char *chname, const char *format, ...)
 void
 irc_log(struct chanset_t *chan, const char *format, ...)
 {
-#ifdef NOTHANKS
+#ifdef NOTYET
   char va_out[LOGLINEMAX + 1];
   va_list va;
 
