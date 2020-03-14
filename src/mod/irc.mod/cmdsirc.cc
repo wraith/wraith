@@ -1450,7 +1450,7 @@ static void cmd_roles(int idx, char *par)
   for (roleidx = 0; role_counts[roleidx].name; roleidx++) {
     role = role_counts[roleidx].role;
     dprintf(idx, "  %-8s: %s\n", role_counts[roleidx].name,
-        static_cast<bd::String>((*chan->role_bots)[role].join(" ")).c_str());
+        (*chan->role_bots)[role].join(" ").c_str());
   }
 }
 

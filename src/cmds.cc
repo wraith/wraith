@@ -937,7 +937,7 @@ static void cmd_groups(int idx, char *par)
 
   if (botnick.length()) {
     dprintf(idx, "%s is in groups: %s\n", botnick.c_str(),
-        static_cast<bd::String>(botGroups[botnick].join(" ")).c_str());
+        botGroups[botnick].join(" ").c_str());
     dprintf(idx, "Total groups: %zu/%zu\n", botGroups[botnick].length(),
         groupBots.size());
   } else {
@@ -2130,7 +2130,7 @@ static void cmd_debug(int idx, char *par)
           }
         }
         dprintf(idx, "Role: %-8s: %s\n", chan->dname,
-            static_cast<bd::String>(roles.join(" ")).c_str());
+            roles.join(" ").c_str());
       }
     }
   }
