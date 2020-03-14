@@ -4,7 +4,7 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:${HOME}/bin
 
 if [ -d .git ]; then
   BUILDTS=$(git log -1 --pretty=format:%ct HEAD)
-  ver=$(git describe)
+  ver=$(git describe --candidates=2)
 else
   ver=$(awk '/^VERSION/ {print $3}' Makefile.in)
   BUILDTS=`grep -m 1 "BUILDTS = " Makefile.in | awk '{print $3}'`
