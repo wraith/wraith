@@ -1190,7 +1190,7 @@ static void cmd_chaninfo(int idx, char *par)
 /* FIXME: SHOW_CHAR() here */
     get_mode_protect(chan, work, sizeof(work));
     dprintf(idx, "Protect modes (chanmode): %s\n", work[0] ? work : "None");
-    dprintf(idx, "Groups: %s\n", chan->groups && chan->groups->length() ? static_cast<bd::String>(chan->groups->join(" ")).c_str() : "None");
+    dprintf(idx, "Groups: %s\n", chan->groups && chan->groups->length() ? chan->groups->join(" ").c_str() : "None");
     dprintf(idx, "FiSH Key: %s\n", chan->fish_key[0] ? chan->fish_key : "not set");
 //    dprintf(idx, "Protect topic (topic)   : %s\n", chan->topic[0] ? chan->topic : "");
 /* Chanchar template
