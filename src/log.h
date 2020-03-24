@@ -33,11 +33,7 @@ void putlog (int, const char *, const char *, ...) __attribute__((format(printf,
 int logmodes(const char *) __attribute__((pure));
 char *masktype(int);
 char *maskname(int);
-void irc_log(struct chanset_t *, const char *, ...) __attribute__((format(printf, 2, 3)))
-#ifndef NOTYET
-  __attribute__((const))
-#endif
-  ;
+void irc_log(struct chanset_t *, const char *, ...) __attribute__((format(printf, 2, 3)));
 void logfile(int type, const char *msg);
 
 extern int		conmask;

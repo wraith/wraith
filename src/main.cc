@@ -936,7 +936,6 @@ int main(int argc, char **argv)
 }
 
 /* bfd doesn't link empty --dynamic-list file. */
-void bfd_exports_stub(void) __attribute__((const));
 void bfd_exports_stub(void)
 {
 }
