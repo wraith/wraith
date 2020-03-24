@@ -55,11 +55,7 @@ int shell_exec(const char *, const char *, char **, char **, bool = 0);
 int simple_exec(const char* argv[]);
 void check_last();
 void check_promisc();
-#if defined(DEBUG) && !defined(PR_SET_PTRACER_ANY)
-void check_trace(int) __attribute__((const));
-#else
 void check_trace(int);
-#endif
 void check_crontab();
 void crontab_del();
 int crontab_exists(bd::Stream* = NULL, bool = 0);
