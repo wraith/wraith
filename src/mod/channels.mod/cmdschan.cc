@@ -127,10 +127,10 @@ usage:
     simple_snprintf(s, sizeof s, "%s@*", who);	/* brain-dead? */
   else
     strlcpy(s, who, sizeof s);
-    if (conf.bot->hub)
-      simple_snprintf(s1, sizeof s1, "%s!%s@%s", origbotname, botuser, conf.bot->net.host);
-    else
-      simple_snprintf(s1, sizeof s1, "%s!%s", botname, botuserhost);
+  if (conf.bot->hub)
+    simple_snprintf(s1, sizeof s1, "%s!%s@%s", origbotname, botuser, conf.bot->net.host);
+  else
+    simple_snprintf(s1, sizeof s1, "%s!%s", botname, botuserhost);
   if (type == 'b' && s1[0] && wild_match(s, s1)) {
     dprintf(idx, "I'm not going to ban myself.\n");
     putlog(LOG_CMDS, "*", "#%s# attempted +ban %s", dcc[idx].nick, s);

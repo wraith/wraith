@@ -633,35 +633,35 @@ static int ctcp_TIME(char *nick, char *uhost, struct userrec *u, char *object, c
 static int ctcp_CHAT(char *nick, char *uhost, struct userrec *u, char *object, char *keyword, char *text)
 {
 
-  if (!ischanhub()) 
+  if (!ischanhub())
     return BIND_RET_LOG;
 
-    if (u_pass_match(u, "-")) {
-      strlcat(ctcp_reply, "\001ERROR no password set\001", sizeof(ctcp_reply));
-      return BIND_RET_BREAK;
-    }
-
-    int ix = -1, i = 0;
-
-    for (i = 0; i < dcc_total; i++) {
-      if (dcc[i].type && (dcc[i].type->flags & DCT_LISTEN) && (!strcmp(dcc[i].nick, "(telnet)")))
-        ix = i;
-    }
-    if (!iptolong(getmyip())) {
-      simple_snprintf(&ctcp_reply[strlen(ctcp_reply)], sizeof(ctcp_reply) - strlen(ctcp_reply), "\001ERROR no ipv4 ip defined. Use /dcc chat %s\001", botname);
-    } else if (dcc_total == max_dcc || (ix < 0 && (ix = listen_all(0, 0, 0)) < 0))
-      strlcat(ctcp_reply, "\001ERROR no telnet port\001", sizeof(ctcp_reply));
-    else {
-      if (listen_time <= 2)
-        listen_time++;
-      /* do me a favour and don't change this back to a CTCP reply,
-       * CTCP replies are NOTICE's this has to be a PRIVMSG
-       * -poptix 5/1/1997 */
-      bd::String msg;
-      msg = bd::String::printf("+p \001DCC CHAT chat %lu %u\001", iptolong(getmyip()), dcc[ix].port);
-      privmsg(nick, msg, DP_SERVER);
-    }
+  if (u_pass_match(u, "-")) {
+    strlcat(ctcp_reply, "\001ERROR no password set\001", sizeof(ctcp_reply));
     return BIND_RET_BREAK;
+  }
+
+  int ix = -1, i = 0;
+
+  for (i = 0; i < dcc_total; i++) {
+    if (dcc[i].type && (dcc[i].type->flags & DCT_LISTEN) && (!strcmp(dcc[i].nick, "(telnet)")))
+      ix = i;
+  }
+  if (!iptolong(getmyip())) {
+    simple_snprintf(&ctcp_reply[strlen(ctcp_reply)], sizeof(ctcp_reply) - strlen(ctcp_reply), "\001ERROR no ipv4 ip defined. Use /dcc chat %s\001", botname);
+  } else if (dcc_total == max_dcc || (ix < 0 && (ix = listen_all(0, 0, 0)) < 0))
+    strlcat(ctcp_reply, "\001ERROR no telnet port\001", sizeof(ctcp_reply));
+  else {
+    if (listen_time <= 2)
+      listen_time++;
+    /* do me a favour and don't change this back to a CTCP reply,
+     * CTCP replies are NOTICE's this has to be a PRIVMSG
+     * -poptix 5/1/1997 */
+    bd::String msg;
+    msg = bd::String::printf("+p \001DCC CHAT chat %lu %u\001", iptolong(getmyip()), dcc[ix].port);
+    privmsg(nick, msg, DP_SERVER);
+  }
+  return BIND_RET_BREAK;
 }
 
 static cmd_t myctcp[] =
