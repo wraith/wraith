@@ -19,7 +19,6 @@ irc.choopa.net
 irc.colosolutions.net
 irc.mzima.net
 irc.servercentral.net
-irc2.choopa.net
 #EU
 efnet.port80.se
 efnet.portlane.se
@@ -44,6 +43,7 @@ irc.choopa.net:9999
 irc.servercentral.net:9999
 irc.underworld.no
 irc.nordunet.se
+efnet.port80.se
 
 :servers6_ssl
 irc.choopa.net:9999
