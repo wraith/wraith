@@ -19,7 +19,7 @@
   * Sort cmd_groups and cmd_bots better.
   * cmd_groups: Indicate which bots are down with a _*_.
 
-# maint
+# 1.4.10
   * Clear FiSH keys when a client quits.
   * Fix crash when clearing last botset entry for a bot.
   * Bots now share channel key to other bots even if not opped.
