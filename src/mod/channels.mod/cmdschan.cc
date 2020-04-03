@@ -108,13 +108,11 @@ usage:
 	}
     }
   }
-  const char *reason = NULL;
+  const char *reason = par;
   if (!par[0])
     reason = "requested";
-  else if (strlen(par) > MASKREASON_MAX) {
+  else if (strlen(par) > MASKREASON_MAX)
     par[MASKREASON_MAX] = 0;
-    reason = par;
-  }
   if (strlen(who) > UHOSTMAX - 4)
     who[UHOSTMAX - 4] = 0;
   /* Fix missing ! or @ BEFORE checking against myself */
