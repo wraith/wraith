@@ -50,7 +50,7 @@
  * Auto-limiter algorithm sets channel limit only when needed.
  * Configurable auto-voicer
  * Bots automatically assign roles to manage channel (limit, voice, kicks, bans, etc)
- * [CIDR ban](http://svn.ratbox.org/svnroot/ircd-ratbox/trunk/doc/CIDR.txt) support
+ * [CIDR ban](http://svn.ratbox.org/svnroot/ircd-ratbox/trunk/doc/README.cidr_bans) support
  * Bots DNS clients to see if they match users/bans. (+r)
  * Bots prefer requesting op from bots on same server or from a list of bots sorted by hops.
  * Bots regain nicks automatically.
@@ -59,7 +59,7 @@
  * RBL banning support.
  * In-channel control of bots via AuthSystem.
  * Native support for floodless ilines.
- * Bot is optimized for [IRCD-Ratbox](http://www.ircd-ratbox.org/) and [EFNet](http://www.efnet.org), but should work on most IRCDs fine.
+ * Bot is optimized for [IRCD-Ratbox](https://ratbox.org/) and [EFNet](http://www.efnet.org), but should work on most IRCDs fine.
  * [005 numeric](http://www.irc.org/tech_docs/005.html) support. All on by default, if supported:
   * [CALLERID](http://svn.ratbox.org/svnroot/ircd-ratbox/trunk/doc/modeg.txt) support. Users are automatically accepted.
   * DEAF support. No channel text is sent to bot unless it has [wiki:AuthSystem authed] users on it.
@@ -72,7 +72,7 @@
  * Protection from MAX SendQ from WHO requests replies.
 
 ## Users
- * [CIDR hostmask](http://svn.ratbox.org/svnroot/ircd-ratbox/trunk/doc/CIDR.txt) support
+ * [CIDR hostmask](http://svn.ratbox.org/svnroot/ircd-ratbox/trunk/doc/README.cidr_bans) support
  * Multiple levels of control through flags
  * "Perm" owners are statically defined in the binaries.
  * Sensitive control is through userflag +a (admin -- shell access, bot configuration, etc.).
