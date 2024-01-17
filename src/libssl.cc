@@ -34,6 +34,12 @@
 #include "libssl.h"
 #include ".defs/libssl_defs.cc"
 
+#ifndef OPENSSL_SHLIB_VERSION
+#define OPENSSL_SHLIB_VERSION_STR SHLIB_VERSION_NUMBER
+#else
+#define OPENSSL_SHLIB_VERSION_STR STRINGIFY(OPENSSL_SHLIB_VERSION)
+#endif
+
 void *libssl_handle = NULL;
 static bd::Array<bd::String> my_symbols;
 
@@ -79,7 +85,7 @@ int load_libssl() {
 
   sdprintf("Loading libssl");
 
-  bd::Array<bd::String> libs_list(bd::String("libssl.so." SHLIB_VERSION_NUMBER " libssl.so libssl.so.1.1 libssl.so.1.0.0 libssl.so.0.9.8 libssl.so.10 libssl.so.9 libssl.so.8 libssl.so.7 libssl.so.6").split(' '));
+  bd::Array<bd::String> libs_list(bd::String("libssl.so." OPENSSL_SHLIB_VERSION_STR " libssl.so libssl.so.1.1 libssl.so.1.0.0 libssl.so.0.9.8 libssl.so.10 libssl.so.9 libssl.so.8 libssl.so.7 libssl.so.6").split(' '));
 
   for (size_t i = 0; i < libs_list.length(); ++i) {
     dlerror(); // Clear Errors
