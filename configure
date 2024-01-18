@@ -4637,68 +4637,6 @@ if [ "${ax_cv_prog_cc_Og}" = "no" ]; then
   DEBCXXFLAGS="${DEBCXXFLAGS} -O0"
 fi
 
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker supports -fsanitize=address" >&5
-$as_echo_n "checking whether the linker supports -fsanitize=address... " >&6; }
-if ${ax_cv_prog_cc_fsanitize_address+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-    ac_ext=cpp
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-    ac_saved_flags="$CXXFLAGS"
-    CXXFLAGS="-Werror -fsanitize=address"
-    cat build/confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end build/confdefs.h.  */
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  ax_cv_prog_cc_fsanitize_address="yes"
-else
-  ax_cv_prog_cc_fsanitize_address="no"
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-    CXXFLAGS="$ac_saved_flags"
-    ac_ext=cpp
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_prog_cc_fsanitize_address" >&5
-$as_echo "$ax_cv_prog_cc_fsanitize_address" >&6; }
-
-  if [ "$ax_cv_prog_cc_fsanitize_address" = "yes" ]; then
-    DEBCXXFLAGS="$DEBCXXFLAGS -fsanitize=address"
-  elif [ -n "" ]; then
-      cat << 'EOF' >&2
-configure: error:
-
-  Your OS or C++ compiler does not support -fsanitize=address.
-  This compile flag is required.
-
-EOF
-    exit 1
-  fi
-
-if [ "${ax_cv_prog_cc_fsanitize_address}" = "yes" ]; then
-  DEBLDFLAGS="${DEBLDFLAGS} -fsanitize=address"
-  DEBCXXFLAGS="${DEBCXXFLAGS} -D__SANITIZE_ADDRESS__"
-fi
-
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the compiler understands -fstack-protector-all" >&5
 $as_echo_n "checking whether the compiler understands -fstack-protector-all... " >&6; }
 if ${ax_cv_prog_cc_stackprotectorall+:} false; then :
@@ -6911,7 +6849,7 @@ else
 fi
 if test ! -z "$cf_openssl_basedir"; then
   if test -f "${cf_openssl_basedir}/include/openssl/opensslv.h" && test -f "${cf_openssl_basedir}/lib/libssl.so"; then
-    SSL_INCLUDES="-I${cf_openssl_basedir}/include"
+    SSL_INCLUDES="-I${cf_openssl_basedir}/include -DOPENSSL_API_COMPAT=0x10000000L"
     SSL_LIBS="-L${cf_openssl_basedir}/lib"
   else
         cf_openssl_basedir=""

@@ -100,6 +100,10 @@
 #define unlikely(x)  (x)
 #endif
 
+#ifndef STRINGIFY
+#define STRINGIFY(x) #x
+#endif
+
 #define lengthof(x) (sizeof(x)/sizeof(x[0]))
 
 #endif				/* _COMMON_H */
