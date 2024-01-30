@@ -103,14 +103,16 @@ int load_libssl() {
 
   bd::Array<bd::String> libs_list(bd::String("libssl.so." OPENSSL_SHLIB_VERSION_STR " "
       "libssl.so "
+      "libssl.so.111 "
       "libssl.so.1.1 "
+      "libssl.so.11 "
       "libssl.so.1.0.0 "
-      "libssl.so.0.9.8 "
       "libssl.so.10 "
       "libssl.so.9 "
       "libssl.so.8 "
       "libssl.so.7 "
-      "libssl.so.6").split(' '));
+      "libssl.so.6 "
+      "libssl.so.0.9.8").split(' '));
 
   for (size_t i = 0; i < libs_list.length(); ++i) {
     dlerror(); // Clear Errors
