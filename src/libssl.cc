@@ -58,18 +58,22 @@ static int load_symbols(void *handle) {
   DLSYM_GLOBAL(handle, SSL_CTX_ctrl);
   DLSYM_GLOBAL(handle, SSL_CTX_set_cipher_list);
   DLSYM_GLOBAL(handle, SSL_CTX_set_tmp_dh_callback);
-#if defined(OPENSSL_API_COMPAT) && OPENSSL_API_COMPAT < 0x10100000L
+#if !defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
   /* For SSL_library_init and SSL_load_error_strings. */
   DLSYM_GLOBAL(handle, OPENSSL_init_ssl);
-#else
+#endif
+#if !defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER < 0x10100000L
   DLSYM_GLOBAL_FWDCOMPAT(handle, SSL_library_init);
   DLSYM_GLOBAL_FWDCOMPAT(handle, SSL_load_error_strings);
-  /* Some forward-compat is handled in src/compat/openssl.cc. */
 #endif
+  /* Some forward-compat is handled in src/compat/openssl.cc. */
 #if !defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
   DLSYM_GLOBAL(handle, TLS_client_method);
   DLSYM_GLOBAL(handle, SSL_CTX_set_options);
 #else
+  /* If SSLv23_client_method() is not found then use our
+   * _SSLv23_client_method()
+   */
   DLSYM_GLOBAL_FWDCOMPAT(handle, SSLv23_client_method);
   /* Some forward-compat is handled in src/compat/openssl.cc. */
 #endif
@@ -85,7 +89,18 @@ int load_libssl() {
 
   sdprintf("Loading libssl");
 
-  const auto& libs_list(bd::String("libssl.so." OPENSSL_SHLIB_VERSION_STR " libssl.so libssl.so.1.1 libssl.so.1.0.0 libssl.so.0.9.8 libssl.so.10 libssl.so.9 libssl.so.8 libssl.so.7 libssl.so.6").split(' '));
+  const auto& libs_list(bd::String("libssl.so." OPENSSL_SHLIB_VERSION_STR " "
+      "libssl.so "
+      "libssl.so.111 "
+      "libssl.so.1.1 "
+      "libssl.so.11 "
+      "libssl.so.1.0.0 "
+      "libssl.so.10 "
+      "libssl.so.9 "
+      "libssl.so.8 "
+      "libssl.so.7 "
+      "libssl.so.6 "
+      "libssl.so.0.9.8").split(' '));
 
   for (const auto& lib : libs_list) {
     dlerror(); // Clear Errors
