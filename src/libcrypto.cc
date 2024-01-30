@@ -107,7 +107,16 @@ int load_libcrypto() {
 
   sdprintf("Loading libcrypto");
 
-  const auto& libs_list(bd::String("libcrypto.so." OPENSSL_SHLIB_VERSION_STR " libcrypto.so libcrypto.so.1.1 libcrypto.so.1.0.0 libcrypto.so.0.9.8 libcrypto.so.10 libcrypto.so.9 libcrypto.so.8 libcrypto.so.7 libcrypto.so.6").split(' '));
+  const auto& libs_list(bd::String("libcrypto.so." OPENSSL_SHLIB_VERSION_STR " "
+      "libcrypto.so "
+      "libcrypto.so.1.1 "
+      "libcrypto.so.1.0.0 "
+      "libcrypto.so.0.9.8 "
+      "libcrypto.so.10 "
+      "libcrypto.so.9 "
+      "libcrypto.so.8 "
+      "libcrypto.so.7 "
+      "libcrypto.so.6").split(' '));
 
   for (const auto& lib : libs_list) {
     dlerror(); // Clear Errors
