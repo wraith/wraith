@@ -91,6 +91,8 @@ int load_libssl() {
 
   const auto& libs_list(bd::String("libssl.so." OPENSSL_SHLIB_VERSION_STR " "
       "libssl.so "
+      "libssl.so.12 "
+      "libssl.so.30 "
       "libssl.so.111 "
       "libssl.so.1.1 "
       "libssl.so.11 "
