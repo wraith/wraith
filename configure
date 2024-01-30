@@ -6118,7 +6118,7 @@ else
     cf_openssl_basedir="/usr"
   fi
 fi
-SSL_INCLUDES="${SSL_INCLUDES} -DOPENSSL_API_COMPAT=0x10000000L"
+SSL_INCLUDES="${SSL_INCLUDES} -DOPENSSL_API_COMPAT=0x10100000L"
 
 if test ! -z "$cf_openssl_basedir"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $cf_openssl_basedir" >&5

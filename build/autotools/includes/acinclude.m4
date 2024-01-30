@@ -619,7 +619,7 @@ else
     cf_openssl_basedir="/usr"
   fi
 fi
-SSL_INCLUDES="${SSL_INCLUDES} -DOPENSSL_API_COMPAT=0x10000000L"
+SSL_INCLUDES="${SSL_INCLUDES} -DOPENSSL_API_COMPAT=0x10100000L"
 
 dnl Has it been found by now?
 if test ! -z "$cf_openssl_basedir"; then
