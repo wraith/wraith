@@ -109,6 +109,8 @@ int load_libcrypto() {
 
   const auto& libs_list(bd::String("libcrypto.so." OPENSSL_SHLIB_VERSION_STR " "
       "libcrypto.so "
+      "libcrypto.so.12 "
+      "libcrypto.so.30 "
       "libcrypto.so.111 "
       "libcrypto.so.1.1 "
       "libcrypto.so.11 "
