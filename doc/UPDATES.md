@@ -16,6 +16,9 @@
   * Sort cmd_groups and cmd_bots better.
   * cmd_groups: Indicate which bots are down with a _*_.
 
+# maint
+  * Fix OpenSSL 3 build.
+
 # 1.4.10
   * Clear FiSH keys when a client quits.
   * Fix crash when clearing last botset entry for a bot.
