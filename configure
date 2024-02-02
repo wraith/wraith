@@ -6108,7 +6108,7 @@ else
 fi
 if test ! -z "$cf_openssl_basedir"; then
   if test -f "${cf_openssl_basedir}/include/openssl/opensslv.h" && test -f "${cf_openssl_basedir}/lib/libssl.so"; then
-    SSL_INCLUDES="-I${cf_openssl_basedir}/include -DOPENSSL_API_COMPAT=0x10000000L"
+    SSL_INCLUDES="-I${cf_openssl_basedir}/include"
     SSL_LIBS="-L${cf_openssl_basedir}/lib"
   else
         cf_openssl_basedir=""
@@ -6118,6 +6118,7 @@ else
     cf_openssl_basedir="/usr"
   fi
 fi
+SSL_INCLUDES="${SSL_INCLUDES} -DOPENSSL_API_COMPAT=0x10000000L"
 
 if test ! -z "$cf_openssl_basedir"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $cf_openssl_basedir" >&5
