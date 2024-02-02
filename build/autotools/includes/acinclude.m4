@@ -607,7 +607,7 @@ fi
 dnl Now check cf_openssl_found to see if we found anything.
 if test ! -z "$cf_openssl_basedir"; then
   if test -f "${cf_openssl_basedir}/include/openssl/opensslv.h" && test -f "${cf_openssl_basedir}/lib/libssl.so"; then
-    SSL_INCLUDES="-I${cf_openssl_basedir}/include -DOPENSSL_API_COMPAT=0x10100000L"
+    SSL_INCLUDES="-I${cf_openssl_basedir}/include"
     SSL_LIBS="-L${cf_openssl_basedir}/lib"
   else
     dnl OpenSSL wasn't found in the directory specified.
@@ -619,6 +619,7 @@ else
     cf_openssl_basedir="/usr"
   fi
 fi
+SSL_INCLUDES="${SSL_INCLUDES} -DOPENSSL_API_COMPAT=0x10100000L"
 
 dnl Has it been found by now?
 if test ! -z "$cf_openssl_basedir"; then
