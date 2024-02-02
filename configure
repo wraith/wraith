@@ -9865,12 +9865,12 @@ fi
 
 
 if test -d .git; then
-  git submodule init
-  git submodule update
-  git submodule foreach --recursive git clean -fdx
+  git submodule init || exit 1
+  git submodule update || exit 1
+  git submodule foreach --recursive git clean -fdx || exit 1
   # Restore as it may have been removed by an older 'make distclean'
   if ! test -f src/response.h; then
-    git checkout src/response.h
+    git checkout src/response.h || exit 1
   fi
 fi
 
