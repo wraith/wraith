@@ -1,3 +1,6 @@
+# maint
+  * Fix OpenSSL 3 build.
+
 # 1.4.10
   * Clear FiSH keys when a client quits.
   * Fix crash when clearing last botset entry for a bot.
