@@ -1,6 +1,5 @@
 # maint
   * Fix OpenSSL 3 build.
-  * Drop support for OpenSSL < 1.1
 
 # 1.4.10
   * Clear FiSH keys when a client quits.
