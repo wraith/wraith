@@ -41,6 +41,9 @@ void init_signals();
 #undef _assert
 void _assert(int, const char *, int, const char *, const char *,
     const char *, ...) __attribute__((format(printf, 6, 7)));
+#ifndef __predict_false
+#define __predict_false(x) (x)
+#endif
 #define _ASSERT(recoverable, cond, msg...) do { \
   if (__predict_false(!(cond))) { \
     _assert(recoverable, __FILE__, __LINE__, __func__, # cond, msg); \
