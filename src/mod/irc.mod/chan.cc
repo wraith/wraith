@@ -1520,7 +1520,7 @@ void recheck_channel(struct chanset_t *chan, int dobans)
 
   memberlist *m = NULL;
   struct flag_record fr = {FR_GLOBAL | FR_CHAN, 0, 0, 0 };
-  int stop_reset = 0, botops = 0, nonbotops = 0, botnonops = 0;
+  int stop_reset = 0, botops = 0, /*nonbotops = 0,*/ botnonops = 0;
   bool flush = 0;
 
   ++stacking;
@@ -1536,8 +1536,11 @@ void recheck_channel(struct chanset_t *chan, int dobans)
           ++botops;
         else
           ++botnonops;
-      } else if (hasop)
+#if 0
+      } else if (hasop) {
         ++nonbotops;
+#endif
+      }
     }
   }
 
@@ -3104,12 +3107,14 @@ void check_should_cycle(struct chanset_t *chan)
     return;
 
   //If there are other ops split off and i'm the only op on this side of split, cycle
-  int localops = 0, localbotops = 0, splitops = 0, splitbotops = 0, localnonops = 0;
+  int localops = 0, localbotops = 0, /*splitops = 0,*/ splitbotops = 0, localnonops = 0;
 
   for (memberlist *ml = chan->channel.member; ml && ml->nick[0]; ml = ml->next) {
     if (chan_hasop(ml)) {
       if (chan_issplit(ml)) {
+#if 0
         splitops++;
+#endif
         if ((ml->user) && ml->user->bot)
           splitbotops++;
       } else {

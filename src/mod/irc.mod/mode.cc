@@ -1070,7 +1070,7 @@ gotmode(char *from, char *msg)
       } else
         nick = splitnick(&from);
 
-      int i = 0, modecnt = 0, ops = 0, deops = 0, bans = 0, unbans = 0;
+      int i = 0, modecnt = 0, ops = 0, deops = 0, /*bans = 0,*/ unbans = 0;
       bool me_opped = 0;
       char **modes = (char **) calloc(1, sizeof(char *));
       char s[UHOSTLEN] = "";
@@ -1118,10 +1118,12 @@ gotmode(char *from, char *msg)
                   me_opped = 0;
               }
             } else if (chg[0] == 'b') {
-              if (sign == '+')
-                ++bans;
-              else
+              if (sign == '-')
                 ++unbans;
+#if 0
+              else
+                ++bans;
+#endif
             }
           }
           ++chg;
