@@ -59,13 +59,8 @@ static int load_symbols(void *handle) {
   DLSYM_GLOBAL(handle, SSL_CTX_set_cipher_list);
   DLSYM_GLOBAL(handle, SSL_CTX_set_tmp_dh_callback);
   DLSYM_GLOBAL(handle, OPENSSL_init_ssl);
-#if !defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
   DLSYM_GLOBAL(handle, TLS_client_method);
   DLSYM_GLOBAL(handle, SSL_CTX_set_options);
-#else
-  DLSYM_GLOBAL_FWDCOMPAT(handle, SSLv23_client_method);
-  /* Some forward-compat is handled in src/compat/openssl.cc. */
-#endif
 
   return 0;
 }
