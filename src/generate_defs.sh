@@ -60,6 +60,13 @@ for file in ${files}; do
     typedef=$(grep "^typedef .*(\*${symbol}_t)" ${dirname}/${basename}.h)
     # ... if not, generate it
     if [ -z "$typedef" ]; then
+      if ! grep -v "DLSYM" "${TMPFILE}" | grep -qw "${symbol}"; then
+        echo "Unable to parse symbol ${symbol}. Is there a missing header?" >&2
+	errors=1
+	rm -f "${TMPFILE}"
+	exit 1
+      fi
+
       # Trim off any extern "C", trim out the variable names, cleanup whitespace issues
       typedef=$(grep -w "${symbol}" $TMPFILE |
 	      head -n 1 |
