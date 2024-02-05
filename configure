@@ -635,6 +635,7 @@ TCLINCFN
 TCL_INCLUDES
 TCLLIBFN
 TCLLIB
+SSL_LIBDIR
 SSL_LIBS
 SSL_INCLUDES
 LIBELF_LIB
@@ -6128,6 +6129,7 @@ else
 $as_echo "not found" >&6; }
   as_fn_error 1 "OpenSSL is required." "$LINENO" 5
 fi
+SSL_LIBDIR="${cf_openssl_basedir}/lib"
 unset cf_openssl_basedir
 
 save_CXX="$CXX"

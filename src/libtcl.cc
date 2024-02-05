@@ -24,7 +24,7 @@
  *
  */
 
-
+#include "buildinfo.h"
 #include "common.h"
 #include "main.h"
 #include "dl.h"
@@ -68,6 +68,7 @@ int load_libtcl() {
 #endif
 
   bd::Array<bd::String> libs_list(bd::String(
+      TCLLIB "/lib" TCLLIBFN " "
       "libtcl.so "
       "libtcl83.so "
       "libtcl8.3.so "

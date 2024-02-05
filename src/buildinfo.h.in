@@ -1,3 +1,5 @@
 #define BUILD_OS "@BUILDOS@"
 #define BUILD_ARCH "@BUILDARCH@"
-
+#define SSL_LIBDIR "@SSL_LIBDIR@"
+#define TCLLIB "@TCLLIB@"
+#define TCLLIBFN "@TCLLIBFN@"

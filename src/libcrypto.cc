@@ -25,6 +25,7 @@
  */
 
 
+#include "buildinfo.h"
 #include "common.h"
 #include "main.h"
 #include "dl.h"
@@ -108,7 +109,12 @@ int load_libcrypto() {
 
   sdprintf("Loading libcrypto");
 
-  bd::Array<bd::String> libs_list(bd::String("libcrypto.so." OPENSSL_SHLIB_VERSION_STR " "
+  bd::Array<bd::String> libs_list(bd::String(
+#if !defined(LIBRESSL_VERSION_NUMBER)
+      SSL_LIBDIR "/libcrypto.so." OPENSSL_SHLIB_VERSION_STR " "
+      "libcrypto.so." OPENSSL_SHLIB_VERSION_STR " "
+#endif
+      SSL_LIBDIR "/libcrypto.so "
       "libcrypto.so "
       "libcrypto.so.12 "
       "libcrypto.so.30 "

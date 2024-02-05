@@ -25,6 +25,7 @@
  */
 
 
+#include "buildinfo.h"
 #include "common.h"
 #include "main.h"
 #include "dl.h"
@@ -101,7 +102,12 @@ int load_libssl() {
 
   sdprintf("Loading libssl");
 
-  bd::Array<bd::String> libs_list(bd::String("libssl.so." OPENSSL_SHLIB_VERSION_STR " "
+  bd::Array<bd::String> libs_list(bd::String(
+#if !defined(LIBRESSL_VERSION_NUMBER)
+      SSL_LIBDIR "/libssl.so." OPENSSL_SHLIB_VERSION_STR " "
+      "libssl.so." OPENSSL_SHLIB_VERSION_STR " "
+#endif
+      SSL_LIBDIR "/libssl.so "
       "libssl.so "
       "libssl.so.12 "
       "libssl.so.30 "
