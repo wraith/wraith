@@ -100,8 +100,11 @@
 #define unlikely(x)  (x)
 #endif
 
-#ifndef STRINGIFY
-#define STRINGIFY(x) #x
+#ifndef __STRING
+#define __STRING(x)     #x              /* stringify without expanding x */
+#endif
+#ifndef __XSTRING
+#define __XSTRING(x)    __STRING(x)     /* expand x, then stringify */
 #endif
 
 #define lengthof(x) (sizeof(x)/sizeof(x[0]))
