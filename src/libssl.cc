@@ -117,7 +117,7 @@ int load_libssl() {
   }
 
   if (load_symbols(libssl_handle)) {
-    fprintf(stderr, STR("Missing symbols for libssl (likely too old)\n"));
+    fprintf(stderr, STR("\nMissing symbols for libssl (likely too old)\n"));
     return(1);
   }
 
