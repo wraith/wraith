@@ -84,7 +84,8 @@ static int load_symbols(void *handle) {
   DLSYM_GLOBAL(handle, DH_new);
   DLSYM_GLOBAL(handle, DH_size);
 
-#if !defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
+#if (defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER >= 0x30500000L) || \
+    (!defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L)
   /* For dh_util.cc */
   DLSYM_GLOBAL(handle, DH_get0_key);
   DLSYM_GLOBAL(handle, DH_set0_key);

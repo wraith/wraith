@@ -84,7 +84,8 @@ void DH1080_gen(bd::String& privateKey, bd::String& publicKeyB64) {
   const BIGNUM *priv_key, *pub_key;
 
   dh = DH_new();
-#if !defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
+#if (defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER >= 0x30500000L) || \
+    (!defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L)
   if (b_prime == NULL || b_generator == NULL ||
       !DH_set0_pqg(dh, BN_dup(b_prime), NULL, BN_dup(b_generator)))
     return;
@@ -99,7 +100,8 @@ void DH1080_gen(bd::String& privateKey, bd::String& publicKeyB64) {
   }
 
   // Get private key
-#if !defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
+#if (defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER >= 0x30500000L) || \
+    (!defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L)
   DH_get0_key(dh, &pub_key, &priv_key);
 #else
   priv_key = dh->priv_key;
@@ -126,7 +128,8 @@ bool DH1080_comp(const bd::String privateKey, const bd::String theirPublicKeyB64
 
 
   dh = DH_new();
-#if !defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
+#if (defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER >= 0x30500000L) || \
+    (!defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L)
   if (b_prime == NULL || b_generator == NULL ||
       !DH_set0_pqg(dh, BN_dup(b_prime), NULL, BN_dup(b_generator)))
     return false;
@@ -137,7 +140,8 @@ bool DH1080_comp(const bd::String privateKey, const bd::String theirPublicKeyB64
 
   // Setup my private key
   b_myPrivkey = BN_bin2bn(reinterpret_cast<const unsigned char*>(privateKey.data()), privateKey.length(), NULL);
-#if !defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
+#if (defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER >= 0x30500000L) || \
+    (!defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L)
   DH_set0_key(dh, NULL, b_myPrivkey);
 #else
   dh->priv_key = b_myPrivkey;
