@@ -24,7 +24,7 @@
  *
  */
 
-
+#include "buildinfo.h"
 #include "common.h"
 #include "main.h"
 #include "dl.h"
@@ -67,7 +67,17 @@ int load_libtcl() {
   }
 #endif
 
-  const auto& libs_list(bd::String("libtcl.so libtcl83.so libtcl8.3.so libtcl84.so libtcl8.4.so libtcl85.so libtcl8.5.so libtcl86.so libtcl8.6.so").split(' '));
+  const auto& libs_list(bd::String(
+      TCLLIB "/lib" TCLLIBFN " "
+      "libtcl.so "
+      "libtcl83.so "
+      "libtcl8.3.so "
+      "libtcl84.so "
+      "libtcl8.4.so "
+      "libtcl85.so "
+      "libtcl8.5.so "
+      "libtcl86.so "
+      "libtcl8.6.so").split(' '));
 
   for (const auto& lib : libs_list) {
     dlerror(); // Clear Errors
@@ -80,7 +90,7 @@ int load_libtcl() {
   }
 
   if (load_symbols(libtcl_handle)) {
-    fprintf(stderr, STR("Missing symbols for libtcl (likely too old)\n"));
+    fprintf(stderr, STR("\nMissing symbols for libtcl (likely too old)\n"));
     return(1);
   }
 

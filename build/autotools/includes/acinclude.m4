@@ -628,6 +628,7 @@ else
   AC_MSG_RESULT([not found])
   AC_MSG_ERROR([OpenSSL is required.], 1)
 fi
+SSL_LIBDIR="${cf_openssl_basedir}/lib"
 unset cf_openssl_basedir
 
 save_CXX="$CXX"
@@ -670,6 +671,7 @@ AC_CHECK_LIB(crypto, AES_encrypt,
 CXX="$save_CXX"
 LIBS="$save_LIBS"
 
+AC_SUBST(SSL_LIBDIR)
 AC_SUBST(SSL_INCLUDES)
 AC_SUBST(SSL_LIBS)
 AC_DEFINE_UNQUOTED(EGG_SSL_EXT, 1, [Defines whether or not SSL is supported])dnl

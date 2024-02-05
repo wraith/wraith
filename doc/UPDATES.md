@@ -21,6 +21,8 @@
 
 # maint
   * Fix OpenSSL 3 build.
+  * Fix LibreSSL 3.5+ build.
+  * Prefer OpenSSL/TCL found at configure-time.
 
 # 1.4.10
   * Clear FiSH keys when a client quits.

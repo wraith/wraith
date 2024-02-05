@@ -25,6 +25,7 @@
  */
 
 
+#include "buildinfo.h"
 #include "common.h"
 #include "main.h"
 #include "dl.h"
@@ -37,7 +38,7 @@
 #ifndef OPENSSL_SHLIB_VERSION
 #define OPENSSL_SHLIB_VERSION_STR SHLIB_VERSION_NUMBER
 #else
-#define OPENSSL_SHLIB_VERSION_STR STRINGIFY(OPENSSL_SHLIB_VERSION)
+#define OPENSSL_SHLIB_VERSION_STR __XSTRING(OPENSSL_SHLIB_VERSION)
 #endif
 
 void *libcrypto_handle = NULL;
@@ -84,7 +85,8 @@ static int load_symbols(void *handle) {
   DLSYM_GLOBAL(handle, DH_new);
   DLSYM_GLOBAL(handle, DH_size);
 
-#if !defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
+#if (defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER >= 0x30500000L) || \
+    (!defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L)
   /* For dh_util.cc */
   DLSYM_GLOBAL(handle, DH_get0_key);
   DLSYM_GLOBAL(handle, DH_set0_key);
@@ -107,7 +109,12 @@ int load_libcrypto() {
 
   sdprintf("Loading libcrypto");
 
-  const auto& libs_list(bd::String("libcrypto.so." OPENSSL_SHLIB_VERSION_STR " "
+  const auto& libs_list(bd::String(
+#if !defined(LIBRESSL_VERSION_NUMBER)
+      SSL_LIBDIR "/libcrypto.so." OPENSSL_SHLIB_VERSION_STR " "
+      "libcrypto.so." OPENSSL_SHLIB_VERSION_STR " "
+#endif
+      SSL_LIBDIR "/libcrypto.so "
       "libcrypto.so "
       "libcrypto.so.12 "
       "libcrypto.so.30 "
@@ -136,7 +143,7 @@ int load_libcrypto() {
   }
 
   if (load_symbols(libcrypto_handle)) {
-    fprintf(stderr, STR("Missing symbols for libcrypto (likely too old)\n"));
+    fprintf(stderr, STR("\nMissing symbols for libcrypto (likely too old)\n"));
     return(1);
   }
 
