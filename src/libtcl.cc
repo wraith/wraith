@@ -67,7 +67,16 @@ int load_libtcl() {
   }
 #endif
 
-  bd::Array<bd::String> libs_list(bd::String("libtcl.so libtcl83.so libtcl8.3.so libtcl84.so libtcl8.4.so libtcl85.so libtcl8.5.so libtcl86.so libtcl8.6.so").split(' '));
+  bd::Array<bd::String> libs_list(bd::String(
+      "libtcl.so "
+      "libtcl83.so "
+      "libtcl8.3.so "
+      "libtcl84.so "
+      "libtcl8.4.so "
+      "libtcl85.so "
+      "libtcl8.5.so "
+      "libtcl86.so "
+      "libtcl8.6.so").split(' '));
 
   for (size_t i = 0; i < libs_list.length(); ++i) {
     dlerror(); // Clear Errors
