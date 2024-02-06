@@ -1,4 +1,5 @@
 #! /bin/sh
+set -e
 
 ### Export LC_ALL=C so sort(1) stays consistent
 export LC_ALL=C
@@ -57,7 +58,7 @@ for file in ${files}; do
   $SED -n -e 's/.*\(DLSYM_GLOBAL[^ (]*\)(.*, \([^)]*\).*/\2 \1/p' $TMPFILE | \
     sort -u | while read symbol dlsym; do
     # Check if the typedef is already defined ...
-    typedef=$(grep "^typedef .*(\*${symbol}_t)" ${dirname}/${basename}.h)
+    typedef=$(grep "^typedef .*(\*${symbol}_t)" ${dirname}/${basename}.h) || :
     # ... if not, generate it
     if [ -z "$typedef" ]; then
       if ! grep -v "DLSYM" "${TMPFILE}" | grep -qw "${symbol}"; then
@@ -78,7 +79,7 @@ for file in ${files}; do
 		 -e 's/  */ /g' \
 		 -e 's/ \([,)]\)/\1/g' \
 		 -e 's/ *()/(void)/g' \
-	 )
+	 ) || :
       existing_typedef=0
     else
       existing_typedef=1
@@ -86,12 +87,16 @@ for file in ${files}; do
 
     if [ "${typedef%;}" = "${typedef}" ]; then
       echo "Error: Unable to generate typedef for: ${symbol}" >&2
-      test -n "$typedef" && echo "$typedef" >&2
+      if [ -n "${typedef}" ]; then
+	      echo "$typedef" >&2
+      fi
       continue
     fi
 
     #pipe typedef into generate_symbol.sh
-    [ -z "$typedef" ] && continue
+    if [ -z "${typedef}" ]; then
+	    continue
+    fi
     if [ "${dlsym}" = "DLSYM_GLOBAL_FWDCOMPAT" ]; then
       echo "_${symbol};" >> $exportsFile
     fi

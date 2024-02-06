@@ -1,4 +1,5 @@
 #! /bin/sh
+set -e
 
 defsFile_wrappers="$1"
 defsFile_pre="$2"
@@ -9,11 +10,13 @@ defsFile_post="$3"
 while read symbol existing_typedef typedef; do
   echo "#define ${symbol} ORIGINAL_SYMBOL_${symbol}" >> $defsFile_pre
   echo "#undef ${symbol}" >> $defsFile_post
-  test $existing_typedef -eq 0 && echo "$typedef" >> $defsFile_post
+  if [ "${existing_typedef}" -eq 0 ]; then
+	  echo "$typedef" >> $defsFile_post
+  fi
 
-  returntype=$(echo "$typedef" | sed -e 's/typedef \([^(]*\) (\*\([^ ]*\)_t)(\(.*\));/\1/')
-  name=$(echo "$typedef" | sed -e 's/typedef \([^(]*\) (\*\([^ ]*\)_t)(\(.*\));/\2/')
-  params=$(echo "$typedef" | sed -e 's/typedef \([^(]*\) (\*\([^ ]*\)_t)(\(.*\));/\3/')
+  returntype=$(echo "$typedef" | sed -e 's/typedef \([^(]*\) (\*\([^ ]*\)_t)(\(.*\));/\1/') || :
+  name=$(echo "$typedef" | sed -e 's/typedef \([^(]*\) (\*\([^ ]*\)_t)(\(.*\));/\2/') || :
+  params=$(echo "$typedef" | sed -e 's/typedef \([^(]*\) (\*\([^ ]*\)_t)(\(.*\));/\3/') ||:
 
   SAVE_IFS=$IFS
   IFS=,
@@ -24,7 +27,7 @@ while read symbol existing_typedef typedef; do
   # Set params to $1,$2, etc
   set $params
   paramCount=$#
-  lastParam=$(expr $paramCount - 1)
+  lastParam=$((paramCount - 1))
   i=0
 
   while [ $i -lt $paramCount ]; do
