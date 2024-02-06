@@ -11507,6 +11507,3 @@ printf "%s\n" "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2
 fi
 
 
-CXX="$CXX" CXXFLAGS="$CXXFLAGS" TCL_INCLUDES="$TCL_INCLUDES" SSL_INCLUDES="$SSL_INCLUDES" \
-  SED="$SED" src/generate_defs.sh || exit 1
-

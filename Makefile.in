@@ -66,7 +66,7 @@ MAKE_UTILS = $(MAKE) 'MAKE=$(MAKE)' 'CXX=$(CXX)' 'CC=$(CC)' 'STRIP=touch' 'INCLU
 'CCDEPMODE=$(CCDEPMODE)' 'DEBLDFLAGS=$(DEBLDFLAGS)' \
 'CXXFLAGS=$(CXXFLAGS) $(DEBCXXFLAGS)' 'CFLGS=$(CFLGS) $(DEBCXXFLAGS)' 'LIBS=$(LIBS)' 'LD=$(LD_DEBUG) -g'
 
-.PHONY: checkclean.static checkclean.dynamic checkclean.debug lib wraith dwraith lib.debug debug test general sorthelp sort indent tar distrib distclean clean cleanutils test all dynamic static tags
+.PHONY: checkclean.static checkclean.dynamic checkclean.debug lib wraith dwraith lib.debug debug test general sorthelp sort indent tar distrib distclean clean cleanutils test all dynamic static tags libdefs
 
 all: dynamic
 
@@ -137,7 +137,19 @@ sort: sorthelp
 sorthelp: src/sorthelp.cc
 	+@cd src && ${MAKE_UTILS} sorthelp
 
-general:
+libdefs: src/.defs/libcrypto_post.h src/.defs/libssl_post.h src/.defs/libtcl_post.h \
+	 src/.defs/libcrypto_pre.h src/.defs/libssl_pre.h src/.defs/libtcl_pre.h \
+	 src/.defs/exports
+src/.defs/libcrypto_post.h src/.defs/libssl_post.h src/.defs/libtcl_post.h \
+	src/.defs/libcrypto_pre.h src/.defs/libssl_pre.h src/.defs/libtcl_pre.h \
+	src/.defs/exports: \
+	src/generate_defs.sh src/generate_symbol.sh \
+	src/dl.h \
+	src/libcrypto.cc src/libssl.cc src/libtcl.cc
+	CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" INCLUDES="$(INCLUDES)" \
+           SED="sed" src/generate_defs.sh || exit 1
+
+general: libdefs
 
 .NOTPARALLEL: checkclean.static checkclean.dynamic checkclean.debug
 

@@ -8,10 +8,10 @@ defsFile_post="$3"
 # X="typedef int (*Tcl_Eval_t)(Tcl_Interp*, const char*);"
 
 while read symbol existing_typedef typedef; do
-  echo "#define ${symbol} ORIGINAL_SYMBOL_${symbol}" >> $defsFile_pre
-  echo "#undef ${symbol}" >> $defsFile_post
+  echo "#define ${symbol} ORIGINAL_SYMBOL_${symbol}" >> "${defsFile_pre}"
+  echo "#undef ${symbol}" >> "${defsFile_post}"
   if [ "${existing_typedef}" -eq 0 ]; then
-	  echo "$typedef" >> $defsFile_post
+	  echo "$typedef" >> "${defsFile_post}"
   fi
 
   returntype=$(echo "$typedef" | sed -e 's/typedef \([^(]*\) (\*\([^ ]*\)_t)(\(.*\));/\1/') || :
@@ -47,13 +47,13 @@ while read symbol existing_typedef typedef; do
     i=$((i + 1))
   done
 
-  cat >> $defsFile_wrappers << EOF
+  cat >> "${defsFile_wrappers}" << EOF
 $returntype $name ($params_full) {
   return DLSYM_VAR($name)($param_names);
 }
 EOF
 
-  echo "$returntype $name ($params_full);" >> $defsFile_post
+  echo "$returntype $name ($params_full);" >> "${defsFile_post}"
 
   IFS=$SAVE_IFS
 done
