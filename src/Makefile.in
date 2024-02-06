@@ -113,7 +113,7 @@ sorthelp: sorthelp.cc $(top_builddir)/lib/bdlib/libbdlib.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $< $(top_builddir)/lib/bdlib/libbdlib.a $(LDFLAGS) -o $@
 	@$(STRIP) $@@EXEEXT@
 
-../$(EGGEXEC): $(OBJS) $(top_builddir)/lib/bdlib/libbdlib.a @LIBELF_BUNDLED@
+../$(EGGEXEC): $(OBJS) $(top_builddir)/lib/bdlib/libbdlib.a @LIBELF_BUNDLED@ $(EXPORTS)
 	@echo -e "[LD ]	\033[1m$@\033[0m"
 	$(LD) $(LDFLAGS) -o ../$(EGGEXEC) $(OBJS) $(top_builddir)/lib/bdlib/libbdlib.a \
 	    $(LIBS) @LIBELF_LIB@ -Wl,--dynamic-list=$(EXPORTS)

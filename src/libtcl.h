@@ -6,11 +6,15 @@
 #include <bdlib/src/String.h>
 #ifdef USE_SCRIPT_TCL
 
+#ifndef GENERATING_DEFS
 #include ".defs/libtcl_pre.h"
+#endif
 
 #include <tcl.h>
 
+#ifndef GENERATING_DEFS
 #include ".defs/libtcl_post.h"
+#endif
 
 
 #define STDVAR (ClientData cd, Tcl_Interp *interp, int argc, const char *argv[])

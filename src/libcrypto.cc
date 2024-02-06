@@ -33,7 +33,9 @@
 #include <bdlib/src/Array.h>
 
 #include "libcrypto.h"
+#ifndef GENERATING_DEFS
 #include ".defs/libcrypto_defs.cc"
+#endif
 
 #ifndef OPENSSL_SHLIB_VERSION
 #define OPENSSL_SHLIB_VERSION_STR SHLIB_VERSION_NUMBER

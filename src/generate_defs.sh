@@ -8,36 +8,37 @@ if [ -z "$SED" -o -z "$CXX" ]; then
   echo "This must be ran by configure" >&2
   exit 1
 fi
-echo "==== Generating lib symbols ===="
+#echo "==== Generating lib symbols ===="
 : ${INCLUDES:="${TCL_INCLUDES} ${SSL_INCLUDES}"}
 
 mkdir -p src/.defs > /dev/null 2>&1
 TMPFILE=$(mktemp "/tmp/pre.XXXXXX")
-files=$(grep -l DLSYM_GLOBAL src/*.cc|grep -v "src/_")
-exportsFile="src/.defs/exports"
+allfiles=$(grep -l DLSYM_GLOBAL src/*.cc|grep -v "src/_")
 
-for file in ${files}; do
-  suffix=${file##*.}
-  basename=${file%%.*}
-  basename=${basename##*/}
+if [ "$#" -eq 0 ]; then
+	for file in ${allfiles}; do
+	  suffix=${file##*.}
+	  basename=${file%%.*}
+	  basename=${basename##*/}
 
-  defsFile_wrappers="src/.defs/${basename}_defs.${suffix}"
-  defsFile_pre="src/.defs/${basename}_pre.h"
-  defsFile_post="src/.defs/${basename}_post.h"
+	  defsFile_wrappers="src/.defs/${basename}_defs.${suffix}"
+	  defsFile_pre="src/.defs/${basename}_pre.h"
+	  defsFile_post="src/.defs/${basename}_post.h"
 
-  if [ ! -f "${defsFile_pre}" ]; then
-	  : > "${defsFile_pre}"
-  fi
-  if [ ! -f "${defsFile_post}" ]; then
-	  : > "${defsFile_post}"
-  fi
-  if [ ! -f "${defsFile_wrappers}" ]; then
-	  : > "${defsFile_wrappers}"
-  fi
-done
+	  rm -f "${defsFile_pre}" "${defsFile_post}" "${defsFile_wrappers}" > /dev/null 2>&1
+	  if [ ! -f "${defsFile_pre}" ]; then
+		  : > "${defsFile_pre}"
+	  fi
+	  if [ ! -f "${defsFile_post}" ]; then
+		  : > "${defsFile_post}"
+	  fi
+	  if [ ! -f "${defsFile_wrappers}" ]; then
+		  : > "${defsFile_wrappers}"
+	  fi
+	done
+fi
 
-echo "{" > "${exportsFile}"
-echo "bfd_exports_stub;" >> "${exportsFile}"
+: ${files:=${1-$(grep -l DLSYM_GLOBAL src/*.cc|grep -v "src/_")}}
 for file in ${files}; do
   suffix=${file##*.}
   basename=${file%%.*}
@@ -46,21 +47,27 @@ for file in ${files}; do
 
   echo -n "Generating symbols for ${basename}... "
 
+  exportsFile="src/.defs/${basename}_exports"
+  {
+	  #echo "{"
+	  :
+  } > "${exportsFile}.new"
+
   defsFile_wrappers="src/.defs/${basename}_defs.${suffix}"
   defsFile_pre="src/.defs/${basename}_pre.h"
   defsFile_post="src/.defs/${basename}_post.h"
 
   {
-	  #echo "#ifndef GENERATE_DEFS"
+	  #echo "#ifndef GENERATING_DEFS"
 	  echo "extern \"C\" {"
   } > "${defsFile_wrappers}.new"
   {
-	  #echo "#ifndef GENERATE_DEFS"
+	  #echo "#ifndef GENERATING_DEFS"
 	  echo "extern \"C\" {"
   } > "${defsFile_post}.new"
 
   cd src
-  $CXX $CXXFLAGS -E -I. -I.. -I../lib ${INCLUDES} -DHAVE_CONFIG_H -DGENERATE_DEFS "../${file}" > "${TMPFILE}"
+  $CXX $CXXFLAGS -E -I. -I.. -I../lib ${INCLUDES} -DHAVE_CONFIG_H -DGENERATING_DEFS "../${file}" > "${TMPFILE}"
   # Fix wrapped prototypes
   $SED -e :a -e N -e '$!ba' -e 's/,\n/,/g' "${TMPFILE}" > "${TMPFILE}.sed"
   mv "${TMPFILE}.sed" "${TMPFILE}"
@@ -109,7 +116,7 @@ for file in ${files}; do
 	    continue
     fi
     if [ "${dlsym}" = "DLSYM_GLOBAL_FWDCOMPAT" ]; then
-      echo "_${symbol};" >> "${exportsFile}"
+      echo "_${symbol};" >> "${exportsFile}.new"
     fi
     echo "${symbol} ${existing_typedef} ${typedef}"
   done | src/generate_symbol.sh "${defsFile_wrappers}" "${defsFile_pre}" "${defsFile_post}"
@@ -123,8 +130,13 @@ for file in ${files}; do
 	  #echo "#endif"
   } >> "${defsFile_post}.new"
 
+  {
+	  :
+	  #echo "};"
+  } >> "${exportsFile}.new"
+
   changed=0
-  for file in ${defsFile_wrappers} ${defsFile_pre} ${defsFile_post}; do
+  for file in ${defsFile_wrappers} ${defsFile_pre} ${defsFile_post} ${exportsFile}; do
 	  if ! cmp -s "${file}.new" "${file}"; then
 		  changed=1
 		  mv -f "${file}.new" "${file}"
@@ -141,5 +153,4 @@ for file in ${files}; do
 	  echo "unchanged"
   fi
 done
-echo "};">> "${exportsFile}"
 rm -f "${TMPFILE}"

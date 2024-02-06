@@ -139,17 +139,36 @@ sorthelp: src/sorthelp.cc
 
 libdefs: src/.defs/libcrypto_post.h src/.defs/libssl_post.h src/.defs/libtcl_post.h \
 	 src/.defs/libcrypto_pre.h src/.defs/libssl_pre.h src/.defs/libtcl_pre.h \
-	 src/.defs/exports
-src/.defs/libcrypto_post.h src/.defs/libssl_post.h src/.defs/libtcl_post.h \
-	src/.defs/libcrypto_pre.h src/.defs/libssl_pre.h src/.defs/libtcl_pre.h \
-	src/.defs/exports: \
-	src/generate_defs.sh src/generate_symbol.sh \
-	src/dl.h \
-	src/libcrypto.cc src/libssl.cc src/libtcl.cc
-	CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" INCLUDES="$(INCLUDES)" \
-           SED="sed" src/generate_defs.sh || exit 1
+	 src/.defs/libcrypto_exports src/.defs/libssl_exports src/.defs/libtcl_exports
+src/.defs/libcrypto_post.h src/.defs/libcrypto_pre.h src/.defs/libcrypto_exports: src/libcrypto.cc \
+	src/generate_defs.sh src/generate_symbol.sh src/dl.h
+	@CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" INCLUDES="$(INCLUDES)" \
+           SED="sed" src/generate_defs.sh src/libcrypto.cc || exit 1
+src/.defs/libssl_post.h src/.defs/libssl_pre.h src/.defs/libssl_exports: src/libssl.cc \
+	src/generate_defs.sh src/generate_symbol.sh src/dl.h
+	@CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" INCLUDES="$(INCLUDES)" \
+           SED="sed" src/generate_defs.sh src/libssl.cc || exit 1
+src/.defs/libtcl_post.h src/.defs/libtcl_pre.h src/.defs/libtcl_exports: src/libtcl.cc \
+	src/generate_defs.sh src/generate_symbol.sh src/dl.h
+	@CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" INCLUDES="$(INCLUDES)" \
+           SED="sed" src/generate_defs.sh src/libtcl.cc || exit 1
+src/.defs/exports: Makefile \
+	src/.defs/libcrypto_exports src/.defs/libssl_exports src/.defs/libtcl_exports
+	@echo "Generating $@"
+	@{ \
+		echo "{"; \
+		echo "bfd_exports_stub;"; \
+		cat src/.defs/*_exports; \
+		echo "};"; \
+	} > $@.tmp
+	@if ! cmp -s $@.tmp $@; then \
+		mv -f $@.tmp $@; \
+	else \
+		rm -f $@.tmp; \
+		touch $@; \
+	fi
 
-general: libdefs
+general: libdefs src/.defs/exports
 
 .NOTPARALLEL: checkclean.static checkclean.dynamic checkclean.debug
 

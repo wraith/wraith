@@ -56,7 +56,7 @@ extern const char *dlsym_error;
 
 extern bd::HashTable<bd::String, FunctionPtr> dl_symbol_table;
 
-#ifdef GENERATE_DEFS
+#ifdef GENERATING_DEFS
 #undef DLSYM_GLOBAL
 #undef DLSYM_GLOBAL_FWDCOMPAT
 #endif
