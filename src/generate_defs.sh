@@ -25,7 +25,6 @@ for file in ${files}; do
   defsFile_pre="src/.defs/${basename}_pre.h"
   defsFile_post="src/.defs/${basename}_post.h"
 
-  rm -f "${defsFile_pre}" "${defsFile_post}" "${defsFile_wrappers}" > /dev/null 2>&1
   if [ ! -f "${defsFile_pre}" ]; then
 	  : > "${defsFile_pre}"
   fi
@@ -51,8 +50,14 @@ for file in ${files}; do
   defsFile_pre="src/.defs/${basename}_pre.h"
   defsFile_post="src/.defs/${basename}_post.h"
 
-  echo "extern \"C\" {" > "${defsFile_wrappers}"
-  echo "extern \"C\" {" > "${defsFile_post}"
+  {
+	  #echo "#ifndef GENERATE_DEFS"
+	  echo "extern \"C\" {"
+  } > "${defsFile_wrappers}.new"
+  {
+	  #echo "#ifndef GENERATE_DEFS"
+	  echo "extern \"C\" {"
+  } > "${defsFile_post}.new"
 
   cd src
   $CXX $CXXFLAGS -E -I. -I.. -I../lib ${INCLUDES} -DHAVE_CONFIG_H -DGENERATE_DEFS "../${file}" > "${TMPFILE}"
@@ -109,10 +114,32 @@ for file in ${files}; do
     echo "${symbol} ${existing_typedef} ${typedef}"
   done | src/generate_symbol.sh "${defsFile_wrappers}" "${defsFile_pre}" "${defsFile_post}"
 
-  echo "}" >> "${defsFile_wrappers}"
-  echo "}" >> "${defsFile_post}"
+  {
+	  echo "}"
+	  #echo "#endif"
+  } >> "${defsFile_wrappers}.new"
+  {
+	  echo "}"
+	  #echo "#endif"
+  } >> "${defsFile_post}.new"
 
-  echo "done"
+  changed=0
+  for file in ${defsFile_wrappers} ${defsFile_pre} ${defsFile_post}; do
+	  if ! cmp -s "${file}.new" "${file}"; then
+		  changed=1
+		  mv -f "${file}.new" "${file}"
+	  else
+		  rm -f "${file}.new"
+		  # Needed because generate_defs.sh may have triggered this
+		  # (or other deps like dl.h)
+		  touch "${file}"
+	  fi
+  done
+  if [ "${changed}" -eq 1 ]; then
+	  echo "done"
+  else
+	  echo "unchanged"
+  fi
 done
 echo "};">> "${exportsFile}"
 rm -f "${TMPFILE}"
