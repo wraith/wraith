@@ -270,8 +270,10 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
+#ifndef RANDOM_MAX
 /* Define limit of random() function. */
 #undef RANDOM_MAX
+#endif
 
 /* Define to 1 if the `S_IS*' macros in <sys/stat.h> do not work properly. */
 #undef STAT_MACROS_BROKEN
