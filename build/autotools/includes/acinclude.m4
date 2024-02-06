@@ -591,32 +591,42 @@ AC_MSG_CHECKING(for path to OpenSSL)
 MY_ARG_WITH_PATH(openssl, [Path to OpenSSL], [auto])
 
 cf_openssl_basedir=""
+cf_openssl_libdir=""
 if test "$with_openssl_path" != "auto"; then
   dnl Support for --with-openssl=/some/place
   cf_openssl_basedir="`echo ${with_openssl_path} | sed 's/\/$//'`"
+  cf_openssl_libdir="${cf_openssl_basedir}/lib"
 else
   dnl Do the auto-probe here.  Check some common directory paths.
-  for dirs in /usr/local/ssl /usr/pkg /usr/local /usr/local/openssl; do
-    if test -f "${dirs}/include/openssl/opensslv.h" && test -f "${dirs}/lib/libssl.so"; then
-      cf_openssl_basedir="${dirs}"
-      break
-    fi
-  done
-  unset dirs
+  if test -f "/usr/include/openssl/opensslv.h" && test -f "/usr/lib64/libssl.so"; then
+      cf_openssl_libdir="/usr/lib64"
+      cf_openssl_basedir="/usr"
+  else
+    for dirs in /usr/local/ssl /usr/pkg /usr/local /usr/local/openssl; do
+      if test -f "${dirs}/include/openssl/opensslv.h" && test -f "${dirs}/lib/libssl.so"; then
+        cf_openssl_basedir="${dirs}"
+        cf_openssl_libdir="${cf_openssl_basedir}/lib"
+        break
+      fi
+    done
+    unset dirs
+  fi
 fi
 dnl Now check cf_openssl_found to see if we found anything.
 if test ! -z "$cf_openssl_basedir"; then
-  if test -f "${cf_openssl_basedir}/include/openssl/opensslv.h" && test -f "${cf_openssl_basedir}/lib/libssl.so"; then
+  if test -f "${cf_openssl_basedir}/include/openssl/opensslv.h" && test -f "${cf_openssl_libdir}/libssl.so"; then
     SSL_INCLUDES="-I${cf_openssl_basedir}/include"
-    SSL_LIBS="-L${cf_openssl_basedir}/lib"
+    SSL_LIBS="-L${cf_openssl_libdir}"
   else
     dnl OpenSSL wasn't found in the directory specified.
     cf_openssl_basedir=""
+    cf_openssl_libdir=""
   fi
 else
   dnl See if present in system base (in which case, no need to change the include path)
   if test -f "/usr/include/openssl/opensslv.h" ; then
     cf_openssl_basedir="/usr"
+    cf_openssl_libdir="/usr/lib"
   fi
 fi
 SSL_INCLUDES="${SSL_INCLUDES} -DOPENSSL_API_COMPAT=0x10000000L"
@@ -628,8 +638,17 @@ else
   AC_MSG_RESULT([not found])
   AC_MSG_ERROR([OpenSSL is required.], 1)
 fi
-SSL_LIBDIR="${cf_openssl_basedir}/lib"
+AC_MSG_CHECKING(for path to OpenSSL Lib)
+MY_ARG_WITH_PATH(openssl, [Path to OpenSSL Lib], [auto])
+if test ! -z "${cf_openssl_libdir}"; then
+  AC_MSG_RESULT(${cf_openssl_libdir})
+else
+  AC_MSG_RESULT([not found])
+  AC_MSG_ERROR([OpenSSL is required.], 1)
+fi
+SSL_LIBDIR="${cf_openssl_libdir}"
 unset cf_openssl_basedir
+unset cf_openssl_libdir
 
 save_CXX="$CXX"
 CXX="$CXX $SSL_INCLUDES"
