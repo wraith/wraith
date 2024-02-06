@@ -291,6 +291,3 @@ if [[ -n "${LIBELF_BUNDLED}" ]] && [[ -f lib/libelf/configure ]]; then
   AC_CONFIG_SUBDIRS([lib/libelf])
 fi
 AC_OUTPUT
-
-CXX="$CXX" CXXFLAGS="$CXXFLAGS" TCL_INCLUDES="$TCL_INCLUDES" SSL_INCLUDES="$SSL_INCLUDES" \
-  SED="$SED" src/generate_defs.sh || exit 1

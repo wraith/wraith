@@ -5,6 +5,7 @@ MAKE=env -u MAKELEVEL gmake ${MFLAGS}
 TARGETS=	\
 		all \
 		debug \
+		libdefs \
 		static \
 		dynamic \
 		clean \

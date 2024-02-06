@@ -9,7 +9,9 @@
 #include "dl.h"
 #include <bdlib/src/String.h>
 
+#ifndef GENERATING_DEFS
 #include ".defs/libssl_pre.h"
+#endif
 
 #ifdef EGG_SSL_EXT
 # ifndef EGG_SSL_INCS
@@ -20,7 +22,9 @@
 
 typedef DH* (*dh_callback_t)(SSL*, int, int);
 
+#ifndef GENERATING_DEFS
 #include ".defs/libssl_post.h"
+#endif
 
 typedef void (*SSL_CTX_set_tmp_dh_callback_t)(SSL_CTX*, dh_callback_t);
 

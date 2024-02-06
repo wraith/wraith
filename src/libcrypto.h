@@ -5,7 +5,9 @@
 #  include "config.h"
 #endif
 
+#ifndef GENERATING_DEFS
 #include ".defs/libcrypto_pre.h"
+#endif
 
 #include <openssl/crypto.h>
 #include <openssl/aes.h>
@@ -16,7 +18,9 @@
 #include <openssl/err.h>
 #include <openssl/rand.h>
 
+#ifndef GENERATING_DEFS
 #include ".defs/libcrypto_post.h"
+#endif
 
 #include "src/crypto/aes_util.h"
 #include "src/crypto/bf_util.h"
