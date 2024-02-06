@@ -17,7 +17,7 @@ autoheader:
 autoconf: 
 	@rm -rf ../../configure
 	@echo "Autoconf...."
-	@autoconf2.69
+	@autoconf
 	@echo "Fixing configure temp paths"
 	@(if ! sed \
 	  -e 's:config\.log:build/config.log:g' \
@@ -31,6 +31,10 @@ autoconf:
 	fi)
 	@chmod 700 ../../configure
 	@ls -al ../../configure
+	@cp -f `automake --print-libdir`/config.guess .
+	@cp -f `automake --print-libdir`/config.sub .
+	@cp -f `automake --print-libdir`/depcomp .
+	@cp -f `automake --print-libdir`/install-sh .
 
 clean:
 	@echo "Cleaning..."
