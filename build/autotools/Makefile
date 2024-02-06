@@ -33,6 +33,7 @@ autoconf:
 	@ls -al ../../configure
 	@cp -f `automake --print-libdir`/config.guess .
 	@cp -f `automake --print-libdir`/config.sub .
+	@cp -f `automake --print-libdir`/depcomp .
 
 clean:
 	@echo "Cleaning..."
