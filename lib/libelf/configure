@@ -5742,7 +5742,7 @@ fi
 
 
     case "$host" in
-      *-linux*|*-gnu*)
+      *-linux*|*-gnu*|*bsd*|*BSD*)
 	if test "$GCC" = yes; then
 
 

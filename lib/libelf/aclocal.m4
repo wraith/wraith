@@ -235,7 +235,7 @@ AC_DEFUN(mr_ENABLE_SHARED, [
     AC_REQUIRE([AC_PROG_CC])
     AC_PATH_PROG(LD, ld, ld)
     case "$host" in
-      *-linux*|*-gnu*)
+      *-linux*|*-gnu*|*bsd*|*BSD*)
 	if test "$GCC" = yes; then
 	  mr_TARGET_ELF
 	  if test "$mr_cv_target_elf" = yes; then
