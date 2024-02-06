@@ -1,6 +1,7 @@
 /Makefile
 /build/confcache
 /build/config.cache
+/build/autotools/configure.ac~
 /config.cache
 /build/confdefs.h
 /src/config.h
