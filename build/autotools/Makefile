@@ -17,7 +17,7 @@ autoheader:
 autoconf: 
 	@rm -rf ../../configure
 	@echo "Autoconf...."
-	@autoconf
+	@autoconf2.69
 	@echo "Fixing configure temp paths"
 	@(if ! sed \
 	  -e 's:config\.log:build/config.log:g' \
