@@ -1043,7 +1043,9 @@ void clear_channel(struct chanset_t *chan, bool reset)
     chan->bot_roles = NULL;
     delete chan->role_bots;
     chan->role_bots = NULL;
+    chan->role = 0;
   }
+  chan->role_rebalance_cookie = 0;
 
   if (chan->channel.cached_members) {
     if (chan->channel.cached_members->size()) {

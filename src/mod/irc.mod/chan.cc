@@ -2970,8 +2970,7 @@ static int gotpart(char *from, char *msg)
       chan->ircnet_status &= ~(CHAN_PEND | CHAN_JOINING);
       reset_chan_info(chan);
     }
-    /* This bot fullfilled a role, need to rebalance. */
-    if (u && u->bot && (*chan->bot_roles)[u->handle] != 0) {
+    if (u && u->bot) {
       chan->role_rebalance_cookie = 0;
     }
     set_handle_laston(chan->dname, u, now);
@@ -3063,8 +3062,7 @@ static int gotkick(char *from, char *origmsg)
       }
 
       set_handle_laston(chan->dname, mv->user, now);
-      /* This bot fullfilled a role, need to rebalance. */
-      if (mv->user->bot && (*chan->bot_roles)[mv->user->handle] != 0) {
+      if (mv->user->bot) {
         chan->role_rebalance_cookie = 0;
       }
     }
@@ -3243,10 +3241,7 @@ static int gotquit(char *from, char *msg)
       if (u) {
         if (u->bot) {
           counter_clear(u->handle);
-          /* This bot fullfilled a role, need to rebalance. */
-          if ((*chan->bot_roles)[u->handle] != 0) {
-            chan->role_rebalance_cookie = 0;
-          }
+          chan->role_rebalance_cookie = 0;
         }
         set_handle_laston(chan->dname, u, now); /* If you remove this, the bot will crash when the user record in question
 						   is removed/modified during the tcl binds below, and the users was on more
