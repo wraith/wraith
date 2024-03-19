@@ -566,6 +566,9 @@ got_op(struct chanset_t *chan, memberlist *m, memberlist *mv)
   if (mv->user && mv->user->bot && !me_opped && !meop) {
     chan->channel.do_opreq = 1;
   }
+  if (mv->user && mv->user->bot) {
+    chan->role_rebalance_cookie = 0;
+  }
 
   /* Flags need to be set correctly right from the beginning now, so that
    * add_mode() doesn't get irritated.
@@ -668,6 +671,10 @@ got_deop(struct chanset_t *chan, memberlist *m, memberlist *mv, char *isserver)
 
   if (channel_pending(chan))
     return;
+
+  if (mv->user && mv->user->bot) {
+    chan->role_rebalance_cookie = 0;
+  }
 
   /* Deop'd someone on my oplist? */
   if (me_op(chan)) {

@@ -1445,6 +1445,7 @@ static void cmd_roles(int idx, char *par)
   }
 
   dprintf(idx, "Roles for %s:\n", chan->dname);
+  dprintf(idx, "Cookie: %lu\n", chan->role_rebalance_cookie);
 
   /* Advertise roles */
   for (roleidx = 0; role_counts[roleidx].name; roleidx++) {
