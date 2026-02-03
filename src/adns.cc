@@ -248,13 +248,15 @@ static void display_dcc_dnswait(int idx, char *buf, size_t bufsiz)
 
 void free_dns_info(struct dns_info *p)
 {
-	if (p->caller_data != NULL) {
-		free(p->caller_data);
-		p->caller_data = NULL;
-	}
-	if (p->ips != NULL) {
-		delete p->ips;
-		p->ips = NULL;
+	if (p != NULL) {
+		if (p->caller_data != NULL) {
+			free(p->caller_data);
+			p->caller_data = NULL;
+		}
+		if (p->ips != NULL) {
+			delete p->ips;
+			p->ips = NULL;
+		}
 	}
 	free(p);
 }

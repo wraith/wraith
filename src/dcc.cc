@@ -365,6 +365,7 @@ bot_version(int idx, char *par)
   dprintf(idx, "el\n");
 }
 
+static void free_dcc_bot_(int n, void *x);
 /*
  * Try next DNS result.
  * Switch back to DCC_DNSWAIT for retry.
@@ -382,6 +383,7 @@ link_try_next_dns_result(int idx)
     return false;
   }
   dcc[idx].u.bot->di = NULL;
+  free_dcc_bot_(idx, dcc[idx].u.bot);
   dcc[idx].type = &DCC_DNSWAIT;
   dcc[idx].u.dns = di;
   botlink_next_ip(idx);
@@ -416,10 +418,8 @@ failed_link(int idx)
 static void
 cont_link(int idx, char *buf, int ii)
 {
-  if (dcc[idx].u.bot->di != NULL) {
-    free_dns_info(dcc[idx].u.bot->di);
-    dcc[idx].u.bot->di = NULL;
-  }
+  free_dns_info(dcc[idx].u.bot->di);
+  dcc[idx].u.bot->di = NULL;
   /* If we're already connected somewhere, unlink and idle a sec */
   for (int i = 0; i < dcc_total; i++) {
     if (unlikely(dcc[i].type && (dcc[i].type == &DCC_BOT) && (!bot_aggressive_to(dcc[i].user)))) {
@@ -509,10 +509,8 @@ free_dcc_bot_(int n, void *x)
     dcc[n].status &= ~STAT_SHARE;
     rembot(dcc[n].nick);
   }
-  if (bi->di != NULL) {
-    free_dns_info(bi->di);
-    bi->di = NULL;
-  }
+  free_dns_info(bi->di);
+  bi->di = NULL;
   free(bi);
 }
 
