@@ -251,9 +251,9 @@ static void kill_dcc_dnswait(int idx, void *x)
 	struct dns_info *p = (struct dns_info *) x;
 
 	if (p) {
-		free(p->cbuf);
-		free(p->cptr);
+		free(p->caller_data);
 		// free(p) is same thing here.
+		assert(p == dcc[idx].u.other);
 		free(dcc[idx].u.other);
 		dcc[idx].u.other = NULL;
 	}

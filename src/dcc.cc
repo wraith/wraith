@@ -1493,7 +1493,7 @@ dcc_telnet(int idx, char *buf, int ii)
   dcc[i].timeval = now;
   strlcpy(dcc[i].nick, "*", sizeof(dcc[i].nick));
 
-  dcc[i].u.dns->ibuf = idx;
+  dcc[i].u.dns->caller_idx = idx;
 
   int dns_id = egg_dns_reverse(s, 20, dcc_telnet_dns_callback, (void *) (long) i);
   if (dns_id >= 0)
@@ -1512,7 +1512,7 @@ static void dcc_telnet_dns_callback(int id, void *client_data, const char *ip,
   if (!valid_dns_id(i, id))
     return;
 
-  int idx = dcc[i].u.dns->ibuf;
+  int idx = dcc[i].u.dns->caller_idx;
 
   if (!valid_idx(idx)) {
     putlog(LOG_BOTS, "*", "Lost listening socket while resolving %s", dcc[i].host);
@@ -1558,7 +1558,7 @@ static void dcc_telnet_dns_forward_callback(int id, void *client_data,
   char s2[UHOSTLEN + 20] = "";
 
   if (valid_idx(i))
-    idx = dcc[i].u.dns->ibuf;
+    idx = dcc[i].u.dns->caller_idx;
 
   if (!valid_idx(idx)) {
     putlog(LOG_BOTS, "*", "Lost listening socket while resolving %s", iptostr(htonl(dcc[i].addr)));

@@ -2121,7 +2121,7 @@ static void connect_server(void)
 
     dcc[newidx].timeval = now;
     dcc[newidx].sock = -1;
-    dcc[newidx].u.dns->cbuf = strdup(pass);
+    dcc[newidx].u.dns->caller_data = strdup(pass);
 
     cycle_time = server_cycle_wait;		/* wait N seconds before attempting next server connect */
 
@@ -2186,7 +2186,7 @@ static void server_dns_callback(int id, void *client_data, const char *host,
   if (addr.family == AF_INET)
     dcc[idx].addr = htonl(addr.u.addr.s_addr);
 
-  strlcpy(serverpass, (char *) dcc[idx].u.dns->cbuf, sizeof(serverpass));
+  strlcpy(serverpass, (char *) dcc[idx].u.dns->caller_data, sizeof(serverpass));
   changeover_dcc(idx, &SERVER_SOCKET, 0);
 
   //No proxy, use identd, 2 = spoof ident
@@ -2210,6 +2210,7 @@ static void server_dns_callback(int id, void *client_data, const char *host,
         putlog(LOG_SERV, "*", "SSL Failed to connect to %s (Error while switching to SSL)", dcc[servidx].host);
         trying_server = 0;
         lostdcc(servidx);
+        delete[] ip;
         return;
       }
     }

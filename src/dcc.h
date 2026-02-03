@@ -75,10 +75,8 @@ struct dcc_t {
 };
 
 struct dns_info {
-  char *cbuf;			/* free`d when done */
-  char *cptr;
-  int ibuf;
-  int ibuf2;
+  void *caller_data;			/* free`d when done */
+  int caller_idx;
 //  struct dcc_table *type;       /* type we are doing the lookup for          */
 };
 

@@ -1084,8 +1084,8 @@ int botlink(const char *linker, int idx, char *nick)
       dcc[i].user = u;
       strlcpy(dcc[i].nick, nick, sizeof(dcc[i].nick));
       strlcpy(dcc[i].host, address, sizeof(dcc[i].host));
-      dcc[i].u.dns->cptr = strdup(linker);
-      dcc[i].u.dns->ibuf = idx;
+      dcc[i].u.dns->caller_data = strdup(linker);
+      dcc[i].u.dns->caller_idx = idx;
       dcc[i].bot = 1;
 
       if (unix_domain) {
@@ -1122,7 +1122,7 @@ static void botlink_dns_callback(int id, void *client_data, const char *host,
     return;
 
 //  if (valid_idx(i)) {
-//    idx = dcc[i].u.dns->ibuf;
+//    idx = dcc[i].u.dns->caller_idx;
 //  }
 
   bd::String ip_from_dns;
@@ -1154,10 +1154,10 @@ static void botlink_dns_callback(int id, void *client_data, const char *host,
 
 static void botlink_real(int i)
 {
-  int idx = dcc[i].u.dns->ibuf;
-  char *linker = strdup(dcc[i].u.dns->cptr);
-  free(dcc[i].u.dns->cptr);
-  dcc[i].u.dns->cptr = NULL;
+  int idx = dcc[i].u.dns->caller_idx;
+  char *linker = strdup((char *)dcc[i].u.dns->caller_data);
+  free(dcc[i].u.dns->caller_data);
+  dcc[i].u.dns->caller_data = NULL;
 
   changeover_dcc(i, &DCC_FORK_BOT, sizeof(struct bot_info));
   dcc[i].timeval = now;
@@ -1279,7 +1279,7 @@ void tandem_relay(int idx, char *nick, int i)
   dcc[idx].u.relay->sock = -1;
 
   dcc[i].timeval = now;
-  dcc[i].u.dns->ibuf = idx;
+  dcc[i].u.dns->caller_idx = idx;
   
   int dns_id = egg_dns_lookup(bi->address, 20, tandem_relay_dns_callback, (void *) (long) i);
   if (dns_id >= 0)
@@ -1302,7 +1302,7 @@ static void tandem_relay_dns_callback(int id, void *client_data,
     return;
 
   if (valid_idx(i))
-    idx = dcc[i].u.dns->ibuf;
+    idx = dcc[i].u.dns->caller_idx;
   
   if (idx < 0) {
     putlog(LOG_MISC, "*", "Can't find user for relay!  %d -> %d", i, idx);

@@ -78,6 +78,7 @@ cleanutils:
 clean:  cleanutils
 	+@cd src && $(MAKE) clean
 	-+@cd lib && $(MAKE) clean
+	@rm -f src/.defs/*.stamp
 	@rm -f $(BINEXEC) build/stamp.* *~ src/*~ configure.temp .mangled stamp.*
 	@rm -f ts@EXEEXT@
 
@@ -140,20 +141,26 @@ sorthelp: src/sorthelp.cc
 libdefs: src/.defs/libcrypto_post.h src/.defs/libssl_post.h src/.defs/libtcl_post.h \
 	 src/.defs/libcrypto_pre.h src/.defs/libssl_pre.h src/.defs/libtcl_pre.h \
 	 src/.defs/libcrypto_exports src/.defs/libssl_exports src/.defs/libtcl_exports
-src/.defs/libcrypto_post.h src/.defs/libcrypto_pre.h src/.defs/libcrypto_exports: src/libcrypto.cc \
+src/.defs/libcrypto_post.h src/.defs/libcrypto_pre.h src/.defs/libcrypto_exports: src/.defs/libcrypto_gen.stamp
+src/.defs/libcrypto_gen.stamp: src/libcrypto.cc \
 	src/generate_defs.sh src/generate_symbol.sh src/dl.h
 	@CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" INCLUDES="$(INCLUDES)" \
            SED="sed" src/generate_defs.sh src/libcrypto.cc || exit 1
-src/.defs/libssl_post.h src/.defs/libssl_pre.h src/.defs/libssl_exports: src/libssl.cc \
+	@touch $@
+src/.defs/libssl_post.h src/.defs/libssl_pre.h src/.defs/libssl_exports: src/.defs/libssl_gen.stamp
+src/.defs/libssl_gen.stamp: src/libssl.cc \
 	src/generate_defs.sh src/generate_symbol.sh src/dl.h
 	@CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" INCLUDES="$(INCLUDES)" \
            SED="sed" src/generate_defs.sh src/libssl.cc || exit 1
-src/.defs/libtcl_post.h src/.defs/libtcl_pre.h src/.defs/libtcl_exports: src/libtcl.cc \
+	@touch $@
+src/.defs/libtcl_post.h src/.defs/libtcl_pre.h src/.defs/libtcl_exports: src/.defs/libtcl_gen.stamp
+src/.defs/libtcl_gen.stamp: src/libtcl.cc \
 	src/generate_defs.sh src/generate_symbol.sh src/dl.h
 	@CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" INCLUDES="$(INCLUDES)" \
            SED="sed" src/generate_defs.sh src/libtcl.cc || exit 1
+	@touch $@
 src/.defs/exports: Makefile \
-	src/.defs/libcrypto_exports src/.defs/libssl_exports src/.defs/libtcl_exports
+	src/.defs/libcrypto_gen.stamp src/.defs/libssl_gen.stamp src/.defs/libtcl_gen.stamp
 	@echo "Generating $@"
 	@{ \
 		echo "{"; \
