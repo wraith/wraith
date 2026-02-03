@@ -1134,12 +1134,6 @@ static void botlink_dns_callback(int id, void *client_data, const char *host,
    * Set up the state to allow retrying multiple results from DNS.
    */
   assert(dcc[i].type == &DCC_DNSWAIT);
-  /*
-   * Not calling changeover_dcc() as we want to take
-   * ownership of the dns_info from DCC_DNSWAIT without
-   * reallocating it.
-   */
-  // dcc[i].type = &DCC_BOT_CONNWAIT;
   dcc[i].u.dns->ips = new bd::Array<bd::String>(ips);
 #ifdef USE_IPV6
   dcc[i].u.dns->no_more_ipv6 = false;
