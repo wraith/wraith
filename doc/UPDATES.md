@@ -1,3 +1,5 @@
+* Support round-robin DNS for botnet linking (#115)
+
 # master
   * Require C++11 compiler support (GCC 48+, Clang 3.4+)
   * Wraith now automatically assigns roles to bots for channels, no longer
