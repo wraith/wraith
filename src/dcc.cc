@@ -365,9 +365,35 @@ bot_version(int idx, char *par)
   dprintf(idx, "el\n");
 }
 
+/*
+ * Try next DNS result.
+ * Switch back to DCC_DNSWAIT for retry.
+ */
+static bool
+link_try_next_dns_result(int idx)
+{
+  assert(dcc[idx].type == &DCC_FORK_BOT);
+  struct dns_info *di = dcc[idx].u.bot->di;
+  if (di == NULL || di->ips == NULL)
+    return false;
+  if (di->ip_from_dns_idx == -1 && di->no_more_ipv6 == true) {
+    putlog(LOG_BOTS, "*", "Could not link to %s (DNS retries exhausted).\n",
+        dcc[idx].nick);
+    return false;
+  }
+  dcc[idx].u.bot->di = NULL;
+  dcc[idx].type = &DCC_DNSWAIT;
+  dcc[idx].u.dns = di;
+  botlink_next_ip(idx);
+  return true;
+}
+
 void
 failed_link(int idx)
 {
+  assert(dcc[idx].type == &DCC_FORK_BOT);
+  if (link_try_next_dns_result(idx))
+    return;
   char nick[NICKLEN] = "", s1[NICKLEN + 17 + 1] = "";
 
   if (dcc[idx].u.bot->linker[0]) {
@@ -593,16 +619,10 @@ struct dcc_table DCC_BOT = {
 static void
 fork_bot_eof(int i)
 {
-  struct dns_info *di = dcc[i].u.dns;
-  /* unix socket won't have ips set, but otherwise wait until exhaustion. */
-  if (di->ips == NULL ||
-      (di->ip_from_dns_idx == -1 && di->no_more_ipv6 == true)) {
-    failed_link(i);
+  assert(dcc[i].type == &DCC_FORK_BOT);
+  if (link_try_next_dns_result(i))
     return;
-  }
-  if (di->ips != NULL) {
-    botlink_next_ip(i);
-  }
+  failed_link(i);
 }
 
 struct dcc_table DCC_FORK_BOT = {

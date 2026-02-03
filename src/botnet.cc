@@ -1148,7 +1148,7 @@ static void botlink_dns_callback(int id, void *client_data, const char *host,
 void
 botlink_next_ip(int i)
 {
-  assert(dcc[i].type == &DCC_FORK_BOT);
+  assert(dcc[i].type == &DCC_DNSWAIT);
   struct dns_info *di = dcc[i].u.dns;
   assert(di->ips->size() > 0);
   if (di->ip_from_dns_idx == -1 && di->no_more_ipv6 == true) {
@@ -1184,6 +1184,7 @@ retries_exhausted:
 
 static void botlink_real(int i)
 {
+  assert(dcc[i].type == &DCC_DNSWAIT);
   int idx = dcc[i].u.dns->caller_idx;
 
   /* Take ownership of the dns_info struct. */
