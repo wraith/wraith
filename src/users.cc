@@ -1011,7 +1011,7 @@ static void autolink_cycle_hub(char *start)
    if (dcc[i].type) {
     if (dcc[i].type == &DCC_BOT_NEW)
       return;
-    if (dcc[i].type == &DCC_FORK_BOT || dcc[i].type == &DCC_BOT_CONNWAIT)
+    if (dcc[i].type == &DCC_FORK_BOT)
       return;
     if (dcc[i].type == &DCC_BOT) {
       if (dcc[i].status & (STAT_OFFEREDU | STAT_GETTINGU | STAT_SENDINGU))
@@ -1137,8 +1137,7 @@ static void autolink_cycle_leaf(char *start)
 
   for (int i = 0; i < dcc_total; i++) {
    if (dcc[i].type) {
-    if (dcc[i].type == &DCC_BOT_NEW || dcc[i].type == &DCC_FORK_BOT ||
-        dcc[i].type == &DCC_BOT_CONNWAIT)
+    if ((dcc[i].type == &DCC_BOT_NEW) || (dcc[i].type == &DCC_FORK_BOT))
       return;
     if (dcc[i].hub && dcc[i].type == &DCC_BOT) {
       strlcpy(curhub, dcc[i].nick, sizeof(curhub));
@@ -1211,8 +1210,7 @@ void autolink_cycle()
       // Make sure not already trying for the localhub
       for (int i = 0; i < dcc_total; i++) {
        if (dcc[i].type) {
-         if (dcc[i].type == &DCC_BOT_NEW || dcc[i].type == &DCC_FORK_BOT ||
-             dcc[i].type == &DCC_BOT_CONNWAIT)
+        if ((dcc[i].type == &DCC_BOT_NEW) || (dcc[i].type == &DCC_FORK_BOT))
           return;
        }
       }
@@ -1230,8 +1228,7 @@ void check_stale_dcc_users()
     
 
     if (dcc[i].user == NULL && !(dcc[i].user = get_user_by_handle(userlist, dcc[i].nick))) { /* Removed user */
-      if (dcc[i].type == &DCC_BOT || dcc[i].type == &DCC_FORK_BOT ||
-          dcc[i].type == &DCC_BOT_NEW || dcc[i].type == &DCC_BOT_CONNWAIT)
+      if (dcc[i].type == &DCC_BOT || dcc[i].type == &DCC_FORK_BOT || dcc[i].type == &DCC_BOT_NEW)
         botunlink(i, dcc[i].nick, "No longer a valid bot.");
       else if (dcc[i].type == &DCC_CHAT) {
         if (!backgrd && term_z && !strcmp(dcc[i].nick, "HQ"))

@@ -922,7 +922,7 @@ int botunlink(int idx, const char *nick, const char *reason)
     dprintf(idx, "%s\n", "Unlinking all bots...");
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type && ((nick[0] == '*') || !strcasecmp(dcc[i].nick, nick))) {
-      if (dcc[i].type == &DCC_FORK_BOT || dcc[i].type == &DCC_BOT_CONNWAIT) {
+      if (dcc[i].type == &DCC_FORK_BOT) {
 	if (idx >= 0)
 	  dprintf(idx, "%s: %s -> %s.\n", "Killed link attempt to",
 		  dcc[i].nick, dcc[i].host);
@@ -1034,7 +1034,6 @@ int botlink(const char *linker, int idx, char *nick)
     for (i = 0; i < dcc_total; i++) {
       if (dcc[i].type && (dcc[i].user == u) &&
 	  ((dcc[i].type == &DCC_FORK_BOT) ||
-	   (dcc[i].type == &DCC_BOT_CONNWAIT) ||
 	   (dcc[i].type == &DCC_BOT_NEW))) {
 	if (idx >= 0)
 	  dprintf(idx, "Already linking to that bot\n");
@@ -1140,7 +1139,7 @@ static void botlink_dns_callback(int id, void *client_data, const char *host,
    * ownership of the dns_info from DCC_DNSWAIT without
    * reallocating it.
    */
-  dcc[i].type = &DCC_BOT_CONNWAIT;
+  // dcc[i].type = &DCC_BOT_CONNWAIT;
   dcc[i].u.dns->ips = new bd::Array<bd::String>(ips);
 #ifdef USE_IPV6
   dcc[i].u.dns->no_more_ipv6 = false;
@@ -1155,8 +1154,7 @@ static void botlink_dns_callback(int id, void *client_data, const char *host,
 void
 botlink_next_ip(int i)
 {
-  assert(dcc[i].type == &DCC_BOT_CONNWAIT ||
-      dcc[i].type == &DCC_FORK_BOT);
+  assert(dcc[i].type == &DCC_FORK_BOT);
   struct dns_info *di = dcc[i].u.dns;
   assert(di->ips->size() > 0);
   if (di->ip_from_dns_idx == -1 && di->no_more_ipv6 == true) {
