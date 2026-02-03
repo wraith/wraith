@@ -605,11 +605,12 @@ dcc_bot_connwait_display(int idx, char *buf, size_t bufsiz)
   simple_snprintf(buf, bufsiz, "conn  bot");
 }
 
+void kill_dcc_dnswait(int idx, void *x);
 static void
 dcc_bot_connwait_free(int idx, void *x)
 {
   /* free's dcc[idx].u.other (dns_info) */
-  free(x);
+  kill_dcc_dnswait(idx, x);
 }
 
 struct dcc_table DCC_BOT_CONNWAIT = {

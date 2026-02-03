@@ -1111,6 +1111,7 @@ int botlink(const char *linker, int idx, char *nick)
   return 0;
 }
 
+static void botlink_next_ip(int);
 static void botlink_dns_callback(int id, void *client_data, const char *host,
     const bd::Array<bd::String>& ips)
 {
@@ -1125,29 +1126,65 @@ static void botlink_dns_callback(int id, void *client_data, const char *host,
 //  if (valid_idx(i)) {
 //    idx = dcc[i].u.dns->caller_idx;
 //  }
-
-  ssize_t ip_from_dns_idx = -1;
-
-  if (ips.size()) {
-#ifdef USE_IPV6
-    /* If IPv6 is available use it, otherwise fall back on IPv4 */
-    if (conf.bot->net.v6)
-      ip_from_dns_idx = dns_find_ip(ips, AF_INET6);
-    if (ip_from_dns_idx == -1)
-#endif /* USE_IPV6 */
-    {
-      /* Use IPv4 if no ipv6 is available */
-      ip_from_dns_idx = dns_find_ip(ips, AF_INET);
-    }
-  }
-
-  if (!ips.size() || ip_from_dns_idx == -1) {
+  if (!ips.size()) {
     putlog(LOG_BOTS, "*", "Could not link to %s (DNS error).\n", dcc[i].nick);
     lostdcc(i);
     return;
   }
 
-  const bd::String ip_from_dns(ips[ip_from_dns_idx]);
+  /*
+   * Set up the state to allow retrying multiple results from DNS.
+   */
+  assert(dcc[i].type == &DCC_DNSWAIT);
+  /*
+   * Not calling changeover_dcc() as we want to take
+   * ownership of the dns_info from DCC_DNSWAIT without
+   * reallocating it.
+   */
+  dcc[i].type = &DCC_BOT_CONNWAIT;
+  dcc[i].u.dns->ips = new bd::Array<bd::String>(ips);
+#ifdef USE_IPV6
+  dcc[i].u.dns->no_more_ipv6 = false;
+#else
+  dcc[i].u.dns->no_more_ipv6 = true;
+#endif
+  dcc[i].u.dns->ip_from_dns_idx = -1;
+
+  botlink_next_ip(i);
+}
+
+void
+botlink_next_ip(int i)
+{
+  assert(dcc[i].type == &DCC_BOT_CONNWAIT ||
+      dcc[i].type == &DCC_FORK_BOT);
+  struct dns_info *di = dcc[i].u.dns;
+  if (di->ip_from_dns_idx == -1 && di->no_more_ipv6 == true) {
+    goto retries_exhausted;
+  }
+  assert(di->ips->size() > 0);
+
+#ifdef USE_IPV6
+  /* If IPv6 is available use it, otherwise fall back on IPv4 */
+  if (conf.bot->net.v6 && di->no_more_ipv6 == false)
+    di->ip_from_dns_idx = dns_find_ip(*di->ips, AF_INET6, di->ip_from_dns_idx);
+  if (di->ip_from_dns_idx == -1 || di->no_more_ipv6 == true)
+#endif /* USE_IPV6 */
+  {
+    /* Use IPv4 if no (more) ipv6 is available */
+    di->ip_from_dns_idx = dns_find_ip(*di->ips, AF_INET, di->ip_from_dns_idx);
+  }
+
+  if (di->ip_from_dns_idx == -1) {
+retries_exhausted:
+    /* No more IPs to lookup. */
+    putlog(LOG_BOTS, "*", "Could not link to %s (DNS retries exhausted).\n",
+        dcc[i].nick);
+    lostdcc(i);
+    return;
+  }
+
+  const bd::String ip_from_dns((*di->ips)[di->ip_from_dns_idx]);
   dcc[i].addr = inet_addr(ip_from_dns.c_str());
   strlcpy(dcc[i].host, ip_from_dns.c_str(), sizeof(dcc[i].host));
 

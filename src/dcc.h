@@ -77,6 +77,9 @@ struct dcc_t {
 struct dns_info {
   void *caller_data;			/* free`d when done */
   int caller_idx;
+  bd::Array<bd::String> *ips;
+  bool no_more_ipv6;
+  int ip_from_dns_idx;
 //  struct dcc_table *type;       /* type we are doing the lookup for          */
 };
 
