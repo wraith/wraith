@@ -1168,9 +1168,7 @@ botlink_next_ip(int i)
 
   if (di->ip_from_dns_idx == -1) {
 retries_exhausted:
-    /* No more IPs to lookup. */
-    putlog(LOG_BOTS, "*", "Could not link to %s (DNS retries exhausted).\n",
-        dcc[i].nick);
+    /* link_try_next_dns_result() will print a log for this. */
     lostdcc(i);
     return;
   }
