@@ -1177,6 +1177,8 @@ retries_exhausted:
   dcc[i].addr = inet_addr(ip_from_dns.c_str());
   strlcpy(dcc[i].host, ip_from_dns.c_str(), sizeof(dcc[i].host));
 
+  putlog(LOG_BOTS, "*", "Linking to %s at %s (%s) ...", dcc[i].nick,
+      dcc[i].host, ip_from_dns.c_str());
   botlink_real(i);
 }
 
