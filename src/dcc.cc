@@ -391,6 +391,10 @@ failed_link(int idx)
 static void
 cont_link(int idx, char *buf, int ii)
 {
+  if (dcc[idx].u.bot->di != NULL) {
+    free_dns_info(dcc[idx].u.bot->di);
+    dcc[idx].u.bot->di = NULL;
+  }
   /* If we're already connected somewhere, unlink and idle a sec */
   for (int i = 0; i < dcc_total; i++) {
     if (unlikely(dcc[i].type && (dcc[i].type == &DCC_BOT) && (!bot_aggressive_to(dcc[i].user)))) {
