@@ -922,7 +922,7 @@ int botunlink(int idx, const char *nick, const char *reason)
     dprintf(idx, "%s\n", "Unlinking all bots...");
   for (i = 0; i < dcc_total; i++) {
     if (dcc[i].type && ((nick[0] == '*') || !strcasecmp(dcc[i].nick, nick))) {
-      if (dcc[i].type == &DCC_FORK_BOT) {
+      if (dcc[i].type == &DCC_FORK_BOT || dcc[i].type == &DCC_BOT_CONNWAIT) {
 	if (idx >= 0)
 	  dprintf(idx, "%s: %s -> %s.\n", "Killed link attempt to",
 		  dcc[i].nick, dcc[i].host);
@@ -1034,6 +1034,7 @@ int botlink(const char *linker, int idx, char *nick)
     for (i = 0; i < dcc_total; i++) {
       if (dcc[i].type && (dcc[i].user == u) &&
 	  ((dcc[i].type == &DCC_FORK_BOT) ||
+	   (dcc[i].type == &DCC_BOT_CONNWAIT) ||
 	   (dcc[i].type == &DCC_BOT_NEW))) {
 	if (idx >= 0)
 	  dprintf(idx, "Already linking to that bot\n");

@@ -247,7 +247,8 @@ greet_new_bot(int idx)
       egg_version);
 
   for (int i = 0; i < dcc_total; i++) {
-    if (dcc[i].type && dcc[i].type == &DCC_FORK_BOT) {
+    if (dcc[i].type &&
+        (dcc[i].type == &DCC_FORK_BOT || dcc[i].type == &DCC_BOT_CONNWAIT)) {
       killsock(dcc[i].sock);
       lostdcc(i);
     }
@@ -565,7 +566,7 @@ display_dcc_bot(int idx, char *buf, size_t bufsiz)
 static void
 display_dcc_fork_bot(int idx, char *buf, size_t bufsiz)
 {
-  simple_snprintf(buf, bufsiz, "conn  bot");
+  simple_snprintf(buf, bufsiz, "fork  bot");
 }
 
 struct dcc_table DCC_BOT = {
@@ -577,6 +578,49 @@ struct dcc_table DCC_BOT = {
   NULL,
   display_dcc_bot,
   free_dcc_bot_,
+  NULL,
+  NULL
+};
+
+static void dcc_bot_connwait_eof(int idx)
+{
+	putlog(LOG_MISC, "*", "Lost connection while connecting to [%s/%d]",
+	    iptostr(htonl(dcc[idx].addr)), dcc[idx].port);
+	killsock(dcc[idx].sock);
+	lostdcc(idx);
+}
+
+static void dcc_bot_connwait(int idx, char *buf, int len)
+{
+	/* Ignore anything now. */
+}
+
+static void dcc_bot_connwait_timeout(int idx)
+{
+}
+
+static void
+dcc_bot_connwait_display(int idx, char *buf, size_t bufsiz)
+{
+  simple_snprintf(buf, bufsiz, "conn  bot");
+}
+
+static void
+dcc_bot_connwait_free(int idx, void *x)
+{
+  /* free's dcc[idx].u.other (dns_info) */
+  free(x);
+}
+
+struct dcc_table DCC_BOT_CONNWAIT = {
+  "BOT_CONNWAIT",
+  0,
+  dcc_bot_connwait_eof,
+  dcc_bot_connwait,
+  &connect_timeout,
+  dcc_bot_connwait_timeout,
+  dcc_bot_connwait_display,
+  dcc_bot_connwait_free,
   NULL,
   NULL
 };
