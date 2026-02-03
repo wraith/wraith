@@ -26,6 +26,7 @@ void tell_bots(int, int, const char *);
 void tell_bottree(int);
 void dump_links(int);
 int botlink(const char *, int, char *);
+void botlink_next_ip(int);
 int botunlink(int, const char *, const char *);
 void addbot(char *, char *, char *, char, int, time_t, char *, char *, int);
 void updatebot(int, char *, char, int, time_t, char *, char *, int);

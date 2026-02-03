@@ -1111,7 +1111,6 @@ int botlink(const char *linker, int idx, char *nick)
   return 0;
 }
 
-static void botlink_next_ip(int);
 static void botlink_dns_callback(int id, void *client_data, const char *host,
     const bd::Array<bd::String>& ips)
 {
@@ -1159,10 +1158,10 @@ botlink_next_ip(int i)
   assert(dcc[i].type == &DCC_BOT_CONNWAIT ||
       dcc[i].type == &DCC_FORK_BOT);
   struct dns_info *di = dcc[i].u.dns;
+  assert(di->ips->size() > 0);
   if (di->ip_from_dns_idx == -1 && di->no_more_ipv6 == true) {
     goto retries_exhausted;
   }
-  assert(di->ips->size() > 0);
 
 #ifdef USE_IPV6
   /* If IPv6 is available use it, otherwise fall back on IPv4 */

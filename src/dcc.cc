@@ -634,10 +634,25 @@ struct dcc_table DCC_BOT_CONNWAIT = {
   NULL
 };
 
+static void
+fork_bot_eof(int i)
+{
+  struct dns_info *di = dcc[i].u.dns;
+  /* unix socket won't have ips set, but otherwise wait until exhaustion. */
+  if (di->ips == NULL ||
+      (di->ip_from_dns_idx == -1 && di->no_more_ipv6 == true)) {
+    failed_link(i);
+    return;
+  }
+  if (di->ips != NULL) {
+    botlink_next_ip(i);
+  }
+}
+
 struct dcc_table DCC_FORK_BOT = {
   "FORK_BOT",
   0,
-  failed_link,
+  fork_bot_eof,
   cont_link,
   &connect_timeout,
   failed_link,
