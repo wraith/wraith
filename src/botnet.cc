@@ -1255,7 +1255,6 @@ void tandem_relay(int idx, char *nick, int i)
   }
 
   i = new_dcc(&DCC_DNSWAIT, sizeof(struct dns_info));
-
   if (i < 0) {
     dprintf(idx, "%s\n", "Sorry, too many DCC connections.");
     return;
