@@ -1194,18 +1194,20 @@ retries_exhausted:
 static void botlink_real(int i)
 {
   int idx = dcc[i].u.dns->caller_idx;
-  char *linker = strdup((char *)dcc[i].u.dns->caller_data);
-  free(dcc[i].u.dns->caller_data);
-  dcc[i].u.dns->caller_data = NULL;
+
+  /* Take ownership of the dns_info struct. */
+  struct dns_info *di = dcc[i].u.dns;
+  const char *linker = (char *)di->caller_data;
+  dcc[i].u.dns = NULL;
 
   changeover_dcc(i, &DCC_FORK_BOT, sizeof(struct bot_info));
+  dcc[i].u.bot->di = di;
   dcc[i].timeval = now;
   struct bot_info dummy;
   strlcpy(dcc[i].u.bot->version, "(primitive bot)", sizeof(dummy.version));
   strlcpy(dcc[i].u.bot->sysname, "*", 2);
   strlcpy(dcc[i].u.bot->linker, linker, sizeof(dummy.linker));
   dcc[i].u.bot->numver = idx;
-  free(linker);
 
   dcc[i].u.bot->port = dcc[i].port;             /* Remember where i started */
 #ifdef USE_IPV6
