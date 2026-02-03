@@ -382,6 +382,10 @@ link_try_next_dns_result(int idx)
         dcc[idx].nick);
     return false;
   }
+  if (dcc[idx].sock != -1) {
+    killsock(dcc[idx].sock);
+    dcc[idx].sock = -1;
+  }
   dcc[idx].u.bot->di = NULL;
   free_dcc_bot_(idx, dcc[idx].u.bot);
   dcc[idx].type = &DCC_DNSWAIT;
@@ -614,19 +618,10 @@ struct dcc_table DCC_BOT = {
   NULL
 };
 
-static void
-fork_bot_eof(int i)
-{
-  assert(dcc[i].type == &DCC_FORK_BOT);
-  if (link_try_next_dns_result(i))
-    return;
-  failed_link(i);
-}
-
 struct dcc_table DCC_FORK_BOT = {
   "FORK_BOT",
   0,
-  fork_bot_eof,
+  failed_link,
   cont_link,
   &connect_timeout,
   failed_link,
