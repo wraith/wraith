@@ -246,13 +246,24 @@ static void display_dcc_dnswait(int idx, char *buf, size_t bufsiz)
 	simple_snprintf(buf, bufsiz, "dns   waited %ds", (int) (now - dcc[idx].timeval));
 }
 
+void free_dns_info(struct dns_info *p)
+{
+	if (p->caller_data != NULL) {
+		free(p->caller_data);
+		p->caller_data = NULL;
+	}
+	if (p->ips != NULL) {
+		delete p->ips;
+		p->ips = NULL;
+	}
+}
+
 void kill_dcc_dnswait(int idx, void *x)
 {
 	struct dns_info *p = (struct dns_info *) x;
 
 	if (p) {
-		free(p->caller_data);
-		delete p->ips;
+		free_dns_info(p);
 		// free(p) is same thing here.
 		assert(p == dcc[idx].u.other);
 		free(dcc[idx].u.other);

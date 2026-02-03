@@ -124,6 +124,7 @@ struct bot_info {
   char linker[NOTENAMELEN + 1]; /* who requested this link              */
   char sysname[121];
   char version[121];            /* channel/version info                 */
+  struct dns_info *di;
 };
 
 struct relay_info {

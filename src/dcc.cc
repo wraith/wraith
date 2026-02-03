@@ -473,13 +473,18 @@ display_dcc_bot_new(int idx, char *buf, size_t bufsiz)
 static void
 free_dcc_bot_(int n, void *x)
 {
+  struct bot_info *bi = (struct bot_info *)x;
   if (dcc[n].type == &DCC_BOT) {
     unvia(n, findbot(dcc[n].nick));
     /* Stop sharing with this bot in case rembot->laston is shared out. */
     dcc[n].status &= ~STAT_SHARE;
     rembot(dcc[n].nick);
   }
-  free(x);
+  if (bi->di != NULL) {
+    free_dns_info(bi->di);
+    bi->di = NULL;
+  }
+  free(bi);
 }
 
 struct dcc_table DCC_BOT_NEW = {
@@ -605,7 +610,6 @@ dcc_bot_connwait_display(int idx, char *buf, size_t bufsiz)
   simple_snprintf(buf, bufsiz, "conn  bot");
 }
 
-void kill_dcc_dnswait(int idx, void *x);
 static void
 dcc_bot_connwait_free(int idx, void *x)
 {
