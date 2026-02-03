@@ -2159,13 +2159,13 @@ static void server_dns_callback(int id, void *client_data, const char *host,
   my_addr_t addr;
   char *ip = NULL;
   const char* dns_type = NULL;
-  bd::String ip_from_dns;
+  ssize_t ip_from_dns_idx;
 
 #ifdef USE_IPV6
   /* If IPv6 is wanted, ensure we are connecting to an IPv6 server, otherwise skip it */
   if (conf.bot->net.v6) {
-    ip_from_dns = dns_find_ip(ips, AF_INET6);
-    if (!ip_from_dns.length()) {
+    ip_from_dns_idx = dns_find_ip(ips, AF_INET6);
+    if (ip_from_dns_idx == -1) {
       dns_type = "IPv6";
       goto fatal_dns;
     }
@@ -2173,13 +2173,13 @@ static void server_dns_callback(int id, void *client_data, const char *host,
 #endif /* USE_IPV6 */
   {
     /* If IPv4 is wanted, don't connect to IPv6! */
-    ip_from_dns = dns_find_ip(ips, AF_INET);
-    if (!ip_from_dns.length()) {
+    ip_from_dns_idx = dns_find_ip(ips, AF_INET);
+    if (ip_from_dns_idx == -1) {
       dns_type = "IPv4";
       goto fatal_dns;
     }
   }
-  ip = ip_from_dns.dup();
+  ip = ips[ip_from_dns_idx].dup();
 
   get_addr(ip, &addr);
  

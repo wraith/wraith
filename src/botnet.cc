@@ -1125,27 +1125,28 @@ static void botlink_dns_callback(int id, void *client_data, const char *host,
 //    idx = dcc[i].u.dns->caller_idx;
 //  }
 
-  bd::String ip_from_dns;
+  ssize_t ip_from_dns_idx = -1;
 
   if (ips.size()) {
 #ifdef USE_IPV6
     /* If IPv6 is available use it, otherwise fall back on IPv4 */
     if (conf.bot->net.v6)
-      ip_from_dns = dns_find_ip(ips, AF_INET6);
-    if (!ip_from_dns)
+      ip_from_dns_idx = dns_find_ip(ips, AF_INET6);
+    if (ip_from_dns_idx == -1)
 #endif /* USE_IPV6 */
     {
       /* Use IPv4 if no ipv6 is available */
-      ip_from_dns = dns_find_ip(ips, AF_INET);
+      ip_from_dns_idx = dns_find_ip(ips, AF_INET);
     }
   }
 
-  if (!ips.size() || !ip_from_dns) {
+  if (!ips.size() || ip_from_dns_idx == -1) {
     putlog(LOG_BOTS, "*", "Could not link to %s (DNS error).\n", dcc[i].nick);
     lostdcc(i);
     return;
   }
 
+  const bd::String ip_from_dns(ips[ip_from_dns_idx]);
   dcc[i].addr = inet_addr(ip_from_dns.c_str());
   strlcpy(dcc[i].host, ip_from_dns.c_str(), sizeof(dcc[i].host));
 
@@ -1310,22 +1311,22 @@ static void tandem_relay_dns_callback(int id, void *client_data,
     return;
   }
 
-  bd::String ip_from_dns;
+  ssize_t ip_from_dns_idx = -1;
 
   if (ips.size()) {
 #ifdef USE_IPV6
     /* If IPv6 is available use it, otherwise fall back on IPv4 */
     if (conf.bot->net.v6)
-      ip_from_dns = dns_find_ip(ips, AF_INET6);
-    if (!ip_from_dns)
+      ip_from_dns_idx = dns_find_ip(ips, AF_INET6);
+    if (ip_from_dns_idx == -1)
 #endif /* USE_IPV6 */
     {
       /* Use IPv4 if no ipv6 is available */
-      ip_from_dns = dns_find_ip(ips, AF_INET);
+      ip_from_dns_idx = dns_find_ip(ips, AF_INET);
     }
   }
 
-  if (!ips.size() || !ip_from_dns) {
+  if (!ips.size() || ip_from_dns_idx == -1) {
     struct chat_info *ci = dcc[idx].u.relay->chat;
 
     dprintf(idx, "Could not relay to %s (DNS error).\n", dcc[i].nick);
@@ -1336,6 +1337,8 @@ static void tandem_relay_dns_callback(int id, void *client_data,
     lostdcc(i);
     return;
   }
+
+  const bd::String ip_from_dns(ips[ip_from_dns_idx]);
 
 #ifdef USE_IPV6
   int af = is_dotted_ip(ip_from_dns.c_str());

@@ -1399,12 +1399,20 @@ bool valid_dns_id(int idx, int id)
 	return 0;
 }
 
-bd::String dns_find_ip(const bd::Array<bd::String>& ips, int af_type) {
-	for (const auto& ip : ips) {
+ssize_t
+dns_find_ip(const bd::Array<bd::String>& ips,
+    int af_type, ssize_t start_idx)
+{
+	ssize_t i = start_idx + 1;
+
+	assert(i >= 0);
+	while (size_t(i) < ips.length()) {
+		const auto& ip = ips[i];
 		if (is_dotted_ip(ip.c_str()) == af_type) {
-			return ip;
+			return i;
 		}
+		++i;
 	}
-	return bd::String();
+	return -1;
 }
 /* vim: set sts=0 sw=8 ts=8 noet: */
