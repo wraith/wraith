@@ -618,7 +618,11 @@ static void
 dcc_bot_connwait_free(int idx, void *x)
 {
   /* free's dcc[idx].u.other (dns_info) */
-  kill_dcc_dnswait(idx, x);
+  struct dns_info *di = (struct dns_info *)x;
+
+  free_dns_info(di);
+  assert(di == dcc[idx].u.other);
+  dcc[idx].u.other = NULL;
 }
 
 struct dcc_table DCC_BOT_CONNWAIT = {

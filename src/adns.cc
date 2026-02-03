@@ -256,17 +256,16 @@ void free_dns_info(struct dns_info *p)
 		delete p->ips;
 		p->ips = NULL;
 	}
+	free(p);
 }
 
-void kill_dcc_dnswait(int idx, void *x)
+static void kill_dcc_dnswait(int idx, void *x)
 {
 	struct dns_info *p = (struct dns_info *) x;
 
 	if (p) {
 		free_dns_info(p);
-		// free(p) is same thing here.
 		assert(p == dcc[idx].u.other);
-		free(dcc[idx].u.other);
 		dcc[idx].u.other = NULL;
 	}
 }

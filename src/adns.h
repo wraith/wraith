@@ -59,7 +59,6 @@ void dns_cache_flush();
 bool valid_dns_id(int, int);
 int reverse_ip(const char *host, char *reverse);
 ssize_t dns_find_ip(const bd::Array<bd::String>& ips, int af_type, ssize_t = -1);
-void kill_dcc_dnswait(int idx, void *x);
 void free_dns_info(struct dns_info *p);
 
 extern int		dns_sock, dns_idx;
