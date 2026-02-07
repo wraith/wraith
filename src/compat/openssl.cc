@@ -1,8 +1,12 @@
 /*
- * Provide forward compat functions when built from < 1.1 in case the
- * binary is run against a 1.1+ library. It will first try to find
- * the symbol it wants, like SSLv23_client_method(), and fallback to
- * _SSLv23_client_method() for TLS_client_method() if not found.
+ * Provide forward compatibility functions for OpenSSL/LibreSSL version gaps.
+ *
+ * This file provides compatibility shims to:
+ * 1. Use TLS_client_method() (protocol-agnostic) instead of deprecated
+ *    SSLv23_client_method() when available
+ * 2. Handle OpenSSL 1.1.1+ API changes where library initialization
+ *    is automatic
+ * 3. Handle LibreSSL 3.4+ API differences
  *
  * Each condition here should match the condition in libssl.cc/libcrypto.cc
  * for where DLSYM_GLOBAL_FWDCOMPAT() is used.
@@ -37,8 +41,14 @@ void _SSL_load_error_strings(void) {
 }
 #endif
 
-#if !((defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER > 0x20020002L) || \
-    (!defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L))
+#if !((defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER >= 0x30400000L) || \
+    (!defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100005L))
+/* TLS_client_method() is available in:
+ * - OpenSSL 1.1.1+ (0x10101005L) with TLS 1.3 support
+ * - LibreSSL 3.4+ (0x30400000L)
+ *
+ * For older versions, we use the compatibility shim below.
+ */
 typedef void *(*TLS_client_method_t)(void);
 static const void *_TLS_client_method(void) {
   if (DLSYM_VAR(TLS_client_method) == NULL)
