@@ -76,8 +76,8 @@ static int load_symbols(void *handle) {
   /* For SSL_library_init and SSL_load_error_strings. */
   DLSYM_GLOBAL(handle, OPENSSL_init_ssl);
 #endif
-#if !defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
-  /* Macro in 1.0 and LibreSSL. Symbol in 1.1+. */
+/* SSL_CTX_set_options: Available as symbol in all versions */
+#if defined(LIBRESSL_VERSION_NUMBER) || OPENSSL_VERSION_NUMBER >= 0x00908000L
   DLSYM_GLOBAL(handle, SSL_CTX_set_options);
 #endif
 #if (defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER > 0x20020002L) || \
