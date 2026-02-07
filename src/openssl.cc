@@ -76,6 +76,14 @@ int init_openssl() {
 
 #ifdef EGG_SSL_EXT
   /* good place to init ssl stuff */
+#if (defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER >= 0x30400000L) || \
+    (!defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100005L)
+  /* OpenSSL 1.1.1+ and LibreSSL 3.4+ */
+  SSL_load_error_strings();
+  SSL_library_init();
+  ssl_ctx = SSL_CTX_new(TLS_client_method());
+#else
+  /* Fallback for older versions */
   SSL_load_error_strings();
   OpenSSL_add_ssl_algorithms();
 #if (defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER > 0x20020002L) || \
@@ -84,17 +92,26 @@ int init_openssl() {
 #else
   ssl_ctx = SSL_CTX_new(SSLv23_client_method());
 #endif
+#endif
   if (!ssl_ctx) {
     sdprintf("SSL_CTX_new() failed");
     return 1;
   }
 
-  // Disable insecure SSLv2
-  SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_SSLv2|SSL_OP_SINGLE_DH_USE);
-  SSL_CTX_set_mode(ssl_ctx, SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER|SSL_MODE_ENABLE_PARTIAL_WRITE);
+  /* Disable insecure protocols: SSLv2, SSLv3, TLSv1.0, TLSv1.1 */
+  SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 |
+                      SSL_OP_NO_TLSv1 | SSL_OP_NO_TLSv1_1 |
+                      SSL_OP_SINGLE_DH_USE);
+  SSL_CTX_set_mode(ssl_ctx, SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER | SSL_MODE_ENABLE_PARTIAL_WRITE);
   SSL_CTX_set_tmp_dh_callback(ssl_ctx, tmp_dh_callback);
 
-  const char* ciphers = "HIGH:!MEDIUM:!LOW:!EXP:!SSLv2:!ADH:!aNULL:!eNULL:!NULL:@STRENGTH";
+  /* Modern cipher list - prefer forward secrecy and AEAD ciphers */
+  const char* ciphers = "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256:"
+                        "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:"
+                        "ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:"
+                        "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:"
+                        "!aNULL:!eNULL:!EXPORT:!DES:!3DES:!RC4:!MD5:!PSK:!aECDH:"
+                        "!EDH-DSS-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA";
   if (!SSL_CTX_set_cipher_list(ssl_ctx, ciphers)) {
     sdprintf("Unable to load ciphers");
     return 1;
@@ -119,6 +136,14 @@ int uninit_openssl () {
 #ifdef EGG_SSL_EXT
   /* cleanup mess when quiting */
   if (ssl_ctx) {
+    /* OpenSSL 1.1.0+ handles cleanup internally, but we still free the ctx */
+#if (defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER >= 0x30500000L) || \
+    (!defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L)
+    /* SSL_CTX_free is still needed, but no explicit cleanup of global state */
+#else
+    /* Older OpenSSL needs explicit cleanup */
+    SSL_CTX_set_cipher_list(ssl_ctx, "");  /* Clear cipher list */
+#endif
     SSL_CTX_free(ssl_ctx);
     ssl_ctx = NULL;
   }
@@ -126,7 +151,7 @@ int uninit_openssl () {
     RAND_write_file(tls_rand_file);
 #endif
 
-  /* Macro from src/libcrypto.cc */
+  /* Macro from src/libcrypto.cc - cleanup only for older OpenSSL */
 #if !((defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER >= 0x30500000L) || \
     (!defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L))
   ERR_free_strings();
