@@ -655,7 +655,7 @@ CXX="$CXX $SSL_INCLUDES"
 save_LIBS="$LIBS"
 LIBS="$LIBS $SSL_LIBS"
 
-dnl Check OpenSSL version
+dnl Check OpenSSL version and feature support
 AC_MSG_CHECKING(for OpenSSL version)
 
 AC_TRY_COMPILE([#include <openssl/opensslv.h>],[
@@ -670,6 +670,21 @@ AC_TRY_COMPILE([#include <openssl/opensslv.h>],[
   AC_MSG_RESULT([too old.])
   AC_MSG_ERROR([OpenSSL version is too old. Must be 0.9.8f+], 1)
 ]
+)
+
+dnl Check for TLS 1.3 support (OpenSSL 1.1.1+, LibreSSL 3.4+)
+AC_MSG_CHECKING(for TLS 1.3 support)
+AC_TRY_COMPILE([#include <openssl/opensslv.h>],[
+#if (defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER >= 0x30400000L) || \
+    (!defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10101000L)
+  /* TLS 1.3 supported */
+  int tls13 = 1;
+#else
+  #error "TLS 1.3 not supported"
+#endif
+], [AC_MSG_RESULT(yes)
+    AC_DEFINE(HAVE_TLS_1_3, 1, [Define if TLS 1.3 is supported])],
+  [AC_MSG_RESULT(no)]
 )
 
 CXX="$CXX $SSL_LIBS"
