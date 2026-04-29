@@ -50,6 +50,7 @@
 #include "dcc.h"
 #include "botmsg.h"
 #include "tandem.h"
+#include "enclink.h"
 #include "core_binds.h"
 #include <bdlib/src/String.h>
 #include <bdlib/src/Array.h>
@@ -122,6 +123,19 @@ void addbot(char *who, char *from, char *next, char flag, int vlocalhub, time_t 
     ptr2->uplink = (tand_t *) 1;
   else
     ptr2->uplink = findbot(next);
+  strlcpy(ptr2->enc_type, "unknown", sizeof(ptr2->enc_type));
+  if (ptr2->uplink == (tand_t*)1) {
+    for (int i = 0; i < dcc_total; i++) {
+      if (dcc[i].type && (dcc[i].type == &DCC_BOT || dcc[i].type == &DCC_FORK_BOT || dcc[i].type == &DCC_BOT_NEW) &&
+          !strcasecmp(dcc[i].nick, who)) {
+        int snum = findanysnum(dcc[i].sock);
+        if (snum >= 0 && socklist[snum].enclink >= 0 && enclink[socklist[snum].enclink].name) {
+          strlcpy(ptr2->enc_type, enclink[socklist[snum].enclink].name, sizeof(ptr2->enc_type));
+        }
+        break;
+      }
+    }
+  }
   tands++;
   tand_updates++;
 
@@ -733,7 +747,14 @@ void tell_bottree(int idx)
           else
             color_str = (char *) NULL;
 
-          s = bd::String::printf("%c%s%s%s (%s)", bot->share ? bot->share : '-', color_str ? color_str : "",
+          if (bot->uplink == (tand_t*)1)
+            s = bd::String::printf("%c%s%s%s (%s) [%s]", bot->share ? bot->share : '-', color_str ? color_str : "",
+                                                bot->bot,
+                                                color_str ? COLOR_END(idx) : "",
+                                                bot->version,
+                                                bot->enc_type);
+          else
+            s = bd::String::printf("%c%s%s%s (%s)", bot->share ? bot->share : '-', color_str ? color_str : "",
                                                 bot->bot,
                                                 color_str ? COLOR_END(idx) : "",
                                                 bot->version);
@@ -775,10 +796,17 @@ void tell_bottree(int idx)
                   color_str = (char *) NULL;
 
 		bot2 = bot;
-                s = bd::String::printf("%c%s%s%s (%s)", bot->share ? bot->share : '-', color_str ? color_str : "",
-                                                      bot->bot,
-                                                      color_str ? COLOR_END(idx) : "",
-                                                      bot->version);
+                if (bot->uplink == (tand_t*)1)
+                  s = bd::String::printf("%c%s%s%s (%s) [%s]", bot->share ? bot->share : '-', color_str ? color_str : "",
+                                                        bot->bot,
+                                                        color_str ? COLOR_END(idx) : "",
+                                                        bot->version,
+                                                        bot->enc_type);
+                else
+                  s = bd::String::printf("%c%s%s%s (%s)", bot->share ? bot->share : '-', color_str ? color_str : "",
+                                                        bot->bot,
+                                                        color_str ? COLOR_END(idx) : "",
+                                                        bot->version);
 	      }
 	    }
 	  }

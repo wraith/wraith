@@ -19,6 +19,7 @@ typedef struct tand_t_struct {
   char bot[HANDLEN + 1];
   char version[151];
   char share;
+  char enc_type[16];
   bool hub;
 } tand_t;
 

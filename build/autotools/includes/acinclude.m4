@@ -687,6 +687,30 @@ AC_CHECK_LIB(crypto, AES_encrypt,
 ]
 )
 
+dnl Check for ChaCha20-Poly1305 support
+AC_MSG_CHECKING([for ChaCha20-Poly1305 support])
+AC_TRY_COMPILE([#include <openssl/opensslv.h>],[
+#if defined(LIBRESSL_VERSION_NUMBER)
+#  if LIBRESSL_VERSION_NUMBER < 0x2090000fL
+#    error "LibreSSL too old for ChaCha20-Poly1305"
+#  endif
+#elif defined(OPENSSL_VERSION_NUMBER)
+#  if OPENSSL_VERSION_NUMBER < 0x10100000L
+#    error "OpenSSL too old for ChaCha20-Poly1305"
+#  endif
+#else
+#  error "Unknown SSL library"
+#endif
+],
+[
+    AC_MSG_RESULT([yes])
+],
+[
+    AC_MSG_RESULT([no])
+    AC_MSG_ERROR([ChaCha20-Poly1305 is required but not available in your OpenSSL/LibreSSL. Upgrade to OpenSSL 1.1.0+ or LibreSSL 2.9.0+.], 1)
+]
+)
+
 CXX="$save_CXX"
 LIBS="$save_LIBS"
 

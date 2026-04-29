@@ -786,6 +786,18 @@ int main(int argc, char **argv)
 
   init_conf();			/* establishes conf and sets to defaults */
 
+#ifdef EGG_SSL_EXT
+  {
+    const EVP_CIPHER *cipher = EVP_get_cipherbyname("chacha20-poly1305");
+    if (!cipher) {
+      fprintf(stderr, "FATAL: ChaCha20-Poly1305 not available in OpenSSL/LibreSSL at runtime.\n");
+      fprintf(stderr, "The running SSL library is older than the one used at build time.\n");
+      fprintf(stderr, "Required: OpenSSL 1.1.0+ or LibreSSL 2.9.0+\n");
+      exit(1);
+    }
+  }
+#endif
+
   /* Version info! */
   simple_snprintf(ver, sizeof(ver), STR("[%s] Wraith %s"), settings.packname, egg_version);
   simple_snprintf(version, sizeof(version), STR("%s%s (%li)"), ver,
