@@ -81,6 +81,7 @@ OBJS = auth.So \
 	compat/strsep.o \
 	crypto/aes_util.o \
 	crypto/bf_util.o \
+	crypto/chacha_util.o \
 	crypto/dh_util.o
 
 MAKE_GENERIC = $(MAKE) 'MAKE=$(MAKE)' 'MAKEFLAGS=$(MAKEFLAGS)' 'CXX=$(CXX)' 'LD=$(LD)' 'STRIP=$(STRIP)' 'CXXFLAGS=$(CXXFLAGS)' 'CFLGS=$(CFLGS)' 'CCDEPMODE=$(CCDEPMODE)'
@@ -116,7 +117,7 @@ sorthelp: sorthelp.cc $(top_builddir)/lib/bdlib/libbdlib.a
 ../$(EGGEXEC): $(OBJS) $(top_builddir)/lib/bdlib/libbdlib.a @LIBELF_BUNDLED@ $(EXPORTS)
 	@echo -e "[LD ]	\033[1m$@\033[0m"
 	$(LD) $(LDFLAGS) -o ../$(EGGEXEC) $(OBJS) $(top_builddir)/lib/bdlib/libbdlib.a \
-	    $(LIBS) @LIBELF_LIB@ -Wl,--dynamic-list=$(EXPORTS)
+	    $(LIBS) -lcrypto @LIBELF_LIB@ -Wl,--dynamic-list=$(EXPORTS)
 	@$(STRIP) ../$(EGGEXEC)
 	@$(OBJCOPY) ../$(EGGEXEC)
 	@echo "Successful compile: $(EGGEXEC)"

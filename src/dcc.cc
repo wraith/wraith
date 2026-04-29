@@ -66,6 +66,51 @@
 
 
 struct cmd_pass *cmdpass = NULL;
+
+#define MAX_FAILED_CIPHERS 64
+
+static struct {
+  char nick[HANDLEN + 1];
+  int count;
+} failed_link_ciphers[MAX_FAILED_CIPHERS] = {{{0}}};
+
+static int get_failed_cipher_count(const char *nick)
+{
+  for (int i = 0; i < MAX_FAILED_CIPHERS; i++) {
+    if (failed_link_ciphers[i].nick[0] && !strcasecmp(failed_link_ciphers[i].nick, nick))
+      return failed_link_ciphers[i].count;
+  }
+  return 0;
+}
+
+static void increment_failed_cipher(const char *nick)
+{
+  for (int i = 0; i < MAX_FAILED_CIPHERS; i++) {
+    if (failed_link_ciphers[i].nick[0] && !strcasecmp(failed_link_ciphers[i].nick, nick)) {
+      failed_link_ciphers[i].count++;
+      return;
+    }
+  }
+  for (int i = 0; i < MAX_FAILED_CIPHERS; i++) {
+    if (!failed_link_ciphers[i].nick[0]) {
+      strlcpy(failed_link_ciphers[i].nick, nick, sizeof(failed_link_ciphers[i].nick));
+      failed_link_ciphers[i].count = 1;
+      return;
+    }
+  }
+}
+
+static void clear_failed_cipher(const char *nick)
+{
+  for (int i = 0; i < MAX_FAILED_CIPHERS; i++) {
+    if (failed_link_ciphers[i].nick[0] && !strcasecmp(failed_link_ciphers[i].nick, nick)) {
+      failed_link_ciphers[i].nick[0] = '\0';
+      failed_link_ciphers[i].count = 0;
+      return;
+    }
+  }
+}
+
 struct dcc_t *dcc = NULL;       /* DCC list                                */
 time_t timesync = 0;
 int dcc_total = 0;              /* size of dcc table                             */
@@ -446,6 +491,7 @@ static void
 eof_dcc_bot_new(int idx)
 {
   putlog(LOG_BOTS, "*", "Lost Bot: %s", dcc[idx].nick);
+  increment_failed_cipher(dcc[idx].nick);
   if (dcc[idx].hub)
     putlog(LOG_BOTS, "*", "See log on %s for disconnect reason.\n", dcc[idx].nick);
   killsock(dcc[idx].sock);
@@ -459,6 +505,7 @@ timeout_dcc_bot_new(int idx)
     putlog(LOG_BOTS, "*", "Timeout: bot link to %s at %s:%d", dcc[idx].nick, dcc[idx].host, dcc[idx].port);
   else
     putlog(LOG_BOTS, "*", "Timeout: bot link to %s", dcc[idx].nick);
+  increment_failed_cipher(dcc[idx].nick);
   killsock(dcc[idx].sock);
   lostdcc(idx);
 }
@@ -1009,6 +1056,8 @@ dcc_chat_pass(int idx, char *buf, int atr)
       }
 
       dcc[idx].encrypt = 2;
+      socklist[snum].encstatus = 1;
+      clear_failed_cipher(dcc[idx].nick);
       if (dcc[idx].bot) {
         dcc[idx].type = &DCC_BOT_NEW;
         dcc[idx].u.bot = (struct bot_info *) calloc(1, sizeof(struct bot_info));
@@ -1037,6 +1086,7 @@ dcc_chat_pass(int idx, char *buf, int atr)
         OPENSSL_cleanse(hash, strlen(hash));
         if (hash_n) {
           putlog(LOG_WARN, "*", STR("%s attempted to negotiate an encryption with an invalid hash."), dcc[idx].nick);
+          increment_failed_cipher(dcc[idx].nick);
           killsock(dcc[idx].sock);
           lostdcc(idx);
           return;
@@ -1050,6 +1100,7 @@ dcc_chat_pass(int idx, char *buf, int atr)
             putlog(LOG_WARN, "*", "This is likely due to %s needing to be upgraded. Enable 'link_cleartext' to allow linking.", dcc[idx].nick);
             putlog(LOG_WARN, "*", "Be sure to disable 'link_cleartext' after all bots are upgraded.");
           }
+          increment_failed_cipher(dcc[idx].nick);
           killsock(dcc[idx].sock);
           lostdcc(idx);
           return;
@@ -1062,6 +1113,7 @@ dcc_chat_pass(int idx, char *buf, int atr)
 
           if (strcasecmp(expected_nick, conf.bot->nick)) {
             putlog(LOG_WARN, "*", STR("%s failed encrypted link handshake (was expecting '%s' instead of me)"), dcc[idx].nick, expected_nick);
+            increment_failed_cipher(dcc[idx].nick);
             killsock(dcc[idx].sock);
             lostdcc(idx);
             return;
@@ -1075,6 +1127,7 @@ dcc_chat_pass(int idx, char *buf, int atr)
     } else {
       /* Invalid password/digest on hub */
       putlog(LOG_WARN, "*", STR("%s failed encrypted link handshake."), dcc[idx].nick);
+      increment_failed_cipher(dcc[idx].nick);
       killsock(dcc[idx].sock);
       lostdcc(idx);
     }
@@ -1916,6 +1969,10 @@ dcc_telnet_pass(int idx, int atr)
       
       for (i = 0; enclink[i].name; i++) {
         if (enclink[i].type == LINK_CLEARTEXT && !link_cleartext) continue;
+        if (enclink[i].type == LINK_CHACHA20) {
+          if (get_failed_cipher_count(dcc[idx].nick) >= 3)
+            continue;
+        }
         simple_snprintf(&buf[strlen(buf)], sizeof(buf) - strlen(buf), "%d ", enclink[i].type);
       }
       dprintf(-dcc[idx].sock, "neg? %s %s\n", rand, buf);
