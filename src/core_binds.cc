@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1997 Robey Pointer
  * Copyright (C) 1999 - 2002 Eggheads Development Team
- * Copyright (C) 2002 - 2014 Bryan Drewery
+ * Copyright (C) 2002 - 2026 Bryan Drewery
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
 /*
@@ -53,7 +53,7 @@ void core_binds_init()
         BT_bot = bind_table_add("bot", 3, "sss", MATCH_EXACT, 0);
         BT_chon = bind_table_add("chon", 2, "si", MATCH_MASK | MATCH_FLAGS, BIND_STACKABLE);
         BT_dcc = bind_table_add("dcc", 2, "is", MATCH_PARTIAL | MATCH_FLAGS, 0);
-	bzero(&cmdlist, 500);
+	memset(cmdlist, 0, sizeof(cmdlist));
         add_builtins("dcc", C_dcc);
         BT_nkch = bind_table_add("nkch", 2, "ss", MATCH_MASK, BIND_STACKABLE);
         BT_note = bind_table_add("note", 3 , "sss", MATCH_EXACT, 0);

@@ -87,8 +87,10 @@ void DH1080_gen(bd::String& privateKey, bd::String& publicKeyB64) {
 #if (defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER >= 0x30500000L) || \
     (!defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L)
   if (b_prime == NULL || b_generator == NULL ||
-      !DH_set0_pqg(dh, BN_dup(b_prime), NULL, BN_dup(b_generator)))
+      !DH_set0_pqg(dh, BN_dup(b_prime), NULL, BN_dup(b_generator))) {
+    DH_free(dh);
     return;
+  }
 #else
   dh->p = BN_dup(b_prime);
   dh->g = BN_dup(b_generator);
@@ -131,8 +133,10 @@ bool DH1080_comp(const bd::String privateKey, const bd::String theirPublicKeyB64
 #if (defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER >= 0x30500000L) || \
     (!defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L)
   if (b_prime == NULL || b_generator == NULL ||
-      !DH_set0_pqg(dh, BN_dup(b_prime), NULL, BN_dup(b_generator)))
+      !DH_set0_pqg(dh, BN_dup(b_prime), NULL, BN_dup(b_generator))) {
+    DH_free(dh);
     return false;
+  }
 #else
   dh->p = BN_dup(b_prime);
   dh->g = BN_dup(b_generator);

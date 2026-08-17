@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1997 Robey Pointer
  * Copyright (C) 1999 - 2002 Eggheads Development Team
- * Copyright (C) 2002 - 2014 Bryan Drewery
+ * Copyright (C) 2002 - 2026 Bryan Drewery
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
 /*
@@ -301,7 +301,7 @@ static void show_help()
   printf(STR("%s [options] [botnick[.conf]]\n"), binname);
   printf(STR("Not supplying any options will make all bots in the binary spawn.\n"));
   printf(STR("\n"));
-  printf(STR("- http://wraith.botpack.net -\n"));
+  printf(STR("- https://wraith.botpack.net -\n"));
   printf(STR("\n"));
   printf(format, STR("Option"), STR("Description"));
   printf(format, STR("------"), STR("-----------"));
@@ -435,7 +435,7 @@ static void dtx_arg(int& argc, char *argv[])
         strftime(date, sizeof date, "%c %Z", gmtime(&buildts));
 	printf(STR("%s\nBuild Date: %s (%s%li%s)\n"), version, date, BOLD(-1), (long)buildts, BOLD_END(-1));
         printf(STR("BuildOS: %s%s%s BuildArch: %s%s%s\n"), BOLD(-1), BUILD_OS, BOLD_END(-1), BOLD(-1), BUILD_ARCH, BOLD_END(-1));
-        printf(STR("- http://wraith.botpack.net -\n"));
+        printf(STR("- https://wraith.botpack.net -\n"));
 #ifdef DEBUG
 	printf(STR("pack: %zu conf: %zu settings_t: %zu prefix: %zu pad: %zu/%zu needed padding: %zu/%zu\n"),
             SIZE_PACK,

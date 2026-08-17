@@ -1,0 +1,46 @@
+name: build
+
+on:
+  push:
+    branches: [ master, main, modernize-2026 ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.compiler }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - compiler: gcc
+            cc: gcc
+            cxx: g++
+          - compiler: clang
+            cc: clang
+            cxx: clang++
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential autoconf automake \
+            libssl-dev tcl-dev libelf-dev zlib1g-dev pkg-config
+
+      - name: Configure
+        run: ./configure
+
+      - name: Build
+        run: make -j"$(nproc)" V=1
+
+      - name: Test
+        run: make -j"$(nproc)" test V=1

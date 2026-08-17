@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1997 Robey Pointer
  * Copyright (C) 1999 - 2002 Eggheads Development Team
- * Copyright (C) 2002 - 2014 Bryan Drewery
+ * Copyright (C) 2002 - 2026 Bryan Drewery
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
 /* async dns
@@ -877,7 +877,7 @@ static void cache_del(int id)
 	if (id < ncache)
 		memcpy(&cache[id], &cache[ncache], sizeof(dns_cache_t));
 	else
-		bzero(&cache[id], sizeof(dns_cache_t));
+		memset(&cache[id], 0, sizeof(dns_cache_t));
 
 	cache = (dns_cache_t *) realloc(cache, (ncache+1) *
 	    sizeof(*cache));
@@ -886,7 +886,7 @@ static void cache_del(int id)
 static void cache_add(const char *query, bd::Array<bd::String> answer, int ttl)
 {
 	cache = (dns_cache_t *) realloc(cache, (ncache+1) * sizeof(*cache));
-	bzero(&cache[ncache], sizeof(cache[ncache]));
+	memset(&cache[ncache], 0, sizeof(cache[ncache]));
 	cache[ncache].query = strdup(query);
 	cache[ncache].answer = new bd::Array<bd::String>;
 	*(cache[ncache].answer) = answer;

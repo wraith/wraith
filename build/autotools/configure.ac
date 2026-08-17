@@ -2,12 +2,12 @@ dnl Process this file with autoconf to produce a configure script.
 dnl
 dnl
 
-AC_PREREQ(2.59)
-AC_INIT([wraith],[],[wraith@botpack.net])
+AC_PREREQ([2.69])
+AC_INIT([wraith],[1.4.11],[wraith@botpack.net])
 AC_CONFIG_SRCDIR(src/eggdrop.h)
-AC_CONFIG_HEADER(src/config.h)
+AC_CONFIG_HEADERS(src/config.h)
 AC_CONFIG_AUX_DIR([build/autotools])
-AC_COPYRIGHT([Copyright (c) Bryan Drewery])
+AC_COPYRIGHT([Copyright (c) 2002 - 2026 Bryan Drewery])
 AC_REVISION($Revision$)
 
 EGG_SAVE_PARAMETERS
@@ -16,12 +16,11 @@ EGG_SAVE_PARAMETERS
 dnl Search for newer gcc versions before older
 #AC_REQUIRE_CPP
 AC_LANG([C++])
-AC_PROG_CXX([clang++90 clang++80 clang++70 clang++60 clang++50 clang++40 clang++39 clang++38 clang++37 clang++36 clang++35 clang++34 g++9 g++8 g++7 g++6 g++5 clang++ eg++ g++ c++ CC cxx cc++])
+AC_PROG_CXX([clang++19 clang++18 clang++17 clang++16 clang++15 clang++14 clang++13 g++14 g++13 g++12 g++11 g++10 clang++90 clang++80 clang++70 clang++60 clang++50 clang++40 clang++39 clang++38 clang++37 clang++36 clang++35 clang++34 g++9 g++8 g++7 g++6 g++5 clang++ eg++ g++ c++ CC cxx cc++])
 CC="${CXX} -x c"
 AC_SUBST(CC)
 AC_REQUIRE_CPP
-AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
-AX_CXX_COMPILE_STDCXX_14([noext], [optional])
+AX_CXX_COMPILE_STDCXX_17([noext], [mandatory])
 EGG_CHECK_CC
 #CXX_RPATH_CHECK
 
@@ -60,10 +59,10 @@ CXX_FLAG_CHECK([LDFLAGS], [-static-libstdc++], [static_libstdcxx])
 #CXX_FLAG_CHECK([LDFLAGS], [-static-libgcc], [static_libgcc])
 if [[ "${ax_cv_prog_cc_static_libstdcxx}" = "yes" ]]; then
   AC_MSG_CHECKING([for static libstdc++])
-  AC_TRY_LINK([], [], [AC_MSG_RESULT(OK)],
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [])], [AC_MSG_RESULT(OK)],
     [
      AC_MSG_RESULT([not found.])
-     AC_MSG_ERROR([Static libstdc++ is rquired to build.], 1)
+     AC_MSG_ERROR([Static libstdc++ is required to build.], 1)
     ]
   )
 fi
@@ -108,10 +107,7 @@ EGG_CHECK_LIBS
 CHECK_LIBELF
 
 # Checks for header files
-AC_HEADER_DIRENT
-AC_HEADER_SYS_WAIT
-AC_HEADER_TIME
-AC_HEADER_STAT
+AC_CHECK_HEADERS([dirent.h sys/wait.h])
 #checkpoint
 AC_CACHE_SAVE 
 AC_CHECK_HEADERS([stdarg.h arpa/inet.h fcntl.h limits.h locale.h netdb.h netinet/in.h])
@@ -128,11 +124,11 @@ CHECK_SSL
 
 # Tcl version to recommend if no Tcl is found, and the site where it can be
 # found for download.
-tclrecommendver="8.5.X"
-tclrecommendsite="ftp://tcl.activestate.com/pub/tcl/tcl8_5/"
+tclrecommendver="8.6.X"
+tclrecommendsite="https://www.tcl-lang.org/software/tcltk/download.html"
 
 # Tcl library filename prefixes, suffixes, and search paths.
-tcllibnames="tcl8.6 tcl86 tcl8.5 tcl85 tcl8.4 tcl84 tcl8.3 tcl83 tcl8.2 tcl82 \
+tcllibnames="tcl9.0 tcl90 tcl8.6 tcl86 tcl8.5 tcl85 tcl8.4 tcl84 tcl8.3 tcl83 tcl8.2 tcl82 \
              tcl8.1 tcl81 tcl8.0 tcl80 tcl tcl7.6 tcl76 tcl7.5 tcl75 \
              tcl7.4 tcl74 tcl7.3 tcl73 tcl7.2 tcl72 tcl7.1 tcl71 \
              tcl7.0 tcl70"
@@ -141,6 +137,8 @@ tcllibextensions=".so .so.1 .so.1.0 .so.1.1 .so.1.2 .dll .dylib .sl .a"
 
 tcllibpaths="$HOME/lib $HOME/tcl/lib \
              /usr/local/lib /usr/lib /lib /lib64 /usr/lib64 \
+             /usr/lib/x86_64-linux-gnu /usr/lib/aarch64-linux-gnu \
+             /usr/local/lib/tcl9.0 /usr/lib/tcl9.0 \
              /usr/local/lib/tcl8.6 /usr/lib/tcl8.6 \
              /usr/local/lib/tcl8.5 /usr/lib/tcl8.5 \
              /usr/local/lib/tcl8.4 /usr/lib/tcl8.4 \

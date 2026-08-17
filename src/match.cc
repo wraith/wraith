@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1997 Robey Pointer
  * Copyright (C) 1999 - 2002 Eggheads Development Team
- * Copyright (C) 2002 - 2014 Bryan Drewery
+ * Copyright (C) 2002 - 2026 Bryan Drewery
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
 /*
@@ -300,8 +300,8 @@ match_cidr(const char *m, const char *a)
   int aftype = 0;
 
   sockname_t ipaddr, maskaddr;
-  bzero(&ipaddr, sizeof(ipaddr));
-  bzero(&maskaddr, sizeof(maskaddr));
+  memset(&ipaddr, 0, sizeof(ipaddr));
+  memset(&maskaddr, 0, sizeof(maskaddr));
 
   if (!strchr(ip, ':') && !strchr(ipmask, ':'))
     aftype = ipaddr.family = maskaddr.family =  AF_INET;

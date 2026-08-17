@@ -598,11 +598,31 @@ if test "$with_openssl_path" != "auto"; then
   cf_openssl_libdir="${cf_openssl_basedir}/lib"
 else
   dnl Do the auto-probe here.  Check some common directory paths.
-  if test -f "/usr/include/openssl/opensslv.h" && test -f "/usr/lib64/libssl.so"; then
-      cf_openssl_libdir="/usr/lib64"
-      cf_openssl_basedir="/usr"
-  else
-    for dirs in /usr/local/ssl /usr/pkg /usr/local /usr/local/openssl; do
+  dnl First honor pkg-config if available (handles multiarch libdirs on modern distros).
+  if test -z "$cf_openssl_basedir" && test -f "/usr/include/openssl/opensslv.h"; then
+    AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
+    if test "$PKG_CONFIG" != "no" && $PKG_CONFIG --exists openssl 2>/dev/null; then
+      cf_openssl_pc_libdir="`$PKG_CONFIG --variable=libdir openssl 2>/dev/null`"
+      if test -n "$cf_openssl_pc_libdir" && test -f "${cf_openssl_pc_libdir}/libssl.so"; then
+        cf_openssl_basedir="/usr"
+        cf_openssl_libdir="${cf_openssl_pc_libdir}"
+      fi
+      unset cf_openssl_pc_libdir
+    fi
+  fi
+  dnl Fall back to probing common (incl. Debian/Ubuntu multiarch) library dirs.
+  if test -z "$cf_openssl_basedir" && test -f "/usr/include/openssl/opensslv.h"; then
+    for libdir in /usr/lib64 /usr/lib/x86_64-linux-gnu /usr/lib/aarch64-linux-gnu /usr/lib; do
+      if test -f "${libdir}/libssl.so"; then
+        cf_openssl_libdir="${libdir}"
+        cf_openssl_basedir="/usr"
+        break
+      fi
+    done
+    unset libdir
+  fi
+  if test -z "$cf_openssl_basedir"; then
+    for dirs in /usr/local/ssl /usr/pkg /usr/local /usr/local/openssl /opt/homebrew/opt/openssl /usr/local/opt/openssl; do
       if test -f "${dirs}/include/openssl/opensslv.h" && test -f "${dirs}/lib/libssl.so"; then
         cf_openssl_basedir="${dirs}"
         cf_openssl_libdir="${cf_openssl_basedir}/lib"
@@ -658,17 +678,17 @@ LIBS="$LIBS $SSL_LIBS"
 dnl Check OpenSSL version
 AC_MSG_CHECKING(for OpenSSL version)
 
-AC_TRY_COMPILE([#include <openssl/opensslv.h>],[
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <openssl/opensslv.h>],[
 #if !defined(OPENSSL_VERSION_NUMBER)
 #error "Missing openssl version"
 #endif
-#if  (OPENSSL_VERSION_NUMBER < 0x0090800f)
+#if  (OPENSSL_VERSION_NUMBER < 0x1000100fL)
 #error "Old/Insecure OpenSSL version " OPENSSL_VERSION_TEXT
-#endif],
+#endif])],
 [AC_MSG_RESULT(OK)],
 [
   AC_MSG_RESULT([too old.])
-  AC_MSG_ERROR([OpenSSL version is too old. Must be 0.9.8f+], 1)
+  AC_MSG_ERROR([OpenSSL version is too old. Must be 1.0.1+], 1)
 ]
 )
 

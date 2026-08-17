@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1997 Robey Pointer
  * Copyright (C) 1999 - 2002 Eggheads Development Team
- * Copyright (C) 2002 - 2014 Bryan Drewery
+ * Copyright (C) 2002 - 2026 Bryan Drewery
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
 /* 
@@ -414,7 +414,7 @@ void show_banner(int idx)
     dumplots(-dcc[idx].sock, "", wbanner()); 
   dprintf(idx, " \n");
   dprintf(-dcc[idx].sock, STR(" -------------------------------------------------------- \n"));
-  dprintf(-dcc[idx].sock, STR("|             - http://wraith.botpack.net/ -             |\n"));
+  dprintf(-dcc[idx].sock, STR("|             - https://wraith.botpack.net/ -             |\n"));
   dprintf(-dcc[idx].sock, STR("|  Get Shell/Irc/Web hosting @ http://www.xzibition.com  |\n"));
   dprintf(-dcc[idx].sock, STR("|     Help support wraith development by signing up.     |\n"));
   dprintf(-dcc[idx].sock, STR("|  Use coupon code 'wraith' for 30%% off lifetime         |\n"));
@@ -1275,7 +1275,7 @@ void shuffle(char *string, const char *delim, size_t str_len)
   char *array[501], *str = NULL, *work = NULL;
   size_t len = 0;
 
-  bzero(&array, sizeof array);
+  memset(&array, 0, sizeof array);
   work = strdup(string);
 
   str = strtok(work, delim);

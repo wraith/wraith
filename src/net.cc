@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1997 Robey Pointer
  * Copyright (C) 1999 - 2002 Eggheads Development Team
- * Copyright (C) 2002 - 2014 Bryan Drewery
+ * Copyright (C) 2002 - 2026 Bryan Drewery
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
 /* 
@@ -103,7 +103,7 @@ int sockprotocol(int sock)
   struct sockaddr sa;
   socklen_t socklen = sizeof(sa);
 
-  bzero(&sa, socklen);
+  memset(&sa, 0, socklen);
   if (getsockname(sock, &sa, &socklen))
     return -1;
   else
@@ -150,7 +150,7 @@ void init_net()
     socklist = (sock_list *) calloc(1, sizeof(sock_list) * MAXSOCKS);
 
   for (int i = 0; i < MAXSOCKS; i++) {
-    bzero(&socklist[i], sizeof(socklist[i]));
+    memset(&socklist[i], 0, sizeof(socklist[i]));
     socklist[i].flags = SOCK_UNUSED;
 #ifdef EGG_SSL_EXT
     socklist[i].ssl = NULL;
@@ -336,8 +336,8 @@ int allocsock(int sock, int options)
       socklist[i].encstatus = 0;
       socklist[i].enclink = -1;
       socklist[i].gz = 0;
-      bzero(&(socklist[i].okey), ENC_KEY_LEN + 1);
-      bzero(&(socklist[i].ikey), ENC_KEY_LEN + 1);
+      memset(&(socklist[i].okey), 0, ENC_KEY_LEN + 1);
+      memset(&(socklist[i].ikey), 0, ENC_KEY_LEN + 1);
       socks_total++;
       sdprintf("allocsock(%d) = %d", i, sock);
       return i;
@@ -422,7 +422,7 @@ void real_killsock(int sock, const char *file, int line)
     }
     if (socklist[i].host)
       free(socklist[i].host);
-    bzero(&socklist[i], sizeof(socklist[i]));
+    memset(&socklist[i], 0, sizeof(socklist[i]));
     socklist[i].flags = SOCK_UNUSED;
     socks_total--;
     sdprintf("killsock(%d, %s, %d) (socklist: %d)", sock, file, line, i);
@@ -482,7 +482,7 @@ static int proxy_connect(int sock, const char *ip, in_port_t port, int proxy_typ
 /* FIXME: REPLACE WITH SOCK_NAME() */
 void initialize_sockaddr(int af_type, const char *host, in_port_t port, union sockaddr_union *so)
 {
-    bzero(so, sizeof(*so));
+    memset(so, 0, sizeof(*so));
 
     so->sa.sa_family = af_type;
 
@@ -710,7 +710,7 @@ int open_address_listen(const char* ip, in_port_t *port) {
       return -1;
 
     debug2("Opening listen socket on port %d with AF_INET6, sock: %d", *port, sock);
-    bzero((char *) &name6, sizeof(name6));
+    memset((char *) &name6, 0, sizeof(name6));
     name6.sin6_family = af_def;
     name6.sin6_port = htons(*port); /* 0 = just assign us a port */
     /* memcpy(&name6.sin6_addr, &in6addr_any, 16); */ /* this is the only way to get ipv6+ipv4 in 1 socket */
@@ -749,7 +749,7 @@ int open_address_listen(const char* ip, in_port_t *port) {
     else
       debug3("Opening listen socket on %s:%d with AF_INET, sock: %d", ip, *port, sock);
 
-    bzero((char *) &name, sizeof(struct sockaddr *));
+    memset((char *) &name, 0, sizeof(struct sockaddr *));
     if (af_def == AF_UNIX) {
       name.sock_un.sun_family = AF_UNIX;
       strcpy(name.sock_un.sun_path, ip);
@@ -863,7 +863,7 @@ int answer(int sock, char *caller, in_addr_t *ip, in_port_t *port, int binary)
 #ifdef USE_IPV6
   struct sockaddr_in6 from6;
 
-  bzero(&from6, sizeof(struct sockaddr_in6));
+  memset(&from6, 0, sizeof(struct sockaddr_in6));
   if (af_ty == AF_INET6) {
     addrlen = sizeof(from6);
     new_sock = accept(sock, (struct sockaddr *) &from6, &addrlen);
@@ -904,7 +904,7 @@ int answer(int sock, char *caller, in_addr_t *ip, in_port_t *port, int binary)
         struct sockaddr_un sock_un;
         socklen_t socklen = sizeof(sock_un);
 
-        bzero(&sock_un, socklen);
+        memset(&sock_un, 0, socklen);
         getsockname(sock, (struct sockaddr*) &sock_un, &socklen);
         strcpy(caller, sock_un.sun_path);
         *port = 0;
